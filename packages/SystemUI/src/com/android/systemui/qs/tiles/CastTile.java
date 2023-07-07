@@ -33,10 +33,12 @@ import android.widget.Button;
 import androidx.annotation.Nullable;
 
 import com.android.internal.app.MediaRouteDialogPresenter;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -45,6 +47,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.connectivity.NetworkController;
@@ -63,6 +66,11 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Cast **/
 public class CastTile extends QSTileImpl<BooleanState> {
+
+    public static final String TILE_SPEC = "cast";
+
+    private static final String INTERACTION_JANK_TAG = TILE_SPEC;
+
     private static final Intent CAST_SETTINGS =
             new Intent(Settings.ACTION_CAST_SETTINGS);
 
@@ -77,6 +85,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     @Inject
     public CastTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -90,7 +99,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
             HotspotController hotspotController,
             DialogLaunchAnimator dialogLaunchAnimator
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = castController;
         mKeyguard = keyguardStateController;
@@ -211,7 +220,9 @@ public class CastTile extends QSTileImpl<BooleanState> {
 
             mUiHandler.post(() -> {
                 if (view != null) {
-                    mDialogLaunchAnimator.showFromView(dialog, view);
+                    mDialogLaunchAnimator.showFromView(dialog, view,
+                            new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                    INTERACTION_JANK_TAG));
                 } else {
                     dialog.show();
                 }

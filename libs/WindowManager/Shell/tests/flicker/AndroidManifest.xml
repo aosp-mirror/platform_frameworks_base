@@ -46,7 +46,7 @@
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
 
     <!-- Allow the test to write directly to /sdcard/ -->
-    <application android:requestLegacyExternalStorage="true">
+    <application android:requestLegacyExternalStorage="true" android:largeHeap="true">
         <uses-library android:name="android.test.runner"/>
 
         <service android:name=".NotificationListener"

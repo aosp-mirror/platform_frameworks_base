@@ -112,7 +112,7 @@ public class NotificationPlayer implements OnCompletionListener, OnErrorListener
                                     if (DEBUG) Log.d(mTag, "requesting AudioFocus");
                                     int focusGain = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
                                     if (mCmd.looping) {
-                                        focusGain = AudioManager.AUDIOFOCUS_GAIN;
+                                        focusGain = AudioManager.AUDIOFOCUS_GAIN_TRANSIENT;
                                     }
                                     mNotificationRampTimeMs = audioManager.getFocusRampTimeMs(
                                             focusGain, mCmd.attributes);

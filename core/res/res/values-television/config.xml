@@ -54,6 +54,12 @@
         com.android.systemui/com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity
     </string>
 
+    <!-- Component name of the activity used to inform a user about a sensor privacy update from
+     SW/HW privacy switches. -->
+    <string name="config_sensorStateChangedActivity" translatable="false">
+        com.android.systemui/com.android.systemui.sensorprivacy.television.TvSensorPrivacyChangedActivity
+    </string>
+
     <!-- Component name of the activity that shows the request for access to a usb device. -->
     <string name="config_usbPermissionActivity" translatable="false">
         com.android.systemui/com.android.systemui.usb.tv.TvUsbPermissionActivity

@@ -29,10 +29,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SamsungRecommendationPlugin implements PrintServicePlugin {
-    private static final Set<String> ALL_MDNS_SERVICES = new HashSet<String>() {{
-        addAll(PrinterFilterMopria.MOPRIA_MDNS_SERVICES);
-        addAll(PrinterFilterSamsung.SAMSUNG_MDNS_SERVICES);
-    }};
+    private static final Set<String> ALL_MDNS_SERVICES = new HashSet<String>();
+    static {
+        ALL_MDNS_SERVICES.addAll(PrinterFilterMopria.MOPRIA_MDNS_SERVICES);
+        ALL_MDNS_SERVICES.addAll(PrinterFilterSamsung.SAMSUNG_MDNS_SERVICES);
+    }
 
     private final @NonNull Context mContext;
     private final @NonNull MDNSFilteredDiscovery mMDNSFilteredDiscovery;

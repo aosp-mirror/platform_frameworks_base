@@ -19,6 +19,6 @@ license {
 
 java_binary {
     name: "appwidget",
-    wrapper: "appwidget",
+    wrapper: "appwidget.sh",
     srcs: ["**/*.java"],
 }

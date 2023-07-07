@@ -29,7 +29,7 @@ object CodeUtils {
      */
     fun hash(position: String, messageString: String, logLevel: LogLevel, logGroup: LogGroup): Int {
         return (position + messageString + logLevel.name + logGroup.name)
-                .map { c -> c.toInt() }.reduce { h, c -> h * 31 + c }
+                .map { c -> c.code }.reduce { h, c -> h * 31 + c }
     }
 
     fun checkWildcardStaticImported(code: CompilationUnit, className: String, fileName: String) {

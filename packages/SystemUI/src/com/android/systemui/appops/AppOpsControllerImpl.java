@@ -64,7 +64,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsController,
         AppOpsManager.OnOpActiveChangedListener,
-        AppOpsManager.OnOpNotedListener, IndividualSensorPrivacyController.Callback,
+        AppOpsManager.OnOpNotedInternalListener, IndividualSensorPrivacyController.Callback,
         Dumpable {
 
     // This is the minimum time that we will keep AppOps that are noted on record. If multiple
@@ -103,6 +103,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
             AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
             AppOpsManager.OP_RECORD_AUDIO,
             AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+            AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
             AppOpsManager.OP_PHONE_CALL_MICROPHONE,
             AppOpsManager.OP_COARSE_LOCATION,
             AppOpsManager.OP_FINE_LOCATION

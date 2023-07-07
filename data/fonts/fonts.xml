@@ -39,7 +39,11 @@
           <axis tag="wdth" stylevalue="100" />
           <axis tag="wght" stylevalue="300" />
         </font>
-        <font weight="400" style="normal">RobotoStatic-Regular.ttf</font>
+        <font weight="400" style="normal">Roboto-Regular.ttf
+          <axis tag="ital" stylevalue="0" />
+          <axis tag="wdth" stylevalue="100" />
+          <axis tag="wght" stylevalue="400" />
+        </font>
         <font weight="500" style="normal">Roboto-Regular.ttf
           <axis tag="ital" stylevalue="0" />
           <axis tag="wdth" stylevalue="100" />
@@ -247,13 +251,16 @@
     <alias name="courier new" to="serif-monospace" />
 
     <family name="casual">
-        <font weight="400" style="normal">ComingSoon.ttf</font>
+        <font weight="400" style="normal" postScriptName="ComingSoon-Regular">ComingSoon.ttf</font>
     </family>
 
     <family name="cursive">
-        <font weight="400" style="normal" postScriptName="DancingScript">DancingScript-Regular.ttf
-        </font>
-        <font weight="700" style="normal">DancingScript-Bold.ttf</font>
+      <font weight="400" style="normal">DancingScript-Regular.ttf
+        <axis tag="wght" stylevalue="400" />
+      </font>
+      <font weight="700" style="normal">DancingScript-Regular.ttf
+        <axis tag="wght" stylevalue="700" />
+      </font>
     </family>
 
     <family name="sans-serif-smallcaps">
@@ -932,7 +939,7 @@
         <font weight="700" style="normal" fallbackFor="serif">NotoSerifLao-Bold.ttf</font>
     </family>
     <family lang="und-Laoo" variant="compact">
-        <font weight="400" style="normal">NotoSansLaoUI-Regular.ttf
+        <font weight="400" style="normal" postScriptName="NotoSansLaoUI">NotoSansLaoUI-Regular.ttf
         </font>
         <font weight="700" style="normal">NotoSansLaoUI-Bold.ttf</font>
     </family>

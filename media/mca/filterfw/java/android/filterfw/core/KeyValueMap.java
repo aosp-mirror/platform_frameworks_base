@@ -55,12 +55,12 @@ public class KeyValueMap extends HashMap<String, Object> {
 
     public int getInt(String key) {
         Object result = get(key);
-        return result != null ? (Integer)result : null;
+        return result != null ? (Integer) result : 0;
     }
 
     public float getFloat(String key) {
         Object result = get(key);
-        return result != null ? (Float)result : null;
+        return result != null ? (Float) result : 0;
     }
 
     @Override

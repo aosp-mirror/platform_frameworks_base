@@ -492,7 +492,9 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             int color = mSendingSpinnerContainer.getVisibility() == View.VISIBLE
                     ? mSendingTextColor : mTextColor;
             for (MessagingMessage message : mMessages) {
-                message.setColor(message.getMessage().isRemoteInputHistory() ? color : mTextColor);
+                final boolean isRemoteInputHistory =
+                        message.getMessage() != null && message.getMessage().isRemoteInputHistory();
+                message.setColor(isRemoteInputHistory ? color : mTextColor);
             }
         }
     }

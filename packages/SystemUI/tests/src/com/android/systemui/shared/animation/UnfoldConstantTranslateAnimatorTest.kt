@@ -1,3 +1,17 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
 package com.android.systemui.shared.animation
 
 import android.testing.AndroidTestingRunner
@@ -7,16 +21,12 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.ViewIdToTranslate
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import com.android.systemui.unfold.TestUnfoldTransitionProvider
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
@@ -24,94 +34,128 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 class UnfoldConstantTranslateAnimatorTest : SysuiTestCase() {
 
-    @Mock private lateinit var progressProvider: UnfoldTransitionProgressProvider
+    private val progressProvider = TestUnfoldTransitionProvider()
 
-    @Mock private lateinit var parent: ViewGroup
+    @Mock
+    private lateinit var parent: ViewGroup
 
-    @Captor private lateinit var progressListenerCaptor: ArgumentCaptor<TransitionProgressListener>
+    @Mock
+    private lateinit var shouldBeAnimated: () -> Boolean
 
     private lateinit var animator: UnfoldConstantTranslateAnimator
-    private lateinit var progressListener: TransitionProgressListener
 
-    private val viewsIdToRegister =
-        setOf(
-            ViewIdToTranslate(LEFT_VIEW_ID, Direction.LEFT),
-            ViewIdToTranslate(RIGHT_VIEW_ID, Direction.RIGHT))
+    private val viewsIdToRegister
+        get() =
+            setOf(
+                    ViewIdToTranslate(START_VIEW_ID, Direction.START, shouldBeAnimated),
+                    ViewIdToTranslate(END_VIEW_ID, Direction.END, shouldBeAnimated)
+            )
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-
-        animator =
-            UnfoldConstantTranslateAnimator(viewsIdToRegister, progressProvider)
+        whenever(shouldBeAnimated.invoke()).thenReturn(true)
+        animator = UnfoldConstantTranslateAnimator(viewsIdToRegister, progressProvider)
 
         animator.init(parent, MAX_TRANSLATION)
-
-        verify(progressProvider).addCallback(progressListenerCaptor.capture())
-        progressListener = progressListenerCaptor.value
     }
 
     @Test
     fun onTransition_noMatchingIds() {
         // GIVEN no views matching any ids
         // WHEN the transition starts
-        progressListener.onTransitionStarted()
-        progressListener.onTransitionProgress(.1f)
+        progressProvider.onTransitionStarted()
+        progressProvider.onTransitionProgress(.1f)
 
         // THEN nothing... no exceptions
     }
 
     @Test
-    fun onTransition_oneMovesLeft() {
+    fun onTransition_oneMovesStartWithLTR() {
         // GIVEN one view with a matching id
         val view = View(context)
-        whenever(parent.findViewById<View>(LEFT_VIEW_ID)).thenReturn(view)
+        whenever(parent.findViewById<View>(START_VIEW_ID)).thenReturn(view)
 
-        moveAndValidate(listOf(view to LEFT))
+        moveAndValidate(listOf(view to START), View.LAYOUT_DIRECTION_LTR)
     }
 
     @Test
-    fun onTransition_oneMovesLeftAndOneMovesRightMultipleTimes() {
+    fun onTransition_oneMovesStartWithRTL() {
+        // GIVEN one view with a matching id
+        val view = View(context)
+        whenever(parent.findViewById<View>(START_VIEW_ID)).thenReturn(view)
+
+        whenever(parent.getLayoutDirection()).thenReturn(View.LAYOUT_DIRECTION_RTL)
+        moveAndValidate(listOf(view to START), View.LAYOUT_DIRECTION_RTL)
+    }
+
+    @Test
+    fun onTransition_oneMovesStartAndOneMovesEndMultipleTimes() {
         // GIVEN two views with a matching id
         val leftView = View(context)
         val rightView = View(context)
-        whenever(parent.findViewById<View>(LEFT_VIEW_ID)).thenReturn(leftView)
-        whenever(parent.findViewById<View>(RIGHT_VIEW_ID)).thenReturn(rightView)
+        whenever(parent.findViewById<View>(START_VIEW_ID)).thenReturn(leftView)
+        whenever(parent.findViewById<View>(END_VIEW_ID)).thenReturn(rightView)
 
-        moveAndValidate(listOf(leftView to LEFT, rightView to RIGHT))
-        moveAndValidate(listOf(leftView to LEFT, rightView to RIGHT))
+        moveAndValidate(listOf(leftView to START, rightView to END), View.LAYOUT_DIRECTION_LTR)
+        moveAndValidate(listOf(leftView to START, rightView to END), View.LAYOUT_DIRECTION_LTR)
     }
 
-    private fun moveAndValidate(list: List<Pair<View, Int>>) {
+    @Test
+    fun onTransition_completeStartedTranslation() {
+        // GIVEN
+        val leftView = View(context)
+        whenever(parent.findViewById<View>(START_VIEW_ID)).thenReturn(leftView)
+        // To start animation, shouldBeAnimated should return true.
+        // There is a possibility for shouldBeAnimated to return false during the animation.
+        whenever(shouldBeAnimated.invoke()).thenReturn(true).thenReturn(false)
+
+        // shouldBeAnimated state may change during the animation.
+        // However, started animation should be completed.
+        moveAndValidate(listOf(leftView to START), View.LAYOUT_DIRECTION_LTR)
+    }
+
+    private fun moveAndValidate(list: List<Pair<View, Int>>, layoutDirection: Int) {
         // Compare values as ints because -0f != 0f
 
         // WHEN the transition starts
-        progressListener.onTransitionStarted()
-        progressListener.onTransitionProgress(0f)
+        progressProvider.onTransitionStarted()
+        progressProvider.onTransitionProgress(0f)
 
+        val rtlMultiplier = if (layoutDirection == View.LAYOUT_DIRECTION_LTR) {
+            1
+        } else {
+            -1
+        }
         list.forEach { (view, direction) ->
-            assertEquals((-MAX_TRANSLATION * direction).toInt(), view.translationX.toInt())
+            assertEquals(
+                (-MAX_TRANSLATION * direction * rtlMultiplier).toInt(),
+                view.translationX.toInt()
+            )
         }
 
         // WHEN the transition progresses, translation is updated
-        progressListener.onTransitionProgress(.5f)
+        progressProvider.onTransitionProgress(.5f)
         list.forEach { (view, direction) ->
-            assertEquals((-MAX_TRANSLATION / 2f * direction).toInt(), view.translationX.toInt())
+            assertEquals(
+                (-MAX_TRANSLATION / 2f * direction * rtlMultiplier).toInt(),
+                view.translationX.toInt()
+            )
         }
 
         // WHEN the transition ends, translation is completed
-        progressListener.onTransitionProgress(1f)
-        progressListener.onTransitionFinished()
+        progressProvider.onTransitionProgress(1f)
+        progressProvider.onTransitionFinished()
         list.forEach { (view, _) -> assertEquals(0, view.translationX.toInt()) }
     }
 
     companion object {
-        private val LEFT = Direction.LEFT.multiplier.toInt()
-        private val RIGHT = Direction.RIGHT.multiplier.toInt()
+        private val START = Direction.START.multiplier.toInt()
+        private val END = Direction.END.multiplier.toInt()
 
         private const val MAX_TRANSLATION = 42f
 
-        private const val LEFT_VIEW_ID = 1
-        private const val RIGHT_VIEW_ID = 2
+        private const val START_VIEW_ID = 1
+        private const val END_VIEW_ID = 2
     }
 }

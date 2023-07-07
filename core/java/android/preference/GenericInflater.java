@@ -406,7 +406,7 @@ abstract class GenericInflater<T, P extends GenericInflater.Parent> {
             InflateException ie = new InflateException(attrs
                     .getPositionDescription()
                     + ": Error inflating class "
-                    + constructor.getClass().getName());
+                    + constructor.getDeclaringClass().getName());
             ie.initCause(e);
             throw ie;
         }

@@ -27,7 +27,6 @@ import android.util.DebugUtils;
 import android.util.Slog;
 
 import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.parsing.ParsingPackageRead;
 
 /** @hide */
 public class PackageUserStateUtils {
@@ -155,7 +154,7 @@ public class PackageUserStateUtils {
     }
 
     public static boolean isPackageEnabled(@NonNull PackageUserState state,
-            @NonNull ParsingPackageRead pkg) {
+            @NonNull AndroidPackage pkg) {
         switch (state.getEnabledState()) {
             case PackageManager.COMPONENT_ENABLED_STATE_ENABLED:
                 return true;

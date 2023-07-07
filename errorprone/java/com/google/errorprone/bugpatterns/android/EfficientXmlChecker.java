@@ -168,6 +168,7 @@ public final class EfficientXmlChecker extends BugChecker
      */
     private static final Matcher<ExpressionTree> CONVERT_PRIMITIVE_TO_STRING =
             new Matcher<ExpressionTree>() {
+        @SuppressWarnings("TreeToString") //TODO: Fix me
         @Override
         public boolean matches(ExpressionTree tree, VisitorState state) {
             if (PRIMITIVE_TO_STRING.matches(tree, state)) {
@@ -205,6 +206,7 @@ public final class EfficientXmlChecker extends BugChecker
      */
     private static final Matcher<ExpressionTree> CONVERT_STRING_TO_PRIMITIVE =
             new Matcher<ExpressionTree>() {
+        @SuppressWarnings("TreeToString") //TODO: Fix me
         @Override
         public boolean matches(ExpressionTree tree, VisitorState state) {
             if (PRIMITIVE_PARSE.matches(tree, state)) {

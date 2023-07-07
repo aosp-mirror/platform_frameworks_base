@@ -18,12 +18,9 @@ package com.android.settingslib.enterprise;
 
 import static java.util.Objects.requireNonNull;
 
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
@@ -69,50 +66,11 @@ final class ManagedDeviceActionDisabledByAdminController
         mResolveActivityChecker = requireNonNull(resolveActivityChecker);
     }
 
+    /**
+     * We don't show Learn More button in Admin-Support Dialog anymore.
+     */
     @Override
     public void setupLearnMoreButton(Context context) {
-        assertInitialized();
-
-        String url = mStringProvider.getLearnMoreHelpPageUrl();
-
-        if (!TextUtils.isEmpty(url)
-                && canLaunchHelpPageInPreferredOrCurrentUser(context, url, mPreferredUserHandle)) {
-            setupLearnMoreButtonToLaunchHelpPage(context, url, mPreferredUserHandle);
-        } else {
-            mLauncher.setupLearnMoreButtonToShowAdminPolicies(context, mEnforcementAdminUserId,
-                    mEnforcedAdmin);
-        }
-    }
-
-    private boolean canLaunchHelpPageInPreferredOrCurrentUser(
-            Context context, String url, UserHandle preferredUserHandle) {
-        PackageManager packageManager = context.getPackageManager();
-        if (mLauncher.canLaunchHelpPage(
-                packageManager, url, preferredUserHandle, mResolveActivityChecker)
-                && mForegroundUserChecker.isUserForeground(context, preferredUserHandle)) {
-            return true;
-        }
-        return mLauncher.canLaunchHelpPage(
-                packageManager, url, context.getUser(), mResolveActivityChecker);
-    }
-
-    /**
-     * Sets up the "Learn more" button to launch the web help page in the {@code
-     * preferredUserHandle} user. If not possible to launch it there, it sets up the button to
-     * launch it in the current user instead.
-     */
-    private void setupLearnMoreButtonToLaunchHelpPage(
-            Context context, String url, UserHandle preferredUserHandle) {
-        PackageManager packageManager = context.getPackageManager();
-        if (mLauncher.canLaunchHelpPage(
-                packageManager, url, preferredUserHandle, mResolveActivityChecker)
-                && mForegroundUserChecker.isUserForeground(context, preferredUserHandle)) {
-            mLauncher.setupLearnMoreButtonToLaunchHelpPage(context, url, preferredUserHandle);
-        }
-        if (mLauncher.canLaunchHelpPage(
-                packageManager, url, context.getUser(), mResolveActivityChecker)) {
-            mLauncher.setupLearnMoreButtonToLaunchHelpPage(context, url, context.getUser());
-        }
     }
 
     private static boolean isUserForeground(Context context, UserHandle userHandle) {
@@ -122,25 +80,7 @@ final class ManagedDeviceActionDisabledByAdminController
 
     @Override
     public String getAdminSupportTitle(@Nullable String restriction) {
-        if (restriction == null) {
-            return mStringProvider.getDefaultDisabledByPolicyTitle();
-        }
-        switch (restriction) {
-            case UserManager.DISALLOW_ADJUST_VOLUME:
-                return mStringProvider.getDisallowAdjustVolumeTitle();
-            case UserManager.DISALLOW_OUTGOING_CALLS:
-                return mStringProvider.getDisallowOutgoingCallsTitle();
-            case UserManager.DISALLOW_SMS:
-                return mStringProvider.getDisallowSmsTitle();
-            case DevicePolicyManager.POLICY_DISABLE_CAMERA:
-                return mStringProvider.getDisableCameraTitle();
-            case DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE:
-                return mStringProvider.getDisableScreenCaptureTitle();
-            case DevicePolicyManager.POLICY_SUSPEND_PACKAGES:
-                return mStringProvider.getSuspendPackagesTitle();
-            default:
-                return mStringProvider.getDefaultDisabledByPolicyTitle();
-        }
+        return mStringProvider.getDefaultDisabledByPolicyTitle();
     }
 
     @Override

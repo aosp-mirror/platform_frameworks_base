@@ -18,11 +18,15 @@ package com.android.systemui.statusbar.notification.row.wrapper;
 
 import android.app.Notification;
 import android.content.Context;
+import android.graphics.drawable.AnimatedImageDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.view.View;
 
+import com.android.internal.R;
+import com.android.internal.widget.BigPictureNotificationImageView;
 import com.android.systemui.statusbar.notification.ImageTransformState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -30,6 +34,8 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  * Wraps a notification containing a big picture template
  */
 public class NotificationBigPictureTemplateViewWrapper extends NotificationTemplateViewWrapper {
+
+    private BigPictureNotificationImageView mImageView;
 
     protected NotificationBigPictureTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
@@ -39,7 +45,12 @@ public class NotificationBigPictureTemplateViewWrapper extends NotificationTempl
     @Override
     public void onContentUpdated(ExpandableNotificationRow row) {
         super.onContentUpdated(row);
+        resolveViews();
         updateImageTag(row.getEntry().getSbn());
+    }
+
+    private void resolveViews() {
+        mImageView = mView.findViewById(R.id.big_picture);
     }
 
     private void updateImageTag(StatusBarNotification sbn) {
@@ -52,6 +63,27 @@ public class NotificationBigPictureTemplateViewWrapper extends NotificationTempl
             // Overwrite in case the superclass populated this tag with the promoted picture,
             // which won't be right since this is the expanded state.
             mRightIcon.setTag(ImageTransformState.ICON_TAG, getLargeIcon(sbn.getNotification()));
+        }
+    }
+
+    /**
+     * Starts or stops the animations in any drawables contained in this BigPicture Notification.
+     *
+     * @param running Whether the animations should be set to run.
+     */
+    @Override
+    public void setAnimationsRunning(boolean running) {
+        if (mImageView == null) {
+            return;
+        }
+        Drawable d = mImageView.getDrawable();
+        if (d instanceof AnimatedImageDrawable) {
+            AnimatedImageDrawable animatedImageDrawable = (AnimatedImageDrawable) d;
+            if (running) {
+                animatedImageDrawable.start();
+            } else {
+                animatedImageDrawable.stop();
+            }
         }
     }
 }

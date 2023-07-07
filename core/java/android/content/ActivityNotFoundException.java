@@ -31,5 +31,4 @@ public class ActivityNotFoundException extends RuntimeException
     {
         super(name);
     }
-};
-
+}

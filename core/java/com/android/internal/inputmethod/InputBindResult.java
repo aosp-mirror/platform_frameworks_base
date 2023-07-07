@@ -30,8 +30,6 @@ import android.os.Parcelable;
 import android.util.SparseArray;
 import android.view.InputChannel;
 
-import com.android.internal.view.IInputMethodSession;
-
 import java.lang.annotation.Retention;
 
 /**
@@ -172,6 +170,9 @@ public final class InputBindResult implements Parcelable {
          * display.
          */
         int ERROR_INVALID_DISPLAY_ID = 15;
+        /**
+         * Indicates that a valid session is created and result is ready for accessibility.
+         */
         int SUCCESS_WITH_ACCESSIBILITY_SESSION = 16;
     }
 
@@ -186,7 +187,7 @@ public final class InputBindResult implements Parcelable {
     /**
      * The accessibility services.
      */
-    public SparseArray<IAccessibilityInputMethodSession> accessibilitySessions;
+    public final SparseArray<IAccessibilityInputMethodSession> accessibilitySessions;
 
     /**
      * The input channel used to send input events to this IME.
@@ -391,6 +392,8 @@ public final class InputBindResult implements Parcelable {
                 return "ERROR_DISPLAY_ID_MISMATCH";
             case ResultCode.ERROR_INVALID_DISPLAY_ID:
                 return "ERROR_INVALID_DISPLAY_ID";
+            case ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION:
+                return "SUCCESS_WITH_ACCESSIBILITY_SESSION";
             default:
                 return "Unknown(" + result + ")";
         }

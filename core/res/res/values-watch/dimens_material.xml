@@ -45,6 +45,13 @@
     <dimen name="progress_bar_size_medium">32dip</dimen>
     <dimen name="progress_bar_size_large">64dip</dimen>
 
+    <!-- Progress bar message dimens -->
+    <dimen name="message_progress_dialog_text_size">18sp</dimen>
+    <dimen name="message_progress_dialog_bottom_padding">80px</dimen>
+    <dimen name="message_progress_dialog_top_padding">0dp</dimen>
+    <dimen name="message_progress_dialog_start_padding">0dp</dimen>
+    <dimen name="message_progress_dialog_end_padding">0dp</dimen>
+
     <!-- fallback for screen percentage widths -->
     <dimen name="screen_percentage_05">0dp</dimen>
     <dimen name="screen_percentage_10">0dp</dimen>

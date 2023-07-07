@@ -36,7 +36,6 @@ import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.StrictMode;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -48,6 +47,9 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 import androidx.test.uiautomator.Until;
 
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -57,11 +59,22 @@ import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Tests for BugreportManager API.
@@ -74,6 +87,7 @@ public class BugreportManagerTest {
     private static final String TAG = "BugreportManagerTest";
     private static final long BUGREPORT_TIMEOUT_MS = TimeUnit.MINUTES.toMillis(10);
     private static final long DUMPSTATE_STARTUP_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10);
+    private static final long DUMPSTATE_TEARDOWN_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10);
     private static final long UIAUTOMATOR_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10);
 
 
@@ -88,6 +102,21 @@ public class BugreportManagerTest {
             "com.android.internal.intent.action.BUGREPORT_FINISHED";
     private static final String EXTRA_BUGREPORT = "android.intent.extra.BUGREPORT";
     private static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
+
+    private static final Path[] UI_TRACES_PREDUMPED = {
+            Paths.get("/data/misc/wmtrace/ime_trace_clients.winscope"),
+            Paths.get("/data/misc/wmtrace/ime_trace_managerservice.winscope"),
+            Paths.get("/data/misc/wmtrace/ime_trace_service.winscope"),
+            Paths.get("/data/misc/wmtrace/wm_trace.winscope"),
+            Paths.get("/data/misc/wmtrace/wm_log.winscope"),
+            Paths.get("/data/misc/wmtrace/layers_trace.winscope"),
+            Paths.get("/data/misc/wmtrace/transactions_trace.winscope"),
+            Paths.get("/data/misc/wmtrace/transition_trace.winscope"),
+            Paths.get("/data/misc/wmtrace/shell_transition_trace.winscope"),
+    };
+    private static final Path[] UI_TRACES_GENERATED_DURING_BUGREPORT = {
+            Paths.get("/data/misc/wmtrace/layers_trace_from_transactions.winscope"),
+    };
 
     private Handler mHandler;
     private Executor mExecutor;
@@ -123,7 +152,6 @@ public class BugreportManagerTest {
         FileUtils.closeQuietly(mBugreportFd);
         FileUtils.closeQuietly(mScreenshotFd);
     }
-
 
     @Test
     public void normalFlow_wifi() throws Exception {
@@ -173,6 +201,66 @@ public class BugreportManagerTest {
         assertThat(mBugreportFile.length()).isGreaterThan(0L);
         assertThat(mScreenshotFile.length()).isGreaterThan(0L);
         assertFdsAreClosed(mBugreportFd, mScreenshotFd);
+    }
+
+    @LargeTest
+    @Test
+    public void preDumpUiData_then_fullWithUsePreDumpFlag() throws Exception {
+        startPreDumpedUiTraces();
+
+        mBrm.preDumpUiData();
+        waitTillDumpstateExitedOrTimeout();
+        List<File> expectedPreDumpedTraceFiles = copyFilesAsRoot(UI_TRACES_PREDUMPED);
+
+        BugreportCallbackImpl callback = new BugreportCallbackImpl();
+        mBrm.startBugreport(mBugreportFd, null, fullWithUsePreDumpFlag(), mExecutor,
+                callback);
+        shareConsentDialog(ConsentReply.ALLOW);
+        waitTillDoneOrTimeout(callback);
+
+        stopPreDumpedUiTraces();
+
+        assertThat(callback.isDone()).isTrue();
+        assertThat(mBugreportFile.length()).isGreaterThan(0L);
+        assertFdsAreClosed(mBugreportFd);
+
+        assertThatBugreportContainsFiles(UI_TRACES_PREDUMPED);
+        assertThatBugreportContainsFiles(UI_TRACES_GENERATED_DURING_BUGREPORT);
+
+        List<File> actualPreDumpedTraceFiles = extractFilesFromBugreport(UI_TRACES_PREDUMPED);
+        assertThatAllFileContentsAreEqual(actualPreDumpedTraceFiles, expectedPreDumpedTraceFiles);
+    }
+
+    @LargeTest
+    @Test
+    public void preDumpData_then_fullWithoutUsePreDumpFlag_ignoresPreDump() throws Exception {
+        startPreDumpedUiTraces();
+
+        // Simulate pre-dump, instead of taking a real one.
+        // In some corner cases, data dumped as part of the full bugreport could be the same as the
+        // pre-dumped data and this test would fail. Hence, here we create fake/artificial
+        // pre-dumped data that we know it won't match with the full bugreport data.
+        createFilesWithFakeDataAsRoot(UI_TRACES_PREDUMPED, "system");
+
+        List<File> preDumpedTraceFiles = copyFilesAsRoot(UI_TRACES_PREDUMPED);
+
+        BugreportCallbackImpl callback = new BugreportCallbackImpl();
+        mBrm.startBugreport(mBugreportFd, null, full(), mExecutor,
+                callback);
+        shareConsentDialog(ConsentReply.ALLOW);
+        waitTillDoneOrTimeout(callback);
+
+        stopPreDumpedUiTraces();
+
+        assertThat(callback.isDone()).isTrue();
+        assertThat(mBugreportFile.length()).isGreaterThan(0L);
+        assertFdsAreClosed(mBugreportFd);
+
+        assertThatBugreportContainsFiles(UI_TRACES_PREDUMPED);
+        assertThatBugreportContainsFiles(UI_TRACES_GENERATED_DURING_BUGREPORT);
+
+        List<File> actualTraceFiles = extractFilesFromBugreport(UI_TRACES_PREDUMPED);
+        assertThatAllFileContentsAreDifferent(preDumpedTraceFiles, actualTraceFiles);
     }
 
     @Test
@@ -384,19 +472,149 @@ public class BugreportManagerTest {
         }
         return bm;
     }
-
     private static File createTempFile(String prefix, String extension) throws Exception {
         final File f = File.createTempFile(prefix, extension);
         f.setReadable(true, true);
         f.setWritable(true, true);
-
         f.deleteOnExit();
         return f;
+    }
+
+    private static void startPreDumpedUiTraces() {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "cmd input_method tracing start"
+        );
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "cmd window tracing start"
+        );
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "service call SurfaceFlinger 1025 i32 1"
+        );
+    }
+
+    private static void stopPreDumpedUiTraces() {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "cmd input_method tracing stop"
+        );
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "cmd window tracing stop"
+        );
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "service call SurfaceFlinger 1025 i32 0"
+        );
+    }
+
+    private void assertThatBugreportContainsFiles(Path[] paths)
+            throws IOException {
+        List<Path> entries = listZipArchiveEntries(mBugreportFile);
+        for (Path pathInDevice : paths) {
+            Path pathInArchive = Paths.get("FS" + pathInDevice.toString());
+            assertThat(entries).contains(pathInArchive);
+        }
+    }
+
+    private List<File> extractFilesFromBugreport(Path[] paths) throws Exception {
+        List<File> files = new ArrayList<File>();
+        for (Path pathInDevice : paths) {
+            Path pathInArchive = Paths.get("FS" + pathInDevice.toString());
+            files.add(extractZipArchiveEntry(mBugreportFile, pathInArchive));
+        }
+        return files;
+    }
+
+    private static List<Path> listZipArchiveEntries(File archive) throws IOException {
+        ArrayList<Path> entries = new ArrayList<>();
+
+        ZipInputStream stream = new ZipInputStream(
+                new BufferedInputStream(new FileInputStream(archive)));
+
+        for (ZipEntry entry = stream.getNextEntry(); entry != null; entry = stream.getNextEntry()) {
+            entries.add(Paths.get(entry.toString()));
+        }
+
+        return entries;
+    }
+
+    private static File extractZipArchiveEntry(File archive, Path entryToExtract)
+            throws Exception {
+        File extractedFile = createTempFile(entryToExtract.getFileName().toString(), ".extracted");
+
+        ZipInputStream is = new ZipInputStream(new FileInputStream(archive));
+        boolean hasFoundEntry = false;
+
+        for (ZipEntry entry = is.getNextEntry(); entry != null; entry = is.getNextEntry()) {
+            if (entry.toString().equals(entryToExtract.toString())) {
+                BufferedOutputStream os =
+                        new BufferedOutputStream(new FileOutputStream(extractedFile));
+                ByteStreams.copy(is, os);
+                os.close();
+                hasFoundEntry = true;
+                break;
+            }
+
+            ByteStreams.exhaust(is); // skip entry
+        }
+
+        is.closeEntry();
+        is.close();
+
+        assertThat(hasFoundEntry).isTrue();
+
+        return extractedFile;
+    }
+
+    private static void createFilesWithFakeDataAsRoot(Path[] paths, String owner) throws Exception {
+        File src = createTempFile("fake", ".data");
+        Files.write("fake data".getBytes(StandardCharsets.UTF_8), src);
+
+        for (Path path : paths) {
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                    "install -m 611 -o " + owner + " -g " + owner
+                    + " " + src.getAbsolutePath() + " " + path.toString()
+            );
+        }
+    }
+
+    private static List<File> copyFilesAsRoot(Path[] paths) throws Exception {
+        ArrayList<File> files = new ArrayList<File>();
+        for (Path src : paths) {
+            File dst = createTempFile(src.getFileName().toString(), ".copy");
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                    "cp " + src.toString() + " " + dst.getAbsolutePath()
+            );
+            files.add(dst);
+        }
+        return files;
     }
 
     private static ParcelFileDescriptor parcelFd(File file) throws Exception {
         return ParcelFileDescriptor.open(file,
                 ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_APPEND);
+    }
+
+    private static void assertThatAllFileContentsAreEqual(List<File> actual, List<File> expected)
+            throws IOException {
+        if (actual.size() != expected.size()) {
+            fail("File lists have different size");
+        }
+        for (int i = 0; i < actual.size(); ++i) {
+            if (!Files.equal(actual.get(i), expected.get(i))) {
+                fail("Contents of " + actual.get(i).toString()
+                        + " != " + expected.get(i).toString());
+            }
+        }
+    }
+
+    private static void assertThatAllFileContentsAreDifferent(List<File> a, List<File> b)
+            throws IOException {
+        if (a.size() != b.size()) {
+            fail("File lists have different size");
+        }
+        for (int i = 0; i < a.size(); ++i) {
+            if (Files.equal(a.get(i), b.get(i))) {
+                fail("Contents of " + a.get(i).toString() + " == " + b.get(i).toString());
+            }
+        }
     }
 
     private static void dropPermissions() {
@@ -410,21 +628,16 @@ public class BugreportManagerTest {
     }
 
     private static boolean isDumpstateRunning() {
-        String[] output;
+        String output;
         try {
-            output =
-                    UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-                            .executeShellCommand("ps -A -o NAME | grep dumpstate")
-                            .trim()
-                            .split("\n");
+            output = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+                    .executeShellCommand("service list | grep dumpstate");
         } catch (IOException e) {
             Log.w(TAG, "Failed to check if dumpstate is running", e);
             return false;
         }
-        for (String line : output) {
-            // Check for an exact match since there may be other things that contain "dumpstate" as
-            // a substring (e.g. the dumpstate HAL).
-            if (TextUtils.equals("dumpstate", line)) {
+        for (String line : output.trim().split("\n")) {
+            if (line.matches("^.*\\s+dumpstate:\\s+\\[.*\\]$")) {
                 return true;
             }
         }
@@ -447,6 +660,17 @@ public class BugreportManagerTest {
 
     private static long now() {
         return System.currentTimeMillis();
+    }
+
+    private static void waitTillDumpstateExitedOrTimeout() throws Exception {
+        long startTimeMs = now();
+        while (isDumpstateRunning()) {
+            Thread.sleep(500 /* .5s */);
+            if (now() - startTimeMs >= DUMPSTATE_TEARDOWN_TIMEOUT_MS) {
+                break;
+            }
+            Log.d(TAG, "Waited " + (now() - startTimeMs) + "ms for dumpstate to exit");
+        }
     }
 
     private static void waitTillDumpstateRunningOrTimeout() throws Exception {
@@ -498,6 +722,16 @@ public class BugreportManagerTest {
      */
     private static BugreportParams full() {
         return new BugreportParams(BugreportParams.BUGREPORT_MODE_FULL);
+    }
+
+    /*
+     * Returns a {@link BugreportParams} for full bugreport that reuses pre-dumped data.
+     *
+     * <p> This can take on the order of minutes to finish
+     */
+    private static BugreportParams fullWithUsePreDumpFlag() {
+        return new BugreportParams(BugreportParams.BUGREPORT_MODE_FULL,
+                BugreportParams.BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA);
     }
 
     /* Allow/deny the consent dialog to sharing bugreport data or check existence only. */

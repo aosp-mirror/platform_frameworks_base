@@ -25,205 +25,197 @@ import static android.view.KeyEvent.KEYCODE_DPAD_RIGHT;
 import static android.view.KeyEvent.KEYCODE_DPAD_UP;
 import static android.view.KeyEvent.KEYCODE_ENTER;
 
-import android.animation.ValueAnimator;
-import android.app.PendingIntent;
-import android.app.RemoteAction;
+import static com.android.wm.shell.pip.tv.TvPipAction.ACTION_MOVE;
+import static com.android.wm.shell.pip.tv.TvPipMenuController.MODE_ALL_ACTIONS_MENU;
+import static com.android.wm.shell.pip.tv.TvPipMenuController.MODE_MOVE_MENU;
+import static com.android.wm.shell.pip.tv.TvPipMenuController.MODE_NO_MENU;
+
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Outline;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.PathShape;
 import android.os.Handler;
-import android.text.Annotation;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.SpannedString;
-import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewRootImpl;
+import android.view.ViewOutlineProvider;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.widget.LinearLayoutManager;
+import com.android.internal.widget.RecyclerView;
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.TvWindowMenuActionButton;
 import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * A View that represents Pip Menu on TV. It's responsible for displaying 3 ever-present Pip Menu
- * actions: Fullscreen, Move and Close, but could also display "additional" actions, that may be set
- * via a {@link #setAdditionalActions(List, Handler)} call.
+ * A View that represents Pip Menu on TV. It's responsible for displaying the Pip menu actions from
+ * the TvPipActionsProvider as well as the buttons for manually moving the PiP.
  */
-public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
+public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.Listener,
+        TvPipMenuEduTextDrawer.Listener {
     private static final String TAG = "TvPipMenuView";
-    private static final boolean DEBUG = TvPipController.DEBUG;
 
-    private static final int FIRST_CUSTOM_ACTION_POSITION = 3;
+    private final TvPipMenuView.Listener mListener;
 
-    @Nullable
-    private Listener mListener;
+    private final TvPipActionsProvider mTvPipActionsProvider;
 
-    private final LinearLayout mActionButtonsContainer;
-    private final View mMenuFrameView;
-    private final List<TvPipMenuActionButton> mAdditionalButtons = new ArrayList<>();
+    private final RecyclerView mActionButtonsRecyclerView;
+    private final LinearLayoutManager mButtonLayoutManager;
+    private final RecyclerViewAdapter mRecyclerViewAdapter;
+
     private final View mPipFrameView;
+    private final View mMenuFrameView;
     private final View mPipView;
-    private final TextView mEduTextView;
-    private final View mEduTextContainerView;
+
+    private final View mPipBackground;
+    private final View mDimLayer;
+
+    private final TvPipMenuEduTextDrawer mEduTextDrawer;
+    private final ViewGroup mEduTextContainer;
+
     private final int mPipMenuOuterSpace;
     private final int mPipMenuBorderWidth;
-    private final int mEduTextFadeExitAnimationDurationMs;
-    private final int mEduTextSlideExitAnimationDurationMs;
-    private int mEduTextHeight;
+
+    private final int mPipMenuFadeAnimationDuration;
+    private final int mResizeAnimationDuration;
 
     private final ImageView mArrowUp;
     private final ImageView mArrowRight;
     private final ImageView mArrowDown;
     private final ImageView mArrowLeft;
+    private final TvWindowMenuActionButton mA11yDoneButton;
 
-    private final ScrollView mScrollView;
-    private final HorizontalScrollView mHorizontalScrollView;
-    private View mFocusedButton;
+    private final int mArrowElevation;
 
-    private Rect mCurrentPipBounds;
-    private boolean mMoveMenuIsVisible;
-    private boolean mButtonMenuIsVisible;
+    private @TvPipMenuController.TvPipMenuMode int mCurrentMenuMode = MODE_NO_MENU;
+    private final Rect mCurrentPipBounds = new Rect();
+    private int mCurrentPipGravity;
 
-    private final TvPipMenuActionButton mExpandButton;
-    private final TvPipMenuActionButton mCloseButton;
+    private final AccessibilityManager mA11yManager;
+    private final Handler mMainHandler;
 
-    private boolean mSwitchingOrientation;
-
-    private final int mPipMenuFadeAnimationDuration;
-    private final int mResizeAnimationDuration;
-
-    public TvPipMenuView(@NonNull Context context) {
-        this(context, null);
-    }
-
-    public TvPipMenuView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public TvPipMenuView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-
-    public TvPipMenuView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-
+    public TvPipMenuView(@NonNull Context context, @NonNull Handler mainHandler,
+            @NonNull Listener listener, TvPipActionsProvider tvPipActionsProvider) {
+        super(context, null, 0, 0);
         inflate(context, R.layout.tv_pip_menu, this);
 
-        mActionButtonsContainer = findViewById(R.id.tv_pip_menu_action_buttons);
-        mActionButtonsContainer.findViewById(R.id.tv_pip_menu_fullscreen_button)
-                .setOnClickListener(this);
+        mMainHandler = mainHandler;
+        mListener = listener;
+        mA11yManager = context.getSystemService(AccessibilityManager.class);
 
-        mCloseButton = mActionButtonsContainer.findViewById(R.id.tv_pip_menu_close_button);
-        mCloseButton.setOnClickListener(this);
-        mCloseButton.setIsCustomCloseAction(true);
+        mActionButtonsRecyclerView = findViewById(R.id.tv_pip_menu_action_buttons);
+        mButtonLayoutManager = new LinearLayoutManager(mContext);
+        mActionButtonsRecyclerView.setLayoutManager(mButtonLayoutManager);
+        mActionButtonsRecyclerView.setPreserveFocusAfterLayout(true);
 
-        mActionButtonsContainer.findViewById(R.id.tv_pip_menu_move_button)
-                .setOnClickListener(this);
-        mExpandButton = findViewById(R.id.tv_pip_menu_expand_button);
-        mExpandButton.setOnClickListener(this);
+        mTvPipActionsProvider = tvPipActionsProvider;
+        mRecyclerViewAdapter = new RecyclerViewAdapter(tvPipActionsProvider.getActionsList());
+        mActionButtonsRecyclerView.setAdapter(mRecyclerViewAdapter);
 
-        mScrollView = findViewById(R.id.tv_pip_menu_scroll);
-        mHorizontalScrollView = findViewById(R.id.tv_pip_menu_horizontal_scroll);
+        tvPipActionsProvider.addListener(this);
 
         mMenuFrameView = findViewById(R.id.tv_pip_menu_frame);
         mPipFrameView = findViewById(R.id.tv_pip_border);
         mPipView = findViewById(R.id.tv_pip);
 
+        mPipBackground = findViewById(R.id.tv_pip_menu_background);
+        mDimLayer = findViewById(R.id.tv_pip_menu_dim_layer);
+
         mArrowUp = findViewById(R.id.tv_pip_menu_arrow_up);
         mArrowRight = findViewById(R.id.tv_pip_menu_arrow_right);
         mArrowDown = findViewById(R.id.tv_pip_menu_arrow_down);
         mArrowLeft = findViewById(R.id.tv_pip_menu_arrow_left);
+        mA11yDoneButton = findViewById(R.id.tv_pip_menu_done_button);
 
-        mEduTextView = findViewById(R.id.tv_pip_menu_edu_text);
-        mEduTextContainerView = findViewById(R.id.tv_pip_menu_edu_text_container);
+        final Resources res = context.getResources();
+        mResizeAnimationDuration = res.getInteger(R.integer.config_pipResizeAnimationDuration);
+        mPipMenuFadeAnimationDuration =
+                res.getInteger(R.integer.tv_window_menu_fade_animation_duration);
+        mPipMenuOuterSpace = res.getDimensionPixelSize(R.dimen.pip_menu_outer_space);
+        mPipMenuBorderWidth = res.getDimensionPixelSize(R.dimen.pip_menu_border_width);
+        mArrowElevation = res.getDimensionPixelSize(R.dimen.pip_menu_arrow_elevation);
 
-        mResizeAnimationDuration = context.getResources().getInteger(
-                R.integer.config_pipResizeAnimationDuration);
-        mPipMenuFadeAnimationDuration = context.getResources()
-                .getInteger(R.integer.pip_menu_fade_animation_duration);
+        initMoveArrows();
 
-        mPipMenuOuterSpace = context.getResources()
-                .getDimensionPixelSize(R.dimen.pip_menu_outer_space);
-        mPipMenuBorderWidth = context.getResources()
-                .getDimensionPixelSize(R.dimen.pip_menu_border_width);
-        mEduTextHeight = context.getResources()
-                .getDimensionPixelSize(R.dimen.pip_menu_edu_text_view_height);
-        mEduTextFadeExitAnimationDurationMs = context.getResources()
-                .getInteger(R.integer.pip_edu_text_view_exit_animation_duration_ms);
-        mEduTextSlideExitAnimationDurationMs = context.getResources()
-                .getInteger(R.integer.pip_edu_text_window_exit_animation_duration_ms);
-
-        initEduText();
+        mEduTextDrawer = new TvPipMenuEduTextDrawer(mContext, mainHandler, this);
+        mEduTextContainer = (ViewGroup) findViewById(R.id.tv_pip_menu_edu_text_container);
+        mEduTextContainer.addView(mEduTextDrawer);
     }
 
-    void initEduText() {
-        final SpannedString eduText = (SpannedString) getResources().getText(R.string.pip_edu_text);
-        final SpannableString spannableString = new SpannableString(eduText);
-        Arrays.stream(eduText.getSpans(0, eduText.length(), Annotation.class)).findFirst()
-                .ifPresent(annotation -> {
-                    final Drawable icon =
-                            getResources().getDrawable(R.drawable.home_icon, mContext.getTheme());
-                    if (icon != null) {
-                        icon.mutate();
-                        icon.setBounds(0, 0, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
-                        spannableString.setSpan(new CenteredImageSpan(icon),
-                                eduText.getSpanStart(annotation),
-                                eduText.getSpanEnd(annotation),
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-                });
+    private void initMoveArrows() {
+        final int arrowSize =
+                mContext.getResources().getDimensionPixelSize(R.dimen.pip_menu_arrow_size);
+        final Path arrowPath = createArrowPath(arrowSize);
 
-        mEduTextView.setText(spannableString);
+        final ShapeDrawable arrowDrawable = new ShapeDrawable();
+        arrowDrawable.setShape(new PathShape(arrowPath, arrowSize, arrowSize));
+        arrowDrawable.setTint(mContext.getResources().getColor(R.color.tv_pip_menu_arrow_color));
+
+        final ViewOutlineProvider arrowOutlineProvider = new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setPath(createArrowPath(view.getMeasuredHeight()));
+            }
+        };
+
+        initArrow(mArrowRight, arrowOutlineProvider, arrowDrawable, 0);
+        initArrow(mArrowDown, arrowOutlineProvider, arrowDrawable, 90);
+        initArrow(mArrowLeft, arrowOutlineProvider, arrowDrawable, 180);
+        initArrow(mArrowUp, arrowOutlineProvider, arrowDrawable, 270);
     }
 
-    void setEduTextActive(boolean active) {
-        mEduTextView.setSelected(active);
+    /**
+     * Creates a Path for a movement arrow in the MODE_MOVE_MENU. The resulting Path is a simple
+     * right-pointing triangle with its tip in the center of a size x size square:
+     *  _ _ _ _ _
+     * |*        |
+     * |* *      |
+     * |*   *    |
+     * |* *      |
+     * |* _ _ _ _|
+     *
+     */
+    private Path createArrowPath(int size) {
+        final Path triangle = new Path();
+        triangle.lineTo(0, size);
+        triangle.lineTo(size / 2, size / 2);
+        triangle.close();
+        return triangle;
     }
 
-    void hideEduText() {
-        final ValueAnimator heightAnimation = ValueAnimator.ofInt(mEduTextHeight, 0);
-        heightAnimation.setDuration(mEduTextSlideExitAnimationDurationMs);
-        heightAnimation.setInterpolator(TvPipInterpolators.BROWSE);
-        heightAnimation.addUpdateListener(animator -> {
-            mEduTextHeight = (int) animator.getAnimatedValue();
-        });
-        mEduTextView.animate()
-                .alpha(0f)
-                .setInterpolator(TvPipInterpolators.EXIT)
-                .setDuration(mEduTextFadeExitAnimationDurationMs)
-                .withEndAction(() -> {
-                    mEduTextContainerView.setVisibility(GONE);
-                }).start();
-        heightAnimation.start();
+    private void initArrow(View v, ViewOutlineProvider arrowOutlineProvider, Drawable arrowDrawable,
+            int rotation) {
+        v.setOutlineProvider(arrowOutlineProvider);
+        v.setBackground(arrowDrawable);
+        v.setRotation(rotation);
+        v.setElevation(mArrowElevation);
     }
 
-    void onPipTransitionStarted(Rect finishBounds) {
+    void onPipTransitionToTargetBoundsStarted(Rect targetBounds) {
+        if (targetBounds == null) {
+            return;
+        }
+
         // Fade out content by fading in view on top.
-        if (mCurrentPipBounds != null && finishBounds != null) {
+        if (mCurrentPipBounds != null) {
             boolean ratioChanged = PipUtils.aspectRatioChanged(
                     mCurrentPipBounds.width() / (float) mCurrentPipBounds.height(),
-                    finishBounds.width() / (float) finishBounds.height());
+                    targetBounds.width() / (float) targetBounds.height());
             if (ratioChanged) {
-                mPipView.animate()
+                mPipBackground.animate()
                         .alpha(1f)
                         .setInterpolator(TvPipInterpolators.EXIT)
                         .setDuration(mResizeAnimationDuration / 2)
@@ -232,170 +224,67 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         }
 
         // Update buttons.
-        final boolean vertical = finishBounds.height() > finishBounds.width();
+        final boolean vertical = targetBounds.height() > targetBounds.width();
         final boolean orientationChanged =
-                vertical != (mActionButtonsContainer.getOrientation() == LinearLayout.VERTICAL);
+                vertical != (mButtonLayoutManager.getOrientation() == LinearLayoutManager.VERTICAL);
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: onPipTransitionStarted(), orientation changed %b", TAG, orientationChanged);
+                "%s: onPipTransitionToTargetBoundsStarted(), orientation changed %b",
+                TAG, orientationChanged);
         if (!orientationChanged) {
             return;
         }
 
-        if (mButtonMenuIsVisible) {
-            mSwitchingOrientation = true;
-            mActionButtonsContainer.animate()
+        if (mCurrentMenuMode == MODE_ALL_ACTIONS_MENU) {
+            // Fade out while orientation change is ongoing and fade back in once transition is
+            // finished.
+            mActionButtonsRecyclerView.animate()
                     .alpha(0)
                     .setInterpolator(TvPipInterpolators.EXIT)
-                    .setDuration(mResizeAnimationDuration / 2)
-                    .withEndAction(() -> {
-                        changeButtonScrollOrientation(finishBounds);
-                        updateButtonGravity(finishBounds);
-                        // Only make buttons visible again in onPipTransitionFinished to keep in
-                        // sync with PiP content alpha animation.
-                    });
+                    .setDuration(mResizeAnimationDuration / 2);
         } else {
-            changeButtonScrollOrientation(finishBounds);
-            updateButtonGravity(finishBounds);
+            mButtonLayoutManager.setOrientation(vertical
+                    ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL);
         }
     }
 
-    void onPipTransitionFinished() {
+    void onPipTransitionFinished(boolean enterTransition) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: onPipTransitionFinished()", TAG);
 
-        // Fade in content by fading out view on top.
-        mPipView.animate()
+        // Fade in content by fading out view on top (faded out at every aspect ratio change).
+        mPipBackground.animate()
                 .alpha(0f)
                 .setDuration(mResizeAnimationDuration / 2)
                 .setInterpolator(TvPipInterpolators.ENTER)
                 .start();
 
-        // Update buttons.
-        if (mSwitchingOrientation) {
-            mActionButtonsContainer.animate()
+        if (enterTransition) {
+            mEduTextDrawer.init();
+        }
+
+        mButtonLayoutManager.setOrientation(
+                    mCurrentPipBounds.height() > mCurrentPipBounds.width()
+                            ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL);
+        if (mCurrentMenuMode == MODE_ALL_ACTIONS_MENU
+                && mActionButtonsRecyclerView.getAlpha() != 1f) {
+            mActionButtonsRecyclerView.animate()
                     .alpha(1)
                     .setInterpolator(TvPipInterpolators.ENTER)
                     .setDuration(mResizeAnimationDuration / 2);
-        } else {
-            refocusPreviousButton();
         }
-        mSwitchingOrientation = false;
     }
 
     /**
      * Also updates the button gravity.
      */
-    void updateBounds(Rect updatedBounds) {
+    void setPipBounds(Rect updatedPipBounds) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: updateLayout, width: %s, height: %s", TAG, updatedBounds.width(),
-                updatedBounds.height());
-        mCurrentPipBounds = updatedBounds;
-        if (!mSwitchingOrientation) {
-            updateButtonGravity(mCurrentPipBounds);
-        }
+                "%s: updateLayout, width: %s, height: %s", TAG, updatedPipBounds.width(),
+                updatedPipBounds.height());
+        if (updatedPipBounds.equals(mCurrentPipBounds)) return;
 
+        mCurrentPipBounds.set(updatedPipBounds);
         updatePipFrameBounds();
-    }
-
-    private void changeButtonScrollOrientation(Rect bounds) {
-        final boolean vertical = bounds.height() > bounds.width();
-
-        final ViewGroup oldScrollView = vertical ? mHorizontalScrollView : mScrollView;
-        final ViewGroup newScrollView = vertical ? mScrollView : mHorizontalScrollView;
-
-        if (oldScrollView.getChildCount() == 1) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: orientation changed", TAG);
-            oldScrollView.removeView(mActionButtonsContainer);
-            oldScrollView.setVisibility(GONE);
-            mActionButtonsContainer.setOrientation(vertical ? LinearLayout.VERTICAL
-                    : LinearLayout.HORIZONTAL);
-            newScrollView.addView(mActionButtonsContainer);
-            newScrollView.setVisibility(VISIBLE);
-            if (mFocusedButton != null) {
-                mFocusedButton.requestFocus();
-            }
-        }
-    }
-
-    /**
-     * Change button gravity based on new dimensions
-     */
-    private void updateButtonGravity(Rect bounds) {
-        final boolean vertical = bounds.height() > bounds.width();
-        // Use Math.max since the possible orientation change might not have been applied yet.
-        final int buttonsSize = Math.max(mActionButtonsContainer.getHeight(),
-                mActionButtonsContainer.getWidth());
-
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: buttons container width: %s, height: %s", TAG,
-                mActionButtonsContainer.getWidth(), mActionButtonsContainer.getHeight());
-
-        final boolean buttonsFit =
-                vertical ? buttonsSize < bounds.height()
-                        : buttonsSize < bounds.width();
-        final int buttonGravity = buttonsFit ? Gravity.CENTER
-                : (vertical ? Gravity.CENTER_HORIZONTAL : Gravity.CENTER_VERTICAL);
-
-        final LayoutParams params = (LayoutParams) mActionButtonsContainer.getLayoutParams();
-        params.gravity = buttonGravity;
-        mActionButtonsContainer.setLayoutParams(params);
-
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: vertical: %b, buttonsFit: %b, gravity: %s", TAG, vertical, buttonsFit,
-                Gravity.toString(buttonGravity));
-    }
-
-    private void refocusPreviousButton() {
-        if (mMoveMenuIsVisible || mCurrentPipBounds == null || mFocusedButton == null) {
-            return;
-        }
-        final boolean vertical = mCurrentPipBounds.height() > mCurrentPipBounds.width();
-
-        if (!mFocusedButton.hasFocus()) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: request focus from: %s", TAG, mFocusedButton);
-            mFocusedButton.requestFocus();
-        } else {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: already focused: %s", TAG, mFocusedButton);
-        }
-
-        // Do we need to scroll?
-        final Rect buttonBounds = new Rect();
-        final Rect scrollBounds = new Rect();
-        if (vertical) {
-            mScrollView.getDrawingRect(scrollBounds);
-        } else {
-            mHorizontalScrollView.getDrawingRect(scrollBounds);
-        }
-        mFocusedButton.getHitRect(buttonBounds);
-
-        if (scrollBounds.contains(buttonBounds)) {
-            // Button is already completely visible, don't scroll
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: not scrolling", TAG);
-            return;
-        }
-
-        // Scrolling so the button is visible to the user.
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: scrolling to focused button", TAG);
-
-        if (vertical) {
-            mScrollView.smoothScrollTo((int) mFocusedButton.getX(),
-                    (int) mFocusedButton.getY());
-        } else {
-            mHorizontalScrollView.smoothScrollTo((int) mFocusedButton.getX(),
-                    (int) mFocusedButton.getY());
-        }
-    }
-
-    Rect getPipMenuContainerBounds(Rect pipBounds) {
-        final Rect menuUiBounds = new Rect(pipBounds);
-        menuUiBounds.inset(-mPipMenuOuterSpace, -mPipMenuOuterSpace);
-        menuUiBounds.bottom += mEduTextHeight;
-        return menuUiBounds;
     }
 
     /**
@@ -406,11 +295,13 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      * pip menu when it gains focus.
      */
     private void updatePipFrameBounds() {
-        final ViewGroup.LayoutParams pipFrameParams = mPipFrameView.getLayoutParams();
-        if (pipFrameParams != null) {
-            pipFrameParams.width = mCurrentPipBounds.width() + 2 * mPipMenuBorderWidth;
-            pipFrameParams.height = mCurrentPipBounds.height() + 2 * mPipMenuBorderWidth;
-            mPipFrameView.setLayoutParams(pipFrameParams);
+        if (mPipFrameView.getVisibility() == VISIBLE) {
+            final ViewGroup.LayoutParams pipFrameParams = mPipFrameView.getLayoutParams();
+            if (pipFrameParams != null) {
+                pipFrameParams.width = mCurrentPipBounds.width() + 2 * mPipMenuBorderWidth;
+                pipFrameParams.height = mCurrentPipBounds.height() + 2 * mPipMenuBorderWidth;
+                mPipFrameView.setLayoutParams(pipFrameParams);
+            }
         }
 
         final ViewGroup.LayoutParams pipViewParams = mPipView.getLayoutParams();
@@ -420,86 +311,130 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
             mPipView.setLayoutParams(pipViewParams);
         }
 
-
-    }
-
-    void setListener(@Nullable Listener listener) {
-        mListener = listener;
-    }
-
-    void setExpandedModeEnabled(boolean enabled) {
-        mExpandButton.setVisibility(enabled ? VISIBLE : GONE);
-    }
-
-    void setIsExpanded(boolean expanded) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: setIsExpanded, expanded: %b", TAG, expanded);
+        // Keep focused button within the visible area while the PiP is changing size. Otherwise,
+        // the button would lose focus which would cause a need for scrolling and re-focusing after
+        // the animation finishes, which does not look good.
+        View focusedChild = mActionButtonsRecyclerView.getFocusedChild();
+        if (focusedChild != null) {
+            mActionButtonsRecyclerView.scrollToPosition(
+                    mActionButtonsRecyclerView.getChildLayoutPosition(focusedChild));
         }
-        mExpandButton.setImageResource(
-                expanded ? R.drawable.pip_ic_collapse : R.drawable.pip_ic_expand);
-        mExpandButton.setTextAndDescription(
-                expanded ? R.string.pip_collapse : R.string.pip_expand);
     }
 
-    /**
-     * @param gravity for the arrow hints
-     */
-    void showMoveMenu(int gravity) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showMoveMenu()", TAG);
+    Rect getPipMenuContainerBounds(Rect pipBounds) {
+        final Rect menuUiBounds = new Rect(pipBounds);
+        menuUiBounds.inset(-mPipMenuOuterSpace, -mPipMenuOuterSpace);
+        menuUiBounds.bottom += mEduTextDrawer.getEduTextDrawerHeight();
+        return menuUiBounds;
+    }
+
+    void transitionToMenuMode(int menuMode, boolean resetMenu) {
+        switch (menuMode) {
+            case MODE_NO_MENU:
+                hideAllUserControls();
+                break;
+            case MODE_MOVE_MENU:
+                showMoveMenu();
+                break;
+            case MODE_ALL_ACTIONS_MENU:
+                showAllActionsMenu(resetMenu);
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Unknown TV PiP menu mode: "
+                        + TvPipMenuController.getMenuModeString(mCurrentMenuMode));
         }
-        mButtonMenuIsVisible = false;
-        mMoveMenuIsVisible = true;
-        showButtonsMenu(false);
-        showMovementHints(gravity);
+
+        mCurrentMenuMode = menuMode;
+    }
+
+    private void showMoveMenu() {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE, "%s: showMoveMenu()", TAG);
+
+        if (mCurrentMenuMode == MODE_MOVE_MENU) return;
+
+        showMovementHints();
+        setMenuButtonsVisible(false);
         setFrameHighlighted(true);
+
+        animateAlphaTo(mA11yManager.isEnabled() ? 1f : 0f, mDimLayer);
+
+        mEduTextDrawer.closeIfNeeded();
     }
 
-    void showButtonsMenu() {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: showButtonsMenu()", TAG);
+    private void showAllActionsMenu(boolean resetMenu) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: showAllActionsMenu(), resetMenu %b", TAG, resetMenu);
+
+        if (resetMenu) {
+            scrollToFirstAction();
         }
 
-        mButtonMenuIsVisible = true;
-        mMoveMenuIsVisible = false;
-        showButtonsMenu(true);
+        if (mCurrentMenuMode == MODE_ALL_ACTIONS_MENU) return;
+
+        setMenuButtonsVisible(true);
         hideMovementHints();
         setFrameHighlighted(true);
+        animateAlphaTo(1f, mDimLayer);
+        mEduTextDrawer.closeIfNeeded();
 
-        // Always focus on the first button when opening the menu, except directly after moving.
-        if (mFocusedButton == null) {
-            // Focus on first button (there is a Space at position 0)
-            mFocusedButton = mActionButtonsContainer.getChildAt(1);
-            // Reset scroll position.
-            mScrollView.scrollTo(0, 0);
-            mHorizontalScrollView.scrollTo(
-                    isLayoutRtl() ? mActionButtonsContainer.getWidth() : 0, 0);
+        if (mCurrentMenuMode == MODE_MOVE_MENU) {
+            refocusButton(mTvPipActionsProvider.getFirstIndexOfAction(ACTION_MOVE));
         }
-        refocusPreviousButton();
+
+    }
+
+    private void scrollToFirstAction() {
+        // Clearing the focus here is necessary to allow a smooth scroll even if the first action
+        // is currently not visible.
+        final View focusedChild = mActionButtonsRecyclerView.getFocusedChild();
+        if (focusedChild != null) {
+            focusedChild.clearFocus();
+        }
+
+        mButtonLayoutManager.scrollToPosition(0);
+        mActionButtonsRecyclerView.post(() -> refocusButton(0));
     }
 
     /**
-     * Hides all menu views, including the menu frame.
+     * @return true if focus was requested, false if focus request could not be carried out due to
+     * the view for the position not being available (scrolling beforehand will be necessary).
      */
-    void hideAllUserControls() {
+    private boolean refocusButton(int position) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: refocusButton, position: %d", TAG, position);
+
+        View itemToFocus = mButtonLayoutManager.findViewByPosition(position);
+        if (itemToFocus != null) {
+            itemToFocus.requestFocus();
+            itemToFocus.requestAccessibilityFocus();
+        }
+        return itemToFocus != null;
+    }
+
+    private void hideAllUserControls() {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "%s: hideAllUserControls()", TAG);
-        mFocusedButton = null;
-        mButtonMenuIsVisible = false;
-        mMoveMenuIsVisible = false;
-        showButtonsMenu(false);
+
+        if (mCurrentMenuMode == MODE_NO_MENU) return;
+
+        setMenuButtonsVisible(false);
         hideMovementHints();
         setFrameHighlighted(false);
+        animateAlphaTo(0f, mDimLayer);
+    }
+
+    void setPipGravity(int gravity) {
+        mCurrentPipGravity = gravity;
+        if (mCurrentMenuMode == MODE_MOVE_MENU) {
+            showMovementHints();
+        }
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {
         super.onWindowFocusChanged(hasWindowFocus);
-        if (!hasWindowFocus) {
-            hideAllUserControls();
-        }
+        mListener.onPipWindowFocusChanged(hasWindowFocus);
     }
 
     private void animateAlphaTo(float alpha, View view) {
@@ -522,143 +457,41 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 });
     }
 
-    /**
-     * Button order:
-     * - Fullscreen
-     * - Close
-     * - Custom actions (app or media actions)
-     * - System actions
-     */
-    void setAdditionalActions(List<RemoteAction> actions, RemoteAction closeAction,
-            Handler mainHandler) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: setAdditionalActions()", TAG);
+    @Override
+    public void onActionsChanged(int added, int updated, int startIndex) {
+        mRecyclerViewAdapter.notifyItemRangeChanged(startIndex, updated);
+        if (added > 0) {
+            mRecyclerViewAdapter.notifyItemRangeInserted(startIndex + updated, added);
+        } else if (added < 0) {
+            mRecyclerViewAdapter.notifyItemRangeRemoved(startIndex + updated, -added);
         }
-
-        // Replace system close action with custom close action if available
-        if (closeAction != null) {
-            setActionForButton(closeAction, mCloseButton, mainHandler);
-        } else {
-            mCloseButton.setTextAndDescription(R.string.pip_close);
-            mCloseButton.setImageResource(R.drawable.pip_ic_close_white);
-        }
-        mCloseButton.setIsCustomCloseAction(closeAction != null);
-        // Make sure the close action is always enabled
-        mCloseButton.setEnabled(true);
-
-        // Make sure we exactly as many additional buttons as we have actions to display.
-        final int actionsNumber = actions.size();
-        int buttonsNumber = mAdditionalButtons.size();
-        if (actionsNumber > buttonsNumber) {
-            // Add buttons until we have enough to display all the actions.
-            while (actionsNumber > buttonsNumber) {
-                TvPipMenuActionButton button = new TvPipMenuActionButton(mContext);
-                button.setOnClickListener(this);
-
-                mActionButtonsContainer.addView(button,
-                        FIRST_CUSTOM_ACTION_POSITION + buttonsNumber);
-                mAdditionalButtons.add(button);
-
-                buttonsNumber++;
-            }
-        } else if (actionsNumber < buttonsNumber) {
-            // Hide buttons until we as many as the actions.
-            while (actionsNumber < buttonsNumber) {
-                final View button = mAdditionalButtons.get(buttonsNumber - 1);
-                button.setVisibility(View.GONE);
-                button.setTag(null);
-
-                buttonsNumber--;
-            }
-        }
-
-        // "Assign" actions to the buttons.
-        for (int index = 0; index < actionsNumber; index++) {
-            final RemoteAction action = actions.get(index);
-            final TvPipMenuActionButton button = mAdditionalButtons.get(index);
-
-            // Remove action if it matches the custom close action.
-            if (PipUtils.remoteActionsMatch(action, closeAction)) {
-                button.setVisibility(GONE);
-                continue;
-            }
-            setActionForButton(action, button, mainHandler);
-        }
-
-        if (mCurrentPipBounds != null) {
-            updateButtonGravity(mCurrentPipBounds);
-            refocusPreviousButton();
-        }
-    }
-
-    private void setActionForButton(RemoteAction action, TvPipMenuActionButton button,
-            Handler mainHandler) {
-        button.setVisibility(View.VISIBLE); // Ensure the button is visible.
-        if (action.getContentDescription().length() > 0) {
-            button.setTextAndDescription(action.getContentDescription());
-        } else {
-            button.setTextAndDescription(action.getTitle());
-        }
-        button.setEnabled(action.isEnabled());
-        button.setTag(action);
-        action.getIcon().loadDrawableAsync(mContext, button::setImageDrawable, mainHandler);
-    }
-
-    @Nullable
-    SurfaceControl getWindowSurfaceControl() {
-        final ViewRootImpl root = getViewRootImpl();
-        if (root == null) {
-            return null;
-        }
-        final SurfaceControl out = root.getSurfaceControl();
-        if (out != null && out.isValid()) {
-            return out;
-        }
-        return null;
     }
 
     @Override
-    public void onClick(View v) {
-        if (mListener == null) return;
+    public void onCloseEduTextAnimationStart() {
+        mListener.onCloseEduText();
+    }
 
-        final int id = v.getId();
-        if (id == R.id.tv_pip_menu_fullscreen_button) {
-            mListener.onFullscreenButtonClick();
-        } else if (id == R.id.tv_pip_menu_move_button) {
-            mListener.onEnterMoveMode();
-        } else if (id == R.id.tv_pip_menu_close_button) {
-            mListener.onCloseButtonClick();
-        } else if (id == R.id.tv_pip_menu_expand_button) {
-            mListener.onToggleExpandedMode();
-        } else {
-            // This should be an "additional action"
-            final RemoteAction action = (RemoteAction) v.getTag();
-            if (action != null) {
-                try {
-                    action.getActionIntent().send();
-                } catch (PendingIntent.CanceledException e) {
-                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                            "%s: Failed to send action, %s", TAG, e);
-                }
-            } else {
-                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                        "%s: RemoteAction is null", TAG);
-            }
-        }
+    @Override
+    public void onCloseEduTextAnimationEnd() {
+        mPipFrameView.setVisibility(GONE);
+        mEduTextContainer.setVisibility(GONE);
     }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (mListener != null && event.getAction() == ACTION_UP) {
-            if (!mMoveMenuIsVisible) {
-                mFocusedButton = mActionButtonsContainer.getFocusedChild();
+        if (event.getAction() == ACTION_UP) {
+
+            if (event.getKeyCode() == KEYCODE_BACK) {
+                mListener.onBackPress();
+                return true;
+            }
+
+            if (mA11yManager.isEnabled()) {
+                return super.dispatchKeyEvent(event);
             }
 
             switch (event.getKeyCode()) {
-                case KEYCODE_BACK:
-                    mListener.onBackPress();
-                    return true;
                 case KEYCODE_DPAD_UP:
                 case KEYCODE_DPAD_DOWN:
                 case KEYCODE_DPAD_LEFT:
@@ -678,16 +511,38 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     /**
      * Shows user hints for moving the PiP, e.g. arrows.
      */
-    public void showMovementHints(int gravity) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: showMovementHints(), position: %s", TAG, Gravity.toString(gravity));
-        }
+    public void showMovementHints() {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: showMovementHints(), position: %s", TAG, Gravity.toString(mCurrentPipGravity));
+        animateAlphaTo(checkGravity(mCurrentPipGravity, Gravity.BOTTOM) ? 1f : 0f, mArrowUp);
+        animateAlphaTo(checkGravity(mCurrentPipGravity, Gravity.TOP) ? 1f : 0f, mArrowDown);
+        animateAlphaTo(checkGravity(mCurrentPipGravity, Gravity.RIGHT) ? 1f : 0f, mArrowLeft);
+        animateAlphaTo(checkGravity(mCurrentPipGravity, Gravity.LEFT) ? 1f : 0f, mArrowRight);
 
-        animateAlphaTo(checkGravity(gravity, Gravity.BOTTOM) ? 1f : 0f, mArrowUp);
-        animateAlphaTo(checkGravity(gravity, Gravity.TOP) ? 1f : 0f, mArrowDown);
-        animateAlphaTo(checkGravity(gravity, Gravity.RIGHT) ? 1f : 0f, mArrowLeft);
-        animateAlphaTo(checkGravity(gravity, Gravity.LEFT) ? 1f : 0f, mArrowRight);
+        boolean a11yEnabled = mA11yManager.isEnabled();
+        setArrowA11yEnabled(mArrowUp, a11yEnabled, KEYCODE_DPAD_UP);
+        setArrowA11yEnabled(mArrowDown, a11yEnabled, KEYCODE_DPAD_DOWN);
+        setArrowA11yEnabled(mArrowLeft, a11yEnabled, KEYCODE_DPAD_LEFT);
+        setArrowA11yEnabled(mArrowRight, a11yEnabled, KEYCODE_DPAD_RIGHT);
+
+        animateAlphaTo(a11yEnabled ? 1f : 0f, mA11yDoneButton);
+        if (a11yEnabled) {
+            mA11yDoneButton.setVisibility(VISIBLE);
+            mA11yDoneButton.setOnClickListener(v -> {
+                mListener.onExitMoveMode();
+            });
+            mA11yDoneButton.requestFocus();
+            mA11yDoneButton.requestAccessibilityFocus();
+        }
+    }
+
+    private void setArrowA11yEnabled(View arrowView, boolean enabled, int keycode) {
+        arrowView.setClickable(enabled);
+        if (enabled) {
+            arrowView.setOnClickListener(v -> {
+                mListener.onPipMovement(keycode);
+            });
+        }
     }
 
     private boolean checkGravity(int gravity, int feature) {
@@ -698,40 +553,80 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
      * Hides user hints for moving the PiP, e.g. arrows.
      */
     public void hideMovementHints() {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: hideMovementHints()", TAG);
-        }
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: hideMovementHints()", TAG);
+
+        if (mCurrentMenuMode != MODE_MOVE_MENU) return;
+
         animateAlphaTo(0, mArrowUp);
         animateAlphaTo(0, mArrowRight);
         animateAlphaTo(0, mArrowDown);
         animateAlphaTo(0, mArrowLeft);
+        animateAlphaTo(0, mA11yDoneButton);
     }
 
     /**
      * Show or hide the pip buttons menu.
      */
-    public void showButtonsMenu(boolean show) {
-        if (DEBUG) {
-            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: showUserActions: %b", TAG, show);
-        }
-        if (show) {
-            mActionButtonsContainer.setVisibility(VISIBLE);
-            refocusPreviousButton();
-        }
-        animateAlphaTo(show ? 1 : 0, mActionButtonsContainer);
+    private void setMenuButtonsVisible(boolean visible) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: showUserActions: %b", TAG, visible);
+        animateAlphaTo(visible ? 1 : 0, mActionButtonsRecyclerView);
     }
 
     private void setFrameHighlighted(boolean highlighted) {
         mMenuFrameView.setActivated(highlighted);
     }
 
+    private class RecyclerViewAdapter extends
+            RecyclerView.Adapter<RecyclerViewAdapter.ButtonViewHolder> {
+
+        private final List<TvPipAction> mActionList;
+
+        RecyclerViewAdapter(List<TvPipAction> actionList) {
+            this.mActionList = actionList;
+        }
+
+        @NonNull
+        @Override
+        public ButtonViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new ButtonViewHolder(new TvWindowMenuActionButton(mContext));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ButtonViewHolder holder, int position) {
+            TvPipAction action = mActionList.get(position);
+            action.populateButton(holder.mButton, mMainHandler);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mActionList.size();
+        }
+
+        private class ButtonViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
+            TvWindowMenuActionButton mButton;
+
+            ButtonViewHolder(@NonNull View itemView) {
+                super(itemView);
+                mButton = (TvWindowMenuActionButton) itemView;
+                mButton.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View v) {
+                TvPipAction action = mActionList.get(
+                        mActionButtonsRecyclerView.getChildLayoutPosition(v));
+                if (action != null) {
+                    action.executeAction();
+                }
+            }
+        }
+    }
+
     interface Listener {
 
         void onBackPress();
-
-        void onEnterMoveMode();
 
         /**
          * Called when a button for exiting move mode was pressed.
@@ -746,10 +641,16 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
          */
         boolean onPipMovement(int keycode);
 
-        void onCloseButtonClick();
+        /**
+         * Called when the TvPipMenuView loses focus. This also means that the TV PiP menu window
+         * has lost focus.
+         */
+        void onPipWindowFocusChanged(boolean focused);
 
-        void onFullscreenButtonClick();
-
-        void onToggleExpandedMode();
+        /**
+         *  The edu text closing impacts the size of the Picture-in-Picture window and influences
+         *  how it is positioned on the screen.
+         */
+        void onCloseEduText();
     }
 }

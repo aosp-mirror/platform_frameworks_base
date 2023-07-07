@@ -37,6 +37,7 @@ public class BiometricNotificationUtils {
     private static final String TAG = "BiometricNotificationUtils";
     private static final String RE_ENROLL_NOTIFICATION_TAG = "FaceService";
     private static final String BAD_CALIBRATION_NOTIFICATION_TAG = "FingerprintService";
+    private static final String KEY_RE_ENROLL_FACE = "re_enroll_face_unlock";
     private static final int NOTIFICATION_ID = 1;
     private static final long NOTIFICATION_INTERVAL_MS = 24 * 60 * 60 * 1000;
     private static long sLastAlertTime = 0;
@@ -57,6 +58,7 @@ public class BiometricNotificationUtils {
 
         final Intent intent = new Intent("android.settings.FACE_SETTINGS");
         intent.setPackage("com.android.settings");
+        intent.putExtra(KEY_RE_ENROLL_FACE, true);
 
         final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context,
                 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE /* flags */,

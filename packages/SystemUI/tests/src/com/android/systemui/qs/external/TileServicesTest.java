@@ -26,10 +26,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
@@ -38,35 +39,30 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dump.DumpManager;
-import com.android.systemui.qs.QSTileHost;
-import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.qs.tileimpl.QSFactoryImpl;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.AutoTileManager;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
-import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.tuner.TunerService;
-import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
-import java.util.Optional;
-import java.util.concurrent.Executor;
 
 import javax.inject.Provider;
 
@@ -89,25 +85,7 @@ public class TileServicesTest extends SysuiTestCase {
     @Mock
     private StatusBarIconController mStatusBarIconController;
     @Mock
-    private QSFactoryImpl mQSFactory;
-    @Mock
-    private PluginManager mPluginManager;
-    @Mock
-    private  TunerService mTunerService;
-    @Mock
-    private AutoTileManager mAutoTileManager;
-    @Mock
-    private DumpManager mDumpManager;
-    @Mock
-    private CentralSurfaces mCentralSurfaces;
-    @Mock
-    private QSLogger mQSLogger;
-    @Mock
-    private UiEventLogger mUiEventLogger;
-    @Mock
     private UserTracker mUserTracker;
-    @Mock
-    private SecureSettings  mSecureSettings;
     @Mock
     private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
     @Mock
@@ -118,11 +96,18 @@ public class TileServicesTest extends SysuiTestCase {
     private TileLifecycleManager.Factory mTileLifecycleManagerFactory;
     @Mock
     private TileLifecycleManager mTileLifecycleManager;
+    @Mock
+    private QSHost mQSHost;
+    @Mock
+    private PanelInteractor mPanelInteractor;
+    @Captor
+    private ArgumentCaptor<CommandQueue.Callbacks> mCallbacksArgumentCaptor;
+    @Mock
+    private CustomTileAddedRepository mCustomTileAddedRepository;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectMockDependency(BluetoothController.class);
         mManagers = new ArrayList<>();
         mTestableLooper = TestableLooper.get(this);
 
@@ -130,33 +115,18 @@ public class TileServicesTest extends SysuiTestCase {
                 .thenReturn(mTileServiceRequestController);
         when(mTileLifecycleManagerFactory.create(any(Intent.class), any(UserHandle.class)))
                 .thenReturn(mTileLifecycleManager);
+        when(mQSHost.getContext()).thenReturn(mContext);
 
         Provider<Handler> provider = () -> new Handler(mTestableLooper.getLooper());
-        Executor executor = new HandlerExecutor(provider.get());
 
-        QSTileHost host = new QSTileHost(mContext,
-                mStatusBarIconController,
-                mQSFactory,
-                executor,
-                mPluginManager,
-                mTunerService,
-                () -> mAutoTileManager,
-                mDumpManager,
-                Optional.of(mCentralSurfaces),
-                mQSLogger,
-                mUiEventLogger,
-                mUserTracker,
-                mSecureSettings,
-                mock(CustomTileStatePersister.class),
-                mTileServiceRequestControllerBuilder,
-                mTileLifecycleManagerFactory);
-        mTileService = new TestTileServices(host, provider, mBroadcastDispatcher,
-                mUserTracker, mKeyguardStateController, mCommandQueue);
+        mTileService = new TestTileServices(mQSHost, provider, mBroadcastDispatcher,
+                mUserTracker, mKeyguardStateController, mCommandQueue, mStatusBarIconController,
+                mPanelInteractor, mCustomTileAddedRepository,
+                new FakeExecutor(new FakeSystemClock()));
     }
 
     @After
     public void tearDown() throws Exception {
-        mTileService.getHost().destroy();
         mTileService.destroy();
         TestableLooper.get(this).processAllMessages();
     }
@@ -241,12 +211,100 @@ public class TileServicesTest extends SysuiTestCase {
         verify(manager.getTileService()).onStartListening();
     }
 
+    @Test
+    public void testValidCustomTileStartsActivity() {
+        CustomTile tile = mock(CustomTile.class);
+        PendingIntent pi = mock(PendingIntent.class);
+        ComponentName componentName = mock(ComponentName.class);
+        when(tile.getComponent()).thenReturn(componentName);
+        when(componentName.getPackageName()).thenReturn(this.getContext().getPackageName());
+
+        mTileService.startActivity(tile, pi);
+
+        verify(tile).startActivityAndCollapse(pi);
+    }
+
+    @Test
+    public void testInvalidCustomTileDoesNotStartActivity() {
+        CustomTile tile = mock(CustomTile.class);
+        PendingIntent pi = mock(PendingIntent.class);
+        ComponentName componentName = mock(ComponentName.class);
+        when(tile.getComponent()).thenReturn(componentName);
+        when(componentName.getPackageName()).thenReturn("invalid.package.name");
+
+        Assert.assertThrows(SecurityException.class, () -> mTileService.startActivity(tile, pi));
+
+        verify(tile, never()).startActivityAndCollapse(pi);
+    }
+
+    @Test
+    public void testOnStartActivityCollapsesPanel() {
+        CustomTile tile = mock(CustomTile.class);
+        ComponentName componentName = mock(ComponentName.class);
+        when(tile.getComponent()).thenReturn(componentName);
+        when(componentName.getPackageName()).thenReturn(this.getContext().getPackageName());
+        TileServiceManager manager = mTileService.getTileWrapper(tile);
+
+        mTileService.onStartActivity(manager.getToken());
+        verify(mPanelInteractor).forceCollapsePanels();
+    }
+
+    @Test
+    public void testOnShowDialogCollapsesPanel() {
+        CustomTile tile = mock(CustomTile.class);
+        ComponentName componentName = mock(ComponentName.class);
+        when(tile.getComponent()).thenReturn(componentName);
+        when(componentName.getPackageName()).thenReturn(this.getContext().getPackageName());
+        TileServiceManager manager = mTileService.getTileWrapper(tile);
+
+        mTileService.onShowDialog(manager.getToken());
+        verify(mPanelInteractor).forceCollapsePanels();
+    }
+
+    @Test
+    public void tileFreedForCorrectUser() throws RemoteException {
+        verify(mCommandQueue).addCallback(mCallbacksArgumentCaptor.capture());
+
+        ComponentName componentName = new ComponentName("pkg", "cls");
+        CustomTile tileUser0 = mock(CustomTile.class);
+        CustomTile tileUser1 = mock(CustomTile.class);
+
+        when(tileUser0.getComponent()).thenReturn(componentName);
+        when(tileUser1.getComponent()).thenReturn(componentName);
+        when(tileUser0.getUser()).thenReturn(0);
+        when(tileUser1.getUser()).thenReturn(1);
+
+        // Create a tile for user 0
+        TileServiceManager manager0 = mTileService.getTileWrapper(tileUser0);
+        when(manager0.isActiveTile()).thenReturn(true);
+        // Then create a tile for user 1
+        TileServiceManager manager1 = mTileService.getTileWrapper(tileUser1);
+        when(manager1.isActiveTile()).thenReturn(true);
+
+        // When the tile for user 0 gets freed
+        mTileService.freeService(tileUser0, manager0);
+        // and the user is 1
+        when(mUserTracker.getUserId()).thenReturn(1);
+
+        // a call to requestListeningState
+        mCallbacksArgumentCaptor.getValue().requestTileServiceListeningState(componentName);
+        mTestableLooper.processAllMessages();
+
+        // will call in the correct tile
+        verify(manager1).setBindRequested(true);
+        // and set it to listening
+        verify(manager1.getTileService()).onStartListening();
+    }
+
     private class TestTileServices extends TileServices {
-        TestTileServices(QSTileHost host, Provider<Handler> handlerProvider,
+        TestTileServices(QSHost host, Provider<Handler> handlerProvider,
                 BroadcastDispatcher broadcastDispatcher, UserTracker userTracker,
-                KeyguardStateController keyguardStateController, CommandQueue commandQueue) {
+                KeyguardStateController keyguardStateController, CommandQueue commandQueue,
+                StatusBarIconController statusBarIconController, PanelInteractor panelInteractor,
+                CustomTileAddedRepository customTileAddedRepository, DelayableExecutor executor) {
             super(host, handlerProvider, broadcastDispatcher, userTracker, keyguardStateController,
-                    commandQueue);
+                    commandQueue, statusBarIconController, panelInteractor,
+                    customTileAddedRepository, executor);
         }
 
         @Override
@@ -255,6 +313,10 @@ public class TileServicesTest extends SysuiTestCase {
             TileServiceManager manager = mock(TileServiceManager.class);
             mManagers.add(manager);
             when(manager.isLifecycleStarted()).thenReturn(true);
+            Binder b = new Binder();
+            when(manager.getToken()).thenReturn(b);
+            IQSTileService service = mock(IQSTileService.class);
+            when(manager.getTileService()).thenReturn(service);
             return manager;
         }
     }

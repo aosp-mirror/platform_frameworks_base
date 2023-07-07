@@ -120,6 +120,31 @@ public interface RILConstants {
     int BLOCKED_DUE_TO_CALL = 69;                   /* SMS is blocked due to call control */
     int RF_HARDWARE_ISSUE = 70;                     /* RF HW issue is detected */
     int NO_RF_CALIBRATION_INFO = 71;                /* No RF calibration in device */
+    int ENCODING_NOT_SUPPORTED = 72;                /* The encoding scheme is not supported by
+                                                       either the network or the MS. */
+    int FEATURE_NOT_SUPPORTED = 73;                 /* The requesting feature is not supported by
+                                                       the service provider. */
+    int INVALID_CONTACT = 74;                       /* The contact to be added is either not
+                                                       existing or not valid. */
+    int MODEM_INCOMPATIBLE = 75;                    /* The modem of the MS is not compatible with
+                                                       the service provider. */
+    int NETWORK_TIMEOUT = 76;                       /* Modem timeout to receive ACK or response from
+                                                       network after sending a request to it. */
+    int NO_SATELLITE_SIGNAL = 77;                   /* Modem fails to communicate with the satellite
+                                                       network since there is no satellite signal.*/
+    int NOT_SUFFICIENT_ACCOUNT_BALANCE = 78;        /* The request cannot be performed since the
+                                                       subscriber's account balance is not
+                                                       sufficient. */
+    int RADIO_TECHNOLOGY_NOT_SUPPORTED = 79;        /* The radio technology is not supported by the
+                                                       service provider. */
+    int SUBSCRIBER_NOT_AUTHORIZED = 80;             /* The subscription is not authorized to
+                                                       register with the service provider. */
+    int SWITCHED_FROM_SATELLITE_TO_TERRESTRIAL = 81; /* While processing a request from the
+                                                       Framework the satellite modem detects
+                                                       terrestrial signal, aborts the request, and
+                                                       switches to the terrestrial network. */
+    int UNIDENTIFIED_SUBSCRIBER = 82;               /* The subscriber is not registered with the
+                                                       service provider */
 
     // Below is list of OEM specific error codes which can by used by OEMs in case they don't want to
     // reveal particular replacement for Generic failure
@@ -500,7 +525,7 @@ public interface RILConstants {
     int RIL_REQUEST_GET_SIM_PHONEBOOK_CAPACITY = 149;
     int RIL_REQUEST_GET_SIM_PHONEBOOK_RECORDS = 150;
     int RIL_REQUEST_UPDATE_SIM_PHONEBOOK_RECORD = 151;
-
+    int RIL_REQUEST_DEVICE_IMEI = 152;
     /* The following requests are not defined in RIL.h */
     int RIL_REQUEST_HAL_NON_RIL_BASE = 200;
     int RIL_REQUEST_GET_SLOT_STATUS = 200;
@@ -532,6 +557,21 @@ public interface RILConstants {
     int RIL_REQUEST_IS_VONR_ENABLED = 226;
     int RIL_REQUEST_SET_USAGE_SETTING = 227;
     int RIL_REQUEST_GET_USAGE_SETTING = 228;
+    int RIL_REQUEST_SET_EMERGENCY_MODE = 229;
+    int RIL_REQUEST_TRIGGER_EMERGENCY_NETWORK_SCAN = 230;
+    int RIL_REQUEST_CANCEL_EMERGENCY_NETWORK_SCAN = 231;
+    int RIL_REQUEST_EXIT_EMERGENCY_MODE = 232;
+    int RIL_REQUEST_SET_SRVCC_CALL_INFO = 233;
+    int RIL_REQUEST_UPDATE_IMS_REGISTRATION_INFO = 234;
+    int RIL_REQUEST_START_IMS_TRAFFIC = 235;
+    int RIL_REQUEST_STOP_IMS_TRAFFIC = 236;
+    int RIL_REQUEST_SEND_ANBR_QUERY = 237;
+    int RIL_REQUEST_TRIGGER_EPS_FALLBACK = 238;
+    int RIL_REQUEST_SET_NULL_CIPHER_AND_INTEGRITY_ENABLED = 239;
+    int RIL_REQUEST_UPDATE_IMS_CALL_STATUS = 240;
+    int RIL_REQUEST_SET_N1_MODE_ENABLED = 241;
+    int RIL_REQUEST_IS_N1_MODE_ENABLED = 242;
+    int RIL_REQUEST_IS_NULL_CIPHER_AND_INTEGRITY_ENABLED = 259;
 
     /* Responses begin */
     int RIL_RESPONSE_ACKNOWLEDGEMENT = 800;
@@ -602,4 +642,8 @@ public interface RILConstants {
     int RIL_UNSOL_UICC_APPLICATIONS_ENABLEMENT_CHANGED = 1103;
     int RIL_UNSOL_REGISTRATION_FAILED = 1104;
     int RIL_UNSOL_BARRING_INFO_CHANGED = 1105;
+    int RIL_UNSOL_EMERGENCY_NETWORK_SCAN_RESULT = 1106;
+    int RIL_UNSOL_TRIGGER_IMS_DEREGISTRATION = 1107;
+    int RIL_UNSOL_CONNECTION_SETUP_FAILURE = 1108;
+    int RIL_UNSOL_NOTIFY_ANBR = 1109;
 }

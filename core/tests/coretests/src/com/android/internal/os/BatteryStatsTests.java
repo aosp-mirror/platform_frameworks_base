@@ -16,43 +16,13 @@
 
 package com.android.internal.os;
 
+import com.android.internal.power.EnergyConsumerStatsTest;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        AmbientDisplayPowerCalculatorTest.class,
-        AudioPowerCalculatorTest.class,
-        BatteryChargeCalculatorTest.class,
-        BatteryStatsCpuTimesTest.class,
-        BatteryStatsBackgroundStatsTest.class,
-        BatteryStatsBinderCallStatsTest.class,
-        BatteryStatsCounterTest.class,
-        BatteryStatsDualTimerTest.class,
-        BatteryStatsDurationTimerTest.class,
-        BatteryStatsHistoryIteratorTest.class,
-        BatteryStatsHistoryTest.class,
-        BatteryStatsImplTest.class,
-        BatteryStatsNoteTest.class,
-        BatteryStatsSamplingTimerTest.class,
-        BatteryStatsSensorTest.class,
-        BatteryStatsServTest.class,
-        BatteryStatsStopwatchTimerTest.class,
-        BatteryStatsTimeBaseTest.class,
-        BatteryStatsTimerTest.class,
-        BatteryStatsUidTest.class,
-        BatteryUsageStatsProviderTest.class,
-        BatteryUsageStatsTest.class,
-        BatteryUsageStatsStoreTest.class,
-        BatteryStatsUserLifecycleTests.class,
-        BluetoothPowerCalculatorTest.class,
-        BstatsCpuTimesValidationTest.class,
-        CameraPowerCalculatorTest.class,
-        CpuPowerCalculatorTest.class,
-        CustomMeasuredPowerCalculatorTest.class,
-        FlashlightPowerCalculatorTest.class,
-        GnssPowerCalculatorTest.class,
-        IdlePowerCalculatorTest.class,
         KernelCpuProcStringReaderTest.class,
         KernelCpuUidActiveTimeReaderTest.class,
         KernelCpuUidBpfMapReaderTest.class,
@@ -62,23 +32,11 @@ import org.junit.runners.Suite;
         KernelMemoryBandwidthStatsTest.class,
         KernelSingleProcessCpuThreadReaderTest.class,
         KernelSingleUidTimeReaderTest.class,
-        KernelWakelockReaderTest.class,
         LongArrayMultiStateCounterTest.class,
         LongMultiStateCounterTest.class,
-        LongSamplingCounterTest.class,
-        LongSamplingCounterArrayTest.class,
-        MobileRadioPowerCalculatorTest.class,
         PowerProfileTest.class,
-        ScreenPowerCalculatorTest.class,
-        SensorPowerCalculatorTest.class,
-        SystemServerCpuThreadReaderTest.class,
-        SystemServicePowerCalculatorTest.class,
-        UserPowerCalculatorTest.class,
-        VideoPowerCalculatorTest.class,
-        WakelockPowerCalculatorTest.class,
-        WifiPowerCalculatorTest.class,
 
-        com.android.internal.power.MeasuredEnergyStatsTest.class
+        EnergyConsumerStatsTest.class
     })
 public class BatteryStatsTests {
 }

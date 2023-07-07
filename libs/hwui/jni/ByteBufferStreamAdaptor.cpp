@@ -2,6 +2,7 @@
 #include "GraphicsJNI.h"
 #include "Utils.h"
 
+#include <SkData.h>
 #include <SkStream.h>
 
 using namespace android;

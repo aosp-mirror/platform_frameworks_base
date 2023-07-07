@@ -14,31 +14,43 @@
  * limitations under the License.
  */
 
+#include "ImageDecoder.h"
+
+#include <FrontBufferedStream.h>
+#include <HardwareBitmapUploader.h>
+#include <SkAlphaType.h>
+#include <SkAndroidCodec.h>
+#include <SkBitmap.h>
+#include <SkCodec.h>
+#include <SkCodecAnimation.h>
+#include <SkColorSpace.h>
+#include <SkColorType.h>
+#include <SkEncodedImageFormat.h>
+#include <SkImageInfo.h>
+#include <SkRect.h>
+#include <SkSize.h>
+#include <SkStream.h>
+#include <SkString.h>
+#include <androidfw/Asset.h>
+#include <fcntl.h>
+#include <gui/TraceUtils.h>
+#include <hwui/Bitmap.h>
+#include <hwui/ImageDecoder.h>
+#include <sys/stat.h>
+
 #include "Bitmap.h"
 #include "BitmapFactory.h"
 #include "ByteBufferStreamAdaptor.h"
 #include "CreateJavaOutputStreamAdaptor.h"
+#include "Gainmap.h"
 #include "GraphicsJNI.h"
-#include "ImageDecoder.h"
 #include "NinePatchPeeker.h"
 #include "Utils.h"
 
-#include <hwui/Bitmap.h>
-#include <hwui/ImageDecoder.h>
-#include <HardwareBitmapUploader.h>
-
-#include <FrontBufferedStream.h>
-#include <SkAndroidCodec.h>
-#include <SkEncodedImageFormat.h>
-#include <SkStream.h>
-
-#include <androidfw/Asset.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-
 using namespace android;
 
-static jclass    gImageDecoder_class;
+jclass gImageDecoder_class;
+jmethodID gImageDecoder_isP010SupportedForHEVCMethodID;
 static jclass    gSize_class;
 static jclass    gDecodeException_class;
 static jclass    gCanvas_class;
@@ -242,6 +254,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
                                           jboolean requireUnpremul, jboolean preferRamOverQuality,
                                           jboolean asAlphaMask, jlong colorSpaceHandle,
                                           jboolean extended) {
+    ATRACE_CALL();
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
     if (!decoder->setTargetSize(targetWidth, targetHeight)) {
         doThrowISE(env, "Could not scale to target size!");
@@ -284,6 +297,14 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
 
     if (colorType == kRGBA_F16_SkColorType && isHardware &&
             !uirenderer::HardwareBitmapUploader::hasFP16Support()) {
+        colorType = kN32_SkColorType;
+    }
+
+    // b/276879147, fallback to RGBA_8888 when decoding HEIF and P010 is not supported.
+    if (colorType == kRGBA_1010102_SkColorType &&
+        decoder->mCodec->getEncodedFormat() == SkEncodedImageFormat::kHEIF &&
+        env->CallStaticBooleanMethod(gImageDecoder_class,
+                                     gImageDecoder_isP010SupportedForHEVCMethodID) == JNI_FALSE) {
         colorType = kN32_SkColorType;
     }
 
@@ -332,10 +353,22 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
         return nullptr;
     }
 
+    ATRACE_FORMAT("Decoding %dx%d bitmap", bitmapInfo.width(), bitmapInfo.height());
     SkCodec::Result result = decoder->decode(bm.getPixels(), bm.rowBytes());
     jthrowable jexception = get_and_clear_exception(env);
-    int onPartialImageError = jexception ? kSourceException
-                                         : 0; // No error.
+    int onPartialImageError = jexception ? kSourceException : 0;  // No error.
+
+    // Only attempt to extract the gainmap if we're not post-processing, as we can't automatically
+    // mimic that to the gainmap and expect it to be meaningful. And also don't extract the gainmap
+    // if we're prioritizing RAM over quality, since the gainmap improves quality at the
+    // cost of RAM
+    if (result == SkCodec::kSuccess && !jpostProcess && !preferRamOverQuality) {
+        // The gainmap costs RAM to improve quality, so skip this if we're prioritizing RAM instead
+        result = decoder->extractGainmap(nativeBitmap.get(),
+                                         allocator == kSharedMemory_Allocator ? true : false);
+        jexception = get_and_clear_exception(env);
+    }
+
     switch (result) {
         case SkCodec::kSuccess:
             // Ignore the exception, since the decode was successful anyway.
@@ -446,6 +479,12 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
             sk_sp<Bitmap> hwBitmap = Bitmap::allocateHardwareBitmap(bm);
             if (hwBitmap) {
                 hwBitmap->setImmutable();
+                if (nativeBitmap->hasGainmap()) {
+                    auto gm = uirenderer::Gainmap::allocateHardwareGainmap(nativeBitmap->gainmap());
+                    if (gm) {
+                        hwBitmap->setGainmap(std::move(gm));
+                    }
+                }
                 return bitmap::createBitmap(env, hwBitmap.release(), bitmapCreateFlags,
                                             ninePatchChunk, ninePatchInsets);
             }
@@ -511,6 +550,8 @@ int register_android_graphics_ImageDecoder(JNIEnv* env) {
     gImageDecoder_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ImageDecoder"));
     gImageDecoder_constructorMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "<init>", "(JIIZZ)V");
     gImageDecoder_postProcessMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "postProcessAndRelease", "(Landroid/graphics/Canvas;)I");
+    gImageDecoder_isP010SupportedForHEVCMethodID =
+            GetStaticMethodIDOrDie(env, gImageDecoder_class, "isP010SupportedForHEVC", "()Z");
 
     gSize_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/util/Size"));
     gSize_constructorMethodID = GetMethodIDOrDie(env, gSize_class, "<init>", "(II)V");

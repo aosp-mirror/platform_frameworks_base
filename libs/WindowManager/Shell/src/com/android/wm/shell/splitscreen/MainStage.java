@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.splitscreen;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -32,16 +31,13 @@ import com.android.wm.shell.common.SyncTransactionQueue;
  * @see StageCoordinator
  */
 class MainStage extends StageTaskListener {
-    private static final String TAG = MainStage.class.getSimpleName();
-
     private boolean mIsActive = false;
 
     MainStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider,
-            @Nullable StageTaskUnfoldController stageTaskUnfoldController) {
-        super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession, iconProvider,
-                stageTaskUnfoldController);
+            SurfaceSession surfaceSession, IconProvider iconProvider) {
+        super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession,
+                iconProvider);
     }
 
     boolean isActive() {
@@ -51,15 +47,8 @@ class MainStage extends StageTaskListener {
     void activate(WindowContainerTransaction wct, boolean includingTopTask) {
         if (mIsActive) return;
 
-        final WindowContainerToken rootToken = mRootTaskInfo.token;
         if (includingTopTask) {
-            wct.reparentTasks(
-                    null /* currentParent */,
-                    rootToken,
-                    CONTROLLED_WINDOWING_MODES,
-                    CONTROLLED_ACTIVITY_TYPES,
-                    true /* onTop */,
-                    true /* reparentTopOnly */);
+            reparentTopTask(wct);
         }
 
         mIsActive = true;
@@ -76,10 +65,10 @@ class MainStage extends StageTaskListener {
         if (mRootTaskInfo == null) return;
         final WindowContainerToken rootToken = mRootTaskInfo.token;
         wct.reparentTasks(
-                        rootToken,
-                        null /* newParent */,
-                        CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
-                        CONTROLLED_ACTIVITY_TYPES,
-                        toTop);
+                rootToken,
+                null /* newParent */,
+                null /* windowingModes */,
+                null /* activityTypes */,
+                toTop);
     }
 }

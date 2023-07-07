@@ -25,6 +25,6 @@ option java_multiple_files = true;
  */
 message ImeFocusControllerProto {
     optional bool has_ime_focus = 1;
-    optional string served_view = 2;
-    optional string next_served_view = 3;
+    optional string served_view = 2 [deprecated = true];
+    optional string next_served_view = 3 [deprecated = true];
 }

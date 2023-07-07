@@ -44,6 +44,10 @@ public final class AppsFilterSnapshotImpl extends AppsFilterBase {
             mQueryableViaUsesLibrary = orig.mQueryableViaUsesLibrarySnapshot.snapshot();
         }
         mQueryableViaUsesLibrarySnapshot = new SnapshotCache.Sealed<>();
+        synchronized (orig.mQueryableViaUsesPermissionLock) {
+            mQueryableViaUsesPermission = orig.mQueryableViaUsesPermissionSnapshot.snapshot();
+        }
+        mQueryableViaUsesPermissionSnapshot = new SnapshotCache.Sealed<>();
         synchronized (orig.mForceQueryableLock) {
             mForceQueryable = orig.mForceQueryableSnapshot.snapshot();
         }
@@ -70,8 +74,9 @@ public final class AppsFilterSnapshotImpl extends AppsFilterBase {
             // cache is not ready, use an empty cache for the snapshot
             mShouldFilterCache = new WatchedSparseBooleanMatrix();
         }
+        mCacheEnabled = orig.mCacheEnabled;
         mShouldFilterCacheSnapshot = new SnapshotCache.Sealed<>();
 
-        mBackgroundHandler = null;
+        mHandler = null;
     }
 }

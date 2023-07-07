@@ -33,12 +33,15 @@ import android.hardware.biometrics.SensorPropertiesInternal;
  */
 interface IAuthService {
     // Creates a test session with the specified sensorId
+    @EnforcePermission("TEST_BIOMETRIC")
     ITestSession createTestSession(int sensorId, ITestSessionCallback callback, String opPackageName);
 
     // Retrieve static sensor properties for all biometric sensors
+    @EnforcePermission("TEST_BIOMETRIC")
     List<SensorPropertiesInternal> getSensorProperties(String opPackageName);
 
     // Retrieve the package where BIometricOrompt's UI is implemented
+    @EnforcePermission("TEST_BIOMETRIC")
     String getUiPackage();
 
     // Requests authentication. The service chooses the appropriate biometric to use, and shows
@@ -75,6 +78,9 @@ interface IAuthService {
     // See documentation in BiometricManager.
     void resetLockoutTimeBound(IBinder token, String opPackageName, int fromSensorId, int userId,
             in byte[] hardwareAuthToken);
+
+    // See documentation in BiometricManager.
+    void resetLockout(int userId, in byte[] hardwareAuthToken);
 
     // Provides a localized string that may be used as the label for a button that invokes
     // BiometricPrompt.

@@ -23,9 +23,6 @@ import static android.view.KeyEvent.KEYCODE_POWER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.server.policy.SingleKeyGestureDetector.KEY_LONGPRESS;
-import static com.android.server.policy.SingleKeyGestureDetector.KEY_VERYLONGPRESS;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -71,6 +68,10 @@ public class SingleKeyGestureTests {
     private boolean mAllowNonInteractiveForPress = true;
     private boolean mAllowNonInteractiveForLongPress = true;
 
+    private boolean mLongPressOnPowerBehavior = true;
+    private boolean mVeryLongPressOnPowerBehavior = true;
+    private boolean mLongPressOnBackBehavior = false;
+
     @Before
     public void setUp() {
         mInstrumentation.runOnMainSync(() -> {
@@ -84,8 +85,15 @@ public class SingleKeyGestureTests {
     }
 
     private void initSingleKeyGestureRules() {
-        mDetector.addRule(new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_POWER,
-                KEY_LONGPRESS | KEY_VERYLONGPRESS) {
+        mDetector.addRule(new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_POWER) {
+            @Override
+            boolean supportLongPress() {
+                return mLongPressOnPowerBehavior;
+            }
+            @Override
+            boolean supportVeryLongPress() {
+                return mVeryLongPressOnPowerBehavior;
+            }
             @Override
             int getMaxMultiPressCount() {
                 return mMaxMultiPressCount;
@@ -122,7 +130,11 @@ public class SingleKeyGestureTests {
             }
         });
 
-        mDetector.addRule(new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_BACK, 0) {
+        mDetector.addRule(new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_BACK) {
+            @Override
+            boolean supportLongPress() {
+                return mLongPressOnBackBehavior;
+            }
             @Override
             int getMaxMultiPressCount() {
                 return mMaxMultiPressCount;
@@ -143,6 +155,11 @@ public class SingleKeyGestureTests {
                 mMultiPressed.countDown();
                 assertTrue(mMaxMultiPressCount >= count);
                 assertEquals(mExpectedMultiPressCount, count);
+            }
+
+            @Override
+            void onLongPress(long downTime) {
+                mLongPressed.countDown();
             }
         });
 
@@ -266,5 +283,37 @@ public class SingleKeyGestureTests {
         } finally {
             handlerThread.quitSafely();
         }
+    }
+
+    @Test
+    public void testUpdateRule() throws InterruptedException {
+        // Power key rule doesn't allow the long press gesture.
+        mLongPressOnPowerBehavior = false;
+        pressKey(KEYCODE_POWER, mLongPressTime);
+        assertFalse(mLongPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+
+        // Back key rule allows the long press gesture.
+        mLongPressOnBackBehavior = true;
+        pressKey(KEYCODE_BACK, mLongPressTime);
+        assertTrue(mLongPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testAddRemove() throws InterruptedException {
+        final SingleKeyGestureDetector.SingleKeyRule rule =
+                new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_POWER) {
+                    @Override
+                    void onPress(long downTime) {
+                        mShortPressed.countDown();
+                    }
+                };
+
+        mDetector.removeRule(rule);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+        assertFalse(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+
+        mDetector.addRule(rule);
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+        assertTrue(mShortPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
     }
 }

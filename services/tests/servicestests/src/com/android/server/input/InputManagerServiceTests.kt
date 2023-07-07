@@ -16,16 +16,17 @@
 
 package com.android.server.input
 
+
 import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.display.DisplayViewport
-import android.hardware.input.InputManagerInternal
 import android.os.IInputConstants
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.view.Display
 import android.view.PointerIcon
 import androidx.test.InstrumentationRegistry
+import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -286,6 +287,40 @@ class InputManagerServiceTests {
 
         verify(native).setPointerIconType(eq(PointerIcon.TYPE_NULL))
         verify(native).setPointerAcceleration(eq(5f))
+    }
+
+    @Test
+    fun setDeviceTypeAssociation_setsDeviceTypeAssociation() {
+        val inputPort = "inputPort"
+        val type = "type"
+
+        localService.setTypeAssociation(inputPort, type)
+
+        assertThat(service.getDeviceTypeAssociations()).asList().containsExactly(inputPort, type)
+            .inOrder()
+    }
+
+    @Test
+    fun setAndUnsetDeviceTypeAssociation_deviceTypeAssociationIsMissing() {
+        val inputPort = "inputPort"
+        val type = "type"
+
+        localService.setTypeAssociation(inputPort, type)
+        localService.unsetTypeAssociation(inputPort)
+
+        assertTrue(service.getDeviceTypeAssociations().isEmpty())
+    }
+
+    @Test
+    fun testAddAndRemoveVirtualmKeyboardLayoutAssociation() {
+        val inputPort = "input port"
+        val languageTag = "language"
+        val layoutType = "layoutType"
+        localService.addKeyboardLayoutAssociation(inputPort, languageTag, layoutType)
+        verify(native).changeKeyboardLayoutAssociation()
+
+        localService.removeKeyboardLayoutAssociation(inputPort)
+        verify(native, times(2)).changeKeyboardLayoutAssociation()
     }
 
     private fun setVirtualMousePointerDisplayIdAndVerify(overrideDisplayId: Int) {

@@ -1598,8 +1598,8 @@ public final class LoadedApk {
                 }
             }
             if (rd == null) {
-                rd = new ReceiverDispatcher(r, context, handler,
-                        instrumentation, registered);
+                rd = new ReceiverDispatcher(mActivityThread.getApplicationThread(), r, context,
+                        handler, instrumentation, registered);
                 if (registered) {
                     if (map == null) {
                         map = new ArrayMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher>();
@@ -1668,10 +1668,13 @@ public final class LoadedApk {
     static final class ReceiverDispatcher {
 
         final static class InnerReceiver extends IIntentReceiver.Stub {
+            final IApplicationThread mApplicationThread;
             final WeakReference<LoadedApk.ReceiverDispatcher> mDispatcher;
             final LoadedApk.ReceiverDispatcher mStrongRef;
 
-            InnerReceiver(LoadedApk.ReceiverDispatcher rd, boolean strong) {
+            InnerReceiver(IApplicationThread thread, LoadedApk.ReceiverDispatcher rd,
+                    boolean strong) {
+                mApplicationThread = thread;
                 mDispatcher = new WeakReference<LoadedApk.ReceiverDispatcher>(rd);
                 mStrongRef = strong ? rd : null;
             }
@@ -1679,6 +1682,17 @@ public final class LoadedApk {
             @Override
             public void performReceive(Intent intent, int resultCode, String data,
                     Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                Log.wtf(TAG, "performReceive() called targeting raw IIntentReceiver for " + intent);
+                performReceive(intent, resultCode, data, extras, ordered, sticky,
+                        BroadcastReceiver.PendingResult.guessAssumeDelivered(
+                                BroadcastReceiver.PendingResult.TYPE_REGISTERED, ordered),
+                        sendingUser, /*sendingUid=*/ Process.INVALID_UID,
+                        /*sendingPackage=*/ null);
+            }
+
+            public void performReceive(Intent intent, int resultCode, String data,
+                    Bundle extras, boolean ordered, boolean sticky, boolean assumeDelivered,
+                    int sendingUser, int sendingUid, String sendingPackage) {
                 final LoadedApk.ReceiverDispatcher rd;
                 if (intent == null) {
                     Log.wtf(TAG, "Null intent received");
@@ -1693,8 +1707,9 @@ public final class LoadedApk {
                 }
                 if (rd != null) {
                     rd.performReceive(intent, resultCode, data, extras,
-                            ordered, sticky, sendingUser);
-                } else {
+                            ordered, sticky, assumeDelivered, sendingUser,
+                            sendingUid, sendingPackage);
+                } else if (!assumeDelivered) {
                     // The activity manager dispatched a broadcast to a registered
                     // receiver in this process, but before it could be delivered the
                     // receiver was unregistered.  Acknowledge the broadcast on its
@@ -1706,7 +1721,8 @@ public final class LoadedApk {
                         if (extras != null) {
                             extras.setAllowFds(false);
                         }
-                        mgr.finishReceiver(this, resultCode, data, extras, false, intent.getFlags());
+                        mgr.finishReceiver(mApplicationThread.asBinder(), resultCode, data,
+                                extras, false, intent.getFlags());
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
                     }
@@ -1714,6 +1730,7 @@ public final class LoadedApk {
             }
         }
 
+        final IApplicationThread mAppThread;
         final IIntentReceiver.Stub mIIntentReceiver;
         @UnsupportedAppUsage
         final BroadcastReceiver mReceiver;
@@ -1728,30 +1745,27 @@ public final class LoadedApk {
 
         final class Args extends BroadcastReceiver.PendingResult {
             private Intent mCurIntent;
-            private final boolean mOrdered;
             private boolean mDispatched;
             private boolean mRunCalled;
 
             public Args(Intent intent, int resultCode, String resultData, Bundle resultExtras,
-                    boolean ordered, boolean sticky, int sendingUser) {
+                    boolean ordered, boolean sticky, boolean assumeDelivered, int sendingUser,
+                    int sendingUid, String sendingPackage) {
                 super(resultCode, resultData, resultExtras,
                         mRegistered ? TYPE_REGISTERED : TYPE_UNREGISTERED, ordered,
-                        sticky, mIIntentReceiver.asBinder(), sendingUser, intent.getFlags());
+                        sticky, assumeDelivered, mAppThread.asBinder(), sendingUser,
+                        intent.getFlags(), sendingUid, sendingPackage);
                 mCurIntent = intent;
-                mOrdered = ordered;
             }
 
             public final Runnable getRunnable() {
                 return () -> {
                     final BroadcastReceiver receiver = mReceiver;
-                    final boolean ordered = mOrdered;
 
                     if (ActivityThread.DEBUG_BROADCAST) {
                         int seq = mCurIntent.getIntExtra("seq", -1);
                         Slog.i(ActivityThread.TAG, "Dispatching broadcast " + mCurIntent.getAction()
                                 + " seq=" + seq + " to " + mReceiver);
-                        Slog.i(ActivityThread.TAG, "  mRegistered=" + mRegistered
-                                + " mOrderedHint=" + ordered);
                     }
 
                     final IActivityManager mgr = ActivityManager.getService();
@@ -1765,11 +1779,9 @@ public final class LoadedApk {
                     mDispatched = true;
                     mRunCalled = true;
                     if (receiver == null || intent == null || mForgotten) {
-                        if (mRegistered && ordered) {
-                            if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
-                                    "Finishing null broadcast to " + mReceiver);
-                            sendFinished(mgr);
-                        }
+                        if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                                "Finishing null broadcast to " + mReceiver);
+                        sendFinished(mgr);
                         return;
                     }
 
@@ -1789,11 +1801,9 @@ public final class LoadedApk {
                         receiver.setPendingResult(this);
                         receiver.onReceive(mContext, intent);
                     } catch (Exception e) {
-                        if (mRegistered && ordered) {
-                            if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
-                                    "Finishing failed broadcast to " + mReceiver);
-                            sendFinished(mgr);
-                        }
+                        if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                                "Finishing failed broadcast to " + mReceiver);
+                        sendFinished(mgr);
                         if (mInstrumentation == null ||
                                 !mInstrumentation.onException(mReceiver, e)) {
                             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -1811,14 +1821,15 @@ public final class LoadedApk {
             }
         }
 
-        ReceiverDispatcher(BroadcastReceiver receiver, Context context,
-                Handler activityThread, Instrumentation instrumentation,
+        ReceiverDispatcher(IApplicationThread appThread, BroadcastReceiver receiver,
+                Context context, Handler activityThread, Instrumentation instrumentation,
                 boolean registered) {
             if (activityThread == null) {
                 throw new NullPointerException("Handler must not be null");
             }
 
-            mIIntentReceiver = new InnerReceiver(this, !registered);
+            mAppThread = appThread;
+            mIIntentReceiver = new InnerReceiver(mAppThread, this, !registered);
             mReceiver = receiver;
             mContext = context;
             mActivityThread = activityThread;
@@ -1866,9 +1877,10 @@ public final class LoadedApk {
         }
 
         public void performReceive(Intent intent, int resultCode, String data,
-                Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                Bundle extras, boolean ordered, boolean sticky, boolean assumeDelivered,
+                int sendingUser, int sendingUid, String sendingPackage) {
             final Args args = new Args(intent, resultCode, data, extras, ordered,
-                    sticky, sendingUser);
+                    sticky, assumeDelivered, sendingUser, sendingUid, sendingPackage);
             if (intent == null) {
                 Log.wtf(TAG, "Null intent received");
             } else {
@@ -1879,12 +1891,10 @@ public final class LoadedApk {
                 }
             }
             if (intent == null || !mActivityThread.post(args.getRunnable())) {
-                if (mRegistered && ordered) {
-                    IActivityManager mgr = ActivityManager.getService();
-                    if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
-                            "Finishing sync broadcast to " + mReceiver);
-                    args.sendFinished(mgr);
-                }
+                IActivityManager mgr = ActivityManager.getService();
+                if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
+                        "Finishing sync broadcast to " + mReceiver);
+                args.sendFinished(mgr);
             }
         }
 
@@ -1892,17 +1902,17 @@ public final class LoadedApk {
 
     @UnsupportedAppUsage
     public final IServiceConnection getServiceDispatcher(ServiceConnection c,
-            Context context, Handler handler, int flags) {
+            Context context, Handler handler, long flags) {
         return getServiceDispatcherCommon(c, context, handler, null, flags);
     }
 
     public final IServiceConnection getServiceDispatcher(ServiceConnection c,
-            Context context, Executor executor, int flags) {
+            Context context, Executor executor, long flags) {
         return getServiceDispatcherCommon(c, context, null, executor, flags);
     }
 
     private IServiceConnection getServiceDispatcherCommon(ServiceConnection c,
-            Context context, Handler handler, Executor executor, int flags) {
+            Context context, Handler handler, Executor executor, long flags) {
         synchronized (mServices) {
             LoadedApk.ServiceDispatcher sd = null;
             ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher> map = mServices.get(context);
@@ -2002,7 +2012,7 @@ public final class LoadedApk {
         private final Handler mActivityThread;
         private final Executor mActivityExecutor;
         private final ServiceConnectionLeaked mLocation;
-        private final int mFlags;
+        private final long mFlags;
 
         private RuntimeException mUnbindLocation;
 
@@ -2035,7 +2045,7 @@ public final class LoadedApk {
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ServiceDispatcher(ServiceConnection conn,
-                Context context, Handler activityThread, int flags) {
+                Context context, Handler activityThread, long flags) {
             mIServiceConnection = new InnerConnection(this);
             mConnection = conn;
             mContext = context;
@@ -2047,7 +2057,7 @@ public final class LoadedApk {
         }
 
         ServiceDispatcher(ServiceConnection conn,
-                Context context, Executor activityExecutor, int flags) {
+                Context context, Executor activityExecutor, long flags) {
             mIServiceConnection = new InnerConnection(this);
             mConnection = conn;
             mContext = context;
@@ -2103,7 +2113,7 @@ public final class LoadedApk {
             return mIServiceConnection;
         }
 
-        int getFlags() {
+        long getFlags() {
             return mFlags;
         }
 

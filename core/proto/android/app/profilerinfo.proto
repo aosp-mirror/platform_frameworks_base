@@ -35,4 +35,5 @@ message ProfilerInfoProto {
     optional bool streaming_output = 5;
     // Denotes an agent (and its parameters) to attach for profiling.
     optional string agent = 6;
+    optional int32 clock_type = 7;
 }

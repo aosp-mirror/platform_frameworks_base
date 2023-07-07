@@ -90,7 +90,7 @@ import java.util.Objects;
  * </p>
  * <pre>
  * MediaRouter mediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
- * MediaRouter.RouteInfo route = mediaRouter.getSelectedRoute();
+ * MediaRouter.RouteInfo route = mediaRouter.getSelectedRoute(MediaRouter.ROUTE_TYPE_LIVE_VIDEO);
  * if (route != null) {
  *     Display presentationDisplay = route.getPresentationDisplay();
  *     if (presentationDisplay != null) {
