@@ -8,7 +8,6 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation.getContentAlpha
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.EmptyShadeView
 import com.android.systemui.statusbar.NotificationShelf
@@ -45,7 +44,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private val dumpManager = mock<DumpManager>()
     private val mStatusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>()
     private val notificationShelf = mock<NotificationShelf>()
-    private val featureFlags = mock<FeatureFlags>()
     private val emptyShadeView = EmptyShadeView(context, /* attrs= */ null).apply {
         layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
     }
@@ -56,7 +54,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* bypassController */ { false },
             mStatusBarKeyguardViewManager,
             largeScreenShadeInterpolator,
-            featureFlags,
         )
 
     private val testableResources = mContext.getOrCreateTestableResources()

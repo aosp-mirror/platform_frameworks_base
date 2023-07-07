@@ -566,7 +566,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public float getTopCornerRadius() {
-        if (isNewHeadsUpAnimFlagEnabled()) {
+        if (mImprovedHunAnimation.isEnabled()) {
             return super.getTopCornerRadius();
         }
 
@@ -576,7 +576,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public float getBottomCornerRadius() {
-        if (isNewHeadsUpAnimFlagEnabled()) {
+        if (mImprovedHunAnimation.isEnabled()) {
             return super.getBottomCornerRadius();
         }
 
