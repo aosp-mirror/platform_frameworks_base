@@ -75,7 +75,13 @@ public class NoOpAudioSystemAdapter extends AudioSystemAdapter {
     }
 
     @Override
-    public int removeDevicesRoleForStrategy(int strategy, int role) {
+    public int removeDevicesRoleForStrategy(int strategy, int role,
+            @NonNull List<AudioDeviceAttributes> devices) {
+        return AudioSystem.AUDIO_STATUS_OK;
+    }
+
+    @Override
+    public int clearDevicesRoleForStrategy(int strategy, int role) {
         return AudioSystem.AUDIO_STATUS_OK;
     }
 
@@ -123,6 +129,11 @@ public class NoOpAudioSystemAdapter extends AudioSystemAdapter {
     @Override
     public boolean isStreamActive(int stream, int inPastMs) {
         return mIsStreamActive;
+    }
+
+    @Override
+    public int setStreamVolumeIndexAS(int stream, int index, int device) {
+        return AudioSystem.AUDIO_STATUS_OK;
     }
 
     @Override

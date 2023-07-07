@@ -233,6 +233,22 @@ public final class FillEventHistory implements Parcelable {
          */
         public static final int TYPE_DATASETS_SHOWN = 5;
 
+        /**
+         * The app/user requested for a field to be Autofilled.
+         *
+         * This event is fired when the view has been entered (by user or app) in order
+         * to differentiate from FillRequests that have been pretriggered for FillDialogs.
+         *
+         * For example, the user might navigate away from a screen without tapping any
+         * fields. In this case, a FillRequest/FillResponse has been generated, but was
+         * not used for Autofilling. The user did not intend to see an Autofill result,
+         * but a FillRequest was still generated. This is different from when the user
+         * did tap on a field after the pretriggered FillRequest, this event will appear
+         * in the FillEventHistory, signaling that the user did intend to Autofill
+         * something.
+         */
+        public static final int TYPE_VIEW_REQUESTED_AUTOFILL = 6;
+
         /** @hide */
         @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_DATASET_SELECTED,
@@ -240,7 +256,8 @@ public final class FillEventHistory implements Parcelable {
                 TYPE_AUTHENTICATION_SELECTED,
                 TYPE_SAVE_SHOWN,
                 TYPE_CONTEXT_COMMITTED,
-                TYPE_DATASETS_SHOWN
+                TYPE_DATASETS_SHOWN,
+                TYPE_VIEW_REQUESTED_AUTOFILL
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface EventIds{}
@@ -659,8 +676,8 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable AutofillId[] detectedFieldIds,
                 @Nullable FieldClassification[] detectedFieldClassifications,
                 int saveDialogNotShowReason, int uiType) {
-            mEventType = Preconditions.checkArgumentInRange(eventType, 0, TYPE_DATASETS_SHOWN,
-                    "eventType");
+            mEventType = Preconditions.checkArgumentInRange(eventType, 0,
+                    TYPE_VIEW_REQUESTED_AUTOFILL, "eventType");
             mDatasetId = datasetId;
             mClientState = clientState;
             mSelectedDatasetIds = selectedDatasetIds;
@@ -723,6 +740,8 @@ public final class FillEventHistory implements Parcelable {
                     return "TYPE_CONTEXT_COMMITTED";
                 case TYPE_DATASETS_SHOWN:
                     return "TYPE_DATASETS_SHOWN";
+                case TYPE_VIEW_REQUESTED_AUTOFILL:
+                    return "TYPE_VIEW_REQUESTED_AUTOFILL";
                 default:
                     return "TYPE_UNKNOWN";
             }

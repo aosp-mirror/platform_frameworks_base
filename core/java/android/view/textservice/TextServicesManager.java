@@ -303,6 +303,10 @@ public final class TextServicesManager {
     /**
      * Retrieve the list of currently enabled spell checkers.
      *
+     * <p> Note: The results are filtered by the rules of
+     * <a href="/training/basics/intents/package-visibility">package visibility</a>, except for
+     * the currently active spell checker.
+     *
      * @return The list of currently enabled spell checkers.
      */
     @UserHandleAware

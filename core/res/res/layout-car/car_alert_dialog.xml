@@ -54,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/text_view_start_margin"
                     android:layout_marginEnd="@dimen/text_view_end_margin"
-                    style="@style/CarBody4"/>
+                    style="@style/CarDialogMessageText"/>
 
                 <!-- we don't need this spacer, but the id needs to be here for compatibility -->
                 <Space

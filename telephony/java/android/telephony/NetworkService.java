@@ -265,7 +265,7 @@ public abstract class NetworkService extends Service {
     /** @hide */
     @Override
     public void onDestroy() {
-        mHandlerThread.quit();
+        mHandlerThread.quitSafely();
         super.onDestroy();
     }
 

@@ -40,6 +40,7 @@ interface IUiAutomationConnection {
     void connect(IAccessibilityServiceClient client, int flags);
     void disconnect();
     boolean injectInputEvent(in InputEvent event, boolean sync, boolean waitForAnimations);
+    void injectInputEventToInputFilter(in InputEvent event);
     void syncInputTransactions(boolean waitForAnimations);
     boolean setRotation(int rotation);
     Bitmap takeScreenshot(in Rect crop);

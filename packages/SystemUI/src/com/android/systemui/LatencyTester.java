@@ -20,7 +20,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Build;
 import android.provider.DeviceConfig;
@@ -46,7 +45,7 @@ import javax.inject.Inject;
  * system that are used for testing the latency.
  */
 @SysUISingleton
-public class LatencyTester extends CoreStartable {
+public class LatencyTester implements CoreStartable {
     private static final boolean DEFAULT_ENABLED = Build.IS_ENG;
     private static final String
             ACTION_FINGERPRINT_WAKE =
@@ -57,21 +56,22 @@ public class LatencyTester extends CoreStartable {
     private final BiometricUnlockController mBiometricUnlockController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final DeviceConfigProxy mDeviceConfigProxy;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private boolean mEnabled;
 
     @Inject
     public LatencyTester(
-            Context context,
             BiometricUnlockController biometricUnlockController,
             BroadcastDispatcher broadcastDispatcher,
             DeviceConfigProxy deviceConfigProxy,
-            @Main DelayableExecutor mainExecutor
+            @Main DelayableExecutor mainExecutor,
+            KeyguardUpdateMonitor keyguardUpdateMonitor
     ) {
-        super(context);
         mBiometricUnlockController = biometricUnlockController;
         mBroadcastDispatcher = broadcastDispatcher;
         mDeviceConfigProxy = deviceConfigProxy;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
 
         updateEnabled();
         mDeviceConfigProxy.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
@@ -87,10 +87,13 @@ public class LatencyTester extends CoreStartable {
         if (!mEnabled) {
             return;
         }
-        mBiometricUnlockController.onBiometricAcquired(type,
-                BiometricConstants.BIOMETRIC_ACQUIRED_GOOD);
-        mBiometricUnlockController.onBiometricAuthenticated(
-                KeyguardUpdateMonitor.getCurrentUser(), type, true /* isStrongBiometric */);
+        if (type == BiometricSourceType.FACE) {
+            mKeyguardUpdateMonitor.onFaceAuthenticated(KeyguardUpdateMonitor.getCurrentUser(),
+                    true);
+        } else if (type == BiometricSourceType.FINGERPRINT) {
+            mKeyguardUpdateMonitor.onFingerprintAuthenticated(
+                    KeyguardUpdateMonitor.getCurrentUser(), true);
+        }
     }
 
     private void registerForBroadcasts(boolean register) {

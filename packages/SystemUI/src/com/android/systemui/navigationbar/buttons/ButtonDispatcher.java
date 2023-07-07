@@ -16,16 +16,13 @@
 
 package com.android.systemui.navigationbar.buttons;
 
-import static com.android.systemui.animation.Interpolators.LINEAR;
+import static com.android.app.animation.Interpolators.LINEAR;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
-
-import com.android.systemui.Dependency;
-import com.android.systemui.assist.AssistManager;
 
 import java.util.ArrayList;
 

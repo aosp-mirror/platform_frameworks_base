@@ -15,6 +15,7 @@
  */
 package com.android.server.policy;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.UserManager;
 import com.android.internal.globalactions.LongPressAction;
@@ -35,6 +36,11 @@ public final class PowerAction extends SinglePressAction implements LongPressAct
 
     @Override
     public boolean onLongPress() {
+        // don't actually trigger the reboot if we are running stability
+        // tests via monkey
+        if (ActivityManager.isUserAMonkey()) {
+            return false;
+        }
         UserManager um = mContext.getSystemService(UserManager.class);
         if (!um.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
             mWindowManagerFuncs.rebootSafeMode(true);
@@ -55,6 +61,11 @@ public final class PowerAction extends SinglePressAction implements LongPressAct
 
     @Override
     public void onPress() {
+        // don't actually trigger the shutdown if we are running stability
+        // tests via monkey
+        if (ActivityManager.isUserAMonkey()) {
+            return;
+        }
         // shutdown by making sure radio and power are handled accordingly.
         mWindowManagerFuncs.shutdown(false /* confirm */);
     }

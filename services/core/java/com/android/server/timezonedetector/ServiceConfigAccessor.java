@@ -59,20 +59,18 @@ public interface ServiceConfigAccessor {
      * Adds a listener that will be invoked when {@link ConfigurationInternal} may have changed.
      * The listener is invoked on the main thread.
      */
-    void addConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener);
+    void addConfigurationInternalChangeListener(@NonNull StateChangeListener listener);
 
     /**
      * Removes a listener previously added via {@link
-     * #addConfigurationInternalChangeListener(ConfigurationChangeListener)}.
+     * #addConfigurationInternalChangeListener(StateChangeListener)}.
      */
-    void removeConfigurationInternalChangeListener(
-            @NonNull ConfigurationChangeListener listener);
+    void removeConfigurationInternalChangeListener(@NonNull StateChangeListener listener);
 
     /**
      * Returns a snapshot of the {@link ConfigurationInternal} for the current user. This is only a
      * snapshot so callers must use {@link
-     * #addConfigurationInternalChangeListener(ConfigurationChangeListener)} to be notified when it
+     * #addConfigurationInternalChangeListener(StateChangeListener)} to be notified when it
      * changes.
      */
     @NonNull
@@ -81,11 +79,15 @@ public interface ServiceConfigAccessor {
     /**
      * Updates the configuration properties that control a device's time zone behavior.
      *
-     * <p>This method returns {@code true} if the configuration was changed,
-     * {@code false} otherwise.
+     * <p>This method returns {@code true} if the configuration was changed, {@code false}
+     * otherwise.
+     *
+     * @param bypassUserPolicyChecks {@code true} for device policy manager use cases where device
+     *   policy restrictions that should apply to actual users can be ignored
      */
-    boolean updateConfiguration(@UserIdInt int userId,
-            @NonNull TimeZoneConfiguration requestedConfiguration);
+    boolean updateConfiguration(
+            @UserIdInt int userId, @NonNull TimeZoneConfiguration requestedConfiguration,
+            boolean bypassUserPolicyChecks);
 
     /**
      * Returns a snapshot of the configuration that controls time zone detector behavior for the
@@ -100,8 +102,7 @@ public interface ServiceConfigAccessor {
      *
      * <p>Note: Currently only for use by long-lived objects; there is no associated remove method.
      */
-    void addLocationTimeZoneManagerConfigListener(
-            @NonNull ConfigurationChangeListener listener);
+    void addLocationTimeZoneManagerConfigListener(@NonNull StateChangeListener listener);
 
     /**
      * Returns {@code true} if the telephony-based time zone detection feature is supported on the

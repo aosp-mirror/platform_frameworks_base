@@ -16,6 +16,7 @@
 
 package android.app.job;
 
+import android.app.Notification;
 import android.app.job.JobWorkItem;
 
 /**
@@ -29,6 +30,25 @@ import android.app.job.JobWorkItem;
  * {@hide}
  */
 interface IJobCallback {
+    /**
+     * Immediate callback to the system after sending a data transfer download progress request
+     * signal; used to quickly detect ANR.
+     *
+     * @param jobId Unique integer used to identify this job.
+     * @param workId Unique integer used to identify a specific work item.
+     * @param transferredBytes How much data has been downloaded, in bytes.
+     */
+    void acknowledgeGetTransferredDownloadBytesMessage(int jobId, int workId,
+            long transferredBytes);
+    /**
+     * Immediate callback to the system after sending a data transfer upload progress request
+     * signal; used to quickly detect ANR.
+     *
+     * @param jobId Unique integer used to identify this job.
+     * @param workId Unique integer used to identify a specific work item.
+     * @param transferredBytes How much data has been uploaded, in bytes.
+     */
+    void acknowledgeGetTransferredUploadBytesMessage(int jobId, int workId, long transferredBytes);
     /**
      * Immediate callback to the system after sending a start signal, used to quickly detect ANR.
      *
@@ -65,4 +85,37 @@ interface IJobCallback {
      */
     @UnsupportedAppUsage
     void jobFinished(int jobId, boolean reschedule);
+    /*
+     * Inform JobScheduler of a change in the estimated transfer payload.
+     *
+     * @param jobId Unique integer used to identify this job.
+     * @param item The particular JobWorkItem this progress is associated with, if any.
+     * @param downloadBytes How many bytes the app expects to download.
+     * @param uploadBytes How many bytes the app expects to upload.
+     */
+    void updateEstimatedNetworkBytes(int jobId, in JobWorkItem item,
+            long downloadBytes, long uploadBytes);
+    /*
+     * Update JobScheduler of how much data the job has successfully transferred.
+     *
+     * @param jobId Unique integer used to identify this job.
+     * @param item The particular JobWorkItem this progress is associated with, if any.
+     * @param transferredDownloadBytes The number of bytes that have successfully been downloaded.
+     * @param transferredUploadBytes The number of bytes that have successfully been uploaded.
+     */
+    void updateTransferredNetworkBytes(int jobId, in JobWorkItem item,
+            long transferredDownloadBytes, long transferredUploadBytes);
+    /**
+     * Provide JobScheduler with a notification to post and tie to this job's
+     * lifecycle.
+     * This is required for all user-initiated job and optional for other jobs.
+     *
+     * @param jobId Unique integer used to identify this job.
+     * @param notificationId The ID for this notification, as per
+     *                       {@link android.app.NotificationManager#notify(int, Notification)}.
+     * @param notification The notification to be displayed.
+     * @param jobEndNotificationPolicy The policy to apply to the notification when the job stops.
+     */
+    void setNotification(int jobId, int notificationId,
+            in Notification notification, int jobEndNotificationPolicy);
 }

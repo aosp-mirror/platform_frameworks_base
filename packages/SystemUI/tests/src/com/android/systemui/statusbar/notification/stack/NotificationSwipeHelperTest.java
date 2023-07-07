@@ -18,13 +18,19 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
@@ -39,7 +45,6 @@ import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.SwipeHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.flags.FeatureFlags;
@@ -51,9 +56,14 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Tests for {@link NotificationSwipeHelper}.
@@ -66,6 +76,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     private NotificationSwipeHelper mSwipeHelper;
     private NotificationSwipeHelper.NotificationCallback mCallback;
     private NotificationMenuRowPlugin.OnMenuEventListener mListener;
+    private NotificationRoundnessManager mNotificationRoundnessManager;
     private View mView;
     private MotionEvent mEvent;
     private NotificationMenuRowPlugin mMenuRow;
@@ -74,16 +85,26 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     private Runnable mFalsingCheck;
     private FeatureFlags mFeatureFlags;
 
-    @Rule public MockitoRule mockito = MockitoJUnit.rule();
+    private static final int FAKE_ROW_WIDTH = 20;
+    private static final int FAKE_ROW_HEIGHT = 20;
+
+    @Rule
+    public MockitoRule mockito = MockitoJUnit.rule();
 
     @Before
     public void setUp() throws Exception {
         mCallback = mock(NotificationSwipeHelper.NotificationCallback.class);
         mListener = mock(NotificationMenuRowPlugin.OnMenuEventListener.class);
+        mNotificationRoundnessManager = mock(NotificationRoundnessManager.class);
         mFeatureFlags = mock(FeatureFlags.class);
         mSwipeHelper = spy(new NotificationSwipeHelper(
-                mContext.getResources(), ViewConfiguration.get(mContext),
-                new FalsingManagerFake(), mFeatureFlags, SwipeHelper.X, mCallback, mListener));
+                mContext.getResources(),
+                ViewConfiguration.get(mContext),
+                new FalsingManagerFake(),
+                mFeatureFlags,
+                mCallback,
+                mListener,
+                mNotificationRoundnessManager));
         mView = mock(View.class);
         mEvent = mock(MotionEvent.class);
         mMenuRow = mock(NotificationMenuRowPlugin.class);
@@ -207,14 +228,154 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHandleUpEvent_menuRow() {
-        when(mSwipeHelper.getCurrentMenuRow()).thenReturn(mMenuRow);
-        doNothing().when(mSwipeHelper).handleMenuRowSwipe(mEvent, mView, 0, mMenuRow);
+    public void testHandleUpEvent_menuRowWithoutMenu_dismiss() {
+        doNothing().when(mSwipeHelper).dismiss(any(), anyFloat());
+        doReturn(true).when(mSwipeHelper).isDismissGesture(any());
+        doReturn(true).when(mSwipeHelper).swipedFarEnough();
+        when(mMenuRow.shouldShowMenu()).thenReturn(true);
+        mSwipeHelper.setCurrentMenuRow(mMenuRow);
 
         assertTrue("Menu row exists",
                 mSwipeHelper.handleUpEvent(mEvent, mView, 0, 0));
         verify(mMenuRow, times(1)).onTouchEnd();
-        verify(mSwipeHelper, times(1)).handleMenuRowSwipe(mEvent, mView, 0, mMenuRow);
+        verify(mSwipeHelper, times(1)).isDismissGesture(mEvent);
+        verify(mSwipeHelper, times(1)).dismiss(mView, 0);
+        verify(mSwipeHelper, never()).isFalseGesture();
+    }
+
+    @Test
+    public void testHandleUpEvent_menuRowWithoutMenu_snapback() {
+        doNothing().when(mSwipeHelper).snapChild(any(), anyInt(), anyFloat());
+        doReturn(false).when(mSwipeHelper).isDismissGesture(any());
+        doReturn(true).when(mSwipeHelper).swipedFarEnough();
+        when(mMenuRow.shouldShowMenu()).thenReturn(true);
+        mSwipeHelper.setCurrentMenuRow(mMenuRow);
+
+        assertTrue("Menu row exists",
+                mSwipeHelper.handleUpEvent(mEvent, mView, 0, 0));
+        verify(mMenuRow, times(1)).onTouchEnd();
+        verify(mSwipeHelper, times(1)).isDismissGesture(mEvent);
+        verify(mSwipeHelper, times(1)).snapClosed(mView, 0);
+        verify(mMenuRow, times(1)).onSnapClosed();
+        verify(mSwipeHelper, never()).isFalseGesture();
+    }
+
+    @Test
+    public void testHandleUpEvent_menuRowWithOpenMenu_dismissed() {
+        doNothing().when(mSwipeHelper).dismiss(any(), anyFloat());
+        doReturn(true).when(mSwipeHelper).isDismissGesture(any());
+        doReturn(true).when(mSwipeHelper).swipedFarEnough();
+        when(mMenuRow.shouldShowMenu()).thenReturn(true);
+        when(mMenuRow.isSnappedAndOnSameSide()).thenReturn(true);
+        mSwipeHelper.setCurrentMenuRow(mMenuRow);
+
+        assertTrue("Menu row exists",
+                mSwipeHelper.handleUpEvent(mEvent, mView, 0, 0));
+        verify(mMenuRow, times(1)).onTouchEnd();
+        verify(mSwipeHelper, times(1)).isDismissGesture(mEvent);
+        verify(mSwipeHelper, times(1)).dismiss(mView, 0);
+        verify(mSwipeHelper, never()).isFalseGesture();
+    }
+
+    @Test
+    public void testHandleUpEvent_menuRowWithOpenMenu_snapback() {
+        doNothing().when(mSwipeHelper).snapChild(any(), anyInt(), anyFloat());
+        doReturn(false).when(mSwipeHelper).isDismissGesture(any());
+        doReturn(true).when(mSwipeHelper).swipedFarEnough();
+        when(mMenuRow.shouldShowMenu()).thenReturn(true);
+        when(mMenuRow.isSnappedAndOnSameSide()).thenReturn(true);
+        mSwipeHelper.setCurrentMenuRow(mMenuRow);
+
+        assertTrue("Menu row exists",
+                mSwipeHelper.handleUpEvent(mEvent, mView, 0, 0));
+        verify(mMenuRow, times(1)).onTouchEnd();
+        verify(mSwipeHelper, times(1)).isDismissGesture(mEvent);
+        verify(mSwipeHelper, times(1)).snapClosed(mView, 0);
+        verify(mMenuRow, times(1)).onSnapClosed();
+        verify(mSwipeHelper, never()).isFalseGesture();
+    }
+
+    @Test
+    public void testHandleUpEvent_menuRowWithClosedMenu_dismissed() {
+        doNothing().when(mSwipeHelper).dismiss(any(), anyFloat());
+        doReturn(true).when(mSwipeHelper).isDismissGesture(any());
+        doReturn(true).when(mSwipeHelper).swipedFarEnough();
+        when(mMenuRow.shouldShowMenu()).thenReturn(true);
+        when(mMenuRow.isSnappedAndOnSameSide()).thenReturn(false);
+        mSwipeHelper.setCurrentMenuRow(mMenuRow);
+
+        assertTrue("Menu row exists",
+                mSwipeHelper.handleUpEvent(mEvent, mView, 0, 0));
+        verify(mMenuRow, times(1)).onTouchEnd();
+        verify(mSwipeHelper, times(1)).isDismissGesture(mEvent);
+        verify(mSwipeHelper, times(1)).dismiss(mView, 0);
+        verify(mSwipeHelper, never()).isFalseGesture();
+    }
+
+    @Test
+    public void testHandleUpEvent_menuRowWithClosedMenu_snapback() {
+        doNothing().when(mSwipeHelper).snapChild(any(), anyInt(), anyFloat());
+        doReturn(false).when(mSwipeHelper).isDismissGesture(any());
+        doReturn(true).when(mSwipeHelper).swipedFarEnough();
+        when(mMenuRow.shouldShowMenu()).thenReturn(true);
+        when(mMenuRow.isSnappedAndOnSameSide()).thenReturn(false);
+        mSwipeHelper.setCurrentMenuRow(mMenuRow);
+
+        assertTrue("Menu row exists",
+                mSwipeHelper.handleUpEvent(mEvent, mView, 0, 0));
+        verify(mMenuRow, times(1)).onTouchEnd();
+        verify(mSwipeHelper, times(1)).isDismissGesture(mEvent);
+        verify(mSwipeHelper, times(1)).snapClosed(mView, 0);
+        verify(mMenuRow, times(1)).onSnapClosed();
+        verify(mSwipeHelper, never()).isFalseGesture();
+    }
+
+    @Test
+    public void testIsDismissGesture() {
+        doReturn(false).when(mSwipeHelper).isFalseGesture();
+        doReturn(true).when(mSwipeHelper).swipedFarEnough();
+        doReturn(true).when(mSwipeHelper).swipedFastEnough();
+        when(mCallback.canChildBeDismissedInDirection(any(), anyBoolean())).thenReturn(true);
+        when(mEvent.getActionMasked()).thenReturn(MotionEvent.ACTION_UP);
+
+        assertTrue("Should be a dismiss gesture", mSwipeHelper.isDismissGesture(mEvent));
+        verify(mSwipeHelper, times(1)).isFalseGesture();
+    }
+
+    @Test
+    public void testIsDismissGesture_falseGesture() {
+        doReturn(true).when(mSwipeHelper).isFalseGesture();
+        doReturn(true).when(mSwipeHelper).swipedFarEnough();
+        doReturn(true).when(mSwipeHelper).swipedFastEnough();
+        when(mCallback.canChildBeDismissedInDirection(any(), anyBoolean())).thenReturn(true);
+        when(mEvent.getActionMasked()).thenReturn(MotionEvent.ACTION_UP);
+
+        assertFalse("False gesture should stop dismissal", mSwipeHelper.isDismissGesture(mEvent));
+        verify(mSwipeHelper, times(1)).isFalseGesture();
+    }
+
+    @Test
+    public void testIsDismissGesture_farEnough() {
+        doReturn(false).when(mSwipeHelper).isFalseGesture();
+        doReturn(true).when(mSwipeHelper).swipedFarEnough();
+        doReturn(false).when(mSwipeHelper).swipedFastEnough();
+        when(mCallback.canChildBeDismissedInDirection(any(), anyBoolean())).thenReturn(true);
+        when(mEvent.getActionMasked()).thenReturn(MotionEvent.ACTION_UP);
+
+        assertTrue("Should be a dismissal", mSwipeHelper.isDismissGesture(mEvent));
+        verify(mSwipeHelper, times(1)).isFalseGesture();
+    }
+
+    @Test
+    public void testIsDismissGesture_notFarOrFastEnough() {
+        doReturn(false).when(mSwipeHelper).isFalseGesture();
+        doReturn(false).when(mSwipeHelper).swipedFarEnough();
+        doReturn(false).when(mSwipeHelper).swipedFastEnough();
+        when(mCallback.canChildBeDismissedInDirection(any(), anyBoolean())).thenReturn(true);
+        when(mEvent.getActionMasked()).thenReturn(MotionEvent.ACTION_UP);
+
+        assertFalse("Should not be a dismissal", mSwipeHelper.isDismissGesture(mEvent));
+        verify(mSwipeHelper, times(1)).isFalseGesture();
     }
 
     @Test
@@ -233,23 +394,32 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
 
     @Test
     public void testSnapchild_targetIsZero() {
-        doNothing().when(mSwipeHelper).superSnapChild(mView, 0, 0);
-        mSwipeHelper.snapChild(mView, 0, 0);
+        doNothing().when(mSwipeHelper).superSnapChild(mNotificationRow, 0, 0);
+        mSwipeHelper.snapChild(mNotificationRow, 0, 0);
 
-        verify(mCallback, times(1)).onDragCancelled(mView);
-        verify(mSwipeHelper, times(1)).superSnapChild(mView, 0, 0);
+        verify(mCallback, times(1)).onDragCancelled(mNotificationRow);
+        verify(mSwipeHelper, times(1)).superSnapChild(mNotificationRow, 0, 0);
         verify(mSwipeHelper, times(1)).handleMenuCoveredOrDismissed();
     }
 
 
     @Test
     public void testSnapchild_targetNotZero() {
+        doNothing().when(mSwipeHelper).superSnapChild(mNotificationRow, 10, 0);
+        mSwipeHelper.snapChild(mNotificationRow, 10, 0);
+
+        verify(mCallback, times(1)).onDragCancelled(mNotificationRow);
+        verify(mSwipeHelper, times(1)).superSnapChild(mNotificationRow, 10, 0);
+        verify(mSwipeHelper, times(0)).handleMenuCoveredOrDismissed();
+    }
+
+    @Test
+    public void testSnapchild_targetNotSwipeable() {
         doNothing().when(mSwipeHelper).superSnapChild(mView, 10, 0);
         mSwipeHelper.snapChild(mView, 10, 0);
 
-        verify(mCallback, times(1)).onDragCancelled(mView);
-        verify(mSwipeHelper, times(1)).superSnapChild(mView, 10, 0);
-        verify(mSwipeHelper, times(0)).handleMenuCoveredOrDismissed();
+        verify(mCallback).onDragCancelled(mView);
+        verify(mSwipeHelper, never()).superSnapChild(mView, 10, 0);
     }
 
     @Test
@@ -264,12 +434,12 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     public void testGetViewTranslationAnimator_notExpandableNotificationRow() {
         Animator animator = mock(Animator.class);
         AnimatorUpdateListener listener = mock(AnimatorUpdateListener.class);
-        doReturn(animator).when(mSwipeHelper).superGetViewTranslationAnimator(mView, 0, listener);
+        doReturn(animator).when(mSwipeHelper).createTranslationAnimation(mView, 0, listener);
 
-        assertEquals("returns the correct animator from super", animator,
+        assertEquals("Should create a new animator", animator,
                 mSwipeHelper.getViewTranslationAnimator(mView, 0, listener));
 
-        verify(mSwipeHelper, times(1)).superGetViewTranslationAnimator(mView, 0, listener);
+        verify(mSwipeHelper).createTranslationAnimation(mView, 0, listener);
     }
 
     @Test
@@ -278,10 +448,10 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         AnimatorUpdateListener listener = mock(AnimatorUpdateListener.class);
         doReturn(animator).when(mNotificationRow).getTranslateViewAnimator(0, listener);
 
-        assertEquals("returns the correct animator from super when view is an ENR", animator,
+        assertEquals("Should return the animator from ExpandableNotificationRow", animator,
                 mSwipeHelper.getViewTranslationAnimator(mNotificationRow, 0, listener));
 
-        verify(mNotificationRow, times(1)).getTranslateViewAnimator(0, listener);
+        verify(mNotificationRow).getTranslateViewAnimator(0, listener);
     }
 
     @Test
@@ -444,8 +614,8 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         doReturn(5f).when(mEvent).getRawX();
         doReturn(10f).when(mEvent).getRawY();
 
-        doReturn(20).when(mView).getWidth();
-        doReturn(20).when(mView).getHeight();
+        doReturn(FAKE_ROW_WIDTH).when(mView).getWidth();
+        doReturn(FAKE_ROW_HEIGHT).when(mView).getHeight();
 
         Answer answer = (Answer) invocation -> {
             int[] arr = invocation.getArgument(0);
@@ -472,8 +642,8 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
         doReturn(5f).when(mEvent).getRawX();
         doReturn(10f).when(mEvent).getRawY();
 
-        doReturn(20).when(mNotificationRow).getWidth();
-        doReturn(20).when(mNotificationRow).getActualHeight();
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getWidth();
+        doReturn(FAKE_ROW_HEIGHT).when(mNotificationRow).getActualHeight();
 
         Answer answer = (Answer) invocation -> {
             int[] arr = invocation.getArgument(0);
@@ -490,5 +660,79 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
 
         assertFalse("Touch is not within the view",
                 mSwipeHelper.isTouchInView(mEvent, mNotificationRow));
+    }
+
+    @Test
+    public void testContentAlphaRemainsUnchangedWhenNotificationIsNotDismissible() {
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+
+        mSwipeHelper.onTranslationUpdate(mNotificationRow, 12, false);
+
+        verify(mNotificationRow, never()).setContentAlpha(anyFloat());
+    }
+
+    @Test
+    public void testForceResetSwipeStateDoesNothingIfTranslationIsZero() {
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+        doReturn(0f).when(mNotificationRow).getTranslationX();
+
+        mSwipeHelper.forceResetSwipeState(mNotificationRow);
+
+        verify(mNotificationRow).getTranslationX();
+        verifyNoMoreInteractions(mNotificationRow);
+    }
+
+    @Test
+    public void testForceResetSwipeStateResetsTranslationAndAlpha() {
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+        doReturn(10f).when(mNotificationRow).getTranslationX();
+
+        mSwipeHelper.forceResetSwipeState(mNotificationRow);
+
+        verify(mNotificationRow).setTranslation(eq(0f));
+        verify(mNotificationRow).setContentAlpha(eq(1f));
+    }
+
+    @Test
+    public void testContentAlphaRemainsUnchangedWhenFeatureFlagIsDisabled() {
+
+        // Returning true prevents alpha fade. In an unmocked scenario the callback is instantiated
+        // within NotificationStackScrollLayoutController and returns the inverted value of the
+        // feature flag
+        doReturn(true).when(mCallback).updateSwipeProgress(any(), anyBoolean(), anyFloat());
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+
+        mSwipeHelper.onTranslationUpdate(mNotificationRow, 12, true);
+
+        verify(mNotificationRow, never()).setContentAlpha(anyFloat());
+    }
+
+    @Test
+    public void testContentAlphaFadeAnimationSpecs() {
+        // The alpha fade should be linear from 1f to 0f as translation progresses from 0 to 60% of
+        // view-width, and 0f at translations higher than that.
+        doReturn(FAKE_ROW_WIDTH).when(mNotificationRow).getMeasuredWidth();
+
+        List<Integer> translations = Arrays.asList(
+                -FAKE_ROW_WIDTH * 2,
+                -FAKE_ROW_WIDTH,
+                (int) (-FAKE_ROW_WIDTH * 0.3),
+                0,
+                (int) (FAKE_ROW_WIDTH * 0.3),
+                (int) (FAKE_ROW_WIDTH * 0.6),
+                FAKE_ROW_WIDTH,
+                FAKE_ROW_WIDTH * 2);
+        List<Float> expectedAlphas = translations.stream().map(translation ->
+                        mSwipeHelper.getSwipeAlpha(Math.abs((float) translation / FAKE_ROW_WIDTH)))
+                .collect(Collectors.toList());
+
+        for (Integer translation : translations) {
+            mSwipeHelper.onTranslationUpdate(mNotificationRow, translation, true);
+        }
+
+        ArgumentCaptor<Float> capturedValues = ArgumentCaptor.forClass(Float.class);
+        verify(mNotificationRow, times(translations.size())).setContentAlpha(
+                capturedValues.capture());
+        assertEquals(expectedAlphas, capturedValues.getAllValues());
     }
 }

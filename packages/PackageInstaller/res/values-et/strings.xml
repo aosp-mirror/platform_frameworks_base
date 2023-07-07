@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Rakendus on installitud."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Kas soovite selle rakenduse installida?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Kas soovite seda rakendust värskendada?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Kas värskendada seda rakendust allikast <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nSee rakendus saab tavaliselt värskendusi allikast <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Muust allikast värskendamise korral võite edaspidi saada telefonis värskendusi mis tahes allikast. Rakenduse funktsioonid võivad muutuda."</string>
     <string name="install_failed" msgid="5777824004474125469">"Rakendus pole installitud."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketi installimine blokeeriti."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Rakendust ei installitud, kuna pakett on olemasoleva paketiga vastuolus."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"See kasutaja ei saa installida tundmatuid rakendusi"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Kasutajal ei ole lubatud rakendusi installida"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Värskenda ikkagi"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Rakend. haldam."</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Pole ruumi"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Rakendust <xliff:g id="APP_NAME">%1$s</xliff:g> ei saanud installida. Vabastage ruumi ja proovige uuesti."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Kas asendada see rakendus tehaseversiooniga? Kõik andmed eemaldatakse."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Kas asendada see rakendus tehaseversiooniga? Kõik andmed eemaldatakse. See mõjutab kõiki seadme kasutajaid, sh neid, kellel on tööprofiilid."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Säilita rakenduse andmete hulk <xliff:g id="SIZE">%1$s</xliff:g>."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Kas soovite selle rakenduse kustutada?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Kas soovite selle rakenduse desinstallida? Rakenduse <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> kloon kustutatakse samuti."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Käimasolevad desinstallimised"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Ebaõnnestunud desinstallimised"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Desinstallimine …"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Paketi <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> desinstallimine …"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Desinstallimine on lõpetatud."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> on desinstallitud"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Kustutati rakenduse <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> kloon"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Desinstallimine ebaõnnestus."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Üksuse <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> desinstallimine ebaõnnestus."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Üksuse <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> klooni kustutamine …"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Aktiivset seadme administraatori rakendust ei saa desinstallida"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Kasutaja <xliff:g id="USERNAME">%1$s</xliff:g> puhul ei saa aktiivset seadme administraatori rakendust desinstallida"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Rakendus on mõne kasutaja või profiili puhul vajalik, teiste puhul see desinstalliti."</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Teadmata"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Teie turvalisuse huvides ei ole tahvelarvutil praegu lubatud installida sellest allikast tundmatuid rakendusi. Saate seda seadetes muuta."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Teie turvalisuse huvides ei ole teleril praegu lubatud installida sellest allikast tundmatuid rakendusi. Saate seda seadetes muuta."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Teie turvalisuse huvides ei ole kellal praegu lubatud installida sellest allikast tundmatuid rakendusi. Saate seda seadetes muuta."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Teie turvalisuse huvides ei ole telefonil praegu lubatud installida sellest allikast tundmatuid rakendusi. Saate seda seadetes muuta."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Teie telefon ja isiklikud andmed on tundmatute rakenduste rünnakute suhtes haavatavamad. Selle rakenduse installimisel nõustute, et vastutate telefoni kahjude ja andmekao eest, mis võivad tuleneda selliste rakenduste kasutamisest."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Teie tahvelarvuti ja isiklikud andmed on tundmatute rakenduste rünnakute suhtes haavatavamad. Selle rakenduse installimisel nõustute, et vastutate tahvelarvuti kahjude ja andmekao eest, mis võivad tuleneda selliste rakenduste kasutamisest."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Teie teler ja isiklikud andmed on tundmatute rakenduste rünnakute suhtes haavatavamad. Selle rakenduse installimisel nõustute, et vastutate teleri kahjude ja andmekao eest, mis võivad tuleneda selliste rakenduste kasutamisest."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Rakenduse <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> kloon"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Jätka"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Seaded"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Weari rak. installimine/desinstallimine"</string>

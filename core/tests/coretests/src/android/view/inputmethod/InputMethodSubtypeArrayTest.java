@@ -16,9 +16,14 @@
 
 package android.view.inputmethod;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.junit.Assert.assertEquals;
 
+import android.os.BadParcelableException;
 import android.os.Parcel;
+import android.platform.test.annotations.Presubmit;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
 import androidx.test.filters.SmallTest;
@@ -31,6 +36,7 @@ import java.util.ArrayList;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@Presubmit
 public class InputMethodSubtypeArrayTest {
 
     @Test
@@ -57,6 +63,36 @@ public class InputMethodSubtypeArrayTest {
         assertEquals(clonedArray.get(0), clonedClonedArray.get(0));
         assertEquals(clonedArray.get(1), clonedClonedArray.get(1));
         assertEquals(clonedArray.get(2), clonedClonedArray.get(2));
+    }
+
+    @Test
+    public void testNegativeCount() throws Exception {
+        InputMethodSubtypeArray negativeCountArray;
+        try {
+            // Construct a InputMethodSubtypeArray with: mCount = -1
+            var p = Parcel.obtain();
+            p.writeInt(-1);
+            p.setDataPosition(0);
+            negativeCountArray = new InputMethodSubtypeArray(p);
+        } catch (BadParcelableException e) {
+            // Expected with fix: Prevent negative mCount
+            assertThat(e).hasMessageThat().contains("mCount");
+            return;
+        }
+        assertWithMessage("Test set-up failed")
+                .that(negativeCountArray.getCount()).isEqualTo(-1);
+
+        var p = Parcel.obtain();
+        // Writes: int (mCount), int (mDecompressedSize), byte[] (mCompressedData)
+        negativeCountArray.writeToParcel(p);
+        p.setDataPosition(0);
+        // Reads: int (mCount)
+        // Leaves: int (mDecompressedSize), byte[] (mCompressedData)
+        new InputMethodSubtypeArray(p);
+
+        assertWithMessage("Didn't read all data that was previously written")
+                .that(p.dataPosition())
+                .isEqualTo(p.dataSize());
     }
 
     InputMethodSubtypeArray cloneViaParcel(final InputMethodSubtypeArray original) {

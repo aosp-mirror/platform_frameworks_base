@@ -78,7 +78,10 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
     private int mDownPointers;
     private boolean mSwipeFireable;
     private boolean mDebugFireable;
-    private boolean mMouseHoveringAtEdge;
+    private boolean mMouseHoveringAtLeft;
+    private boolean mMouseHoveringAtTop;
+    private boolean mMouseHoveringAtRight;
+    private boolean mMouseHoveringAtBottom;
     private long mLastFlingTime;
 
     SystemGesturesPointerEventListener(Context context, Handler handler, Callbacks callbacks) {
@@ -174,9 +177,21 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
                 mDebugFireable = true;
                 mDownPointers = 0;
                 captureDown(event, 0);
-                if (mMouseHoveringAtEdge) {
-                    mMouseHoveringAtEdge = false;
-                    mCallbacks.onMouseLeaveFromEdge();
+                if (mMouseHoveringAtLeft) {
+                    mMouseHoveringAtLeft = false;
+                    mCallbacks.onMouseLeaveFromLeft();
+                }
+                if (mMouseHoveringAtTop) {
+                    mMouseHoveringAtTop = false;
+                    mCallbacks.onMouseLeaveFromTop();
+                }
+                if (mMouseHoveringAtRight) {
+                    mMouseHoveringAtRight = false;
+                    mCallbacks.onMouseLeaveFromRight();
+                }
+                if (mMouseHoveringAtBottom) {
+                    mMouseHoveringAtBottom = false;
+                    mCallbacks.onMouseLeaveFromBottom();
                 }
                 mCallbacks.onDown();
                 break;
@@ -211,16 +226,35 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
                 break;
             case MotionEvent.ACTION_HOVER_MOVE:
                 if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
-                    if (!mMouseHoveringAtEdge && event.getY() == 0) {
+                    final float eventX = event.getX();
+                    final float eventY = event.getY();
+                    if (!mMouseHoveringAtLeft && eventX == 0) {
+                        mCallbacks.onMouseHoverAtLeft();
+                        mMouseHoveringAtLeft = true;
+                    } else if (mMouseHoveringAtLeft && eventX > 0) {
+                        mCallbacks.onMouseLeaveFromLeft();
+                        mMouseHoveringAtLeft = false;
+                    }
+                    if (!mMouseHoveringAtTop && eventY == 0) {
                         mCallbacks.onMouseHoverAtTop();
-                        mMouseHoveringAtEdge = true;
-                    } else if (!mMouseHoveringAtEdge && event.getY() >= screenHeight - 1) {
+                        mMouseHoveringAtTop = true;
+                    } else if (mMouseHoveringAtTop && eventY > 0) {
+                        mCallbacks.onMouseLeaveFromTop();
+                        mMouseHoveringAtTop = false;
+                    }
+                    if (!mMouseHoveringAtRight && eventX >= screenWidth - 1) {
+                        mCallbacks.onMouseHoverAtRight();
+                        mMouseHoveringAtRight = true;
+                    } else if (mMouseHoveringAtRight && eventX < screenWidth - 1) {
+                        mCallbacks.onMouseLeaveFromRight();
+                        mMouseHoveringAtRight = false;
+                    }
+                    if (!mMouseHoveringAtBottom && eventY >= screenHeight - 1) {
                         mCallbacks.onMouseHoverAtBottom();
-                        mMouseHoveringAtEdge = true;
-                    } else if (mMouseHoveringAtEdge
-                            && (event.getY() > 0 && event.getY() < screenHeight - 1)) {
-                        mCallbacks.onMouseLeaveFromEdge();
-                        mMouseHoveringAtEdge = false;
+                        mMouseHoveringAtBottom = true;
+                    } else if (mMouseHoveringAtBottom && eventY < screenHeight - 1) {
+                        mCallbacks.onMouseLeaveFromBottom();
+                        mMouseHoveringAtBottom = false;
                     }
                 }
                 break;
@@ -373,9 +407,14 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
         void onFling(int durationMs);
         void onDown();
         void onUpOrCancel();
+        void onMouseHoverAtLeft();
         void onMouseHoverAtTop();
+        void onMouseHoverAtRight();
         void onMouseHoverAtBottom();
-        void onMouseLeaveFromEdge();
+        void onMouseLeaveFromLeft();
+        void onMouseLeaveFromTop();
+        void onMouseLeaveFromRight();
+        void onMouseLeaveFromBottom();
         void onDebug();
     }
 }

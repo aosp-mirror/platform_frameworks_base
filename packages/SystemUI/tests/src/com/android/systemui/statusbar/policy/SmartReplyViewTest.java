@@ -51,12 +51,12 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
-import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.After;
 import org.junit.Before;
@@ -488,7 +488,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
     private SmartReplyView.SmartReplies createSmartReplies(CharSequence[] choices,
             boolean fromAssistant) {
         PendingIntent pendingIntent =
-                PendingIntent.getBroadcast(mContext, 0, new Intent(TEST_ACTION),
+                PendingIntent.getBroadcast(mContext, 0,
+                        new Intent(TEST_ACTION).setPackage(mContext.getPackageName()),
                         PendingIntent.FLAG_MUTABLE);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(choices).build();
         return new SmartReplyView.SmartReplies(
@@ -505,7 +506,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private Notification.Action createAction(String actionTitle) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(TEST_ACTION), PendingIntent.FLAG_MUTABLE);
+                new Intent(TEST_ACTION).setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_MUTABLE);
         return new Notification.Action.Builder(mActionIcon, actionTitle, pendingIntent).build();
     }
 
@@ -583,8 +585,6 @@ public class SmartReplyViewTest extends SysuiTestCase {
         // devices.
         layout.setBaselineAligned(false);
 
-        final boolean isRtl = mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-
         // Add smart replies
         Button previous = null;
         SmartReplyView.SmartReplies smartReplies =
@@ -604,11 +604,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
             if (previous != null) {
                 ViewGroup.MarginLayoutParams lp =
                         (ViewGroup.MarginLayoutParams) previous.getLayoutParams();
-                if (isRtl) {
-                    lp.leftMargin = mSpacing;
-                } else {
-                    lp.rightMargin = mSpacing;
-                }
+                lp.setMarginEnd(mSpacing);
             }
             layout.addView(current);
             previous = current;
@@ -632,11 +628,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
             if (previous != null) {
                 ViewGroup.MarginLayoutParams lp =
                         (ViewGroup.MarginLayoutParams) previous.getLayoutParams();
-                if (isRtl) {
-                    lp.leftMargin = mSpacing;
-                } else {
-                    lp.rightMargin = mSpacing;
-                }
+                lp.setMarginEnd(mSpacing);
             }
             layout.addView(current);
             previous = current;
@@ -935,8 +927,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
                 .collect(Collectors.toList());
         Button singleLineButton = buttons.get(0);
         Button doubleLineButton = buttons.get(1);
-        Drawable singleLineDrawable = singleLineButton.getCompoundDrawables()[0]; // left drawable
-        Drawable doubleLineDrawable = doubleLineButton.getCompoundDrawables()[0]; // left drawable
+        Drawable singleLineDrawable = singleLineButton.getCompoundDrawablesRelative()[0]; // start
+        Drawable doubleLineDrawable = doubleLineButton.getCompoundDrawablesRelative()[0]; // start
         assertEquals(singleLineDrawable.getBounds().width(),
                      doubleLineDrawable.getBounds().width());
         assertEquals(singleLineDrawable.getBounds().height(),

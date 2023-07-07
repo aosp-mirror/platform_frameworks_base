@@ -81,20 +81,28 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.service.chooser.ChooserTarget;
+import android.util.Pair;
 import android.view.View;
 
 import androidx.annotation.CallSuper;
+import androidx.test.espresso.matcher.BoundedDiagnosingMatcher;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.internal.R;
+import com.android.internal.app.ChooserActivity.ServiceResultInfo;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.widget.GridLayoutManager;
+import com.android.internal.widget.RecyclerView;
 
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -135,7 +143,8 @@ public class ChooserActivityTest {
      * `Parameterized` runner.
      * --------
      */
-
+    private static final UserHandle PERSONAL_USER_HANDLE = InstrumentationRegistry
+            .getInstrumentation().getTargetContext().getUser();
     private static final Function<PackageManager, PackageManager> DEFAULT_PM = pm -> pm;
     private static final Function<PackageManager, PackageManager> NO_APP_PREDICTION_SERVICE_PM =
             pm -> {
@@ -260,6 +269,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         final IChooserWrapper activity = (IChooserWrapper) mActivityRule.launchActivity(
@@ -283,6 +293,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, "chooser test"));
@@ -303,6 +314,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -321,6 +333,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -344,6 +357,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -372,6 +386,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -397,6 +412,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -418,6 +434,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -429,7 +446,7 @@ public class ChooserActivityTest {
         onView(withIdFromRuntimeResource("profile_button")).check(doesNotExist());
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -456,7 +473,7 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> infosToStack = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             ResolveInfo resolveInfo = ResolverDataProvider.createResolveInfo(i,
-                    UserHandle.USER_CURRENT);
+                    UserHandle.USER_CURRENT, PERSONAL_USER_HANDLE);
             resolveInfo.activityInfo.applicationInfo.name = appName;
             resolveInfo.activityInfo.applicationInfo.packageName = packageName;
             resolveInfo.activityInfo.packageName = packageName;
@@ -472,6 +489,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -483,7 +501,7 @@ public class ChooserActivityTest {
         assertThat(activity.getAdapter().getCount(), is(6));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -512,6 +530,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -522,17 +541,21 @@ public class ChooserActivityTest {
         verify(ChooserActivityOverrideData.getInstance().resolverListController, times(1))
                 .topK(any(List.class), anyInt());
         assertThat(activity.getIsSelected(), is(false));
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             return true;
         };
         ResolveInfo toChoose = resolvedComponentInfos.get(0).getResolveInfoAt(0);
+        DisplayResolveInfo testDri =
+                activity.createTestDisplayResolveInfo(sendIntent, toChoose, "testLabel", "testInfo",
+                        sendIntent,/* resolveInfoPresentationGetter */ null);
         onView(withText(toChoose.activityInfo.name))
                 .perform(click());
         waitForIdle();
         verify(ChooserActivityOverrideData.getInstance().resolverListController, times(1))
-                .updateChooserCounts(Mockito.anyString(), anyInt(), Mockito.anyString());
+                .updateChooserCounts(Mockito.anyString(), any(UserHandle.class),
+                        Mockito.anyString());
         verify(ChooserActivityOverrideData.getInstance().resolverListController, times(1))
-                .updateModel(toChoose.activityInfo.getComponentName());
+                .updateModel(testDri);
         assertThat(activity.getIsSelected(), is(true));
     }
 
@@ -544,6 +567,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -568,7 +592,7 @@ public class ChooserActivityTest {
     @Test
     public void autoLaunchSingleResult() throws InterruptedException {
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -579,6 +603,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -613,7 +638,7 @@ public class ChooserActivityTest {
         assertThat(activity.getAdapter().getCount(), is(1));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -643,6 +668,7 @@ public class ChooserActivityTest {
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
                 Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
         when(ChooserActivityOverrideData.getInstance().resolverListController.getLastChosen())
                 .thenReturn(resolvedComponentInfos.get(0).getResolveInfoAt(0));
@@ -655,7 +681,7 @@ public class ChooserActivityTest {
         assertThat(activity.getAdapter().getCount(), is(2));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -682,6 +708,7 @@ public class ChooserActivityTest {
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
                 Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final IChooserWrapper activity = (IChooserWrapper)
@@ -692,7 +719,7 @@ public class ChooserActivityTest {
         assertThat(activity.getAdapter().getCount(), is(2));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -712,6 +739,7 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
+            Mockito.anyBoolean(),
             Mockito.anyBoolean(),
             Mockito.anyBoolean(),
             Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
@@ -741,6 +769,7 @@ public class ChooserActivityTest {
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
             Mockito.anyBoolean(),
             Mockito.anyBoolean(),
+            Mockito.anyBoolean(),
             Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         MetricsLogger mockLogger = ChooserActivityOverrideData.getInstance().metricsLogger;
@@ -768,6 +797,7 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
@@ -838,6 +868,7 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
 
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
@@ -916,6 +947,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -950,6 +982,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -989,6 +1022,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1085,6 +1119,7 @@ public class ChooserActivityTest {
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
             Mockito.anyBoolean(),
             Mockito.anyBoolean(),
+            Mockito.anyBoolean(),
             Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -1116,6 +1151,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1151,6 +1187,7 @@ public class ChooserActivityTest {
                     .getResolversForIntent(
                             Mockito.anyBoolean(),
                             Mockito.anyBoolean(),
+                            Mockito.anyBoolean(),
                             Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -1183,6 +1220,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
@@ -1210,6 +1248,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1242,6 +1281,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1278,6 +1318,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         when(
@@ -1293,7 +1334,11 @@ public class ChooserActivityTest {
 
         final DisplayResolveInfo testDri =
                 activity.createTestDisplayResolveInfo(sendIntent,
-                ResolverDataProvider.createResolveInfo(3, 0), "testLabel", "testInfo", sendIntent,
+                ResolverDataProvider.createResolveInfo(
+                        3, 0, PERSONAL_USER_HANDLE),
+                        "testLabel",
+                        "testInfo",
+                        sendIntent,
                 /* resolveInfoPresentationGetter */ null);
         final ChooserListAdapter adapter = activity.getAdapter();
 
@@ -1315,6 +1360,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1357,6 +1403,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -1403,6 +1450,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -1411,7 +1459,8 @@ public class ChooserActivityTest {
         ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
         // Create direct share target
         List<ChooserTarget> serviceTargets = createDirectShareTargets(1, "");
-        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0);
+        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0,
+                PERSONAL_USER_HANDLE);
 
         // Start activity
         final IChooserWrapper activity = (IChooserWrapper)
@@ -1479,6 +1528,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -1488,7 +1538,8 @@ public class ChooserActivityTest {
         // Create direct share target
         List<ChooserTarget> serviceTargets = createDirectShareTargets(1,
                 resolvedComponentInfos.get(0).getResolveInfoAt(0).activityInfo.packageName);
-        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0);
+        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0,
+                PERSONAL_USER_HANDLE);
 
         // Start activity
         final IChooserWrapper activity = (IChooserWrapper)
@@ -1560,12 +1611,14 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         // Create direct share target
         List<ChooserTarget> serviceTargets = createDirectShareTargets(2,
                 resolvedComponentInfos.get(0).getResolveInfoAt(0).activityInfo.packageName);
-        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0);
+        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0,
+                PERSONAL_USER_HANDLE);
 
         // Start activity
         final ChooserActivity activity =
@@ -1632,12 +1685,14 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
         // Create direct share target
         List<ChooserTarget> serviceTargets = createDirectShareTargets(2,
                 resolvedComponentInfos.get(0).getResolveInfoAt(0).activityInfo.packageName);
-        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0);
+        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0,
+                PERSONAL_USER_HANDLE);
 
         // Start activity
         final ChooserActivity activity =
@@ -1680,6 +1735,25 @@ public class ChooserActivityTest {
                 wrapper.getAdapter().getItem(1).getDisplayLabel(), is("testTitle1"));
     }
 
+    @Test
+    public void testUpdateMaxTargetsPerRow_columnCountIsUpdated() throws InterruptedException {
+        updateMaxTargetsPerRowResource(/* targetsPerRow= */ 4);
+        givenAppTargets(/* appCount= */ 16);
+        Intent sendIntent = createSendTextIntent();
+        final ChooserActivity activity =
+                mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+
+        updateMaxTargetsPerRowResource(/* targetsPerRow= */ 6);
+        InstrumentationRegistry.getInstrumentation()
+                .runOnMainSync(() -> activity.onConfigurationChanged(
+                        InstrumentationRegistry.getInstrumentation()
+                                .getContext().getResources().getConfiguration()));
+
+        waitForIdle();
+        onView(withIdFromRuntimeResource("resolver_list"))
+                .check(matches(withGridColumnCount(6)));
+    }
+
     // This test is too long and too slow and should not be taken as an example for future tests.
     @Test @Ignore
     public void testDirectTargetLoggingWithAppTargetNotRankedPortrait()
@@ -1720,6 +1794,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -1729,7 +1804,8 @@ public class ChooserActivityTest {
         // Create direct share target
         List<ChooserTarget> serviceTargets = createDirectShareTargets(1,
                 resolvedComponentInfos.get(14).getResolveInfoAt(0).activityInfo.packageName);
-        ResolveInfo ri = ResolverDataProvider.createResolveInfo(16, 0);
+        ResolveInfo ri = ResolverDataProvider.createResolveInfo(16, 0,
+                PERSONAL_USER_HANDLE);
 
         // Start activity
         final IChooserWrapper activity = (IChooserWrapper)
@@ -1873,7 +1949,7 @@ public class ChooserActivityTest {
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType(TEST_MIME_TYPE);
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2035,6 +2111,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
@@ -2050,7 +2127,7 @@ public class ChooserActivityTest {
         onView(withIdFromRuntimeResource("profile_button")).check(doesNotExist());
 
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2105,8 +2182,8 @@ public class ChooserActivityTest {
         assertThat(logger.numCalls(), is(6));
     }
 
-    @Test @Ignore
-    public void testDirectTargetLogging() throws InterruptedException {
+    @Test
+    public void testDirectTargetLogging() {
         Intent sendIntent = createSendTextIntent();
         // We need app targets for direct targets to get displayed
         List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
@@ -2117,37 +2194,44 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(resolvedComponentInfos);
 
         // Create direct share target
         List<ChooserTarget> serviceTargets = createDirectShareTargets(1,
                 resolvedComponentInfos.get(0).getResolveInfoAt(0).activityInfo.packageName);
-        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0);
+        ResolveInfo ri = ResolverDataProvider.createResolveInfo(3, 0,
+                PERSONAL_USER_HANDLE);
+
+        ChooserActivityOverrideData
+                .getInstance()
+                .directShareTargets = (activity, adapter) -> {
+                    DisplayResolveInfo displayInfo = activity.createTestDisplayResolveInfo(
+                            sendIntent,
+                            ri,
+                             "testLabel",
+                             "testInfo",
+                            sendIntent,
+                            /* resolveInfoPresentationGetter */ null);
+                    ServiceResultInfo[] results = {
+                            new ServiceResultInfo(
+                                    displayInfo,
+                                    serviceTargets,
+                                    adapter.getUserHandle())};
+                    // TODO: consider covering the other type.
+                    //  Only 2 types are expected out of the shortcut loading logic:
+                    //  - TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER, if shortcuts were loaded from
+                    //    the ShortcutManager, and;
+                    //  - TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE, if shortcuts were loaded
+                    //    from AppPredictor.
+                    //  Ideally, our tests should cover all of them.
+                    return new Pair<>(TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER, results);
+                };
 
         // Start activity
         final IChooserWrapper activity = (IChooserWrapper)
                 mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
-
-        // Insert the direct share target
-        Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos = new HashMap<>();
-        directShareToShortcutInfos.put(serviceTargets.get(0), null);
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                () -> activity.getAdapter().addServiceResults(
-                        activity.createTestDisplayResolveInfo(sendIntent,
-                                ri,
-                                "testLabel",
-                                "testInfo",
-                                sendIntent,
-                                /* resolveInfoPresentationGetter */ null),
-                        serviceTargets,
-                        TARGET_TYPE_CHOOSER_TARGET,
-                        directShareToShortcutInfos)
-        );
-        // Thread.sleep shouldn't be a thing in an integration test but it's
-        // necessary here because of the way the code is structured
-        // TODO: restructure the tests b/129870719
-        Thread.sleep(((ChooserActivity) activity).mListViewUpdateDelayMs);
 
         assertThat("Chooser should have 3 targets (2 apps, 1 direct)",
                 activity.getAdapter().getCount(), is(3));
@@ -2202,6 +2286,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -2271,6 +2356,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -2421,12 +2507,13 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType(TEST_MIME_TYPE);
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2450,12 +2537,13 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         Intent sendIntent = createSendTextIntent();
         sendIntent.setType(TEST_MIME_TYPE);
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2481,7 +2569,7 @@ public class ChooserActivityTest {
         setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
         Intent sendIntent = createSendTextIntent();
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2503,12 +2591,13 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         Intent chooserIntent = createChooserIntent(createSendTextIntent(),
                 new Intent[] {new Intent("action.fake")});
         ResolveInfo[] chosen = new ResolveInfo[1];
-        ChooserActivityOverrideData.getInstance().onSafelyStartCallback = targetInfo -> {
+        ChooserActivityOverrideData.getInstance().onSafelyStartInternalCallback = targetInfo -> {
             chosen[0] = targetInfo.getResolveInfo();
             return true;
         };
@@ -2639,6 +2728,7 @@ public class ChooserActivityTest {
         when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(personalResolvedComponentInfos));
         // Create caller target which is duplicate with one of app targets
@@ -2646,7 +2736,7 @@ public class ChooserActivityTest {
                 new Intent[] {new Intent("action.fake")});
         ChooserActivityOverrideData.getInstance().packageManager = mock(PackageManager.class);
         ResolveInfo ri = ResolverDataProvider.createResolveInfo(0,
-                UserHandle.USER_CURRENT);
+                UserHandle.USER_CURRENT, PERSONAL_USER_HANDLE);
         when(
                 ChooserActivityOverrideData
                         .getInstance()
@@ -2811,6 +2901,53 @@ public class ChooserActivityTest {
         assertEquals(3, wrapper.getWorkListAdapter().getCount());
     }
 
+    @Test
+    public void testClonedProfilePresent_personalAdapterIsSetWithPersonalProfile() {
+        // enable cloneProfile
+        markCloneProfileUserAvailable();
+        List<ResolvedComponentInfo> resolvedComponentInfos =
+                createResolvedComponentsWithCloneProfileForTest(
+                        3,
+                        PERSONAL_USER_HANDLE,
+                        ChooserActivityOverrideData.getInstance().cloneProfileUserHandle);
+        when(ChooserActivityOverrideData.getInstance().resolverListController.getResolversForIntent(
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class)))
+                .thenReturn(new ArrayList<>(resolvedComponentInfos));
+        Intent sendIntent = createSendTextIntent();
+
+        final IChooserWrapper activity = (IChooserWrapper) mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, "personalProfileTest"));
+        waitForIdle();
+
+        assertThat(activity.getPersonalListAdapter().getUserHandle(), is(PERSONAL_USER_HANDLE));
+        assertThat(activity.getAdapter().getCount(), is(3));
+    }
+
+    @Test
+    public void testClonedProfilePresent_personalTabUsesExpectedAdapter() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        markCloneProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        List<ResolvedComponentInfo> workResolvedComponentInfos = createResolvedComponentsForTest(
+                4);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendTextIntent();
+        sendIntent.setType(TEST_MIME_TYPE);
+
+
+        final IChooserWrapper activity = (IChooserWrapper)
+                mActivityRule.launchActivity(Intent.createChooser(sendIntent, "multi tab test"));
+        waitForIdle();
+
+        assertThat(activity.getCurrentUserHandle(), is(PERSONAL_USER_HANDLE));
+    }
+
     private Intent createChooserIntent(Intent intent, Intent[] initialIntents) {
         Intent chooserIntent = new Intent();
         chooserIntent.setAction(Intent.ACTION_CHOOSER);
@@ -2831,6 +2968,7 @@ public class ChooserActivityTest {
         ri.activityInfo.packageName = "fake.package.name";
         ri.activityInfo.applicationInfo = new ApplicationInfo();
         ri.activityInfo.applicationInfo.packageName = "fake.package.name";
+        ri.userHandle = UserHandle.CURRENT;
         return ri;
     }
 
@@ -2892,7 +3030,23 @@ public class ChooserActivityTest {
     private List<ResolvedComponentInfo> createResolvedComponentsForTest(int numberOfResults) {
         List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
         for (int i = 0; i < numberOfResults; i++) {
-            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
+            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i, PERSONAL_USER_HANDLE));
+        }
+        return infoList;
+    }
+
+    private List<ResolvedComponentInfo> createResolvedComponentsWithCloneProfileForTest(
+            int numberOfResults,
+            UserHandle resolvedForPersonalUser,
+            UserHandle resolvedForClonedUser) {
+        List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
+        for (int i = 0; i < 1; i++) {
+            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i,
+                    resolvedForPersonalUser));
+        }
+        for (int i = 1; i < numberOfResults; i++) {
+            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i,
+                    resolvedForClonedUser));
         }
         return infoList;
     }
@@ -2902,9 +3056,11 @@ public class ChooserActivityTest {
         List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
         for (int i = 0; i < numberOfResults; i++) {
             if (i == 0) {
-                infoList.add(ResolverDataProvider.createResolvedComponentInfoWithOtherId(i));
+                infoList.add(ResolverDataProvider.createResolvedComponentInfoWithOtherId(i,
+                        PERSONAL_USER_HANDLE));
             } else {
-                infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
+                infoList.add(ResolverDataProvider.createResolvedComponentInfo(i,
+                        PERSONAL_USER_HANDLE));
             }
         }
         return infoList;
@@ -2916,9 +3072,11 @@ public class ChooserActivityTest {
         for (int i = 0; i < numberOfResults; i++) {
             if (i == 0) {
                 infoList.add(
-                        ResolverDataProvider.createResolvedComponentInfoWithOtherId(i, userId));
+                        ResolverDataProvider.createResolvedComponentInfoWithOtherId(i, userId,
+                                PERSONAL_USER_HANDLE));
             } else {
-                infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
+                infoList.add(ResolverDataProvider.createResolvedComponentInfo(i,
+                        PERSONAL_USER_HANDLE));
             }
         }
         return infoList;
@@ -2928,7 +3086,8 @@ public class ChooserActivityTest {
             int numberOfResults, int userId) {
         List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
         for (int i = 0; i < numberOfResults; i++) {
-            infoList.add(ResolverDataProvider.createResolvedComponentInfoWithOtherId(i, userId));
+            infoList.add(ResolverDataProvider.createResolvedComponentInfoWithOtherId(i, userId,
+                    PERSONAL_USER_HANDLE));
         }
         return infoList;
     }
@@ -3022,6 +3181,10 @@ public class ChooserActivityTest {
         ChooserActivityOverrideData.getInstance().workProfileUserHandle = UserHandle.of(10);
     }
 
+    private void markCloneProfileUserAvailable() {
+        ChooserActivityOverrideData.getInstance().cloneProfileUserHandle = UserHandle.of(11);
+    }
+
     private void setupResolverControllers(
             List<ResolvedComponentInfo> personalResolvedComponentInfos,
             List<ResolvedComponentInfo> workResolvedComponentInfos) {
@@ -3030,6 +3193,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .resolverListController
                         .getResolversForIntent(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
@@ -3041,6 +3205,7 @@ public class ChooserActivityTest {
                         .getResolversForIntent(
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
                                 Mockito.isA(List.class)))
                 .thenReturn(new ArrayList<>(workResolvedComponentInfos));
         when(
@@ -3048,6 +3213,7 @@ public class ChooserActivityTest {
                         .getInstance()
                         .workResolverListController
                         .getResolversForIntentAsUser(
+                                Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.anyBoolean(),
                                 Mockito.isA(List.class),
@@ -3061,6 +3227,65 @@ public class ChooserActivityTest {
 
     private Matcher<View> withTextFromRuntimeResource(String id) {
         return withText(getRuntimeResourceId(id, "string"));
+    }
+
+    private static GridRecyclerSpanCountMatcher withGridColumnCount(int columnCount) {
+        return new GridRecyclerSpanCountMatcher(Matchers.is(columnCount));
+    }
+
+    private static class GridRecyclerSpanCountMatcher extends
+            BoundedDiagnosingMatcher<View, RecyclerView> {
+
+        private final Matcher<Integer> mIntegerMatcher;
+
+        private GridRecyclerSpanCountMatcher(Matcher<Integer> integerMatcher) {
+            super(RecyclerView.class);
+            this.mIntegerMatcher = integerMatcher;
+        }
+
+        @Override
+        protected void describeMoreTo(Description description) {
+            description.appendText("RecyclerView grid layout span count to match: ");
+            this.mIntegerMatcher.describeTo(description);
+        }
+
+        @Override
+        protected boolean matchesSafely(RecyclerView view, Description mismatchDescription) {
+            int spanCount = ((GridLayoutManager) view.getLayoutManager()).getSpanCount();
+            if (this.mIntegerMatcher.matches(spanCount)) {
+                return true;
+            } else {
+                mismatchDescription.appendText("RecyclerView grid layout span count was ")
+                        .appendValue(spanCount);
+                return false;
+            }
+        }
+    }
+
+    private void givenAppTargets(int appCount) {
+        List<ResolvedComponentInfo> resolvedComponentInfos =
+                createResolvedComponentsForTest(appCount);
+        when(
+                ChooserActivityOverrideData
+                        .getInstance()
+                        .resolverListController
+                        .getResolversForIntent(
+                                Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
+                                Mockito.isA(List.class)))
+                .thenReturn(resolvedComponentInfos);
+    }
+
+    private void updateMaxTargetsPerRowResource(int targetsPerRow) {
+        ChooserActivityOverrideData.getInstance().resources = Mockito.spy(
+                InstrumentationRegistry.getInstrumentation().getContext().getResources());
+        when(
+                ChooserActivityOverrideData
+                        .getInstance()
+                        .resources
+                        .getInteger(R.integer.config_chooser_max_targets_per_row))
+                .thenReturn(targetsPerRow);
     }
 
     // ChooserWrapperActivity inherits from the framework ChooserActivity, so if the framework

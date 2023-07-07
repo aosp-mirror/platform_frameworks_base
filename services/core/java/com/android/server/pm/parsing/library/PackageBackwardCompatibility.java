@@ -21,12 +21,12 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_T
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,15 +130,16 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
      * @param parsedPackage the {@link ParsedPackage} to modify.
      */
     @VisibleForTesting
-    public static void modifySharedLibraries(ParsedPackage parsedPackage,
+    public static void modifySharedLibraries(ParsedPackage parsedPackage, boolean isSystemApp,
             boolean isUpdatedSystemApp) {
-        INSTANCE.updatePackage(parsedPackage, isUpdatedSystemApp);
+        INSTANCE.updatePackage(parsedPackage, isSystemApp, isUpdatedSystemApp);
     }
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+            boolean isUpdatedSystemApp) {
         for (PackageSharedLibraryUpdater packageUpdater : mPackageUpdaters) {
-            packageUpdater.updatePackage(parsedPackage, isUpdatedSystemApp);
+            packageUpdater.updatePackage(parsedPackage, isSystemApp, isUpdatedSystemApp);
         }
     }
 
@@ -163,7 +164,8 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
     public static class AndroidTestRunnerSplitUpdater extends PackageSharedLibraryUpdater {
 
         @Override
-        public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+        public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+                boolean isUpdatedSystemApp) {
             // android.test.runner has a dependency on android.test.mock so if android.test.runner
             // is present but android.test.mock is not then add android.test.mock.
             prefixImplicitDependency(parsedPackage, ANDROID_TEST_RUNNER, ANDROID_TEST_MOCK);
@@ -179,7 +181,8 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
             extends PackageSharedLibraryUpdater {
 
         @Override
-        public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+        public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+                boolean isUpdatedSystemApp) {
             removeLibrary(parsedPackage, ORG_APACHE_HTTP_LEGACY);
         }
 
@@ -194,7 +197,8 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
             extends PackageSharedLibraryUpdater {
 
         @Override
-        public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+        public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+                boolean isUpdatedSystemApp) {
             removeLibrary(parsedPackage, ANDROID_TEST_BASE);
         }
     }

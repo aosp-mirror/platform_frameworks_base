@@ -127,14 +127,6 @@ public class BubbleCoordinator implements Coordinator {
                 DismissedByUserStats dismissedByUserStats,
                 int reason
         ) {
-            if (!mNotifPipeline.isNewPipelineEnabled()) {
-                // The `entry` will be from whichever pipeline is active, so if the old pipeline is
-                // running, make sure that we use the new pipeline's entry (if it still exists).
-                NotificationEntry newPipelineEntry = mNotifPipeline.getEntry(entry.getKey());
-                if (newPipelineEntry != null) {
-                    entry = newPipelineEntry;
-                }
-            }
             if (isInterceptingDismissal(entry)) {
                 mInterceptedDismissalEntries.remove(entry.getKey());
                 mOnEndDismissInterception.onEndDismissInterception(mDismissInterceptor, entry,
@@ -150,12 +142,7 @@ public class BubbleCoordinator implements Coordinator {
 
         @Override
         public void invalidateNotifications(String reason) {
-            mNotifFilter.invalidateList();
-        }
-
-        @Override
-        public void maybeCancelSummary(NotificationEntry entry) {
-            // no-op
+            mNotifFilter.invalidateList(reason);
         }
     };
 

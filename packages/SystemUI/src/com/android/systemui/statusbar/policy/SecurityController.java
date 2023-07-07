@@ -36,9 +36,14 @@ public interface SecurityController extends CallbackController<SecurityControlle
     String getProfileOwnerName();
     CharSequence getDeviceOwnerOrganizationName();
     CharSequence getWorkProfileOrganizationName();
+
+    boolean isFinancedDevice();
+
     /** Device owner component even if not on this user. **/
     ComponentName getDeviceOwnerComponentOnAnyUser();
+    // TODO(b/259908270): remove
     /** Device owner type for a device owner. **/
+    @Deprecated
     int getDeviceOwnerType(ComponentName admin);
     boolean isNetworkLoggingEnabled();
     boolean isVpnEnabled();

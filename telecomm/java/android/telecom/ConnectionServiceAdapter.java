@@ -16,10 +16,16 @@
 
 package android.telecom;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.NonNull;
+import android.location.Location;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder.DeathRecipient;
+import android.os.OutcomeReceiver;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 
 import com.android.internal.telecom.IConnectionServiceAdapter;
 import com.android.internal.telecom.RemoteServiceCallback;
@@ -29,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 /**
  * Provides methods for IConnectionService implementations to interact with the system phone app.
@@ -567,6 +574,41 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
+    /**
+     * Sets the call endpoint associated with a {@link Connection}.
+     *
+     * @param callId The unique ID of the call.
+     * @param endpoint The new call endpoint (see {@link CallEndpoint}).
+     * @param executor The executor of where the callback will execute.
+     * @param callback The callback to notify the result of the endpoint change.
+     */
+    void requestCallEndpointChange(String callId, CallEndpoint endpoint, Executor executor,
+            OutcomeReceiver<Void, CallEndpointException> callback) {
+        Log.v(this, "requestCallEndpointChange");
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.requestCallEndpointChange(callId, endpoint, new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle result) {
+                        super.onReceiveResult(resultCode, result);
+                        final long identity = Binder.clearCallingIdentity();
+                        try {
+                            if (resultCode == CallEndpoint.ENDPOINT_OPERATION_SUCCESS) {
+                                executor.execute(() -> callback.onResult(null));
+                            } else {
+                                executor.execute(() -> callback.onError(result.getParcelable(
+                                        CallEndpointException.CHANGE_ERROR,
+                                        CallEndpointException.class)));
+                            }
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
+                        }
+                    }}, Log.getExternalSession());
+            } catch (RemoteException ignored) {
+                Log.d(this, "Remote exception calling requestCallEndpointChange");
+            }
+        }
+    }
 
     /**
      * Informs Telecom of a connection level event.
@@ -706,6 +748,47 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             try {
                 a.setCallDirection(callId, direction, Log.getExternalSession());
             } catch (RemoteException e) {
+            }
+        }
+    }
+
+    /**
+     * Query location information.
+     * Only SIM call managers can call this method for Connections representing Emergency calls.
+     * If the previous request is not completed, the new request will be rejected.
+     *
+     * @param timeoutMillis long: Timeout in millis waiting for query response.
+     * @param provider String: the location provider name, This value cannot be null.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The callback to notify the result of queryLocation.
+     */
+    void queryLocation(String callId, long timeoutMillis, @NonNull String provider,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Location, QueryLocationException> callback) {
+        Log.v(this, "queryLocation: %s %d", callId, timeoutMillis);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.queryLocation(callId, timeoutMillis, provider,
+                        new ResultReceiver(null) {
+                            @Override
+                            protected void onReceiveResult(int resultCode, Bundle result) {
+                                super.onReceiveResult(resultCode, result);
+
+                                if (resultCode == 1 /* success */) {
+                                    executor.execute(() -> callback.onResult(result.getParcelable(
+                                            Connection.EXTRA_KEY_QUERY_LOCATION, Location.class)));
+                                } else {
+                                    executor.execute(() -> callback.onError(result.getParcelable(
+                                            QueryLocationException.QUERY_LOCATION_ERROR,
+                                            QueryLocationException.class)));
+                                }
+                            }
+                        },
+                        Log.getExternalSession());
+            } catch (RemoteException e) {
+                Log.d(this, "queryLocation: Exception e : " + e);
+                executor.execute(() -> callback.onError(new QueryLocationException(
+                        e.getMessage(), QueryLocationException.ERROR_SERVICE_UNAVAILABLE)));
             }
         }
     }

@@ -28,16 +28,17 @@ import android.graphics.fonts.FontUpdateRequest;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.SystemFonts;
 import android.os.Binder;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.ShellCommand;
 import android.text.FontConfig;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import com.android.internal.util.DumpUtils;
+import com.android.modules.utils.TypedXmlPullParser;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -103,6 +104,10 @@ public class FontManagerShellCommand extends ShellCommand {
         w.println("update-family [family definition XML path]");
         w.println("    Update font families with the new definitions.");
         w.println();
+        w.println("install-debug-cert [cert file path]");
+        w.println("    Install debug certificate file. This command can be used only on");
+        w.println("    debuggable device with root user.");
+        w.println();
         w.println("clear");
         w.println("    Remove all installed font files and reset to the initial state.");
         w.println();
@@ -158,19 +163,25 @@ public class FontManagerShellCommand extends ShellCommand {
         // Dump named font family first.
         List<FontConfig.FontFamily> families = fontConfig.getFontFamilies();
 
-        w.println("Named Font Families");
+        // Dump FontFamilyList
+        w.println("Named Family List");
         w.increaseIndent();
-        for (int i = 0; i < families.size(); ++i) {
-            final FontConfig.FontFamily family = families.get(i);
-
-            // Here, only dump the named family only.
-            if (family.getName() == null) continue;
-
-            w.println("Named Family (" + family.getName() + ")");
-            final List<FontConfig.Font> fonts = family.getFontList();
+        List<FontConfig.NamedFamilyList> namedFamilyLists = fontConfig.getNamedFamilyLists();
+        for (int i = 0; i < namedFamilyLists.size(); ++i) {
+            final FontConfig.NamedFamilyList namedFamilyList = namedFamilyLists.get(i);
+            w.println("Named Family (" + namedFamilyList.getName() + ")");
             w.increaseIndent();
-            for (int j = 0; j < fonts.size(); ++j) {
-                dumpSingleFontConfig(w, fonts.get(j));
+            final List<FontConfig.FontFamily> namedFamilies = namedFamilyList.getFamilies();
+            for (int j = 0; j < namedFamilies.size(); ++j) {
+                final FontConfig.FontFamily family = namedFamilies.get(j);
+
+                w.println("Family");
+                final List<FontConfig.Font> fonts = family.getFontList();
+                w.increaseIndent();
+                for (int k = 0; k < fonts.size(); ++k) {
+                    dumpSingleFontConfig(w, fonts.get(k));
+                }
+                w.decreaseIndent();
             }
             w.decreaseIndent();
         }
@@ -319,6 +330,33 @@ public class FontManagerShellCommand extends ShellCommand {
                 dumpFallback(writer, families);
             }
         }
+        return 0;
+    }
+
+    private int installCert(ShellCommand shell) throws SystemFontException {
+        if (!Build.IS_DEBUGGABLE) {
+            throw new SecurityException("Only debuggable device can add debug certificate");
+        }
+        if (Binder.getCallingUid() != Process.ROOT_UID) {
+            throw new SecurityException("Only root can add debug certificate");
+        }
+
+        String certPath = shell.getNextArg();
+        if (certPath == null) {
+            throw new SystemFontException(
+                    FontManager.RESULT_ERROR_INVALID_DEBUG_CERTIFICATE,
+                    "Cert file path argument is required.");
+        }
+        File file = new File(certPath);
+        if (!file.isFile()) {
+            throw new SystemFontException(
+                    FontManager.RESULT_ERROR_INVALID_DEBUG_CERTIFICATE,
+                    "Cert file (" + file + ") is not found");
+        }
+
+        mService.addDebugCertificate(certPath);
+        mService.restart();
+        shell.getOutPrintWriter().println("Success");
         return 0;
     }
 
@@ -494,6 +532,8 @@ public class FontManagerShellCommand extends ShellCommand {
                     return restart(shell);
                 case "status":
                     return status(shell);
+                case "install-debug-cert":
+                    return installCert(shell);
                 default:
                     return shell.handleDefaultCommands(cmd);
             }

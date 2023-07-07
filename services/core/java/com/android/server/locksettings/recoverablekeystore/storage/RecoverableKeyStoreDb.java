@@ -389,7 +389,55 @@ public class RecoverableKeyStoreDb {
 
         ensureUserMetadataEntryExists(userId);
         return db.update(UserMetadataEntry.TABLE_NAME, values, selection, selectionArguments);
+    }
 
+    /**
+     * Sets the {@code badGuessCounter} for the user {@code userId}.
+     *
+     * @return The number of updated rows.
+     */
+    public long setBadRemoteGuessCounter(int userId, int badGuessCounter) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(UserMetadataEntry.COLUMN_NAME_USER_ID, userId);
+        values.put(UserMetadataEntry.COLUMN_NAME_BAD_REMOTE_GUESS_COUNTER, badGuessCounter);
+        String selection = UserMetadataEntry.COLUMN_NAME_USER_ID + " = ?";
+        String[] selectionArguments = new String[] {String.valueOf(userId)};
+
+        ensureUserMetadataEntryExists(userId);
+        return db.update(UserMetadataEntry.TABLE_NAME, values, selection, selectionArguments);
+    }
+
+    /**
+     * Returns the number of invalid remote lock screen guesses for the user {@code userId}.
+     */
+    public int getBadRemoteGuessCounter(int userId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+        String[] projection = {
+                UserMetadataEntry.COLUMN_NAME_BAD_REMOTE_GUESS_COUNTER};
+        String selection =
+                UserMetadataEntry.COLUMN_NAME_USER_ID + " = ?";
+        String[] selectionArguments = {
+                Integer.toString(userId)};
+
+        try (
+            Cursor cursor = db.query(
+                UserMetadataEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArguments,
+                /*groupBy=*/ null,
+                /*having=*/ null,
+                /*orderBy=*/ null)
+        ) {
+            if (cursor.getCount() == 0) {
+                return 0;
+            }
+            cursor.moveToFirst();
+            return cursor.getInt(
+                    cursor.getColumnIndexOrThrow(
+                            UserMetadataEntry.COLUMN_NAME_BAD_REMOTE_GUESS_COUNTER));
+        }
     }
 
     /**

@@ -30,8 +30,10 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.app.Notification;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
@@ -96,6 +98,15 @@ public class JobInfo implements Parcelable {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long THROW_ON_INVALID_PRIORITY_VALUE = 140852299L;
+
+    /**
+     * Require that estimated network bytes are nonnegative.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long REJECT_NEGATIVE_NETWORK_ESTIMATES = 253665015L;
 
     /** @hide */
     @IntDef(prefix = { "NETWORK_TYPE_" }, value = {
@@ -386,6 +397,13 @@ public class JobInfo implements Parcelable {
     public static final int FLAG_EXPEDITED = 1 << 4;
 
     /**
+     * Whether it's a user initiated job or not.
+     *
+     * @hide
+     */
+    public static final int FLAG_USER_INITIATED = 1 << 5;
+
+    /**
      * @hide
      */
     public static final int CONSTRAINT_FLAG_CHARGING = 1 << 0;
@@ -414,6 +432,7 @@ public class JobInfo implements Parcelable {
     @UnsupportedAppUsage
     private final ComponentName service;
     private final int constraintFlags;
+    private final int mPreferredConstraintFlags;
     private final TriggerContentUri[] triggerContentUris;
     private final long triggerContentUpdateDelay;
     private final long triggerContentMaxDelay;
@@ -504,6 +523,30 @@ public class JobInfo implements Parcelable {
     }
 
     /**
+     * @hide
+     * @see JobInfo.Builder#setPrefersBatteryNotLow(boolean)
+     */
+    public boolean isPreferBatteryNotLow() {
+        return (mPreferredConstraintFlags & CONSTRAINT_FLAG_BATTERY_NOT_LOW) != 0;
+    }
+
+    /**
+     * @hide
+     * @see JobInfo.Builder#setPrefersCharging(boolean)
+     */
+    public boolean isPreferCharging() {
+        return (mPreferredConstraintFlags & CONSTRAINT_FLAG_CHARGING) != 0;
+    }
+
+    /**
+     * @hide
+     * @see JobInfo.Builder#setPrefersDeviceIdle(boolean)
+     */
+    public boolean isPreferDeviceIdle() {
+        return (mPreferredConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0;
+    }
+
+    /**
      * @see JobInfo.Builder#setRequiresCharging(boolean)
      */
     public boolean isRequireCharging() {
@@ -536,6 +579,13 @@ public class JobInfo implements Parcelable {
      */
     public int getConstraintFlags() {
         return constraintFlags;
+    }
+
+    /**
+     * @hide
+     */
+    public int getPreferredConstraintFlags() {
+        return mPreferredConstraintFlags;
     }
 
     /**
@@ -713,6 +763,13 @@ public class JobInfo implements Parcelable {
     }
 
     /**
+     * @see JobInfo.Builder#setUserInitiated(boolean)
+     */
+    public boolean isUserInitiated() {
+        return (flags & FLAG_USER_INITIATED) != 0;
+    }
+
+    /**
      * @see JobInfo.Builder#setImportantWhileForeground(boolean)
      */
     public boolean isImportantWhileForeground() {
@@ -773,6 +830,9 @@ public class JobInfo implements Parcelable {
             return false;
         }
         if (constraintFlags != j.constraintFlags) {
+            return false;
+        }
+        if (mPreferredConstraintFlags != j.mPreferredConstraintFlags) {
             return false;
         }
         if (!Arrays.equals(triggerContentUris, j.triggerContentUris)) {
@@ -855,6 +915,7 @@ public class JobInfo implements Parcelable {
             hashCode = 31 * hashCode + service.hashCode();
         }
         hashCode = 31 * hashCode + constraintFlags;
+        hashCode = 31 * hashCode + mPreferredConstraintFlags;
         if (triggerContentUris != null) {
             hashCode = 31 * hashCode + Arrays.hashCode(triggerContentUris);
         }
@@ -885,7 +946,8 @@ public class JobInfo implements Parcelable {
     @SuppressWarnings("UnsafeParcelApi")
     private JobInfo(Parcel in) {
         jobId = in.readInt();
-        extras = in.readPersistableBundle();
+        final PersistableBundle persistableExtras = in.readPersistableBundle();
+        extras = persistableExtras != null ? persistableExtras : PersistableBundle.EMPTY;
         transientExtras = in.readBundle();
         if (in.readInt() != 0) {
             clipData = ClipData.CREATOR.createFromParcel(in);
@@ -896,6 +958,7 @@ public class JobInfo implements Parcelable {
         }
         service = in.readParcelable(null);
         constraintFlags = in.readInt();
+        mPreferredConstraintFlags = in.readInt();
         triggerContentUris = in.createTypedArray(TriggerContentUri.CREATOR);
         triggerContentUpdateDelay = in.readLong();
         triggerContentMaxDelay = in.readLong();
@@ -930,6 +993,7 @@ public class JobInfo implements Parcelable {
         clipGrantFlags = b.mClipGrantFlags;
         service = b.mJobService;
         constraintFlags = b.mConstraintFlags;
+        mPreferredConstraintFlags = b.mPreferredConstraintFlags;
         triggerContentUris = b.mTriggerContentUris != null
                 ? b.mTriggerContentUris.toArray(new TriggerContentUri[b.mTriggerContentUris.size()])
                 : null;
@@ -973,6 +1037,7 @@ public class JobInfo implements Parcelable {
         }
         out.writeParcelable(service, flags);
         out.writeInt(constraintFlags);
+        out.writeInt(mPreferredConstraintFlags);
         out.writeTypedArray(triggerContentUris, flags);
         out.writeLong(triggerContentUpdateDelay);
         out.writeLong(triggerContentMaxDelay);
@@ -1120,6 +1185,7 @@ public class JobInfo implements Parcelable {
         private int mFlags;
         // Requirements.
         private int mConstraintFlags;
+        private int mPreferredConstraintFlags;
         private NetworkRequest mNetworkRequest;
         private long mNetworkDownloadBytes = NETWORK_BYTES_UNKNOWN;
         private long mNetworkUploadBytes = NETWORK_BYTES_UNKNOWN;
@@ -1173,6 +1239,7 @@ public class JobInfo implements Parcelable {
             mBias = job.getBias();
             mFlags = job.getFlags();
             mConstraintFlags = job.getConstraintFlags();
+            mPreferredConstraintFlags = job.getPreferredConstraintFlags();
             mNetworkRequest = job.getRequiredNetwork();
             mNetworkDownloadBytes = job.getEstimatedNetworkDownloadBytes();
             mNetworkUploadBytes = job.getEstimatedNetworkUploadBytes();
@@ -1211,6 +1278,9 @@ public class JobInfo implements Parcelable {
          * to run before other jobs. Giving the same priority to all of your jobs will result
          * in them all being treated the same. The priorities each have slightly different
          * behaviors, as noted in their relevant javadoc.
+         *
+         * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * the priority will only affect sorting order within the job's namespace.
          *
          * <b>NOTE:</b> Setting all of your jobs to high priority will not be
          * beneficial to your app and in fact may hurt its performance in the
@@ -1312,6 +1382,12 @@ public class JobInfo implements Parcelable {
          * Calling this method will override any requirements previously defined
          * by {@link #setRequiredNetwork(NetworkRequest)}; you typically only
          * want to call one of these methods.
+         *
+         * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * an app must hold the
+         * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} permission to
+         * schedule a job that requires a network.
+         *
          * <p class="note">
          * When your job executes in
          * {@link JobService#onStartJob(JobParameters)}, be sure to use the
@@ -1367,6 +1443,11 @@ public class JobInfo implements Parcelable {
          * specific network returned by {@link JobParameters#getNetwork()},
          * otherwise you'll use the default network which may not meet this
          * constraint.
+         *
+         * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+         * an app must hold the
+         * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} permission to
+         * schedule a job that requires a network.
          *
          * @param networkRequest The detailed description of the kind of network
          *            this job requires, or {@code null} if no specific kind of
@@ -1431,6 +1512,7 @@ public class JobInfo implements Parcelable {
          * @see JobInfo#getEstimatedNetworkUploadBytes()
          * @see JobWorkItem#JobWorkItem(android.content.Intent, long, long)
          */
+        // TODO(b/255371817): update documentation to reflect how this data will be used
         public Builder setEstimatedNetworkBytes(@BytesLong long downloadBytes,
                 @BytesLong long uploadBytes) {
             mNetworkDownloadBytes = downloadBytes;
@@ -1472,9 +1554,104 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Specify that to run this job, the device must be charging (or be a
+         * Specify that this job would prefer to be run when the device's battery is not low.
+         * This defaults to {@code false}.
+         *
+         * <p>The system may attempt to delay this job until the device's battery is not low,
+         * but may choose to run it even if the device's battery is low. JobScheduler will not stop
+         * this job if this constraint is no longer satisfied after the job has started running.
+         * If this job must only run when the device's battery is not low,
+         * use {@link #setRequiresBatteryNotLow(boolean)} instead.
+         *
+         * <p>
+         * Because it doesn't make sense for a constraint to be both preferred and required,
+         * calling both this and {@link #setRequiresBatteryNotLow(boolean)} with {@code true}
+         * will result in an {@link java.lang.IllegalArgumentException} when
+         * {@link android.app.job.JobInfo.Builder#build()} is called.
+         *
+         * @param prefersBatteryNotLow Pass {@code true} to prefer that the device's battery level
+         *                             not be low in order to run the job.
+         * @return This object for method chaining
+         * @see JobInfo#isPreferBatteryNotLow()
+         * @hide
+         */
+        @NonNull
+        public Builder setPrefersBatteryNotLow(boolean prefersBatteryNotLow) {
+            mPreferredConstraintFlags =
+                    (mPreferredConstraintFlags & ~CONSTRAINT_FLAG_BATTERY_NOT_LOW)
+                            | (prefersBatteryNotLow ? CONSTRAINT_FLAG_BATTERY_NOT_LOW : 0);
+            return this;
+        }
+
+        /**
+         * Specify that this job would prefer to be run when the device is charging (or be a
          * non-battery-powered device connected to permanent power, such as Android TV
          * devices). This defaults to {@code false}.
+         *
+         * <p>
+         * The system may attempt to delay this job until the device is charging, but may
+         * choose to run it even if the device is not charging. JobScheduler will not stop
+         * this job if this constraint is no longer satisfied after the job has started running.
+         * If this job must only run when the device is charging,
+         * use {@link #setRequiresCharging(boolean)} instead.
+         *
+         * <p>
+         * Because it doesn't make sense for a constraint to be both preferred and required,
+         * calling both this and {@link #setRequiresCharging(boolean)} with {@code true}
+         * will result in an {@link java.lang.IllegalArgumentException} when
+         * {@link android.app.job.JobInfo.Builder#build()} is called.
+         *
+         * @param prefersCharging Pass {@code true} to prefer that the device be
+         *                        charging in order to run the job.
+         * @return This object for method chaining
+         * @see JobInfo#isPreferCharging()
+         * @hide
+         */
+        @NonNull
+        public Builder setPrefersCharging(boolean prefersCharging) {
+            mPreferredConstraintFlags = (mPreferredConstraintFlags & ~CONSTRAINT_FLAG_CHARGING)
+                    | (prefersCharging ? CONSTRAINT_FLAG_CHARGING : 0);
+            return this;
+        }
+
+        /**
+         * Specify that this job would prefer to be run when the device is not in active use.
+         * This defaults to {@code false}.
+         *
+         * <p>The system may attempt to delay this job until the device is not in active use,
+         * but may choose to run it even if the device is not idle. JobScheduler will not stop
+         * this job if this constraint is no longer satisfied after the job has started running.
+         * If this job must only run when the device is not in active use,
+         * use {@link #setRequiresDeviceIdle(boolean)} instead.
+         *
+         * <p>
+         * Because it doesn't make sense for a constraint to be both preferred and required,
+         * calling both this and {@link #setRequiresDeviceIdle(boolean)} with {@code true}
+         * will result in an {@link java.lang.IllegalArgumentException} when
+         * {@link android.app.job.JobInfo.Builder#build()} is called.
+         *
+         * <p class="note">Despite the similar naming, this job constraint is <em>not</em>
+         * related to the system's "device idle" or "doze" states.  This constraint only
+         * determines whether a job is allowed to run while the device is directly in use.
+         *
+         * @param prefersDeviceIdle Pass {@code true} to prefer that the device not be in active
+         *                          use when running this job.
+         * @return This object for method chaining
+         * @see JobInfo#isRequireDeviceIdle()
+         * @hide
+         */
+        @NonNull
+        public Builder setPrefersDeviceIdle(boolean prefersDeviceIdle) {
+            mPreferredConstraintFlags = (mPreferredConstraintFlags & ~CONSTRAINT_FLAG_DEVICE_IDLE)
+                    | (prefersDeviceIdle ? CONSTRAINT_FLAG_DEVICE_IDLE : 0);
+            return this;
+        }
+
+        /**
+         * Specify that to run this job, the device must be charging (or be a
+         * non-battery-powered device connected to permanent power, such as Android TV
+         * devices). This defaults to {@code false}. Setting this to {@code false} <b>DOES NOT</b>
+         * mean the job will only run when the device is not charging.
          *
          * <p class="note">For purposes of running jobs, a battery-powered device
          * "charging" is not quite the same as simply being connected to power.  If the
@@ -1497,7 +1674,9 @@ public class JobInfo implements Parcelable {
          * Specify that to run this job, the device's battery level must not be low.
          * This defaults to false.  If true, the job will only run when the battery level
          * is not low, which is generally the point where the user is given a "low battery"
-         * warning.
+         * warning. Setting this to {@code false} <b>DOES NOT</b> mean the job will only run
+         * when the battery is low.
+         *
          * @param batteryNotLow Whether or not the device's battery level must not be low.
          * @see JobInfo#isRequireBatteryNotLow()
          */
@@ -1510,7 +1689,8 @@ public class JobInfo implements Parcelable {
         /**
          * When set {@code true}, ensure that this job will not run if the device is in active use.
          * The default state is {@code false}: that is, the for the job to be runnable even when
-         * someone is interacting with the device.
+         * someone is interacting with the device. Setting this to {@code false} <b>DOES NOT</b>
+         * mean the job will only run when the device is not idle.
          *
          * <p>This state is a loose definition provided by the system. In general, it means that
          * the device is not currently being used interactively, and has not been in use for some
@@ -1742,6 +1922,7 @@ public class JobInfo implements Parcelable {
          *     <li>Bypass Doze, app standby, and battery saver network restrictions</li>
          *     <li>Be less likely to be killed than regular jobs</li>
          *     <li>Be subject to background location throttling</li>
+         *     <li>Be exempt from delay to optimize job execution</li>
          * </ol>
          *
          * <p>
@@ -1797,6 +1978,64 @@ public class JobInfo implements Parcelable {
                     mPriority = PRIORITY_DEFAULT;
                 }
                 mFlags &= (~FLAG_EXPEDITED);
+            }
+            return this;
+        }
+
+        /**
+         * Indicates that this job is being scheduled to fulfill an explicit user request.
+         * As such, user-initiated jobs can only be scheduled when the app is in the foreground
+         * or in a state where launching an activity is allowed, as defined
+         * <a href=
+         * "https://developer.android.com/guide/components/activities/background-starts#exceptions">
+         * here</a>. Attempting to schedule one outside of these conditions will throw a
+         * {@link SecurityException}.
+         *
+         * <p>
+         * This should <b>NOT</b> be used for automatic features.
+         *
+         * <p>
+         * All user-initiated jobs must have an associated notification, set via
+         * {@link JobService#setNotification(JobParameters, int, Notification, int)}, and will be
+         * shown in the Task Manager when running. These jobs cannot be rescheduled by the app
+         * if the user stops the job via system provided affordance (such as the Task Manager).
+         * Thus, it is best practice and recommended to provide action buttons in the
+         * associated notification to allow the user to stop the job gracefully
+         * and allow for rescheduling.
+         *
+         * <p>
+         * If the app doesn't hold the {@link android.Manifest.permission#RUN_USER_INITIATED_JOBS}
+         * permission when scheduling a user-initiated job, JobScheduler will throw a
+         * {@link SecurityException}.
+         *
+         * <p>
+         * In {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, user-initiated jobs can only
+         * be used for network data transfers. As such, they must specify a required network via
+         * {@link #setRequiredNetwork(NetworkRequest)} or {@link #setRequiredNetworkType(int)}.
+         *
+         * <p>
+         * These jobs will not be subject to quotas and will be started immediately once scheduled
+         * if all constraints are met and the device system health allows for additional tasks.
+         *
+         * @see JobInfo#isUserInitiated()
+         */
+        @RequiresPermission(android.Manifest.permission.RUN_USER_INITIATED_JOBS)
+        @NonNull
+        public Builder setUserInitiated(boolean userInitiated) {
+            if (userInitiated) {
+                mFlags |= FLAG_USER_INITIATED;
+                if (mPriority == PRIORITY_DEFAULT) {
+                    // The default priority for UIJs is MAX, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_MAX;
+                }
+            } else {
+                if (mPriority == PRIORITY_MAX && (mFlags & FLAG_USER_INITIATED) != 0) {
+                    // Reset the priority for the job, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_DEFAULT;
+                }
+                mFlags &= (~FLAG_USER_INITIATED);
             }
             return this;
         }
@@ -1886,11 +2125,13 @@ public class JobInfo implements Parcelable {
          * @return The job object to hand to the JobScheduler. This object is immutable.
          */
         public JobInfo build() {
-            return build(Compatibility.isChangeEnabled(DISALLOW_DEADLINES_FOR_PREFETCH_JOBS));
+            return build(Compatibility.isChangeEnabled(DISALLOW_DEADLINES_FOR_PREFETCH_JOBS),
+                    Compatibility.isChangeEnabled(REJECT_NEGATIVE_NETWORK_ESTIMATES));
         }
 
         /** @hide */
-        public JobInfo build(boolean disallowPrefetchDeadlines) {
+        public JobInfo build(boolean disallowPrefetchDeadlines,
+                boolean rejectNegativeNetworkEstimates) {
             // This check doesn't need to be inside enforceValidity. It's an unnecessary legacy
             // check that would ideally be phased out instead.
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
@@ -1899,7 +2140,7 @@ public class JobInfo implements Parcelable {
                         " setRequiresDeviceIdle is an error.");
             }
             JobInfo jobInfo = new JobInfo(this);
-            jobInfo.enforceValidity(disallowPrefetchDeadlines);
+            jobInfo.enforceValidity(disallowPrefetchDeadlines, rejectNegativeNetworkEstimates);
             return jobInfo;
         }
 
@@ -1917,12 +2158,23 @@ public class JobInfo implements Parcelable {
     /**
      * @hide
      */
-    public final void enforceValidity(boolean disallowPrefetchDeadlines) {
+    public final void enforceValidity(boolean disallowPrefetchDeadlines,
+            boolean rejectNegativeNetworkEstimates) {
         // Check that network estimates require network type and are reasonable values.
         if ((networkDownloadBytes > 0 || networkUploadBytes > 0 || minimumNetworkChunkBytes > 0)
                 && networkRequest == null) {
             throw new IllegalArgumentException(
                     "Can't provide estimated network usage without requiring a network");
+        }
+        if (networkRequest != null && rejectNegativeNetworkEstimates) {
+            if (networkUploadBytes != NETWORK_BYTES_UNKNOWN && networkUploadBytes < 0) {
+                throw new IllegalArgumentException(
+                        "Invalid network upload bytes: " + networkUploadBytes);
+            }
+            if (networkDownloadBytes != NETWORK_BYTES_UNKNOWN && networkDownloadBytes < 0) {
+                throw new IllegalArgumentException(
+                        "Invalid network download bytes: " + networkDownloadBytes);
+            }
         }
         final long estimatedTransfer;
         if (networkUploadBytes == NETWORK_BYTES_UNKNOWN) {
@@ -1998,10 +2250,12 @@ public class JobInfo implements Parcelable {
         }
 
         final boolean isExpedited = (flags & FLAG_EXPEDITED) != 0;
+        final boolean isUserInitiated = (flags & FLAG_USER_INITIATED) != 0;
         switch (mPriority) {
             case PRIORITY_MAX:
-                if (!isExpedited) {
-                    throw new IllegalArgumentException("Only expedited jobs can have max priority");
+                if (!(isExpedited || isUserInitiated)) {
+                    throw new IllegalArgumentException(
+                            "Only expedited or user-initiated jobs can have max priority");
                 }
                 break;
             case PRIORITY_HIGH:
@@ -2030,6 +2284,9 @@ public class JobInfo implements Parcelable {
             if (isPeriodic) {
                 throw new IllegalArgumentException("An expedited job cannot be periodic");
             }
+            if (isUserInitiated) {
+                throw new IllegalArgumentException("An expedited job cannot be user-initiated");
+            }
             if (mPriority != PRIORITY_MAX && mPriority != PRIORITY_HIGH) {
                 throw new IllegalArgumentException(
                         "An expedited job must be high or max priority. Don't use expedited jobs"
@@ -2043,6 +2300,62 @@ public class JobInfo implements Parcelable {
             if (triggerContentUris != null && triggerContentUris.length > 0) {
                 throw new IllegalArgumentException(
                         "Can't call addTriggerContentUri() on an expedited job");
+            }
+        }
+
+        if ((constraintFlags & mPreferredConstraintFlags) != 0) {
+            // Something is marked as both preferred and required. Try to give a clear exception
+            // reason.
+            if ((constraintFlags & CONSTRAINT_FLAG_BATTERY_NOT_LOW) != 0
+                    && (mPreferredConstraintFlags & CONSTRAINT_FLAG_BATTERY_NOT_LOW) != 0) {
+                throw new IllegalArgumentException(
+                        "battery-not-low constraint cannot be both preferred and required");
+            }
+            if ((constraintFlags & CONSTRAINT_FLAG_CHARGING) != 0
+                    && (mPreferredConstraintFlags & CONSTRAINT_FLAG_CHARGING) != 0) {
+                throw new IllegalArgumentException(
+                        "charging constraint cannot be both preferred and required");
+            }
+            if ((constraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0
+                    && (mPreferredConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
+                throw new IllegalArgumentException(
+                        "device idle constraint cannot be both preferred and required");
+            }
+            // Couldn't figure out what the overlap was. Just use a generic message.
+            throw new IllegalArgumentException(
+                    "constraints cannot be both preferred and required");
+        }
+
+        if (isUserInitiated) {
+            if (hasEarlyConstraint) {
+                throw new IllegalArgumentException("A user-initiated job cannot have a time delay");
+            }
+            if (hasLateConstraint) {
+                throw new IllegalArgumentException("A user-initiated job cannot have a deadline");
+            }
+            if (isPeriodic) {
+                throw new IllegalArgumentException("A user-initiated job cannot be periodic");
+            }
+            if ((flags & FLAG_PREFETCH) != 0) {
+                throw new IllegalArgumentException(
+                        "A user-initiated job cannot also be a prefetch job");
+            }
+            if (mPriority != PRIORITY_MAX) {
+                throw new IllegalArgumentException("A user-initiated job must be max priority.");
+            }
+            if ((constraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0
+                    || (mPreferredConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
+                throw new IllegalArgumentException(
+                        "A user-initiated job cannot have a device-idle constraint");
+            }
+            if (triggerContentUris != null && triggerContentUris.length > 0) {
+                throw new IllegalArgumentException(
+                        "Can't call addTriggerContentUri() on a user-initiated job");
+            }
+            // UIDTs
+            if (networkRequest == null) {
+                throw new IllegalArgumentException(
+                        "A user-initiated data transfer job must specify a valid network type");
             }
         }
     }

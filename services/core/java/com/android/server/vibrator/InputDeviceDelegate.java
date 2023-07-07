@@ -21,7 +21,6 @@ import android.content.Context;
 import android.hardware.input.InputManager;
 import android.os.CombinedVibration;
 import android.os.Handler;
-import android.os.VibrationAttributes;
 import android.os.VibratorManager;
 import android.util.SparseArray;
 import android.view.InputDevice;
@@ -94,11 +93,11 @@ final class InputDeviceDelegate implements InputManager.InputDeviceListener {
      *
      * @return {@link #isAvailable()}
      */
-    public boolean vibrateIfAvailable(int uid, String opPkg, CombinedVibration effect,
-            String reason, VibrationAttributes attrs) {
+    public boolean vibrateIfAvailable(Vibration.CallerInfo callerInfo, CombinedVibration effect) {
         synchronized (mLock) {
             for (int i = 0; i < mInputDeviceVibrators.size(); i++) {
-                mInputDeviceVibrators.valueAt(i).vibrate(uid, opPkg, effect, reason, attrs);
+                mInputDeviceVibrators.valueAt(i).vibrate(callerInfo.uid, callerInfo.opPkg, effect,
+                        callerInfo.reason, callerInfo.attrs);
             }
             return mInputDeviceVibrators.size() > 0;
         }

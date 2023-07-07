@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.notification.collection.inflation
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.notification.NotificationEntryListener
-import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.inflation.BindEventManager.Listener
 import javax.inject.Inject
@@ -31,12 +29,4 @@ class BindEventManagerImpl @Inject constructor() : BindEventManager() {
     /** Emit the [Listener.onViewBound] event to all registered listeners. */
     fun notifyViewBound(entry: NotificationEntry) =
         listeners.forEach { listener -> listener.onViewBound(entry) }
-
-    /** Initialize this for the legacy pipeline. */
-    fun attachToLegacyPipeline(notificationEntryManager: NotificationEntryManager) {
-        notificationEntryManager.addNotificationEntryListener(object : NotificationEntryListener {
-            override fun onEntryInflated(entry: NotificationEntry) = notifyViewBound(entry)
-            override fun onEntryReinflated(entry: NotificationEntry) = notifyViewBound(entry)
-        })
-    }
 }

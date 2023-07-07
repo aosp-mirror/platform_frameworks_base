@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.IAccessibilityServiceClient;
 import android.app.Instrumentation;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
@@ -34,6 +35,7 @@ import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 
+import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -51,6 +53,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 /**
  * Tests for the AccessibilityManager by mocking the backing service.
@@ -70,6 +73,7 @@ public class AccessibilityManagerTest {
             LABEL,
             DESCRIPTION,
             TEST_PENDING_INTENT);
+    private static final int DISPLAY_ID = 22;
 
     @Mock private IAccessibilityManager mMockService;
     private MessageCapturingHandler mHandler;
@@ -223,5 +227,60 @@ public class AccessibilityManagerTest {
                 manager.getAccessibilityFocusStrokeWidth());
         assertEquals(mFocusColorDefaultValue,
                 manager.getAccessibilityFocusColor());
+    }
+
+    @Test
+    public void testRegisterAccessibilityProxy() throws Exception {
+        // Accessibility does not need to be enabled for a proxy to be registered.
+        AccessibilityManager manager =
+                new AccessibilityManager(mInstrumentation.getContext(), mHandler, mMockService,
+                        UserHandle.USER_CURRENT, true);
+
+
+        ArrayList<AccessibilityServiceInfo> infos = new ArrayList<>();
+        infos.add(new AccessibilityServiceInfo());
+        AccessibilityDisplayProxy proxy = new MyAccessibilityProxy(DISPLAY_ID, infos);
+        manager.registerDisplayProxy(proxy);
+        // Cannot access proxy.mServiceClient directly due to visibility.
+        verify(mMockService).registerProxyForDisplay(any(IAccessibilityServiceClient.class),
+                any(Integer.class));
+    }
+
+    @Test
+    public void testUnregisterAccessibilityProxy() throws Exception {
+        // Accessibility does not need to be enabled for a proxy to be registered.
+        final AccessibilityManager manager =
+                new AccessibilityManager(mInstrumentation.getContext(), mHandler, mMockService,
+                        UserHandle.USER_CURRENT, true);
+
+        final ArrayList<AccessibilityServiceInfo> infos = new ArrayList<>();
+        infos.add(new AccessibilityServiceInfo());
+
+        final AccessibilityDisplayProxy proxy = new MyAccessibilityProxy(DISPLAY_ID, infos);
+        manager.registerDisplayProxy(proxy);
+        manager.unregisterDisplayProxy(proxy);
+        verify(mMockService).unregisterProxyForDisplay(proxy.getDisplayId());
+    }
+
+    private class MyAccessibilityProxy extends AccessibilityDisplayProxy {
+        MyAccessibilityProxy(int displayId,
+                @NonNull List<AccessibilityServiceInfo> serviceInfos) {
+            super(displayId, Executors.newSingleThreadExecutor(), serviceInfos);
+        }
+
+        @Override
+        public void onAccessibilityEvent(@NonNull AccessibilityEvent event) {
+
+        }
+
+        @Override
+        public void onProxyConnected() {
+
+        }
+
+        @Override
+        public void interrupt() {
+
+        }
     }
 }

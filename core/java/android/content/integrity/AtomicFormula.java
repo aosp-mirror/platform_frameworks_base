@@ -261,8 +261,8 @@ public abstract class AtomicFormula extends IntegrityFormula {
             }
             LongAtomicFormula that = (LongAtomicFormula) o;
             return getKey() == that.getKey()
-                    && mValue == that.mValue
-                    && mOperator == that.mOperator;
+                    && Objects.equals(mValue, that.mValue)
+                    && Objects.equals(mOperator, that.mOperator);
         }
 
         @Override
@@ -628,7 +628,7 @@ public abstract class AtomicFormula extends IntegrityFormula {
                 return false;
             }
             BooleanAtomicFormula that = (BooleanAtomicFormula) o;
-            return getKey() == that.getKey() && mValue == that.mValue;
+            return getKey() == that.getKey() && Objects.equals(mValue, that.mValue);
         }
 
         @Override

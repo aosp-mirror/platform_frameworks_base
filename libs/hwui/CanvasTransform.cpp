@@ -15,19 +15,21 @@
  */
 
 #include "CanvasTransform.h"
-#include "Properties.h"
-#include "utils/Color.h"
 
+#include <SkAndroidFrameworkUtils.h>
+#include <SkBlendMode.h>
 #include <SkColorFilter.h>
 #include <SkGradientShader.h>
+#include <SkHighContrastFilter.h>
 #include <SkPaint.h>
 #include <SkShader.h>
+#include <log/log.h>
 
 #include <algorithm>
 #include <cmath>
 
-#include <log/log.h>
-#include <SkHighContrastFilter.h>
+#include "Properties.h"
+#include "utils/Color.h"
 
 namespace android::uirenderer {
 
@@ -82,27 +84,21 @@ static void applyColorTransform(ColorTransform transform, SkPaint& paint) {
     paint.setColor(newColor);
 
     if (paint.getShader()) {
-        SkShader::GradientInfo info;
+        SkAndroidFrameworkUtils::LinearGradientInfo info;
         std::array<SkColor, 10> _colorStorage;
         std::array<SkScalar, _colorStorage.size()> _offsetStorage;
         info.fColorCount = _colorStorage.size();
         info.fColors = _colorStorage.data();
         info.fColorOffsets = _offsetStorage.data();
-        SkShader::GradientType type = paint.getShader()->asAGradient(&info);
 
-        if (info.fColorCount <= 10) {
-            switch (type) {
-                case SkShader::kLinear_GradientType:
-                    for (int i = 0; i < info.fColorCount; i++) {
-                        info.fColors[i] = transformColor(transform, info.fColors[i]);
-                    }
-                    paint.setShader(SkGradientShader::MakeLinear(info.fPoint, info.fColors,
-                                                                 info.fColorOffsets, info.fColorCount,
-                                                                 info.fTileMode, info.fGradientFlags, nullptr));
-                    break;
-                default:break;
+        if (SkAndroidFrameworkUtils::ShaderAsALinearGradient(paint.getShader(), &info) &&
+            info.fColorCount <= _colorStorage.size()) {
+            for (int i = 0; i < info.fColorCount; i++) {
+                info.fColors[i] = transformColor(transform, info.fColors[i]);
             }
-
+            paint.setShader(SkGradientShader::MakeLinear(
+                    info.fPoints, info.fColors, info.fColorOffsets, info.fColorCount,
+                    info.fTileMode, info.fGradientFlags, nullptr));
         }
     }
 

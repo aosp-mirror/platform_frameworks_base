@@ -49,7 +49,7 @@ public final class SharedLibraryInfo implements Parcelable {
             TYPE_SDK_PACKAGE,
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface Type{}
+    public @interface Type{}
 
     /**
      * Shared library type: this library is a part of the OS

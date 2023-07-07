@@ -21,16 +21,15 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.provider.Settings
 import android.util.Log
-
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.settings.UserContextProvider
+import com.android.systemui.statusbar.phone.AutoTileManager
 import com.android.systemui.statusbar.policy.DeviceControlsController.Callback
 import com.android.systemui.util.settings.SecureSettings
-
 import javax.inject.Inject
 
 /**
@@ -67,8 +66,7 @@ public class DeviceControlsControllerImpl @Inject constructor(
         internal const val QS_DEFAULT_POSITION = 7
 
         internal const val PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted"
-        internal const val PREFS_CONTROLS_FILE = "controls_prefs"
-        internal const val PREFS_SETTINGS_DIALOG_ATTEMPTS = "show_settings_attempts"
+        const val PREFS_CONTROLS_FILE = "controls_prefs"
         private const val SEEDING_MAX = 2
     }
 
@@ -88,6 +86,10 @@ public class DeviceControlsControllerImpl @Inject constructor(
      * incorrect.
      */
     override fun setCallback(callback: Callback) {
+        if (!controlsComponent.isEnabled()) {
+            callback.removeControlsAutoTracker()
+            return
+        }
         // Treat any additional call as a reset before recalculating
         removeCallback()
         this.callback = callback
@@ -139,6 +141,9 @@ public class DeviceControlsControllerImpl @Inject constructor(
                         // When there are existing controls but no saved preference, assume it
                         // is out of sync, perhaps through a device restore, and update the
                         // preference
+                        addPackageToSeededSet(prefs, pkg)
+                    } else if (it.panelActivity != null) {
+                        // Do not seed for packages with panels
                         addPackageToSeededSet(prefs, pkg)
                     } else {
                         componentsToSeed.add(it.componentName)

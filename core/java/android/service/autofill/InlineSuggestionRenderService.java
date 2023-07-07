@@ -166,7 +166,7 @@ public abstract class InlineSuggestionRenderService extends Service {
                     PixelFormat.TRANSPARENT);
 
             final SurfaceControlViewHost host = new SurfaceControlViewHost(this, getDisplay(),
-                    hostInputToken);
+                    hostInputToken, "InlineSuggestionRenderService");
             host.setView(suggestionRoot, lp);
 
             // Set the suggestion view to be non-focusable so that if its background is set to a

@@ -28,6 +28,7 @@ import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class is used for sending data to a port on a MIDI device
@@ -43,6 +44,7 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
 
     private final CloseGuard mGuard = CloseGuard.get();
     private boolean mIsClosed;
+    private AtomicInteger mTotalBytes = new AtomicInteger();
 
     // buffer to use for sending data out our output stream
     private final byte[] mBuffer = new byte[MidiPortImpl.MAX_PACKET_SIZE];
@@ -87,6 +89,7 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
             }
             int length = MidiPortImpl.packData(msg, offset, count, timestamp, mBuffer);
             mOutputStream.write(mBuffer, 0, length);
+            mTotalBytes.addAndGet(length);
         }
     }
 
@@ -169,5 +172,13 @@ public final class MidiInputPort extends MidiReceiver implements Closeable {
         } finally {
             super.finalize();
         }
+    }
+
+    /**
+     * Pulls total number of bytes and sets to zero. This allows multiple callers.
+     * @hide
+     */
+    public int pullTotalBytesCount() {
+        return mTotalBytes.getAndSet(0);
     }
 }

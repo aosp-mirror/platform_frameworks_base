@@ -28,6 +28,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsServiceInfo
+import com.android.systemui.util.icuMessageFormat
 import java.text.Collator
 import java.util.concurrent.Executor
 
@@ -44,14 +45,15 @@ import java.util.concurrent.Executor
  * @param onAppSelected a callback to indicate that an app has been selected in the list.
  */
 class AppAdapter(
-    backgroundExecutor: Executor,
-    uiExecutor: Executor,
-    lifecycle: Lifecycle,
-    controlsListingController: ControlsListingController,
-    private val layoutInflater: LayoutInflater,
-    private val onAppSelected: (ComponentName?) -> Unit = {},
-    private val favoritesRenderer: FavoritesRenderer,
-    private val resources: Resources
+        backgroundExecutor: Executor,
+        uiExecutor: Executor,
+        lifecycle: Lifecycle,
+        controlsListingController: ControlsListingController,
+        private val layoutInflater: LayoutInflater,
+        private val onAppSelected: (ControlsServiceInfo) -> Unit = {},
+        private val favoritesRenderer: FavoritesRenderer,
+        private val resources: Resources,
+        private val authorizedPanels: Set<String> = emptySet(),
 ) : RecyclerView.Adapter<AppAdapter.Holder>() {
 
     private var listOfServices = emptyList<ControlsServiceInfo>()
@@ -61,9 +63,12 @@ class AppAdapter(
             backgroundExecutor.execute {
                 val collator = Collator.getInstance(resources.configuration.locales[0])
                 val localeComparator = compareBy<ControlsServiceInfo, CharSequence>(collator) {
-                    it.loadLabel()
+                    it.loadLabel() ?: ""
                 }
-                listOfServices = serviceInfos.sortedWith(localeComparator)
+                // No panel or the panel is not authorized
+                listOfServices = serviceInfos.filter {
+                    it.panelActivity == null || it.panelActivity?.packageName !in authorizedPanels
+                }.sortedWith(localeComparator)
                 uiExecutor.execute(::notifyDataSetChanged)
             }
         }
@@ -74,16 +79,18 @@ class AppAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, i: Int): Holder {
-        return Holder(layoutInflater.inflate(R.layout.controls_app_item, parent, false),
-                favoritesRenderer)
+        return Holder(
+            layoutInflater.inflate(R.layout.controls_app_item, parent, false),
+            favoritesRenderer
+        )
     }
 
     override fun getItemCount() = listOfServices.size
 
     override fun onBindViewHolder(holder: Holder, index: Int) {
         holder.bindData(listOfServices[index])
-        holder.itemView.setOnClickListener {
-            onAppSelected(ComponentName.unflattenFromString(listOfServices[index].key))
+        holder.view.setOnClickListener {
+            onAppSelected(listOfServices[index])
         }
     }
 
@@ -91,6 +98,8 @@ class AppAdapter(
      * Holder for binding views in the [RecyclerView]-
      */
     class Holder(view: View, val favRenderer: FavoritesRenderer) : RecyclerView.ViewHolder(view) {
+        val view: View = itemView
+
         private val icon: ImageView = itemView.requireViewById(com.android.internal.R.id.icon)
         private val title: TextView = itemView.requireViewById(com.android.internal.R.id.title)
         private val favorites: TextView = itemView.requireViewById(R.id.favorites)
@@ -102,7 +111,11 @@ class AppAdapter(
         fun bindData(data: ControlsServiceInfo) {
             icon.setImageDrawable(data.loadIcon())
             title.text = data.loadLabel()
-            val text = favRenderer.renderFavoritesForComponent(data.componentName)
+            val text = if (data.panelActivity == null) {
+                favRenderer.renderFavoritesForComponent(data.componentName)
+            } else {
+                null
+            }
             favorites.text = text
             favorites.visibility = if (text == null) View.GONE else View.VISIBLE
         }
@@ -116,10 +129,10 @@ class FavoritesRenderer(
 
     fun renderFavoritesForComponent(component: ComponentName): String? {
         val qty = favoriteFunction(component)
-        if (qty != 0) {
-            return resources.getQuantityString(R.plurals.controls_number_of_favorites, qty, qty)
+        return if (qty != 0) {
+            icuMessageFormat(resources, R.string.controls_number_of_favorites, qty)
         } else {
-            return null
+            null
         }
     }
 }

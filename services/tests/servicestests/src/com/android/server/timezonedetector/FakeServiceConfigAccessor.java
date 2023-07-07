@@ -16,14 +16,11 @@
 
 package com.android.server.timezonedetector;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.time.TimeZoneCapabilities;
-import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
 
 import java.time.Duration;
@@ -31,75 +28,104 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/** A partially implemented, fake implementation of ServiceConfigAccessor for tests. */
-class FakeServiceConfigAccessor implements ServiceConfigAccessor {
+/**
+ * A partially implemented, fake implementation of ServiceConfigAccessor for tests.
+ *
+ * <p>This class has rudamentary support for multiple users, but unlike the real thing, it doesn't
+ * simulate that some settings are global and shared between users. It also delivers config updates
+ * synchronously.
+ */
+public class FakeServiceConfigAccessor implements ServiceConfigAccessor {
 
-    private final List<ConfigurationChangeListener> mConfigurationInternalChangeListeners =
+    private final List<StateChangeListener> mConfigurationInternalChangeListeners =
             new ArrayList<>();
-    private ConfigurationInternal mConfigurationInternal;
+    private ConfigurationInternal mCurrentUserConfigurationInternal;
+    private ConfigurationInternal mOtherUserConfigurationInternal;
 
     @Override
-    public void addConfigurationInternalChangeListener(ConfigurationChangeListener listener) {
+    public void addConfigurationInternalChangeListener(StateChangeListener listener) {
         mConfigurationInternalChangeListeners.add(listener);
     }
 
     @Override
-    public void removeConfigurationInternalChangeListener(ConfigurationChangeListener listener) {
+    public void removeConfigurationInternalChangeListener(StateChangeListener listener) {
         mConfigurationInternalChangeListeners.remove(listener);
     }
 
     @Override
     public ConfigurationInternal getCurrentUserConfigurationInternal() {
-        return mConfigurationInternal;
+        return getConfigurationInternal(mCurrentUserConfigurationInternal.getUserId());
     }
 
     @Override
     public boolean updateConfiguration(
-            @UserIdInt int userID, @NonNull TimeZoneConfiguration requestedChanges) {
-        assertNotNull(mConfigurationInternal);
+            @UserIdInt int userId, @NonNull TimeZoneConfiguration requestedChanges,
+            boolean bypassUserPolicyChecks) {
+        assertNotNull(mCurrentUserConfigurationInternal);
         assertNotNull(requestedChanges);
 
+        ConfigurationInternal toUpdate = getConfigurationInternal(userId);
+
         // Simulate the real strategy's behavior: the new configuration will be updated to be the
-        // old configuration merged with the new if the user has the capability to up the settings.
-        // Then, if the configuration changed, the change listener is invoked.
-        TimeZoneCapabilitiesAndConfig capabilitiesAndConfig =
-                mConfigurationInternal.createCapabilitiesAndConfig();
-        TimeZoneCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
-        TimeZoneConfiguration configuration = capabilitiesAndConfig.getConfiguration();
+        // old configuration merged with the new if the user has the capability to update the
+        // settings. Then, if the configuration changed, the change listener is invoked.
+        TimeZoneCapabilities capabilities = toUpdate.asCapabilities(bypassUserPolicyChecks);
+        TimeZoneConfiguration configuration = toUpdate.asConfiguration();
         TimeZoneConfiguration newConfiguration =
                 capabilities.tryApplyConfigChanges(configuration, requestedChanges);
         if (newConfiguration == null) {
             return false;
         }
 
-        if (!newConfiguration.equals(capabilitiesAndConfig.getConfiguration())) {
-            mConfigurationInternal = mConfigurationInternal.merge(newConfiguration);
-
+        if (!newConfiguration.equals(configuration)) {
+            ConfigurationInternal updatedConfiguration = toUpdate.merge(newConfiguration);
+            if (updatedConfiguration.getUserId() == mCurrentUserConfigurationInternal.getUserId()) {
+                mCurrentUserConfigurationInternal = updatedConfiguration;
+            } else if (mOtherUserConfigurationInternal != null
+                    && updatedConfiguration.getUserId()
+                    == mOtherUserConfigurationInternal.getUserId()) {
+                mOtherUserConfigurationInternal = updatedConfiguration;
+            }
             // Note: Unlike the real strategy, the listeners are invoked synchronously.
-            simulateConfigurationChangeForTests();
+            notifyConfigurationChange();
         }
         return true;
     }
 
-    void initializeConfiguration(ConfigurationInternal configurationInternal) {
-        mConfigurationInternal = configurationInternal;
+    void initializeCurrentUserConfiguration(ConfigurationInternal configurationInternal) {
+        mCurrentUserConfigurationInternal = configurationInternal;
     }
 
-    void simulateConfigurationChangeForTests() {
-        for (ConfigurationChangeListener listener : mConfigurationInternalChangeListeners) {
-            listener.onChange();
-        }
+    void initializeOtherUserConfiguration(ConfigurationInternal configurationInternal) {
+        mOtherUserConfigurationInternal = configurationInternal;
+    }
+
+    void simulateCurrentUserConfigurationInternalChange(
+            ConfigurationInternal configurationInternal) {
+        mCurrentUserConfigurationInternal = configurationInternal;
+        // Note: Unlike the real strategy, the listeners are invoked synchronously.
+        notifyConfigurationChange();
+    }
+
+    void simulateOtherUserConfigurationInternalChange(ConfigurationInternal configurationInternal) {
+        mOtherUserConfigurationInternal = configurationInternal;
+        // Note: Unlike the real strategy, the listeners are invoked synchronously.
+        notifyConfigurationChange();
     }
 
     @Override
     public ConfigurationInternal getConfigurationInternal(int userId) {
-        assertEquals("Multi-user testing not supported currently",
-                userId, mConfigurationInternal.getUserId());
-        return mConfigurationInternal;
+        if (userId == mCurrentUserConfigurationInternal.getUserId()) {
+            return mCurrentUserConfigurationInternal;
+        } else if (mOtherUserConfigurationInternal != null
+                    && userId == mOtherUserConfigurationInternal.getUserId()) {
+            return mOtherUserConfigurationInternal;
+        }
+        throw new AssertionError("userId not known: " + userId);
     }
 
     @Override
-    public void addLocationTimeZoneManagerConfigListener(ConfigurationChangeListener listener) {
+    public void addLocationTimeZoneManagerConfigListener(StateChangeListener listener) {
         failUnimplemented();
     }
 
@@ -205,9 +231,14 @@ class FakeServiceConfigAccessor implements ServiceConfigAccessor {
         failUnimplemented();
     }
 
+    private void notifyConfigurationChange() {
+        for (StateChangeListener listener : mConfigurationInternalChangeListeners) {
+            listener.onChange();
+        }
+    }
+
     @SuppressWarnings("UnusedReturnValue")
     private static <T> T failUnimplemented() {
-        fail("Unimplemented");
-        return null;
+        throw new AssertionError("Unimplemented");
     }
 }

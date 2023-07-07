@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import androidx.annotation.MainThread;
+
 import com.android.systemui.statusbar.phone.ManagedProfileController.Callback;
 import com.android.systemui.statusbar.policy.CallbackController;
 
@@ -25,8 +27,20 @@ public interface ManagedProfileController extends CallbackController<Callback> {
 
     boolean isWorkModeEnabled();
 
-    public interface Callback {
+    /**
+     * Callback to get updates about work profile status.
+     */
+    interface Callback {
+        /**
+         * Called when managed profile change is detected. This always runs on the main thread.
+         */
+        @MainThread
         void onManagedProfileChanged();
+
+        /**
+         * Called when managed profile removal is detected. This always runs on the main thread.
+         */
+        @MainThread
         void onManagedProfileRemoved();
     }
 }

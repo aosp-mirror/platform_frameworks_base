@@ -60,6 +60,7 @@ import com.android.internal.R;
 import com.android.server.UiThread;
 import com.android.server.autofill.AutofillManagerService;
 import com.android.server.autofill.Helper;
+import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -86,6 +87,7 @@ final class FillUi {
         void onDatasetPicked(@NonNull Dataset dataset);
         void onCanceled();
         void onDestroy();
+        void onShown();
         void requestShowFillUi(int width, int height,
                 IAutofillWindowPresenter windowPresenter);
         void requestHideFillUi();
@@ -136,7 +138,9 @@ final class FillUi {
             @NonNull AutofillId focusedViewId, @Nullable String filterText,
             @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
             @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
-        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+        if (sVerbose) {
+            Slogf.v(TAG, "nightMode: %b displayId: %d", nightMode, context.getDisplayId());
+        }
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mCallback = callback;
         mFullScreen = isFullScreen(context);
@@ -706,6 +710,7 @@ final class FillUi {
                     mWm.addView(mContentView, params);
                     mOverlayControl.hideOverlays();
                     mShowing = true;
+                    mCallback.onShown();
                 } else {
                     mWm.updateViewLayout(mContentView, params);
                 }
@@ -772,6 +777,7 @@ final class FillUi {
         pw.print(prefix); pw.print("mContentWidth: "); pw.println(mContentWidth);
         pw.print(prefix); pw.print("mContentHeight: "); pw.println(mContentHeight);
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
+        pw.print(prefix); pw.print("mContext: "); pw.println(mContext);
         pw.print(prefix); pw.print("theme id: "); pw.print(mThemeId);
         switch (mThemeId) {
             case THEME_ID_DARK:

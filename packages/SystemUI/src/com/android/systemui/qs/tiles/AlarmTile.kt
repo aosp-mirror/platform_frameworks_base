@@ -22,6 +22,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.settings.UserTracker
@@ -31,6 +32,7 @@ import javax.inject.Inject
 
 class AlarmTile @Inject constructor(
     host: QSHost,
+    uiEventLogger: QsEventLogger,
     @Background backgroundLooper: Looper,
     @Main mainHandler: Handler,
     falsingManager: FalsingManager,
@@ -42,6 +44,7 @@ class AlarmTile @Inject constructor(
     nextAlarmController: NextAlarmController
 ) : QSTileImpl<QSTile.State>(
     host,
+    uiEventLogger,
     backgroundLooper,
     mainHandler,
     falsingManager,
@@ -117,5 +120,9 @@ class AlarmTile @Inject constructor(
 
     override fun getLongClickIntent(): Intent? {
         return null
+    }
+
+    companion object {
+        const val TILE_SPEC = "alarm"
     }
 }

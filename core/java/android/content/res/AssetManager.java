@@ -1453,6 +1453,16 @@ public final class AssetManager implements AutoCloseable {
     }
 
     /**
+     * @hide
+     */
+    Configuration[] getSizeAndUiModeConfigurations() {
+        synchronized (this) {
+            ensureValidLocked();
+            return nativeGetSizeAndUiModeConfigurations(mObject);
+        }
+    }
+
+    /**
      * Change the configuration used when retrieving resources.  Not for use by
      * applications.
      * @hide
@@ -1461,13 +1471,14 @@ public final class AssetManager implements AutoCloseable {
     public void setConfiguration(int mcc, int mnc, @Nullable String locale, int orientation,
             int touchscreen, int density, int keyboard, int keyboardHidden, int navigation,
             int screenWidth, int screenHeight, int smallestScreenWidthDp, int screenWidthDp,
-            int screenHeightDp, int screenLayout, int uiMode, int colorMode, int majorVersion) {
+            int screenHeightDp, int screenLayout, int uiMode, int colorMode, int grammaticalGender,
+            int majorVersion) {
         synchronized (this) {
             ensureValidLocked();
             nativeSetConfiguration(mObject, mcc, mnc, locale, orientation, touchscreen, density,
                     keyboard, keyboardHidden, navigation, screenWidth, screenHeight,
                     smallestScreenWidthDp, screenWidthDp, screenHeightDp, screenLayout, uiMode,
-                    colorMode, majorVersion);
+                    colorMode, grammaticalGender, majorVersion);
         }
     }
 
@@ -1557,7 +1568,7 @@ public final class AssetManager implements AutoCloseable {
             @Nullable String locale, int orientation, int touchscreen, int density, int keyboard,
             int keyboardHidden, int navigation, int screenWidth, int screenHeight,
             int smallestScreenWidthDp, int screenWidthDp, int screenHeightDp, int screenLayout,
-            int uiMode, int colorMode, int majorVersion);
+            int uiMode, int colorMode, int grammaticalGender, int majorVersion);
     private static native @NonNull SparseArray<String> nativeGetAssignedPackageIdentifiers(
             long ptr, boolean includeOverlays, boolean includeLoaders);
 
@@ -1603,6 +1614,7 @@ public final class AssetManager implements AutoCloseable {
     private static native @Nullable String nativeGetResourceEntryName(long ptr, @AnyRes int resid);
     private static native @Nullable String[] nativeGetLocales(long ptr, boolean excludeSystem);
     private static native @Nullable Configuration[] nativeGetSizeConfigurations(long ptr);
+    private static native @Nullable Configuration[] nativeGetSizeAndUiModeConfigurations(long ptr);
     private static native void nativeSetResourceResolutionLoggingEnabled(long ptr, boolean enabled);
     private static native @Nullable String nativeGetLastResourceResolution(long ptr);
 

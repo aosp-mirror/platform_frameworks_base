@@ -19,6 +19,9 @@ package com.android.server.locksettings;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -34,6 +37,8 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * atest FrameworksServicesTests:RebootEscrowDataTest
  */
+@SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class RebootEscrowDataTest {
     private RebootEscrowKey mKey;

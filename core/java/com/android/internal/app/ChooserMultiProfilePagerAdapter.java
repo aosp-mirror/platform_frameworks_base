@@ -16,17 +16,7 @@
 
 package com.android.internal.app;
 
-import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CANT_ACCESS_PERSONAL;
-import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CANT_ACCESS_WORK;
-import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CANT_SHARE_WITH_PERSONAL;
-import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CANT_SHARE_WITH_WORK;
-import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_CROSS_PROFILE_BLOCKED_TITLE;
-import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_NO_PERSONAL_APPS;
-import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_NO_WORK_APPS;
-import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_PAUSED_TITLE;
-
 import android.annotation.Nullable;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.UserHandle;
 import android.view.LayoutInflater;
@@ -47,37 +37,39 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     private static final int SINGLE_CELL_SPAN_SIZE = 1;
 
     private final ChooserProfileDescriptor[] mItems;
-    private final boolean mIsSendAction;
     private int mBottomOffset;
     private int mMaxTargetsPerRow;
 
     ChooserMultiProfilePagerAdapter(Context context,
             ChooserActivity.ChooserGridAdapter adapter,
-            UserHandle personalProfileUserHandle,
+            EmptyStateProvider emptyStateProvider,
+            QuietModeManager quietModeManager,
             UserHandle workProfileUserHandle,
-            boolean isSendAction, int maxTargetsPerRow) {
-        super(context, /* currentPage */ 0, personalProfileUserHandle, workProfileUserHandle);
+            UserHandle cloneUserHandle,
+            int maxTargetsPerRow) {
+        super(context, /* currentPage */ 0, emptyStateProvider, quietModeManager,
+                workProfileUserHandle, cloneUserHandle);
         mItems = new ChooserProfileDescriptor[] {
                 createProfileDescriptor(adapter)
         };
-        mIsSendAction = isSendAction;
         mMaxTargetsPerRow = maxTargetsPerRow;
     }
 
     ChooserMultiProfilePagerAdapter(Context context,
             ChooserActivity.ChooserGridAdapter personalAdapter,
             ChooserActivity.ChooserGridAdapter workAdapter,
+            EmptyStateProvider emptyStateProvider,
+            QuietModeManager quietModeManager,
             @Profile int defaultProfile,
-            UserHandle personalProfileUserHandle,
             UserHandle workProfileUserHandle,
-            boolean isSendAction, int maxTargetsPerRow) {
-        super(context, /* currentPage */ defaultProfile, personalProfileUserHandle,
-                workProfileUserHandle);
+            UserHandle cloneUserHandle,
+            int maxTargetsPerRow) {
+        super(context, /* currentPage */ defaultProfile, emptyStateProvider,
+                quietModeManager, workProfileUserHandle, cloneUserHandle);
         mItems = new ChooserProfileDescriptor[] {
                 createProfileDescriptor(personalAdapter),
                 createProfileDescriptor(workAdapter)
         };
-        mIsSendAction = isSendAction;
         mMaxTargetsPerRow = maxTargetsPerRow;
     }
 
@@ -91,6 +83,10 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
         profileDescriptor.recyclerView.setAccessibilityDelegateCompat(
                 new ChooserRecyclerViewAccessibilityDelegate(profileDescriptor.recyclerView));
         return profileDescriptor;
+    }
+
+    public void setMaxTargetsPerRow(int maxTargetsPerRow) {
+        mMaxTargetsPerRow = maxTargetsPerRow;
     }
 
     RecyclerView getListViewForIndex(int index) {
@@ -116,11 +112,12 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     @Override
     @Nullable
     ChooserListAdapter getListAdapterForUserHandle(UserHandle userHandle) {
-        if (getActiveListAdapter().getUserHandle().equals(userHandle)) {
-            return getActiveListAdapter();
-        } else if (getInactiveListAdapter() != null
-                && getInactiveListAdapter().getUserHandle().equals(userHandle)) {
-            return getInactiveListAdapter();
+        if (getPersonalListAdapter().getUserHandle().equals(userHandle)
+                || userHandle.equals(getCloneUserHandle())) {
+            return getPersonalListAdapter();
+        } else if (getWorkListAdapter() != null
+                && getWorkListAdapter().getUserHandle().equals(userHandle)) {
+            return getWorkListAdapter();
         }
         return null;
     }
@@ -159,13 +156,16 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     }
 
     @Override
-    public ResolverListAdapter getPersonalListAdapter() {
+    public ChooserListAdapter getPersonalListAdapter() {
         return getAdapterForIndex(PROFILE_PERSONAL).getListAdapter();
     }
 
     @Override
     @Nullable
-    public ResolverListAdapter getWorkListAdapter() {
+    public ChooserListAdapter getWorkListAdapter() {
+        if (getCount() == 1) {
+            return null;
+        }
         return getAdapterForIndex(PROFILE_WORK).getListAdapter();
     }
 
@@ -187,112 +187,6 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
         }
         return getListViewForIndex(1 - getCurrentPage());
     }
-
-    @Override
-    String getMetricsCategory() {
-        return ResolverActivity.METRICS_CATEGORY_CHOOSER;
-    }
-
-    @Override
-    protected void showWorkProfileOffEmptyState(ResolverListAdapter activeListAdapter,
-            View.OnClickListener listener) {
-        showEmptyState(activeListAdapter,
-                getWorkAppPausedTitle(),
-                /* subtitle = */ null,
-                listener);
-    }
-
-    @Override
-    protected void showNoPersonalToWorkIntentsEmptyState(ResolverListAdapter activeListAdapter) {
-        if (mIsSendAction) {
-            showEmptyState(activeListAdapter,
-                    getCrossProfileBlockedTitle(),
-                    getCantShareWithWorkMessage());
-        } else {
-            showEmptyState(activeListAdapter,
-                    getCrossProfileBlockedTitle(),
-                    getCantAccessWorkMessage());
-        }
-    }
-
-    @Override
-    protected void showNoWorkToPersonalIntentsEmptyState(ResolverListAdapter activeListAdapter) {
-        if (mIsSendAction) {
-            showEmptyState(activeListAdapter,
-                    getCrossProfileBlockedTitle(),
-                    getCantShareWithPersonalMessage());
-        } else {
-            showEmptyState(activeListAdapter,
-                    getCrossProfileBlockedTitle(),
-                    getCantAccessPersonalMessage());
-        }
-    }
-
-    @Override
-    protected void showNoPersonalAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
-        showEmptyState(listAdapter, getNoPersonalAppsAvailableMessage(), /* subtitle= */ null);
-
-    }
-
-    @Override
-    protected void showNoWorkAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
-        showEmptyState(listAdapter, getNoWorkAppsAvailableMessage(), /* subtitle = */ null);
-    }
-
-    private String getWorkAppPausedTitle() {
-        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
-                RESOLVER_WORK_PAUSED_TITLE,
-                () -> getContext().getString(R.string.resolver_turn_on_work_apps));
-    }
-
-    private String getCrossProfileBlockedTitle() {
-        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
-                RESOLVER_CROSS_PROFILE_BLOCKED_TITLE,
-                () -> getContext().getString(R.string.resolver_cross_profile_blocked));
-    }
-
-    private String getCantShareWithWorkMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
-                RESOLVER_CANT_SHARE_WITH_WORK,
-                () -> getContext().getString(
-                        R.string.resolver_cant_share_with_work_apps_explanation));
-    }
-
-    private String getCantShareWithPersonalMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
-                RESOLVER_CANT_SHARE_WITH_PERSONAL,
-                () -> getContext().getString(
-                        R.string.resolver_cant_share_with_personal_apps_explanation));
-    }
-
-    private String getCantAccessWorkMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
-                RESOLVER_CANT_ACCESS_WORK,
-                () -> getContext().getString(
-                        R.string.resolver_cant_access_work_apps_explanation));
-    }
-
-    private String getCantAccessPersonalMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
-                RESOLVER_CANT_ACCESS_PERSONAL,
-                () -> getContext().getString(
-                        R.string.resolver_cant_access_personal_apps_explanation));
-    }
-
-    private String getNoWorkAppsAvailableMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
-                RESOLVER_NO_WORK_APPS,
-                () -> getContext().getString(
-                        R.string.resolver_no_work_apps_available));
-    }
-
-    private String getNoPersonalAppsAvailableMessage() {
-        return getContext().getSystemService(DevicePolicyManager.class).getResources().getString(
-                RESOLVER_NO_PERSONAL_APPS,
-                () -> getContext().getString(
-                        R.string.resolver_no_personal_apps_available));
-    }
-
 
     void setEmptyStateBottomOffset(int bottomOffset) {
         mBottomOffset = bottomOffset;

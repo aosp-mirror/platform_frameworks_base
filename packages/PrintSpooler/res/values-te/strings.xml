@@ -103,7 +103,7 @@
     <item msgid="3199660090246166812">"ల్యాండ్‌స్కేప్"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ఫైల్‌లోకి వ్రాయలేకపోయింది"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"క్షమించండి, అది పని చేయలేదు. మళ్లీ ప్రయత్నించండి."</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"క్షమించండి, అది పని చేయలేదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"మళ్లీ ప్రయత్నించు"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ఈ ప్రింటర్ ప్రస్తుతం అందుబాటులో లేదు."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"ప్రివ్యూను ప్రదర్శించడం సాధ్యపడలేదు"</string>

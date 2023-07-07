@@ -147,7 +147,7 @@ public final class RcsContactPresenceTuple implements Parcelable {
             "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.chatbot";
 
     /**
-     * The service ID used to indicate that the Standalone Messaging is available.
+     * The service ID used to indicate that the Chatbot using Standalone Messaging is available.
      * <p>
      * See the GSMA RCC.07 specification for more information.
      */
@@ -160,6 +160,14 @@ public final class RcsContactPresenceTuple implements Parcelable {
      * See the GSMA RCC.07 specification for more information.
      */
     public static final String SERVICE_ID_CHATBOT_ROLE = "org.gsma.rcs.isbot";
+
+    /**
+     * The service ID used to indicate that the Standalone Messaging is available.
+     * <p>
+     * See the GSMA RCC.07 RCS5_1_advanced_communications_specification_v4.0 specification
+     * for more information.
+     */
+    public static final String SERVICE_ID_SLM = "org.openmobilealliance:StandaloneMsg";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -177,7 +185,8 @@ public final class RcsContactPresenceTuple implements Parcelable {
             SERVICE_ID_SHARED_SKETCH,
             SERVICE_ID_CHATBOT,
             SERVICE_ID_CHATBOT_STANDALONE,
-            SERVICE_ID_CHATBOT_ROLE
+            SERVICE_ID_CHATBOT_ROLE,
+            SERVICE_ID_SLM
     })
     public @interface ServiceId {}
 

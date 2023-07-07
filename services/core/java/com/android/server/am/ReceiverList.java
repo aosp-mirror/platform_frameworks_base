@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.annotation.Nullable;
 import android.content.IIntentReceiver;
 import android.content.IntentFilter;
 import android.os.Binder;
@@ -23,8 +24,6 @@ import android.os.IBinder;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
-
-import com.android.server.IntentResolver;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
         implements IBinder.DeathRecipient {
     final ActivityManagerService owner;
     public final IIntentReceiver receiver;
-    public final ProcessRecord app;
+    public final @Nullable ProcessRecord app;
     public final int pid;
     public final int uid;
     public final int userId;
@@ -46,7 +45,7 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
 
     String stringName;
 
-    ReceiverList(ActivityManagerService _owner, ProcessRecord _app,
+    ReceiverList(ActivityManagerService _owner, @Nullable ProcessRecord _app,
             int _pid, int _uid, int _userId, IIntentReceiver _receiver) {
         owner = _owner;
         receiver = _receiver;
@@ -73,7 +72,7 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
         final int N = size();
         for (int i = 0; i < N; i++) {
             final BroadcastFilter f = get(i);
-            if (IntentResolver.filterEquals(f, filter)) {
+            if (IntentFilter.filterEquals(f, filter)) {
                 return true;
             }
         }
@@ -82,7 +81,10 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        app.dumpDebug(proto, ReceiverListProto.APP);
+        if (app != null) {
+            app.dumpDebug(proto, ReceiverListProto.APP);
+            proto.write(ReceiverListProto.NUMBER_RECEIVERS, app.mReceivers.numberOfReceivers());
+        }
         proto.write(ReceiverListProto.PID, pid);
         proto.write(ReceiverListProto.UID, uid);
         proto.write(ReceiverListProto.USER, userId);
@@ -101,8 +103,12 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
 
     void dumpLocal(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("app="); pw.print(app != null ? app.toShortString() : null);
-            pw.print(" pid="); pw.print(pid); pw.print(" uid="); pw.print(uid);
-            pw.print(" user="); pw.println(userId);
+        pw.print(" pid="); pw.print(pid); pw.print(" uid="); pw.print(uid);
+        pw.print(" user="); pw.print(userId);
+        if (app != null) {
+            pw.print(" #receivers="); pw.print(app.mReceivers.numberOfReceivers());
+        }
+        pw.println();
         if (curBroadcast != null || linkedToDeath) {
             pw.print(prefix); pw.print("curBroadcast="); pw.print(curBroadcast);
                 pw.print(" linkedToDeath="); pw.println(linkedToDeath);

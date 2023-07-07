@@ -17,12 +17,15 @@
 package com.android.systemui;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.service.dreams.Sandman;
 
 /**
  * A simple activity that launches a dream.
  * <p>
+ *
+ * This activity has been deprecated and no longer used. The system uses its presence to determine
+ * whether a dock app should be started on dock through intent resolution.
+ *
  * Note: This Activity is special.  If this class is moved to another package or
  * renamed, be sure to update the component name in {@link Sandman}.
  * </p>
@@ -34,27 +37,6 @@ public class Somnambulator extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-
-        final Intent launchIntent = getIntent();
-        final String action = launchIntent.getAction();
-        if (Intent.ACTION_CREATE_SHORTCUT.equals(action)) {
-            Intent shortcutIntent = new Intent(this, Somnambulator.class);
-            shortcutIntent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                    | Intent.FLAG_ACTIVITY_NEW_TASK);
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
-                    Intent.ShortcutIconResource.fromContext(this, R.mipmap.ic_launcher_dreams));
-            resultIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-            resultIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.start_dreams));
-            setResult(RESULT_OK, resultIntent);
-        } else {
-            boolean docked = launchIntent.hasCategory(Intent.CATEGORY_DESK_DOCK);
-            if (docked) {
-                Sandman.startDreamWhenDockedIfAppropriate(this);
-            } else {
-                Sandman.startDreamByUserRequest(this);
-            }
-        }
         finish();
     }
 }

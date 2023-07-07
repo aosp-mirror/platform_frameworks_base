@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import android.view.IWindow;
 import android.util.proto.ProtoOutputStream;
+import android.view.IWindow;
 
 /**
  * Common interface between focusable objects.
@@ -58,7 +58,6 @@ interface InputTarget {
     boolean canScreenshotIme();
 
     ActivityRecord getActivityRecord();
-    void unfreezeInsetsAfterStartInput();
 
     boolean isInputMethodClientFocus(int uid, int pid);
 

@@ -52,6 +52,7 @@ interface IStorageManager {
      * Shuts down the StorageManagerService and gracefully unmounts all external media.
      * Invokes call back once the shutdown is complete.
      */
+    @EnforcePermission("SHUTDOWN")
     void shutdown(IStorageShutdownObserver observer) = 19;
     /**
      * Mounts an Opaque Binary Blob (OBB). Only allows the calling process's UID
@@ -100,33 +101,54 @@ interface IStorageManager {
      * Kick off an immediate maintenance operation
      * @throws RemoteException
      */
+    @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void runMaintenance() = 42;
     DiskInfo[] getDisks() = 44;
     VolumeInfo[] getVolumes(int flags) = 45;
     VolumeRecord[] getVolumeRecords(int flags) = 46;
+    @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void mount(in String volId) = 47;
+    @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void unmount(in String volId) = 48;
+    @EnforcePermission("MOUNT_FORMAT_FILESYSTEMS")
     void format(in String volId) = 49;
+    @EnforcePermission("MOUNT_FORMAT_FILESYSTEMS")
     void partitionPublic(in String diskId) = 50;
+    @EnforcePermission("MOUNT_FORMAT_FILESYSTEMS")
     void partitionPrivate(in String diskId) = 51;
+    @EnforcePermission("MOUNT_FORMAT_FILESYSTEMS")
     void partitionMixed(in String diskId, int ratio) = 52;
+    @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void setVolumeNickname(in String fsUuid, in String nickname) = 53;
+    @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void setVolumeUserFlags(in String fsUuid, int flags, int mask) = 54;
+    @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void forgetVolume(in String fsUuid) = 55;
+    @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void forgetAllVolumes() = 56;
     String getPrimaryStorageUuid() = 57;
+    @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void setPrimaryStorageUuid(in String volumeUuid, IPackageMoveObserver callback) = 58;
+    @EnforcePermission("MOUNT_FORMAT_FILESYSTEMS")
     void benchmark(in String volId, IVoldTaskListener listener) = 59;
+    @EnforcePermission("MOUNT_UNMOUNT_FILESYSTEMS")
     void setDebugFlags(int flags, int mask) = 60;
+    @EnforcePermission("STORAGE_INTERNAL")
     void createUserKey(int userId, int serialNumber, boolean ephemeral) = 61;
+    @EnforcePermission("STORAGE_INTERNAL")
     void destroyUserKey(int userId) = 62;
+    @EnforcePermission("STORAGE_INTERNAL")
     void unlockUserKey(int userId, int serialNumber, in byte[] secret) = 63;
+    @EnforcePermission("STORAGE_INTERNAL")
     void lockUserKey(int userId) = 64;
     boolean isUserKeyUnlocked(int userId) = 65;
+    @EnforcePermission("STORAGE_INTERNAL")
     void prepareUserStorage(in String volumeUuid, int userId, int serialNumber, int flags) = 66;
+    @EnforcePermission("STORAGE_INTERNAL")
     void destroyUserStorage(in String volumeUuid, int userId, int flags) = 67;
-    void addUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 70;
-    void fixateNewestUserKeyAuth(int userId) = 71;
+    @EnforcePermission("STORAGE_INTERNAL")
+    void setUserKeyProtection(int userId, in byte[] secret) = 70;
+    @EnforcePermission("MOUNT_FORMAT_FILESYSTEMS")
     void fstrim(int flags, IVoldTaskListener listener) = 72;
     AppFuseMount mountProxyFileDescriptorBridge() = 73;
     ParcelFileDescriptor openProxyFileDescriptor(int mountPointId, int fileId, int mode) = 74;
@@ -139,14 +161,15 @@ interface IStorageManager {
     void commitChanges() = 83;
     boolean supportsCheckpoint() = 84;
     void startCheckpoint(int numTries) = 85;
+    @EnforcePermission("MOUNT_FORMAT_FILESYSTEMS")
     boolean needsCheckpoint() = 86;
     void abortChanges(in String message, boolean retry) = 87;
-    void clearUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 88;
     void fixupAppDir(in String path) = 89;
     void disableAppDataIsolation(in String pkgName, int pid, int userId) = 90;
     PendingIntent getManageSpaceActivityIntent(in String packageName, int requestCode) = 91;
     void notifyAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 92;
     void notifyAppIoResumed(in String volumeUuid, int uid, int tid, int reason) = 93;
+    @EnforcePermission("WRITE_MEDIA_STORAGE")
     int getExternalStorageMountMode(int uid, in String packageName) = 94;
     boolean isAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 95;
     void setCloudMediaProvider(in String authority) = 96;

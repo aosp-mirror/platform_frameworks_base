@@ -24,8 +24,10 @@
 #include <hwui/Paint.h>
 #include <utils/Log.h>
 
+#include "SkBitmap.h"
 #include "SkCanvas.h"
 #include "SkLatticeIter.h"
+#include "SkRect.h"
 #include "SkRegion.h"
 #include "GraphicsJNI.h"
 #include "NinePatchPeeker.h"

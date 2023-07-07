@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
@@ -88,7 +89,8 @@ public final class BugreportManager {
                     BUGREPORT_ERROR_RUNTIME,
                     BUGREPORT_ERROR_USER_DENIED_CONSENT,
                     BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT,
-                    BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS
+                    BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS,
+                    BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE
                 })
         public @interface BugreportErrorCode {}
 
@@ -115,6 +117,10 @@ public final class BugreportManager {
         public static final int BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS =
                 IDumpstateListener.BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS;
 
+        /** There is no bugreport to retrieve for the caller. */
+        public static final int BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE =
+                IDumpstateListener.BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE;
+
         /**
          * Called when there is a progress update.
          *
@@ -137,14 +143,54 @@ public final class BugreportManager {
          */
         public void onError(@BugreportErrorCode int errorCode) {}
 
-        /** Called when taking bugreport finishes successfully. */
+        /** Called when taking bugreport finishes successfully.
+         *
+         * <p>This callback will be invoked if the
+         * {@link BugreportParams#BUGREPORT_FLAG_DEFER_CONSENT} flag is not set.
+         */
         public void onFinished() {}
+
+        /** Called when taking bugreport finishes successfully.
+         *
+         * <p>This callback will only be invoked if the
+         * {@link BugreportParams#BUGREPORT_FLAG_DEFER_CONSENT} flag is set. Otherwise, the
+         * {@link #onFinished()} callback will be invoked.
+         *
+         * @param bugreportFile the absolute path of the generated bugreport file.
+         * @hide
+
+         */
+        @SystemApi
+        public void onFinished(@NonNull String bugreportFile) {}
 
         /**
          * Called when it is ready for calling app to show UI, showing any extra UI before this
          * callback can interfere with bugreport generation.
          */
         public void onEarlyReportFinished() {}
+    }
+
+    /**
+     * Speculatively pre-dumps UI data for a bugreport request that might come later.
+     *
+     * <p>Triggers the dump of certain critical UI data, e.g. traces stored in short
+     * ring buffers that might get lost by the time the actual bugreport is requested.
+     *
+     * <p>{@link #startBugreport} will then pick the pre-dumped data if both of the following
+     * conditions are met:
+     * - {@link android.os.BugreportParams#BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA} is specified.
+     * - {@link #preDumpUiData} and {@link #startBugreport} were called by the same UID.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    @WorkerThread
+    public void preDumpUiData() {
+        try {
+            mBinder.preDumpUiData(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -155,7 +201,9 @@ public final class BugreportManager {
      * updates.
      *
      * <p>The bugreport artifacts will be copied over to the given file descriptors only if the user
-     * consents to sharing with the calling app.
+     * consents to sharing with the calling app. If
+     * {@link BugreportParams#BUGREPORT_FLAG_DEFER_CONSENT} is set, user consent will be deferred
+     * and no files will be copied to the given file descriptors.
      *
      * <p>{@link BugreportManager} takes ownership of {@code bugreportFd} and {@code screenshotFd}.
      *
@@ -182,7 +230,9 @@ public final class BugreportManager {
             Preconditions.checkNotNull(executor);
             Preconditions.checkNotNull(callback);
 
-            boolean isScreenshotRequested = screenshotFd != null;
+            boolean deferConsent =
+                    (params.getFlags() & BugreportParams.BUGREPORT_FLAG_DEFER_CONSENT) != 0;
+            boolean isScreenshotRequested = screenshotFd != null || deferConsent;
             if (screenshotFd == null) {
                 // Binder needs a valid File Descriptor to be passed
                 screenshotFd =
@@ -190,7 +240,7 @@ public final class BugreportManager {
                                 new File("/dev/null"), ParcelFileDescriptor.MODE_READ_ONLY);
             }
             DumpstateListener dsListener =
-                    new DumpstateListener(executor, callback, isScreenshotRequested);
+                    new DumpstateListener(executor, callback, isScreenshotRequested, deferConsent);
             // Note: mBinder can get callingUid from the binder transaction.
             mBinder.startBugreport(
                     -1 /* callingUid */,
@@ -198,6 +248,7 @@ public final class BugreportManager {
                     bugreportFd.getFileDescriptor(),
                     screenshotFd.getFileDescriptor(),
                     params.getMode(),
+                    params.getFlags(),
                     dsListener,
                     isScreenshotRequested);
         } catch (RemoteException e) {
@@ -210,6 +261,58 @@ public final class BugreportManager {
             if (screenshotFd != null) {
                 IoUtils.closeQuietly(screenshotFd);
             }
+        }
+    }
+
+    /**
+     * Retrieves a previously generated bugreport.
+     *
+     * <p>The previously generated bugreport must have been generated by calling {@link
+     * #startBugreport(ParcelFileDescriptor, ParcelFileDescriptor, BugreportParams,
+     * Executor, BugreportCallback)} with the {@link BugreportParams#BUGREPORT_FLAG_DEFER_CONSENT}
+     * flag set. The bugreport file returned by the {@link BugreportCallback#onFinished(String)}
+     * callback for a previously generated bugreport must be passed to this method. A caller may
+     * only retrieve bugreports that they have previously requested.
+     *
+     * <p>The bugreport artifacts will be copied over to the given file descriptor only if the user
+     * consents to sharing with the calling app.
+     *
+     * <p>{@link BugreportManager} takes ownership of {@code bugreportFd}.
+     *
+     * <p>The caller may only request to retrieve a given bugreport once. Subsequent calls will fail
+     * with error code {@link BugreportCallback#BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE}.
+     *
+     * @param bugreportFile the identifier for a bugreport that was previously generated for this
+     *      caller using {@code startBugreport}.
+     * @param bugreportFd file to copy over the previous bugreport. This should be opened in
+     *      write-only, append mode.
+     * @param executor the executor to execute callback methods.
+     * @param callback callback for progress and status updates.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.DUMP)
+    @WorkerThread
+    public void retrieveBugreport(
+            @NonNull String bugreportFile,
+            @NonNull ParcelFileDescriptor bugreportFd,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BugreportCallback callback
+    ) {
+        try {
+            Preconditions.checkNotNull(bugreportFile);
+            Preconditions.checkNotNull(bugreportFd);
+            Preconditions.checkNotNull(executor);
+            Preconditions.checkNotNull(callback);
+            DumpstateListener dsListener = new DumpstateListener(executor, callback, false, false);
+            mBinder.retrieveBugreport(Binder.getCallingUid(), mContext.getOpPackageName(),
+                    bugreportFd.getFileDescriptor(),
+                    bugreportFile,
+                    dsListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } finally {
+            IoUtils.closeQuietly(bugreportFd);
         }
     }
 
@@ -292,7 +395,7 @@ public final class BugreportManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.DUMP)
+    @RequiresPermission(Manifest.permission.DUMP)
     public void requestBugreport(
             @NonNull BugreportParams params,
             @Nullable CharSequence shareTitle,
@@ -311,12 +414,15 @@ public final class BugreportManager {
         private final Executor mExecutor;
         private final BugreportCallback mCallback;
         private final boolean mIsScreenshotRequested;
+        private final boolean mIsConsentDeferred;
 
         DumpstateListener(
-                Executor executor, BugreportCallback callback, boolean isScreenshotRequested) {
+                Executor executor, BugreportCallback callback, boolean isScreenshotRequested,
+                boolean isConsentDeferred) {
             mExecutor = executor;
             mCallback = callback;
             mIsScreenshotRequested = isScreenshotRequested;
+            mIsConsentDeferred = isConsentDeferred;
         }
 
         @Override
@@ -340,10 +446,14 @@ public final class BugreportManager {
         }
 
         @Override
-        public void onFinished() throws RemoteException {
+        public void onFinished(String bugreportFile) throws RemoteException {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mExecutor.execute(() -> mCallback.onFinished());
+                if (mIsConsentDeferred) {
+                    mExecutor.execute(() -> mCallback.onFinished(bugreportFile));
+                } else {
+                    mExecutor.execute(() -> mCallback.onFinished());
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

@@ -88,6 +88,7 @@ public abstract class Conference extends Conferenceable {
     private String mTelecomCallId;
     private PhoneAccountHandle mPhoneAccount;
     private CallAudioState mCallAudioState;
+    private CallEndpoint mCallEndpoint;
     private int mState = Connection.STATE_NEW;
     private DisconnectCause mDisconnectCause;
     private int mConnectionCapabilities;
@@ -223,9 +224,23 @@ public abstract class Conference extends Conferenceable {
      * @return The audio state of the conference, describing how its audio is currently
      *         being routed by the system. This is {@code null} if this Conference
      *         does not directly know about its audio state.
+     * @deprecated Use {@link #getCurrentCallEndpoint()},
+     * {@link #onAvailableCallEndpointsChanged(List)} and
+     * {@link #onMuteStateChanged(boolean)} instead.
      */
+    @Deprecated
     public final CallAudioState getCallAudioState() {
         return mCallAudioState;
+    }
+
+    /**
+     * Obtains the current CallEndpoint.
+     *
+     * @return An object encapsulating the CallEndpoint.
+     */
+    @NonNull
+    public final CallEndpoint getCurrentCallEndpoint() {
+        return mCallEndpoint;
     }
 
     /**
@@ -314,8 +329,33 @@ public abstract class Conference extends Conferenceable {
      * value.
      *
      * @param state The new call audio state.
+     * @deprecated Use {@link #onCallEndpointChanged(CallEndpoint)},
+     * {@link #onAvailableCallEndpointsChanged(List)} and
+     * {@link #onMuteStateChanged(boolean)} instead.
      */
+    @Deprecated
     public void onCallAudioStateChanged(CallAudioState state) {}
+
+    /**
+     * Notifies the {@link Conference} that the audio endpoint has been changed.
+     *
+     * @param callEndpoint The new call endpoint.
+     */
+    public void onCallEndpointChanged(@NonNull CallEndpoint callEndpoint) {}
+
+    /**
+     * Notifies the {@link Conference} that the available call endpoints have been changed.
+     *
+     * @param availableEndpoints The available call endpoints.
+     */
+    public void onAvailableCallEndpointsChanged(@NonNull List<CallEndpoint> availableEndpoints) {}
+
+    /**
+     * Notifies the {@link Conference} that its audio mute state has been changed.
+     *
+     * @param isMuted The new mute state.
+     */
+    public void onMuteStateChanged(boolean isMuted) {}
 
     /**
      * Notifies the {@link Conference} that a {@link Connection} has been added to it.
@@ -728,6 +768,40 @@ public abstract class Conference extends Conferenceable {
         mCallAudioState = state;
         onAudioStateChanged(getAudioState());
         onCallAudioStateChanged(state);
+    }
+
+    /**
+     * Inform this Conference that the audio endpoint has been changed.
+     *
+     * @param endpoint The new call endpoint.
+     * @hide
+     */
+    final void setCallEndpoint(CallEndpoint endpoint) {
+        Log.d(this, "setCallEndpoint %s", endpoint);
+        mCallEndpoint = endpoint;
+        onCallEndpointChanged(endpoint);
+    }
+
+    /**
+     * Inform this Conference that the available call endpoints have been changed.
+     *
+     * @param availableEndpoints The available call endpoints.
+     * @hide
+     */
+    final void setAvailableCallEndpoints(List<CallEndpoint> availableEndpoints) {
+        Log.d(this, "setAvailableCallEndpoints");
+        onAvailableCallEndpointsChanged(availableEndpoints);
+    }
+
+    /**
+     * Inform this Conference that its audio mute state has been changed.
+     *
+     * @param isMuted The new mute state.
+     * @hide
+     */
+    final void setMuteState(boolean isMuted) {
+        Log.d(this, "setMuteState %s", isMuted);
+        onMuteStateChanged(isMuted);
     }
 
     private void setState(int newState) {

@@ -192,7 +192,7 @@ class AssetManagerSymbolSource : public ISymbolSource {
  public:
   AssetManagerSymbolSource() = default;
 
-  bool AddAssetPath(const android::StringPiece& path);
+  bool AddAssetPath(android::StringPiece path);
   std::map<size_t, std::string> GetAssignedPackageIds() const;
   bool IsPackageDynamic(uint32_t packageId, const std::string& package_name) const;
 

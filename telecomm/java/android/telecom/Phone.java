@@ -16,11 +16,14 @@
 
 package android.telecom;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.OutcomeReceiver;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
@@ -30,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 
 /**
  * A unified virtual device providing a means of voice (and other) communication on a device.
@@ -375,6 +379,21 @@ public final class Phone {
      */
     public void requestBluetoothAudio(String bluetoothAddress) {
         mInCallAdapter.requestBluetoothAudio(bluetoothAddress);
+    }
+
+    /**
+     * Request audio routing to a specific CallEndpoint. When this request is honored, there will
+     * be change to the {@link #getCurrentCallEndpoint()}.
+     *
+     * @param endpoint The call endpoint to use.
+     * @param executor The executor of where the callback will execute.
+     * @param callback The callback to notify the result of the endpoint change.
+     * @hide
+     */
+    public void requestCallEndpointChange(@NonNull CallEndpoint endpoint,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Void, CallEndpointException> callback) {
+        mInCallAdapter.requestCallEndpointChange(endpoint, executor, callback);
     }
 
     /**

@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
 
 import static org.mockito.Mockito.when;
 
@@ -29,8 +30,6 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -38,10 +37,12 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +54,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class QRCodeScannerTileTest extends SysuiTestCase {
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
@@ -62,7 +63,8 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
     @Mock
     private QSLogger mQSLogger;
-    private UiEventLogger mUiEventLogger = new UiEventLoggerFake();
+    @Mock
+    private QsEventLogger mUiEventLogger;
     @Mock
     private QRCodeScannerController mController;
 
@@ -77,6 +79,7 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
 
         mTile = new QRCodeScannerTile(
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),
@@ -87,6 +90,12 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
                 mController);
 
         mTile.initialize();
+        mTestableLooper.processAllMessages();
+    }
+
+    @After
+    public void tearDown() {
+        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 
@@ -108,17 +117,20 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
 
     @Test
     public void testQRCodeTileUnavailable() {
-        when(mController.isEnabledForQuickSettings()).thenReturn(false);
+        when(mController.isAbleToOpenCameraApp()).thenReturn(false);
         QSTile.State state = new QSTile.State();
         mTile.handleUpdateState(state, null);
         assertEquals(state.state, Tile.STATE_UNAVAILABLE);
+        assertEquals(state.secondaryLabel.toString(),
+                     mContext.getString(R.string.qr_code_scanner_updating_secondary_label));
     }
 
     @Test
     public void testQRCodeTileAvailable() {
-        when(mController.isEnabledForQuickSettings()).thenReturn(true);
+        when(mController.isAbleToOpenCameraApp()).thenReturn(true);
         QSTile.State state = new QSTile.State();
         mTile.handleUpdateState(state, null);
-        assertEquals(state.state, Tile.STATE_ACTIVE);
+        assertEquals(state.state, Tile.STATE_INACTIVE);
+        assertNull(state.secondaryLabel);
     }
 }

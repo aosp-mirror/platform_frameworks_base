@@ -161,9 +161,17 @@ public final class RadioAccessSpecifier implements Parcelable {
     }
 
     @Override
-    public int hashCode () {
+    public int hashCode() {
         return ((mRadioAccessNetwork * 31)
                 + (Arrays.hashCode(mBands) * 37)
                 + (Arrays.hashCode(mChannels)) * 39);
+    }
+
+    @Override
+    public String toString() {
+        return "RadioAccessSpecifier[mRadioAccessNetwork="
+                + AccessNetworkConstants.AccessNetworkType.toString(mRadioAccessNetwork)
+                + ", mBands=" + Arrays.toString(mBands)
+                + ", mChannels=" + Arrays.toString(mChannels) + "]";
     }
 }

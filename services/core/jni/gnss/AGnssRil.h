@@ -43,6 +43,8 @@ public:
     virtual jboolean updateNetworkState(jboolean connected, jint type, jboolean roaming,
                                         jboolean available, const jstring& apn, jlong networkHandle,
                                         jshort capabilities) = 0;
+    virtual jboolean injectNiSuplMessageData(const jbyteArray& msgData, jint length,
+                                             jint slotIndex) = 0;
 };
 
 class AGnssRil : public AGnssRilInterface {
@@ -55,6 +57,8 @@ public:
     jboolean updateNetworkState(jboolean connected, jint type, jboolean roaming, jboolean available,
                                 const jstring& apn, jlong networkHandle,
                                 jshort capabilities) override;
+    jboolean injectNiSuplMessageData(const jbyteArray& msgData, jint length,
+                                     jint slotIndex) override;
 
 private:
     const sp<android::hardware::gnss::IAGnssRil> mIAGnssRil;
@@ -70,6 +74,7 @@ public:
     jboolean updateNetworkState(jboolean connected, jint type, jboolean roaming, jboolean available,
                                 const jstring& apn, jlong networkHandle,
                                 jshort capabilities) override;
+    jboolean injectNiSuplMessageData(const jbyteArray&, jint, jint) override;
 
 private:
     const sp<android::hardware::gnss::V1_0::IAGnssRil> mAGnssRil_V1_0;

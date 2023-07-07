@@ -21,6 +21,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
     android:background="?androidprv:attr/colorSurface"
     android:theme="@style/Theme.SystemUI">
 
@@ -46,6 +48,7 @@
             android:layout_toEndOf="@+id/snooze_option_default"
             android:layout_centerVertical="true"
             android:paddingTop="1dp"
+            android:importantForAccessibility="yes"
             android:tint="#9E9E9E" />
 
         <TextView

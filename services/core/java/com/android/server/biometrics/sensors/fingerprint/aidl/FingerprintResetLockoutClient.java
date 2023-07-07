@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.RemoteException;
@@ -27,6 +28,7 @@ import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
@@ -48,17 +50,20 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
     private final HardwareAuthToken mHardwareAuthToken;
     private final LockoutCache mLockoutCache;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
+    private final int mBiometricStrength;
 
     FingerprintResetLockoutClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, int userId, String owner, int sensorId,
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             @NonNull byte[] hardwareAuthToken, @NonNull LockoutCache lockoutTracker,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @Authenticators.Types int biometricStrength) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, biometricLogger, biometricContext);
         mHardwareAuthToken = HardwareAuthTokenUtils.toHardwareAuthToken(hardwareAuthToken);
         mLockoutCache = lockoutTracker;
         mLockoutResetDispatcher = lockoutResetDispatcher;
+        mBiometricStrength = biometricStrength;
     }
 
     @Override
@@ -88,7 +93,8 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
 
     void onLockoutCleared() {
         resetLocalLockoutStateToNone(getSensorId(), getTargetUserId(), mLockoutCache,
-                mLockoutResetDispatcher);
+                mLockoutResetDispatcher, getBiometricContext().getAuthSessionCoordinator(),
+                mBiometricStrength, getRequestId());
         mCallback.onClientFinished(this, true /* success */);
     }
 
@@ -102,9 +108,12 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
      */
     static void resetLocalLockoutStateToNone(int sensorId, int userId,
             @NonNull LockoutCache lockoutTracker,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull AuthSessionCoordinator authSessionCoordinator,
+            @Authenticators.Types int biometricStrength, long requestId) {
         lockoutTracker.setLockoutModeForUser(userId, LockoutTracker.LOCKOUT_NONE);
         lockoutResetDispatcher.notifyLockoutResetCallbacks(sensorId);
+        authSessionCoordinator.resetLockoutFor(userId, biometricStrength, requestId);
     }
 
     @Override

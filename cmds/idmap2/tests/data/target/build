@@ -17,5 +17,7 @@ aapt2 link --manifest AndroidManifest.xml -A assets -o target.apk compiled.flata
 rm compiled.flata
 
 aapt2 compile res/values/values.xml -o .
-aapt2 link --manifest AndroidManifest.xml -A assets -o target-no-overlayable.apk values_values.arsc.flat
+aapt2 compile res/drawable/dr1.png -o .
+aapt2 link --manifest AndroidManifest.xml -A assets -o target-no-overlayable.apk values_values.arsc.flat drawable_dr1.png.flat
 rm values_values.arsc.flat
+rm drawable_dr1.png.flat

@@ -39,7 +39,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.verify.domain.DomainVerificationCollector;
 import com.android.server.pm.verify.domain.DomainVerificationDebug;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;

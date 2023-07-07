@@ -20,8 +20,8 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACH
 import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 /**
  * Updates a package to ensure that if it targets < P that the org.apache.http.legacy library is
@@ -37,7 +37,8 @@ public class OrgApacheHttpLegacyUpdater extends PackageSharedLibraryUpdater {
     }
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage, boolean isUpdatedSystemApp) {
+    public void updatePackage(ParsedPackage parsedPackage, boolean isSystemApp,
+            boolean isUpdatedSystemApp) {
         // Packages targeted at <= O_MR1 expect the classes in the org.apache.http.legacy library
         // to be accessible so this maintains backward compatibility by adding the
         // org.apache.http.legacy library to those packages.

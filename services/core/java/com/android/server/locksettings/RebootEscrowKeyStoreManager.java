@@ -64,9 +64,9 @@ public class RebootEscrowKeyStoreManager {
     private SecretKey getKeyStoreEncryptionKeyLocked() {
         try {
             KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE_PROVIDER);
-            KeyStore.LoadStoreParameter loadStoreParameter = null;
             // Load from the specific namespace if keystore2 is enabled.
-            loadStoreParameter = new AndroidKeyStoreLoadStoreParameter(KEY_STORE_NAMESPACE);
+            KeyStore.LoadStoreParameter loadStoreParameter =
+                new AndroidKeyStoreLoadStoreParameter(KEY_STORE_NAMESPACE);
             keyStore.load(loadStoreParameter);
             return (SecretKey) keyStore.getKey(REBOOT_ESCROW_KEY_STORE_ENCRYPTION_KEY_NAME,
                     null);
@@ -86,9 +86,9 @@ public class RebootEscrowKeyStoreManager {
         synchronized (mKeyStoreLock) {
             try {
                 KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE_PROVIDER);
-                KeyStore.LoadStoreParameter loadStoreParameter = null;
                 // Load from the specific namespace if keystore2 is enabled.
-                loadStoreParameter = new AndroidKeyStoreLoadStoreParameter(KEY_STORE_NAMESPACE);
+                KeyStore.LoadStoreParameter loadStoreParameter =
+                    new AndroidKeyStoreLoadStoreParameter(KEY_STORE_NAMESPACE);
                 keyStore.load(loadStoreParameter);
                 keyStore.deleteEntry(REBOOT_ESCROW_KEY_STORE_ENCRYPTION_KEY_NAME);
             } catch (IOException | GeneralSecurityException e) {

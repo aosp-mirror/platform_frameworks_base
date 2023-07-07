@@ -27,6 +27,11 @@
         <option name="test-file-name" value="CorePerfTests.apk" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="input keyevent KEYCODE_WAKEUP" />
+        <option name="run-command" value="wm dismiss-keyguard" />
+    </target_preparer>
+
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
         <option name="pull-pattern-keys" value="perfetto_file_path" />
     </metrics_collector>

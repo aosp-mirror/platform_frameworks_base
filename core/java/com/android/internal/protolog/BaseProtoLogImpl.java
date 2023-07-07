@@ -32,6 +32,7 @@ import static com.android.internal.protolog.ProtoLogMessage.STR_PARAMS;
 import android.annotation.Nullable;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -44,7 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.IllegalFormatConversionException;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -72,11 +72,13 @@ public class BaseProtoLogImpl {
     private static final String TAG = "ProtoLog";
     private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
     static final String PROTOLOG_VERSION = "1.0.0";
+    private static final int DEFAULT_PER_CHUNK_SIZE = 0;
 
     private final File mLogFile;
     private final String mViewerConfigFilename;
     private final TraceBuffer mBuffer;
     protected final ProtoLogViewerConfigReader mViewerConfig;
+    private final int mPerChunkSize;
 
     private boolean mProtoLogEnabled;
     private boolean mProtoLogEnabledLockFree;
@@ -108,10 +110,14 @@ public class BaseProtoLogImpl {
             messageString = mViewerConfig.getViewerString(messageHash);
         }
         if (messageString != null) {
-            try {
-                message = String.format(messageString, args);
-            } catch (IllegalFormatConversionException ex) {
-                Slog.w(TAG, "Invalid ProtoLog format string.", ex);
+            if (args != null) {
+                try {
+                    message = TextUtils.formatSimple(messageString, args);
+                } catch (Exception ex) {
+                    Slog.w(TAG, "Invalid ProtoLog format string.", ex);
+                }
+            } else {
+                message = messageString;
             }
         }
         if (message == null) {
@@ -156,7 +162,7 @@ public class BaseProtoLogImpl {
             return;
         }
         try {
-            ProtoOutputStream os = new ProtoOutputStream();
+            ProtoOutputStream os = new ProtoOutputStream(mPerChunkSize);
             long token = os.start(LOG);
             os.write(MESSAGE_HASH, messageHash);
             os.write(ELAPSED_REALTIME_NANOS, SystemClock.elapsedRealtimeNanos());
@@ -215,10 +221,16 @@ public class BaseProtoLogImpl {
 
     public BaseProtoLogImpl(File file, String viewerConfigFilename, int bufferCapacity,
             ProtoLogViewerConfigReader viewerConfig) {
+        this(file, viewerConfigFilename, bufferCapacity, viewerConfig, DEFAULT_PER_CHUNK_SIZE);
+    }
+
+    public BaseProtoLogImpl(File file, String viewerConfigFilename, int bufferCapacity,
+            ProtoLogViewerConfigReader viewerConfig, int perChunkSize) {
         mLogFile = file;
         mBuffer = new TraceBuffer(bufferCapacity);
         mViewerConfigFilename = viewerConfigFilename;
         mViewerConfig = viewerConfig;
+        mPerChunkSize = perChunkSize;
     }
 
     /**
@@ -255,6 +267,7 @@ public class BaseProtoLogImpl {
             if (writeToFile) {
                 writeProtoLogToFileLocked();
                 logAndPrintln(pw, "Log written to " + mLogFile + ".");
+                mBuffer.resetBuffer();
             }
             if (mProtoLogEnabled) {
                 logAndPrintln(pw, "ERROR: logging was re-enabled while waiting for flush.");
@@ -363,7 +376,7 @@ public class BaseProtoLogImpl {
         try {
             long offset =
                     (System.currentTimeMillis() - (SystemClock.elapsedRealtimeNanos() / 1000000));
-            ProtoOutputStream proto = new ProtoOutputStream();
+            ProtoOutputStream proto = new ProtoOutputStream(mPerChunkSize);
             proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
             proto.write(VERSION, PROTOLOG_VERSION);
             proto.write(REAL_TIME_TO_ELAPSED_TIME_OFFSET_MILLIS, offset);

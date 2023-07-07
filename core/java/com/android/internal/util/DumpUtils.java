@@ -25,6 +25,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -312,5 +313,85 @@ public final class DumpUtils {
                     || cn.flattenToString().toLowerCase().contains(filterString.toLowerCase());
         };
     }
-}
 
+    /**
+     * Lambda used to dump a key (and its index) while iterating though a collection.
+     */
+    public interface KeyDumper {
+
+        /** Dumps the index and key.*/
+        void dump(int index, int key);
+    }
+
+    /**
+     * Lambda used to dump a value while iterating though a collection.
+     *
+     * @param <T> type of the value.
+     */
+    public interface ValueDumper<T> {
+
+        /** Dumps the value.*/
+        void dump(T value);
+    }
+
+    /**
+     * Dumps a sparse array.
+     */
+    public static void dumpSparseArray(PrintWriter pw, String prefix, SparseArray<?> array,
+            String name) {
+        dumpSparseArray(pw, prefix, array, name, /* keyDumper= */ null, /* valueDumper= */ null);
+    }
+
+    /**
+     * Dumps the values of a sparse array.
+     */
+    public static <T> void dumpSparseArrayValues(PrintWriter pw, String prefix,
+            SparseArray<T> array, String name) {
+        dumpSparseArray(pw, prefix, array, name, (i, k) -> {
+            pw.printf("%s%s", prefix, prefix);
+        }, /* valueDumper= */ null);
+    }
+
+    /**
+     * Dumps a sparse array, customizing each line.
+     */
+    public static <T> void dumpSparseArray(PrintWriter pw, String prefix, SparseArray<T> array,
+            String name, @Nullable KeyDumper keyDumper, @Nullable ValueDumper<T> valueDumper) {
+        int size = array.size();
+        if (size == 0) {
+            pw.print(prefix);
+            pw.print("No ");
+            pw.print(name);
+            pw.println("s");
+            return;
+        }
+        pw.print(prefix);
+        pw.print(size);
+        pw.print(' ');
+        pw.print(name);
+        pw.println("(s):");
+
+        String prefix2 = prefix + prefix;
+        for (int i = 0; i < size; i++) {
+            int key = array.keyAt(i);
+            T value = array.valueAt(i);
+            if (keyDumper != null) {
+                keyDumper.dump(i, key);
+            } else {
+                pw.print(prefix2);
+                pw.print(i);
+                pw.print(": ");
+                pw.print(key);
+                pw.print("->");
+            }
+            if (value == null) {
+                pw.print("(null)");
+            } else if (valueDumper != null) {
+                valueDumper.dump(value);
+            } else {
+                pw.print(value);
+            }
+            pw.println();
+        }
+    }
+}

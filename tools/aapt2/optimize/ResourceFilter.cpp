@@ -28,7 +28,7 @@ bool ResourceFilter::Consume(IAaptContext* context, ResourceTable* table) {
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto it = type->entries.begin(); it != type->entries.end(); ) {
-        ResourceName resource = ResourceName({}, type->type, (*it)->name);
+        ResourceName resource = ResourceName({}, type->named_type, (*it)->name);
         if (exclude_list_.find(resource) != exclude_list_.end()) {
           it = type->entries.erase(it);
         } else {

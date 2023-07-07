@@ -20,13 +20,18 @@ import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.power.PowerNotificationWarnings;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.power.data.repository.PowerRepositoryModule;
 
 import dagger.Binds;
 import dagger.Module;
 
 
 /** Dagger Module for code in the power package. */
-@Module
+@Module(
+        includes = {
+                PowerRepositoryModule.class,
+        }
+)
 public interface PowerModule {
     /** */
     @Binds

@@ -329,7 +329,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
             if (!skipCallbacks && !mBatchedInputEventPending && mInputConsumer.hasPendingBatch()) {
                 // There is a pending batch.  Come back later.
                 if (!receiverObj.get()) {
-                    receiverObj.reset(jniGetReferent(env, mReceiverWeakGlobal));
+                    receiverObj.reset(GetReferent(env, mReceiverWeakGlobal));
                     if (!receiverObj.get()) {
                         ALOGW("channel '%s' ~ Receiver object was finalized "
                               "without being disposed.",
@@ -358,7 +358,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 
         if (!skipCallbacks) {
             if (!receiverObj.get()) {
-                receiverObj.reset(jniGetReferent(env, mReceiverWeakGlobal));
+                receiverObj.reset(GetReferent(env, mReceiverWeakGlobal));
                 if (!receiverObj.get()) {
                     ALOGW("channel '%s' ~ Receiver object was finalized "
                             "without being disposed.", getInputChannelName().c_str());
@@ -368,73 +368,77 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 
             jobject inputEventObj;
             switch (inputEvent->getType()) {
-            case AINPUT_EVENT_TYPE_KEY:
-                if (kDebugDispatchCycle) {
-                    ALOGD("channel '%s' ~ Received key event.", getInputChannelName().c_str());
-                }
-                inputEventObj = android_view_KeyEvent_fromNative(env,
-                        static_cast<KeyEvent*>(inputEvent));
-                break;
+                case InputEventType::KEY:
+                    if (kDebugDispatchCycle) {
+                        ALOGD("channel '%s' ~ Received key event.", getInputChannelName().c_str());
+                    }
+                    inputEventObj =
+                            android_view_KeyEvent_fromNative(env,
+                                                             static_cast<KeyEvent&>(*inputEvent));
+                    break;
 
-            case AINPUT_EVENT_TYPE_MOTION: {
-                if (kDebugDispatchCycle) {
-                    ALOGD("channel '%s' ~ Received motion event.", getInputChannelName().c_str());
+                case InputEventType::MOTION: {
+                    if (kDebugDispatchCycle) {
+                        ALOGD("channel '%s' ~ Received motion event.",
+                              getInputChannelName().c_str());
+                    }
+                    const MotionEvent& motionEvent = static_cast<const MotionEvent&>(*inputEvent);
+                    if ((motionEvent.getAction() & AMOTION_EVENT_ACTION_MOVE) && outConsumedBatch) {
+                        *outConsumedBatch = true;
+                    }
+                    inputEventObj = android_view_MotionEvent_obtainAsCopy(env, motionEvent);
+                    break;
                 }
-                MotionEvent* motionEvent = static_cast<MotionEvent*>(inputEvent);
-                if ((motionEvent->getAction() & AMOTION_EVENT_ACTION_MOVE) && outConsumedBatch) {
-                    *outConsumedBatch = true;
+                case InputEventType::FOCUS: {
+                    FocusEvent* focusEvent = static_cast<FocusEvent*>(inputEvent);
+                    if (kDebugDispatchCycle) {
+                        ALOGD("channel '%s' ~ Received focus event: hasFocus=%s.",
+                              getInputChannelName().c_str(), toString(focusEvent->getHasFocus()));
+                    }
+                    env->CallVoidMethod(receiverObj.get(),
+                                        gInputEventReceiverClassInfo.onFocusEvent,
+                                        jboolean(focusEvent->getHasFocus()));
+                    finishInputEvent(seq, true /* handled */);
+                    continue;
                 }
-                inputEventObj = android_view_MotionEvent_obtainAsCopy(env, motionEvent);
-                break;
-            }
-            case AINPUT_EVENT_TYPE_FOCUS: {
-                FocusEvent* focusEvent = static_cast<FocusEvent*>(inputEvent);
-                if (kDebugDispatchCycle) {
-                    ALOGD("channel '%s' ~ Received focus event: hasFocus=%s.",
-                          getInputChannelName().c_str(), toString(focusEvent->getHasFocus()));
+                case InputEventType::CAPTURE: {
+                    const CaptureEvent* captureEvent = static_cast<CaptureEvent*>(inputEvent);
+                    if (kDebugDispatchCycle) {
+                        ALOGD("channel '%s' ~ Received capture event: pointerCaptureEnabled=%s",
+                              getInputChannelName().c_str(),
+                              toString(captureEvent->getPointerCaptureEnabled()));
+                    }
+                    env->CallVoidMethod(receiverObj.get(),
+                                        gInputEventReceiverClassInfo.onPointerCaptureEvent,
+                                        jboolean(captureEvent->getPointerCaptureEnabled()));
+                    finishInputEvent(seq, true /* handled */);
+                    continue;
                 }
-                env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onFocusEvent,
-                                    jboolean(focusEvent->getHasFocus()));
-                finishInputEvent(seq, true /* handled */);
-                continue;
-            }
-            case AINPUT_EVENT_TYPE_CAPTURE: {
-                const CaptureEvent* captureEvent = static_cast<CaptureEvent*>(inputEvent);
-                if (kDebugDispatchCycle) {
-                    ALOGD("channel '%s' ~ Received capture event: pointerCaptureEnabled=%s",
-                          getInputChannelName().c_str(),
-                          toString(captureEvent->getPointerCaptureEnabled()));
+                case InputEventType::DRAG: {
+                    const DragEvent* dragEvent = static_cast<DragEvent*>(inputEvent);
+                    if (kDebugDispatchCycle) {
+                        ALOGD("channel '%s' ~ Received drag event: isExiting=%s",
+                              getInputChannelName().c_str(), toString(dragEvent->isExiting()));
+                    }
+                    env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onDragEvent,
+                                        jboolean(dragEvent->isExiting()), dragEvent->getX(),
+                                        dragEvent->getY());
+                    finishInputEvent(seq, true /* handled */);
+                    continue;
                 }
-                env->CallVoidMethod(receiverObj.get(),
-                                    gInputEventReceiverClassInfo.onPointerCaptureEvent,
-                                    jboolean(captureEvent->getPointerCaptureEnabled()));
-                finishInputEvent(seq, true /* handled */);
-                continue;
-            }
-            case AINPUT_EVENT_TYPE_DRAG: {
-                const DragEvent* dragEvent = static_cast<DragEvent*>(inputEvent);
-                if (kDebugDispatchCycle) {
-                    ALOGD("channel '%s' ~ Received drag event: isExiting=%s",
-                          getInputChannelName().c_str(), toString(dragEvent->isExiting()));
+                case InputEventType::TOUCH_MODE: {
+                    const TouchModeEvent* touchModeEvent = static_cast<TouchModeEvent*>(inputEvent);
+                    if (kDebugDispatchCycle) {
+                        ALOGD("channel '%s' ~ Received touch mode event: isInTouchMode=%s",
+                              getInputChannelName().c_str(),
+                              toString(touchModeEvent->isInTouchMode()));
+                    }
+                    env->CallVoidMethod(receiverObj.get(),
+                                        gInputEventReceiverClassInfo.onTouchModeChanged,
+                                        jboolean(touchModeEvent->isInTouchMode()));
+                    finishInputEvent(seq, true /* handled */);
+                    continue;
                 }
-                env->CallVoidMethod(receiverObj.get(), gInputEventReceiverClassInfo.onDragEvent,
-                                    jboolean(dragEvent->isExiting()), dragEvent->getX(),
-                                    dragEvent->getY());
-                finishInputEvent(seq, true /* handled */);
-                continue;
-            }
-            case AINPUT_EVENT_TYPE_TOUCH_MODE: {
-                const TouchModeEvent* touchModeEvent = static_cast<TouchModeEvent*>(inputEvent);
-                if (kDebugDispatchCycle) {
-                    ALOGD("channel '%s' ~ Received touch mode event: isInTouchMode=%s",
-                          getInputChannelName().c_str(), toString(touchModeEvent->isInTouchMode()));
-                }
-                env->CallVoidMethod(receiverObj.get(),
-                                    gInputEventReceiverClassInfo.onTouchModeChanged,
-                                    jboolean(touchModeEvent->isInTouchMode()));
-                finishInputEvent(seq, true /* handled */);
-                continue;
-            }
 
             default:
                 assert(false); // InputConsumer should prevent this from ever happening

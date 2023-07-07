@@ -17,6 +17,7 @@
 package android.window;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -40,7 +41,15 @@ public class ClientWindowFrames implements Parcelable {
      */
     public final @NonNull Rect parentFrame = new Rect();
 
+    /**
+     * The frame this window attaches to. If this is not null, this is the frame of the parent
+     * window.
+     */
+    public @Nullable Rect attachedFrame;
+
     public boolean isParentFrameClippedByDisplayCutout;
+
+    public float compatScale = 1f;
 
     public ClientWindowFrames() {
     }
@@ -49,7 +58,11 @@ public class ClientWindowFrames implements Parcelable {
         frame.set(other.frame);
         displayFrame.set(other.displayFrame);
         parentFrame.set(other.parentFrame);
+        if (other.attachedFrame != null) {
+            attachedFrame = new Rect(other.attachedFrame);
+        }
         isParentFrameClippedByDisplayCutout = other.isParentFrameClippedByDisplayCutout;
+        compatScale = other.compatScale;
     }
 
     private ClientWindowFrames(Parcel in) {
@@ -61,7 +74,9 @@ public class ClientWindowFrames implements Parcelable {
         frame.readFromParcel(in);
         displayFrame.readFromParcel(in);
         parentFrame.readFromParcel(in);
+        attachedFrame = in.readTypedObject(Rect.CREATOR);
         isParentFrameClippedByDisplayCutout = in.readBoolean();
+        compatScale = in.readFloat();
     }
 
     @Override
@@ -69,7 +84,9 @@ public class ClientWindowFrames implements Parcelable {
         frame.writeToParcel(dest, flags);
         displayFrame.writeToParcel(dest, flags);
         parentFrame.writeToParcel(dest, flags);
+        dest.writeTypedObject(attachedFrame, flags);
         dest.writeBoolean(isParentFrameClippedByDisplayCutout);
+        dest.writeFloat(compatScale);
     }
 
     @Override
@@ -78,7 +95,9 @@ public class ClientWindowFrames implements Parcelable {
         return "ClientWindowFrames{frame=" + frame.toShortString(sb)
                 + " display=" + displayFrame.toShortString(sb)
                 + " parentFrame=" + parentFrame.toShortString(sb)
-                + " parentClippedByDisplayCutout=" + isParentFrameClippedByDisplayCutout + "}";
+                + (attachedFrame != null ? " attachedFrame=" + attachedFrame.toShortString() : "")
+                + (isParentFrameClippedByDisplayCutout ? " parentClippedByDisplayCutout" : "")
+                + (compatScale != 1f ? " sizeCompatScale=" + compatScale : "") +  "}";
     }
 
     @Override

@@ -59,7 +59,6 @@ public final class SystemLightsManager extends LightsManager {
      */
     @VisibleForTesting
     public SystemLightsManager(@NonNull Context context, @NonNull ILightsManager service) {
-        super(context);
         mService = Preconditions.checkNotNull(service);
     }
 

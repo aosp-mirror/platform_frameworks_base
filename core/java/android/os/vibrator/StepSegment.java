@@ -21,6 +21,7 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
 
 import com.android.internal.util.Preconditions;
 
@@ -77,6 +78,19 @@ public final class StepSegment extends VibrationEffectSegment {
     @Override
     public long getDuration() {
         return mDuration;
+    }
+
+    /** @hide */
+    @Override
+    public boolean areVibrationFeaturesSupported(@NonNull Vibrator vibrator) {
+        boolean areFeaturesSupported = true;
+        if (frequencyRequiresFrequencyControl(mFrequencyHz)) {
+            areFeaturesSupported &= vibrator.hasFrequencyControl();
+        }
+        if (amplitudeRequiresAmplitudeControl(mAmplitude)) {
+            areFeaturesSupported &= vibrator.hasAmplitudeControl();
+        }
+        return areFeaturesSupported;
     }
 
     /** @hide */

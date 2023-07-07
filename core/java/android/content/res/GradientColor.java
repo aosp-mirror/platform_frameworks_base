@@ -22,13 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.Theme;
-
-import com.android.internal.R;
-import com.android.internal.util.GrowingArrayUtils;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.graphics.LinearGradient;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
@@ -38,9 +31,16 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
 
+import com.android.internal.R;
+import com.android.internal.util.GrowingArrayUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 
 /**
  * Lets you define a gradient color, which is used inside
@@ -466,7 +466,7 @@ public class GradientColor extends ComplexColor {
         }
         if (tempColors.length < 2) {
             Log.w(TAG, "<gradient> tag requires 2 color values specified!" + tempColors.length
-                    + " " + tempColors);
+                    + " " + Arrays.toString(tempColors));
         }
 
         if (mGradientType == GradientDrawable.LINEAR_GRADIENT) {

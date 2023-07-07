@@ -19,7 +19,7 @@ package com.android.systemui.util.animation
 import android.animation.ValueAnimator
 import android.graphics.PointF
 import android.util.MathUtils
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 
 /**
  * The fraction after which we start fading in when going from a gone widget to a visible one
@@ -234,6 +234,15 @@ open class TransitionLayoutController {
                     progress).toInt()
             height = MathUtils.lerp(startState.height.toFloat(), endState.height.toFloat(),
                     progress).toInt()
+            // If we're at the start, let's measure with the starting dimensions, otherwise always
+            // with the end state
+            if (progress == 0.0f) {
+                measureWidth = startState.measureWidth
+                measureHeight = startState.measureHeight
+            } else {
+                measureWidth = endState.measureWidth
+                measureHeight = endState.measureHeight
+            }
             translation.x = MathUtils.lerp(startState.translation.x, endState.translation.x,
                     progress)
             translation.y = MathUtils.lerp(startState.translation.y, endState.translation.y,

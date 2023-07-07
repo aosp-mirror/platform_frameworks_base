@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2022, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- These resources are around just to allow their values to be customized
+     for different hardware and product builds.  Do not translate.
+
+     NOTE: The naming convention is "config_camelCaseValue". Some legacy
+     entries do not follow the convention, but all new entries should. -->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Default for DeviceIdleController.Constants.FLEX_TIME_SHORT -->
+    <integer name="device_idle_flex_time_short_ms">60000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT -->
+    <integer name="device_idle_light_after_inactive_to_ms">240000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_TIMEOUT -->
+    <integer name="device_idle_light_idle_to_ms">300000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_TIMEOUT_MAX_FLEX -->
+    <integer name="device_idle_light_idle_to_init_flex_ms">60000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_TIMEOUT_MAX_FLEX -->
+    <integer name="device_idle_light_idle_to_max_flex_ms">900000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_FACTOR -->
+    <item name="device_idle_light_idle_factor" format="float" type="integer">2.0</item>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_MAX_IDLE_TIMEOUT -->
+    <integer name="device_idle_light_max_idle_to_ms">900000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET -->
+    <integer name="device_idle_light_idle_maintenance_min_budget_ms">60000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_MAINTENANCE_MAX_BUDGET -->
+    <integer name="device_idle_light_idle_maintenance_max_budget_ms">300000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.MIN_LIGHT_MAINTENANCE_TIME -->
+    <integer name="device_idle_min_light_maintenance_time_ms">5000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.MIN_DEEP_MAINTENANCE_TIME -->
+    <integer name="device_idle_min_deep_maintenance_time_ms">30000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.INACTIVE_TIMEOUT -->
+    <integer name="device_idle_inactive_to_ms">1800000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.SENSING_TIMEOUT -->
+    <integer name="device_idle_sensing_to_ms">240000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LOCATING_TIMEOUT -->
+    <integer name="device_idle_locating_to_ms">30000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LOCATION_ACCURACY -->
+    <item name="device_idle_location_accuracy" format="float" type="integer">20.0</item>
+
+    <!-- Default for DeviceIdleController.Constants.MOTION_INACTIVE_TIMEOUT -->
+    <integer name="device_idle_motion_inactive_to_ms">600000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.MOTION_INACTIVE_TIMEOUT_FLEX -->
+    <integer name="device_idle_motion_inactive_to_flex_ms">60000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.IDLE_AFTER_INACTIVE_TIMEOUT -->
+    <integer name="device_idle_idle_after_inactive_to_ms">1800000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.IDLE_PENDING_TIMEOUT -->
+    <integer name="device_idle_idle_pending_to_ms">300000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.MAX_IDLE_PENDING_TIMEOUT -->
+    <integer name="device_idle_max_idle_pending_to_ms">600000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.IDLE_PENDING_FACTOR -->
+    <item name="device_idle_idle_pending_factor" format="float" type="integer">2.0</item>
+
+    <!-- Default for DeviceIdleController.Constants.QUICK_DOZE_DELAY_TIMEOUT -->
+    <integer name="device_idle_quick_doze_delay_to_ms">60000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.IDLE_TIMEOUT -->
+    <integer name="device_idle_idle_to_ms">3600000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.MAX_IDLE_TIMEOUT -->
+    <integer name="device_idle_max_idle_to_ms">21600000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.IDLE_FACTOR -->
+    <item name="device_idle_idle_factor" format="float" type="integer">2.0</item>
+
+    <!-- Default for DeviceIdleController.Constants.MIN_TIME_TO_ALARM -->
+    <integer name="device_idle_min_time_to_alarm_ms">3600000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.MAX_TEMP_APP_ALLOWLIST_DURATION_MS -->
+    <integer name="device_idle_max_temp_app_allowlist_duration_ms">300000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.MMS_TEMP_APP_ALLOWLIST_DURATION_MS -->
+    <integer name="device_idle_mms_temp_app_allowlist_duration_ms">60000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.SMS_TEMP_APP_ALLOWLIST_DURATION_MS -->
+    <integer name="device_idle_sms_temp_app_allowlist_duration_ms">20000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.NOTIFICATION_ALLOWLIST_DURATION_MS -->
+    <integer name="device_idle_notification_allowlist_duration_ms">30000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.WAIT_FOR_UNLOCK -->
+    <bool name="device_idle_wait_for_unlock">true</bool>
+
+    <!-- Default for DeviceIdleController.Constants.PRE_IDLE_FACTOR_LONG -->
+    <item name="device_idle_pre_idle_factor_long" format="float" type="integer">1.67</item>
+
+    <!-- Default for DeviceIdleController.Constants.PRE_IDLE_FACTOR_SHORT -->
+    <item name="device_idle_pre_idle_factor_short" format="float" type="integer">0.33</item>
+
+    <!-- Default for DeviceIdleController.Constants.USE_WINDOW_ALARMS -->
+    <bool name="device_idle_use_window_alarms">true</bool>
+</resources>
+

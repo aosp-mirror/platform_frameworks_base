@@ -18,29 +18,71 @@ package com.android.server.tare;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.tare.EconomyManager;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
+import android.util.Slog;
 import android.util.SparseArray;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 
 import libcore.util.EmptyArray;
 
-
 /** Combines all enabled policies into one. */
 public class CompleteEconomicPolicy extends EconomicPolicy {
+    private static final String TAG = "TARE-" + CompleteEconomicPolicy.class.getSimpleName();
+
+    private final CompleteInjector mInjector;
     private final ArraySet<EconomicPolicy> mEnabledEconomicPolicies = new ArraySet<>();
     /** Lazily populated set of actions covered by this policy. */
     private final SparseArray<Action> mActions = new SparseArray<>();
     /** Lazily populated set of rewards covered by this policy. */
     private final SparseArray<Reward> mRewards = new SparseArray<>();
-    private final int[] mCostModifiers;
-    private long mMaxSatiatedBalance;
-    private long mConsumptionLimit;
+    private int mEnabledEconomicPolicyIds = 0;
+    private int[] mCostModifiers = EmptyArray.INT;
+    private long mInitialConsumptionLimit;
+    private long mMinConsumptionLimit;
+    private long mMaxConsumptionLimit;
 
     CompleteEconomicPolicy(@NonNull InternalResourceService irs) {
+        this(irs, new CompleteInjector());
+    }
+
+    @VisibleForTesting
+    CompleteEconomicPolicy(@NonNull InternalResourceService irs,
+            @NonNull CompleteInjector injector) {
         super(irs);
-        mEnabledEconomicPolicies.add(new AlarmManagerEconomicPolicy(irs));
-        mEnabledEconomicPolicies.add(new JobSchedulerEconomicPolicy(irs));
+        mInjector = injector;
+
+        if (mInjector.isPolicyEnabled(POLICY_ALARM, null)) {
+            mEnabledEconomicPolicyIds |= POLICY_ALARM;
+            mEnabledEconomicPolicies.add(new AlarmManagerEconomicPolicy(mIrs, mInjector));
+        }
+        if (mInjector.isPolicyEnabled(POLICY_JOB, null)) {
+            mEnabledEconomicPolicyIds |= POLICY_JOB;
+            mEnabledEconomicPolicies.add(new JobSchedulerEconomicPolicy(mIrs, mInjector));
+        }
+    }
+
+    @Override
+    void setup(@NonNull DeviceConfig.Properties properties) {
+        super.setup(properties);
+
+        mActions.clear();
+        mRewards.clear();
+
+        mEnabledEconomicPolicies.clear();
+        mEnabledEconomicPolicyIds = 0;
+        if (mInjector.isPolicyEnabled(POLICY_ALARM, properties)) {
+            mEnabledEconomicPolicyIds |= POLICY_ALARM;
+            mEnabledEconomicPolicies.add(new AlarmManagerEconomicPolicy(mIrs, mInjector));
+        }
+        if (mInjector.isPolicyEnabled(POLICY_JOB, properties)) {
+            mEnabledEconomicPolicyIds |= POLICY_JOB;
+            mEnabledEconomicPolicies.add(new JobSchedulerEconomicPolicy(mIrs, mInjector));
+        }
 
         ArraySet<Integer> costModifiers = new ArraySet<>();
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
@@ -49,35 +91,27 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
                 costModifiers.add(s);
             }
         }
-        mCostModifiers = new int[costModifiers.size()];
-        for (int i = 0; i < costModifiers.size(); ++i) {
-            mCostModifiers[i] = costModifiers.valueAt(i);
-        }
+        mCostModifiers = ArrayUtils.convertToIntArray(costModifiers);
 
-        updateMaxBalances();
-    }
-
-    @Override
-    void setup(@NonNull DeviceConfig.Properties properties) {
-        super.setup(properties);
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
             mEnabledEconomicPolicies.valueAt(i).setup(properties);
         }
-        updateMaxBalances();
+        updateLimits();
     }
 
-    private void updateMaxBalances() {
-        long max = 0;
+    private void updateLimits() {
+        long initialConsumptionLimit = 0;
+        long minConsumptionLimit = 0;
+        long maxConsumptionLimit = 0;
         for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
-            max += mEnabledEconomicPolicies.valueAt(i).getMaxSatiatedBalance();
+            final EconomicPolicy economicPolicy = mEnabledEconomicPolicies.valueAt(i);
+            initialConsumptionLimit += economicPolicy.getInitialSatiatedConsumptionLimit();
+            minConsumptionLimit += economicPolicy.getMinSatiatedConsumptionLimit();
+            maxConsumptionLimit += economicPolicy.getMaxSatiatedConsumptionLimit();
         }
-        mMaxSatiatedBalance = max;
-
-        max = 0;
-        for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
-            max += mEnabledEconomicPolicies.valueAt(i).getInitialSatiatedConsumptionLimit();
-        }
-        mConsumptionLimit = max;
+        mInitialConsumptionLimit = initialConsumptionLimit;
+        mMinConsumptionLimit = minConsumptionLimit;
+        mMaxConsumptionLimit = maxConsumptionLimit;
     }
 
     @Override
@@ -90,18 +124,27 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
     }
 
     @Override
-    long getMaxSatiatedBalance() {
-        return mMaxSatiatedBalance;
+    long getMaxSatiatedBalance(int userId, @NonNull String pkgName) {
+        long max = 0;
+        for (int i = 0; i < mEnabledEconomicPolicies.size(); ++i) {
+            max += mEnabledEconomicPolicies.valueAt(i).getMaxSatiatedBalance(userId, pkgName);
+        }
+        return max;
     }
 
     @Override
     long getInitialSatiatedConsumptionLimit() {
-        return mConsumptionLimit;
+        return mInitialConsumptionLimit;
     }
 
     @Override
-    long getHardSatiatedConsumptionLimit() {
-        return mConsumptionLimit;
+    long getMinSatiatedConsumptionLimit() {
+        return mMinConsumptionLimit;
+    }
+
+    @Override
+    long getMaxSatiatedConsumptionLimit() {
+        return mMaxConsumptionLimit;
     }
 
     @NonNull
@@ -156,6 +199,40 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
         return reward;
     }
 
+    boolean isPolicyEnabled(@Policy int policyId) {
+        return (mEnabledEconomicPolicyIds & policyId) == policyId;
+    }
+
+    int getEnabledPolicyIds() {
+        return mEnabledEconomicPolicyIds;
+    }
+
+    @VisibleForTesting
+    static class CompleteInjector extends Injector {
+
+        boolean isPolicyEnabled(int policy, @Nullable DeviceConfig.Properties properties) {
+            final String key;
+            final boolean defaultEnable;
+            switch (policy) {
+                case POLICY_ALARM:
+                    key = EconomyManager.KEY_ENABLE_POLICY_ALARM;
+                    defaultEnable = EconomyManager.DEFAULT_ENABLE_POLICY_ALARM;
+                    break;
+                case POLICY_JOB:
+                    key = EconomyManager.KEY_ENABLE_POLICY_JOB_SCHEDULER;
+                    defaultEnable = EconomyManager.DEFAULT_ENABLE_POLICY_JOB_SCHEDULER;
+                    break;
+                default:
+                    Slog.wtf(TAG, "Unknown policy: " + policy);
+                    return false;
+            }
+            if (properties == null) {
+                return defaultEnable;
+            }
+            return properties.getBoolean(key, defaultEnable);
+        }
+    }
+
     @Override
     void dump(IndentingPrintWriter pw) {
         dumpActiveModifiers(pw);
@@ -167,7 +244,10 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
         pw.println("Cached actions:");
         pw.increaseIndent();
         for (int i = 0; i < mActions.size(); ++i) {
-            dumpAction(pw, mActions.valueAt(i));
+            final Action action = mActions.valueAt(i);
+            if (action != null) {
+                dumpAction(pw, action);
+            }
         }
         pw.decreaseIndent();
 
@@ -175,7 +255,10 @@ public class CompleteEconomicPolicy extends EconomicPolicy {
         pw.println("Cached rewards:");
         pw.increaseIndent();
         for (int i = 0; i < mRewards.size(); ++i) {
-            dumpReward(pw, mRewards.valueAt(i));
+            final Reward reward = mRewards.valueAt(i);
+            if (reward != null) {
+                dumpReward(pw, reward);
+            }
         }
         pw.decreaseIndent();
 

@@ -35,7 +35,7 @@ import android.util.SparseArrayMap;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.lang.annotation.Retention;
@@ -219,38 +219,21 @@ class UserSystemPackageInstaller {
 
         // Install/uninstall system packages per user.
         for (int userId : mUm.getUserIds()) {
-            final Set<String> userWhitelist = getInstallablePackagesForUserId(userId);
+            final Set<String> userAllowlist = getInstallablePackagesForUserId(userId);
 
-            // If null, run for all packages
-            if (userWhitelist == null) {
-                pmInt.forEachPackageState(packageState -> {
-                    if (packageState.getPkg() == null) {
-                        return;
-                    }
-                    final boolean install = !packageState.getTransientState()
-                            .isHiddenUntilInstalled();
-                    if (packageState.getUserStateOrDefault(userId).isInstalled() != install
-                            && shouldChangeInstallationState(packageState, install, userId,
-                            isFirstBoot, isConsideredUpgrade, preExistingPackages)) {
-                        changesToCommit.add(userId, packageState.getPackageName(), install);
-                    }
-                });
-            } else {
-                for (String packageName : userWhitelist) {
-                    PackageStateInternal packageState = pmInt.getPackageStateInternal(packageName);
-                    if (packageState.getPkg() == null) {
-                        continue;
-                    }
-
-                    final boolean install = !packageState.getTransientState()
-                            .isHiddenUntilInstalled();
-                    if (packageState.getUserStateOrDefault(userId).isInstalled() != install
-                            && shouldChangeInstallationState(packageState, install, userId,
-                            isFirstBoot, isConsideredUpgrade, preExistingPackages)) {
-                        changesToCommit.add(userId, packageState.getPackageName(), install);
-                    }
+            pmInt.forEachPackageState(packageState -> {
+                if (packageState.getPkg() == null || !packageState.isSystem()) {
+                    return;
                 }
-            }
+                boolean install = (userAllowlist == null
+                                || userAllowlist.contains(packageState.getPackageName()))
+                        && !packageState.getTransientState().isHiddenUntilInstalled();
+                if (packageState.getUserStateOrDefault(userId).isInstalled() != install
+                        && shouldChangeInstallationState(packageState, install, userId,
+                        isFirstBoot, isConsideredUpgrade, preExistingPackages)) {
+                    changesToCommit.add(userId, packageState.getPackageName(), install);
+                }
+            });
         }
 
         pmInt.commitPackageStateMutation(null, packageStateMutator -> {
@@ -369,10 +352,11 @@ class UserSystemPackageInstaller {
         final String notSystemFmt = "%s is allowlisted and present but not a system package.";
         final String overlayFmt = "%s is allowlisted unnecessarily since it's a static overlay.";
         for (String pkgName : allWhitelistedPackages) {
-            final AndroidPackage pkg = pmInt.getPackage(pkgName);
+            var packageState = pmInt.getPackageStateInternal(pkgName);
+            var pkg = packageState == null ? null : packageState.getAndroidPackage();
             if (pkg == null) {
                 warnings.add(String.format(notPresentFmt, pkgName));
-            } else if (!pkg.isSystem()) {
+            } else if (!packageState.isSystem()) {
                 warnings.add(String.format(notSystemFmt, pkgName));
             } else if (shouldUseOverlayTargetName(pkg)) {
                 warnings.add(String.format(overlayFmt, pkgName));
@@ -397,8 +381,9 @@ class UserSystemPackageInstaller {
         // Check whether all system packages are indeed allowlisted.
         final String logMessageFmt = "System package %s is not whitelisted using "
                 + "'install-in-user-type' in SystemConfig for any user types!";
-        pmInt.forEachPackage(pkg -> {
-            if (!pkg.isSystem()) return;
+        pmInt.forEachPackageState(packageState -> {
+            var pkg = packageState.getAndroidPackage();
+            if (pkg == null || !packageState.isSystem() || pkg.isApex()) return;
             final String pkgName = pkg.getManifestPackageName();
             if (!allWhitelistedPackages.contains(pkgName)
                     && !shouldUseOverlayTargetName(pmInt.getPackage(pkgName))) {
@@ -540,8 +525,9 @@ class UserSystemPackageInstaller {
 
         final Set<String> installPackages = new ArraySet<>();
         final PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
-        pmInt.forEachPackage(pkg -> {
-            if (!pkg.isSystem()) {
+        pmInt.forEachPackageState(packageState -> {
+            var pkg = packageState.getAndroidPackage();
+            if (pkg == null || !packageState.isSystem()) {
                 return;
             }
             if (shouldInstallPackage(pkg, mWhitelistedPackagesForUserTypes,
@@ -574,7 +560,8 @@ class UserSystemPackageInstaller {
         final String pkgName = shouldUseOverlayTargetName(sysPkg) ?
                 sysPkg.getOverlayTarget() : sysPkg.getManifestPackageName();
         return (implicitlyWhitelist && !userTypeWhitelist.containsKey(pkgName))
-                || userWhitelist.contains(pkgName);
+                || userWhitelist.contains(pkgName)
+                || sysPkg.isApex();
     }
 
     /**

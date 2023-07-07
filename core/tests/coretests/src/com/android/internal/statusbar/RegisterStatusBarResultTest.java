@@ -20,11 +20,12 @@ import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_B
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Parcel;
 import android.os.UserHandle;
 import android.util.ArrayMap;
-import android.view.InsetsVisibilities;
+import android.view.WindowInsets;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -48,7 +49,11 @@ public class RegisterStatusBarResultTest {
         final ArrayMap<String, StatusBarIcon> iconMap = new ArrayMap<>();
         iconMap.put(dumyIconKey, new StatusBarIcon("com.android.internal.statusbar.test",
                 UserHandle.of(100), 123, 1, 2, "dummyIconDescription"));
-
+        final LetterboxDetails letterboxDetails = new LetterboxDetails(
+                /* letterboxInnerBounds= */ new Rect(1, 2, 3, 4),
+                /* letterboxFullBounds= */ new Rect(5, 6, 7, 8),
+                /* appAppearance= */ 321
+        );
         final RegisterStatusBarResult original = new RegisterStatusBarResult(iconMap,
                 0x2 /* disabledFlags1 */,
                 0x4 /* appearance */,
@@ -60,9 +65,10 @@ public class RegisterStatusBarResultTest {
                 new Binder() /* imeToken */,
                 true /* navbarColorManagedByIme */,
                 BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
-                new InsetsVisibilities() /* requestedVisibilities */,
+                WindowInsets.Type.defaultVisible(),
                 "test" /* packageName */,
-                new int[0] /* transientBarTypes */);
+                0 /* transientBarTypes */,
+                new LetterboxDetails[] {letterboxDetails});
 
         final RegisterStatusBarResult copy = clone(original);
 
@@ -81,9 +87,10 @@ public class RegisterStatusBarResultTest {
         assertThat(copy.mImeToken).isSameInstanceAs(original.mImeToken);
         assertThat(copy.mNavbarColorManagedByIme).isEqualTo(original.mNavbarColorManagedByIme);
         assertThat(copy.mBehavior).isEqualTo(original.mBehavior);
-        assertThat(copy.mRequestedVisibilities).isEqualTo(original.mRequestedVisibilities);
+        assertThat(copy.mRequestedVisibleTypes).isEqualTo(original.mRequestedVisibleTypes);
         assertThat(copy.mPackageName).isEqualTo(original.mPackageName);
         assertThat(copy.mTransientBarTypes).isEqualTo(original.mTransientBarTypes);
+        assertThat(copy.mLetterboxDetails).isEqualTo(original.mLetterboxDetails);
     }
 
     private RegisterStatusBarResult clone(RegisterStatusBarResult original) {

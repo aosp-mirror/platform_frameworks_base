@@ -49,6 +49,7 @@ import com.android.frameworks.servicestests.R;
 import com.android.server.SystemService;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -59,7 +60,6 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
-    private static final String USER_TYPE_EMPTY = "";
     private static final int COPE_ADMIN1_APP_ID = 123;
     private static final int COPE_ANOTHER_ADMIN_APP_ID = 125;
     private static final int COPE_PROFILE_USER_ID = 11;
@@ -81,10 +81,12 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
         when(getServices().packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(true);
+        when(getServices().userManagerInternal.getUserIds()).thenReturn(new int[]{0});
     }
 
     // Test setting default restrictions for managed profile.
     @Test
+    @Ignore("b/277916462")
     public void testMigration_managedProfileOwner() throws Exception {
         // Create a managed profile user.
         final File user10dir = getServices().addUser(10, 0,
@@ -156,6 +158,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     @SmallTest
     @Test
+    @Ignore("b/269249457")
     public void testCompMigrationAffiliated() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.R);

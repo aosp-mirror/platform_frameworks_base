@@ -33,10 +33,13 @@ import java.lang.ref.WeakReference;
  * @param <T> type of data to cache
  */
 abstract class ThemedResourceCache<T> {
+    public static final int UNDEFINED_GENERATION = -1;
     @UnsupportedAppUsage
     private ArrayMap<ThemeKey, LongSparseArray<WeakReference<T>>> mThemedEntries;
     private LongSparseArray<WeakReference<T>> mUnthemedEntries;
     private LongSparseArray<WeakReference<T>> mNullThemedEntries;
+
+    private int mGeneration;
 
     /**
      * Adds a new theme-dependent entry to the cache.
@@ -45,9 +48,10 @@ abstract class ThemedResourceCache<T> {
      * @param theme the theme against which this entry was inflated, or
      *              {@code null} if the entry has no theme applied
      * @param entry the entry to cache
+     * @param generation The generation of the cache to compare against before storing
      */
-    public void put(long key, @Nullable Theme theme, @NonNull T entry) {
-        put(key, theme, entry, true);
+    public void put(long key, @Nullable Theme theme, @NonNull T entry, int generation) {
+        put(key, theme, entry, generation, true);
     }
 
     /**
@@ -57,10 +61,12 @@ abstract class ThemedResourceCache<T> {
      * @param theme the theme against which this entry was inflated, or
      *              {@code null} if the entry has no theme applied
      * @param entry the entry to cache
+     * @param generation The generation of the cache to compare against before storing
      * @param usesTheme {@code true} if the entry is affected theme changes,
      *                  {@code false} otherwise
      */
-    public void put(long key, @Nullable Theme theme, @NonNull T entry, boolean usesTheme) {
+    public void put(long key, @Nullable Theme theme, @NonNull T entry, int generation,
+            boolean usesTheme) {
         if (entry == null) {
             return;
         }
@@ -72,10 +78,20 @@ abstract class ThemedResourceCache<T> {
             } else {
                 entries = getThemedLocked(theme, true);
             }
-            if (entries != null) {
+            if (entries != null
+                    && ((generation == mGeneration) || (generation == UNDEFINED_GENERATION)))  {
                 entries.put(key, new WeakReference<>(entry));
             }
         }
+    }
+
+    /**
+     * Returns the current generation of the cache
+     *
+     * @return The current generation
+     */
+    public int getGeneration() {
+        return mGeneration;
     }
 
     /**
@@ -112,6 +128,7 @@ abstract class ThemedResourceCache<T> {
         return null;
     }
 
+
     /**
      * Prunes cache entries that have been invalidated by a configuration
      * change.
@@ -120,7 +137,10 @@ abstract class ThemedResourceCache<T> {
      */
     @UnsupportedAppUsage
     public void onConfigurationChange(@Config int configChanges) {
-        prune(configChanges);
+        synchronized (this) {
+            pruneLocked(configChanges);
+            mGeneration++;
+        }
     }
 
     /**
@@ -196,22 +216,20 @@ abstract class ThemedResourceCache<T> {
      *                      simply prune missing weak references
      * @return {@code true} if the cache is completely empty after pruning
      */
-    private boolean prune(@Config int configChanges) {
-        synchronized (this) {
-            if (mThemedEntries != null) {
-                for (int i = mThemedEntries.size() - 1; i >= 0; i--) {
-                    if (pruneEntriesLocked(mThemedEntries.valueAt(i), configChanges)) {
-                        mThemedEntries.removeAt(i);
-                    }
+    private boolean pruneLocked(@Config int configChanges) {
+        if (mThemedEntries != null) {
+            for (int i = mThemedEntries.size() - 1; i >= 0; i--) {
+                if (pruneEntriesLocked(mThemedEntries.valueAt(i), configChanges)) {
+                    mThemedEntries.removeAt(i);
                 }
             }
-
-            pruneEntriesLocked(mNullThemedEntries, configChanges);
-            pruneEntriesLocked(mUnthemedEntries, configChanges);
-
-            return mThemedEntries == null && mNullThemedEntries == null
-                    && mUnthemedEntries == null;
         }
+
+        pruneEntriesLocked(mNullThemedEntries, configChanges);
+        pruneEntriesLocked(mUnthemedEntries, configChanges);
+
+        return mThemedEntries == null && mNullThemedEntries == null
+                && mUnthemedEntries == null;
     }
 
     private boolean pruneEntriesLocked(@Nullable LongSparseArray<WeakReference<T>> entries,

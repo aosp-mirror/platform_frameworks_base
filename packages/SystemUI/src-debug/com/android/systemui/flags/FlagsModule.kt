@@ -19,19 +19,26 @@ package com.android.systemui.flags
 import android.content.Context
 import android.os.Handler
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlagsDebug.ALL_FLAGS
 import com.android.systemui.util.settings.SettingsUtilModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.IntoSet
 import javax.inject.Named
 
 @Module(includes = [
-    SettingsUtilModule::class
+    FeatureFlagsDebugStartableModule::class,
+    FlagsCommonModule::class,
+    ServerFlagReaderModule::class,
+    SettingsUtilModule::class,
 ])
 abstract class FlagsModule {
     @Binds
     abstract fun bindsFeatureFlagDebug(impl: FeatureFlagsDebug): FeatureFlags
+
+    @Binds
+    @IntoSet
+    abstract fun bindsScreenIdleCondition(impl: ScreenIdleCondition): ConditionalRestarter.Condition
 
     @Module
     companion object {
@@ -43,7 +50,7 @@ abstract class FlagsModule {
 
         @JvmStatic
         @Provides
-        @Named(ALL_FLAGS)
-        fun providesAllFlags(): Map<Int, Flag<*>> = Flags.collectFlags()
+        @Named(ConditionalRestarter.RESTART_DELAY)
+        fun provideRestartDelaySec(): Long = 1
     }
 }

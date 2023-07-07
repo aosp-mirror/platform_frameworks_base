@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- The name of this application. Credential Manager is a service that centralizes and provides
+  access to a user's credentials used to sign in to various apps. [CHAR LIMIT=80] -->
+  <string name="app_name">Credential Manager</string>
+
+  <!-- Strings for the create flow. -->
+  <!-- Button label to close the dialog when the user does not want to create the credential. [CHAR LIMIT=20] -->
+  <string name="string_cancel">Cancel</string>
+  <!-- This is a label for a button that takes user to the next screen. [CHAR LIMIT=20] -->
+  <string name="string_continue">Continue</string>
+  <!-- This is a label for a button that leads to a holistic view of all different options where the user can save their new app credential. [CHAR LIMIT=20] -->
+  <string name="string_more_options">Save another way</string>
+  <!-- This is a label for a button that links to additional information about passkeys. [CHAR LIMIT=20] -->
+  <string name="string_learn_more">Learn more</string>
+  <!-- This is a label for content description for show password icon button. -->
+  <string name="content_description_show_password">Show password</string>
+  <!-- This is a label for content description for hide password icon button. -->
+  <string name="content_description_hide_password">Hide password</string>
+  <!-- This string introduces passkeys to the users for the first time they use this method. Tip: to avoid gendered language patterns, this header could be translated as if the original string were "More safety with passkeys". [CHAR LIMIT=200] -->
+  <string name="passkey_creation_intro_title">Safer with passkeys</string>
+  <!-- This string highlight passkey benefits related with the password. [CHAR LIMIT=200] -->
+  <string name="passkey_creation_intro_body_password">With passkeys, you don’t need to create or remember complex passwords</string>
+  <!-- This string highlight passkey benefits related with encrypted. [CHAR LIMIT=200] -->
+  <string name="passkey_creation_intro_body_fingerprint">Passkeys are encrypted digital keys you create using your fingerprint, face, or screen lock</string>
+  <!-- This string highlight passkey benefits related with signing with other devices. [CHAR LIMIT=200] -->
+  <string name="passkey_creation_intro_body_device">They are saved to a password manager, so you can sign in on other devices</string>
+  <!-- This string introduces passkeys in more detail to the users for the first time they use this method. [CHAR LIMIT=200] -->
+  <string name="more_about_passkeys_title">More about passkeys</string>
+  <!-- Title for subsection of "Learn more about passkeys" screen about passwordless technology. [CHAR LIMIT=80] -->
+  <string name="passwordless_technology_title">Passwordless technology</string>
+  <!-- Detail for subsection of "Learn more about passkeys" screen about passwordless technology. [CHAR LIMIT=500] -->
+  <string name="passwordless_technology_detail">Passkeys allow you to sign in without relying on passwords. You just need to use your fingerprint, face recognition, PIN, or swipe pattern to verify your identity and create a passkey.</string>
+  <!-- Title for subsection of "Learn more about passkeys" screen about public key cryptography. [CHAR LIMIT=80] -->
+  <string name="public_key_cryptography_title">Public key cryptography</string>
+  <!-- Detail for subsection of "Learn more about passkeys" screen about public key cryptography. [CHAR LIMIT=500] -->
+  <string name="public_key_cryptography_detail">Based on FIDO Alliance (which includes Google, Apple, Microsoft, and more) and W3C standards, passkeys use cryptographic key pairs. Unlike the username and string of characters we use for passwords, a private-public key pair is created for an app or website. The private key is safely stored on your device or password manager and it confirms your identity. The public key is  shared with the app or website server. With corresponding keys, you can instantly register and sign in.</string>
+  <!-- Title for subsection of "Learn more about passkeys" screen about improved account security. [CHAR LIMIT=80] -->
+  <string name="improved_account_security_title">Improved account security</string>
+  <!-- Detail for subsection of "Learn more about passkeys" screen about improved account security. [CHAR LIMIT=500] -->
+  <string name="improved_account_security_detail">Each key is exclusively linked with the app or website they were created for, so you can never sign in to a fraudulent app or website by mistake. Plus, with servers only keeping public keys, hacking is a lot harder.</string>
+  <!-- Title for subsection of "Learn more about passkeys" screen about seamless transition. [CHAR LIMIT=80] -->
+  <string name="seamless_transition_title">Seamless transition</string>
+  <!-- Detail for subsection of "Learn more about passkeys" screen about seamless transition. [CHAR LIMIT=500] -->
+  <string name="seamless_transition_detail">As we move towards a passwordless future, passwords will still be available alongside passkeys.</string>
+  <!-- This appears as the title of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
+  <string name="choose_provider_title">Choose where to save your <xliff:g id="createTypes" example="passkeys">%1$s</xliff:g></string>
+  <!-- This appears as the description body of the modal bottom sheet which provides all available providers for users to choose. [CHAR LIMIT=200] -->
+  <string name="choose_provider_body">Select a password manager to save your info and sign in faster next time</string>
+  <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is passkey. [CHAR LIMIT=200] -->
+  <string name="choose_create_option_passkey_title">Create passkey for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is password. [CHAR LIMIT=200] -->
+  <string name="choose_create_option_password_title">Save password for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the modal bottom sheet for users to choose the create option inside a provider when the credential type is others. [CHAR LIMIT=200] -->
+  <string name="choose_create_option_sign_in_title">Save sign-in info for <xliff:g id="appName" example="Tribank">%1$s</xliff:g>?</string>
+  <!-- Types which are inserted as a placeholder as credentialTypes for other strings. [CHAR LIMIT=200] -->
+  <string name="passkey">passkey</string>
+  <string name="password">password</string>
+  <string name="passkeys">passkeys</string>
+  <string name="passwords">passwords</string>
+  <string name="sign_ins">sign-ins</string>
+  <string name="sign_in_info">sign-in info</string>
+
+  <!-- This text is followed by a list of one or more options. [CHAR LIMIT=200] -->
+  <string name="save_credential_to_title">Save <xliff:g id="credentialTypes" example="passkey">%1$s</xliff:g> to</string>
+  <!-- This appears as the title of the modal bottom sheet for users to confirm to create a passkey on another device. [CHAR LIMIT=200] -->
+  <string name="create_passkey_in_other_device_title">Create passkey on another device?</string>
+  <!-- This appears as the title of the modal bottom sheet for users to confirm to save a password on another device. [CHAR LIMIT=200] -->
+  <string name="save_password_on_other_device_title">Save password on another device?</string>
+  <!-- This appears as the title of the modal bottom sheet for users to confirm to save a sign-in credential on another device. [CHAR LIMIT=200] -->
+  <string name="save_sign_in_on_other_device_title">Save sign-in on another device?</string>
+  <!-- This appears as the title of the modal bottom sheet for users to confirm whether they should use the selected provider as default or not. [CHAR LIMIT=200] -->
+  <string name="use_provider_for_all_title">Use <xliff:g id="providerInfoDisplayName" example="Google Password Manager">%1$s</xliff:g> for all your sign-ins?</string>
+  <!-- This appears as the description body of the modal bottom sheet for users to confirm whether they should use the selected provider as default or not. [CHAR LIMIT=300] -->
+  <string name="use_provider_for_all_description">This password manager for <xliff:g id="username" example="becket@gmail.com">%1$s</xliff:g> will store your passwords and passkeys to help you easily sign in</string>
+  <!-- This is a label for a button that sets this password manager as the default. [CHAR LIMIT=20] -->
+  <string name="set_as_default">Set as default</string>
+  <!-- This is a button text to navigate the user to their system settings. [CHAR LIMIT=30] -->
+  <string name="settings">Settings</string>
+  <!-- This is a label for a button that makes this password manager be used just in this specific case. [CHAR LIMIT=20] -->
+  <string name="use_once">Use once</string>
+  <!-- Appears as an option row subtitle to show how many passwords and passkeys are saved in this option when there are passwords and passkeys. [CHAR LIMIT=80] -->
+  <string name="more_options_usage_passwords_passkeys"><xliff:g id="passwordsNumber" example="1">%1$s</xliff:g> passwords • <xliff:g id="passkeysNumber" example="2">%2$s</xliff:g> passkeys</string>
+  <!-- Appears as an option row subtitle to show how many passwords and passkeys are saved in this option when there are only passwords. [CHAR LIMIT=80] -->
+  <string name="more_options_usage_passwords"><xliff:g id="passwordsNumber" example="3">%1$s</xliff:g> passwords</string>
+  <!-- Appears as an option row subtitle to show how many passwords and passkeys are saved in this option when there are only passkeys. [CHAR LIMIT=80] -->
+  <string name="more_options_usage_passkeys"><xliff:g id="passkeysNumber" example="4">%1$s</xliff:g> passkeys</string>
+  <!-- Appears as an option row subtitle to show how many total credentials are saved in this option when the request type is other sign-ins. [CHAR LIMIT=80] -->
+  <string name="more_options_usage_credentials"><xliff:g id="totalCredentialsNumber" example="5">%1$s</xliff:g> credentials</string>
+  <!-- Appears before a request display name when the credential type is passkey . [CHAR LIMIT=80] -->
+  <string name="passkey_before_subtitle">Passkey</string>
+  <!-- This is a label for a button that lets users save their passkey to a different device. [CHAR LIMIT=80] -->
+  <string name="another_device">Another device</string>
+  <!-- Appears as an option row title that users can choose to view other disabled providers. [CHAR LIMIT=80] -->
+  <string name="other_password_manager">Other password managers</string>
+  <!-- Spoken content description of an element which will close the sheet when clicked. -->
+  <string name="close_sheet">"Close sheet"</string>
+  <!-- Spoken content description of the back arrow button. -->
+  <string name="accessibility_back_arrow_button">"Go back to the previous page"</string>
+  <!-- Spoken content description of the close "X" icon button. -->
+  <string name="accessibility_close_button">Close</string>
+  <!-- Spoken content description of the close "X" icon button. [CHAR LIMIT=NONE] -->
+  <string name="accessibility_snackbar_dismiss">Dismiss</string>
+
+  <!-- Strings for the get flow. -->
+  <!-- This appears as the title of the modal bottom sheet asking for user confirmation to use the single previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_use_passkey_for">Use your saved passkey for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the modal bottom sheet asking for user confirmation to use the single previously saved password to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_use_password_for">Use your saved password for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the dialog asking for user confirmation to use the single user credential (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_use_sign_in_for">Use your sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the dialog asking for user confirmation to unlock / authenticate (e.g. via fingerprint, faceId, passcode etc.) so that we can retrieve their sign-in options. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_unlock_options_for">Unlock sign-in options for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from multiple previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_passkey_for">Choose a saved passkey for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from multiple previously saved passwords to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_password_for">Choose a saved password for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from multiple previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_saved_sign_in_for">Choose a saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from various available user credentials (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_sign_in_for">Choose a sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from options of available user information (e.g. driver's license, vaccination status) to pass to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_option_for">Choose an option for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the dialog asking user to send a piece of user information (e.g. driver's license, vaccination status) to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_use_info_on">Use this info on <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This is a label for a button that links the user to different sign-in methods . [CHAR LIMIT=80] -->
+  <string name="get_dialog_use_saved_passkey_for">Sign in another way</string>
+  <!-- This is a label for a button that links the user to different sign-in methods. [CHAR LIMIT=80] -->
+  <string name="snackbar_action">View options</string>
+  <!-- This is a label for a button that takes user to the next screen. [CHAR LIMIT=20] -->
+  <string name="get_dialog_button_label_continue">Continue</string>
+  <!-- Separator for sign-in type and username in a sign-in entry. -->
+  <string name="get_dialog_sign_in_type_username_separator" translatable="false">" • "</string>
+  <!-- This text is followed by a list of one or more options. [CHAR LIMIT=80] -->
+  <string name="get_dialog_title_sign_in_options">Sign-in options</string>
+  <!-- Button label for viewing the full information about an account. [CHAR LIMIT=80] -->
+  <string name="button_label_view_more">View more</string>
+  <!-- Column heading for displaying sign-ins for a specific username. [CHAR LIMIT=80] -->
+  <string name="get_dialog_heading_for_username">For <xliff:g id="username" example="becket@gmail.com">%1$s</xliff:g></string>
+  <!-- Column heading for displaying locked (that is, the user needs to first authenticate via pin, fingerprint, faceId, etc.) sign-ins. [CHAR LIMIT=80] -->
+  <string name="get_dialog_heading_locked_password_managers">Locked password managers</string>
+  <!-- Explanatory label for a button that takes the user to unlock a credential provider by authenticating via pin, fingerprint, faceId, etc. [CHAR LIMIT=120] -->
+  <string name="locked_credential_entry_label_subtext_tap_to_unlock">Tap to unlock</string>
+  <!-- Explanatory label for a disabled button explaining that this option isn't viable because it does not contain any available credential (e.g. password, passkey, etc.) for the user. [CHAR LIMIT=120] -->
+  <string name="locked_credential_entry_label_subtext_no_sign_in">No sign-in info</string>
+  <!-- Label displayed when a selected option does not contain any viable credentials that can be used to log into the app. [CHAR LIMIT=80] -->
+  <string name="no_sign_in_info_in">No sign-in info in <xliff:g id="source" example="becket@gmail.com">%1$s</xliff:g></string>
+  <!-- Column heading for displaying action chips for managing sign-ins from each credential provider. [CHAR LIMIT=80] -->
+  <string name="get_dialog_heading_manage_sign_ins">Manage sign-ins</string>
+  <!-- Column heading for displaying option to use sign-ins saved on a different device. [CHAR LIMIT=80] -->
+  <string name="get_dialog_heading_from_another_device">From another device</string>
+  <!-- This is a label for a button that takes the user to other available devices. [CHAR LIMIT=120] -->
+  <string name="get_dialog_option_headline_use_a_different_device">Use a different device</string>
+  <!-- Text shown on a snackbar when the app cancelled the UI. [CHAR LIMIT=120] -->
+  <string name="request_cancelled_by">Request cancelled by <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+</resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">CarrierDefaultApp</string>
+    <string name="app_name">Carrier Communications</string>
     <string name="android_system_label">Mobile Carrier</string>
     <string name="portal_notification_id">Mobile data has run out</string>
     <string name="no_data_notification_id">Your mobile data has been deactivated</string>
@@ -13,4 +13,18 @@
     <string name="ssl_error_warning">The network you&#8217;re trying to join has security issues.</string>
     <string name="ssl_error_example">For example, the login page may not belong to the organization shown.</string>
     <string name="ssl_error_continue">Continue anyway via browser</string>
+
+    <!-- Telephony notification channel name for performance boost notifications. -->
+    <string name="performance_boost_notification_channel">Performance boost</string>
+    <!-- Notification title text for the performance boost notification. -->
+    <string name="performance_boost_notification_title">5G options from your carrier</string>
+    <!-- Notification detail text for the performance boost notification. -->
+    <string name="performance_boost_notification_detail">Visit %s\'s website to see options for your app experience</string>
+    <!-- Notification button text to cancel the performance boost notification. -->
+    <string name="performance_boost_notification_button_not_now">Not now</string>
+    <!-- Notification button text to manage the performance boost notification. -->
+    <string name="performance_boost_notification_button_manage">Manage</string>
+
+    <!-- Label to display when the slice purchase application opens. -->
+    <string name="slice_purchase_app_label">Purchase a performance boost.</string>
 </resources>

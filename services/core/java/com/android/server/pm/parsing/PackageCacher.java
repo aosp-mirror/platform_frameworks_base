@@ -62,6 +62,8 @@ public class PackageCacher {
         StringBuilder sb = new StringBuilder(packageFile.getName());
         sb.append('-');
         sb.append(flags);
+        sb.append('-');
+        sb.append(packageFile.getAbsolutePath().hashCode());
 
         return sb.toString();
     }
@@ -171,7 +173,12 @@ public class PackageCacher {
             }
 
             final byte[] bytes = IoUtils.readFileAsByteArray(cacheFile.getAbsolutePath());
-            return fromCacheEntry(bytes);
+            ParsedPackage parsed = fromCacheEntry(bytes);
+            if (!packageFile.getAbsolutePath().equals(parsed.getPath())) {
+                // Don't use this cache if the path doesn't match
+                return null;
+            }
+            return parsed;
         } catch (Throwable e) {
             Slog.w(TAG, "Error reading package cache: ", e);
 

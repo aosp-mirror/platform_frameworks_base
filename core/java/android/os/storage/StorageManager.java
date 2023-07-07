@@ -18,17 +18,10 @@ package android.os.storage;
 
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_MANAGE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.OP_READ_EXTERNAL_STORAGE;
-import static android.app.AppOpsManager.OP_READ_MEDIA_AUDIO;
 import static android.app.AppOpsManager.OP_READ_MEDIA_IMAGES;
-import static android.app.AppOpsManager.OP_READ_MEDIA_VIDEO;
-import static android.app.AppOpsManager.OP_WRITE_EXTERNAL_STORAGE;
-import static android.app.AppOpsManager.OP_WRITE_MEDIA_AUDIO;
-import static android.app.AppOpsManager.OP_WRITE_MEDIA_IMAGES;
-import static android.app.AppOpsManager.OP_WRITE_MEDIA_VIDEO;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.PER_USER_RANGE;
@@ -153,8 +146,6 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_ADOPTABLE = "persist.sys.adoptable";
     /** {@hide} */
-    public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";
-    /** {@hide} */
     public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
     /** {@hide} */
     public static final String PROP_VIRTUAL_DISK = "persist.sys.virtual_disk";
@@ -258,13 +249,11 @@ public class StorageManager {
     /** {@hide} */
     public static final int DEBUG_ADOPTABLE_FORCE_OFF = 1 << 1;
     /** {@hide} */
-    public static final int DEBUG_EMULATE_FBE = 1 << 2;
+    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 2;
     /** {@hide} */
-    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 3;
+    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 3;
     /** {@hide} */
-    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 4;
-    /** {@hide} */
-    public static final int DEBUG_VIRTUAL_DISK = 1 << 5;
+    public static final int DEBUG_VIRTUAL_DISK = 1 << 4;
 
     /** {@hide} */
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
@@ -1610,15 +1599,6 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void unlockUserKey(int userId, int serialNumber, byte[] secret) {
-        try {
-            mStorageManager.unlockUserKey(userId, serialNumber, secret);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
     public void lockUserKey(int userId) {
         try {
             mStorageManager.lockUserKey(userId);
@@ -1694,30 +1674,31 @@ public class StorageManager {
     }
 
     /** {@hide}
-     * Is this device file encrypted?
-     * @return true for file encrypted. (Implies isEncrypted() == true)
-     *         false not encrypted or using "managed" encryption
+     * Does this device have file-based encryption (FBE) enabled?
+     * @return true if the device has file-based encryption enabled.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static boolean isFileEncryptedNativeOnly() {
+    public static boolean isFileEncrypted() {
         if (!isEncrypted()) {
             return false;
         }
         return RoSystemProperties.CRYPTO_FILE_ENCRYPTED;
     }
 
-    /** {@hide} */
-    public static boolean isFileEncryptedEmulatedOnly() {
-        return SystemProperties.getBoolean(StorageManager.PROP_EMULATE_FBE, false);
+    /** {@hide}
+     * @deprecated Use {@link #isFileEncrypted} instead, since emulated FBE is no longer supported.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @Deprecated
+    public static boolean isFileEncryptedNativeOnly() {
+        return isFileEncrypted();
     }
 
     /** {@hide}
-     * Is this device running in a file encrypted mode, either native or emulated?
-     * @return true for file encrypted, false otherwise
+     * @deprecated Use {@link #isFileEncrypted} instead, since emulated FBE is no longer supported.
      */
+    @Deprecated
     public static boolean isFileEncryptedNativeOrEmulated() {
-        return isFileEncryptedNativeOnly()
-               || isFileEncryptedEmulatedOnly();
+        return isFileEncrypted();
     }
 
     /** {@hide} */
@@ -1881,51 +1862,14 @@ public class StorageManager {
     // handle obscure cases like when an app targets Q but was installed on
     // a device that was originally running on P before being upgraded to Q.
 
-    /** {@hide} */
-    public boolean checkPermissionReadAudio(boolean enforce,
-            int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
-                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
-            return false;
-        }
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
-                OP_READ_MEDIA_AUDIO);
-    }
-
-    /** {@hide} */
-    public boolean checkPermissionWriteAudio(boolean enforce,
-            int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
-                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
-            return false;
-        }
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
-                OP_WRITE_MEDIA_AUDIO);
-    }
-
-    /** {@hide} */
-    public boolean checkPermissionReadVideo(boolean enforce,
-            int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
-                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
-            return false;
-        }
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
-                OP_READ_MEDIA_VIDEO);
-    }
-
-    /** {@hide} */
-    public boolean checkPermissionWriteVideo(boolean enforce,
-            int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
-                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
-            return false;
-        }
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
-                OP_WRITE_MEDIA_VIDEO);
-    }
-
-    /** {@hide} */
+    /**
+     * @deprecated This method should not be used since it check slegacy permissions,
+     * no longer valid. Clients should check the appropriate permissions directly
+     * instead (e.g. READ_MEDIA_IMAGES).
+     *
+     * {@hide}
+     */
+    @Deprecated
     public boolean checkPermissionReadImages(boolean enforce,
             int pid, int uid, String packageName, @Nullable String featureId) {
         if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
@@ -1934,17 +1878,6 @@ public class StorageManager {
         }
         return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
                 OP_READ_MEDIA_IMAGES);
-    }
-
-    /** {@hide} */
-    public boolean checkPermissionWriteImages(boolean enforce,
-            int pid, int uid, String packageName, @Nullable String featureId) {
-        if (!checkExternalStoragePermissionAndAppOp(enforce, pid, uid, packageName, featureId,
-                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
-            return false;
-        }
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
-                OP_WRITE_MEDIA_IMAGES);
     }
 
     private boolean checkExternalStoragePermissionAndAppOp(boolean enforce,
@@ -2555,6 +2488,8 @@ public class StorageManager {
      * This API doesn't require any special permissions, though typical implementations
      * will require being called from an SELinux domain that allows setting file attributes
      * related to quota (eg the GID or project ID).
+     * If the calling user has MANAGE_EXTERNAL_STORAGE permissions, quota for shared profile's
+     * volumes is also updated.
      *
      * The default platform user of this API is the MediaProvider process, which is
      * responsible for managing all of external storage.
@@ -2575,7 +2510,14 @@ public class StorageManager {
             @QuotaType int quotaType) throws IOException {
         long projectId;
         final String filePath = path.getCanonicalPath();
-        final StorageVolume volume = getStorageVolume(path);
+        int volFlags = FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE;
+        // If caller has MANAGE_EXTERNAL_STORAGE permission, results from User Profile(s) are also
+        // returned by enabling FLAG_INCLUDE_SHARED_PROFILE.
+        if (mContext.checkSelfPermission(MANAGE_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
+            volFlags |= FLAG_INCLUDE_SHARED_PROFILE;
+        }
+        final StorageVolume[] availableVolumes = getVolumeList(mContext.getUserId(), volFlags);
+        final StorageVolume volume = getStorageVolume(availableVolumes, path);
         if (volume == null) {
             Log.w(TAG, "Failed to update quota type for " + filePath);
             return;
@@ -2745,7 +2687,8 @@ public class StorageManager {
 
     /** {@hide} */
     @TestApi
-    public static @NonNull UUID convert(@NonNull String uuid) {
+    public static @NonNull UUID convert(@Nullable String uuid) {
+        // UUID_PRIVATE_INTERNAL is null, so this accepts nullable input
         if (Objects.equals(uuid, UUID_PRIVATE_INTERNAL)) {
             return UUID_DEFAULT;
         } else if (Objects.equals(uuid, UUID_PRIMARY_PHYSICAL)) {

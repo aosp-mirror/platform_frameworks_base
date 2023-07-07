@@ -51,6 +51,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TimingsTraceLog;
+import android.view.WindowManager;
 import android.webkit.WebViewFactory;
 import android.widget.TextView;
 
@@ -72,6 +73,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.Provider;
 import java.security.Security;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Startup class for the zygote process.
@@ -185,8 +188,13 @@ public class ZygoteInit {
     private static void preloadSharedLibraries() {
         Log.i(TAG, "Preloading shared libraries...");
         System.loadLibrary("android");
-        System.loadLibrary("compiler_rt");
         System.loadLibrary("jnigraphics");
+
+        // TODO(b/206676167): This library is only used for renderscript today. When renderscript is
+        // removed, this load can be removed as well.
+        if (!SystemProperties.getBoolean("config.disable_renderscript", false)) {
+            System.loadLibrary("compiler_rt");
+        }
     }
 
     native private static void nativePreloadAppProcessHALs();
@@ -236,6 +244,21 @@ public class ZygoteInit {
         Log.i(TAG, "Warmed up JCA providers in "
                 + (SystemClock.uptimeMillis() - startTime) + "ms.");
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+    }
+
+    private static boolean isExperimentEnabled(String experiment) {
+        boolean defaultValue = SystemProperties.getBoolean(
+                "dalvik.vm." + experiment,
+                /*def=*/false);
+        // Can't use device_config since we are the zygote, and it's not initialized at this point.
+        return SystemProperties.getBoolean(
+                "persist.device_config." + DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT
+                        + "." + experiment,
+                defaultValue);
+    }
+
+    /* package-private */ static boolean shouldProfileSystemServer() {
+        return isExperimentEnabled("profilesystemserver");
     }
 
     /**
@@ -341,14 +364,7 @@ public class ZygoteInit {
             // If we are profiling the boot image, reset the Jit counters after preloading the
             // classes. We want to preload for performance, and we can use method counters to
             // infer what clases are used after calling resetJitCounters, for profile purposes.
-            // Can't use device_config since we are the zygote.
-            String prop = SystemProperties.get(
-                    "persist.device_config.runtime_native_boot.profilebootclasspath", "");
-            // Might be empty if the property is unset since the default is "".
-            if (prop.length() == 0) {
-                prop = SystemProperties.get("dalvik.vm.profilebootclasspath", "");
-            }
-            if ("true".equals(prop)) {
+            if (isExperimentEnabled("profilebootclasspath")) {
                 Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ResetJitCounters");
                 VMRuntime.resetJitCounters();
                 Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
@@ -371,33 +387,49 @@ public class ZygoteInit {
      * classpath.
      */
     private static void cacheNonBootClasspathClassLoaders() {
+        // Ordered dependencies first
+        final List<SharedLibraryInfo> libs = new ArrayList<>();
         // These libraries used to be part of the bootclasspath, but had to be removed.
         // Old system applications still get them for backwards compatibility reasons,
         // so they are cached here in order to preserve performance characteristics.
-        SharedLibraryInfo hidlBase = new SharedLibraryInfo(
+        libs.add(new SharedLibraryInfo(
                 "/system/framework/android.hidl.base-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
-                false /*isNative*/);
-        SharedLibraryInfo hidlManager = new SharedLibraryInfo(
+                false /*isNative*/));
+        libs.add(new SharedLibraryInfo(
                 "/system/framework/android.hidl.manager-V1.0-java.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
-                false /*isNative*/);
+                false /*isNative*/));
 
-        SharedLibraryInfo androidTestBase = new SharedLibraryInfo(
+        libs.add(new SharedLibraryInfo(
                 "/system/framework/android.test.base.jar", null /*packageName*/,
                 null /*codePaths*/, null /*name*/, 0 /*version*/, SharedLibraryInfo.TYPE_BUILTIN,
                 null /*declaringPackage*/, null /*dependentPackages*/, null /*dependencies*/,
-                false /*isNative*/);
+                false /*isNative*/));
 
-        ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(
-                new SharedLibraryInfo[]{
-                    // ordered dependencies first
-                    hidlBase,
-                    hidlManager,
-                    androidTestBase,
-                });
+        // WindowManager Extensions is an optional shared library that is required for WindowManager
+        // Jetpack to fully function. Since it is a widely used library, preload it to improve apps
+        // startup performance.
+        if (WindowManager.hasWindowExtensionsEnabled()) {
+            final String systemExtFrameworkPath =
+                    new File(Environment.getSystemExtDirectory(), "framework").getPath();
+            libs.add(new SharedLibraryInfo(
+                    systemExtFrameworkPath + "/androidx.window.extensions.jar",
+                    "androidx.window.extensions", null /*codePaths*/,
+                    "androidx.window.extensions", SharedLibraryInfo.VERSION_UNDEFINED,
+                    SharedLibraryInfo.TYPE_BUILTIN, null /*declaringPackage*/,
+                    null /*dependentPackages*/, null /*dependencies*/, false /*isNative*/));
+            libs.add(new SharedLibraryInfo(
+                    systemExtFrameworkPath + "/androidx.window.sidecar.jar",
+                    "androidx.window.sidecar", null /*codePaths*/,
+                    "androidx.window.sidecar", SharedLibraryInfo.VERSION_UNDEFINED,
+                    SharedLibraryInfo.TYPE_BUILTIN, null /*declaringPackage*/,
+                    null /*dependentPackages*/, null /*dependencies*/, false /*isNative*/));
+        }
+
+        ApplicationLoaders.getDefault().createAndCacheNonBootclasspathSystemClassLoaders(libs);
     }
 
     /**
@@ -489,16 +521,6 @@ public class ZygoteInit {
         ZygoteHooks.gcAndFinalize();
     }
 
-    private static boolean shouldProfileSystemServer() {
-        boolean defaultValue = SystemProperties.getBoolean("dalvik.vm.profilesystemserver",
-                /*default=*/ false);
-        // Can't use DeviceConfig since it's not initialized at this point.
-        return SystemProperties.getBoolean(
-                "persist.device_config." + DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT
-                        + ".profilesystemserver",
-                defaultValue);
-    }
-
     /**
      * Finish remaining work for the newly forked system server process.
      */
@@ -517,7 +539,12 @@ public class ZygoteInit {
             if (shouldProfileSystemServer() && (Build.IS_USERDEBUG || Build.IS_ENG)) {
                 try {
                     Log.d(TAG, "Preparing system server profile");
-                    prepareSystemServerProfile(systemServerClasspath);
+                    final String standaloneSystemServerJars =
+                            Os.getenv("STANDALONE_SYSTEMSERVER_JARS");
+                    final String systemServerPaths = standaloneSystemServerJars != null
+                            ? String.join(":", systemServerClasspath, standaloneSystemServerJars)
+                            : systemServerClasspath;
+                    prepareSystemServerProfile(systemServerPaths);
                 } catch (Exception e) {
                     Log.wtf(TAG, "Failed to set up system server profile", e);
                 }
@@ -580,6 +607,13 @@ public class ZygoteInit {
      * in the forked system server process in the zygote SELinux domain.
      */
     private static void prefetchStandaloneSystemServerJars() {
+        if (shouldProfileSystemServer()) {
+            // We don't prefetch AOT artifacts if we are profiling system server, as we are going to
+            // JIT it.
+            // This method only gets called from native and should already be skipped if we profile
+            // system server. Still, be robust and check it again.
+            return;
+        }
         String envStr = Os.getenv("STANDALONE_SYSTEMSERVER_JARS");
         if (TextUtils.isEmpty(envStr)) {
             return;
@@ -603,12 +637,12 @@ public class ZygoteInit {
      * permissions. From the installer perspective the system server is a regular package which can
      * capture profile information.
      */
-    private static void prepareSystemServerProfile(String systemServerClasspath)
+    private static void prepareSystemServerProfile(String systemServerPaths)
             throws RemoteException {
-        if (systemServerClasspath.isEmpty()) {
+        if (systemServerPaths.isEmpty()) {
             return;
         }
-        String[] codePaths = systemServerClasspath.split(":");
+        String[] codePaths = systemServerPaths.split(":");
 
         final IInstalld installd = IInstalld.Stub
                 .asInterface(ServiceManager.getService("installd"));
@@ -706,7 +740,8 @@ public class ZygoteInit {
         } catch (ErrnoException ex) {
             throw new RuntimeException("Failed to capget()", ex);
         }
-        capabilities &= ((long) data[0].effective) | (((long) data[1].effective) << 32);
+        capabilities &= Integer.toUnsignedLong(data[0].effective) |
+                (Integer.toUnsignedLong(data[1].effective) << 32);
 
         /* Hardcoded command line to start the system server */
         String[] args = {

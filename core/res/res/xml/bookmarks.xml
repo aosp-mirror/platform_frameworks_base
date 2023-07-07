@@ -19,22 +19,19 @@
      Bookmarks for vendor apps should be added to a bookmarks resource overlay; not here.
 
      Typical shortcuts (not necessarily defined here):
-       'a': Calculator
        'b': Browser
        'c': Contacts
        'e': Email
        'g': GMail
-       'l': Calendar
+       'k': Calendar
        'm': Maps
        'p': Music
        's': SMS
        't': Talk
+       'u': Calculator
        'y': YouTube
 -->
 <bookmarks>
-    <bookmark
-        category="android.intent.category.APP_CALCULATOR"
-        shortcut="a" />
     <bookmark
         category="android.intent.category.APP_BROWSER"
         shortcut="b" />
@@ -46,7 +43,7 @@
         shortcut="e" />
     <bookmark
         category="android.intent.category.APP_CALENDAR"
-        shortcut="l" />
+        shortcut="k" />
     <bookmark
         category="android.intent.category.APP_MAPS"
         shortcut="m" />
@@ -56,4 +53,7 @@
     <bookmark
         category="android.intent.category.APP_MESSAGING"
         shortcut="s" />
+    <bookmark
+        category="android.intent.category.APP_CALCULATOR"
+        shortcut="u" />
 </bookmarks>

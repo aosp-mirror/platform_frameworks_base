@@ -1,4 +1,4 @@
-# See system/core/logcat/event.logtags for a description of the format of this file.
+# See system/logging/logcat/event.logtags for a description of the format of this file.
 
 option java_package android.app
 
@@ -6,21 +6,21 @@ option java_package android.app
 # google3/googledata/wireless/android/provisioning/gservices.config !!
 #
 # The activity's onPause has been called.
-30021 wm_on_paused_called (Token|1|5),(Component Name|3),(Reason|3)
+30021 wm_on_paused_called (Token|1|5),(Component Name|3),(Reason|3),(time|2|3)
 # The activity's onResume has been called.
-30022 wm_on_resume_called (Token|1|5),(Component Name|3),(Reason|3)
+30022 wm_on_resume_called (Token|1|5),(Component Name|3),(Reason|3),(time|2|3)
 
 # The activity's onStop has been called.
-30049 wm_on_stop_called (Token|1|5),(Component Name|3),(Reason|3)
+30049 wm_on_stop_called (Token|1|5),(Component Name|3),(Reason|3),(time|2|3)
 
 # The activity's onCreate has been called.
-30057 wm_on_create_called (Token|1|5),(Component Name|3),(Reason|3)
+30057 wm_on_create_called (Token|1|5),(Component Name|3),(Reason|3),(time|2|3)
 # The activity's onRestart has been called.
-30058 wm_on_restart_called (Token|1|5),(Component Name|3),(Reason|3)
+30058 wm_on_restart_called (Token|1|5),(Component Name|3),(Reason|3),(time|2|3)
 # The activity's onStart has been called.
-30059 wm_on_start_called (Token|1|5),(Component Name|3),(Reason|3)
+30059 wm_on_start_called (Token|1|5),(Component Name|3),(Reason|3),(time|2|3)
 # The activity's onDestroy has been called.
-30060 wm_on_destroy_called (Token|1|5),(Component Name|3),(Reason|3)
+30060 wm_on_destroy_called (Token|1|5),(Component Name|3),(Reason|3),(time|2|3)
 # The activity's onActivityResult has been called.
 30062 wm_on_activity_result_called (Token|1|5),(Component Name|3),(Reason|3)
 

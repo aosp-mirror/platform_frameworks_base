@@ -27,7 +27,6 @@ import static org.junit.Assert.assertTrue;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import org.junit.After;
@@ -110,7 +109,6 @@ public class PersisterQueueTests {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testProcessOneItem_Flush() throws Exception {
         mFactory.setExpectedProcessedItemNumber(1);
         mListener.setExpectedOnPreProcessItemCallbackTimes(1);
@@ -162,7 +160,6 @@ public class PersisterQueueTests {
     }
 
     @Test
-    @FlakyTest(bugId = 128526085)
     public void testProcessTwoItems_OneAfterAnother() throws Exception {
         // First item
         mFactory.setExpectedProcessedItemNumber(1);

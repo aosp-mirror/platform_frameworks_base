@@ -22,6 +22,7 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Налады"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Падзяліць экран"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Меню"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Меню рэжыму \"Відарыс у відарысе\""</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> з’яўляецца відарысам у відарысе"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Калі вы не хочаце, каб праграма <xliff:g id="NAME">%s</xliff:g> выкарыстоўвала гэту функцыю, дакраніцеся, каб адкрыць налады і адключыць яе."</string>
     <string name="pip_play" msgid="3496151081459417097">"Прайграць"</string>
@@ -33,9 +34,11 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Паказаць"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Праграма можа не працаваць у рэжыме падзеленага экрана."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Праграма не падтрымлівае функцыю дзялення экрана."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Гэту праграму можна адкрыць толькі ў адным акне."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Праграма можа не працаваць на дадатковых экранах."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Праграма не падтрымлівае запуск на дадатковых экранах."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Раздзяляльнік падзеленага экрана"</string>
+    <string name="divider_title" msgid="5482989479865361192">"Раздзяляльнік падзеленага экрана"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"Левы экран – поўнаэкранны рэжым"</string>
     <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"Левы экран – 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"Левы экран – 50%"</string>
@@ -46,6 +49,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Верхні экран – 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Верхні экран – 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Ніжні экран – поўнаэкранны рэжым"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Выкарыстоўваецца рэжым кіравання адной рукой"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Каб выйсці, правядзіце па экране пальцам знізу ўверх або націсніце ў любым месцы над праграмай"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Запусціць рэжым кіравання адной рукой"</string>
@@ -72,17 +83,28 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Усплывальнае апавяшчэнне"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Кіраваць"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Усплывальнае апавяшчэнне адхілена."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Націсніце, каб перазапусціць гэту праграму і перайсці ў поўнаэкранны рэжым."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Націсніце, каб перазапусціць гэту праграму для лепшага прагляду."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Праблемы з камерай?\nНацісніце, каб пераабсталяваць"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Не ўдалося выправіць?\nНацісніце, каб аднавіць"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Ніякіх праблем з камерай? Націсніце, каб адхіліць."</string>
-    <!-- no translation found for letterbox_education_dialog_title (6688664582871779215) -->
-    <skip />
-    <!-- no translation found for letterbox_education_dialog_subtext (4853542518367719562) -->
-    <skip />
-    <!-- no translation found for letterbox_education_screen_rotation_text (5085786687366339027) -->
-    <skip />
-    <!-- no translation found for letterbox_education_reposition_text (1068293354123934727) -->
-    <skip />
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Адначасова выконвайце розныя задачы"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Перацягніце іншую праграму, каб выкарыстоўваць падзелены экран"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Двойчы націсніце экран па-за праграмай, каб перамясціць яе"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Зразумела"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Разгарнуць для дадатковай інфармацыі"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Перазапусціць?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Вы можаце перазапусціць праграму, каб яна выглядала лепш на вашым экране, але пры гэтым могуць знікнуць даныя пра ваш прагрэс або незахаваныя змяненні"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Скасаваць"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Перазапусціць"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Больш не паказваць"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Разгарнуць"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Згарнуць"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Закрыць"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Назад"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Маркер"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"На ўвесь экран"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Рэжым працоўнага стала"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Падзяліць экран"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Яшчэ"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Зрабіць рухомым акном"</string>
 </resources>

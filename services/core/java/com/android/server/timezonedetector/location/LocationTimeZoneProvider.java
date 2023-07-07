@@ -16,6 +16,10 @@
 
 package com.android.server.timezonedetector.location;
 
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_IS_CERTAIN;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_IS_UNCERTAIN;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_NOT_PRESENT;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_NOT_READY;
 import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_PERMANENT_FAILURE;
 import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_SUGGESTION;
 import static android.service.timezone.TimeZoneProviderEvent.EVENT_TYPE_UNCERTAIN;
@@ -33,9 +37,11 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.time.LocationTimeZoneAlgorithmStatus.ProviderStatus;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.service.timezone.TimeZoneProviderEvent;
+import android.service.timezone.TimeZoneProviderStatus;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -294,6 +300,40 @@ abstract class LocationTimeZoneProvider implements Dumpable {
                     || stateEnum == PROVIDER_STATE_DESTROYED;
         }
 
+        /**
+         * Maps the internal state enum value to one of the status values exposed to the layers
+         * above.
+         */
+        public @ProviderStatus int getProviderStatus() {
+            switch (stateEnum) {
+                case PROVIDER_STATE_STARTED_INITIALIZING:
+                    return PROVIDER_STATUS_NOT_READY;
+                case PROVIDER_STATE_STARTED_CERTAIN:
+                    return PROVIDER_STATUS_IS_CERTAIN;
+                case PROVIDER_STATE_STARTED_UNCERTAIN:
+                    return PROVIDER_STATUS_IS_UNCERTAIN;
+                case PROVIDER_STATE_PERM_FAILED:
+                    // Perm failed means the providers wasn't configured, configured properly,
+                    // or has removed itself for other reasons, e.g. turned-down server.
+                    return PROVIDER_STATUS_NOT_PRESENT;
+                case PROVIDER_STATE_STOPPED:
+                case PROVIDER_STATE_DESTROYED:
+                    // This is a "safe" default that best describes a provider that isn't in one of
+                    // the more obviously mapped states.
+                    return PROVIDER_STATUS_NOT_READY;
+                case PROVIDER_STATE_UNKNOWN:
+                default:
+                    throw new IllegalStateException(
+                            "Unknown state enum:" + prettyPrintStateEnum(stateEnum));
+            }
+        }
+
+        /** Returns the status reported by the provider, if available. */
+        @Nullable
+        TimeZoneProviderStatus getReportedStatus() {
+            return event == null ? null : event.getTimeZoneProviderStatus();
+        }
+
         @Override
         public String toString() {
             // this.provider is omitted deliberately to avoid recursion, since the provider holds
@@ -408,13 +448,21 @@ abstract class LocationTimeZoneProvider implements Dumpable {
             currentState = currentState.newState(PROVIDER_STATE_STOPPED, null, null, "initialize");
             setCurrentState(currentState, false);
 
+            boolean initializationSuccess;
+            String initializationFailureReason;
             // Guard against uncaught exceptions due to initialization problems.
             try {
-                onInitialize();
+                initializationSuccess = onInitialize();
+                initializationFailureReason = "onInitialize() returned false";
             } catch (RuntimeException e) {
-                warnLog("Unable to initialize the provider", e);
+                warnLog("Unable to initialize the provider due to exception", e);
+                initializationSuccess = false;
+                initializationFailureReason = "onInitialize() threw exception:" + e.getMessage();
+            }
+
+            if (!initializationSuccess) {
                 currentState = currentState.newState(PROVIDER_STATE_PERM_FAILED, null, null,
-                        "Failed to initialize: " + e.getMessage());
+                        "Failed to initialize: " + initializationFailureReason);
                 setCurrentState(currentState, true);
             }
         }
@@ -422,9 +470,12 @@ abstract class LocationTimeZoneProvider implements Dumpable {
 
     /**
      * Implemented by subclasses to do work during {@link #initialize}.
+     *
+     * @return returns {@code true} on success, {@code false} if the provider should be considered
+     *   "permanently failed" / disabled
      */
     @GuardedBy("mSharedLock")
-    abstract void onInitialize();
+    abstract boolean onInitialize();
 
     /**
      * Destroys the provider. Called after the provider is stopped. This instance will not be called

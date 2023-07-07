@@ -18,7 +18,7 @@ package android.view;
 
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -177,6 +177,8 @@ public class KeyCharacterMap implements Parcelable {
     private static final int ACCENT_UMLAUT = '\u00A8';
     private static final int ACCENT_VERTICAL_LINE_ABOVE = '\u02C8';
     private static final int ACCENT_VERTICAL_LINE_BELOW = '\u02CC';
+    private static final int ACCENT_APOSTROPHE = '\'';
+    private static final int ACCENT_QUOTATION_MARK = '"';
 
     /* Legacy dead key display characters used in previous versions of the API.
      * We still support these characters by mapping them to their non-legacy version. */
@@ -204,8 +206,6 @@ public class KeyCharacterMap implements Parcelable {
         addCombining('\u030A', ACCENT_RING_ABOVE);
         addCombining('\u030B', ACCENT_DOUBLE_ACUTE);
         addCombining('\u030C', ACCENT_CARON);
-        addCombining('\u030D', ACCENT_VERTICAL_LINE_ABOVE);
-        //addCombining('\u030E', ACCENT_DOUBLE_VERTICAL_LINE_ABOVE);
         //addCombining('\u030F', ACCENT_DOUBLE_GRAVE);
         //addCombining('\u0310', ACCENT_CANDRABINDU);
         //addCombining('\u0311', ACCENT_INVERTED_BREVE);
@@ -229,11 +229,17 @@ public class KeyCharacterMap implements Parcelable {
         sCombiningToAccent.append('\u0340', ACCENT_GRAVE);
         sCombiningToAccent.append('\u0341', ACCENT_ACUTE);
         sCombiningToAccent.append('\u0343', ACCENT_COMMA_ABOVE);
+        sCombiningToAccent.append('\u030D', ACCENT_APOSTROPHE);
+        sCombiningToAccent.append('\u030E', ACCENT_QUOTATION_MARK);
 
         // One-way legacy mappings to preserve compatibility with older applications.
         sAccentToCombining.append(ACCENT_GRAVE_LEGACY, '\u0300');
         sAccentToCombining.append(ACCENT_CIRCUMFLEX_LEGACY, '\u0302');
         sAccentToCombining.append(ACCENT_TILDE_LEGACY, '\u0303');
+
+        // One-way mappings to use the preferred accent
+        sAccentToCombining.append(ACCENT_APOSTROPHE, '\u0301');
+        sAccentToCombining.append(ACCENT_QUOTATION_MARK, '\u0308');
     }
 
     private static void addCombining(int combining, int accent) {
@@ -349,7 +355,7 @@ public class KeyCharacterMap implements Parcelable {
      * is missing from the system.
      */
     public static KeyCharacterMap load(int deviceId) {
-        final InputManager im = InputManager.getInstance();
+        final InputManagerGlobal im = InputManagerGlobal.getInstance();
         InputDevice inputDevice = im.getInputDevice(deviceId);
         if (inputDevice == null) {
             inputDevice = im.getInputDevice(VIRTUAL_KEYBOARD);
@@ -716,7 +722,7 @@ public class KeyCharacterMap implements Parcelable {
      * @return True if at least one attached keyboard supports the specified key code.
      */
     public static boolean deviceHasKey(int keyCode) {
-        return InputManager.getInstance().deviceHasKeys(new int[] { keyCode })[0];
+        return InputManagerGlobal.getInstance().deviceHasKeys(new int[] { keyCode })[0];
     }
 
     /**
@@ -729,7 +735,7 @@ public class KeyCharacterMap implements Parcelable {
      * at the same index in the key codes array.
      */
     public static boolean[] deviceHasKeys(int[] keyCodes) {
-        return InputManager.getInstance().deviceHasKeys(keyCodes);
+        return InputManagerGlobal.getInstance().deviceHasKeys(keyCodes);
     }
 
     @Override

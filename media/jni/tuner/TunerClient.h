@@ -31,6 +31,7 @@
 using Status = ::ndk::ScopedAStatus;
 
 using ::aidl::android::hardware::tv::tuner::DemuxCapabilities;
+using ::aidl::android::hardware::tv::tuner::DemuxInfo;
 using ::aidl::android::hardware::tv::tuner::FrontendInfo;
 using ::aidl::android::hardware::tv::tuner::FrontendType;
 using ::aidl::android::hardware::tv::tuner::Result;
@@ -81,6 +82,21 @@ public:
      * @return a newly created DemuxClient interface.
      */
     sp<DemuxClient> openDemux(int32_t demuxHandle);
+
+    /**
+     * Retrieve the DemuxInfo of a specific demux
+     *
+     * @param demuxHandle the handle of the demux to query demux info for
+     * @return the demux info
+     */
+    shared_ptr<DemuxInfo> getDemuxInfo(int32_t demuxHandle);
+
+    /**
+     * Retrieve a list of demux info
+     *
+     * @return a list of DemuxInfo
+     */
+    void getDemuxInfoList(vector<DemuxInfo>* demuxInfoList);
 
     /**
      * Retrieve the Demux capabilities.
@@ -148,12 +164,18 @@ public:
      */
     int getMaxNumberOfFrontends(FrontendType frontendType);
 
+    /**
+     * Is Low Noise Amplifier (LNA) supported.
+     */
+    bool isLnaSupported();
+
 private:
     /**
-     * An AIDL Tuner Service Singleton assigned at the first time the Tuner Client
-     * connects with the Tuner Service. Default null when the service does not exist.
+     * An AIDL Tuner Service assigned at the first time the Tuner Client connects with
+     * the Tuner Service. null when the service does not exist. The tuner client in JNI
+     * will be singleton, so this Tuner Service client will be singleton too.
      */
-    static shared_ptr<ITunerService> mTunerService;
+    shared_ptr<ITunerService> mTunerService;
 
     // An integer that carries the Tuner version. The high 16 bits are the major version number
     // while the low 16 bits are the minor version. Default value is unknown version 0.

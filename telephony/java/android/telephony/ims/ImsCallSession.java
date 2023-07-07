@@ -18,10 +18,12 @@ package android.telephony.ims;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.CallQuality;
 import android.telephony.ims.aidl.IImsCallSessionListener;
+import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -99,7 +101,6 @@ public class ImsCallSession {
      * Listener for events relating to an IMS session, such as when a session is being
      * recieved ("on ringing") or a call is outgoing ("on calling").
      * <p>Many of these events are also received by {@link ImsCall.Listener}.</p>
-     * @hide
      */
     public static class Listener {
         /**
@@ -519,20 +520,30 @@ public class ImsCallSession {
                 @NonNull Set<RtpHeaderExtension> extensions) {
             // no-op
         }
+
+        /**
+         * Called when radio to send ANBRQ message to the access network to query the desired
+         * bitrate.
+         */
+        public void callSessionSendAnbrQuery(int mediaType, int direction, int bitsPerSecond) {
+            // no-op
+        }
     }
 
     private final IImsCallSession miSession;
     private boolean mClosed = false;
+    private String mCallId = null;
     private Listener mListener;
     private Executor mListenerExecutor = Runnable::run;
+    private IImsCallSessionListenerProxy mIImsCallSessionListenerProxy = null;
 
-    /** @hide */
     public ImsCallSession(IImsCallSession iSession) {
         miSession = iSession;
+        mIImsCallSessionListenerProxy = new IImsCallSessionListenerProxy();
 
         if (iSession != null) {
             try {
-                iSession.setListener(new IImsCallSessionListenerProxy());
+                iSession.setListener(mIImsCallSessionListenerProxy);
             } catch (RemoteException e) {
             }
         } else {
@@ -540,10 +551,16 @@ public class ImsCallSession {
         }
     }
 
-    /** @hide */
     public ImsCallSession(IImsCallSession iSession, Listener listener, Executor executor) {
         this(iSession);
         setListener(listener, executor);
+    }
+
+    /**
+     * returns the IImsCallSessionListenerProxy for the ImsCallSession
+     */
+    public final IImsCallSessionListenerProxy getIImsCallSessionListenerProxy() {
+        return mIImsCallSessionListenerProxy;
     }
 
     /**
@@ -567,16 +584,34 @@ public class ImsCallSession {
      * Gets the call ID of the session.
      *
      * @return the call ID
+     * If null is returned for getCallId, then that means that the call ID has not been set yet.
      */
     public String getCallId() {
         if (mClosed) {
             return null;
         }
 
-        try {
-            return miSession.getCallId();
-        } catch (RemoteException e) {
-            return null;
+        if (mCallId != null) {
+            return mCallId;
+        } else {
+            try {
+                return mCallId = miSession.getCallId();
+            } catch (RemoteException e) {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Sets the call ID of the session.
+     *
+     * @param callId Call ID of the session, which is transferred from
+     * {@link android.telephony.ims.feature.MmTelFeature#notifyIncomingCall(
+     * ImsCallSessionImplBase, String, Bundle)}
+     */
+    public void setCallId(String callId) {
+        if (callId != null) {
+            mCallId = callId;
         }
     }
 
@@ -635,7 +670,6 @@ public class ImsCallSession {
      * Gets the video call provider for the session.
      *
      * @return The video call provider.
-     * @hide
      */
     public IImsVideoCallProvider getVideoCallProvider() {
         if (mClosed) {
@@ -712,7 +746,6 @@ public class ImsCallSession {
 
     /**
      * Gets the native IMS call session.
-     * @hide
      */
     public IImsCallSession getSession() {
         return miSession;
@@ -742,7 +775,6 @@ public class ImsCallSession {
      *
      * @param listener to listen to the session events of this object
      * @param executor an Executor that will execute callbacks
-     * @hide
      */
     public void setListener(Listener listener, Executor executor) {
         mListener = listener;
@@ -1197,6 +1229,27 @@ public class ImsCallSession {
             miSession.sendRtpHeaderExtensions(
                     new ArrayList<RtpHeaderExtension>(rtpHeaderExtensions));
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Deliver the bitrate for the indicated media type, direction and bitrate to the upper layer.
+     *
+     * @param mediaType MediaType is used to identify media stream such as audio or video.
+     * @param direction Direction of this packet stream (e.g. uplink or downlink).
+     * @param bitsPerSecond This value is the bitrate received from the NW through the Recommended
+     *        bitrate MAC Control Element message and ImsStack converts this value from MAC bitrate
+     *        to audio/video codec bitrate (defined in TS26.114).
+     */
+    public void callSessionNotifyAnbr(int mediaType, int direction, int bitsPerSecond) {
+        if (mClosed) {
+            return;
+        }
+
+        try {
+            miSession.callSessionNotifyAnbr(mediaType, direction, bitsPerSecond);
+        } catch (RemoteException e) {
+            Log.e(TAG, "callSessionNotifyAnbr" + e);
         }
     }
 
@@ -1693,6 +1746,26 @@ public class ImsCallSession {
                 }
             }, mListenerExecutor);
         }
+
+        /**
+         * ANBR Query received.
+         *
+         * @param mediaType MediaType is used to identify media stream such as audio or video.
+         * @param direction Direction of this packet stream (e.g. uplink or downlink).
+         * @param bitsPerSecond This value is the bitrate requested by the other party UE through
+         *        RTP CMR, RTCPAPP or TMMBR, and ImsStack converts this value to the MAC bitrate
+         *        (defined in TS36.321, range: 0 ~ 8000 kbit/s).
+         */
+        @Override
+        public void callSessionSendAnbrQuery(int mediaType, int direction,
+                int bitsPerSecond) {
+            Log.d(TAG, "callSessionSendAnbrQuery in ImsCallSession");
+            TelephonyUtils.runWithCleanCallingIdentity(()-> {
+                if (mListener != null) {
+                    mListener.callSessionSendAnbrQuery(mediaType, direction, bitsPerSecond);
+                }
+            }, mListenerExecutor);
+        }
     }
 
     /**
@@ -1706,10 +1779,8 @@ public class ImsCallSession {
         StringBuilder sb = new StringBuilder();
         sb.append("[ImsCallSession objId:");
         sb.append(System.identityHashCode(this));
-        sb.append(" state:");
-        sb.append(State.toString(getState()));
         sb.append(" callId:");
-        sb.append(getCallId());
+        sb.append(mCallId != null ? mCallId : "[UNINITIALIZED]");
         sb.append("]");
         return sb.toString();
     }

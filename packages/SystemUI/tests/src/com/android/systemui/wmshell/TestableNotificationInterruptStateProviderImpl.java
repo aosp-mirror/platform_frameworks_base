@@ -20,16 +20,17 @@ import android.content.ContentResolver;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.service.dreams.IDreamManager;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 public class TestableNotificationInterruptStateProviderImpl
         extends NotificationInterruptStateProviderImpl {
@@ -37,28 +38,30 @@ public class TestableNotificationInterruptStateProviderImpl
     TestableNotificationInterruptStateProviderImpl(
             ContentResolver contentResolver,
             PowerManager powerManager,
-            IDreamManager dreamManager,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
-            NotificationFilter filter,
             StatusBarStateController statusBarStateController,
+            KeyguardStateController keyguardStateController,
             BatteryController batteryController,
             HeadsUpManager headsUpManager,
             NotificationInterruptLogger logger,
             Handler mainHandler,
             NotifPipelineFlags flags,
-            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
+            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
+            UiEventLogger uiEventLogger,
+            UserTracker userTracker) {
         super(contentResolver,
                 powerManager,
-                dreamManager,
                 ambientDisplayConfiguration,
-                filter,
                 batteryController,
                 statusBarStateController,
+                keyguardStateController,
                 headsUpManager,
                 logger,
                 mainHandler,
                 flags,
-                keyguardNotificationVisibilityProvider);
+                keyguardNotificationVisibilityProvider,
+                uiEventLogger,
+                userTracker);
         mUseHeadsUp = true;
     }
 }

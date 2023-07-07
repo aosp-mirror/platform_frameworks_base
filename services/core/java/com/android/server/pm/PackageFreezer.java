@@ -51,7 +51,7 @@ final class PackageFreezer implements AutoCloseable {
     }
 
     PackageFreezer(String packageName, int userId, String killReason,
-            PackageManagerService pm) {
+            PackageManagerService pm, int exitInfoReason) {
         mPm = pm;
         mPackageName = packageName;
         final PackageSetting ps;
@@ -62,7 +62,8 @@ final class PackageFreezer implements AutoCloseable {
             ps = mPm.mSettings.getPackageLPr(mPackageName);
         }
         if (ps != null) {
-            mPm.killApplication(ps.getPackageName(), ps.getAppId(), userId, killReason);
+            mPm.killApplication(ps.getPackageName(), ps.getAppId(), userId, killReason,
+                    exitInfoReason);
         }
         mCloseGuard.open("close");
     }

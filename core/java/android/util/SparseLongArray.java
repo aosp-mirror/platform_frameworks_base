@@ -51,7 +51,7 @@ public class SparseLongArray implements Cloneable {
      * Creates a new SparseLongArray containing no mappings.
      */
     public SparseLongArray() {
-        this(10);
+        this(0);
     }
 
     /**

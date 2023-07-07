@@ -19,6 +19,7 @@ package com.android.server.notification;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.fail;
 
+import android.os.Parcel;
 import android.service.notification.ZenPolicy;
 import android.service.notification.nano.DNDPolicyProto;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -32,9 +33,13 @@ import com.google.protobuf.nano.InvalidProtocolBufferNanoException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ZenPolicyTest extends UiServiceTestCase {
+    private static final String CLASS = "android.service.notification.ZenPolicy";
 
     @Test
     public void testZenPolicyApplyAllowedToDisallowed() {
@@ -522,6 +527,66 @@ public class ZenPolicyTest extends UiServiceTestCase {
         policy = builder.build();
         assertAllVisualEffectsUnsetExcept(policy, ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST);
         assertProtoMatches(policy, policy.toProto());
+    }
+
+    @Test
+    public void testTooLongLists_fromParcel() {
+        ArrayList<Integer> longList = new ArrayList<Integer>(50);
+        for (int i = 0; i < 50; i++) {
+            longList.add(ZenPolicy.STATE_UNSET);
+        }
+
+        ZenPolicy.Builder builder = new ZenPolicy.Builder();
+        ZenPolicy policy = builder.build();
+
+        try {
+            Field priorityCategories = Class.forName(CLASS).getDeclaredField(
+                    "mPriorityCategories");
+            priorityCategories.setAccessible(true);
+            priorityCategories.set(policy, longList);
+
+            Field visualEffects = Class.forName(CLASS).getDeclaredField("mVisualEffects");
+            visualEffects.setAccessible(true);
+            visualEffects.set(policy, longList);
+        } catch (NoSuchFieldException e) {
+            fail(e.toString());
+        } catch (ClassNotFoundException e) {
+            fail(e.toString());
+        } catch (IllegalAccessException e) {
+            fail(e.toString());
+        }
+
+        Parcel parcel = Parcel.obtain();
+        policy.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        ZenPolicy fromParcel = ZenPolicy.CREATOR.createFromParcel(parcel);
+
+        // Confirm that all the fields are accessible and UNSET
+        assertAllPriorityCategoriesUnsetExcept(fromParcel, -1);
+        assertAllVisualEffectsUnsetExcept(fromParcel, -1);
+
+        // Because we don't access the lists directly, we also need to use reflection to make sure
+        // the lists are the right length.
+        try {
+            Field priorityCategories = Class.forName(CLASS).getDeclaredField(
+                    "mPriorityCategories");
+            priorityCategories.setAccessible(true);
+            ArrayList<Integer> pcList = (ArrayList<Integer>) priorityCategories.get(fromParcel);
+            assertEquals(ZenPolicy.NUM_PRIORITY_CATEGORIES, pcList.size());
+
+
+            Field visualEffects = Class.forName(CLASS).getDeclaredField("mVisualEffects");
+            visualEffects.setAccessible(true);
+            ArrayList<Integer> veList = (ArrayList<Integer>) visualEffects.get(fromParcel);
+            assertEquals(ZenPolicy.NUM_VISUAL_EFFECTS, veList.size());
+        } catch (NoSuchFieldException e) {
+            fail(e.toString());
+        } catch (ClassNotFoundException e) {
+            fail(e.toString());
+        } catch (IllegalAccessException e) {
+            fail(e.toString());
+        }
     }
 
     private void assertAllPriorityCategoriesUnsetExcept(ZenPolicy policy, int except) {

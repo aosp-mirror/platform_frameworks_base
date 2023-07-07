@@ -49,6 +49,38 @@ public class EventLogWriter implements LogWriter {
     }
 
     @Override
+    public void clicked(int sourceCategory, String key) {
+        final LogMaker logMaker = new LogMaker(MetricsProto.MetricsEvent.ACTION_SETTINGS_TILE_CLICK)
+                .setType(MetricsProto.MetricsEvent.TYPE_ACTION);
+        if (sourceCategory != MetricsProto.MetricsEvent.VIEW_UNKNOWN) {
+            logMaker.addTaggedData(MetricsProto.MetricsEvent.FIELD_CONTEXT, sourceCategory);
+        }
+        if (!TextUtils.isEmpty(key)) {
+            logMaker.addTaggedData(MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_NAME,
+                    key);
+        }
+        MetricsLogger.action(logMaker);
+    }
+
+    @Override
+    public void changed(int category, String key, int value) {
+        final LogMaker logMaker = new LogMaker(
+                MetricsProto.MetricsEvent.ACTION_SETTINGS_PREFERENCE_CHANGE)
+                .setType(MetricsProto.MetricsEvent.TYPE_ACTION);
+        if (category != MetricsProto.MetricsEvent.VIEW_UNKNOWN) {
+            logMaker.addTaggedData(MetricsProto.MetricsEvent.FIELD_CONTEXT, category);
+        }
+        if (!TextUtils.isEmpty(key)) {
+            logMaker.addTaggedData(MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_NAME,
+                    key);
+            logMaker.addTaggedData(
+                    MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE,
+                    value);
+        }
+        MetricsLogger.action(logMaker);
+    }
+
+    @Override
     public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
         final LogMaker logMaker = new LogMaker(category)
                 .setType(MetricsProto.MetricsEvent.TYPE_ACTION);

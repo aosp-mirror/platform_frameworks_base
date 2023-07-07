@@ -19,6 +19,7 @@ package com.android.server.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
@@ -26,9 +27,11 @@ import android.os.Bundle;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 abstract class MediaRoute2Provider {
     final ComponentName mComponentName;
@@ -54,7 +57,9 @@ abstract class MediaRoute2Provider {
     public abstract void requestCreateSession(long requestId, String packageName, String routeId,
             @Nullable Bundle sessionHints);
     public abstract void releaseSession(long requestId, String sessionId);
-    public abstract void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference);
+
+    public abstract void updateDiscoveryPreference(
+            Set<String> activelyScanningPackages, RouteDiscoveryPreference discoveryPreference);
 
     public abstract void selectRoute(long requestId, String sessionId, String routeId);
     public abstract void deselectRoute(long requestId, String sessionId, String routeId);
@@ -107,6 +112,28 @@ abstract class MediaRoute2Provider {
         return mComponentName.getPackageName().equals(packageName)
                 && mComponentName.getClassName().equals(className);
     }
+
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + getDebugString());
+        prefix += "  ";
+        if (mProviderInfo == null) {
+            pw.println(prefix + "<provider info not received, yet>");
+        } else if (mProviderInfo.getRoutes().isEmpty()) {
+            pw.println(prefix + "<provider info has no routes>");
+        } else {
+            for (MediaRoute2Info route : mProviderInfo.getRoutes()) {
+                pw.printf("%s%s | %s\n", prefix, route.getId(), route.getName());
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return getDebugString();
+    }
+
+    /** Returns a human-readable string describing the instance, for debugging purposes. */
+    protected abstract String getDebugString();
 
     public interface Callback {
         void onProviderStateChanged(@Nullable MediaRoute2Provider provider);

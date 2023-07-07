@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,8 +44,10 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.TestLooperManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
+import android.view.Display;
 import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -91,7 +94,9 @@ public class Instrumentation {
 
     private static final String TAG = "Instrumentation";
 
-    private static final long CONNECT_TIMEOUT_MILLIS = 5000;
+    private static final long CONNECT_TIMEOUT_MILLIS = 60_000;
+
+    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
     /**
      * @hide
@@ -390,7 +395,7 @@ public class Instrumentation {
     public void setInTouchMode(boolean inTouch) {
         try {
             IWindowManager.Stub.asInterface(
-                    ServiceManager.getService("window")).setInTouchMode(inTouch);
+                    ServiceManager.getService("window")).setInTouchModeOnAllDisplays(inTouch);
         } catch (RemoteException e) {
             // Shouldn't happen!
         }
@@ -783,6 +788,17 @@ public class Instrumentation {
             return null;
         }
 
+        /**
+         * This is called after starting an Activity and provides the result code that defined in
+         * {@link ActivityManager}, like {@link ActivityManager#START_SUCCESS}.
+         *
+         * @param result the result code that returns after starting an Activity.
+         * @param bOptions the bundle generated from {@link ActivityOptions} that originally
+         *                 being used to start the Activity.
+         * @hide
+         */
+        public void onStartActivityResult(int result, @NonNull Bundle bOptions) {}
+
         final boolean match(Context who,
                             Activity activity,
                             Intent intent) {
@@ -1113,8 +1129,42 @@ public class Instrumentation {
         newEvent.setTime(downTime, eventTime);
         newEvent.setSource(source);
         newEvent.setFlags(event.getFlags() | KeyEvent.FLAG_FROM_SYSTEM);
-        InputManager.getInstance().injectInputEvent(newEvent,
+        setDisplayIfNeeded(newEvent);
+
+        InputManagerGlobal.getInstance().injectInputEvent(newEvent,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+    }
+
+    private void setDisplayIfNeeded(KeyEvent event) {
+        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            return;
+        }
+        // In devices that support visible background users visible, the display id must be set to
+        // reflect the display the user was started visible on, otherwise the event would be sent to
+        // the main display (which would most likely fail the test).
+        int eventDisplayId = event.getDisplayId();
+        if (eventDisplayId != Display.INVALID_DISPLAY) {
+            if (VERBOSE) {
+                Log.v(TAG, "setDisplayIfNeeded(" + event + "): not changing display id as it's "
+                        + "explicitly set to " + eventDisplayId);
+            }
+            return;
+        }
+
+        UserManager userManager = mInstrContext.getSystemService(UserManager.class);
+        int userDisplayId = userManager.getMainDisplayIdAssignedToUser();
+        if (VERBOSE) {
+            Log.v(TAG, "setDisplayIfNeeded(" + event + "): eventDisplayId=" + eventDisplayId
+                    + ", user=" + mInstrContext.getUser() + ", userDisplayId=" + userDisplayId);
+        }
+        if (userDisplayId == Display.INVALID_DISPLAY) {
+            Log.e(TAG, "setDisplayIfNeeded(" + event + "): UserManager returned INVALID_DISPLAY as "
+                    + "display assigned to user " + mInstrContext.getUser());
+            return;
+
+        }
+
+        event.setDisplayId(userDisplayId);
     }
 
     /**
@@ -1180,7 +1230,7 @@ public class Instrumentation {
             }
 
             // Direct the injected event into windows owned by the instrumentation target.
-            InputManager.getInstance().injectInputEvent(
+            InputManagerGlobal.getInstance().injectInputEvent(
                     event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH, Process.myUid());
 
             if (syncAfter) {
@@ -1210,7 +1260,7 @@ public class Instrumentation {
         if (!event.isFromSource(InputDevice.SOURCE_CLASS_TRACKBALL)) {
             event.setSource(InputDevice.SOURCE_TRACKBALL);
         }
-        InputManager.getInstance().injectInputEvent(event,
+        InputManagerGlobal.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
@@ -1342,6 +1392,28 @@ public class Instrumentation {
         // This is in the case of starting up "android".
         if (apk == null) apk = mThread.getSystemContext().mPackageInfo;
         return apk.getAppFactory();
+    }
+
+    /**
+     * This should be called before {@link #checkStartActivityResult(int, Object)}, because
+     * exceptions might be thrown while checking the results.
+     */
+    private void notifyStartActivityResult(int result, @Nullable Bundle options) {
+        if (mActivityMonitors == null) {
+            return;
+        }
+        synchronized (mSync) {
+            final int size = mActivityMonitors.size();
+            for (int i = 0; i < size; i++) {
+                final ActivityMonitor am = mActivityMonitors.get(i);
+                if (am.ignoreMatchingSpecificIntents()) {
+                    if (options == null) {
+                        options = ActivityOptions.makeBasic().toBundle();
+                    }
+                    am.onStartActivityResult(result, options);
+                }
+            }
+        }
     }
 
     private void prePerformCreate(Activity activity) {
@@ -1802,6 +1874,7 @@ public class Instrumentation {
                     who.getOpPackageName(), who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), token,
                     target != null ? target.mEmbeddedID : null, requestCode, 0, null, options);
+            notifyStartActivityResult(result, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -1876,6 +1949,7 @@ public class Instrumentation {
             int result = ActivityTaskManager.getService().startActivities(whoThread,
                     who.getOpPackageName(), who.getAttributionTag(), intents, resolvedTypes,
                     token, options, userId);
+            notifyStartActivityResult(result, options);
             checkStartActivityResult(result, intents[0]);
             return result;
         } catch (RemoteException e) {
@@ -1947,6 +2021,7 @@ public class Instrumentation {
                     who.getOpPackageName(), who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), token, target,
                     requestCode, 0, null, options);
+            notifyStartActivityResult(result, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -2017,6 +2092,7 @@ public class Instrumentation {
                     who.getOpPackageName(), who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), token, resultWho,
                     requestCode, 0, null, options, user.getIdentifier());
+            notifyStartActivityResult(result, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -2068,6 +2144,7 @@ public class Instrumentation {
                             token, target != null ? target.mEmbeddedID : null,
                             requestCode, 0, null, options,
                             ignoreTargetSecurity, userId);
+            notifyStartActivityResult(result, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -2115,6 +2192,7 @@ public class Instrumentation {
             int result = appTask.startActivity(whoThread.asBinder(), who.getOpPackageName(),
                     who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), options);
+            notifyStartActivityResult(result, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -2276,8 +2354,7 @@ public class Instrumentation {
                 return mUiAutomation;
             }
             if (mustCreateNewAutomation) {
-                mUiAutomation = new UiAutomation(getTargetContext().getMainLooper(),
-                        mUiAutomationConnection);
+                mUiAutomation = new UiAutomation(getTargetContext(), mUiAutomationConnection);
             } else {
                 mUiAutomation.disconnect();
             }
@@ -2285,10 +2362,13 @@ public class Instrumentation {
                 mUiAutomation.connect(flags);
                 return mUiAutomation;
             }
+            final long startUptime = SystemClock.uptimeMillis();
             try {
                 mUiAutomation.connectWithTimeout(flags, CONNECT_TIMEOUT_MILLIS);
                 return mUiAutomation;
             } catch (TimeoutException e) {
+                final long waited = SystemClock.uptimeMillis() - startUptime;
+                Log.e(TAG, "Unable to connect to UiAutomation. Waited for " + waited + " ms", e);
                 mUiAutomation.destroy();
                 mUiAutomation = null;
             }

@@ -22,7 +22,6 @@ import android.net.NetworkTemplate.MATCH_CARRIER
 import android.net.NetworkTemplate.MATCH_ETHERNET
 import android.net.NetworkTemplate.MATCH_MOBILE
 import android.net.NetworkTemplate.MATCH_WIFI
-import android.text.format.Time.TIMEZONE_UTC
 import androidx.test.runner.AndroidJUnit4
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,7 +56,7 @@ class NetworkPolicyTest {
     }
 
     private fun createTestPolicyForTemplate(template: NetworkTemplate): NetworkPolicy {
-        return NetworkPolicy(template, NetworkPolicy.buildRule(5, ZoneId.of(TIMEZONE_UTC)),
+        return NetworkPolicy(template, NetworkPolicy.buildRule(5, ZoneId.of("UTC")),
                 NetworkPolicy.WARNING_DISABLED, NetworkPolicy.LIMIT_DISABLED,
                 NetworkPolicy.SNOOZE_NEVER, NetworkPolicy.SNOOZE_NEVER, NetworkPolicy.SNOOZE_NEVER,
                 /*metered*/ false, /*inferred*/ true)

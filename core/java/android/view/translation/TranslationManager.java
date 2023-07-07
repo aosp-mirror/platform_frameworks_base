@@ -40,11 +40,11 @@ import android.util.Pair;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.SyncResultReceiver;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
@@ -92,7 +92,8 @@ public final class TranslationManager {
     private final Map<Consumer<TranslationCapability>, IRemoteCallback> mCapabilityCallbacks =
             new ArrayMap<>();
 
-    private static final Random ID_GENERATOR = new Random();
+    // TODO(b/158778794): make the session ids truly globally unique across processes
+    private static final SecureRandom ID_GENERATOR = new SecureRandom();
     private final Object mLock = new Object();
 
     @NonNull
@@ -246,7 +247,7 @@ public final class TranslationManager {
                 return Collections.emptySet();
             }
             ParceledListSlice<TranslationCapability> listSlice =
-                    result.bundle.getParcelable(EXTRA_CAPABILITIES);
+                    result.bundle.getParcelable(EXTRA_CAPABILITIES, android.content.pm.ParceledListSlice.class);
             ArraySet<TranslationCapability> capabilities =
                     new ArraySet<>(listSlice == null ? null : listSlice.getList());
             return capabilities;
@@ -466,7 +467,7 @@ public final class TranslationManager {
 
         private void onTranslationCapabilityUpdate(Bundle bundle) {
             TranslationCapability capability =
-                    (TranslationCapability) bundle.getParcelable(EXTRA_CAPABILITIES);
+                    (TranslationCapability) bundle.getParcelable(EXTRA_CAPABILITIES, android.view.translation.TranslationCapability.class);
             mListener.accept(capability);
         }
     }

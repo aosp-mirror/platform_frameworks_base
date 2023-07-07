@@ -23,13 +23,19 @@ import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.os.Bundle;
 import android.view.WindowManager;
 
+import com.android.systemui.Dumpable;
+import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface for the biometric dialog UI.
+ *
+ * TODO(b/251476085): remove along with legacy controller once flag is removed
  */
-public interface AuthDialog {
+@Deprecated
+public interface AuthDialog extends Dumpable {
 
     String KEY_CONTAINER_GOING_AWAY = "container_going_away";
     String KEY_BIOMETRIC_SHOWING = "biometric_showing";
@@ -68,10 +74,10 @@ public interface AuthDialog {
      * {@link AuthPanelController}.
      */
     class LayoutParams {
-        final int mMediumHeight;
-        final int mMediumWidth;
+        public final int mMediumHeight;
+        public final int mMediumWidth;
 
-        LayoutParams(int mediumWidth, int mediumHeight) {
+        public LayoutParams(int mediumWidth, int mediumHeight) {
             mMediumWidth = mediumWidth;
             mMediumHeight = mediumHeight;
         }
@@ -170,4 +176,6 @@ public interface AuthDialog {
      * must remain fixed on the physical sensor location.
      */
     void onOrientationChanged();
+
+    PromptViewModel getViewModel();
 }

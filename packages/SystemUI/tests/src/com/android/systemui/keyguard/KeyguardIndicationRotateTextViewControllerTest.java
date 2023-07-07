@@ -17,15 +17,18 @@
 package com.android.systemui.keyguard;
 
 
+import static com.android.systemui.flags.Flags.KEYGUARD_TALKBACK_FIX;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -38,7 +41,9 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -66,6 +71,8 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
     private KeyguardIndicationTextView mView;
     @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private KeyguardLogger mLogger;
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
 
@@ -76,12 +83,62 @@ public class KeyguardIndicationRotateTextViewControllerTest extends SysuiTestCas
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mView.getTextColors()).thenReturn(ColorStateList.valueOf(Color.WHITE));
+        FakeFeatureFlags flags = new FakeFeatureFlags();
+        flags.set(KEYGUARD_TALKBACK_FIX, true);
         mController = new KeyguardIndicationRotateTextViewController(mView, mExecutor,
-                mStatusBarStateController);
+                mStatusBarStateController, mLogger, flags);
         mController.onViewAttached();
 
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
         mStatusBarStateListener = mStatusBarStateListenerCaptor.getValue();
+    }
+
+    @Test
+    public void onViewDetached_removesStatusBarStateListener() {
+        mController.onViewDetached();
+        verify(mStatusBarStateController).removeCallback(mStatusBarStateListener);
+    }
+
+    @Test
+    public void onViewDetached_removesAllScheduledIndications() {
+        // GIVEN show next indication runnable is set
+        final KeyguardIndicationRotateTextViewController.ShowNextIndication mockShowNextIndication =
+                mock(KeyguardIndicationRotateTextViewController.ShowNextIndication.class);
+        mController.mShowNextIndicationRunnable = mockShowNextIndication;
+
+        // WHEN the view is detached
+        mController.onViewDetached();
+
+        // THEN delayed execution is cancelled & runnable set to null
+        verify(mockShowNextIndication).cancelDelayedExecution();
+        assertNull(mController.mShowNextIndicationRunnable);
+    }
+
+    @Test
+    public void destroy_removesStatusBarStateListener() {
+        mController.destroy();
+        verify(mStatusBarStateController).removeCallback(mStatusBarStateListener);
+    }
+
+    @Test
+    public void destroy_removesOnAttachStateChangeListener() {
+        mController.destroy();
+        verify(mView).removeOnAttachStateChangeListener(any());
+    }
+
+    @Test
+    public void destroy_removesAllScheduledIndications() {
+        // GIVEN show next indication runnable is set
+        final KeyguardIndicationRotateTextViewController.ShowNextIndication mockShowNextIndication =
+                mock(KeyguardIndicationRotateTextViewController.ShowNextIndication.class);
+        mController.mShowNextIndicationRunnable = mockShowNextIndication;
+
+        // WHEN the controller is destroyed
+        mController.destroy();
+
+        // THEN delayed execution is cancelled & runnable set to null
+        verify(mockShowNextIndication).cancelDelayedExecution();
+        assertNull(mController.mShowNextIndicationRunnable);
     }
 
     @Test

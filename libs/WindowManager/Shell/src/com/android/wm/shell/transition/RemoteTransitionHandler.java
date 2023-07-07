@@ -18,8 +18,8 @@ package com.android.wm.shell.transition;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityTaskManager;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -39,6 +39,7 @@ import androidx.annotation.BinderThread;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 
@@ -83,7 +84,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     }
 
     @Override
-    public void onTransitionMerged(@NonNull IBinder transition) {
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+            @Nullable SurfaceControl.Transaction finishT) {
         mRequestedRemotes.remove(transition);
     }
 
@@ -92,10 +94,16 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        if (!Transitions.SHELL_TRANSITIONS_ROTATION && TransitionUtil.hasDisplayChange(info)) {
+            // Note that if the remote doesn't have permission ACCESS_SURFACE_FLINGER, some
+            // operations of the start transaction may be ignored.
+            mRequestedRemotes.remove(transition);
+            return false;
+        }
         RemoteTransition pendingRemote = mRequestedRemotes.get(transition);
         if (pendingRemote == null) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s doesn't have "
-                    + "explicit remote, search filters for match for %s", transition, info);
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition doesn't have "
+                    + "explicit remote, search filters for match for %s", info);
             // If no explicit remote, search filters until one matches
             for (int i = mFilters.size() - 1; i >= 0; --i) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Checking filter %s",
@@ -109,8 +117,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
                 }
             }
         }
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Delegate animation for %s to %s",
-                transition, pendingRemote);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Delegate animation for #%d to %s",
+                info.getDebugId(), pendingRemote);
 
         if (pendingRemote == null) return false;
 
@@ -120,25 +128,27 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             public void onTransitionFinished(WindowContainerTransaction wct,
                     SurfaceControl.Transaction sct) {
                 unhandleDeath(remote.asBinder(), finishCallback);
+                if (sct != null) {
+                    finishTransaction.merge(sct);
+                }
                 mMainExecutor.execute(() -> {
-                    if (sct != null) {
-                        finishTransaction.merge(sct);
-                    }
                     mRequestedRemotes.remove(transition);
                     finishCallback.onTransitionFinished(wct, null /* wctCB */);
                 });
             }
         };
+        Transitions.setRunningRemoteTransitionDelegate(remote.getAppThread());
         try {
+            // If the remote is actually in the same process, then make a copy of parameters since
+            // remote impls assume that they have to clean-up native references.
+            final SurfaceControl.Transaction remoteStartT =
+                    copyIfLocal(startTransaction, remote.getRemoteTransition());
+            final TransitionInfo remoteInfo =
+                    remoteStartT == startTransaction ? info : info.localRemoteCopy();
             handleDeath(remote.asBinder(), finishCallback);
-            try {
-                ActivityTaskManager.getService().setRunningRemoteTransitionDelegate(
-                        remote.getAppThread());
-            } catch (SecurityException e) {
-                Log.e(Transitions.TAG, "Unable to boost animation thread. This should only happen"
-                        + " during unit tests");
-            }
-            remote.getRemoteTransition().startAnimation(transition, info, startTransaction, cb);
+            remote.getRemoteTransition().startAnimation(transition, remoteInfo, remoteStartT, cb);
+            // assume that remote will apply the start transaction.
+            startTransaction.clear();
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error running remote transition.", e);
             unhandleDeath(remote.asBinder(), finishCallback);
@@ -149,19 +159,47 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         return true;
     }
 
+    static SurfaceControl.Transaction copyIfLocal(SurfaceControl.Transaction t,
+            IRemoteTransition remote) {
+        // We care more about parceling than local (though they should be the same); so, use
+        // queryLocalInterface since that's what Binder uses to decide if it needs to parcel.
+        if (remote.asBinder().queryLocalInterface(IRemoteTransition.DESCRIPTOR) == null) {
+            // No local interface, so binder itself will parcel and thus we don't need to.
+            return t;
+        }
+        // Binder won't be parceling; however, the remotes assume they have their own native
+        // objects (and don't know if caller is local or not), so we need to make a COPY here so
+        // that the remote can clean it up without clearing the original transaction.
+        // Since there's no direct `copy` for Transaction, we have to parcel/unparcel instead.
+        final Parcel p = Parcel.obtain();
+        try {
+            t.writeToParcel(p, 0);
+            p.setDataPosition(0);
+            return SurfaceControl.Transaction.CREATOR.createFromParcel(p);
+        } finally {
+            p.recycle();
+        }
+    }
+
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        final IRemoteTransition remote = mRequestedRemotes.get(mergeTarget).getRemoteTransition();
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt merge %s into %s",
-                transition, remote);
+        final RemoteTransition remoteTransition = mRequestedRemotes.get(mergeTarget);
+        final IRemoteTransition remote = remoteTransition.getRemoteTransition();
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "   Merge into remote: %s",
+                remoteTransition);
         if (remote == null) return;
 
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
             public void onTransitionFinished(WindowContainerTransaction wct,
                     SurfaceControl.Transaction sct) {
+                // We have merged, since we sent the transaction over binder, the one in this
+                // process won't be cleared if the remote applied it. We don't actually know if the
+                // remote applied the transaction, but applying twice will break surfaceflinger
+                // so just assume the worst-case and clear the local transaction.
+                t.clear();
                 mMainExecutor.execute(() -> {
                     if (!mRequestedRemotes.containsKey(mergeTarget)) {
                         Log.e(TAG, "Merged transition finished after it's mergeTarget (the "
@@ -174,7 +212,11 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             }
         };
         try {
-            remote.mergeAnimation(transition, info, t, mergeTarget, cb);
+            // If the remote is actually in the same process, then make a copy of parameters since
+            // remote impls assume that they have to clean-up native references.
+            final SurfaceControl.Transaction remoteT = copyIfLocal(t, remote);
+            final TransitionInfo remoteInfo = remoteT == t ? info : info.localRemoteCopy();
+            remote.mergeAnimation(transition, remoteInfo, remoteT, mergeTarget, cb);
         } catch (RemoteException e) {
             Log.e(Transitions.TAG, "Error attempting to merge remote transition.", e);
         }

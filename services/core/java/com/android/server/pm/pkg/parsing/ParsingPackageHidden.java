@@ -23,12 +23,12 @@ import android.content.pm.PackageInfo;
  * Methods that normal consumers should not have access to. This usually means the field is stateful
  * or deprecated and should be access through a utility class or a system manager class.
  * <p>
- * This is a separate interface, not implemented by the base {@link ParsingPackageRead} because Java
+ * This is a separate interface, not implemented by the base {@link ParsingPackage} because Java
  * doesn't support non-public interface methods. The class must be cast to this interface.
  *
  * @hide
  */
-interface ParsingPackageHidden {
+public interface ParsingPackageHidden {
 
     /**
      * @see PackageInfo#versionCode

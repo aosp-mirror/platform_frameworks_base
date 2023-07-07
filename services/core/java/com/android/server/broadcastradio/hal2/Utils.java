@@ -25,9 +25,14 @@ enum FrequencyBand {
     AM_LW,
     AM_MW,
     AM_SW,
-};
+}
 
 class Utils {
+
+    private Utils() {
+        throw new UnsupportedOperationException("Utils class is noninstantiable");
+    }
+
     private static final String TAG = "BcRadio2Srv.utils";
 
     static FrequencyBand getBand(int freq) {

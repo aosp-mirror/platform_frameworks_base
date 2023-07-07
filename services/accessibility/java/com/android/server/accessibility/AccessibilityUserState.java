@@ -44,6 +44,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
@@ -118,6 +119,7 @@ class AccessibilityUserState {
     private boolean mRequestMultiFingerGestures;
     private boolean mRequestTwoFingerPassthrough;
     private boolean mSendMotionEventsEnabled;
+    private SparseArray<Boolean> mServiceDetectsGestures = new SparseArray<>(0);
     private int mUserInteractiveUiTimeout;
     private int mUserNonInteractiveUiTimeout;
     private int mNonInteractiveUiTimeout = 0;
@@ -132,6 +134,8 @@ class AccessibilityUserState {
     private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     // Whether the following typing focus feature for magnification is enabled.
     private boolean mMagnificationFollowTypingEnabled = true;
+    // Whether the always on magnification feature is enabled.
+    private boolean mAlwaysOnMagnificationEnabled = false;
 
     /** The stroke width of the focus rectangle in pixels */
     private int mFocusStrokeWidth;
@@ -215,6 +219,7 @@ class AccessibilityUserState {
         mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
         mFocusColor = mFocusColorDefaultValue;
         mMagnificationFollowTypingEnabled = true;
+        mAlwaysOnMagnificationEnabled = false;
     }
 
     void addServiceLocked(AccessibilityServiceConnection serviceConnection) {
@@ -381,18 +386,22 @@ class AccessibilityUserState {
     }
 
     /**
-     * Remove service from crashed service list if users disable it.
+     * Remove the service from the crashed and binding service lists if the user disabled it.
      */
-    void updateCrashedServicesIfNeededLocked() {
+    void removeDisabledServicesFromTemporaryStatesLocked() {
         for (int i = 0, count = mInstalledServices.size(); i < count; i++) {
             final AccessibilityServiceInfo installedService = mInstalledServices.get(i);
             final ComponentName componentName = ComponentName.unflattenFromString(
                     installedService.getId());
 
-            if (mCrashedServices.contains(componentName)
-                    && !mEnabledServices.contains(componentName)) {
-                // Remove it from mCrashedServices since users toggle the switch bar to retry.
+            if (!mEnabledServices.contains(componentName)) {
+                // Remove from mCrashedServices, since users may toggle the on/off switch to retry.
                 mCrashedServices.remove(componentName);
+                // Remove from mBindingServices, since services can get stuck in the binding state
+                // if binding starts but never finishes. If the service later attempts to finish
+                // binding but it is not in the enabled list then it will exit before initializing;
+                // see AccessibilityServiceConnection#initializeService().
+                mBindingServices.remove(componentName);
             }
         }
     }
@@ -520,6 +529,8 @@ class AccessibilityUserState {
                 .append(String.valueOf(mIsAudioDescriptionByDefaultRequested));
         pw.append(", magnificationFollowTypingEnabled=")
                 .append(String.valueOf(mMagnificationFollowTypingEnabled));
+        pw.append(", alwaysOnMagnificationEnabled=")
+                .append(String.valueOf(mAlwaysOnMagnificationEnabled));
         pw.append("}");
         pw.println();
         pw.append("     shortcut key:{");
@@ -698,6 +709,14 @@ class AccessibilityUserState {
 
     public boolean isMagnificationFollowTypingEnabled() {
         return mMagnificationFollowTypingEnabled;
+    }
+
+    public void setAlwaysOnMagnificationEnabled(boolean enabled) {
+        mAlwaysOnMagnificationEnabled = enabled;
+    }
+
+    public boolean isAlwaysOnMagnificationEnabled() {
+        return mAlwaysOnMagnificationEnabled;
     }
 
     /**
@@ -986,5 +1005,20 @@ class AccessibilityUserState {
     public void setFocusAppearanceLocked(int strokeWidth, int color) {
         mFocusStrokeWidth = strokeWidth;
         mFocusColor = color;
+    }
+
+    public void setServiceDetectsGesturesEnabled(int displayId, boolean mode) {
+        mServiceDetectsGestures.put(displayId, mode);
+    }
+
+    public void resetServiceDetectsGestures() {
+        mServiceDetectsGestures.clear();
+    }
+
+    public boolean isServiceDetectsGesturesEnabled(int displayId) {
+        if (mServiceDetectsGestures.contains(displayId)) {
+            return mServiceDetectsGestures.get(displayId);
+        }
+        return false;
     }
 }

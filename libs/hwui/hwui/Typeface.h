@@ -78,7 +78,8 @@ public:
             Typeface* src, const std::vector<minikin::FontVariation>& variations);
 
     static Typeface* createFromFamilies(
-            std::vector<std::shared_ptr<minikin::FontFamily>>&& families, int weight, int italic);
+            std::vector<std::shared_ptr<minikin::FontFamily>>&& families, int weight, int italic,
+            const Typeface* fallback);
 
     static void setDefault(const Typeface* face);
 

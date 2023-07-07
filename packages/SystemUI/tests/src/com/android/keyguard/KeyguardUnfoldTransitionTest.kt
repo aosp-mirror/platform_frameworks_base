@@ -22,9 +22,13 @@ import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.StatusBarState.KEYGUARD
+import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -33,7 +37,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 /**
@@ -50,7 +53,9 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
 
     @Mock private lateinit var parent: ViewGroup
 
-    private lateinit var keyguardUnfoldTransition: KeyguardUnfoldTransition
+    @Mock private lateinit var statusBarStateController: StatusBarStateController
+
+    private lateinit var underTest: KeyguardUnfoldTransition
     private lateinit var progressListener: TransitionProgressListener
     private var xTranslationMax = 0f
 
@@ -61,10 +66,10 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
         xTranslationMax =
             context.resources.getDimensionPixelSize(R.dimen.keyguard_unfold_translation_x).toFloat()
 
-        keyguardUnfoldTransition = KeyguardUnfoldTransition(context, progressProvider)
+        underTest = KeyguardUnfoldTransition(context, statusBarStateController, progressProvider)
 
-        keyguardUnfoldTransition.setup(parent)
-        keyguardUnfoldTransition.statusViewCentered = false
+        underTest.setup(parent)
+        underTest.statusViewCentered = false
 
         verify(progressProvider).addCallback(capture(progressListenerCaptor))
         progressListener = progressListenerCaptor.value
@@ -72,10 +77,11 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
 
     @Test
     fun onTransition_centeredViewDoesNotMove() {
-        keyguardUnfoldTransition.statusViewCentered = true
+        whenever(statusBarStateController.getState()).thenReturn(KEYGUARD)
+        underTest.statusViewCentered = true
 
         val view = View(context)
-        `when`(parent.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(view)
+        whenever(parent.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(view)
 
         progressListener.onTransitionStarted()
         assertThat(view.translationX).isZero()
@@ -85,6 +91,46 @@ class KeyguardUnfoldTransitionTest : SysuiTestCase() {
 
         progressListener.onTransitionProgress(0.5f)
         assertThat(view.translationX).isZero()
+
+        progressListener.onTransitionFinished()
+        assertThat(view.translationX).isZero()
+    }
+
+    @Test
+    fun whenInShadeState_viewDoesNotMove() {
+        whenever(statusBarStateController.getState()).thenReturn(SHADE)
+
+        val view = View(context)
+        whenever(parent.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(view)
+
+        progressListener.onTransitionStarted()
+        assertThat(view.translationX).isZero()
+
+        progressListener.onTransitionProgress(0f)
+        assertThat(view.translationX).isZero()
+
+        progressListener.onTransitionProgress(0.5f)
+        assertThat(view.translationX).isZero()
+
+        progressListener.onTransitionFinished()
+        assertThat(view.translationX).isZero()
+    }
+
+    @Test
+    fun whenInKeyguardState_viewDoesMove() {
+        whenever(statusBarStateController.getState()).thenReturn(KEYGUARD)
+
+        val view = View(context)
+        whenever(parent.findViewById<View>(R.id.lockscreen_clock_view_large)).thenReturn(view)
+
+        progressListener.onTransitionStarted()
+        assertThat(view.translationX).isZero()
+
+        progressListener.onTransitionProgress(0f)
+        assertThat(view.translationX).isEqualTo(xTranslationMax)
+
+        progressListener.onTransitionProgress(0.5f)
+        assertThat(view.translationX).isEqualTo(0.5f * xTranslationMax)
 
         progressListener.onTransitionFinished()
         assertThat(view.translationX).isZero()

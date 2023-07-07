@@ -24,11 +24,6 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
-    <style name="TextAppearance.QS.Status" parent="TextAppearance.QS.TileLabel.Secondary">
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-    </style>
-
     <!-- Screenshots -->
     <style name="LongScreenshotActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
         <item name="android:windowNoTitle">true</item>
@@ -44,7 +39,6 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
-        <item name="android:textColorSecondary">?android:attr/textColorPrimaryInverse</item>
     </style>
 
     <style name="FloatingOverlay" parent="@android:style/Theme.DeviceDefault.DayNight">
@@ -64,17 +58,13 @@
     <style name="TextAppearance.InternetDialog.Active">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:textColor">@color/material_dynamic_primary80</item>
         <item name="android:textDirection">locale</item>
     </style>
 
     <style name="TextAppearance.InternetDialog.Secondary.Active">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">?android:attr/textColorSecondaryInverse</item>
-    </style>
-
-    <style name="InternetDialog.Divider.Active">
-        <item name="android:background">?android:attr/textColorSecondaryInverse</item>
+        <item name="android:textColor">@color/material_dynamic_secondary80</item>
     </style>
 
 </resources>

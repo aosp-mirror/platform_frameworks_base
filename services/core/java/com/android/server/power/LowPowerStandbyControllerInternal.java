@@ -16,6 +16,8 @@
 
 package com.android.server.power;
 
+import android.os.PowerManager.LowPowerStandbyAllowedReason;
+
 /**
  * @hide Only for use within the system server.
  */
@@ -25,13 +27,16 @@ public abstract class LowPowerStandbyControllerInternal {
      * exempting it from Low Power Standby restrictions.
      *
      * @param uid UID to add to allowlist.
+     * @param allowedReason reason for this package to be allowed
      */
-    public abstract void addToAllowlist(int uid);
+    public abstract void addToAllowlist(int uid, @LowPowerStandbyAllowedReason int allowedReason);
 
     /**
      * Removes an application from the Low Power Standby allowlist.
      *
      * @param uid UID to remove from allowlist.
+     * @param allowedReason reason for this package to have been allowed
      */
-    public abstract void removeFromAllowlist(int uid);
+    public abstract void removeFromAllowlist(int uid,
+            @LowPowerStandbyAllowedReason int allowedReason);
 }

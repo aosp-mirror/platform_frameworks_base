@@ -17,6 +17,7 @@ package com.android.systemui.keyguard
 
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,6 +40,22 @@ class LifecycleScreenStatusProvider @Inject constructor(screenLifecycle: ScreenL
     }
 
     override fun onScreenTurnedOn() {
-        listeners.forEach(ScreenListener::onScreenTurnedOn)
+        traceSection("$TRACE_TAG#onScreenTurnedOn") {
+            listeners.forEach(ScreenListener::onScreenTurnedOn)
+        }
+    }
+
+    override fun onScreenTurningOff() {
+        traceSection("$TRACE_TAG#onScreenTurningOff") {
+            listeners.forEach(ScreenListener::onScreenTurningOff)
+        }
+    }
+
+    override fun onScreenTurningOn() {
+        traceSection("$TRACE_TAG#onScreenTurningOn") {
+            listeners.forEach(ScreenListener::onScreenTurningOn)
+        }
     }
 }
+
+private const val TRACE_TAG = "LifecycleScreenStatusProvider"

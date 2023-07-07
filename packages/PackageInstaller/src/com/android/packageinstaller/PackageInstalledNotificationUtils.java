@@ -16,7 +16,6 @@
 
 package com.android.packageinstaller;
 
-import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -24,7 +23,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -32,7 +30,10 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 /**
  * A util class that handle and post new app installed notifications.
@@ -107,8 +108,8 @@ class PackageInstalledNotificationUtils {
             @NonNull String packageName) {
         CharSequence label = appInfo.loadSafeLabel(context.getPackageManager(),
                 DEFAULT_MAX_LABEL_SIZE_PX,
-                PackageItemInfo.SAFE_LABEL_FLAG_TRIM
-                        | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE).toString();
+                TextUtils.SAFE_STRING_FLAG_TRIM
+                        | TextUtils.SAFE_STRING_FLAG_FIRST_LINE).toString();
         if (label != null) {
             return label.toString();
         }

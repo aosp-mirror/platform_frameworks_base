@@ -16,11 +16,10 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.inputmethod.stresstest">
-
+          package="com.android.inputmethod.stresstest">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application>
-        <activity android:name=".AutoShowTest$TestActivity"/>
-        <activity android:name=".ImeOpenCloseStressTest$TestActivity"/>
+        <activity android:name=".ImeStressTestUtil$TestActivity"/>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"

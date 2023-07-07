@@ -43,6 +43,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * Reports power consumption values for various device activities. Reads values from an XML file.
@@ -315,6 +316,8 @@ public class PowerProfile {
 
     private static final Object sLock = new Object();
 
+    private int mCpuPowerBracketCount;
+
     @VisibleForTesting
     @UnsupportedAppUsage
     public PowerProfile(Context context) {
@@ -346,7 +349,6 @@ public class PowerProfile {
             sModemPowerProfile.clear();
             initLocked(context, xmlId);
         }
-
     }
 
     @GuardedBy("sLock")
@@ -450,6 +452,9 @@ public class PowerProfile {
     private static final String CPU_CLUSTER_POWER_COUNT = "cpu.cluster_power.cluster";
     private static final String CPU_CORE_SPEED_PREFIX = "cpu.core_speeds.cluster";
     private static final String CPU_CORE_POWER_PREFIX = "cpu.core_power.cluster";
+    private static final String CPU_POWER_BRACKETS_PREFIX = "cpu.power_brackets.cluster";
+
+    private static final int DEFAULT_CPU_POWER_BRACKET_NUMBER = 3;
 
     private void initCpuClusters() {
         if (sPowerArrayMap.containsKey(CPU_PER_CLUSTER_CORE_COUNT)) {
@@ -471,13 +476,104 @@ public class PowerProfile {
             mCpuClusters[0] = new CpuClusterKey(CPU_CORE_SPEED_PREFIX + 0,
                     CPU_CLUSTER_POWER_COUNT + 0, CPU_CORE_POWER_PREFIX + 0, numCpus);
         }
+
+        initCpuPowerBrackets(DEFAULT_CPU_POWER_BRACKET_NUMBER);
     }
 
-    public static class CpuClusterKey {
-        private final String freqKey;
-        private final String clusterPowerKey;
-        private final String corePowerKey;
-        private final int numCpus;
+    /**
+     * Parses or computes CPU power brackets: groups of states with similar power requirements.
+     */
+    @VisibleForTesting
+    public void initCpuPowerBrackets(int defaultCpuPowerBracketNumber) {
+        boolean anyBracketsSpecified = false;
+        boolean allBracketsSpecified = true;
+        for (int cluster = 0; cluster < mCpuClusters.length; cluster++) {
+            final int steps = getNumSpeedStepsInCpuCluster(cluster);
+            mCpuClusters[cluster].powerBrackets = new int[steps];
+            if (sPowerArrayMap.get(CPU_POWER_BRACKETS_PREFIX + cluster) != null) {
+                anyBracketsSpecified = true;
+            } else {
+                allBracketsSpecified = false;
+            }
+        }
+
+        if (anyBracketsSpecified && !allBracketsSpecified) {
+            throw new RuntimeException(
+                    "Power brackets should be specified for all clusters or no clusters");
+        }
+
+        mCpuPowerBracketCount = 0;
+        if (allBracketsSpecified) {
+            for (int cluster = 0; cluster < mCpuClusters.length; cluster++) {
+                final Double[] data = sPowerArrayMap.get(CPU_POWER_BRACKETS_PREFIX + cluster);
+                if (data.length != mCpuClusters[cluster].powerBrackets.length) {
+                    throw new RuntimeException(
+                            "Wrong number of items in " + CPU_POWER_BRACKETS_PREFIX + cluster);
+                }
+
+                for (int i = 0; i < data.length; i++) {
+                    final int bracket = (int) Math.round(data[i]);
+                    mCpuClusters[cluster].powerBrackets[i] = bracket;
+                    if (bracket > mCpuPowerBracketCount) {
+                        mCpuPowerBracketCount = bracket;
+                    }
+                }
+            }
+            mCpuPowerBracketCount++;
+        } else {
+            double minPower = Double.MAX_VALUE;
+            double maxPower = Double.MIN_VALUE;
+            int stateCount = 0;
+            for (int cluster = 0; cluster < mCpuClusters.length; cluster++) {
+                final int steps = getNumSpeedStepsInCpuCluster(cluster);
+                for (int step = 0; step < steps; step++) {
+                    final double power = getAveragePowerForCpuCore(cluster, step);
+                    if (power < minPower) {
+                        minPower = power;
+                    }
+                    if (power > maxPower) {
+                        maxPower = power;
+                    }
+                }
+                stateCount += steps;
+            }
+
+            if (stateCount <= defaultCpuPowerBracketNumber) {
+                mCpuPowerBracketCount = stateCount;
+                int bracket = 0;
+                for (int cluster = 0; cluster < mCpuClusters.length; cluster++) {
+                    final int steps = getNumSpeedStepsInCpuCluster(cluster);
+                    for (int step = 0; step < steps; step++) {
+                        mCpuClusters[cluster].powerBrackets[step] = bracket++;
+                    }
+                }
+            } else {
+                mCpuPowerBracketCount = defaultCpuPowerBracketNumber;
+                final double minLogPower = Math.log(minPower);
+                final double logBracket = (Math.log(maxPower) - minLogPower)
+                        / defaultCpuPowerBracketNumber;
+
+                for (int cluster = 0; cluster < mCpuClusters.length; cluster++) {
+                    final int steps = getNumSpeedStepsInCpuCluster(cluster);
+                    for (int step = 0; step < steps; step++) {
+                        final double power = getAveragePowerForCpuCore(cluster, step);
+                        int bracket = (int) ((Math.log(power) - minLogPower) / logBracket);
+                        if (bracket >= defaultCpuPowerBracketNumber) {
+                            bracket = defaultCpuPowerBracketNumber - 1;
+                        }
+                        mCpuClusters[cluster].powerBrackets[step] = bracket;
+                    }
+                }
+            }
+        }
+    }
+
+    private static class CpuClusterKey {
+        public final String freqKey;
+        public final String clusterPowerKey;
+        public final String corePowerKey;
+        public final int numCpus;
+        public int[] powerBrackets;
 
         private CpuClusterKey(String freqKey, String clusterPowerKey,
                 String corePowerKey, int numCpus) {
@@ -524,6 +620,57 @@ public class PowerProfile {
         }
         return 0;
     }
+
+    /**
+     * Returns the number of CPU power brackets: groups of states with similar power requirements.
+     */
+    public int getCpuPowerBracketCount() {
+        return mCpuPowerBracketCount;
+    }
+
+    /**
+     * Description of a CPU power bracket: which cluster/frequency combinations are included.
+     */
+    public String getCpuPowerBracketDescription(int powerBracket) {
+        StringBuilder sb = new StringBuilder();
+        for (int cluster = 0; cluster < mCpuClusters.length; cluster++) {
+            int[] brackets = mCpuClusters[cluster].powerBrackets;
+            for (int step = 0; step < brackets.length; step++) {
+                if (brackets[step] == powerBracket) {
+                    if (sb.length() != 0) {
+                        sb.append(", ");
+                    }
+                    if (mCpuClusters.length > 1) {
+                        sb.append(cluster).append('/');
+                    }
+                    Double[] freqs = sPowerArrayMap.get(mCpuClusters[cluster].freqKey);
+                    if (freqs != null && step < freqs.length) {
+                        // Frequency in MHz
+                        sb.append(freqs[step].intValue() / 1000);
+                    }
+                    sb.append('(');
+                    sb.append(String.format(Locale.US, "%.1f",
+                            getAveragePowerForCpuCore(cluster, step)));
+                    sb.append(')');
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Returns the CPU power bracket corresponding to the specified cluster and frequency step
+     */
+    public int getPowerBracketForCpuCore(int cluster, int step) {
+        if (cluster >= 0
+                && cluster < mCpuClusters.length
+                && step >= 0
+                && step < mCpuClusters[cluster].powerBrackets.length) {
+            return mCpuClusters[cluster].powerBrackets[step];
+        }
+        return 0;
+    }
+
 
     private int mNumDisplays;
 

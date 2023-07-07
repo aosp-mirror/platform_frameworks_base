@@ -51,7 +51,7 @@ class NotificationListener : NotificationListenerService() {
 
         private const val CMD_NOTIFICATION_ALLOW_LISTENER = "cmd notification allow_listener %s"
         private const val CMD_NOTIFICATION_DISALLOW_LISTENER =
-                "cmd notification disallow_listener %s"
+            "cmd notification disallow_listener %s"
         private const val COMPONENT_NAME = "com.android.wm.shell.flicker/.NotificationListener"
 
         private var instance: NotificationListener? = null
@@ -79,25 +79,23 @@ class NotificationListener : NotificationListenerService() {
         ): StatusBarNotification? {
             instance?.run {
                 return notifications.values.firstOrNull(predicate)
-            } ?: throw IllegalStateException("NotificationListenerService is not connected")
+            }
+                ?: throw IllegalStateException("NotificationListenerService is not connected")
         }
 
         fun waitForNotificationToAppear(
             predicate: (StatusBarNotification) -> Boolean
         ): StatusBarNotification? {
             instance?.let {
-                return waitForResult(extractor = {
-                    it.notifications.values.firstOrNull(predicate)
-                }).second
-            } ?: throw IllegalStateException("NotificationListenerService is not connected")
+                return waitForResult(extractor = { it.notifications.values.firstOrNull(predicate) })
+                    .second
+            }
+                ?: throw IllegalStateException("NotificationListenerService is not connected")
         }
 
-        fun waitForNotificationToDisappear(
-            predicate: (StatusBarNotification) -> Boolean
-        ): Boolean {
-            return instance?.let {
-                wait { it.notifications.values.none(predicate) }
-            } ?: throw IllegalStateException("NotificationListenerService is not connected")
+        fun waitForNotificationToDisappear(predicate: (StatusBarNotification) -> Boolean): Boolean {
+            return instance?.let { wait { it.notifications.values.none(predicate) } }
+                ?: throw IllegalStateException("NotificationListenerService is not connected")
         }
     }
 }

@@ -18,6 +18,7 @@ package com.android.server.contentcapture;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.assist.ActivityId;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.os.Bundle;
@@ -61,5 +62,6 @@ public abstract class ContentCaptureManagerInternal {
      * Notifies the intelligence service of a high-level activity event for the given user.
      */
     public abstract void notifyActivityEvent(@UserIdInt int userId,
-            @NonNull ComponentName activityComponent, @ActivityEventType int eventType);
+            @NonNull ComponentName activityComponent, @ActivityEventType int eventType,
+            @NonNull ActivityId activityId);
 }

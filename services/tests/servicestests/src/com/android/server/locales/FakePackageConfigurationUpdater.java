@@ -16,6 +16,8 @@
 
 package com.android.server.locales;
 
+import static android.content.res.Configuration.GRAMMATICAL_GENDER_NOT_SPECIFIED;
+
 import android.annotation.Nullable;
 import android.os.LocaleList;
 
@@ -29,6 +31,8 @@ class FakePackageConfigurationUpdater implements PackageConfigurationUpdater {
 
     FakePackageConfigurationUpdater() {}
 
+    private int mGender = GRAMMATICAL_GENDER_NOT_SPECIFIED;
+
     LocaleList mLocales = null;
 
     @Override
@@ -39,6 +43,12 @@ class FakePackageConfigurationUpdater implements PackageConfigurationUpdater {
     @Override
     public PackageConfigurationUpdater setLocales(LocaleList locales) {
         mLocales = locales;
+        return this;
+    }
+
+    @Override
+    public PackageConfigurationUpdater setGrammaticalGender(int gender) {
+        mGender = gender;
         return this;
     }
 
@@ -56,4 +66,10 @@ class FakePackageConfigurationUpdater implements PackageConfigurationUpdater {
         return mLocales;
     }
 
+    /**
+     * Returns the gender that were stored during the test run.
+     */
+    int getGender() {
+        return mGender;
+    }
 }

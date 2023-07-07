@@ -18,6 +18,8 @@ package com.android.server.notification;
 
 import android.content.ComponentName;
 import android.net.Uri;
+import android.os.Binder;
+import android.os.Process;
 import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
@@ -108,7 +110,9 @@ public class ZenModeConditions implements ConditionProviders.Callback {
     @Override
     public void onServiceAdded(ComponentName component) {
         if (DEBUG) Log.d(TAG, "onServiceAdded " + component);
-        mHelper.setConfig(mHelper.getConfig(), component, "zmc.onServiceAdded:" + component);
+        final int callingUid = Binder.getCallingUid();
+        mHelper.setConfig(mHelper.getConfig(), component, "zmc.onServiceAdded:" + component,
+                callingUid, callingUid == Process.SYSTEM_UID);
     }
 
     @Override
@@ -116,7 +120,9 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         if (DEBUG) Log.d(TAG, "onConditionChanged " + id + " " + condition);
         ZenModeConfig config = mHelper.getConfig();
         if (config == null) return;
-        mHelper.setAutomaticZenRuleState(id, condition);
+        final int callingUid = Binder.getCallingUid();
+        mHelper.setAutomaticZenRuleState(id, condition, callingUid,
+                callingUid == Process.SYSTEM_UID);
     }
 
     // Only valid for CPS backed rules

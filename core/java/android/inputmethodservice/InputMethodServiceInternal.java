@@ -85,4 +85,11 @@ interface InputMethodServiceInternal {
      */
     default void triggerServiceDump(@NonNull String where, @Nullable byte[] icProto) {
     }
+
+    /**
+     * @return {@code true} if {@link InputMethodService} is destroyed.
+     */
+    default boolean isServiceDestroyed() {
+        return false;
+    };
 }

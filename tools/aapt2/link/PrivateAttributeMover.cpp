@@ -57,7 +57,7 @@ OutputIterator move_if(InputContainer& input_container, OutputIterator result, P
 
 bool PrivateAttributeMover::Consume(IAaptContext* context, ResourceTable* table) {
   for (auto& package : table->packages) {
-    ResourceTableType* type = package->FindType(ResourceType::kAttr);
+    ResourceTableType* type = package->FindTypeWithDefaultName(ResourceType::kAttr);
     if (!type) {
       continue;
     }
@@ -80,7 +80,8 @@ bool PrivateAttributeMover::Consume(IAaptContext* context, ResourceTable* table)
       continue;
     }
 
-    ResourceTableType* priv_attr_type = package->FindOrCreateType(ResourceType::kAttrPrivate);
+    auto attr_private_type = ResourceNamedTypeWithDefaultName(ResourceType::kAttrPrivate);
+    ResourceTableType* priv_attr_type = package->FindOrCreateType(attr_private_type);
     CHECK(priv_attr_type->entries.empty());
     priv_attr_type->entries = std::move(private_attr_entries);
   }

@@ -18,6 +18,7 @@ package android.telephony.ims.aidl;
 
 import android.net.Uri;
 import android.telephony.ims.RcsContactTerminatedReason;
+import android.telephony.ims.SipDetails;
 
 import java.util.List;
 import java.util.Map;
@@ -29,8 +30,7 @@ import java.util.Map;
  */
 oneway interface ISubscribeResponseCallback {
     void onCommandError(int code);
-    void onNetworkResponse(int code, in String reason);
-    void onNetworkRespHeader(int code, String reasonPhrase, int reasonHeaderCause, String reasonHeaderText);
+    void onNetworkResponse(in SipDetails detail);
     void onNotifyCapabilitiesUpdate(in List<String> pidfXmls);
     void onResourceTerminated(in List<RcsContactTerminatedReason> uriTerminatedReason);
     void onTerminated(in String reason, long retryAfterMilliseconds);

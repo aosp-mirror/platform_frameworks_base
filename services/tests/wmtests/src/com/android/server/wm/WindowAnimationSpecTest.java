@@ -38,6 +38,8 @@ import android.view.animation.ClipRectAnimation;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.testutils.StubTransaction;
+
 import org.junit.Test;
 
 /**

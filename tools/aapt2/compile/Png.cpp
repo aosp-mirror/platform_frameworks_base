@@ -24,11 +24,10 @@
 #include <string>
 #include <vector>
 
+#include "androidfw/BigBuffer.h"
 #include "androidfw/ResourceTypes.h"
-
-#include "Source.h"
+#include "androidfw/Source.h"
 #include "trace/TraceBuffer.h"
-#include "util/BigBuffer.h"
 #include "util/Util.h"
 
 namespace aapt {
@@ -91,7 +90,7 @@ static void readDataFromStream(png_structp readPtr, png_bytep data,
 
 static void writeDataToStream(png_structp writePtr, png_bytep data,
                               png_size_t length) {
-  BigBuffer* outBuffer = reinterpret_cast<BigBuffer*>(png_get_io_ptr(writePtr));
+  android::BigBuffer* outBuffer = reinterpret_cast<android::BigBuffer*>(png_get_io_ptr(writePtr));
   png_bytep buf = outBuffer->NextBlock<png_byte>(length);
   memcpy(buf, data, length);
 }
@@ -99,15 +98,15 @@ static void writeDataToStream(png_structp writePtr, png_bytep data,
 static void flushDataToStream(png_structp /*writePtr*/) {}
 
 static void logWarning(png_structp readPtr, png_const_charp warningMessage) {
-  IDiagnostics* diag =
-      reinterpret_cast<IDiagnostics*>(png_get_error_ptr(readPtr));
-  diag->Warn(DiagMessage() << warningMessage);
+  android::IDiagnostics* diag =
+      reinterpret_cast<android::IDiagnostics*>(png_get_error_ptr(readPtr));
+  diag->Warn(android::DiagMessage() << warningMessage);
 }
 
-static bool readPng(IDiagnostics* diag, png_structp readPtr, png_infop infoPtr,
+static bool readPng(android::IDiagnostics* diag, png_structp readPtr, png_infop infoPtr,
                     PngInfo* outInfo) {
   if (setjmp(png_jmpbuf(readPtr))) {
-    diag->Error(DiagMessage() << "failed reading png");
+    diag->Error(android::DiagMessage() << "failed reading png");
     return false;
   }
 
@@ -245,10 +244,9 @@ PNG_COLOR_TYPE_RGB_ALPHA) {
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define ABS(a) ((a) < 0 ? -(a) : (a))
 
-static void analyze_image(IDiagnostics* diag, const PngInfo& imageInfo,
-                          int grayscaleTolerance, png_colorp rgbPalette,
-                          png_bytep alphaPalette, int* paletteEntries,
-                          bool* hasTransparency, int* colorType,
+static void analyze_image(android::IDiagnostics* diag, const PngInfo& imageInfo,
+                          int grayscaleTolerance, png_colorp rgbPalette, png_bytep alphaPalette,
+                          int* paletteEntries, bool* hasTransparency, int* colorType,
                           png_bytepp outRows) {
   int w = imageInfo.width;
   int h = imageInfo.height;
@@ -383,8 +381,8 @@ static void analyze_image(IDiagnostics* diag, const PngInfo& imageInfo,
     *colorType = PNG_COLOR_TYPE_PALETTE;
   } else {
     if (maxGrayDeviation <= grayscaleTolerance) {
-      diag->Note(DiagMessage() << "forcing image to gray (max deviation = "
-                               << maxGrayDeviation << ")");
+      diag->Note(android::DiagMessage()
+                 << "forcing image to gray (max deviation = " << maxGrayDeviation << ")");
       *colorType = isOpaque ? PNG_COLOR_TYPE_GRAY : PNG_COLOR_TYPE_GRAY_ALPHA;
     } else {
       *colorType = isOpaque ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA;
@@ -431,10 +429,10 @@ static void analyze_image(IDiagnostics* diag, const PngInfo& imageInfo,
   }
 }
 
-static bool writePng(IDiagnostics* diag, png_structp writePtr,
-                     png_infop infoPtr, PngInfo* info, int grayScaleTolerance) {
+static bool writePng(android::IDiagnostics* diag, png_structp writePtr, png_infop infoPtr,
+                     PngInfo* info, int grayScaleTolerance) {
   if (setjmp(png_jmpbuf(writePtr))) {
-    diag->Error(DiagMessage() << "failed to write png");
+    diag->Error(android::DiagMessage() << "failed to write png");
     return false;
   }
 
@@ -463,8 +461,8 @@ static bool writePng(IDiagnostics* diag, png_structp writePtr,
   png_set_compression_level(writePtr, Z_BEST_COMPRESSION);
 
   if (kDebug) {
-    diag->Note(DiagMessage() << "writing image: w = " << info->width
-                             << ", h = " << info->height);
+    diag->Note(android::DiagMessage()
+               << "writing image: w = " << info->width << ", h = " << info->height);
   }
 
   png_color rgbPalette[256];
@@ -486,24 +484,21 @@ static bool writePng(IDiagnostics* diag, png_structp writePtr,
   if (kDebug) {
     switch (colorType) {
       case PNG_COLOR_TYPE_PALETTE:
-        diag->Note(DiagMessage() << "has " << paletteEntries << " colors"
-                                 << (hasTransparency ? " (with alpha)" : "")
-                                 << ", using PNG_COLOR_TYPE_PALLETTE");
+        diag->Note(android::DiagMessage() << "has " << paletteEntries << " colors"
+                                          << (hasTransparency ? " (with alpha)" : "")
+                                          << ", using PNG_COLOR_TYPE_PALLETTE");
         break;
       case PNG_COLOR_TYPE_GRAY:
-        diag->Note(DiagMessage()
-                   << "is opaque gray, using PNG_COLOR_TYPE_GRAY");
+        diag->Note(android::DiagMessage() << "is opaque gray, using PNG_COLOR_TYPE_GRAY");
         break;
       case PNG_COLOR_TYPE_GRAY_ALPHA:
-        diag->Note(DiagMessage()
-                   << "is gray + alpha, using PNG_COLOR_TYPE_GRAY_ALPHA");
+        diag->Note(android::DiagMessage() << "is gray + alpha, using PNG_COLOR_TYPE_GRAY_ALPHA");
         break;
       case PNG_COLOR_TYPE_RGB:
-        diag->Note(DiagMessage() << "is opaque RGB, using PNG_COLOR_TYPE_RGB");
+        diag->Note(android::DiagMessage() << "is opaque RGB, using PNG_COLOR_TYPE_RGB");
         break;
       case PNG_COLOR_TYPE_RGB_ALPHA:
-        diag->Note(DiagMessage()
-                   << "is RGB + alpha, using PNG_COLOR_TYPE_RGB_ALPHA");
+        diag->Note(android::DiagMessage() << "is RGB + alpha, using PNG_COLOR_TYPE_RGB_ALPHA");
         break;
     }
   }
@@ -537,7 +532,7 @@ static bool writePng(IDiagnostics* diag, png_structp writePtr,
 
     // base 9 patch data
     if (kDebug) {
-      diag->Note(DiagMessage() << "adding 9-patch info..");
+      diag->Note(android::DiagMessage() << "adding 9-patch info..");
     }
     memcpy((char*)unknowns[pIndex].name, "npTc", 5);
     unknowns[pIndex].data = (png_byte*)info->serialize9Patch();
@@ -614,11 +609,10 @@ static bool writePng(IDiagnostics* diag, png_structp writePtr,
                &interlaceType, &compressionType, nullptr);
 
   if (kDebug) {
-    diag->Note(DiagMessage() << "image written: w = " << width
-                             << ", h = " << height << ", d = " << bitDepth
-                             << ", colors = " << colorType
-                             << ", inter = " << interlaceType
-                             << ", comp = " << compressionType);
+    diag->Note(android::DiagMessage()
+               << "image written: w = " << width << ", h = " << height << ", d = " << bitDepth
+               << ", colors = " << colorType << ", inter = " << interlaceType
+               << ", comp = " << compressionType);
   }
   return true;
 }
@@ -1232,20 +1226,20 @@ getout:
   return true;
 }
 
-bool Png::process(const Source& source, std::istream* input,
-                  BigBuffer* outBuffer, const PngOptions& options) {
+bool Png::process(const android::Source& source, std::istream* input, android::BigBuffer* outBuffer,
+                  const PngOptions& options) {
   TRACE_CALL();
   png_byte signature[kPngSignatureSize];
 
   // Read the PNG signature first.
   if (!input->read(reinterpret_cast<char*>(signature), kPngSignatureSize)) {
-    mDiag->Error(DiagMessage() << strerror(errno));
+    mDiag->Error(android::DiagMessage() << strerror(errno));
     return false;
   }
 
   // If the PNG signature doesn't match, bail early.
   if (png_sig_cmp(signature, 0, kPngSignatureSize) != 0) {
-    mDiag->Error(DiagMessage() << "not a valid png file");
+    mDiag->Error(android::DiagMessage() << "not a valid png file");
     return false;
   }
 
@@ -1258,13 +1252,13 @@ bool Png::process(const Source& source, std::istream* input,
 
   readPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, nullptr, nullptr);
   if (!readPtr) {
-    mDiag->Error(DiagMessage() << "failed to allocate read ptr");
+    mDiag->Error(android::DiagMessage() << "failed to allocate read ptr");
     goto bail;
   }
 
   infoPtr = png_create_info_struct(readPtr);
   if (!infoPtr) {
-    mDiag->Error(DiagMessage() << "failed to allocate info ptr");
+    mDiag->Error(android::DiagMessage() << "failed to allocate info ptr");
     goto bail;
   }
 
@@ -1281,7 +1275,7 @@ bool Png::process(const Source& source, std::istream* input,
   if (util::EndsWith(source.path, ".9.png")) {
     std::string errorMsg;
     if (!do9Patch(&pngInfo, &errorMsg)) {
-      mDiag->Error(DiagMessage() << errorMsg);
+      mDiag->Error(android::DiagMessage() << errorMsg);
       goto bail;
     }
   }
@@ -1289,13 +1283,13 @@ bool Png::process(const Source& source, std::istream* input,
   writePtr =
       png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, nullptr, nullptr);
   if (!writePtr) {
-    mDiag->Error(DiagMessage() << "failed to allocate write ptr");
+    mDiag->Error(android::DiagMessage() << "failed to allocate write ptr");
     goto bail;
   }
 
   writeInfoPtr = png_create_info_struct(writePtr);
   if (!writeInfoPtr) {
-    mDiag->Error(DiagMessage() << "failed to allocate write info ptr");
+    mDiag->Error(android::DiagMessage() << "failed to allocate write info ptr");
     goto bail;
   }
 

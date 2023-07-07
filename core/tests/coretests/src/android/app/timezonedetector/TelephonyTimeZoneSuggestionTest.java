@@ -16,8 +16,8 @@
 
 package android.app.timezonedetector;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
-import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcelable;
+import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.time.ParcelableTestSupport.roundTripParcelable;
 import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;

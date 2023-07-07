@@ -1561,6 +1561,16 @@ public final class RenderNode {
         return nGetUniqueId(mNativeRenderNode);
     }
 
+    /**
+     * Captures whether this RenderNote represents a TextureView
+     * TODO(b/281695725): Clean this up once TextureView use setFrameRate API
+     *
+     * @hide
+     */
+    public void setIsTextureView() {
+        nSetIsTextureView(mNativeRenderNode);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Animations
     ///////////////////////////////////////////////////////////////////////////
@@ -1891,4 +1901,7 @@ public final class RenderNode {
 
     @CriticalNative
     private static native long nGetUniqueId(long renderNode);
+
+    @CriticalNative
+    private static native void nSetIsTextureView(long renderNode);
 }

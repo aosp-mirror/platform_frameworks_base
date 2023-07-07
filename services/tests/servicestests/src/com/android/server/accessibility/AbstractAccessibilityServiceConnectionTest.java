@@ -207,7 +207,7 @@ public class AbstractAccessibilityServiceConnectionTest {
         addA11yWindowInfo(mA11yWindowInfos, PIP_WINDOWID, true, Display.DEFAULT_DISPLAY);
         addA11yWindowInfo(mA11yWindowInfosOnSecondDisplay, WINDOWID_ONSECONDDISPLAY, false,
                 SECONDARY_DISPLAY_ID);
-        when(mMockA11yWindowManager.getDisplayListLocked()).thenReturn(mDisplayList);
+        when(mMockA11yWindowManager.getDisplayListLocked(anyInt())).thenReturn(mDisplayList);
         when(mMockA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY))
                 .thenReturn(mA11yWindowInfos);
         when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(WINDOWID))
@@ -303,6 +303,18 @@ public class AbstractAccessibilityServiceConnectionTest {
         updateServiceInfo(serviceInfo, 0, 0, A11Y_SERVICE_FLAG, null, 1000);
         mServiceConnection.setServiceInfo(serviceInfo);
         assertTrue(mServiceConnection.mPackageNames.isEmpty());
+    }
+
+    @Test
+    public void setServiceInfo_ChangeAccessibilityTool_updateFails() {
+        assertFalse(mSpyServiceInfo.isAccessibilityTool());
+
+        final AccessibilityServiceInfo serviceInfo = new AccessibilityServiceInfo();
+        serviceInfo.setAccessibilityTool(true);
+        mServiceConnection.setServiceInfo(serviceInfo);
+
+        // isAccessibilityTool should not be dynamically updatable
+        assertFalse(mSpyServiceInfo.isAccessibilityTool());
     }
 
     @Test

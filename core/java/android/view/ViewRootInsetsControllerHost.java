@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CO
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
 import android.annotation.NonNull;
+import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.os.Handler;
 import android.os.IBinder;
@@ -145,15 +146,17 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public void updateCompatSysUiVisibility(int type, boolean visible, boolean hasControl) {
-        mViewRoot.updateCompatSysUiVisibility(type, visible, hasControl);
+    public void updateCompatSysUiVisibility(int visibleTypes, int requestedVisibleTypes,
+            int controllableTypes) {
+        mViewRoot.updateCompatSysUiVisibility(visibleTypes, requestedVisibleTypes,
+                controllableTypes);
     }
 
     @Override
-    public void updateRequestedVisibilities(InsetsVisibilities vis) {
+    public void updateRequestedVisibleTypes(@WindowInsets.Type.InsetsType int types) {
         try {
             if (mViewRoot.mAdded) {
-                mViewRoot.mWindowSession.updateRequestedVisibilities(mViewRoot.mWindow, vis);
+                mViewRoot.mWindowSession.updateRequestedVisibleTypes(mViewRoot.mWindow, types);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call insetsModified", e);
@@ -241,6 +244,11 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             return null;
         }
         return mViewRoot.getTitle().toString();
+    }
+
+    @Override
+    public Context getRootViewContext() {
+        return mViewRoot != null ? mViewRoot.mContext : null;
     }
 
     @Override

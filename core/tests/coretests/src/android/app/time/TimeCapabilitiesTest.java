@@ -17,13 +17,18 @@
 package android.app.time;
 
 
+import static android.app.time.Capabilities.CAPABILITY_NOT_ALLOWED;
 import static android.app.time.Capabilities.CAPABILITY_NOT_APPLICABLE;
 import static android.app.time.Capabilities.CAPABILITY_NOT_SUPPORTED;
 import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
+import static android.app.time.ParcelableTestSupport.assertEqualsAndHashCode;
+import static android.app.time.ParcelableTestSupport.assertRoundTripParcelable;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import android.os.UserHandle;
@@ -38,75 +43,193 @@ import org.junit.runner.RunWith;
 @SmallTest
 public class TimeCapabilitiesTest {
 
-    private static final UserHandle USER_HANDLE = UserHandle.of(332211);
+    private static final UserHandle TEST_USER_HANDLE = UserHandle.of(332211);
 
     @Test
-    public void testBuilder() {
-        TimeCapabilities capabilities = new TimeCapabilities.Builder(USER_HANDLE)
-                .setConfigureAutoTimeDetectionEnabledCapability(CAPABILITY_NOT_APPLICABLE)
-                .setSuggestTimeManuallyCapability(CAPABILITY_NOT_SUPPORTED)
-                .build();
-
-        assertThat(capabilities.getConfigureAutoTimeDetectionEnabledCapability())
-                .isEqualTo(CAPABILITY_NOT_APPLICABLE);
-        assertThat(capabilities.getSuggestTimeManuallyCapability())
-                .isEqualTo(CAPABILITY_NOT_SUPPORTED);
-
-        try {
-            new TimeCapabilities.Builder(USER_HANDLE)
-                    .build();
-            fail("Should throw IllegalStateException");
-        } catch (IllegalStateException ignored) {
-            // expected
+    public void testEquals() {
+        TimeCapabilities.Builder builder1 = new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
+                .setSetManualTimeCapability(CAPABILITY_POSSESSED);
+        TimeCapabilities.Builder builder2 = new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
+                .setSetManualTimeCapability(CAPABILITY_POSSESSED);
+        {
+            TimeCapabilities one = builder1.build();
+            TimeCapabilities two = builder2.build();
+            assertEqualsAndHashCode(one, two);
         }
 
-        try {
-            new TimeCapabilities.Builder(USER_HANDLE)
-                    .setConfigureAutoTimeDetectionEnabledCapability(CAPABILITY_NOT_APPLICABLE)
-                    .build();
-            fail("Should throw IllegalStateException");
-        } catch (IllegalStateException ignored) {
-            // expected
+        builder2.setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED);
+        {
+            TimeCapabilities one = builder1.build();
+            TimeCapabilities two = builder2.build();
+            assertNotEquals(one, two);
         }
 
-        try {
-            new TimeCapabilities.Builder(USER_HANDLE)
-                    .setSuggestTimeManuallyCapability(CAPABILITY_NOT_APPLICABLE)
-                    .build();
-            fail("Should throw IllegalStateException");
-        } catch (IllegalStateException ignored) {
-            // expected
+        builder1.setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED);
+        {
+            TimeCapabilities one = builder1.build();
+            TimeCapabilities two = builder2.build();
+            assertEqualsAndHashCode(one, two);
+        }
+
+        builder2.setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED);
+        {
+            TimeCapabilities one = builder1.build();
+            TimeCapabilities two = builder2.build();
+            assertNotEquals(one, two);
+        }
+
+        builder1.setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED);
+        {
+            TimeCapabilities one = builder1.build();
+            TimeCapabilities two = builder2.build();
+            assertEqualsAndHashCode(one, two);
         }
     }
 
     @Test
     public void userHandle_notIgnoredInEquals() {
         TimeCapabilities firstUserCapabilities = new TimeCapabilities.Builder(UserHandle.of(1))
-                .setConfigureAutoTimeDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestTimeManuallyCapability(CAPABILITY_POSSESSED)
+                .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
+                .setSetManualTimeCapability(CAPABILITY_POSSESSED)
                 .build();
 
         TimeCapabilities secondUserCapabilities = new TimeCapabilities.Builder(UserHandle.of(2))
-                .setConfigureAutoTimeDetectionEnabledCapability(CAPABILITY_POSSESSED)
-                .setSuggestTimeManuallyCapability(CAPABILITY_POSSESSED)
+                .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
+                .setSetManualTimeCapability(CAPABILITY_POSSESSED)
                 .build();
 
         assertThat(firstUserCapabilities).isNotEqualTo(secondUserCapabilities);
     }
 
     @Test
+    public void testBuilder() {
+        TimeCapabilities capabilities = new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_APPLICABLE)
+                .setSetManualTimeCapability(CAPABILITY_NOT_SUPPORTED)
+                .build();
+
+        assertThat(capabilities.getConfigureAutoDetectionEnabledCapability())
+                .isEqualTo(CAPABILITY_NOT_APPLICABLE);
+        assertThat(capabilities.getSetManualTimeCapability())
+                .isEqualTo(CAPABILITY_NOT_SUPPORTED);
+
+        try {
+            new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                    .build();
+            fail("Should throw IllegalStateException");
+        } catch (IllegalStateException ignored) {
+            // expected
+        }
+
+        try {
+            new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                    .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_APPLICABLE)
+                    .build();
+            fail("Should throw IllegalStateException");
+        } catch (IllegalStateException ignored) {
+            // expected
+        }
+
+        try {
+            new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                    .setSetManualTimeCapability(CAPABILITY_NOT_APPLICABLE)
+                    .build();
+            fail("Should throw IllegalStateException");
+        } catch (IllegalStateException ignored) {
+            // expected
+        }
+    }
+
+    @Test
     public void testParcelable() {
-        TimeCapabilities.Builder builder = new TimeCapabilities.Builder(USER_HANDLE)
-                .setConfigureAutoTimeDetectionEnabledCapability(CAPABILITY_NOT_SUPPORTED)
-                .setSuggestTimeManuallyCapability(CAPABILITY_NOT_SUPPORTED);
+        TimeCapabilities.Builder builder = new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_SUPPORTED)
+                .setSetManualTimeCapability(CAPABILITY_NOT_SUPPORTED);
 
         assertRoundTripParcelable(builder.build());
 
-        builder.setSuggestTimeManuallyCapability(CAPABILITY_POSSESSED);
+        builder.setSetManualTimeCapability(CAPABILITY_POSSESSED);
         assertRoundTripParcelable(builder.build());
 
-        builder.setConfigureAutoTimeDetectionEnabledCapability(CAPABILITY_POSSESSED);
+        builder.setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED);
         assertRoundTripParcelable(builder.build());
     }
 
+    @Test
+    public void testTryApplyConfigChanges_permitted() {
+        TimeConfiguration oldConfiguration =
+                new TimeConfiguration.Builder()
+                        .setAutoDetectionEnabled(true)
+                        .build();
+        TimeCapabilities capabilities = new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
+                .setSetManualTimeCapability(CAPABILITY_POSSESSED)
+                .build();
+
+        TimeConfiguration configChange = new TimeConfiguration.Builder()
+                .setAutoDetectionEnabled(false)
+                .build();
+
+        TimeConfiguration expected = new TimeConfiguration.Builder(oldConfiguration)
+                .setAutoDetectionEnabled(false)
+                .build();
+        assertEquals(expected, capabilities.tryApplyConfigChanges(oldConfiguration, configChange));
+    }
+
+    @Test
+    public void testTryApplyConfigChanges_notPermitted() {
+        TimeConfiguration oldConfiguration =
+                new TimeConfiguration.Builder()
+                        .setAutoDetectionEnabled(true)
+                        .build();
+        TimeCapabilities capabilities = new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
+                .setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED)
+                .build();
+
+        TimeConfiguration configChange = new TimeConfiguration.Builder()
+                .setAutoDetectionEnabled(false)
+                .build();
+
+        assertNull(capabilities.tryApplyConfigChanges(oldConfiguration, configChange));
+    }
+
+    @Test
+    public void copyBuilder_copiesAllFields() {
+        TimeCapabilities capabilities = new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
+                .setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED)
+                .build();
+
+        {
+            TimeCapabilities updatedCapabilities =
+                    new TimeCapabilities.Builder(capabilities)
+                            .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
+                            .build();
+            TimeCapabilities expectedCapabilities =
+                    new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                            .setConfigureAutoDetectionEnabledCapability(CAPABILITY_POSSESSED)
+                            .setSetManualTimeCapability(CAPABILITY_NOT_ALLOWED)
+                            .build();
+
+            assertThat(updatedCapabilities).isEqualTo(expectedCapabilities);
+        }
+
+        {
+            TimeCapabilities updatedCapabilities =
+                    new TimeCapabilities.Builder(capabilities)
+                            .setSetManualTimeCapability(CAPABILITY_POSSESSED)
+                            .build();
+
+            TimeCapabilities expectedCapabilities =
+                    new TimeCapabilities.Builder(TEST_USER_HANDLE)
+                            .setConfigureAutoDetectionEnabledCapability(CAPABILITY_NOT_ALLOWED)
+                            .setSetManualTimeCapability(CAPABILITY_POSSESSED)
+                            .build();
+
+            assertThat(updatedCapabilities).isEqualTo(expectedCapabilities);
+        }
+    }
 }

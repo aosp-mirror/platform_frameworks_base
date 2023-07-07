@@ -148,4 +148,31 @@ public class ContextUserIdCheckerTest {
                         "}")
                 .doTest();
     }
+
+    @Test
+    public void testUserManager() {
+        compilationHelper
+                .addSourceFile("/android/annotation/SystemService.java")
+                .addSourceFile("/android/content/Context.java")
+                .addSourceFile("/android/content/Intent.java")
+                .addSourceFile("/android/foo/IFooService.java")
+                .addSourceFile("/android/os/IInterface.java")
+                .addSourceFile("/android/os/UserHandle.java")
+                .addSourceFile("/android/os/RemoteException.java")
+                .addSourceLines("UserManager.java",
+                        "package android.os;",
+                        "import android.annotation.SystemService;",
+                        "import android.content.Context;",
+                        "import android.foo.IFooService;",
+                        "import android.os.UserHandle;",
+                        "import android.os.RemoteException;",
+                        "@SystemService(\"user\") public class UserManager {",
+                        "  IFooService mService;",
+                        "  int getContextUserIfAppropriate() { return 0; }",
+                        "  void bar() throws RemoteException {",
+                        "    mService.baz(null, getContextUserIfAppropriate());",
+                        "  }",
+                        "}")
+                .doTest();
+    }
 }

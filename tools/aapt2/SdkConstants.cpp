@@ -27,7 +27,7 @@ namespace aapt {
 
 static ApiVersion sDevelopmentSdkLevel = 10000;
 static const auto sDevelopmentSdkCodeNames =
-    std::unordered_set<StringPiece>({"Q", "R", "S", "Sv2", "Tiramisu"});
+    std::unordered_set<StringPiece>({"Q", "R", "S", "Sv2", "Tiramisu", "UpsideDownCake"});
 
 static const std::vector<std::pair<uint16_t, ApiVersion>> sAttrIdMap = {
     {0x021c, 1},
@@ -77,7 +77,7 @@ ApiVersion FindAttributeSdkLevel(const ResourceId& id) {
   return iter->second;
 }
 
-std::optional<ApiVersion> GetDevelopmentSdkCodeNameVersion(const StringPiece& code_name) {
+std::optional<ApiVersion> GetDevelopmentSdkCodeNameVersion(StringPiece code_name) {
   return (sDevelopmentSdkCodeNames.find(code_name) == sDevelopmentSdkCodeNames.end())
              ? std::optional<ApiVersion>()
              : sDevelopmentSdkLevel;

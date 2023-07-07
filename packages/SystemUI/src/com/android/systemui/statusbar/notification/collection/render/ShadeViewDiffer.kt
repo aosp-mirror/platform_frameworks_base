@@ -67,7 +67,10 @@ class ShadeViewDiffer(
     fun getViewLabel(view: View): String =
             nodes.values.firstOrNull { node -> node.view === view }?.label ?: view.toString()
 
-    private fun detachChildren(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
+    private fun detachChildren(
+        parentNode: ShadeNode,
+        specMap: Map<NodeController, NodeSpec>
+    ) = traceSection("detachChildren") {
         val views = nodes.values.associateBy { it.view }
         fun detachRecursively(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
             val parentSpec = specMap[parentNode.controller]
@@ -86,10 +89,10 @@ class ShadeViewDiffer(
     }
 
     private fun maybeDetachChild(
-        parentNode: ShadeNode,
-        parentSpec: NodeSpec?,
-        childNode: ShadeNode,
-        childSpec: NodeSpec?
+            parentNode: ShadeNode,
+            parentSpec: NodeSpec?,
+            childNode: ShadeNode,
+            childSpec: NodeSpec?
     ) {
         val newParentNode = childSpec?.parent?.let { getNode(it) }
 
@@ -100,18 +103,34 @@ class ShadeViewDiffer(
                 nodes.remove(childNode.controller)
             }
 
-            logger.logDetachingChild(
-                key = childNode.label,
-                isTransfer = !childCompletelyRemoved,
-                isParentRemoved = parentSpec == null,
-                oldParent = parentNode.label,
-                newParent = newParentNode?.label)
-            parentNode.removeChild(childNode, isTransfer = !childCompletelyRemoved)
-            childNode.parent = null
+            if (childCompletelyRemoved && parentSpec == null &&
+                    childNode.offerToKeepInParentForAnimation()) {
+                // If both the child and the parent are being removed at the same time, then
+                // keep the child attached to the parent for animation purposes
+                logger.logSkipDetachingChild(
+                        key = childNode.label,
+                        parentKey = parentNode.label,
+                        isTransfer = !childCompletelyRemoved,
+                        isParentRemoved = true
+                )
+            } else {
+                logger.logDetachingChild(
+                        key = childNode.label,
+                        isTransfer = !childCompletelyRemoved,
+                        isParentRemoved = parentSpec == null,
+                        oldParent = parentNode.label,
+                        newParent = newParentNode?.label
+                )
+                parentNode.removeChild(childNode, isTransfer = !childCompletelyRemoved)
+                childNode.parent = null
+            }
         }
     }
 
-    private fun attachChildren(parentNode: ShadeNode, specMap: Map<NodeController, NodeSpec>) {
+    private fun attachChildren(
+        parentNode: ShadeNode,
+        specMap: Map<NodeController, NodeSpec>
+    ): Unit = traceSection("attachChildren") {
         val parentSpec = checkNotNull(specMap[parentNode.controller])
 
         for ((index, childSpec) in parentSpec.children.withIndex()) {
@@ -119,11 +138,21 @@ class ShadeViewDiffer(
             val childNode = getNode(childSpec)
 
             if (childNode.view != currView) {
+                val removedFromParent = childNode.removeFromParentIfKeptForAnimation()
+                if (removedFromParent) {
+                    logger.logDetachingChild(
+                            key = childNode.label,
+                            isTransfer = false,
+                            isParentRemoved = true,
+                            oldParent = null,
+                            newParent = null
+                    )
+                }
 
                 when (childNode.parent) {
                     null -> {
                         // A new child (either newly created or coming from some other parent)
-                        logger.logAttachingChild(childNode.label, parentNode.label)
+                        logger.logAttachingChild(childNode.label, parentNode.label, index)
                         parentNode.addChildAt(childNode, index)
                         childNode.parent = parentNode
                     }
@@ -141,6 +170,8 @@ class ShadeViewDiffer(
                     }
                 }
             }
+
+            childNode.resetKeepInParentForAnimation()
 
             if (childSpec.children.isNotEmpty()) {
                 attachChildren(childNode, specMap)
@@ -212,5 +243,17 @@ private class ShadeNode(val controller: NodeController) {
     fun removeChild(child: ShadeNode, isTransfer: Boolean) {
         controller.removeChild(child.controller, isTransfer)
         child.controller.onViewRemoved()
+    }
+
+    fun offerToKeepInParentForAnimation(): Boolean {
+        return controller.offerToKeepInParentForAnimation()
+    }
+
+    fun removeFromParentIfKeptForAnimation(): Boolean {
+        return controller.removeFromParentIfKeptForAnimation()
+    }
+
+    fun resetKeepInParentForAnimation() {
+        controller.resetKeepInParentForAnimation()
     }
 }

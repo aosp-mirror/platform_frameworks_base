@@ -18,9 +18,6 @@ package android.view;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArraySet;
-
-import java.util.Set;
 
 /**
  * Holds information about how to execute task transition animations.
@@ -36,32 +33,12 @@ public class TaskTransitionSpec implements Parcelable {
      */
     public final int backgroundColor;
 
-    /**
-     * TEMPORARY FIELD (b/202383002)
-     * TODO: Remove once we use surfaceflinger rounded corners on tasks rather than taskbar overlays
-     *  or when shell transitions are fully enabled
-     *
-     * A set of {@InsetsState.InternalInsetsType}s we want to use as the source to set the bounds
-     * of the task during the animation. Used to make sure that task animate above the taskbar.
-     * Will also be used to crop to the frame size of the inset source to the inset size to prevent
-     * the taskbar rounded corners overlay from being invisible during task transition animation.
-     */
-    public final Set<Integer> animationBoundInsets;
-
-    public TaskTransitionSpec(
-            int backgroundColor, Set<Integer> animationBoundInsets) {
+    public TaskTransitionSpec(int backgroundColor) {
         this.backgroundColor = backgroundColor;
-        this.animationBoundInsets = animationBoundInsets;
     }
 
     public TaskTransitionSpec(Parcel in) {
         this.backgroundColor = in.readInt();
-
-        int animationBoundInsetsSize = in.readInt();
-        this.animationBoundInsets = new ArraySet<>(animationBoundInsetsSize);
-        for (int i = 0; i < animationBoundInsetsSize; i++) {
-            this.animationBoundInsets.add(in.readInt());
-        }
     }
 
     @Override
@@ -72,11 +49,6 @@ public class TaskTransitionSpec implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(backgroundColor);
-
-        dest.writeInt(animationBoundInsets.size());
-        for (int insetType : animationBoundInsets) {
-            dest.writeInt(insetType);
-        }
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<TaskTransitionSpec>

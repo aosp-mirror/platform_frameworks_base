@@ -37,7 +37,6 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
     private final List<OnMainSwitchChangeListener> mSwitchChangeListeners = new ArrayList<>();
 
     private MainSwitchBar mMainSwitchBar;
-    private CharSequence mTitle;
 
     public MainSwitchPreference(Context context) {
         super(context);
@@ -68,6 +67,10 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
         holder.setDividerAllowedBelow(false);
 
         mMainSwitchBar = (MainSwitchBar) holder.findViewById(R.id.settingslib_main_switch_bar);
+        // To support onPreferenceChange callback, it needs to call callChangeListener() when
+        // MainSwitchBar is clicked.
+        mMainSwitchBar.setOnClickListener((view) -> callChangeListener(isChecked()));
+        setIconSpaceReserved(isIconSpaceReserved());
         updateStatus(isChecked());
         registerListenerToSwitchBar();
     }
@@ -82,6 +85,10 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
             final CharSequence title = a.getText(
                     androidx.preference.R.styleable.Preference_android_title);
             setTitle(title);
+
+            final boolean bIconSpaceReserved = a.getBoolean(
+                    androidx.preference.R.styleable.Preference_android_iconSpaceReserved, true);
+            setIconSpaceReserved(bIconSpaceReserved);
             a.recycle();
         }
     }
@@ -96,9 +103,17 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
 
     @Override
     public void setTitle(CharSequence title) {
-        mTitle = title;
+        super.setTitle(title);
         if (mMainSwitchBar != null) {
-            mMainSwitchBar.setTitle(mTitle);
+            mMainSwitchBar.setTitle(title);
+        }
+    }
+
+    @Override
+    public void setIconSpaceReserved(boolean iconSpaceReserved) {
+        super.setIconSpaceReserved(iconSpaceReserved);
+        if (mMainSwitchBar != null) {
+            mMainSwitchBar.setIconSpaceReserved(iconSpaceReserved);
         }
     }
 
@@ -113,7 +128,7 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
     public void updateStatus(boolean checked) {
         setChecked(checked);
         if (mMainSwitchBar != null) {
-            mMainSwitchBar.setTitle(mTitle);
+            mMainSwitchBar.setTitle(getTitle());
             mMainSwitchBar.show();
         }
     }
@@ -125,6 +140,7 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
         if (!mSwitchChangeListeners.contains(listener)) {
             mSwitchChangeListeners.add(listener);
         }
+
         if (mMainSwitchBar != null) {
             mMainSwitchBar.addOnSwitchChangeListener(listener);
         }

@@ -21,26 +21,30 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Gib deine PIN ein"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Gib die PIN ein"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Muster eingeben"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Zeichne das Muster"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Passwort eingeben"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Gib das Passwort ein"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ungültige Karte."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Aufgeladen"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kabelloses Laden"</string>
-    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladestation"</string>
+    <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird geladen"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird geladen"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird schnell geladen"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wird langsam geladen"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laden vorübergehend eingeschränkt"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optimiertes Laden zur Akkuschonung"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Problem mit dem Ladezubehör"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Zum Entsperren die Menütaste drücken."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Netzwerk gesperrt"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Keine SIM-Karte"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"SIM-Karte einlegen."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"SIM-Karte fehlt oder ist nicht lesbar. Bitte lege eine SIM-Karte ein."</string>
-    <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"SIM-Karte unbrauchbar."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"Deine SIM-Karte wurde dauerhaft deaktiviert.\n Wende dich an deinen Mobilfunkanbieter, um eine andere SIM-Karte zu erhalten."</string>
-    <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"SIM-Karte ist gesperrt."</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"PUK-Sperre auf SIM-Karte."</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"SIM-Karte wird entsperrt..."</string>
+    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Keine SIM-Karte"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Lege eine SIM-Karte ein."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"SIM-Karte fehlt oder ist nicht lesbar. Lege eine SIM-Karte ein."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM-Karte ist nicht nutzbar."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Deine SIM-Karte wurde dauerhaft deaktiviert.\n Wende dich an deinen Mobilfunkanbieter, um eine andere SIM-Karte zu erhalten."</string>
+    <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM-Karte ist gesperrt."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM-Karte ist mit einem PUK gesperrt."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIM-Karte wird entsperrt…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"PIN-Bereich"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Gerätepasswort"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"SIM-PIN-Bereich"</string>
@@ -51,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Die eSim kann aufgrund eines Fehlers nicht deaktiviert werden."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Eingabe"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Falsches Muster"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Muster ist falsch. Versuche es noch einmal."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Falsches Passwort"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Passwort ist falsch. Versuche es noch einmal."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Falsche PIN"</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN ist falsch. Versuche es noch einmal.."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Oder Gerät per Fingerabdruck entsperren"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Fingerabdruck nicht erkannt"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Gesicht nicht erkannt"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Bitte noch einmal versuchen oder PIN eingeben"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Bitte noch einmal versuchen oder Passwort eingeben"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Bitte noch einmal versuchen oder Muster zeichnen"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Nach zu vielen Versuchen wird die PIN abgefragt"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"Nach zu vielen Versuchen wird das Passwort abgefragt"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Nach zu vielen Versuchen wird das Muster abgefragt"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Entsperrung mit PIN/Fingerabdruck"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Entsperrung mit Passwort/Fingerabdruck"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Entsperrung mit Muster/Fingerabdruck"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Gerät vom Admin aus Sicherheitsgründen gesperrt"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Nach einer Sperre muss die PIN eingegeben werden"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Nach einer Sperre muss das Passwort eingegeben werden"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Nach einer Sperre muss das Muster gezeichnet werden"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Update wird installiert, wenn das Gerät inaktiv ist"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Zusätzliche Sicherheitsmaßnahme erforderlich. Die PIN wurde länger nicht genutzt."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Zusätzliche Sicherheitsmaßnahme erforderlich. Passwort wurde länger nicht genutzt."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Zusätzliche Sicherheitsmaßnahme erforderlich. Muster wurde länger nicht genutzt."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Zusätzliche Sicherheitsmaßnahme erforderlich. Gerät wurde länger nicht entsperrt."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Entsperrung mit Gesicht geht nicht. Zu oft versucht."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Entsperrung mit Finger geht nicht. Zu oft versucht."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Trust Agent nicht verfügbar"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Zu viele Versuche mit falscher PIN"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Zu viele Versuche mit falschem Muster"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Zu viele Versuche mit falschem Passwort"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{In # Sekunde noch einmal versuchen.}other{In # Sekunden noch einmal versuchen.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Gib die SIM-PIN ein"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Gib die SIM-PIN für \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ein."</string>
@@ -61,45 +95,40 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Die SIM-Karte \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Weitere Informationen erhältst du von deinem Mobilfunkanbieter."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Gewünschten PIN-Code eingeben"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Gewünschten PIN-Code bestätigen"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"SIM-Karte wird entsperrt..."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"SIM-Karte wird entsperrt…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Gib eine 4- bis 8-stellige PIN ein."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"Der PUK-Code muss mindestens 8 Ziffern aufweisen."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Du hast deine PIN <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch eingegeben.\n\nBitte versuche es in <xliff:g id="NUMBER_1">%2$d</xliff:g> Sekunden noch einmal."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Du hast dein Passwort <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch eingegeben.\n\nBitte versuche es in <xliff:g id="NUMBER_1">%2$d</xliff:g> Sekunden noch einmal."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Du hast dein Entsperrungsmuster <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch gezeichnet. \n\nBitte versuche es in <xliff:g id="NUMBER_1">%2$d</xliff:g> Sekunden noch einmal."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Falscher PIN-Code der SIM-Karte. Bitte wende dich an deinen Mobilfunkanbieter, damit er dein Gerät entsperrt."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
-      <item quantity="other">Falscher PIN-Code der SIM-Karte. Du hast noch <xliff:g id="NUMBER_1">%d</xliff:g> Versuche.</item>
-      <item quantity="one">Falscher PIN-Code der SIM-Karte. Du hast noch <xliff:g id="NUMBER_0">%d</xliff:g> Versuch, bevor du das Gerät von deinem Mobilfunkanbieter entsperren lassen musst.</item>
-    </plurals>
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Falscher PIN-Code für die SIM-Karte. Du hast noch # Versuch, bevor das Gerät nur noch vom Mobilfunkanbieter entsperrt werden kann.}other{Falscher PIN-Code für die SIM-Karte. Du hast noch # Versuche. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"Die SIM-Karte kann nicht verwendet werden. Bitte wende dich an deinen Mobilfunkanbieter."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
-      <item quantity="other">Falscher PUK-Code der SIM-Karte. Du hast noch <xliff:g id="NUMBER_1">%d</xliff:g> Versuche, bevor deine SIM-Karte endgültig gesperrt wird.</item>
-      <item quantity="one">Falscher PUK-Code der SIM-Karte. Du hast noch <xliff:g id="NUMBER_0">%d</xliff:g> Versuch, bevor deine SIM-Karte endgültig gesperrt wird.</item>
-    </plurals>
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Falscher PUK-Code für die SIM-Karte. Du hast noch # Versuch, bevor die SIM-Karte endgültig gesperrt wird.}other{Falscher PUK-Code für die SIM-Karte. Du hast noch # Versuche, bevor die SIM-Karte endgültig gesperrt wird.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Fehler beim Entsperren der SIM-Karte mit der PIN."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Fehler beim Entsperren der SIM-Karte mithilfe des PUK-Codes."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Eingabemethode wechseln"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Flugmodus"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Nach dem Neustart des Geräts ist die Eingabe des Musters erforderlich"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Nach dem Neustart des Geräts ist die Eingabe der PIN erforderlich"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Nach dem Neustart des Geräts ist die Eingabe des Passworts erforderlich"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Zur Verbesserung der Sicherheit ist ein Muster erforderlich"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Zur Verbesserung der Sicherheit ist eine PIN erforderlich"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Zur Verbesserung der Sicherheit ist ein Passwort erforderlich"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Nach Geräteneustart ist das Muster erforderlich"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Nach Geräteneustart ist die PIN erforderlich"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Nach Geräteneustart ist das Passwort erforderlich"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Verwende für mehr Sicherheit stattdessen dein Muster"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Verwende für mehr Sicherheit stattdessen deine PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Verwende für mehr Sicherheit stattdessen dein Passwort"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Gerät vom Administrator gesperrt"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Gerät manuell gesperrt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nicht erkannt"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Wenn du die Entsperrung per Gesichtserkennung verwenden möchtest, aktiviere in den Einstellungen unter „Datenschutz“ die Option "<b>"Kamerazugriff"</b></string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
-      <item quantity="other">Gib die PIN für die SIM-Karte ein. Du hast noch <xliff:g id="NUMBER_1">%d</xliff:g> Versuche.</item>
-      <item quantity="one">Gib die PIN für die SIM-Karte ein. Du hast noch <xliff:g id="NUMBER_0">%d</xliff:g> Versuch, bevor das Gerät nur noch vom Mobilfunkanbieter entsperrt werden kann.</item>
-    </plurals>
-    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="other">Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Du hast noch <xliff:g id="_NUMBER_1">%d</xliff:g> Versuche, bevor die SIM-Karte endgültig gesperrt wird. Weitere Informationen erhältst du von deinem Mobilfunkanbieter.</item>
-      <item quantity="one">Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Du hast noch <xliff:g id="_NUMBER_0">%d</xliff:g> Versuch, bevor die SIM-Karte endgültig gesperrt wird. Weitere Informationen erhältst du von deinem Mobilfunkanbieter.</item>
-    </plurals>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Die Gesichtsentsperrung benötigt Kamerazugriff"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Gib die PIN für die SIM-Karte ein. Du hast noch # Versuch, bevor das Gerät nur noch vom Mobilfunkanbieter entsperrt werden kann.}other{Gib die PIN für die SIM-Karte ein. Du hast noch # Versuche.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Du hast noch # Versuch, bevor die SIM-Karte endgültig gesperrt wird. Wende dich für weitere Informationen an deinen Mobilfunkanbieter.}other{Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Du hast noch # Versuche, bevor die SIM-Karte endgültig gesperrt wird. Wende dich für weitere Informationen an deinen Mobilfunkanbieter.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Standard"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bubble"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Gerät entsperren, um fortzufahren"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"Gib deine PIN ein, um das Update später zu installieren"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"Gib dein Passwort ein, um das Update später zu installieren"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"Zeichne dein Muster, um das Update später zu installieren"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"Gerät aktualisiert. Gib deine PIN ein, um fortzufahren."</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"Gerät aktualisiert. Gib dein Passwort ein, um fortzufahren."</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"Gerät aktualisiert. Zeichne dein Muster, um fortzufahren."</string>
 </resources>

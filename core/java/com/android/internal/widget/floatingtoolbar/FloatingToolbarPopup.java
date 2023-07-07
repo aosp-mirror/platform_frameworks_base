@@ -21,6 +21,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.selectiontoolbar.SelectionToolbarManager;
 import android.widget.PopupWindow;
 
 import java.util.List;
@@ -92,7 +93,10 @@ public interface FloatingToolbarPopup {
      * enabled, otherwise returns {@link LocalFloatingToolbarPopup} implementation.
      */
     static FloatingToolbarPopup createInstance(Context context, View parent) {
-        return new LocalFloatingToolbarPopup(context, parent);
+        boolean enabled = SelectionToolbarManager.isRemoteSelectionToolbarEnabled(context);
+        return enabled
+                ? new RemoteFloatingToolbarPopup(context, parent)
+                : new LocalFloatingToolbarPopup(context, parent);
     }
 
 }

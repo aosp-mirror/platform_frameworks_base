@@ -23,10 +23,15 @@ import android.app.search.ISearchCallback.Stub;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
+import android.util.ArrayMap;
 import android.util.Log;
+
+import com.android.internal.annotations.GuardedBy;
 
 import dalvik.system.CloseGuard;
 
@@ -70,7 +75,7 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
-public final class SearchSession implements AutoCloseable{
+public final class SearchSession implements AutoCloseable {
 
     private static final String TAG = SearchSession.class.getSimpleName();
     private static final boolean DEBUG = false;
@@ -81,6 +86,8 @@ public final class SearchSession implements AutoCloseable{
 
     private final SearchSessionId mSessionId;
     private final IBinder mToken = new Binder();
+    @GuardedBy("itself")
+    private final ArrayMap<Callback, CallbackWrapper> mRegisteredCallbacks = new ArrayMap<>();
 
     /**
      * Creates a new search ui client.
@@ -154,6 +161,68 @@ public final class SearchSession implements AutoCloseable{
             e.rethrowFromSystemServer();
         }
     }
+    /**
+     * Request the search ui service provide continuous updates of {@link SearchTarget} list
+     * via the provided callback to render for zero state, until the given callback is
+     * unregistered. Zero state means when user entered search ui but not issued any query yet.
+     *
+     * @see SearchSession.Callback#onTargetsAvailable(List).
+     *
+     * @param callbackExecutor The callback executor to use when calling the callback.
+     * @param callback The Callback to be called when updates of search targets for zero state
+     *                 are available.
+     */
+    public void registerEmptyQueryResultUpdateCallback(
+            @NonNull @CallbackExecutor Executor callbackExecutor,
+            @NonNull Callback callback) {
+        synchronized (mRegisteredCallbacks) {
+            if (mIsClosed.get()) {
+                throw new IllegalStateException("This client has already been destroyed.");
+            }
+            if (mRegisteredCallbacks.containsKey(callback)) {
+                // Skip if this callback is already registered
+                return;
+            }
+            try {
+                final CallbackWrapper callbackWrapper = new CallbackWrapper(callbackExecutor,
+                        callback::onTargetsAvailable);
+                mInterface.registerEmptyQueryResultUpdateCallback(mSessionId, callbackWrapper);
+                mRegisteredCallbacks.put(callback, callbackWrapper);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to register for empty query result updates", e);
+                e.rethrowAsRuntimeException();
+            }
+        }
+    }
+
+    /**
+     * Requests the search ui service to stop providing continuous updates of {@link SearchTarget}
+     * to the provided callback for zero state until the callback is re-registered. Zero state
+     * means when user entered search ui but not issued any query yet.
+     *
+     * @see {@link SearchSession#registerEmptyQueryResultUpdateCallback(Executor, Callback)}
+     * @param callback The callback to be unregistered.
+     */
+    public void unregisterEmptyQueryResultUpdateCallback(
+            @NonNull Callback callback) {
+        synchronized (mRegisteredCallbacks) {
+            if (mIsClosed.get()) {
+                throw new IllegalStateException("This client has already been destroyed.");
+            }
+
+            if (!mRegisteredCallbacks.containsKey(callback)) {
+                // Skip if this callback was never registered
+                return;
+            }
+            try {
+                final CallbackWrapper callbackWrapper = mRegisteredCallbacks.remove(callback);
+                mInterface.unregisterEmptyQueryResultUpdateCallback(mSessionId, callbackWrapper);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to unregister for empty query result updates", e);
+                e.rethrowAsRuntimeException();
+            }
+        }
+    }
 
     /**
      * Destroys the client and unregisters the callback. Any method on this class after this call
@@ -211,6 +280,19 @@ public final class SearchSession implements AutoCloseable{
         }
     }
 
+    /**
+     *  Callback for receiving {@link SearchTarget} updates for zero state. Zero state
+     *  means when user entered search ui but not issued any query yet.
+     */
+    public interface Callback {
+
+        /**
+         * Called when a new set of {@link SearchTarget} are available for zero state.
+         * @param targets Sorted list of search targets.
+         */
+        void onTargetsAvailable(@NonNull List<SearchTarget> targets);
+    }
+
     static class CallbackWrapper extends Stub {
 
         private final Consumer<List<SearchTarget>> mCallback;
@@ -229,7 +311,14 @@ public final class SearchSession implements AutoCloseable{
                 if (DEBUG) {
                     Log.d(TAG, "CallbackWrapper.onResult result=" + result.getList());
                 }
-                mExecutor.execute(() -> mCallback.accept(result.getList()));
+                List<SearchTarget> list = result.getList();
+                if (list.size() > 0) {
+                    Bundle bundle = list.get(0).getExtras();
+                    if (bundle != null) {
+                        bundle.putLong("key_ipc_start", SystemClock.elapsedRealtime());
+                    }
+                }
+                mExecutor.execute(() -> mCallback.accept(list));
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

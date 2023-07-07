@@ -38,18 +38,18 @@ public class BubbleEntry {
     private StatusBarNotification mSbn;
     private Ranking mRanking;
 
-    private boolean mIsClearable;
+    private boolean mIsDismissable;
     private boolean mShouldSuppressNotificationDot;
     private boolean mShouldSuppressNotificationList;
     private boolean mShouldSuppressPeek;
 
     public BubbleEntry(@NonNull StatusBarNotification sbn,
-            Ranking ranking, boolean isClearable, boolean shouldSuppressNotificationDot,
+            Ranking ranking, boolean isDismissable, boolean shouldSuppressNotificationDot,
             boolean shouldSuppressNotificationList, boolean shouldSuppressPeek) {
         mSbn = sbn;
         mRanking = ranking;
 
-        mIsClearable = isClearable;
+        mIsDismissable = isDismissable;
         mShouldSuppressNotificationDot = shouldSuppressNotificationDot;
         mShouldSuppressNotificationList = shouldSuppressNotificationList;
         mShouldSuppressPeek = shouldSuppressPeek;
@@ -115,9 +115,9 @@ public class BubbleEntry {
         return mRanking.canBubble();
     }
 
-    /** @return true if this notification is clearable. */
-    public boolean isClearable() {
-        return mIsClearable;
+    /** @return true if this notification can be dismissed. */
+    public boolean isDismissable() {
+        return mIsDismissable;
     }
 
     /** @return true if {@link Policy#SUPPRESSED_EFFECT_BADGE} set for this notification. */

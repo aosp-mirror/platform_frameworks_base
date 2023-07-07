@@ -17,18 +17,16 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import android.support.test.launcherhelper.LauncherStrategyFactory
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.parser.toFlickerComponent
 
- class FixedOrientationAppHelper @JvmOverloads constructor(
-     instr: Instrumentation,
-     launcherName: String = ActivityOptions.PORTRAIT_ONLY_ACTIVITY_LAUNCHER_NAME,
-     component: FlickerComponentName =
-             ActivityOptions.PORTRAIT_ONLY_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
-     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-             .getInstance(instr)
-             .launcherStrategy
- ) : StandardAppHelper(instr, launcherName, component, launcherStrategy)
+class FixedOrientationAppHelper
+@JvmOverloads
+constructor(
+    instr: Instrumentation,
+    launcherName: String = ActivityOptions.PortraitOnlyActivity.LABEL,
+    component: ComponentNameMatcher =
+        ActivityOptions.PortraitOnlyActivity.COMPONENT.toFlickerComponent()
+) : StandardAppHelper(instr, launcherName, component)

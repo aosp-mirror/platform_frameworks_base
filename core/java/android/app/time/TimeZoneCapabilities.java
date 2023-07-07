@@ -22,8 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.time.Capabilities.CapabilityState;
-import android.app.timezonedetector.ManualTimeZoneSuggestion;
-import android.app.timezonedetector.TimeZoneDetector;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -43,16 +41,15 @@ import java.util.Objects;
 @SystemApi
 public final class TimeZoneCapabilities implements Parcelable {
 
-    public static final @NonNull Creator<TimeZoneCapabilities> CREATOR =
-            new Creator<TimeZoneCapabilities>() {
-                public TimeZoneCapabilities createFromParcel(Parcel in) {
-                    return TimeZoneCapabilities.createFromParcel(in);
-                }
+    public static final @NonNull Creator<TimeZoneCapabilities> CREATOR = new Creator<>() {
+        public TimeZoneCapabilities createFromParcel(Parcel in) {
+            return TimeZoneCapabilities.createFromParcel(in);
+        }
 
-                public TimeZoneCapabilities[] newArray(int size) {
-                    return new TimeZoneCapabilities[size];
-                }
-            };
+        public TimeZoneCapabilities[] newArray(int size) {
+            return new TimeZoneCapabilities[size];
+        }
+    };
 
     /**
      * The user the capabilities are for. This is used for object equality and debugging but there
@@ -60,25 +57,37 @@ public final class TimeZoneCapabilities implements Parcelable {
      */
     @NonNull private final UserHandle mUserHandle;
     private final @CapabilityState int mConfigureAutoDetectionEnabledCapability;
+
+    /**
+     * The values of the user's "Use location" value, AKA the Master Location Switch.
+     *
+     * <p>This is only exposed for SettingsUI and so is not part of the SDK API.
+     *
+     * <p>This is not treated as a CapabilityState as it's a boolean value that all user's have.
+     */
+    private final boolean mUseLocationEnabled;
+
     private final @CapabilityState int mConfigureGeoDetectionEnabledCapability;
-    private final @CapabilityState int mSuggestManualTimeZoneCapability;
+    private final @CapabilityState int mSetManualTimeZoneCapability;
 
     private TimeZoneCapabilities(@NonNull Builder builder) {
         this.mUserHandle = Objects.requireNonNull(builder.mUserHandle);
         this.mConfigureAutoDetectionEnabledCapability =
                 builder.mConfigureAutoDetectionEnabledCapability;
+        this.mUseLocationEnabled = builder.mUseLocationEnabled;
         this.mConfigureGeoDetectionEnabledCapability =
                 builder.mConfigureGeoDetectionEnabledCapability;
-        this.mSuggestManualTimeZoneCapability = builder.mSuggestManualTimeZoneCapability;
+        this.mSetManualTimeZoneCapability = builder.mSetManualTimeZoneCapability;
     }
 
     @NonNull
-    private static TimeZoneCapabilities createFromParcel(Parcel in) {
+    private static TimeZoneCapabilities createFromParcel(@NonNull Parcel in) {
         UserHandle userHandle = UserHandle.readFromParcel(in);
         return new TimeZoneCapabilities.Builder(userHandle)
                 .setConfigureAutoDetectionEnabledCapability(in.readInt())
+                .setUseLocationEnabled(in.readBoolean())
                 .setConfigureGeoDetectionEnabledCapability(in.readInt())
-                .setSuggestManualTimeZoneCapability(in.readInt())
+                .setSetManualTimeZoneCapability(in.readInt())
                 .build();
     }
 
@@ -86,8 +95,9 @@ public final class TimeZoneCapabilities implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         UserHandle.writeToParcel(mUserHandle, dest);
         dest.writeInt(mConfigureAutoDetectionEnabledCapability);
+        dest.writeBoolean(mUseLocationEnabled);
         dest.writeInt(mConfigureGeoDetectionEnabledCapability);
-        dest.writeInt(mSuggestManualTimeZoneCapability);
+        dest.writeInt(mSetManualTimeZoneCapability);
     }
 
     /**
@@ -98,6 +108,20 @@ public final class TimeZoneCapabilities implements Parcelable {
     @CapabilityState
     public int getConfigureAutoDetectionEnabledCapability() {
         return mConfigureAutoDetectionEnabledCapability;
+    }
+
+    /**
+     * Returns {@code true} if the device's location can be used by the Android system, and
+     * therefore the platform components running on behalf of the user. At the time of writing, the
+     * user can change this via the "Use location" setting on the Location settings screen.
+     *
+     * Not part of the SDK API because it is intended for use by SettingsUI, which can display
+     * text about needing it to be on for location-based time zone detection.
+     * @hide
+     *
+     */
+    public boolean isUseLocationEnabled() {
+        return mUseLocationEnabled;
     }
 
     /**
@@ -112,17 +136,15 @@ public final class TimeZoneCapabilities implements Parcelable {
 
     /**
      * Returns the capability state associated with the user's ability to manually set the time zone
-     * on a device via {@link TimeZoneDetector#suggestManualTimeZone(ManualTimeZoneSuggestion)}.
+     * on a device.
      *
-     * <p>The suggestion will be ignored in all cases unless the value is {@link
+     * <p>The time zone will be ignored in all cases unless the value is {@link
      * Capabilities#CAPABILITY_POSSESSED}. See also
      * {@link TimeZoneConfiguration#isAutoDetectionEnabled()}.
-     *
-     * @hide
      */
     @CapabilityState
-    public int getSuggestManualTimeZoneCapability() {
-        return mSuggestManualTimeZoneCapability;
+    public int getSetManualTimeZoneCapability() {
+        return mSetManualTimeZoneCapability;
     }
 
     /**
@@ -172,15 +194,16 @@ public final class TimeZoneCapabilities implements Parcelable {
         return mUserHandle.equals(that.mUserHandle)
                 && mConfigureAutoDetectionEnabledCapability
                 == that.mConfigureAutoDetectionEnabledCapability
+                && mUseLocationEnabled == that.mUseLocationEnabled
                 && mConfigureGeoDetectionEnabledCapability
                 == that.mConfigureGeoDetectionEnabledCapability
-                && mSuggestManualTimeZoneCapability == that.mSuggestManualTimeZoneCapability;
+                && mSetManualTimeZoneCapability == that.mSetManualTimeZoneCapability;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mUserHandle, mConfigureAutoDetectionEnabledCapability,
-                mConfigureGeoDetectionEnabledCapability, mSuggestManualTimeZoneCapability);
+                mConfigureGeoDetectionEnabledCapability, mSetManualTimeZoneCapability);
     }
 
     @Override
@@ -189,19 +212,25 @@ public final class TimeZoneCapabilities implements Parcelable {
                 + "mUserHandle=" + mUserHandle
                 + ", mConfigureAutoDetectionEnabledCapability="
                 + mConfigureAutoDetectionEnabledCapability
+                + ", mUseLocationEnabled=" + mUseLocationEnabled
                 + ", mConfigureGeoDetectionEnabledCapability="
                 + mConfigureGeoDetectionEnabledCapability
-                + ", mSuggestManualTimeZoneCapability=" + mSuggestManualTimeZoneCapability
+                + ", mSetManualTimeZoneCapability=" + mSetManualTimeZoneCapability
                 + '}';
     }
 
-    /** @hide */
+    /**
+     * A builder of {@link TimeZoneCapabilities} objects.
+     *
+     * @hide
+     */
     public static class Builder {
 
         @NonNull private UserHandle mUserHandle;
         private @CapabilityState int mConfigureAutoDetectionEnabledCapability;
+        private Boolean mUseLocationEnabled;
         private @CapabilityState int mConfigureGeoDetectionEnabledCapability;
-        private @CapabilityState int mSuggestManualTimeZoneCapability;
+        private @CapabilityState int mSetManualTimeZoneCapability;
 
         public Builder(@NonNull UserHandle userHandle) {
             mUserHandle = Objects.requireNonNull(userHandle);
@@ -212,27 +241,36 @@ public final class TimeZoneCapabilities implements Parcelable {
             mUserHandle = capabilitiesToCopy.mUserHandle;
             mConfigureAutoDetectionEnabledCapability =
                 capabilitiesToCopy.mConfigureAutoDetectionEnabledCapability;
+            mUseLocationEnabled = capabilitiesToCopy.mUseLocationEnabled;
             mConfigureGeoDetectionEnabledCapability =
                 capabilitiesToCopy.mConfigureGeoDetectionEnabledCapability;
-            mSuggestManualTimeZoneCapability =
-                capabilitiesToCopy.mSuggestManualTimeZoneCapability;
+            mSetManualTimeZoneCapability =
+                capabilitiesToCopy.mSetManualTimeZoneCapability;
         }
 
-        /** Sets the state for the automatic time zone detection enabled config. */
+        /** Sets the value for the "configure automatic time zone detection enabled" capability. */
         public Builder setConfigureAutoDetectionEnabledCapability(@CapabilityState int value) {
             this.mConfigureAutoDetectionEnabledCapability = value;
             return this;
         }
 
-        /** Sets the state for the geolocation time zone detection enabled config. */
+        /** Sets the values for "use location". See {@link #isUseLocationEnabled()}. */
+        public Builder setUseLocationEnabled(boolean useLocation) {
+            mUseLocationEnabled = useLocation;
+            return this;
+        }
+
+        /**
+         * Sets the value for the "configure geolocation time zone detection enabled" capability.
+         */
         public Builder setConfigureGeoDetectionEnabledCapability(@CapabilityState int value) {
             this.mConfigureGeoDetectionEnabledCapability = value;
             return this;
         }
 
-        /** Sets the state for the suggestManualTimeZone action. */
-        public Builder setSuggestManualTimeZoneCapability(@CapabilityState int value) {
-            this.mSuggestManualTimeZoneCapability = value;
+        /** Sets the value for the "set manual time zone" capability. */
+        public Builder setSetManualTimeZoneCapability(@CapabilityState int value) {
+            this.mSetManualTimeZoneCapability = value;
             return this;
         }
 
@@ -241,10 +279,11 @@ public final class TimeZoneCapabilities implements Parcelable {
         public TimeZoneCapabilities build() {
             verifyCapabilitySet(mConfigureAutoDetectionEnabledCapability,
                     "configureAutoDetectionEnabledCapability");
+            Objects.requireNonNull(mUseLocationEnabled, "useLocationEnabled");
             verifyCapabilitySet(mConfigureGeoDetectionEnabledCapability,
                     "configureGeoDetectionEnabledCapability");
-            verifyCapabilitySet(mSuggestManualTimeZoneCapability,
-                    "suggestManualTimeZoneCapability");
+            verifyCapabilitySet(mSetManualTimeZoneCapability,
+                    "mSetManualTimeZoneCapability");
             return new TimeZoneCapabilities(this);
         }
 

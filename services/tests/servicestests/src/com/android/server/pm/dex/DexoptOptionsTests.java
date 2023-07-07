@@ -52,7 +52,6 @@ public class DexoptOptionsTests {
         assertFalse(opt.isBootComplete());
         assertFalse(opt.isCheckForProfileUpdates());
         assertFalse(opt.isDexoptOnlySecondaryDex());
-        assertFalse(opt.isDexoptOnlySharedDex());
         assertFalse(opt.isDowngrade());
         assertFalse(opt.isForce());
         assertFalse(opt.isDexoptIdleBackgroundJob());
@@ -67,7 +66,6 @@ public class DexoptOptionsTests {
                 DexoptOptions.DEXOPT_BOOT_COMPLETE |
                 DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES |
                 DexoptOptions.DEXOPT_ONLY_SECONDARY_DEX |
-                DexoptOptions.DEXOPT_ONLY_SHARED_DEX |
                 DexoptOptions.DEXOPT_DOWNGRADE  |
                 DexoptOptions.DEXOPT_AS_SHARED_LIBRARY |
                 DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB |
@@ -81,7 +79,6 @@ public class DexoptOptionsTests {
         assertTrue(opt.isBootComplete());
         assertTrue(opt.isCheckForProfileUpdates());
         assertTrue(opt.isDexoptOnlySecondaryDex());
-        assertTrue(opt.isDexoptOnlySharedDex());
         assertTrue(opt.isDowngrade());
         assertTrue(opt.isForce());
         assertTrue(opt.isDexoptAsSharedLibrary());
@@ -113,7 +110,6 @@ public class DexoptOptionsTests {
             assertTrue(opt.isBootComplete());
             assertTrue(opt.isCheckForProfileUpdates());
             assertFalse(opt.isDexoptOnlySecondaryDex());
-            assertFalse(opt.isDexoptOnlySharedDex());
             assertFalse(opt.isDowngrade());
             assertTrue(opt.isForce());
             assertFalse(opt.isDexoptAsSharedLibrary());
@@ -131,7 +127,6 @@ public class DexoptOptionsTests {
         assertTrue(opt.isBootComplete());
         assertFalse(opt.isCheckForProfileUpdates());
         assertFalse(opt.isDexoptOnlySecondaryDex());
-        assertFalse(opt.isDexoptOnlySharedDex());
         assertFalse(opt.isDowngrade());
         assertTrue(opt.isForce());
         assertFalse(opt.isDexoptAsSharedLibrary());

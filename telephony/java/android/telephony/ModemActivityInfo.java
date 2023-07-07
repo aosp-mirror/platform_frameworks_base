@@ -567,14 +567,14 @@ public final class ModemActivityInfo implements Parcelable {
     /** @hide */
     @TestApi
     public boolean isEmpty() {
-        boolean isTxPowerEmpty = false;
-        boolean isRxPowerEmpty = false;
+        boolean isTxPowerEmpty = true;
+        boolean isRxPowerEmpty = true;
         for (int i = 0; i < getSpecificInfoLength(); i++) {
-            if (mActivityStatsTechSpecificInfo[i].isTxPowerEmpty()) {
-                isTxPowerEmpty = true;
+            if (!mActivityStatsTechSpecificInfo[i].isTxPowerEmpty()) {
+                isTxPowerEmpty = false;
             }
-            if (mActivityStatsTechSpecificInfo[i].isRxPowerEmpty()) {
-                isRxPowerEmpty = true;
+            if (!mActivityStatsTechSpecificInfo[i].isRxPowerEmpty()) {
+                isRxPowerEmpty = false;
             }
         }
         return isTxPowerEmpty

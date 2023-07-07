@@ -16,11 +16,12 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsController.AnimationType;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 
 /**
  * Interface representing a runner for an insets animation.
@@ -63,16 +64,22 @@ public interface InsetsAnimationControlRunner {
     WindowInsetsAnimation getAnimation();
 
     /**
-     * @return Whether {@link #getTypes()} maps to a specific {@link InternalInsetsType}.
+     * @return Whether {@link #getTypes()} contains a specific {@link InsetsType}.
      */
-    default boolean controlsInternalType(@InternalInsetsType int type) {
-        return InsetsState.toInternalType(getTypes()).contains(type);
+    default boolean controlsType(@InsetsType int type) {
+        return (getTypes() & type) != 0;
     }
 
     /**
      * @return The animation type this runner is running.
      */
     @AnimationType int getAnimationType();
+
+    /**
+     * @return The token tracking the current IME request or {@code null} otherwise.
+     */
+    @Nullable
+    ImeTracker.Token getStatsToken();
 
     /**
      *

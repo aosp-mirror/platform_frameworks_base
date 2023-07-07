@@ -36,6 +36,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Locale;
 
 @Presubmit
@@ -214,6 +216,57 @@ public class FormatterTest {
         setLocale(new Locale("ru", "RU"));
         assertEquals("1 мин", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                 mContext, 1 * SECOND));
+    }
+
+    /**
+     * Regression test for http://b/71580745 and https://unicode-org.atlassian.net/browse/CLDR-10831
+     */
+    @Test
+    public void testFormatFileSize_zhCN() {
+        setLocale(Locale.forLanguageTag("zh-CN"));
+
+        assertFormatFileSize_englishOutput();
+    }
+
+    @Test
+    public void testFormatFileSize_enUS() {
+        setLocale(Locale.US);
+
+        assertFormatFileSize_englishOutput();
+    }
+
+    private void assertFormatFileSize_englishOutput() {
+        final MathContext mc = MathContext.DECIMAL64;
+        final BigDecimal bd = new BigDecimal((long) 1000, mc);
+        // test null Context
+        assertEquals("", Formatter.formatFileSize(null, 0));
+        // test different long values with various length
+        assertEquals("0 B", Formatter.formatFileSize(mContext, 0));
+        assertEquals("1 B", Formatter.formatFileSize(mContext, 1));
+        assertEquals("9 B", Formatter.formatFileSize(mContext, 9));
+        assertEquals("10 B", Formatter.formatFileSize(mContext, 10));
+        assertEquals("99 B", Formatter.formatFileSize(mContext, 99));
+        assertEquals("100 B", Formatter.formatFileSize(mContext, 100));
+        assertEquals("900 B", Formatter.formatFileSize(mContext, 900));
+        assertEquals("0.90 kB", Formatter.formatFileSize(mContext, 901));
+
+        assertEquals("1.00 kB", Formatter.formatFileSize(mContext, bd.pow(1).longValue()));
+        assertEquals("1.50 kB", Formatter.formatFileSize(mContext, bd.pow(1).longValue() * 3 / 2));
+        assertEquals("12.50 kB", Formatter.formatFileSize(mContext,
+                bd.pow(1).longValue() * 25 / 2));
+
+        assertEquals("1.00 MB", Formatter.formatFileSize(mContext, bd.pow(2).longValue()));
+
+        assertEquals("1.00 GB", Formatter.formatFileSize(mContext, bd.pow(3).longValue()));
+
+        assertEquals("1.00 TB", Formatter.formatFileSize(mContext, bd.pow(4).longValue()));
+
+        assertEquals("1.00 PB", Formatter.formatFileSize(mContext, bd.pow(5).longValue()));
+
+        assertEquals("1000 PB", Formatter.formatFileSize(mContext, bd.pow(6).longValue()));
+
+        // test Negative value
+        assertEquals("-1 B", Formatter.formatFileSize(mContext, -1));
     }
 
     private void checkFormatBytes(long bytes, boolean useShort,

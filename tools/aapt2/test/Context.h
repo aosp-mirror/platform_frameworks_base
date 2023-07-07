@@ -19,10 +19,10 @@
 
 #include <list>
 
+#include "Diagnostics.h"
+#include "NameMangler.h"
 #include "android-base/logging.h"
 #include "android-base/macros.h"
-
-#include "NameMangler.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 #include "test/Common.h"
@@ -43,7 +43,7 @@ class Context : public IAaptContext {
     return &symbols_;
   }
 
-  IDiagnostics* GetDiagnostics() override {
+  android::IDiagnostics* GetDiagnostics() override {
     return &diagnostics_;
   }
 
@@ -52,8 +52,8 @@ class Context : public IAaptContext {
     return compilation_package_.value();
   }
 
-  void SetCompilationPackage(const android::StringPiece& package) {
-    compilation_package_ = package.to_string();
+  void SetCompilationPackage(android::StringPiece package) {
+    compilation_package_ = std::string(package);
   }
 
   uint8_t GetPackageId() override {
@@ -111,8 +111,8 @@ class ContextBuilder {
     return *this;
   }
 
-  ContextBuilder& SetCompilationPackage(const android::StringPiece& package) {
-    context_->compilation_package_ = package.to_string();
+  ContextBuilder& SetCompilationPackage(android::StringPiece package) {
+    context_->compilation_package_ = std::string(package);
     return *this;
   }
 
@@ -149,7 +149,7 @@ class ContextBuilder {
 
 class StaticSymbolSourceBuilder {
  public:
-  StaticSymbolSourceBuilder& AddPublicSymbol(const android::StringPiece& name, ResourceId id,
+  StaticSymbolSourceBuilder& AddPublicSymbol(android::StringPiece name, ResourceId id,
                                              std::unique_ptr<Attribute> attr = {}) {
     std::unique_ptr<SymbolTable::Symbol> symbol =
         util::make_unique<SymbolTable::Symbol>(id, std::move(attr), true);
@@ -159,7 +159,7 @@ class StaticSymbolSourceBuilder {
     return *this;
   }
 
-  StaticSymbolSourceBuilder& AddSymbol(const android::StringPiece& name, ResourceId id,
+  StaticSymbolSourceBuilder& AddSymbol(android::StringPiece name, ResourceId id,
                                        std::unique_ptr<Attribute> attr = {}) {
     std::unique_ptr<SymbolTable::Symbol> symbol =
         util::make_unique<SymbolTable::Symbol>(id, std::move(attr), false);

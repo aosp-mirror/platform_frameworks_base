@@ -49,13 +49,13 @@ import android.os.UserHandle;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.AtomicFile;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.widget.RemoteViews;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.appwidget.IAppWidgetHost;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 
 import org.mockito.ArgumentCaptor;
@@ -164,7 +164,7 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
     }
 
     public void testRequestPinAppWidget() {
-        ComponentName provider = new ComponentName(mTestContext, DummyAppWidget.class);
+        ComponentName provider = new ComponentName(mTestContext, TestAppWidgetProvider.class);
         // Set up users.
         when(mMockShortcutService.requestPinAppWidget(anyString(),
                 any(AppWidgetProviderInfo.class), eq(null), eq(null), anyInt()))
@@ -289,6 +289,16 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         assertEquals(4, updates.size());
     }
 
+    public void testReceiveBroadcastBehavior_enableAndUpdate() {
+        TestAppWidgetProvider testAppWidgetProvider = new TestAppWidgetProvider();
+        Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_ENABLE_AND_UPDATE);
+
+        testAppWidgetProvider.onReceive(mTestContext, intent);
+
+        assertTrue(testAppWidgetProvider.isBehaviorSuccess());
+    }
+
+
     public void testUpdatesReceived_queueNotEmpty_multipleWidgetIdProvided() {
         int widgetId = setupHostAndWidget();
         int widgetId2 = bindNewWidget();
@@ -385,7 +395,7 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
     }
 
     private int bindNewWidget() {
-        ComponentName provider = new ComponentName(mTestContext, DummyAppWidget.class);
+        ComponentName provider = new ComponentName(mTestContext, TestAppWidgetProvider.class);
         int widgetId = mService.allocateAppWidgetId(mPkgName, HOST_ID);
         assertTrue(mManager.bindAppWidgetIdIfAllowed(widgetId, provider));
         assertEquals(provider, mManager.getAppWidgetInfo(widgetId).provider);

@@ -181,8 +181,11 @@ static status_t decode(int fd, int64_t offset, int64_t length,
                     format.get(), AMEDIAFORMAT_KEY_CHANNEL_COUNT, channelCount)) {
                 return UNKNOWN_ERROR;
             }
-            if (!AMediaFormat_getInt32(format.get(), AMEDIAFORMAT_KEY_CHANNEL_MASK,
-                    (int32_t*) channelMask)) {
+            int32_t mediaFormatChannelMask;
+            if (AMediaFormat_getInt32(format.get(), AMEDIAFORMAT_KEY_CHANNEL_MASK,
+                    &mediaFormatChannelMask)) {
+                *channelMask = audio_channel_mask_from_media_format_mask(mediaFormatChannelMask);
+            } else {
                 *channelMask = AUDIO_CHANNEL_NONE;
             }
             *sizeInBytes = written;

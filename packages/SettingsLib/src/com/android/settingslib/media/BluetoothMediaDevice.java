@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.media;
 
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
+
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -22,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+import android.media.RouteListingPreference;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -39,7 +42,13 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
             MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName) {
-        super(context, routerManager, info, packageName);
+        this(context, device, routerManager, info, packageName, null);
+    }
+
+    BluetoothMediaDevice(Context context, CachedBluetoothDevice device,
+            MediaRouter2Manager routerManager, MediaRoute2Info info, String packageName,
+            RouteListingPreference.Item item) {
+        super(context, routerManager, info, packageName, item);
         mCachedDevice = device;
         mAudioManager = context.getSystemService(AudioManager.class);
         initDeviceRecord();
@@ -58,15 +67,21 @@ public class BluetoothMediaDevice extends MediaDevice {
     }
 
     @Override
+    public int getSelectionBehavior() {
+        // We don't allow apps to override the selection behavior of system routes.
+        return SELECTION_BEHAVIOR_TRANSFER;
+    }
+
+    @Override
     public Drawable getIcon() {
-        return BluetoothUtils.isAdvancedDetailsHeader(mCachedDevice.getDevice())
+        return BluetoothUtils.isAdvancedUntetheredDevice(mCachedDevice.getDevice())
                 ? mContext.getDrawable(R.drawable.ic_earbuds_advanced)
                 : BluetoothUtils.getBtClassDrawableWithDescription(mContext, mCachedDevice).first;
     }
 
     @Override
     public Drawable getIconWithoutBackground() {
-        return BluetoothUtils.isAdvancedDetailsHeader(mCachedDevice.getDevice())
+        return BluetoothUtils.isAdvancedUntetheredDevice(mCachedDevice.getDevice())
                 ? mContext.getDrawable(R.drawable.ic_earbuds_advanced)
                 : BluetoothUtils.getBtClassDrawableWithDescription(mContext, mCachedDevice).first;
     }

@@ -19,9 +19,13 @@ package com.android.server.tare;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.app.IBatteryStats;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,20 +49,20 @@ public class AnalystTest {
         final Analyst analyst = new Analyst();
 
         Analyst.Report expected = new Analyst.Report();
-        expected.currentBatteryLevel = 55;
-        analyst.noteBatteryLevelChange(55);
+        expected.currentBatteryLevel = 75;
+        analyst.noteBatteryLevelChange(75);
         assertEquals(1, analyst.getReports().size());
         assertReportsEqual(expected, analyst.getReports().get(0));
 
         // Discharging
         analyst.noteBatteryLevelChange(54);
         expected.currentBatteryLevel = 54;
-        expected.cumulativeBatteryDischarge = 1;
+        expected.cumulativeBatteryDischarge = 21;
         assertEquals(1, analyst.getReports().size());
         assertReportsEqual(expected, analyst.getReports().get(0));
         analyst.noteBatteryLevelChange(50);
         expected.currentBatteryLevel = 50;
-        expected.cumulativeBatteryDischarge = 5;
+        expected.cumulativeBatteryDischarge = 25;
         assertEquals(1, analyst.getReports().size());
         assertReportsEqual(expected, analyst.getReports().get(0));
 
@@ -87,27 +91,53 @@ public class AnalystTest {
     }
 
     @Test
-    public void testTransaction_PeriodChange() {
-        final Analyst analyst = new Analyst();
+    public void testTransaction_PeriodChange() throws Exception {
+        IBatteryStats iBatteryStats = mock(IBatteryStats.class);
+        final Analyst analyst = new Analyst(iBatteryStats);
 
+        // Reset from enough discharge.
         Analyst.Report expected = new Analyst.Report();
-        expected.currentBatteryLevel = 55;
-        analyst.noteBatteryLevelChange(55);
+        expected.currentBatteryLevel = 75;
+        analyst.noteBatteryLevelChange(75);
 
         runTestTransactions(analyst, expected, 1);
 
         expected.currentBatteryLevel = 49;
-        expected.cumulativeBatteryDischarge = 6;
+        expected.cumulativeBatteryDischarge = 26;
         analyst.noteBatteryLevelChange(49);
 
         runTestTransactions(analyst, expected, 1);
 
         expected = new Analyst.Report();
-        expected.currentBatteryLevel = 100;
-        analyst.noteBatteryLevelChange(100);
+        expected.currentBatteryLevel = 90;
+        analyst.noteBatteryLevelChange(90);
         expected.cumulativeBatteryDischarge = 0;
 
         runTestTransactions(analyst, expected, 2);
+
+        // Reset from report being long enough.
+        doReturn(Analyst.MIN_REPORT_DURATION_FOR_RESET)
+                .when(iBatteryStats).computeBatteryScreenOffRealtimeMs();
+        expected.currentBatteryLevel = 85;
+        analyst.noteBatteryLevelChange(85);
+        expected.cumulativeBatteryDischarge = 5;
+        expected.screenOffDurationMs = Analyst.MIN_REPORT_DURATION_FOR_RESET;
+
+        runTestTransactions(analyst, expected, 2);
+
+        expected.currentBatteryLevel = 79;
+        analyst.noteBatteryLevelChange(79);
+        expected.cumulativeBatteryDischarge = 11;
+
+        runTestTransactions(analyst, expected, 2);
+
+        expected = new Analyst.Report();
+        expected.currentBatteryLevel = 80;
+        analyst.noteBatteryLevelChange(80);
+        expected.cumulativeBatteryDischarge = 0;
+        expected.screenOffDurationMs = 0;
+
+        runTestTransactions(analyst, expected, 3);
     }
 
     private void runTestTransactions(Analyst analyst, Analyst.Report lastExpectedReport,
@@ -223,6 +253,8 @@ public class AnalystTest {
         assertEquals(expected.numPositiveRegulations, actual.numPositiveRegulations);
         assertEquals(expected.cumulativeNegativeRegulations, actual.cumulativeNegativeRegulations);
         assertEquals(expected.numNegativeRegulations, actual.numNegativeRegulations);
+        assertEquals(expected.screenOffDurationMs, actual.screenOffDurationMs);
+        assertEquals(expected.screenOffDischargeMah, actual.screenOffDischargeMah);
     }
 
     private void assertReportListsEqual(List<Analyst.Report> expected,

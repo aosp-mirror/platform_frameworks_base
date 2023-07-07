@@ -27,9 +27,10 @@ import android.app.admin.ParcelableResource;
 import android.os.Environment;
 import android.util.AtomicFile;
 import android.util.Log;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import libcore.io.IoUtils;
 

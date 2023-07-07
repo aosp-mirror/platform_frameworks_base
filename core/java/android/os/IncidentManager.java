@@ -119,6 +119,19 @@ public class IncidentManager {
     public static final int FLAG_CONFIRMATION_DIALOG = 0x1;
 
     /**
+     * Flag marking whether corresponding pending report allows consentless bugreport.
+     */
+    public static final int FLAG_ALLOW_CONSENTLESS_BUGREPORT = 0x2;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_CONFIRMATION_DIALOG,
+            FLAG_ALLOW_CONSENTLESS_BUGREPORT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PendingReportFlags {}
+
+    /**
      * Flag marking fields and incident reports than can be taken
      * off the device only via adb.
      */
@@ -220,8 +233,9 @@ public class IncidentManager {
         /**
          * Get the flags requested for this pending report.
          *
-         * @see #FLAG_CONFIRMATION_DIALOG
+         * @see PendingReportFlags
          */
+        @PendingReportFlags
         public int getFlags() {
             return mFlags;
         }

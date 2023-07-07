@@ -79,6 +79,12 @@ public final class ZenPolicy implements Parcelable {
     /** @hide */
     public static final int PRIORITY_CATEGORY_CONVERSATIONS = 8;
 
+    /**
+     * Total number of priority categories. Keep updated with any updates to PriorityCategory enum.
+     * @hide
+     */
+    public static final int NUM_PRIORITY_CATEGORIES = 9;
+
     /** @hide */
     @IntDef(prefix = { "VISUAL_EFFECT_" }, value = {
             VISUAL_EFFECT_FULL_SCREEN_INTENT,
@@ -106,6 +112,12 @@ public final class ZenPolicy implements Parcelable {
     public static final int VISUAL_EFFECT_AMBIENT = 5;
     /** @hide */
     public static final int VISUAL_EFFECT_NOTIFICATION_LIST = 6;
+
+    /**
+     * Total number of visual effects. Keep updated with any updates to VisualEffect enum.
+     * @hide
+     */
+    public static final int NUM_VISUAL_EFFECTS = 7;
 
     /** @hide */
     @IntDef(prefix = { "PEOPLE_TYPE_" }, value = {
@@ -202,8 +214,8 @@ public final class ZenPolicy implements Parcelable {
 
     /** @hide */
     public ZenPolicy() {
-        mPriorityCategories = new ArrayList<>(Collections.nCopies(9, 0));
-        mVisualEffects = new ArrayList<>(Collections.nCopies(7, 0));
+        mPriorityCategories = new ArrayList<>(Collections.nCopies(NUM_PRIORITY_CATEGORIES, 0));
+        mVisualEffects = new ArrayList<>(Collections.nCopies(NUM_VISUAL_EFFECTS, 0));
     }
 
     /**
@@ -804,8 +816,12 @@ public final class ZenPolicy implements Parcelable {
         @Override
         public ZenPolicy createFromParcel(Parcel source) {
             ZenPolicy policy = new ZenPolicy();
-            policy.mPriorityCategories = source.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class);
-            policy.mVisualEffects = source.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class);
+            policy.mPriorityCategories = trimList(
+                    source.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class),
+                    NUM_PRIORITY_CATEGORIES);
+            policy.mVisualEffects = trimList(
+                    source.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class),
+                    NUM_VISUAL_EFFECTS);
             policy.mPriorityCalls = source.readInt();
             policy.mPriorityMessages = source.readInt();
             policy.mConversationSenders = source.readInt();
@@ -832,6 +848,15 @@ public final class ZenPolicy implements Parcelable {
                 .toString();
     }
 
+    // Returns a list containing the first maxLength elements of the input list if the list is
+    // longer than that size. For the lists in ZenPolicy, this should not happen unless the input
+    // is corrupt.
+    private static ArrayList<Integer> trimList(ArrayList<Integer> list, int maxLength) {
+        if (list == null || list.size() <= maxLength) {
+            return list;
+        }
+        return new ArrayList<>(list.subList(0, maxLength));
+    }
 
     private String priorityCategoriesToString() {
         StringBuilder builder = new StringBuilder();

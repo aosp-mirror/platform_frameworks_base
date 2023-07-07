@@ -37,6 +37,8 @@
     <string name="install_confirm_question">Do you want to install this app?</string>
     <!-- Message for updating an existing app [CHAR LIMIT=NONE] -->
     <string name="install_confirm_question_update">Do you want to update this app?</string>
+    <!-- Message for updating an existing app with update owner reminder [CHAR LIMIT=NONE] -->
+    <string name="install_confirm_question_update_owner_reminder">Update this app from <xliff:g id="new_update_owner">%1$s</xliff:g>?\n\nThis app normally receives updates from <xliff:g id="existing_update_owner">%2$s</xliff:g>. By updating from a different source, you may receive future updates from any source on your phone. App functionality may change.</string>
     <!-- [CHAR LIMIT=100] -->
     <string name="install_failed">App not installed.</string>
     <!-- Reason displayed when installation fails because the package was blocked
@@ -79,6 +81,8 @@
 
     <!-- [CHAR LIMIT=15] -->
     <string name="ok">OK</string>
+    <!-- [CHAR LIMIT=30] -->
+    <string name="update_anyway">Update anyway</string>
     <!-- [CHAR LIMIT=15] -->
     <string name="manage_applications">Manage apps</string>
     <!-- [CHAR LIMIT=30] -->
@@ -119,6 +123,10 @@
     <string name="uninstall_update_text_multiuser">Replace this app with the factory version? All data will be removed. This affects all users of this device, including those with work profiles.</string>
     <!-- Label of a checkbox that allows to keep the data (e.g. files, settings) of the app on uninstall [CHAR LIMIT=none] -->
     <string name="uninstall_keep_data">Keep <xliff:g id="size" example="1.5MB">%1$s</xliff:g> of app data.</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="uninstall_application_text_current_user_clone_profile">Do you want to delete this app?</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="uninstall_application_text_with_clone_instance">Do you want to uninstall this app? <xliff:g id="package_label">%1$s</xliff:g> clone will also be deleted.</string>
 
     <!-- Label for the notification channel containing notifications for current uninstall operations [CHAR LIMIT=40] -->
     <string name="uninstalling_notification_channel">Running uninstalls</string>
@@ -134,9 +142,13 @@
     <!-- [CHAR LIMIT=100] -->
     <string name="uninstall_done_app">Uninstalled <xliff:g id="package_label">%1$s</xliff:g></string>
     <!-- [CHAR LIMIT=100] -->
+    <string name="uninstall_done_clone_app">Deleted <xliff:g id="package_label">%1$s</xliff:g> clone</string>
+    <!-- [CHAR LIMIT=100] -->
     <string name="uninstall_failed">Uninstall unsuccessful.</string>
     <!-- [CHAR LIMIT=100] -->
     <string name="uninstall_failed_app">Uninstalling <xliff:g id="package_label">%1$s</xliff:g> unsuccessful.</string>
+    <!-- [CHAR LIMIT=100] -->
+    <string name="uninstalling_cloned_app">Deleting <xliff:g id="package_label">%1$s</xliff:g> clone\u2026</string>
     <!-- String presented to the user when uninstalling a package failed because the target package
         is a current device administrator [CHAR LIMIT=80] -->
     <string name="uninstall_failed_device_policy_manager">Can\'t uninstall active device admin
@@ -189,6 +201,9 @@
     <!-- Text to show in warning dialog on the tv when the app source is not trusted [CHAR LIMIT=NONE] -->
     <string name="untrusted_external_source_warning" product="tv">For your security, your TV currently isn’t allowed to install unknown apps from this source. You can change this in Settings.</string>
 
+    <!-- Text to show in warning dialog on the wear when the app source is not trusted [CHAR LIMIT=NONE] -->
+    <string name="untrusted_external_source_warning" product="watch">For your security, your watch currently isn’t allowed to install unknown apps from this source. You can change this in Settings.</string>
+
     <!-- Text to show in warning dialog on the phone when the app source is not trusted [CHAR LIMIT=NONE] -->
     <string name="untrusted_external_source_warning" product="default">For your security, your phone currently isn’t allowed to install unknown apps from this source. You can change this in Settings.</string>
 
@@ -215,6 +230,9 @@
         agree that you are responsible for any damage to your
         TV or loss of data that may result from its use.
     </string>
+
+    <!-- Label for cloned app in uninstall dialogue [CHAR LIMIT=40] -->
+    <string name="cloned_app_label"><xliff:g id="package_label">%1$s</xliff:g> Clone</string>
 
     <!-- Label for button to continue install of an app whose source cannot be identified [CHAR LIMIT=40] -->
     <string name="anonymous_source_continue">Continue</string>

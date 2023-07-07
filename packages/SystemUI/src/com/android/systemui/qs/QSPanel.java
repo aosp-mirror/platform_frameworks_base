@@ -25,8 +25,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -43,13 +41,13 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.RemeasuringLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /** View that represents the quick settings tile panel (when expanded/pulled down). **/
 public class QSPanel extends LinearLayout implements Tunable {
@@ -81,7 +79,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected boolean mExpanded;
     protected boolean mListening;
 
-    @Nullable protected QSTileHost mHost;
     private final List<OnConfigurationChangedListener> mOnConfigurationChangedListeners =
             new ArrayList<>();
 
@@ -106,6 +103,12 @@ public class QSPanel extends LinearLayout implements Tunable {
     private final Rect mClippingRect = new Rect();
     private ViewGroup mMediaHostView;
     private boolean mShouldMoveMediaOnExpansion = true;
+    private QSLogger mQsLogger;
+    /**
+     * Specifies if we can collapse to QQS in current state. In split shade that should be always
+     * false. It influences available accessibility actions.
+     */
+    private boolean mCanCollapse = true;
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -122,7 +125,8 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     }
 
-    void initialize() {
+    void initialize(QSLogger qsLogger) {
+        mQsLogger = qsLogger;
         mTileLayout = getOrCreateTileLayout();
 
         if (mUsingMediaPlayer) {
@@ -202,6 +206,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         if (mTileLayout == null) {
             mTileLayout = (QSTileLayout) LayoutInflater.from(mContext)
                     .inflate(R.layout.qs_paged_tile_layout, this, false);
+            mTileLayout.setLogger(mQsLogger);
             mTileLayout.setSquishinessFraction(mSquishinessFraction);
         }
         return mTileLayout;
@@ -291,7 +296,16 @@ public class QSPanel extends LinearLayout implements Tunable {
                 } else {
                     topOffset = tileHeightOffset;
                 }
-                int top = Objects.requireNonNull(mChildrenLayoutTop.get(child));
+                // Animation can occur before the layout pass, meaning setSquishinessFraction() gets
+                // called before onLayout(). So, a child view could be null because it has not
+                // been added to mChildrenLayoutTop yet (which happens in onLayout()).
+                // We use a continue statement here to catch this NPE because, on the layout pass,
+                // this code will be called again from onLayout() with the populated children views.
+                Integer childLayoutTop = mChildrenLayoutTop.get(child);
+                if (childLayoutTop == null) {
+                    continue;
+                }
+                int top = childLayoutTop;
                 child.setLeftTopRightBottom(child.getLeft(), top + topOffset,
                         child.getRight(), top + topOffset + child.getHeight());
             }
@@ -342,11 +356,6 @@ public class QSPanel extends LinearLayout implements Tunable {
                 ((PagedTileLayout) mTileLayout).setPageIndicator(mFooterPageIndicator);
             }
         }
-    }
-
-    @Nullable
-    public QSTileHost getHost() {
-        return mHost;
     }
 
     public void updateResources() {
@@ -513,7 +522,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         return mExpanded;
     }
 
-    void addTile(QSPanelControllerBase.TileRecord tileRecord) {
+    final void addTile(QSPanelControllerBase.TileRecord tileRecord) {
         final QSTile.Callback callback = new QSTile.Callback() {
             @Override
             public void onStateChanged(QSTile.State state) {
@@ -631,7 +640,9 @@ public class QSPanel extends LinearLayout implements Tunable {
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+        if (mCanCollapse) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+        }
     }
 
     @Override
@@ -650,15 +661,11 @@ public class QSPanel extends LinearLayout implements Tunable {
         mCollapseExpandAction = action;
     }
 
-    private class H extends Handler {
-        private static final int ANNOUNCE_FOR_ACCESSIBILITY = 1;
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == ANNOUNCE_FOR_ACCESSIBILITY) {
-                announceForAccessibility((CharSequence) msg.obj);
-            }
-        }
+    /**
+     * Specifies if these expanded QS can collapse to QQS.
+     */
+    public void setCanCollapse(boolean canCollapse) {
+        mCanCollapse = canCollapse;
     }
 
     public interface QSTileLayout {
@@ -720,6 +727,8 @@ public class QSPanel extends LinearLayout implements Tunable {
         default void setExpansion(float expansion, float proposedTranslation) {}
 
         int getNumVisibleTiles();
+
+        default void setLogger(QSLogger qsLogger) { }
     }
 
     interface OnConfigurationChangedListener {

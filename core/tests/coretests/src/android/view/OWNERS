@@ -1,4 +1,5 @@
 # Accessibility
+per-file AccessibilityInteractionControllerTest.java = file:/services/accessibility/OWNERS
 per-file WindowInfoTest.java = file:/services/accessibility/OWNERS
 
 # Input

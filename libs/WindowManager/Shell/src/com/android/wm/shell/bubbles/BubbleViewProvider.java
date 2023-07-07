@@ -22,18 +22,40 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
+import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
+
 /**
  * Interface to represent actual Bubbles and UI elements that act like bubbles, like BubbleOverflow.
  */
 public interface BubbleViewProvider {
-    @Nullable BubbleExpandedView getExpandedView();
+
+    /**
+     * Returns the icon view used for a bubble (the click target when collapsed). This is populated
+     * when bubbles are floating, i.e. when {@link BubbleController#isShowingAsBubbleBar()} is
+     * false.
+     */
+    @Nullable
+    View getIconView();
+
+    /**
+     * Returns the expanded view used for a bubble. This is populated when bubbles are floating,
+     * i.e. when {@link BubbleController#isShowingAsBubbleBar()} is false.
+     */
+    @Nullable
+    BubbleExpandedView getExpandedView();
+
+    /**
+     * Returns the expanded view used for a bubble being show in the bubble bar. This is populated
+     * when {@link BubbleController#isShowingAsBubbleBar()} is true.
+     */
+    @Nullable
+    BubbleBarExpandedView getBubbleBarExpandedView();
 
     /**
      * Sets whether the contents of the bubble's TaskView should be visible.
      */
     void setTaskViewVisibility(boolean visible);
 
-    @Nullable View getIconView();
 
     String getKey();
 

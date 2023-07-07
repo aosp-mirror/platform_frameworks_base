@@ -55,14 +55,16 @@ public class IrisService extends SystemService {
      * Receives the incoming binder calls from IrisManager.
      */
     private final class IrisServiceWrapper extends IIrisService.Stub {
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public void registerAuthenticators(@NonNull List<SensorPropertiesInternal> hidlSensors) {
-            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             // Some HAL might not be started before the system service and will cause the code below
             // to wait, and some of the operations below might take a significant amount of time to
             // complete (calls to the HALs). To avoid blocking the rest of system server we put
             // this on a background thread.
+            super.registerAuthenticators_enforcePermission();
+
             final ServiceThread thread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
                     true /* allowIo */);
             thread.start();

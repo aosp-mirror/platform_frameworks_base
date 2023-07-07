@@ -25,7 +25,10 @@ package {
 
 android_test {
     name: "SurfaceControlViewHostTest",
-    srcs: ["**/*.java"],
+    srcs: [
+        "**/*.aidl",
+        "**/*.java",
+    ],
     platform_apis: true,
     certificate: "platform",
 }

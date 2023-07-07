@@ -207,27 +207,6 @@ static void applyTransforms(DirtyStack* frame, DirtyStack* end) {
     }
 }
 
-static void computeTransformImpl(const DirtyStack* frame, const DirtyStack* end,
-                                 Matrix4* outMatrix) {
-  while (frame != end) {
-    switch (frame->type) {
-        case TransformRenderNode:
-            frame->renderNode->applyViewPropertyTransforms(*outMatrix);
-            break;
-        case TransformMatrix4:
-            outMatrix->multiply(*frame->matrix4);
-            break;
-        case TransformNone:
-            // nothing to be done
-            break;
-        default:
-            LOG_ALWAYS_FATAL("Tried to compute transform with an invalid type: %d",
-                             frame->type);
-    }
-    frame = frame->prev;
-  }
-}
-
 void DamageAccumulator::applyRenderNodeTransform(DirtyStack* frame) {
     if (frame->pendingDirty.isEmpty()) {
         return;
@@ -282,9 +261,6 @@ void DamageAccumulator::finish(SkRect* totalDirty) {
 
 DamageAccumulator::StretchResult DamageAccumulator::findNearestStretchEffect() const {
     DirtyStack* frame = mHead;
-    const auto& headProperties = mHead->renderNode->properties();
-    float startWidth = headProperties.getWidth();
-    float startHeight = headProperties.getHeight();
     while (frame->prev != frame) {
         if (frame->type == TransformRenderNode) {
             const auto& renderNode = frame->renderNode;
@@ -295,21 +271,16 @@ DamageAccumulator::StretchResult DamageAccumulator::findNearestStretchEffect() c
             const float height = (float) frameRenderNodeProperties.getHeight();
             if (!effect.isEmpty()) {
                 Matrix4 stretchMatrix;
-                computeTransformImpl(mHead, frame, &stretchMatrix);
-                Rect stretchRect = Rect(0.f, 0.f, startWidth, startHeight);
+                computeTransformImpl(frame, &stretchMatrix);
+                Rect stretchRect = Rect(0.f, 0.f, width, height);
                 stretchMatrix.mapRect(stretchRect);
 
                 return StretchResult{
-                    .stretchEffect = &effect,
-                    .childRelativeBounds = SkRect::MakeLTRB(
-                        stretchRect.left,
-                        stretchRect.top,
-                        stretchRect.right,
-                        stretchRect.bottom
-                    ),
-                    .width = width,
-                    .height = height
-                };
+                        .stretchEffect = &effect,
+                        .parentBounds = SkRect::MakeLTRB(stretchRect.left, stretchRect.top,
+                                                         stretchRect.right, stretchRect.bottom),
+                        .width = width,
+                        .height = height};
             }
         }
         frame = frame->prev;

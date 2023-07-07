@@ -44,6 +44,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.om.IOverlayManager;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
@@ -669,7 +670,10 @@ public class StatusBarManagerServiceTest {
     }
 
     @Test
-    public void testSetNavBarMode_setsModeKids() throws RemoteException {
+    public void testSetNavBarMode_setsModeKids() throws Exception {
+        mContext.setMockPackageManager(mPackageManager);
+        when(mPackageManager.getPackageInfo(anyString(),
+                any(PackageManager.PackageInfoFlags.class))).thenReturn(new PackageInfo());
         int navBarModeKids = StatusBarManager.NAV_BAR_MODE_KIDS;
 
         mStatusBarManagerService.setNavBarMode(navBarModeKids);

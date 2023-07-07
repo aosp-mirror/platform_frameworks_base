@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="app_name" msgid="2809080280462257271">"Kommunikation mit Mobilfunkanbieter"</string>
     <string name="android_system_label" msgid="2797790869522345065">"Mobilfunkanbieter"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"Mobile Daten sind aufgebraucht"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Deine mobilen Daten wurden deaktiviert"</string>
@@ -14,4 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"Im Netzwerk, zu dem du eine Verbindung herstellen möchtest, liegen Sicherheitsprobleme vor."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Beispiel: Die Log-in-Seite gehört eventuell nicht zur angezeigten Organisation."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Trotzdem in einem Browser fortfahren"</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Leistungs-Boost"</string>
+    <string name="performance_boost_notification_title" msgid="3126203390685781861">"5G-Optionen von deinem Mobilfunkanbieter"</string>
+    <string name="performance_boost_notification_detail" msgid="216569851036236346">"Besuche die Website von %s, um dir die Optionen für deine App anzusehen"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Nicht jetzt"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Verwalten"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"Leistungs-Boost erwerben."</string>
 </resources>

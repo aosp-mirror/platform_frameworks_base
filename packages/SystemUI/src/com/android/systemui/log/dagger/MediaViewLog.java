@@ -26,7 +26,7 @@ import java.lang.annotation.Retention;
 import javax.inject.Qualifier;
 
 /**
- * A {@link LogBuffer} for {@link com.android.systemui.media.MediaViewLogger}
+ * A {@link LogBuffer} for {@link com.android.systemui.media.controls.ui.MediaViewLogger}
  */
 @Qualifier
 @Documented

@@ -111,6 +111,10 @@ void hintActivityLaunch_native(JNIEnv* env, jobject clazz) {
     android::GraphicsEnv::getInstance().hintActivityLaunch();
 }
 
+void nativeToggleAngleAsSystemDriver_native(JNIEnv* env, jobject clazz, jboolean enabled) {
+    android::GraphicsEnv::getInstance().nativeToggleAngleAsSystemDriver(enabled);
+}
+
 const JNINativeMethod g_methods[] = {
         {"isDebuggable", "()Z", reinterpret_cast<void*>(isDebuggable_native)},
         {"setDriverPathAndSphalLibraries", "(Ljava/lang/String;Ljava/lang/String;)V",
@@ -130,6 +134,8 @@ const JNINativeMethod g_methods[] = {
         {"setDebugLayersGLES", "(Ljava/lang/String;)V",
          reinterpret_cast<void*>(setDebugLayersGLES_native)},
         {"hintActivityLaunch", "()V", reinterpret_cast<void*>(hintActivityLaunch_native)},
+        {"nativeToggleAngleAsSystemDriver", "(Z)V",
+         reinterpret_cast<void*>(nativeToggleAngleAsSystemDriver_native)},
 };
 
 const char* const kGraphicsEnvironmentName = "android/os/GraphicsEnvironment";

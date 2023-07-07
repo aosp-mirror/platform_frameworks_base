@@ -130,12 +130,12 @@ public class DeviceFeatures {
         byte result = 0;
 
         if (mRecordTvScreenSupport == FEATURE_SUPPORTED) result |= (byte) (1 << 6);
-        if (mSetOsdStringSupport == FEATURE_SUPPORTED) result = (byte) (1 << 5);
-        if (mDeckControlSupport == FEATURE_SUPPORTED) result = (byte) (1 << 4);
-        if (mSetAudioRateSupport == FEATURE_SUPPORTED) result = (byte) (1 << 3);
-        if (mArcTxSupport == FEATURE_SUPPORTED) result = (byte) (1 << 2);
-        if (mArcRxSupport == FEATURE_SUPPORTED) result = (byte) (1 << 1);
-        if (mSetAudioVolumeLevelSupport == FEATURE_SUPPORTED) result = (byte) 1;
+        if (mSetOsdStringSupport == FEATURE_SUPPORTED) result |= (byte) (1 << 5);
+        if (mDeckControlSupport == FEATURE_SUPPORTED) result |= (byte) (1 << 4);
+        if (mSetAudioRateSupport == FEATURE_SUPPORTED) result |= (byte) (1 << 3);
+        if (mArcTxSupport == FEATURE_SUPPORTED) result |= (byte) (1 << 2);
+        if (mArcRxSupport == FEATURE_SUPPORTED) result |= (byte) (1 << 1);
+        if (mSetAudioVolumeLevelSupport == FEATURE_SUPPORTED) result |= (byte) 1;
 
         return new byte[]{ result };
     }
