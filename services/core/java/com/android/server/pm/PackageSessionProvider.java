@@ -29,4 +29,9 @@ public interface PackageSessionProvider {
     PackageInstallerSession getSession(int sessionId);
 
     PackageSessionVerifier getSessionVerifier();
+
+    /**
+     * Get the GentleUpdateHelper instance.
+     */
+    GentleUpdateHelper getGentleUpdateHelper();
 }

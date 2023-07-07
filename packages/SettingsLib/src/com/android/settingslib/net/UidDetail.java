@@ -24,4 +24,5 @@ public class UidDetail {
     public CharSequence[] detailLabels;
     public CharSequence[] detailContentDescriptions;
     public Drawable icon;
+    public CharSequence packageName;
 }

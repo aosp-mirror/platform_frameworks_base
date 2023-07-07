@@ -28,6 +28,7 @@ import java.util.List;
  * @hide
  */
 interface IFontManager {
+    @EnforcePermission("UPDATE_FONTS")
     FontConfig getFontConfig();
 
     int updateFontFamily(in List<FontUpdateRequest> request, int baseVersion);

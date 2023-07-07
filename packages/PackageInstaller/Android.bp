@@ -41,10 +41,10 @@ android_app {
     privileged: true,
     platform_apis: true,
     rename_resources_package: false,
-
     static_libs: [
         "xz-java",
         "androidx.leanback_leanback",
+        "androidx.annotation_annotation",
     ],
 }
 
@@ -58,6 +58,7 @@ android_app {
     privileged: true,
     platform_apis: true,
     rename_resources_package: false,
+    overrides: ["PackageInstaller"],
 
     static_libs: [
         "xz-java",
@@ -76,10 +77,12 @@ android_app {
     privileged: true,
     platform_apis: true,
     rename_resources_package: false,
+    overrides: ["PackageInstaller"],
 
     static_libs: [
         "xz-java",
         "androidx.leanback_leanback",
+        "androidx.annotation_annotation",
     ],
     aaptflags: ["--product tv"],
 }

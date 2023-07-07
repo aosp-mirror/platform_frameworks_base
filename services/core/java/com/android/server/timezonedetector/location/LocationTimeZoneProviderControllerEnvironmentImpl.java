@@ -20,9 +20,9 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.os.SystemClock;
 
-import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.ServiceConfigAccessor;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -35,7 +35,7 @@ class LocationTimeZoneProviderControllerEnvironmentImpl
         extends LocationTimeZoneProviderController.Environment {
 
     @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
-    @NonNull private final ConfigurationChangeListener mConfigurationInternalChangeListener;
+    @NonNull private final StateChangeListener mConfigurationInternalChangeListener;
 
     LocationTimeZoneProviderControllerEnvironmentImpl(@NonNull ThreadingDomain threadingDomain,
             @NonNull ServiceConfigAccessor serviceConfigAccessor,

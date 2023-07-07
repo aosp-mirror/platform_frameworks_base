@@ -35,6 +35,7 @@ public class HdmiCecMessageValidator {
             ERROR_DESTINATION,
             ERROR_PARAMETER,
             ERROR_PARAMETER_SHORT,
+            ERROR_PARAMETER_LONG,
     })
     public @interface ValidationResult {};
 
@@ -43,6 +44,7 @@ public class HdmiCecMessageValidator {
     static final int ERROR_DESTINATION = 2;
     static final int ERROR_PARAMETER = 3;
     static final int ERROR_PARAMETER_SHORT = 4;
+    static final int ERROR_PARAMETER_LONG = 5;
 
     interface ParameterValidator {
         /**
@@ -52,22 +54,40 @@ public class HdmiCecMessageValidator {
         int isValid(byte[] params);
     }
 
-    // Only the direct addressing is allowed.
-    public static final int DEST_DIRECT = 1 << 0;
-    // Only the broadcast addressing is allowed.
-    public static final int DEST_BROADCAST = 1 << 1;
-    // Both the direct and the broadcast addressing are allowed.
-    public static final int DEST_ALL = DEST_DIRECT | DEST_BROADCAST;
-    // True if the messages from address 15 (unregistered) are allowed.
-    public static final int SRC_UNREGISTERED = 1 << 2;
+    /**
+     * Bitmasks used for source and destination validations.
+     */
+    static final int ADDR_TV = 1 << 0;
+    static final int ADDR_RECORDER_1 = 1 << 1;
+    static final int ADDR_RECORDER_2 = 1 << 2;
+    static final int ADDR_TUNER_1 = 1 << 3;
+    static final int ADDR_PLAYBACK_1 = 1 << 4;
+    static final int ADDR_AUDIO_SYSTEM = 1 << 5;
+    static final int ADDR_TUNER_2 = 1 << 6;
+    static final int ADDR_TUNER_3 = 1 << 7;
+    static final int ADDR_PLAYBACK_2 = 1 << 8;
+    static final int ADDR_RECORDER_3 = 1 << 9;
+    static final int ADDR_TUNER_4 = 1 << 10;
+    static final int ADDR_PLAYBACK_3 = 1 << 11;
+    static final int ADDR_BACKUP_1 = 1 << 12;
+    static final int ADDR_BACKUP_2 = 1 << 13;
+    static final int ADDR_SPECIFIC_USE = 1 << 14;
+    static final int ADDR_UNREGISTERED = 1 << 15;
+    static final int ADDR_BROADCAST = 1 << 15;
+    static final int ADDR_ALL = (1 << 16) - 1;
+    static final int ADDR_DIRECT = ADDR_ALL ^ ADDR_BROADCAST;
+    static final int ADDR_NOT_UNREGISTERED = ADDR_ALL ^ ADDR_UNREGISTERED;
 
     private static class ValidationInfo {
         public final ParameterValidator parameterValidator;
-        public final int addressType;
+        public final int validSources;
+        public final int validDestinations;
 
-        public ValidationInfo(ParameterValidator validator, int type) {
-            parameterValidator = validator;
-            addressType = type;
+        ValidationInfo(ParameterValidator parameterValidator, int validSources,
+                int validDestinations) {
+            this.parameterValidator = parameterValidator;
+            this.validSources = validSources;
+            this.validDestinations = validDestinations;
         }
     }
 
@@ -79,188 +99,213 @@ public class HdmiCecMessageValidator {
         // Messages related to the physical address.
         PhysicalAddressValidator physicalAddressValidator = new PhysicalAddressValidator();
         addValidationInfo(Constants.MESSAGE_ACTIVE_SOURCE,
-                physicalAddressValidator, DEST_BROADCAST | SRC_UNREGISTERED);
-        addValidationInfo(Constants.MESSAGE_INACTIVE_SOURCE, physicalAddressValidator, DEST_DIRECT);
+                physicalAddressValidator, ADDR_ALL ^ (ADDR_RECORDER_1 | ADDR_RECORDER_2
+                        | ADDR_AUDIO_SYSTEM | ADDR_RECORDER_3), ADDR_BROADCAST);
+        addValidationInfo(Constants.MESSAGE_INACTIVE_SOURCE,
+                physicalAddressValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS,
-                new ReportPhysicalAddressValidator(), DEST_BROADCAST | SRC_UNREGISTERED);
+                new ReportPhysicalAddressValidator(), ADDR_ALL, ADDR_BROADCAST);
         addValidationInfo(Constants.MESSAGE_ROUTING_CHANGE,
-                new RoutingChangeValidator(), DEST_BROADCAST | SRC_UNREGISTERED);
+                new RoutingChangeValidator(), ADDR_ALL, ADDR_BROADCAST);
         addValidationInfo(Constants.MESSAGE_ROUTING_INFORMATION,
-                physicalAddressValidator, DEST_BROADCAST | SRC_UNREGISTERED);
+                physicalAddressValidator, ADDR_ALL, ADDR_BROADCAST);
         addValidationInfo(Constants.MESSAGE_SET_STREAM_PATH,
-                physicalAddressValidator, DEST_BROADCAST);
+                physicalAddressValidator, ADDR_NOT_UNREGISTERED, ADDR_BROADCAST);
         addValidationInfo(Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST,
-                new SystemAudioModeRequestValidator(), DEST_DIRECT);
+                new SystemAudioModeRequestValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
 
         // Messages have no parameter.
         FixedLengthValidator noneValidator = new FixedLengthValidator(0);
-        addValidationInfo(Constants.MESSAGE_ABORT, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_GET_CEC_VERSION, noneValidator, DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_ABORT,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_GET_CEC_VERSION,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_GET_MENU_LANGUAGE,
-                noneValidator, DEST_DIRECT | SRC_UNREGISTERED);
-        addValidationInfo(Constants.MESSAGE_GIVE_AUDIO_STATUS, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS, noneValidator, DEST_DIRECT);
+                noneValidator, ADDR_ALL, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_GIVE_AUDIO_STATUS,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_GIVE_DEVICE_POWER_STATUS,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID,
-                noneValidator, DEST_DIRECT | SRC_UNREGISTERED);
-        addValidationInfo(Constants.MESSAGE_GIVE_OSD_NAME, noneValidator, DEST_DIRECT);
+                noneValidator, ADDR_ALL, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_GIVE_OSD_NAME,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS,
-                noneValidator, DEST_DIRECT | SRC_UNREGISTERED);
+                noneValidator, ADDR_ALL, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS,
-                noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_IMAGE_VIEW_ON, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_INITIATE_ARC, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_RECORD_OFF, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_RECORD_TV_SCREEN, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_REPORT_ARC_INITIATED, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_REPORT_ARC_TERMINATED, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_REQUEST_ARC_INITIATION, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_REQUEST_ARC_TERMINATION, noneValidator, DEST_DIRECT);
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_IMAGE_VIEW_ON,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_INITIATE_ARC,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_RECORD_OFF,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_RECORD_TV_SCREEN,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_REPORT_ARC_INITIATED,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_REPORT_ARC_TERMINATED,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_REQUEST_ARC_INITIATION,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_REQUEST_ARC_TERMINATION,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_REQUEST_ACTIVE_SOURCE,
-                noneValidator, DEST_BROADCAST | SRC_UNREGISTERED);
-        addValidationInfo(Constants.MESSAGE_STANDBY, noneValidator, DEST_ALL | SRC_UNREGISTERED);
-        addValidationInfo(Constants.MESSAGE_TERMINATE_ARC, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_TEXT_VIEW_ON, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_TUNER_STEP_DECREMENT, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_TUNER_STEP_INCREMENT, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_USER_CONTROL_RELEASED, noneValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_VENDOR_REMOTE_BUTTON_UP, noneValidator, DEST_ALL);
+                noneValidator, ADDR_ALL, ADDR_BROADCAST);
+        addValidationInfo(Constants.MESSAGE_STANDBY,
+                noneValidator, ADDR_ALL, ADDR_ALL);
+        addValidationInfo(Constants.MESSAGE_TERMINATE_ARC,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_TEXT_VIEW_ON,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_TUNER_STEP_DECREMENT,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_TUNER_STEP_INCREMENT,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_USER_CONTROL_RELEASED,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_VENDOR_REMOTE_BUTTON_UP,
+                noneValidator, ADDR_NOT_UNREGISTERED, ADDR_ALL);
 
         // TODO: Validate more than length for the following messages.
 
         // Messages for the One Touch Record.
         addValidationInfo(Constants.MESSAGE_RECORD_ON,
-                new VariableLengthValidator(1, 8), DEST_DIRECT);
+                new VariableLengthValidator(1, 8), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_RECORD_STATUS,
-                new RecordStatusInfoValidator(), DEST_DIRECT);
+                new RecordStatusInfoValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
 
-        addValidationInfo(
-                Constants.MESSAGE_CLEAR_ANALOG_TIMER, new AnalogueTimerValidator(), DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_CLEAR_DIGITAL_TIMER, new DigitalTimerValidator(), DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_CLEAR_EXTERNAL_TIMER, new ExternalTimerValidator(), DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_SET_ANALOG_TIMER, new AnalogueTimerValidator(), DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_SET_DIGITAL_TIMER, new DigitalTimerValidator(), DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_SET_EXTERNAL_TIMER, new ExternalTimerValidator(), DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_SET_TIMER_PROGRAM_TITLE, new AsciiValidator(1, 14), DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_TIMER_CLEARED_STATUS,
-                new TimerClearedStatusValidator(),
-                DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_TIMER_STATUS, new TimerStatusValidator(), DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_CLEAR_ANALOG_TIMER,
+                new AnalogueTimerValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_CLEAR_DIGITAL_TIMER,
+                new DigitalTimerValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_CLEAR_EXTERNAL_TIMER,
+                new ExternalTimerValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SET_ANALOG_TIMER,
+                new AnalogueTimerValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SET_DIGITAL_TIMER,
+                new DigitalTimerValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SET_EXTERNAL_TIMER,
+                new ExternalTimerValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SET_TIMER_PROGRAM_TITLE,
+                new AsciiValidator(1, 14), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_TIMER_CLEARED_STATUS,
+                new TimerClearedStatusValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_TIMER_STATUS,
+                new TimerStatusValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
 
         // Messages for the System Information.
         FixedLengthValidator oneByteValidator = new FixedLengthValidator(1);
-        addValidationInfo(Constants.MESSAGE_CEC_VERSION, oneByteValidator, DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_CEC_VERSION,
+                oneByteValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_SET_MENU_LANGUAGE,
-                new AsciiValidator(3), DEST_BROADCAST);
+                new AsciiValidator(3), ADDR_NOT_UNREGISTERED, ADDR_BROADCAST);
 
-        ParameterValidator statusRequestValidator = new OneByteRangeValidator(0x01, 0x03);
-        addValidationInfo(
-                Constants.MESSAGE_DECK_CONTROL, new OneByteRangeValidator(0x01, 0x04), DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_DECK_STATUS, new OneByteRangeValidator(0x11, 0x1F), DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_GIVE_DECK_STATUS, statusRequestValidator, DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_PLAY, new PlayModeValidator(), DEST_DIRECT);
+        ParameterValidator statusRequestValidator = new MinimumOneByteRangeValidator(0x01, 0x03);
+        addValidationInfo(Constants.MESSAGE_DECK_CONTROL,
+                new MinimumOneByteRangeValidator(0x01, 0x04), ADDR_NOT_UNREGISTERED,
+                ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_DECK_STATUS,
+                new MinimumOneByteRangeValidator(0x11, 0x1F), ADDR_NOT_UNREGISTERED,
+                ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_GIVE_DECK_STATUS,
+                statusRequestValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_PLAY,
+                new PlayModeValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
 
-        addValidationInfo(
-                Constants.MESSAGE_GIVE_TUNER_DEVICE_STATUS, statusRequestValidator, DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_SELECT_ANALOG_SERVICE,
-                new SelectAnalogueServiceValidator(),
-                DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_SELECT_DIGITAL_SERVICE,
-                new SelectDigitalServiceValidator(),
-                DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_TUNER_DEVICE_STATUS,
-                new TunerDeviceStatusValidator(),
-                DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_GIVE_TUNER_DEVICE_STATUS,
+                statusRequestValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SELECT_ANALOG_SERVICE,
+                new SelectAnalogueServiceValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SELECT_DIGITAL_SERVICE,
+                new SelectDigitalServiceValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_TUNER_DEVICE_STATUS,
+                new TunerDeviceStatusValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
 
         // Messages for the Vendor Specific Commands.
         VariableLengthValidator maxLengthValidator = new VariableLengthValidator(0, 14);
         addValidationInfo(Constants.MESSAGE_DEVICE_VENDOR_ID,
-                new FixedLengthValidator(3), DEST_BROADCAST);
+                new FixedLengthValidator(3), ADDR_NOT_UNREGISTERED, ADDR_BROADCAST);
         // Allow unregistered source for all vendor specific commands, because we don't know
         // how to use the commands at this moment.
         addValidationInfo(Constants.MESSAGE_VENDOR_COMMAND,
-                new VariableLengthValidator(1, 14), DEST_DIRECT | SRC_UNREGISTERED);
+                new VariableLengthValidator(1, 14), ADDR_ALL, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_VENDOR_COMMAND_WITH_ID,
-                new VariableLengthValidator(4, 14), DEST_ALL | SRC_UNREGISTERED);
+                new VariableLengthValidator(4, 14), ADDR_ALL, ADDR_ALL);
         addValidationInfo(Constants.MESSAGE_VENDOR_REMOTE_BUTTON_DOWN,
-                maxLengthValidator, DEST_ALL | SRC_UNREGISTERED);
+                maxLengthValidator, ADDR_ALL, ADDR_ALL);
 
         // Messages for the OSD.
-        addValidationInfo(Constants.MESSAGE_SET_OSD_STRING, new OsdStringValidator(), DEST_DIRECT);
-        addValidationInfo(Constants.MESSAGE_SET_OSD_NAME, new AsciiValidator(1, 14), DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SET_OSD_STRING,
+                new OsdStringValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SET_OSD_NAME,
+                new AsciiValidator(1, 14), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
 
         // Messages for the Device Menu Control.
-        addValidationInfo(
-                Constants.MESSAGE_MENU_REQUEST, new OneByteRangeValidator(0x00, 0x02), DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_MENU_STATUS, new OneByteRangeValidator(0x00, 0x01), DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_MENU_REQUEST,
+                new MinimumOneByteRangeValidator(0x00, 0x02), ADDR_NOT_UNREGISTERED,
+                ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_MENU_STATUS,
+                new MinimumOneByteRangeValidator(0x00, 0x01), ADDR_NOT_UNREGISTERED,
+                ADDR_DIRECT);
 
         // Messages for the Remote Control Passthrough.
-        addValidationInfo(
-                Constants.MESSAGE_USER_CONTROL_PRESSED,
-                new UserControlPressedValidator(),
-                DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_USER_CONTROL_PRESSED,
+                new UserControlPressedValidator(), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
 
         // Messages for the Power Status.
-        addValidationInfo(
-                Constants.MESSAGE_REPORT_POWER_STATUS,
-                new OneByteRangeValidator(0x00, 0x03),
-                DEST_DIRECT | DEST_BROADCAST);
+        addValidationInfo(Constants.MESSAGE_REPORT_POWER_STATUS,
+                new MinimumOneByteRangeValidator(0x00, 0x03),
+                ADDR_NOT_UNREGISTERED, ADDR_ALL);
 
         // Messages for the General Protocol.
         addValidationInfo(Constants.MESSAGE_FEATURE_ABORT,
-                new FixedLengthValidator(2), DEST_DIRECT);
+                new FixedLengthValidator(2), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
 
         // Messages for the System Audio Control.
-        addValidationInfo(Constants.MESSAGE_REPORT_AUDIO_STATUS, oneByteValidator, DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_REPORT_AUDIO_STATUS,
+                oneByteValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_REPORT_SHORT_AUDIO_DESCRIPTOR,
-                new FixedLengthValidator(3), DEST_DIRECT);
+                new FixedLengthValidator(3), ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
         addValidationInfo(Constants.MESSAGE_REQUEST_SHORT_AUDIO_DESCRIPTOR,
-                oneByteValidator, DEST_DIRECT);
-        addValidationInfo(
-                Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE,
-                new OneByteRangeValidator(0x00, 0x01),
-                DEST_ALL);
-        addValidationInfo(
-                Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
-                new OneByteRangeValidator(0x00, 0x01),
-                DEST_DIRECT);
+                oneByteValidator, ADDR_NOT_UNREGISTERED, ADDR_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE,
+                new MinimumOneByteRangeValidator(0x00, 0x01),
+                ADDR_NOT_UNREGISTERED, ADDR_ALL);
+        addValidationInfo(Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
+                new SingleByteRangeValidator(0x00, 0x01), ADDR_NOT_UNREGISTERED,
+                ADDR_DIRECT);
 
         // Messages for the Audio Rate Control.
-        addValidationInfo(
-                Constants.MESSAGE_SET_AUDIO_RATE,
-                new OneByteRangeValidator(0x00, 0x06),
-                DEST_DIRECT);
+        addValidationInfo(Constants.MESSAGE_SET_AUDIO_RATE,
+                new MinimumOneByteRangeValidator(0x00, 0x06), ADDR_NOT_UNREGISTERED,
+                ADDR_DIRECT);
 
         // Messages for Feature Discovery.
-        addValidationInfo(Constants.MESSAGE_GIVE_FEATURES, noneValidator,
-                DEST_DIRECT | SRC_UNREGISTERED);
+        addValidationInfo(Constants.MESSAGE_GIVE_FEATURES,
+                noneValidator, ADDR_ALL, ADDR_DIRECT);
 
         // Messages for Dynamic Auto Lipsync
-        addValidationInfo(Constants.MESSAGE_REQUEST_CURRENT_LATENCY, physicalAddressValidator,
-                DEST_BROADCAST);
+        addValidationInfo(Constants.MESSAGE_REQUEST_CURRENT_LATENCY,
+                physicalAddressValidator, ADDR_NOT_UNREGISTERED, ADDR_BROADCAST);
         addValidationInfo(Constants.MESSAGE_REPORT_CURRENT_LATENCY,
-                new VariableLengthValidator(4, 14), DEST_BROADCAST);
+                new VariableLengthValidator(4, 14), ADDR_NOT_UNREGISTERED, ADDR_BROADCAST);
 
         // All Messages for the ARC have no parameters.
 
         // Messages for the Capability Discovery and Control.
-        addValidationInfo(Constants.MESSAGE_CDC_MESSAGE, maxLengthValidator,
-                DEST_BROADCAST | SRC_UNREGISTERED);
+        addValidationInfo(Constants.MESSAGE_CDC_MESSAGE,
+                maxLengthValidator, ADDR_ALL, ADDR_BROADCAST);
     }
 
-    private static void addValidationInfo(int opcode, ParameterValidator validator, int addrType) {
-        sValidationInfo.append(opcode, new ValidationInfo(validator, addrType));
+    /**
+     * validSources and validDestinations are bitmasks that represent the sources and destinations
+     * that are allowed for a message.
+     */
+    private static void addValidationInfo(int opcode, ParameterValidator validator,
+            int validSources, int validDestinations) {
+        sValidationInfo.append(opcode, new ValidationInfo(validator, validSources,
+                validDestinations));
     }
 
     /**
@@ -275,7 +320,8 @@ public class HdmiCecMessageValidator {
             return OK;
         }
 
-        int addressValidationResult = validateAddress(source, destination, info.addressType);
+        int addressValidationResult = validateAddress(source, destination, info.validSources,
+                info.validDestinations);
         if (addressValidationResult != OK) {
             return addressValidationResult;
         }
@@ -295,25 +341,21 @@ public class HdmiCecMessageValidator {
      * on static information in this class.
      * @param source Source address to validate
      * @param destination Destination address to validate
-     * @param addressType Rules for validating the addresses - e.g. {@link #DEST_BROADCAST}
+     * @param validSources Bitmask used to validate the source address
+     *                     - e.g. {@link #ADDR_SOURCE_DEVICES}
+     * @param validDestinations Bitmask used to validate the destination address
+     *                        - e.g. {@link #ADDR_DIRECT}
      */
     @ValidationResult
-    static int validateAddress(int source, int destination, int addressType) {
+    static int validateAddress(int source, int destination, int validSources,
+            int validDestinations) {
         // Check the source field.
-        if (source == Constants.ADDR_UNREGISTERED
-                && (addressType & SRC_UNREGISTERED) == 0) {
+        if ((validSources & (1 << source)) == 0) {
             return ERROR_SOURCE;
         }
-
         // Check the destination field.
-        if (destination == Constants.ADDR_BROADCAST) {
-            if ((addressType & DEST_BROADCAST) == 0) {
-                return ERROR_DESTINATION;
-            }
-        } else {  // Direct addressing.
-            if ((addressType & DEST_DIRECT) == 0) {
-                return ERROR_DESTINATION;
-            }
+        if ((validDestinations & (1 << destination)) == 0) {
+            return ERROR_DESTINATION;
         }
         return OK;
     }
@@ -900,11 +942,14 @@ public class HdmiCecMessageValidator {
         }
     }
 
-    /** Check if the given parameters are one byte parameters and within range. */
-    private static class OneByteRangeValidator implements ParameterValidator {
+    /**
+     * Check if the given parameters are at least one byte parameters
+     * and the first byte is within range.
+     */
+    private static class MinimumOneByteRangeValidator implements ParameterValidator {
         private final int mMinValue, mMaxValue;
 
-        OneByteRangeValidator(int minValue, int maxValue) {
+        MinimumOneByteRangeValidator(int minValue, int maxValue) {
             mMinValue = minValue;
             mMaxValue = maxValue;
         }
@@ -913,6 +958,26 @@ public class HdmiCecMessageValidator {
         public int isValid(byte[] params) {
             if (params.length < 1) {
                 return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isWithinRange(params[0], mMinValue, mMaxValue));
+        }
+    }
+
+    /** Check if the given parameters are exactly one byte parameters and within range. */
+    private static class SingleByteRangeValidator implements ParameterValidator {
+        private final int mMinValue, mMaxValue;
+
+        SingleByteRangeValidator(int minValue, int maxValue) {
+            mMinValue = minValue;
+            mMaxValue = maxValue;
+        }
+
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 1) {
+                return ERROR_PARAMETER_SHORT;
+            } else if (params.length > 1) {
+                return ERROR_PARAMETER_LONG;
             }
             return toErrorCode(isWithinRange(params[0], mMinValue, mMaxValue));
         }

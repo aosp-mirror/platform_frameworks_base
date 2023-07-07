@@ -16,20 +16,27 @@
 
 package com.android.systemui.user;
 
-import android.app.Activity;
+import android.os.UserHandle;
 
+import com.android.settingslib.users.CreateUserDialogController;
 import com.android.settingslib.users.EditUserInfoController;
+import com.android.systemui.user.data.repository.UserRepositoryModule;
+import com.android.systemui.user.domain.interactor.HeadlessSystemUserModeModule;
+import com.android.systemui.user.ui.dialog.UserDialogModule;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.ClassKey;
-import dagger.multibindings.IntoMap;
 
 /**
  * Dagger module for User related classes.
  */
-@Module
+@Module(
+        includes = {
+                UserDialogModule.class,
+                UserRepositoryModule.class,
+                HeadlessSystemUserModeModule.class,
+        }
+)
 public abstract class UserModule {
 
     private static final String FILE_PROVIDER_AUTHORITY = "com.android.systemui.fileprovider";
@@ -39,9 +46,27 @@ public abstract class UserModule {
         return new EditUserInfoController(FILE_PROVIDER_AUTHORITY);
     }
 
-    /** Provides UserSwitcherActivity */
-    @Binds
-    @IntoMap
-    @ClassKey(UserSwitcherActivity.class)
-    public abstract Activity provideUserSwitcherActivity(UserSwitcherActivity activity);
+    /** Provides {@link CreateUserDialogController} */
+    @Provides
+    public static CreateUserDialogController provideCreateUserDialogController() {
+        return new CreateUserDialogController(FILE_PROVIDER_AUTHORITY);
+    }
+
+    /**
+     * Provides the {@link UserHandle} for the user associated with this System UI process.
+     *
+     * <p>Note that this is static and unchanging for the life-time of the process we are running
+     * in. It can be <i>different</i> from the user that is the currently-selected user, which may
+     * be associated with a different System UI process.
+     *
+     * <p>For example, the System UI process which creates all the windows and renders UI is always
+     * the one associated with the primary user on the device. However, if the user is switched to
+     * another, non-primary user (for example user "X"), then a secondary System UI process will be
+     * spawned. While the original primary user process continues to be the only one rendering UI,
+     * the new system UI process may be used for things like file or content access.
+     */
+    @Provides
+    public static UserHandle provideUserHandle() {
+        return new UserHandle(UserHandle.myUserId());
+    }
 }

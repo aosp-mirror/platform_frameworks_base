@@ -17,16 +17,20 @@
 package com.android.systemui.statusbar.notification.row.wrapper
 
 import android.content.Context
+import android.graphics.drawable.AnimatedImageDrawable
 import android.view.View
 import android.view.ViewGroup
 import com.android.internal.widget.CachingIconView
 import com.android.internal.widget.ConversationLayout
+import com.android.internal.widget.MessagingGroup
+import com.android.internal.widget.MessagingImageMessage
 import com.android.internal.widget.MessagingLinearLayout
 import com.android.systemui.R
 import com.android.systemui.statusbar.notification.NotificationFadeAware
 import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationMessagingTemplateViewWrapper.setCustomImageMessageTransform
+import com.android.systemui.util.children
 
 /**
  * Wraps a notification containing a conversation template
@@ -49,6 +53,7 @@ class NotificationConversationTemplateViewWrapper constructor(
     private lateinit var expandBtn: View
     private lateinit var expandBtnContainer: View
     private lateinit var imageMessageContainer: ViewGroup
+    private lateinit var messageContainers: ArrayList<MessagingGroup>
     private lateinit var messagingLinearLayout: MessagingLinearLayout
     private lateinit var conversationTitleView: View
     private lateinit var importanceRing: View
@@ -60,6 +65,7 @@ class NotificationConversationTemplateViewWrapper constructor(
     private fun resolveViews() {
         messagingLinearLayout = conversationLayout.messagingLinearLayout
         imageMessageContainer = conversationLayout.imageMessageContainer
+        messageContainers = conversationLayout.messagingGroups
         with(conversationLayout) {
             conversationIconContainer =
                     requireViewById(com.android.internal.R.id.conversation_icon_container)
@@ -145,5 +151,27 @@ class NotificationConversationTemplateViewWrapper constructor(
         // Do not call super
         NotificationFadeAware.setLayerTypeForFaded(expandBtn, faded)
         NotificationFadeAware.setLayerTypeForFaded(conversationIconContainer, faded)
+    }
+
+    // Starts or stops the animations in any drawables contained in this Conversation Notification.
+    override fun setAnimationsRunning(running: Boolean) {
+        // We apply to both the child message containers in a conversation group,
+        // and the top level image message container.
+        val containers = messageContainers.asSequence().map { it.messageContainer } +
+                sequenceOf(imageMessageContainer)
+        val drawables =
+                containers
+                        .flatMap { it.children }
+                        .mapNotNull { child ->
+                            (child as? MessagingImageMessage)?.let { imageMessage ->
+                                imageMessage.drawable as? AnimatedImageDrawable
+                            }
+                        }
+        drawables.toSet().forEach {
+            when {
+                running -> it.start()
+                !running -> it.stop()
+            }
+        }
     }
 }

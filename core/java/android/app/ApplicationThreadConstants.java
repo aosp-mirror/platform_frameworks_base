@@ -28,6 +28,7 @@ public final class ApplicationThreadConstants {
     public static final int DEBUG_OFF = 0;
     public static final int DEBUG_ON = 1;
     public static final int DEBUG_WAIT = 2;
+    public static final int DEBUG_SUSPEND = 3;
 
     // the package has been removed, clean up internal references
     public static final int PACKAGE_REMOVED = 0;

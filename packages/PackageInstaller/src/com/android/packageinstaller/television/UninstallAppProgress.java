@@ -17,24 +17,20 @@
 package com.android.packageinstaller.television;
 
 import android.app.Activity;
-import android.app.admin.IDevicePolicyManager;
+import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageDeleteObserver2;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
+import android.content.pm.VersionedPackage;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -42,8 +38,12 @@ import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
+import com.android.packageinstaller.EventResultPersister;
 import com.android.packageinstaller.PackageUtil;
 import com.android.packageinstaller.R;
+import com.android.packageinstaller.UninstallEventReceiver;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -55,14 +55,17 @@ import java.util.List;
  * by an intent with the intent's class name explicitly set to UninstallAppProgress and expects
  * the application object of the application to uninstall.
  */
-public class UninstallAppProgress extends Activity {
+public class UninstallAppProgress extends Activity implements
+        EventResultPersister.EventResultObserver {
     private static final String TAG = "UninstallAppProgress";
 
     private static final String FRAGMENT_TAG = "progress_fragment";
+    private static final String BROADCAST_ACTION =
+            "com.android.packageinstaller.ACTION_UNINSTALL_COMMIT";
 
     private ApplicationInfo mAppInfo;
     private boolean mAllUsers;
-    private IBinder mCallback;
+    private PackageManager.UninstallCompleteCallback mCallback;
 
     private volatile int mResultCode = -1;
 
@@ -116,13 +119,7 @@ public class UninstallAppProgress extends Activity {
                 final String packageName = (String) msg.obj;
 
                 if (mCallback != null) {
-                    final IPackageDeleteObserver2 observer = IPackageDeleteObserver2.Stub
-                            .asInterface(mCallback);
-                    try {
-                        observer.onPackageDeleted(mAppInfo.packageName, mResultCode,
-                                packageName);
-                    } catch (RemoteException ignored) {
-                    }
+                    mCallback.onUninstallComplete(mAppInfo.packageName, mResultCode, packageName);
                     finish();
                     return;
                 }
@@ -139,37 +136,34 @@ public class UninstallAppProgress extends Activity {
 
                 // Update the status text
                 final String statusText;
+                Context ctx = getBaseContext();
                 switch (msg.arg1) {
                     case PackageManager.DELETE_SUCCEEDED:
                         statusText = getString(R.string.uninstall_done);
                         // Show a Toast and finish the activity
-                        Context ctx = getBaseContext();
                         Toast.makeText(ctx, statusText, Toast.LENGTH_LONG).show();
                         setResultAndFinish();
                         return;
                     case PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER: {
                         UserManager userManager =
                                 (UserManager) getSystemService(Context.USER_SERVICE);
-                        IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
-                                ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
                         // Find out if the package is an active admin for some non-current user.
-                        int myUserId = UserHandle.myUserId();
-                        UserInfo otherBlockingUser = null;
-                        for (UserInfo user : userManager.getUsers()) {
+                        UserHandle myUserHandle =  Process.myUserHandle();
+                        UserHandle otherBlockingUserHandle = null;
+                        for (UserHandle otherUserHandle : userManager.getUserHandles(true)) {
                             // We only catch the case when the user in question is neither the
                             // current user nor its profile.
-                            if (isProfileOfOrSame(userManager, myUserId, user.id)) continue;
-
-                            try {
-                                if (dpm.packageHasActiveAdmins(packageName, user.id)) {
-                                    otherBlockingUser = user;
-                                    break;
-                                }
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Failed to talk to package manager", e);
+                            if (isProfileOfOrSame(userManager, myUserHandle, otherUserHandle)) {
+                                continue;
+                            }
+                            DevicePolicyManager dpm = ctx.createContextAsUser(otherUserHandle, 0)
+                                    .getSystemService(DevicePolicyManager.class);
+                            if (dpm.packageHasActiveAdmins(packageName)) {
+                                otherBlockingUserHandle = otherUserHandle;
+                                break;
                             }
                         }
-                        if (otherBlockingUser == null) {
+                        if (otherBlockingUserHandle == null) {
                             Log.d(TAG, "Uninstall failed because " + packageName
                                     + " is a device admin");
                             getProgressFragment().setDeviceManagerButtonVisible(true);
@@ -177,45 +171,40 @@ public class UninstallAppProgress extends Activity {
                                     R.string.uninstall_failed_device_policy_manager);
                         } else {
                             Log.d(TAG, "Uninstall failed because " + packageName
-                                    + " is a device admin of user " + otherBlockingUser);
+                                    + " is a device admin of user " + otherBlockingUserHandle);
                             getProgressFragment().setDeviceManagerButtonVisible(false);
+                            String userName = ctx.createContextAsUser(otherBlockingUserHandle, 0)
+                                    .getSystemService(UserManager.class).getUserName();
                             statusText = String.format(
                                     getString(R.string.uninstall_failed_device_policy_manager_of_user),
-                                    otherBlockingUser.name);
+                                    userName);
                         }
                         break;
                     }
                     case PackageManager.DELETE_FAILED_OWNER_BLOCKED: {
                         UserManager userManager =
                                 (UserManager) getSystemService(Context.USER_SERVICE);
-                        IPackageManager packageManager = IPackageManager.Stub.asInterface(
-                                ServiceManager.getService("package"));
-                        List<UserInfo> users = userManager.getUsers();
-                        int blockingUserId = UserHandle.USER_NULL;
-                        for (int i = 0; i < users.size(); ++i) {
-                            final UserInfo user = users.get(i);
-                            try {
-                                if (packageManager.getBlockUninstallForUser(packageName,
-                                        user.id)) {
-                                    blockingUserId = user.id;
-                                    break;
-                                }
-                            } catch (RemoteException e) {
-                                // Shouldn't happen.
-                                Log.e(TAG, "Failed to talk to package manager", e);
+                        PackageManager packageManager = ctx.getPackageManager();
+                        List<UserHandle> userHandles = userManager.getUserHandles(true);
+                        UserHandle otherBlockingUserHandle = null;
+                        for (int i = 0; i < userHandles.size(); ++i) {
+                            final UserHandle handle = userHandles.get(i);
+                            if (packageManager.canUserUninstall(packageName, handle)) {
+                                otherBlockingUserHandle = handle;
+                                break;
                             }
                         }
-                        int myUserId = UserHandle.myUserId();
-                        if (isProfileOfOrSame(userManager, myUserId, blockingUserId)) {
+                        UserHandle myUserHandle = Process.myUserHandle();
+                        if (isProfileOfOrSame(userManager, myUserHandle, otherBlockingUserHandle)) {
                             getProgressFragment().setDeviceManagerButtonVisible(true);
                         } else {
                             getProgressFragment().setDeviceManagerButtonVisible(false);
                             getProgressFragment().setUsersButtonVisible(true);
                         }
                         // TODO: b/25442806
-                        if (blockingUserId == UserHandle.USER_SYSTEM) {
+                        if (otherBlockingUserHandle == UserHandle.SYSTEM) {
                             statusText = getString(R.string.uninstall_blocked_device_owner);
-                        } else if (blockingUserId == UserHandle.USER_NULL) {
+                        } else if (otherBlockingUserHandle == null) {
                             Log.d(TAG, "Uninstall failed for " + packageName + " with code "
                                     + msg.arg1 + " no blocking user");
                             statusText = getString(R.string.uninstall_failed);
@@ -239,12 +228,13 @@ public class UninstallAppProgress extends Activity {
         }
     }
 
-    private boolean isProfileOfOrSame(UserManager userManager, int userId, int profileId) {
-        if (userId == profileId) {
+    private boolean isProfileOfOrSame(UserManager userManager, UserHandle userHandle,
+            UserHandle profileHandle) {
+        if (userHandle.equals(profileHandle)) {
             return true;
         }
-        UserInfo parentUser = userManager.getProfileParent(profileId);
-        return parentUser != null && parentUser.id == userId;
+        return userManager.getProfileParent(profileHandle) != null
+                && userManager.getProfileParent(profileHandle).equals(userHandle);
     }
 
     @Override
@@ -253,7 +243,8 @@ public class UninstallAppProgress extends Activity {
 
         Intent intent = getIntent();
         mAppInfo = intent.getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
-        mCallback = intent.getIBinderExtra(PackageInstaller.EXTRA_CALLBACK);
+        mCallback = intent.getParcelableExtra(PackageInstaller.EXTRA_CALLBACK,
+                PackageManager.UninstallCompleteCallback.class);
 
         // This currently does not support going through a onDestroy->onCreate cycle. Hence if that
         // happened, just fail the operation for mysterious reasons.
@@ -261,12 +252,7 @@ public class UninstallAppProgress extends Activity {
             mResultCode = PackageManager.DELETE_FAILED_INTERNAL_ERROR;
 
             if (mCallback != null) {
-                final IPackageDeleteObserver2 observer = IPackageDeleteObserver2.Stub
-                        .asInterface(mCallback);
-                try {
-                    observer.onPackageDeleted(mAppInfo.packageName, mResultCode, null);
-                } catch (RemoteException ignored) {
-                }
+                mCallback.onUninstallComplete(mAppInfo.packageName, mResultCode, null);
                 finish();
             } else {
                 setResultAndFinish();
@@ -278,10 +264,9 @@ public class UninstallAppProgress extends Activity {
         mAllUsers = intent.getBooleanExtra(Intent.EXTRA_UNINSTALL_ALL_USERS, false);
         UserHandle user = intent.getParcelableExtra(Intent.EXTRA_USER);
         if (user == null) {
-            user = android.os.Process.myUserHandle();
+            user = Process.myUserHandle();
         }
 
-        PackageDeleteObserver observer = new PackageDeleteObserver();
 
         // Make window transparent until initView is called. In many cases we can avoid showing the
         // UI at all as the app is uninstalled very quickly. If we show the UI and instantly remove
@@ -291,11 +276,29 @@ public class UninstallAppProgress extends Activity {
         getWindow().setNavigationBarColor(Color.TRANSPARENT);
 
         try {
-            getPackageManager().deletePackageAsUser(mAppInfo.packageName, observer,
-                    mAllUsers ? PackageManager.DELETE_ALL_USERS : 0, user.getIdentifier());
+            int uninstallId = UninstallEventReceiver.addObserver(this,
+                    EventResultPersister.GENERATE_NEW_ID, this);
+
+            Intent broadcastIntent = new Intent(BROADCAST_ACTION);
+            broadcastIntent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            broadcastIntent.putExtra(EventResultPersister.EXTRA_ID, uninstallId);
+            broadcastIntent.setPackage(getPackageName());
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, uninstallId,
+                    broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT
+                            | PendingIntent.FLAG_MUTABLE);
+
+            createContextAsUser(user, 0).getPackageManager().getPackageInstaller().uninstall(
+                    new VersionedPackage(mAppInfo.packageName, PackageManager.VERSION_CODE_HIGHEST),
+                    mAllUsers ? PackageManager.DELETE_ALL_USERS : 0,
+                    pendingIntent.getIntentSender());
         } catch (IllegalArgumentException e) {
             // Couldn't find the package, no need to call uninstall.
             Log.w(TAG, "Could not find package, not deleting " + mAppInfo.packageName, e);
+        } catch (EventResultPersister.OutOfIdsException e) {
+            Log.e(TAG, "Fails to start uninstall", e);
+            onResult(PackageInstaller.STATUS_FAILURE, PackageManager.DELETE_FAILED_INTERNAL_ERROR,
+                    null, 0);
         }
 
         mHandler.sendMessageDelayed(mHandler.obtainMessage(UNINSTALL_IS_SLOW),
@@ -306,13 +309,12 @@ public class UninstallAppProgress extends Activity {
         return mAppInfo;
     }
 
-    private class PackageDeleteObserver extends IPackageDeleteObserver.Stub {
-        public void packageDeleted(String packageName, int returnCode) {
-            Message msg = mHandler.obtainMessage(UNINSTALL_COMPLETE);
-            msg.arg1 = returnCode;
-            msg.obj = packageName;
-            mHandler.sendMessage(msg);
-        }
+    @Override
+    public void onResult(int status, int legacyStatus, @Nullable String message, int serviceId) {
+        Message msg = mHandler.obtainMessage(UNINSTALL_COMPLETE);
+        msg.arg1 = legacyStatus;
+        msg.obj = mAppInfo.packageName;
+        mHandler.sendMessage(msg);
     }
 
     public void setResultAndFinish() {

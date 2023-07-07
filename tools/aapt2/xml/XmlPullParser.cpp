@@ -140,8 +140,7 @@ const std::string& XmlPullParser::namespace_uri() const {
   return event_queue_.front().data2;
 }
 
-std::optional<ExtractedPackage> XmlPullParser::TransformPackageAlias(
-    const StringPiece& alias) const {
+std::optional<ExtractedPackage> XmlPullParser::TransformPackageAlias(StringPiece alias) const {
   if (alias.empty()) {
     return ExtractedPackage{{}, false /*private*/};
   }
@@ -307,7 +306,7 @@ void XMLCALL XmlPullParser::EndCdataSectionHandler(void* user_data) {
                                       parser->depth_ });
 }
 
-std::optional<StringPiece> FindAttribute(const XmlPullParser* parser, const StringPiece& name) {
+std::optional<StringPiece> FindAttribute(const XmlPullParser* parser, StringPiece name) {
   auto iter = parser->FindAttribute("", name);
   if (iter != parser->end_attributes()) {
     return StringPiece(util::TrimWhitespace(iter->value));
@@ -315,8 +314,7 @@ std::optional<StringPiece> FindAttribute(const XmlPullParser* parser, const Stri
   return {};
 }
 
-std::optional<StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser,
-                                                 const StringPiece& name) {
+std::optional<StringPiece> FindNonEmptyAttribute(const XmlPullParser* parser, StringPiece name) {
   auto iter = parser->FindAttribute("", name);
   if (iter != parser->end_attributes()) {
     StringPiece trimmed = util::TrimWhitespace(iter->value);

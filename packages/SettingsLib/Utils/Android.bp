@@ -25,7 +25,9 @@ android_library {
         "//apex_available:platform",
         "com.android.adservices",
         "com.android.cellbroadcast",
+        "com.android.devicelock",
         "com.android.extservices",
+        "com.android.healthfitness",
         "com.android.permission",
     ],
 }

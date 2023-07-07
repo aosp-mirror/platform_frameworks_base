@@ -16,17 +16,23 @@
 
 package com.android.systemui.sensorprivacy.television;
 
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 import static android.hardware.SensorPrivacyManager.Sources.OTHER;
 
 import android.annotation.DimenRes;
+import android.app.AppOpsManager;
+import android.app.role.RoleManager;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorPrivacyManager;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -38,6 +44,8 @@ import android.widget.Toast;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.tv.TvBottomSheetActivity;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -57,6 +65,8 @@ public class TvUnblockSensorActivity extends TvBottomSheetActivity {
 
     private int mSensor = -1;
 
+    private final AppOpsManager mAppOpsManager;
+    private final RoleManager mRoleManager;
     private final IndividualSensorPrivacyController mSensorPrivacyController;
     private IndividualSensorPrivacyController.Callback mSensorPrivacyCallback;
     private TextView mTitle;
@@ -68,8 +78,11 @@ public class TvUnblockSensorActivity extends TvBottomSheetActivity {
 
     @Inject
     public TvUnblockSensorActivity(
-            IndividualSensorPrivacyController individualSensorPrivacyController) {
+            IndividualSensorPrivacyController individualSensorPrivacyController,
+            AppOpsManager appOpsManager, RoleManager roleManager) {
         mSensorPrivacyController = individualSensorPrivacyController;
+        mAppOpsManager = appOpsManager;
+        mRoleManager = roleManager;
     }
 
     @Override
@@ -120,6 +133,10 @@ public class TvUnblockSensorActivity extends TvBottomSheetActivity {
                 toastMsgResId = R.string.sensor_privacy_mic_camera_unblocked_toast_content;
                 break;
         }
+        showToastAndFinish(toastMsgResId);
+    }
+
+    private void showToastAndFinish(int toastMsgResId) {
         Toast.makeText(this, toastMsgResId, Toast.LENGTH_SHORT).show();
         finish();
     }
@@ -149,7 +166,9 @@ public class TvUnblockSensorActivity extends TvBottomSheetActivity {
     }
 
     private void updateUI() {
-        if (isBlockedByHardwareToggle()) {
+        if (isHTTAccessDisabled()) {
+            updateUiForHTT();
+        } else if (isBlockedByHardwareToggle()) {
             updateUiForHardwareToggle();
         } else {
             updateUiForSoftwareToggle();
@@ -208,20 +227,20 @@ public class TvUnblockSensorActivity extends TvBottomSheetActivity {
 
         switch (mSensor) {
             case MICROPHONE:
-                mTitle.setText(R.string.sensor_privacy_start_use_mic_dialog_title);
+                mTitle.setText(R.string.sensor_privacy_start_use_mic_blocked_dialog_title);
                 mContent.setText(R.string.sensor_privacy_start_use_mic_dialog_content);
                 mIcon.setImageResource(com.android.internal.R.drawable.perm_group_microphone);
                 mSecondIcon.setVisibility(View.GONE);
                 break;
             case CAMERA:
-                mTitle.setText(R.string.sensor_privacy_start_use_camera_dialog_title);
+                mTitle.setText(R.string.sensor_privacy_start_use_camera_blocked_dialog_title);
                 mContent.setText(R.string.sensor_privacy_start_use_camera_dialog_content);
                 mIcon.setImageResource(com.android.internal.R.drawable.perm_group_camera);
                 mSecondIcon.setVisibility(View.GONE);
                 break;
             case ALL_SENSORS:
             default:
-                mTitle.setText(R.string.sensor_privacy_start_use_mic_camera_dialog_title);
+                mTitle.setText(R.string.sensor_privacy_start_use_mic_camera_blocked_dialog_title);
                 mContent.setText(R.string.sensor_privacy_start_use_mic_camera_dialog_content);
                 mIcon.setImageResource(com.android.internal.R.drawable.perm_group_camera);
                 mSecondIcon.setImageResource(
@@ -237,6 +256,29 @@ public class TvUnblockSensorActivity extends TvBottomSheetActivity {
                 mSensorPrivacyController.setSensorBlocked(OTHER, MICROPHONE, false);
             } else {
                 mSensorPrivacyController.setSensorBlocked(OTHER, mSensor, false);
+            }
+        });
+    }
+
+    private void updateUiForHTT() {
+        setIconTint(true);
+        setIconSize(R.dimen.bottom_sheet_icon_size, R.dimen.bottom_sheet_icon_size);
+
+        mTitle.setText(R.string.sensor_privacy_start_use_mic_blocked_dialog_title);
+        mContent.setText(R.string.sensor_privacy_htt_blocked_dialog_content);
+        mIcon.setImageResource(com.android.internal.R.drawable.perm_group_microphone);
+        mSecondIcon.setVisibility(View.GONE);
+
+        mPositiveButton.setText(R.string.sensor_privacy_dialog_open_settings);
+        mPositiveButton.setOnClickListener(v -> {
+            Intent openPrivacySettings = new Intent(ACTION_MANAGE_MICROPHONE_PRIVACY);
+            ActivityInfo activityInfo = openPrivacySettings.resolveActivityInfo(getPackageManager(),
+                    MATCH_SYSTEM_ONLY);
+            if (activityInfo == null) {
+                showToastAndFinish(com.android.internal.R.string.noApplications);
+            } else {
+                startActivity(openPrivacySettings);
+                finish();
             }
         });
     }
@@ -270,6 +312,18 @@ public class TvUnblockSensorActivity extends TvBottomSheetActivity {
         mSecondIcon.getLayoutParams().width = iconWidth;
         mSecondIcon.getLayoutParams().height = iconHeight;
         mSecondIcon.invalidate();
+    }
+
+    private boolean isHTTAccessDisabled() {
+        String pkg = getIntent().getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+        List<String> assistantPkgs = mRoleManager.getRoleHolders(RoleManager.ROLE_ASSISTANT);
+        if (!assistantPkgs.contains(pkg)) {
+            return false;
+        }
+
+        return (mAppOpsManager.checkOpNoThrow(
+                AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO, UserHandle.myUserId(),
+                pkg) != AppOpsManager.MODE_ALLOWED);
     }
 
     @Override

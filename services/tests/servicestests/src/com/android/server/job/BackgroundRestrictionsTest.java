@@ -37,7 +37,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -71,7 +70,7 @@ public class BackgroundRestrictionsTest {
     private static final String TEST_APP_PACKAGE = "com.android.servicestests.apps.jobtestapp";
     private static final String TEST_APP_ACTIVITY = TEST_APP_PACKAGE + ".TestJobActivity";
     private static final long POLL_INTERVAL = 500;
-    private static final long DEFAULT_WAIT_TIMEOUT = 5000;
+    private static final long DEFAULT_WAIT_TIMEOUT = 10_000;
 
     private Context mContext;
     private AppOpsManager mAppOpsManager;
@@ -115,7 +114,8 @@ public class BackgroundRestrictionsTest {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_JOB_STARTED);
         intentFilter.addAction(ACTION_JOB_STOPPED);
-        mContext.registerReceiver(mJobStateChangeReceiver, intentFilter);
+        mContext.registerReceiver(mJobStateChangeReceiver, intentFilter,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
         setAppOpsModeAllowed(true);
         setPowerExemption(false);
     }
@@ -164,17 +164,6 @@ public class BackgroundRestrictionsTest {
                 awaitJobStart(DEFAULT_WAIT_TIMEOUT));
     }
 
-    @Test
-    public void testFeatureFlag() throws Exception {
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.FORCED_APP_STANDBY_ENABLED, 0);
-        scheduleAndAssertJobStarted();
-        setAppOpsModeAllowed(false);
-        mIActivityManager.makePackageIdle(TEST_APP_PACKAGE, UserHandle.USER_CURRENT);
-        assertFalse("Job stopped even when feature flag was disabled",
-                awaitJobStop(DEFAULT_WAIT_TIMEOUT, JobParameters.STOP_REASON_UNDEFINED));
-    }
-
     @After
     public void tearDown() throws Exception {
         final Intent cancelJobsIntent = new Intent(TestJobActivity.ACTION_CANCEL_JOBS);
@@ -185,8 +174,6 @@ public class BackgroundRestrictionsTest {
         Thread.sleep(500); // To avoid race with register in the next setUp
         setAppOpsModeAllowed(true);
         setPowerExemption(false);
-        Settings.Global.putInt(mContext.getContentResolver(),
-                Settings.Global.FORCED_APP_STANDBY_ENABLED, 1);
     }
 
     private void setPowerExemption(boolean exempt) throws RemoteException {

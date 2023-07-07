@@ -14,13 +14,17 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -32,6 +36,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,11 +46,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
 public class SystemUIDialogTest extends SysuiTestCase {
 
+    @Mock
+    private FeatureFlags mFeatureFlags;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
 
@@ -52,6 +62,7 @@ public class SystemUIDialogTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
+        mDependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);
         mDependency.injectTestDependency(BroadcastDispatcher.class, mBroadcastDispatcher);
     }
 
@@ -76,7 +87,7 @@ public class SystemUIDialogTest extends SysuiTestCase {
 
     @Test
     public void testNoRegisterReceiver() {
-        final SystemUIDialog dialog = new SystemUIDialog(mContext, false);
+        final SystemUIDialog dialog = new SystemUIDialog(mContext, 0, false);
 
         dialog.show();
         verify(mBroadcastDispatcher, never()).registerReceiver(any(), any(), eq(null), any());
@@ -85,5 +96,48 @@ public class SystemUIDialogTest extends SysuiTestCase {
         dialog.dismiss();
         verify(mBroadcastDispatcher, never()).unregisterReceiver(any());
         assertFalse(dialog.isShowing());
+    }
+
+    @Test
+    public void usePredictiveBackAnimFlag() {
+        when(mFeatureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM))
+                .thenReturn(true);
+        final SystemUIDialog dialog = new SystemUIDialog(mContext);
+
+        dialog.show();
+
+        assertTrue(dialog.isShowing());
+        verify(mFeatureFlags, atLeast(1))
+                .isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM);
+
+        dialog.dismiss();
+        assertFalse(dialog.isShowing());
+    }
+
+    @Test public void startAndStopAreCalled() {
+        AtomicBoolean calledStart = new AtomicBoolean(false);
+        AtomicBoolean calledStop = new AtomicBoolean(false);
+        SystemUIDialog dialog = new SystemUIDialog(mContext) {
+            @Override
+            protected void start() {
+                calledStart.set(true);
+            }
+
+            @Override
+            protected void stop() {
+                calledStop.set(true);
+            }
+        };
+
+        assertThat(calledStart.get()).isFalse();
+        assertThat(calledStop.get()).isFalse();
+
+        dialog.show();
+        assertThat(calledStart.get()).isTrue();
+        assertThat(calledStop.get()).isFalse();
+
+        dialog.dismiss();
+        assertThat(calledStart.get()).isTrue();
+        assertThat(calledStop.get()).isTrue();
     }
 }

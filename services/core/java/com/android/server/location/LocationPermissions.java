@@ -26,8 +26,10 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.Binder;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /** Utility class for dealing with location permissions. */
 public final class LocationPermissions {
@@ -49,6 +51,7 @@ public final class LocationPermissions {
      */
     public static final int PERMISSION_FINE = 2;
 
+    @Target(ElementType.TYPE_USE)
     @IntDef({PERMISSION_NONE, PERMISSION_COARSE, PERMISSION_FINE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionLevel {}

@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikace je nainstalována."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Chcete tuto aplikaci nainstalovat?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Chcete tuto aplikaci aktualizovat?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Aktualizovat tuto aplikaci ze zdroje <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nTato aplikace obvykle dostává aktualizace ze zdroje <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Pokud ji aktualizujete z jiného zdroje, budete v budoucnu do telefonu moci dostávat aktualizace z libovolného zdroje. Funkčnost aplikace se může změnit."</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikaci nelze nainstalovat."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Instalace balíčku byla zablokována."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikaci nelze nainstalovat, protože balíček je v konfliktu se stávajícím balíčkem."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Tento uživatel nemůže instalovat neznámé aplikace"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Tento uživatel nesmí instalovat aplikace"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Přesto aktualizovat"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Správa aplikací"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nedostatek místa"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g> nelze nainstalovat. Uvolněte místo v paměti a zkuste to znovu."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Chcete tuto aplikaci nahradit tovární verzí? Všechna data budou odstraněna."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Chcete tuto aplikaci nahradit tovární verzí? Všechna data budou odstraněna. Tato akce ovlivní všechny uživatele zařízení, včetně uživatelů s pracovním profilem."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Ponechat data aplikace o velikosti <xliff:g id="SIZE">%1$s</xliff:g>."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Chcete tuto aplikaci smazat?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Chcete tuto aplikaci odinstalovat? Smazán bude také klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Probíhající odinstalace"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Neúspěšné odinstalace"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Odinstalace…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Odinstalace balíčku <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Odinstalace byla dokončena."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Balíček <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> byl odinstalován"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Byl smazán klon balíčku <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Odinstalace se nezdařila."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Odinstalace balíčku <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> se nezdařila."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Mazání klonu <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Aktivní aplikaci pro správu zařízení nelze odinstalovat"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Aktivní aplikaci pro správu zařízení uživatele <xliff:g id="USERNAME">%1$s</xliff:g> nelze odinstalovat"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Tato aplikace je u některých uživatelů nebo profilů požadována, u ostatních byla odinstalována"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Neznámé"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Z bezpečnostních důvodů momentálně není dovoleno do tabletu instalovat neznámé aplikace z tohoto zdroje. Změnit to můžete v Nastavení."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Z bezpečnostních důvodů momentálně není dovoleno do televize instalovat neznámé aplikace z tohoto zdroje. Změnit to můžete v Nastavení."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Z bezpečnostních důvodů momentálně není dovoleno do hodinek instalovat neznámé aplikace z tohoto zdroje. Změnit to můžete v Nastavení."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Z bezpečnostních důvodů momentálně není dovoleno do telefonu instalovat neznámé aplikace z tohoto zdroje. Změnit to můžete v Nastavení."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefon a osobní údaje jsou zranitelnější vůči útoku ze strany neznámých aplikací. Instalací této aplikace přijímáte odpovědnost za případné škody na telefonu nebo ztrátu dat, která může být používáním aplikace způsobena."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tablet a osobní údaje jsou zranitelnější vůči útoku ze strany neznámých aplikací. Instalací této aplikace přijímáte odpovědnost za případné škody na tabletu nebo ztrátu dat, která může být používáním aplikace způsobena."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Televize a osobní údaje jsou zranitelnější vůči útoku ze strany neznámých aplikací. Instalací této aplikace přijímáte odpovědnost za případné škody na televizi nebo ztrátu dat, která může být používáním aplikace způsobena."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Pokračovat"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Nastavení"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instalace/odinstalace aplikací pro Wear"</string>

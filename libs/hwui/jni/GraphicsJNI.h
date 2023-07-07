@@ -2,28 +2,25 @@
 #define _ANDROID_GRAPHICS_GRAPHICS_JNI_H_
 
 #include <cutils/compiler.h>
+#include <hwui/Bitmap.h>
+#include <hwui/Canvas.h>
 
-#include "Bitmap.h"
 #include "BRDAllocator.h"
+#include "Bitmap.h"
 #include "SkBitmap.h"
 #include "SkCodec.h"
-#include "SkPixelRef.h"
+#include "SkColorSpace.h"
 #include "SkMallocPixelRef.h"
+#include "SkPixelRef.h"
 #include "SkPoint.h"
 #include "SkRect.h"
-#include "SkColorSpace.h"
-#include <hwui/Canvas.h>
-#include <hwui/Bitmap.h>
-
 #include "graphics_jni_helpers.h"
 
 class SkCanvas;
 struct SkFontMetrics;
 
 namespace android {
-namespace skia {
-    class BitmapRegionDecoder;
-}
+class BitmapRegionDecoderWrapper;
 class Canvas;
 class Paint;
 struct Typeface;
@@ -49,10 +46,16 @@ public:
 
     static void setJavaVM(JavaVM* javaVM);
 
-    /** returns a pointer to the JavaVM provided when we initialized the module */
+    /**
+     * returns a pointer to the JavaVM provided when we initialized the module
+     * DEPRECATED: Objects should know the JavaVM that created them
+     */
     static JavaVM* getJavaVM() { return mJavaVM; }
 
-    /** return a pointer to the JNIEnv for this thread */
+    /**
+     * return a pointer to the JNIEnv for this thread
+     * DEPRECATED: Objects should know the JavaVM that created them
+     */
     static JNIEnv* getJNIEnv();
 
     /** create a JNIEnv* for this thread or assert if one already exists */
@@ -120,7 +123,7 @@ public:
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
     static jobject createBitmapRegionDecoder(JNIEnv* env,
-                                             android::skia::BitmapRegionDecoder* bitmap);
+                                             android::BitmapRegionDecoderWrapper* bitmap);
 
     /**
      * Given a bitmap we natively allocate a memory block to store the contents
@@ -219,9 +222,8 @@ private:
  */
 class RecyclingClippingPixelAllocator : public android::skia::BRDAllocator {
 public:
-
     RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap,
-            size_t recycledBytes);
+                                    bool mustMatchColorType = true);
 
     ~RecyclingClippingPixelAllocator();
 
@@ -249,6 +251,7 @@ private:
     const size_t     mRecycledBytes;
     SkBitmap*        mSkiaBitmap;
     bool             mNeedsCopy;
+    const bool mMustMatchColorType;
 };
 
 class AshmemPixelAllocator : public SkBitmap::Allocator {
@@ -333,6 +336,34 @@ private:
     jbyteArray fArray;
     jbyte*      fPtr;
     int         fLen;
+};
+
+class JGlobalRefHolder {
+public:
+    JGlobalRefHolder(JavaVM* vm, jobject object) : mVm(vm), mObject(object) {}
+
+    virtual ~JGlobalRefHolder() {
+        env()->DeleteGlobalRef(mObject);
+        mObject = nullptr;
+    }
+
+    jobject object() { return mObject; }
+    JavaVM* vm() { return mVm; }
+
+    JNIEnv* env() {
+        JNIEnv* env;
+        if (mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+            LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", mVm);
+        }
+        return env;
+    }
+
+private:
+    JGlobalRefHolder(const JGlobalRefHolder&) = delete;
+    void operator=(const JGlobalRefHolder&) = delete;
+
+    JavaVM* mVm;
+    jobject mObject;
 };
 
 void doThrowNPE(JNIEnv* env);

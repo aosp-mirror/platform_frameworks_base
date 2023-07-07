@@ -25,11 +25,8 @@
         android:id="@+id/dream_overlay_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/dream_overlay_container_margin_top"
-        android:layout_marginEnd="@dimen/dream_overlay_container_margin_end"
-        android:layout_marginBottom="@dimen/dream_overlay_container_margin_bottom"
-        android:layout_marginStart="@dimen/dream_overlay_container_margin_start"
-
+        android:clipToPadding="false"
+        android:clipChildren="false"
         app:layout_constraintTop_toBottomOf="@id/dream_overlay_status_bar"
         app:layout_constraintBottom_toBottomOf="parent"
         />

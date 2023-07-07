@@ -1,6 +1,9 @@
 {
     "presubmit": [
         {
+            "name": "CtsLocationFineTestCases"
+        },
+        {
             "name": "CtsLocationCoarseTestCases"
         },
         {
@@ -20,6 +23,18 @@
             "file_patterns": ["NotificationManagerService\\.java"]
         },
         {
+            "name": "CtsScopedStorageCoreHostTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageHostTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageDeviceOnlyTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
             "name": "FrameworksMockingServicesTests",
             "options": [
                 {
@@ -36,21 +51,34 @@
                 }
             ],
             "file_patterns": ["BinaryTransparencyService\\.java"]
+        },
+        {
+            "name": "BinaryTransparencyHostTest",
+            "file_patterns": [
+                "BinaryTransparencyService\\.java"
+            ]
+        },
+        {
+            "name": "CtsMediaProjectionTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                }
+            ]
+        },
+        {
+            // GWP-ASan's CTS test ensures that recoverable tombstones work,
+            // which is emitted by the NativeTombstoneManager.
+            "name": "CtsGwpAsanTestCases"
         }
     ],
     "presubmit-large": [
-        {
-            "name": "CtsScopedStorageCoreHostTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
-        {
-            "name": "CtsScopedStorageHostTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
-        {
-            "name": "CtsScopedStorageDeviceOnlyTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
         {
             "name": "CtsContentTestCases",
             "options": [
@@ -65,11 +93,6 @@
                 }
             ],
             "file_patterns": ["ClipboardService\\.java"]
-        }
-    ],
-    "postsubmit": [
-        {
-            "name": "CtsLocationFineTestCases"
         }
     ]
 }

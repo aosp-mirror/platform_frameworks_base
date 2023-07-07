@@ -189,6 +189,8 @@ message PowerManagerServiceDumpProto {
     optional bool is_enhanced_discharge_prediction_personalized = 54;
     optional bool is_low_power_standby_active = 55;
     optional LowPowerStandbyControllerDumpProto low_power_standby_controller = 56;
+    // The battery level drained by the dream.
+    optional int32 battery_level_drained_while_dreaming = 57;
 }
 
 // A com.android.server.power.PowerManagerService.SuspendBlockerImpl object.
@@ -238,6 +240,7 @@ message PowerServiceSettingsAndConfigurationDumpProto {
         optional bool is_stay_on_while_plugged_in_ac = 1;
         optional bool is_stay_on_while_plugged_in_usb = 2;
         optional bool is_stay_on_while_plugged_in_wireless = 3;
+        optional bool is_stay_on_while_plugged_in_dock = 4;
     }
     message ScreenBrightnessSettingLimitsProto {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -466,5 +469,26 @@ message LowPowerStandbyControllerDumpProto {
     // Set of app ids that are exempt form low power standby
     repeated int32 allowlist = 10;
 
-    // Next tag: 11
+    // The active policy specifying exemptions
+    optional LowPowerStandbyPolicyProto policy = 11;
+
+    // Next tag: 12
+}
+
+message LowPowerStandbyPolicyProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Name of the policy
+    optional string identifier = 1;
+
+    // Packages that are exempt from Low Power Standby restrictions
+    repeated string exempt_packages = 2;
+
+    // Exemption reasons that this policy allows
+    optional int32 allowed_reasons = 3;
+
+    // Features that this policy allows to be used
+    repeated string allowed_features = 4;
+
+    // Next tag: 5
 }

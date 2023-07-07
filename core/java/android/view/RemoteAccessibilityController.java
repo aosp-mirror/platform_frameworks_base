@@ -24,6 +24,8 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 
+import java.lang.ref.WeakReference;
+
 class RemoteAccessibilityController {
     private static final String TAG = "RemoteAccessibilityController";
     private int mHostId;
@@ -80,12 +82,17 @@ class RemoteAccessibilityController {
     /**
      * Wrapper of accessibility embedded connection for embedded view hierarchy.
      */
-    private final class RemoteAccessibilityEmbeddedConnection implements IBinder.DeathRecipient {
+    private static final class RemoteAccessibilityEmbeddedConnection
+            implements IBinder.DeathRecipient {
+        private final WeakReference<RemoteAccessibilityController> mController;
         private final IAccessibilityEmbeddedConnection mConnection;
         private final IBinder mLeashToken;
 
-        RemoteAccessibilityEmbeddedConnection(IAccessibilityEmbeddedConnection connection,
+        RemoteAccessibilityEmbeddedConnection(
+                RemoteAccessibilityController controller,
+                IAccessibilityEmbeddedConnection connection,
                 IBinder leashToken) {
+            mController = new WeakReference<>(controller);
             mConnection = connection;
             mLeashToken = leashToken;
         }
@@ -109,9 +116,13 @@ class RemoteAccessibilityController {
         @Override
         public void binderDied() {
             unlinkToDeath();
-            runOnUiThread(() -> {
-                if (mConnectionWrapper == this) {
-                    mConnectionWrapper = null;
+            RemoteAccessibilityController controller = mController.get();
+            if (controller == null) {
+                return;
+            }
+            controller.runOnUiThread(() -> {
+                if (controller.mConnectionWrapper == this) {
+                    controller.mConnectionWrapper = null;
                 }
             });
         }
@@ -128,7 +139,7 @@ class RemoteAccessibilityController {
             }
             if (connection != null && leashToken != null) {
                 mConnectionWrapper =
-                    new RemoteAccessibilityEmbeddedConnection(connection, leashToken);
+                    new RemoteAccessibilityEmbeddedConnection(this, connection, leashToken);
                 mConnectionWrapper.linkToDeath();
             }
         } catch (RemoteException e) {

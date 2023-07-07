@@ -352,7 +352,7 @@ public class SearchDialog extends Dialog {
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         if (savedInstanceState == null) return;
 
-        ComponentName launchComponent = savedInstanceState.getParcelable(INSTANCE_KEY_COMPONENT);
+        ComponentName launchComponent = savedInstanceState.getParcelable(INSTANCE_KEY_COMPONENT, android.content.ComponentName.class);
         Bundle appSearchData = savedInstanceState.getBundle(INSTANCE_KEY_APPDATA);
         String userQuery = savedInstanceState.getString(INSTANCE_KEY_USER_QUERY);
 

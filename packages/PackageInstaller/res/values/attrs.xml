@@ -32,4 +32,49 @@
         <attr name="circle_radius_pressed_percent" format="fraction" />
     </declare-styleable>
     <!-- END: Ported from WearableSupport -->
+    <declare-styleable name="Theme">
+        <attr name="alertDialogCenterButtons" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="AlertDialog">
+        <attr name="fullDark" format="reference|color" />
+        <attr name="topDark" format="reference|color" />
+        <attr name="centerDark" format="reference|color" />
+        <attr name="bottomDark" format="reference|color" />
+        <attr name="fullBright" format="reference|color" />
+        <attr name="topBright" format="reference|color" />
+        <attr name="centerBright" format="reference|color" />
+        <attr name="bottomBright" format="reference|color" />
+        <attr name="bottomMedium" format="reference|color" />
+        <attr name="centerMedium" format="reference|color" />
+        <attr name="layout" format="reference" />
+        <attr name="buttonPanelSideLayout" format="reference" />
+        <attr name="listLayout" format="reference" />
+        <attr name="multiChoiceItemLayout" format="reference" />
+        <attr name="singleChoiceItemLayout" format="reference" />
+        <attr name="listItemLayout" format="reference" />
+        <attr name="progressLayout" format="reference" />
+        <attr name="horizontalProgressLayout" format="reference" />
+        <!-- @hide Not ready for public use. -->
+        <attr name="showTitle" format="boolean" />
+        <!-- Whether fullDark, etc. should use default values if null. -->
+        <attr name="needsDefaultBackgrounds" format="boolean" />
+        <!-- Workaround until we replace AlertController with custom layout. -->
+        <attr name="controllerType">
+            <!-- The default controller. -->
+            <enum name="normal" value="0" />
+            <!-- Controller for micro specific layout. -->
+            <enum name="micro" value="1" />
+        </attr>
+        <!-- Offset when scrolling to a selection. -->
+        <attr name="selectionScrollOffset" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="ButtonBarLayout">
+        <!-- Whether to automatically stack the buttons when there is not
+             enough space to lay them out side-by-side. -->
+        <attr name="allowStacking" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="TextAppearance">
+        <!-- Size of the text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp). -->
+        <attr name="textSize" format="dimension" />
+    </declare-styleable>
 </resources>

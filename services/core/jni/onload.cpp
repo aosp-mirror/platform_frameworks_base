@@ -35,8 +35,8 @@ int register_android_server_storage_AppFuse(JNIEnv* env);
 int register_android_server_SerialService(JNIEnv* env);
 int register_android_server_SystemServer(JNIEnv* env);
 int register_android_server_UsbAlsaJackDetector(JNIEnv* env);
+int register_android_server_UsbAlsaMidiDevice(JNIEnv* env);
 int register_android_server_UsbDeviceManager(JNIEnv* env);
-int register_android_server_UsbMidiDevice(JNIEnv* env);
 int register_android_server_UsbHostManager(JNIEnv* env);
 int register_android_server_vr_VrManagerService(JNIEnv* env);
 int register_android_server_vibrator_VibratorController(JavaVM* vm, JNIEnv* env);
@@ -64,6 +64,8 @@ int register_android_server_sensor_SensorService(JavaVM* vm, JNIEnv* env);
 int register_android_server_companion_virtual_InputController(JNIEnv* env);
 int register_android_server_app_GameManagerService(JNIEnv* env);
 int register_com_android_server_wm_TaskFpsCallbackController(JNIEnv* env);
+int register_com_android_server_display_DisplayControl(JNIEnv* env);
+int register_com_android_server_SystemClockTime(JNIEnv* env);
 };
 
 using namespace android;
@@ -88,8 +90,8 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_InputManager(env);
     register_android_server_LightsService(env);
     register_android_server_UsbDeviceManager(env);
-    register_android_server_UsbMidiDevice(env);
     register_android_server_UsbAlsaJackDetector(env);
+    register_android_server_UsbAlsaMidiDevice(env);
     register_android_server_UsbHostManager(env);
     register_android_server_vr_VrManagerService(env);
     register_android_server_vibrator_VibratorController(vm, env);
@@ -120,5 +122,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_companion_virtual_InputController(env);
     register_android_server_app_GameManagerService(env);
     register_com_android_server_wm_TaskFpsCallbackController(env);
+    register_com_android_server_display_DisplayControl(env);
+    register_com_android_server_SystemClockTime(env);
     return JNI_VERSION_1_4;
 }

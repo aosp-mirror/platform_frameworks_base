@@ -33,5 +33,7 @@
     <string name="mic_stopped_recording_announcement">Microphone stopped recording</string>
     <string name="camera_stopped_recording_announcement">Camera stopped recording</string>
     <string name="mic_camera_stopped_recording_announcement">Camera and Microphone stopped recording</string>
+    <string name="screen_recording_announcement">Screen recording started</string>
+    <string name="screen_stopped_recording_announcement">Screen recording stopped</string>
 
 </resources>

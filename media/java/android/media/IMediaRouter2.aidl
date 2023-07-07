@@ -26,9 +26,7 @@ import android.os.Bundle;
 oneway interface IMediaRouter2 {
     void notifyRouterRegistered(in List<MediaRoute2Info> currentRoutes,
             in RoutingSessionInfo currentSystemSessionInfo);
-    void notifyRoutesAdded(in List<MediaRoute2Info> routes);
-    void notifyRoutesRemoved(in List<MediaRoute2Info> routes);
-    void notifyRoutesChanged(in List<MediaRoute2Info> routes);
+    void notifyRoutesUpdated(in List<MediaRoute2Info> routes);
     void notifySessionCreated(int requestId, in @nullable RoutingSessionInfo sessionInfo);
     void notifySessionInfoChanged(in RoutingSessionInfo sessionInfo);
     void notifySessionReleased(in RoutingSessionInfo sessionInfo);

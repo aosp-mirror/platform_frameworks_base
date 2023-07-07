@@ -205,4 +205,18 @@ TEST(ConfigTest, ScreenIsHdr) {
   EXPECT_EQ(defaultConfig.diff(hdrConfig), ResTable_config::CONFIG_COLOR_MODE);
 }
 
+TEST(ConfigTest, GrammaticalGender) {
+  ResTable_config defaultConfig = {};
+  ResTable_config masculine = {};
+  masculine.grammaticalInflection = ResTable_config::GRAMMATICAL_GENDER_MASCULINE;
+
+  EXPECT_EQ(defaultConfig.diff(masculine), ResTable_config::CONFIG_GRAMMATICAL_GENDER);
+
+  ResTable_config feminine = {};
+  feminine.grammaticalInflection = ResTable_config::GRAMMATICAL_GENDER_FEMININE;
+
+  EXPECT_EQ(defaultConfig.diff(feminine), ResTable_config::CONFIG_GRAMMATICAL_GENDER);
+  EXPECT_EQ(masculine.diff(feminine), ResTable_config::CONFIG_GRAMMATICAL_GENDER);
+}
+
 }  // namespace android.

@@ -293,7 +293,7 @@ class BlobMetadata {
                 // Check if the caller is allowed access as per the access mode specified
                 // by the committer.
                 if (committer.blobAccessMode.isAccessAllowedForCaller(mContext,
-                        callingPackage, committer.packageName)) {
+                        callingPackage, callingUid, committer.uid)) {
                     return true;
                 }
             }
@@ -316,7 +316,7 @@ class BlobMetadata {
                 // Check if the caller is allowed access as per the access mode specified
                 // by the committer.
                 if (committer.blobAccessMode.isAccessAllowedForCaller(mContext,
-                        callingPackage, committer.packageName)) {
+                        callingPackage, callingUid, committer.uid)) {
                     return true;
                 }
             }

@@ -44,6 +44,8 @@ public class PendingInsetsController implements WindowInsetsController {
     private ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
             = new ArrayList<>();
     private int mCaptionInsetsHeight = 0;
+    private WindowInsetsAnimationControlListener mLoggingListener;
+    private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
 
     @Override
     public void show(int types) {
@@ -51,6 +53,7 @@ public class PendingInsetsController implements WindowInsetsController {
             mReplayedInsetsController.show(types);
         } else {
             mRequests.add(new ShowRequest(types));
+            mRequestedVisibleTypes |= types;
         }
     }
 
@@ -60,6 +63,7 @@ public class PendingInsetsController implements WindowInsetsController {
             mReplayedInsetsController.hide(types);
         } else {
             mRequests.add(new HideRequest(types));
+            mRequestedVisibleTypes &= ~types;
         }
     }
 
@@ -121,11 +125,11 @@ public class PendingInsetsController implements WindowInsetsController {
     }
 
     @Override
-    public boolean isRequestedVisible(int type) {
-
-        // Method is only used once real insets controller is attached, so no need to traverse
-        // requests here.
-        return InsetsState.getDefaultVisibility(type);
+    public @InsetsType int getRequestedVisibleTypes() {
+        if (mReplayedInsetsController != null) {
+            return mReplayedInsetsController.getRequestedVisibleTypes();
+        }
+        return mRequestedVisibleTypes;
     }
 
     @Override
@@ -176,6 +180,9 @@ public class PendingInsetsController implements WindowInsetsController {
             controller.addOnControllableInsetsChangedListener(
                     mControllableInsetsChangedListeners.get(i));
         }
+        if (mLoggingListener != null) {
+            controller.setSystemDrivenInsetsAnimationLoggingListener(mLoggingListener);
+        }
 
         // Reset all state so it doesn't get applied twice just in case
         mRequests.clear();
@@ -184,7 +191,8 @@ public class PendingInsetsController implements WindowInsetsController {
         mAppearance = 0;
         mAppearanceMask = 0;
         mAnimationsDisabled = false;
-
+        mLoggingListener = null;
+        mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
         // After replaying, we forward everything directly to the replayed instance.
         mReplayedInsetsController = controller;
     }
@@ -195,6 +203,16 @@ public class PendingInsetsController implements WindowInsetsController {
     @VisibleForTesting
     public void detach() {
         mReplayedInsetsController = null;
+    }
+
+    @Override
+    public void setSystemDrivenInsetsAnimationLoggingListener(
+            @Nullable WindowInsetsAnimationControlListener listener) {
+        if (mReplayedInsetsController != null) {
+            mReplayedInsetsController.setSystemDrivenInsetsAnimationLoggingListener(listener);
+        } else {
+            mLoggingListener = listener;
+        }
     }
 
     @Override

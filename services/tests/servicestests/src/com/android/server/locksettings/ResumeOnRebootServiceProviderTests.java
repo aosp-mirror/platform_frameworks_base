@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.platform.test.annotations.Presubmit;
 import android.service.resumeonreboot.ResumeOnRebootService;
 
 import androidx.test.filters.SmallTest;
@@ -46,6 +47,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class ResumeOnRebootServiceProviderTests {
 

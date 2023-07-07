@@ -23,7 +23,6 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.hardware.input.InputManagerInternal;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -35,6 +34,7 @@ import android.view.selectiontoolbar.ShowInfo;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
+import com.android.server.input.InputManagerInternal;
 
 final class SelectionToolbarManagerServiceImpl extends
         AbstractPerUserSystemService<SelectionToolbarManagerServiceImpl,

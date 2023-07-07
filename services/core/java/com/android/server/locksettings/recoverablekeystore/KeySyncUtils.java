@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
+import com.android.security.SecureBox;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -88,7 +90,7 @@ public class KeySyncUtils {
     ) throws NoSuchAlgorithmException, InvalidKeyException {
         byte[] encryptedRecoveryKey = locallyEncryptRecoveryKey(lockScreenHash, recoveryKey);
         byte[] thmKfHash = calculateThmKfHash(lockScreenHash);
-        byte[] header = concat(THM_ENCRYPTED_RECOVERY_KEY_HEADER, vaultParams);
+        byte[] header = ArrayUtils.concat(THM_ENCRYPTED_RECOVERY_KEY_HEADER, vaultParams);
         return SecureBox.encrypt(
                 /*theirPublicKey=*/ publicKey,
                 /*sharedSecret=*/ thmKfHash,
@@ -171,7 +173,7 @@ public class KeySyncUtils {
                 // Note that Android P devices do not have the API to provide the optional metadata,
                 // so all the keys with non-empty metadata stored on Android Q+ devices cannot be
                 // recovered on Android P devices.
-                header = concat(ENCRYPTED_APPLICATION_KEY_HEADER, metadata);
+                header = ArrayUtils.concat(ENCRYPTED_APPLICATION_KEY_HEADER, metadata);
             }
             byte[] encryptedKey = SecureBox.encrypt(
                     /*theirPublicKey=*/ null,
@@ -218,8 +220,8 @@ public class KeySyncUtils {
         return SecureBox.encrypt(
                 publicKey,
                 /*sharedSecret=*/ null,
-                /*header=*/ concat(RECOVERY_CLAIM_HEADER, vaultParams, challenge),
-                /*payload=*/ concat(thmKfHash, keyClaimant));
+                /*header=*/ ArrayUtils.concat(RECOVERY_CLAIM_HEADER, vaultParams, challenge),
+                /*payload=*/ ArrayUtils.concat(thmKfHash, keyClaimant));
     }
 
     /**
@@ -240,7 +242,7 @@ public class KeySyncUtils {
         return SecureBox.decrypt(
                 /*ourPrivateKey=*/ null,
                 /*sharedSecret=*/ keyClaimant,
-                /*header=*/ concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*header=*/ ArrayUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
                 /*encryptedPayload=*/ encryptedResponse);
     }
 
@@ -280,7 +282,7 @@ public class KeySyncUtils {
         if (applicationKeyMetadata == null) {
             header = ENCRYPTED_APPLICATION_KEY_HEADER;
         } else {
-            header = concat(ENCRYPTED_APPLICATION_KEY_HEADER, applicationKeyMetadata);
+            header = ArrayUtils.concat(ENCRYPTED_APPLICATION_KEY_HEADER, applicationKeyMetadata);
         }
         return SecureBox.decrypt(
                 /*ourPrivateKey=*/ null,
@@ -331,26 +333,6 @@ public class KeySyncUtils {
                 .putInt(maxAttempts)
                 .put(vaultHandle)
                 .array();
-    }
-
-    /**
-     * Returns the concatenation of all the given {@code arrays}.
-     */
-    @VisibleForTesting
-    static byte[] concat(byte[]... arrays) {
-        int length = 0;
-        for (byte[] array : arrays) {
-            length += array.length;
-        }
-
-        byte[] concatenated = new byte[length];
-        int pos = 0;
-        for (byte[] array : arrays) {
-            System.arraycopy(array, /*srcPos=*/ 0, concatenated, pos, array.length);
-            pos += array.length;
-        }
-
-        return concatenated;
     }
 
     // Statics only

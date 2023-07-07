@@ -219,7 +219,7 @@ static void AssertTranslations(CommandTestFixture *ctf, std::string file_name,
   ASSERT_NE(table, nullptr);
   table->string_pool.Sort();
 
-  const std::vector<std::unique_ptr<StringPool::Entry>>& pool_strings =
+  const std::vector<std::unique_ptr<android::StringPool::Entry>>& pool_strings =
       table->string_pool.strings();
 
   // The actual / expected vectors have the same size
@@ -316,7 +316,7 @@ TEST_F(CompilerTest, RelativePathTest) {
 
   std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(apk_path, &diag);
   ResourceTable* resource_table = apk.get()->GetResourceTable();
-  const std::vector<std::unique_ptr<StringPool::Entry>>& pool_strings =
+  const std::vector<std::unique_ptr<android::StringPool::Entry>>& pool_strings =
       resource_table->string_pool.strings();
 
   ASSERT_EQ(pool_strings.size(), 2);

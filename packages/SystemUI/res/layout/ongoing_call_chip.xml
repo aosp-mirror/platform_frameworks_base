@@ -23,7 +23,7 @@
     android:layout_gravity="center_vertical|start"
     android:layout_marginStart="5dp"
 >
-    <LinearLayout
+    <com.android.systemui.statusbar.phone.ongoingcall.OngoingCallBackgroundContainer
         android:id="@+id/ongoing_call_chip_background"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/ongoing_appops_chip_height"
@@ -55,5 +55,5 @@
             android:textColor="?android:attr/colorPrimary"
         />
 
-    </LinearLayout>
+    </com.android.systemui.statusbar.phone.ongoingcall.OngoingCallBackgroundContainer>
 </FrameLayout>

@@ -23,6 +23,7 @@ package {
 
 cc_defaults {
     name: "idmap2_defaults",
+    cpp_std: "gnu++2b",
     tidy: true,
     tidy_checks: [
         "modernize-*",
@@ -31,6 +32,7 @@ cc_defaults {
         "android-*",
         "misc-*",
         "readability-*",
+        "-readability-identifier-length",
     ],
     tidy_checks_as_errors: [
         "modernize-*",
@@ -41,6 +43,7 @@ cc_defaults {
         "-modernize-return-braced-init-list",
         "-modernize-use-default-member-init",
         "-modernize-use-equals-default",
+        "-modernize-use-emplace",
         "-modernize-use-nodiscard",
         "-modernize-use-override",
         "-modernize-use-trailing-return-type",
@@ -54,7 +57,6 @@ cc_defaults {
         "-readability-convert-member-functions-to-static",
         "-readability-duplicate-include",
         "-readability-else-after-return",
-        "-readability-identifier-length",
         "-readability-named-parameter",
         "-readability-redundant-access-specifiers",
         "-readability-uppercase-literal-suffix",
@@ -69,6 +71,7 @@ cc_library {
     host_supported: true,
     srcs: [
         "libidmap2/**/*.cpp",
+        "self_targeting/*.cpp",
     ],
     export_include_dirs: ["include"],
     target: {
@@ -115,6 +118,7 @@ cc_library {
         "libidmap2/proto/*.proto",
     ],
     host_supported: true,
+    tidy: false,
     proto: {
         type: "lite",
         export_proto_headers: true,
@@ -219,6 +223,7 @@ cc_test {
     },
     data: [
         "tests/data/**/*.apk",
+        "tests/data/**/*.png",
     ],
     compile_multilib: "first",
     test_options: {

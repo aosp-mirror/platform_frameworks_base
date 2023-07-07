@@ -24,6 +24,7 @@ package {
 }
 
 toolSources = [
+    "cmd/ApkInfo.cpp",
     "cmd/Command.cpp",
     "cmd/Compile.cpp",
     "cmd/Convert.cpp",
@@ -36,6 +37,7 @@ toolSources = [
 
 cc_defaults {
     name: "aapt2_defaults",
+    cpp_std: "gnu++2b",
     cflags: [
         "-Wall",
         "-Werror",
@@ -48,6 +50,7 @@ cc_defaults {
     ],
     target: {
         windows: {
+            compile_multilib: "64",
             enabled: true,
             cflags: ["-Wno-maybe-uninitialized"],
             ldflags: ["-static"],
@@ -103,6 +106,7 @@ cc_library_host_static {
         "format/Container.cpp",
         "format/binary/BinaryResourceParser.cpp",
         "format/binary/ResChunkPullParser.cpp",
+        "format/binary/ResEntryWriter.cpp",
         "format/binary/TableFlattener.cpp",
         "format/binary/XmlFlattener.cpp",
         "format/proto/ProtoDeserialize.cpp",
@@ -128,14 +132,13 @@ cc_library_host_static {
         "optimize/MultiApkGenerator.cpp",
         "optimize/ResourceDeduper.cpp",
         "optimize/ResourceFilter.cpp",
-        "optimize/ResourcePathShortener.cpp",
+        "optimize/Obfuscator.cpp",
         "optimize/VersionCollapser.cpp",
         "process/SymbolTable.cpp",
         "split/TableSplitter.cpp",
         "text/Printer.cpp",
         "text/Unicode.cpp",
         "text/Utf8Iterator.cpp",
-        "util/BigBuffer.cpp",
         "util/Files.cpp",
         "util/Util.cpp",
         "Debug.cpp",
@@ -152,14 +155,15 @@ cc_library_host_static {
         "ResourceUtils.cpp",
         "ResourceValues.cpp",
         "SdkConstants.cpp",
-        "StringPool.cpp",
         "trace/TraceBuffer.cpp",
         "xml/XmlActionExecutor.cpp",
         "xml/XmlDom.cpp",
         "xml/XmlPullParser.cpp",
         "xml/XmlUtil.cpp",
+        "ApkInfo.proto",
         "Configuration.proto",
         "Resources.proto",
+        "ResourceMetadata.proto",
         "ResourcesInternal.proto",
         "ValueTransformer.cpp",
     ],
@@ -190,6 +194,7 @@ cc_test_host {
         "integration-tests/CompileTest/**/*",
         "integration-tests/CommandTests/**/*",
         "integration-tests/ConvertTest/**/*",
+        "integration-tests/DumpTest/**/*",
     ],
 }
 
@@ -216,6 +221,7 @@ genrule {
     srcs: [
         "Configuration.proto",
         "ResourcesInternal.proto",
+        "ResourceMetadata.proto",
         "Resources.proto",
     ],
     out: ["aapt2-protos.zip"],

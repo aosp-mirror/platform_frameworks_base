@@ -21,12 +21,13 @@ import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
-import android.media.AudioSystem;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
+
+import java.util.function.Consumer;
 
 /**
  * Class to handle device rotation events for AudioService, and forward device rotation
@@ -53,11 +54,15 @@ class RotationHelper {
 
     private static AudioDisplayListener sDisplayListener;
     private static FoldStateListener sFoldStateListener;
+    /** callback to send rotation updates to AudioSystem */
+    private static Consumer<Integer> sRotationCallback;
+    /** callback to send folded state updates to AudioSystem */
+    private static Consumer<Boolean> sFoldStateCallback;
 
     private static final Object sRotationLock = new Object();
     private static final Object sFoldStateLock = new Object();
-    private static int sDeviceRotation = Surface.ROTATION_0; // R/W synchronized on sRotationLock
-    private static boolean sDeviceFold = true; // R/W synchronized on sFoldStateLock
+    private static Integer sRotation = null; // R/W synchronized on sRotationLock
+    private static Boolean sFoldState = null; // R/W synchronized on sFoldStateLock
 
     private static Context sContext;
     private static Handler sHandler;
@@ -67,13 +72,16 @@ class RotationHelper {
      * - sDisplayListener != null
      * - sContext != null
      */
-    static void init(Context context, Handler handler) {
+    static void init(Context context, Handler handler,
+            Consumer<Integer> rotationCallback, Consumer<Boolean> foldStateCallback) {
         if (context == null) {
             throw new IllegalArgumentException("Invalid null context");
         }
         sContext = context;
         sHandler = handler;
         sDisplayListener = new AudioDisplayListener();
+        sRotationCallback = rotationCallback;
+        sFoldStateCallback = foldStateCallback;
         enable();
     }
 
@@ -104,9 +112,9 @@ class RotationHelper {
         int newRotation = DisplayManagerGlobal.getInstance()
                 .getDisplayInfo(Display.DEFAULT_DISPLAY).rotation;
         synchronized(sRotationLock) {
-            if (newRotation != sDeviceRotation) {
-                sDeviceRotation = newRotation;
-                publishRotation(sDeviceRotation);
+            if (sRotation == null || sRotation != newRotation) {
+                sRotation = newRotation;
+                publishRotation(sRotation);
             }
         }
     }
@@ -115,36 +123,52 @@ class RotationHelper {
         if (DEBUG_ROTATION) {
             Log.i(TAG, "publishing device rotation =" + rotation + " (x90deg)");
         }
+        int rotationDegrees;
         switch (rotation) {
             case Surface.ROTATION_0:
-                AudioSystem.setParameters("rotation=0");
+                rotationDegrees = 0;
                 break;
             case Surface.ROTATION_90:
-                AudioSystem.setParameters("rotation=90");
+                rotationDegrees = 90;
                 break;
             case Surface.ROTATION_180:
-                AudioSystem.setParameters("rotation=180");
+                rotationDegrees = 180;
                 break;
             case Surface.ROTATION_270:
-                AudioSystem.setParameters("rotation=270");
+                rotationDegrees = 270;
                 break;
             default:
                 Log.e(TAG, "Unknown device rotation");
+                rotationDegrees = -1;
+        }
+        if (rotationDegrees != -1) {
+            sRotationCallback.accept(rotationDegrees);
         }
     }
 
     /**
      * publish the change of device folded state if any.
      */
-    static void updateFoldState(boolean newFolded) {
+    static void updateFoldState(boolean foldState) {
         synchronized (sFoldStateLock) {
-            if (sDeviceFold != newFolded) {
-                sDeviceFold = newFolded;
-                if (newFolded) {
-                    AudioSystem.setParameters("device_folded=on");
-                } else {
-                    AudioSystem.setParameters("device_folded=off");
-                }
+            if (sFoldState == null || sFoldState != foldState) {
+                sFoldState = foldState;
+                sFoldStateCallback.accept(foldState);
+            }
+        }
+    }
+
+    /**
+     *  forceUpdate is called when audioserver restarts.
+     */
+    static void forceUpdate() {
+        synchronized (sRotationLock) {
+            sRotation = null;
+        }
+        updateOrientation(); // We will get at least one orientation update now.
+        synchronized (sFoldStateLock) {
+            if (sFoldState  != null) {
+                sFoldStateCallback.accept(sFoldState);
             }
         }
     }

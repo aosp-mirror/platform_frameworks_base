@@ -59,6 +59,7 @@ static struct {
     jfieldID orientation;
     jfieldID relativeX;
     jfieldID relativeY;
+    jfieldID isResampled;
 } gPointerCoordsClassInfo;
 
 static struct {
@@ -82,7 +83,7 @@ static void android_view_MotionEvent_setNativePtr(JNIEnv* env, jobject eventObj,
             reinterpret_cast<jlong>(event));
 }
 
-jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent* event) {
+jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent& event) {
     jobject eventObj = env->CallStaticObjectMethod(gMotionEventClassInfo.clazz,
             gMotionEventClassInfo.obtain);
     if (env->ExceptionCheck() || !eventObj) {
@@ -98,7 +99,21 @@ jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent* ev
         android_view_MotionEvent_setNativePtr(env, eventObj, destEvent);
     }
 
-    destEvent->copyFrom(event, true);
+    destEvent->copyFrom(&event, true);
+    return eventObj;
+}
+
+jobject android_view_MotionEvent_obtainFromNative(JNIEnv* env, std::unique_ptr<MotionEvent> event) {
+    if (event == nullptr) {
+        return nullptr;
+    }
+    jobject eventObj =
+            env->CallStaticObjectMethod(gMotionEventClassInfo.clazz, gMotionEventClassInfo.obtain);
+    if (env->ExceptionCheck() || !eventObj) {
+        LOGE_EX(env);
+        LOG_ALWAYS_FATAL("An exception occurred while obtaining a Java motion event.");
+    }
+    android_view_MotionEvent_setNativePtr(env, eventObj, event.release());
     return eventObj;
 }
 
@@ -223,6 +238,8 @@ static void pointerCoordsToNative(JNIEnv* env, jobject pointerCoordsObj,
     outRawPointerCoords->setAxisValue(AMOTION_EVENT_AXIS_RELATIVE_Y,
                                       env->GetFloatField(pointerCoordsObj,
                                                          gPointerCoordsClassInfo.relativeY));
+    outRawPointerCoords->isResampled =
+            env->GetBooleanField(pointerCoordsObj, gPointerCoordsClassInfo.isResampled);
 
     BitSet64 bits =
             BitSet64(env->GetLongField(pointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits));
@@ -299,8 +316,9 @@ static void pointerPropertiesToNative(JNIEnv* env, jobject pointerPropertiesObj,
     outPointerProperties->clear();
     outPointerProperties->id = env->GetIntField(pointerPropertiesObj,
             gPointerPropertiesClassInfo.id);
-    outPointerProperties->toolType = env->GetIntField(pointerPropertiesObj,
+    const int32_t toolType = env->GetIntField(pointerPropertiesObj,
             gPointerPropertiesClassInfo.toolType);
+    outPointerProperties->toolType = static_cast<ToolType>(toolType);
 }
 
 static void pointerPropertiesFromNative(JNIEnv* env, const PointerProperties* pointerProperties,
@@ -308,7 +326,7 @@ static void pointerPropertiesFromNative(JNIEnv* env, const PointerProperties* po
     env->SetIntField(outPointerPropertiesObj, gPointerPropertiesClassInfo.id,
             pointerProperties->id);
     env->SetIntField(outPointerPropertiesObj, gPointerPropertiesClassInfo.toolType,
-            pointerProperties->toolType);
+            static_cast<int32_t>(pointerProperties->toolType));
 }
 
 
@@ -440,6 +458,11 @@ static void android_view_MotionEvent_nativeGetPointerCoords(JNIEnv* env, jclass 
         bits.clearBit(axis);
     }
     pointerCoordsFromNative(env, rawPointerCoords, bits, outPointerCoordsObj);
+
+    const bool isResampled = historyPos == HISTORY_CURRENT
+            ? event->isResampled(pointerIndex, event->getHistorySize())
+            : event->isResampled(pointerIndex, historyPos);
+    env->SetBooleanField(outPointerCoordsObj, gPointerCoordsClassInfo.isResampled, isResampled);
 }
 
 static void android_view_MotionEvent_nativeGetPointerProperties(JNIEnv* env, jclass clazz,
@@ -493,7 +516,7 @@ static jstring android_view_MotionEvent_nativeAxisToString(JNIEnv* env, jclass c
 static jint android_view_MotionEvent_nativeAxisFromString(JNIEnv* env, jclass clazz,
         jstring label) {
     ScopedUtfChars axisLabel(env, label);
-    return static_cast<jint>(MotionEvent::getAxisFromLabel(axisLabel.c_str()));
+    return static_cast<jint>(MotionEvent::getAxisFromLabel(axisLabel.c_str()).value_or(-1));
 }
 
 // ---------------- @FastNative ----------------------------------
@@ -513,7 +536,7 @@ static jint android_view_MotionEvent_nativeGetToolType(JNIEnv* env, jclass clazz
     if (!validatePointerIndex(env, pointerIndex, *event)) {
         return -1;
     }
-    return event->getToolType(pointerIndex);
+    return static_cast<jint>(event->getToolType(pointerIndex));
 }
 
 static jlong android_view_MotionEvent_nativeGetEventTimeNanos(JNIEnv* env, jclass clazz,
@@ -763,7 +786,12 @@ static void android_view_MotionEvent_nativeScale(jlong nativePtr, jfloat scale) 
 
 static jint android_view_MotionEvent_nativeGetSurfaceRotation(jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    return jint(event->getSurfaceRotation());
+    auto rotation = event->getSurfaceRotation();
+    if (rotation) {
+        return static_cast<jint>(rotation.value());
+    } else {
+        return -1;
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -876,6 +904,7 @@ int register_android_view_MotionEvent(JNIEnv* env) {
     gPointerCoordsClassInfo.orientation = GetFieldIDOrDie(env, clazz, "orientation", "F");
     gPointerCoordsClassInfo.relativeX = GetFieldIDOrDie(env, clazz, "relativeX", "F");
     gPointerCoordsClassInfo.relativeY = GetFieldIDOrDie(env, clazz, "relativeY", "F");
+    gPointerCoordsClassInfo.isResampled = GetFieldIDOrDie(env, clazz, "isResampled", "Z");
 
     clazz = FindClassOrDie(env, "android/view/MotionEvent$PointerProperties");
 

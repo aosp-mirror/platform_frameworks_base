@@ -55,7 +55,7 @@ public class DeviceIconUtil {
                 new Device(
                     AudioDeviceInfo.TYPE_DOCK,
                     MediaRoute2Info.TYPE_DOCK,
-                    R.drawable.ic_headphone),
+                    R.drawable.ic_dock_device),
                 new Device(
                     AudioDeviceInfo.TYPE_HDMI,
                     MediaRoute2Info.TYPE_HDMI,

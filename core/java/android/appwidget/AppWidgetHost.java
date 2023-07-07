@@ -70,7 +70,7 @@ public class AppWidgetHost {
     private final Handler mHandler;
     private final int mHostId;
     private final Callbacks mCallbacks;
-    private final SparseArray<AppWidgetHostView> mViews = new SparseArray<>();
+    private final SparseArray<AppWidgetHostListener> mListeners = new SparseArray<>();
     private InteractionHandler mInteractionHandler;
 
     static class Callbacks extends IAppWidgetHost.Stub {
@@ -171,6 +171,15 @@ public class AppWidgetHost {
         this(context, hostId, null, context.getMainLooper());
     }
 
+    @Nullable
+    private AppWidgetHostListener getListener(final int appWidgetId) {
+        AppWidgetHostListener tempListener = null;
+        synchronized (mListeners) {
+            tempListener = mListeners.get(appWidgetId);
+        }
+        return tempListener;
+    }
+
     /**
      * @hide
      */
@@ -210,11 +219,11 @@ public class AppWidgetHost {
             return;
         }
         final int[] idsToUpdate;
-        synchronized (mViews) {
-            int N = mViews.size();
-            idsToUpdate = new int[N];
-            for (int i = 0; i < N; i++) {
-                idsToUpdate[i] = mViews.keyAt(i);
+        synchronized (mListeners) {
+            int n = mListeners.size();
+            idsToUpdate = new int[n];
+            for (int i = 0; i < n; i++) {
+                idsToUpdate[i] = mListeners.keyAt(i);
             }
         }
         List<PendingHostUpdate> updates;
@@ -320,6 +329,22 @@ public class AppWidgetHost {
     }
 
     /**
+     * Set the visibiity of all widgets associated with this host to hidden
+     *
+     * @hide
+     */
+    public void setAppWidgetHidden() {
+        if (sService == null) {
+            return;
+        }
+        try {
+            sService.setAppWidgetHidden(mContextOpPackageName, mHostId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("System server dead?", e);
+        }
+    }
+
+    /**
      * Set the host's interaction handler.
      *
      * @hide
@@ -349,14 +374,11 @@ public class AppWidgetHost {
         if (sService == null) {
             return;
         }
-        synchronized (mViews) {
-            mViews.remove(appWidgetId);
-            try {
-                sService.deleteAppWidgetId(mContextOpPackageName, appWidgetId);
-            }
-            catch (RemoteException e) {
-                throw new RuntimeException("system server dead?", e);
-            }
+        removeListener(appWidgetId);
+        try {
+            sService.deleteAppWidgetId(mContextOpPackageName, appWidgetId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
         }
     }
 
@@ -412,16 +434,7 @@ public class AppWidgetHost {
         AppWidgetHostView view = onCreateView(context, appWidgetId, appWidget);
         view.setInteractionHandler(mInteractionHandler);
         view.setAppWidget(appWidgetId, appWidget);
-        synchronized (mViews) {
-            mViews.put(appWidgetId, view);
-        }
-        RemoteViews views;
-        try {
-            views = sService.getAppWidgetViews(mContextOpPackageName, appWidgetId);
-        } catch (RemoteException e) {
-            throw new RuntimeException("system server dead?", e);
-        }
-        view.updateAppWidget(views);
+        setListener(appWidgetId, view);
 
         return view;
     }
@@ -439,24 +452,52 @@ public class AppWidgetHost {
      * Called when the AppWidget provider for a AppWidget has been upgraded to a new apk.
      */
     protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
-        AppWidgetHostView v;
+        AppWidgetHostListener v = getListener(appWidgetId);
 
         // Convert complex to dp -- we are getting the AppWidgetProviderInfo from the
         // AppWidgetService, which doesn't have our context, hence we need to do the
         // conversion here.
         appWidget.updateDimensions(mDisplayMetrics);
-        synchronized (mViews) {
-            v = mViews.get(appWidgetId);
-        }
         if (v != null) {
-            v.resetAppWidget(appWidget);
+            v.onUpdateProviderInfo(appWidget);
         }
     }
 
+    /**
+     * This interface specifies the actions to be performed on the app widget based on the calls
+     * from the service
+     *
+     * @hide
+     */
+    public interface AppWidgetHostListener {
+
+        /**
+         * This function is called when the service want to reset the app widget provider info
+         * @param appWidget The new app widget provider info
+         *
+         * @hide
+         */
+        void onUpdateProviderInfo(@Nullable AppWidgetProviderInfo appWidget);
+
+        /**
+         * This function is called when the RemoteViews of the app widget is updated
+         * @param views The new RemoteViews to be set for the app widget
+         *
+         * @hide
+         */
+        void updateAppWidget(@Nullable RemoteViews views);
+
+        /**
+         * This function is called when the view ID is changed for the app widget
+         * @param viewId The new view ID to be be set for the widget
+         *
+         * @hide
+         */
+        void onViewDataChanged(int viewId);
+    }
+
     void dispatchOnAppWidgetRemoved(int appWidgetId) {
-        synchronized (mViews) {
-            mViews.remove(appWidgetId);
-        }
+        removeListener(appWidgetId);
         onAppWidgetRemoved(appWidgetId);
     }
 
@@ -476,23 +517,49 @@ public class AppWidgetHost {
         // Does nothing
     }
 
-    void updateAppWidgetView(int appWidgetId, RemoteViews views) {
-        AppWidgetHostView v;
-        synchronized (mViews) {
-            v = mViews.get(appWidgetId);
+    /**
+     * Create an AppWidgetHostListener for the given widget.
+     * The AppWidgetHost retains a pointer to the newly-created listener.
+     * @param appWidgetId The ID of the app widget for which to add the listener
+     * @param listener The listener interface that deals with actions towards the widget view
+     * @hide
+     */
+    public void setListener(int appWidgetId, @NonNull AppWidgetHostListener listener) {
+        synchronized (mListeners) {
+            mListeners.put(appWidgetId, listener);
         }
+        RemoteViews views = null;
+        try {
+            views = sService.getAppWidgetViews(mContextOpPackageName, appWidgetId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+        listener.updateAppWidget(views);
+    }
+
+    /**
+     * Delete the listener for the given widget
+     * @param appWidgetId The ID of the app widget for which the listener is to be deleted
+
+     * @hide
+     */
+    public void removeListener(int appWidgetId) {
+        synchronized (mListeners) {
+            mListeners.remove(appWidgetId);
+        }
+    }
+
+    void updateAppWidgetView(int appWidgetId, RemoteViews views) {
+        AppWidgetHostListener v = getListener(appWidgetId);
         if (v != null) {
             v.updateAppWidget(views);
         }
     }
 
     void viewDataChanged(int appWidgetId, int viewId) {
-        AppWidgetHostView v;
-        synchronized (mViews) {
-            v = mViews.get(appWidgetId);
-        }
+        AppWidgetHostListener v = getListener(appWidgetId);
         if (v != null) {
-            v.viewDataChanged(viewId);
+            v.onViewDataChanged(viewId);
         }
     }
 
@@ -500,8 +567,8 @@ public class AppWidgetHost {
      * Clear the list of Views that have been created by this AppWidgetHost.
      */
     protected void clearViews() {
-        synchronized (mViews) {
-            mViews.clear();
+        synchronized (mListeners) {
+            mListeners.clear();
         }
     }
 }

@@ -1293,7 +1293,8 @@ public class CallLog {
                 USER_MISSED_NO_VIBRATE,
                 USER_MISSED_CALL_SCREENING_SERVICE_SILENCED,
                 USER_MISSED_CALL_FILTERS_TIMEOUT,
-                USER_MISSED_NEVER_RANG
+                USER_MISSED_NEVER_RANG,
+                USER_MISSED_NOT_RUNNING
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface MissedReason {}
@@ -1389,6 +1390,13 @@ public class CallLog {
          * @hide
          */
         public static final long USER_MISSED_NEVER_RANG = 1 << 23;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE}, set this bit when
+         * the user receiving the call is not running (i.e. work profile paused).
+         * @hide
+         */
+        public static final long USER_MISSED_NOT_RUNNING = 1 << 24;
 
         /**
          * Where the {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE},

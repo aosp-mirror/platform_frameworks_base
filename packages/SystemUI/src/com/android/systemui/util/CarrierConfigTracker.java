@@ -67,6 +67,8 @@ public class CarrierConfigTracker
     private boolean mDefaultCarrierProvisionsWifiMergedNetworks;
     private boolean mDefaultShowOperatorNameConfigLoaded;
     private boolean mDefaultShowOperatorNameConfig;
+    private boolean mDefaultAlwaysShowPrimarySignalBarInOpportunisticNetworkConfigLoaded;
+    private boolean mDefaultAlwaysShowPrimarySignalBarInOpportunisticNetworkConfig;
 
     @Inject
     public CarrierConfigTracker(
@@ -204,6 +206,22 @@ public class CarrierConfigTracker
         }
 
         return mDefaultShowOperatorNameConfig;
+    }
+
+    /**
+     * Returns KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN value for
+     * the default carrier config.
+     */
+    public boolean getAlwaysShowPrimarySignalBarInOpportunisticNetworkDefault() {
+        if (!mDefaultAlwaysShowPrimarySignalBarInOpportunisticNetworkConfigLoaded) {
+            mDefaultAlwaysShowPrimarySignalBarInOpportunisticNetworkConfig = CarrierConfigManager
+                    .getDefaultConfig().getBoolean(CarrierConfigManager
+                            .KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN
+                    );
+            mDefaultAlwaysShowPrimarySignalBarInOpportunisticNetworkConfigLoaded = true;
+        }
+
+        return mDefaultAlwaysShowPrimarySignalBarInOpportunisticNetworkConfig;
     }
 
     /**

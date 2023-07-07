@@ -31,6 +31,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -245,10 +246,13 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             intent.putExtra(PrintManager.EXTRA_PRINT_JOB, printJob);
             intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
 
+            ActivityOptions activityOptions = ActivityOptions.makeBasic()
+                    .setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
             IntentSender intentSender = PendingIntent.getActivityAsUser(
                     mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT
-                    | PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                    null, new UserHandle(mUserId)) .getIntentSender();
+                            | PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    activityOptions.toBundle(), new UserHandle(mUserId)).getIntentSender();
 
             Bundle result = new Bundle();
             result.putParcelable(PrintManager.EXTRA_PRINT_JOB, printJob);

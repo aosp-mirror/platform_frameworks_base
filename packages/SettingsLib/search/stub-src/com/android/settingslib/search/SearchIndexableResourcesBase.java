@@ -24,11 +24,11 @@ import java.util.Collection;
 public class SearchIndexableResourcesBase implements SearchIndexableResources {
 
     @Override
-    public Collection<Class> getProviderValues() {
+    public Collection<SearchIndexableData> getProviderValues() {
         throw new RuntimeException("STUB!");
     }
 
-    public void addIndex(Class indexClass) {
+    public void addIndex(SearchIndexableData indexClass) {
         throw new RuntimeException("STUB!");
     }
 }

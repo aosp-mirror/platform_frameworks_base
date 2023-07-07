@@ -301,6 +301,35 @@ public class BackupManagerServiceRoboTest {
         verify(mUserOneService, never()).initializeTransports(transports, /* observer */ null);
     }
 
+    /**
+     * Test that the backup services throws a {@link SecurityException} if the caller does not have
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testIsUserReadyForBackup_withoutPermission_throwsSecurityException() {
+        BackupManagerService backupManagerService = createService();
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ false);
+
+        expectThrows(
+                SecurityException.class,
+                () -> backupManagerService.isUserReadyForBackup(mUserOneId));
+    }
+
+    /**
+     * Test that the backup service does not throw a {@link SecurityException} if the caller has
+     * INTERACT_ACROSS_USERS_FULL permission and passes a different user id.
+     */
+    @Test
+    public void testIsUserReadyForBackup_withPermission_callsMethodForUser() {
+        BackupManagerService backupManagerService = createService();
+        registerUser(backupManagerService, UserHandle.USER_SYSTEM, mUserSystemService);
+        registerUser(backupManagerService, mUserOneId, mUserOneService);
+        setCallerAndGrantInteractUserPermission(mUserTwoId, /* shouldGrantPermission */ true);
+
+        assertThat(backupManagerService.isUserReadyForBackup(mUserOneId)).isTrue();
+    }
+
     /** Test that the backup service routes methods correctly to the user that requests it. */
     @Test
     public void testClearBackupData_onRegisteredUser_callsMethodForUser() throws Exception {
@@ -1555,11 +1584,7 @@ public class BackupManagerServiceRoboTest {
     @Test
     public void testConstructor_withNullContext_throws() throws Exception {
         expectThrows(
-                NullPointerException.class,
-                () ->
-                        new BackupManagerService(
-                                /* context */ null,
-                                new SparseArray<>()));
+                NullPointerException.class, () -> new BackupManagerService(/* context */ null));
     }
 
     /** Test that the constructor does not create {@link UserBackupManagerService} instances. */
@@ -1585,18 +1610,6 @@ public class BackupManagerServiceRoboTest {
         lifecycle.onStart();
 
         verify(lifecycle).publishService(Context.BACKUP_SERVICE, backupManagerService);
-    }
-
-    /** testOnUnlockUser_forwards */
-    @Test
-    public void testOnUnlockUser_forwards() {
-        BackupManagerService backupManagerService = mock(BackupManagerService.class);
-        BackupManagerService.Lifecycle lifecycle =
-                new BackupManagerService.Lifecycle(mContext, backupManagerService);
-
-        lifecycle.onUserUnlocking(new TargetUser(new UserInfo(UserHandle.USER_SYSTEM, null, 0)));
-
-        verify(backupManagerService).onUnlockUser(UserHandle.USER_SYSTEM);
     }
 
     /** testOnStopUser_forwards */

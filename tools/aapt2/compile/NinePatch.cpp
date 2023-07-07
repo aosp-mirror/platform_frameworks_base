@@ -218,11 +218,9 @@ inline static uint32_t get_alpha(uint32_t color) {
 
 static bool PopulateBounds(const std::vector<Range>& padding,
                            const std::vector<Range>& layout_bounds,
-                           const std::vector<Range>& stretch_regions,
-                           const int32_t length, int32_t* padding_start,
-                           int32_t* padding_end, int32_t* layout_start,
-                           int32_t* layout_end, const StringPiece& edge_name,
-                           std::string* out_err) {
+                           const std::vector<Range>& stretch_regions, const int32_t length,
+                           int32_t* padding_start, int32_t* padding_end, int32_t* layout_start,
+                           int32_t* layout_end, StringPiece edge_name, std::string* out_err) {
   if (padding.size() > 1) {
     std::stringstream err_stream;
     err_stream << "too many padding sections on " << edge_name << " border";

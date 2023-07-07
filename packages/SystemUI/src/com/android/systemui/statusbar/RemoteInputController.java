@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.RemoteInput;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -52,10 +54,21 @@ public class RemoteInputController {
     private final Delegate mDelegate;
     private final RemoteInputUriController mRemoteInputUriController;
 
+    private final RemoteInputControllerLogger mLogger;
+
+    /**
+     * RemoteInput Active's last emitted value. It's added for debugging purpose to directly see
+     * its last emitted value. As RemoteInputController holds weak reference, isRemoteInputActive
+     * in dump may not reflect the last emitted value of  Active.
+     */
+    @Nullable private Boolean mLastAppliedRemoteInputActive = null;
+
     public RemoteInputController(Delegate delegate,
-            RemoteInputUriController remoteInputUriController) {
+            RemoteInputUriController remoteInputUriController,
+            RemoteInputControllerLogger logger) {
         mDelegate = delegate;
         mRemoteInputUriController = remoteInputUriController;
+        mLogger = logger;
     }
 
     /**
@@ -117,6 +130,9 @@ public class RemoteInputController {
         boolean isActive = isRemoteInputActive(entry);
         boolean found = pruneWeakThenRemoveAndContains(
                 entry /* contains */, null /* remove */, token /* removeToken */);
+        mLogger.logAddRemoteInput(entry.getKey()/* entryKey */,
+                isActive /* isRemoteInputAlreadyActive */,
+                found /* isRemoteInputFound */);
         if (!found) {
             mOpen.add(new Pair<>(new WeakReference<>(entry), token));
         }
@@ -137,9 +153,22 @@ public class RemoteInputController {
      */
     public void removeRemoteInput(NotificationEntry entry, Object token) {
         Objects.requireNonNull(entry);
-        if (entry.mRemoteEditImeVisible && entry.mRemoteEditImeAnimatingAway) return;
+        if (entry.mRemoteEditImeVisible && entry.mRemoteEditImeAnimatingAway) {
+            mLogger.logRemoveRemoteInput(
+                    entry.getKey() /* entryKey*/,
+                    true /* remoteEditImeVisible */,
+                    true /* remoteEditImeAnimatingAway */);
+            return;
+        }
         // If the view is being removed, this may be called even though we're not active
-        if (!isRemoteInputActive(entry)) return;
+        boolean remoteInputActive = isRemoteInputActive(entry);
+        mLogger.logRemoveRemoteInput(
+                entry.getKey() /* entryKey*/,
+                entry.mRemoteEditImeVisible /* remoteEditImeVisible */,
+                entry.mRemoteEditImeAnimatingAway /* remoteEditImeAnimatingAway */,
+                remoteInputActive /* isRemoteInputActive */);
+
+        if (!remoteInputActive) return;
 
         pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */, token);
 
@@ -196,6 +225,7 @@ public class RemoteInputController {
         for (int i = 0; i < N; i++) {
             mCallbacks.get(i).onRemoteInputActive(remoteInputActive);
         }
+        mLastAppliedRemoteInputActive = remoteInputActive;
     }
 
     /**
@@ -302,6 +332,8 @@ public class RemoteInputController {
 
     /** dump debug info; called by {@link NotificationRemoteInputManager} */
     public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.print("mLastAppliedRemoteInputActive: ");
+        pw.println((Object) mLastAppliedRemoteInputActive);
         pw.print("isRemoteInputActive: ");
         pw.println(isRemoteInputActive()); // Note that this prunes the mOpen list, printed later.
         pw.println("mOpen: " + mOpen.size());

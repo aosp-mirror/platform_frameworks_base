@@ -252,13 +252,16 @@ public class PipMediaController {
     // It can be removed when min_sdk of the app is set to 31 or greater.
     @SuppressLint("NewApi")
     private List<RemoteAction> getMediaActions() {
-        if (mMediaController == null || mMediaController.getPlaybackState() == null) {
+        // Cache the PlaybackState since it's a Binder call.
+        final PlaybackState playbackState;
+        if (mMediaController == null
+                || (playbackState = mMediaController.getPlaybackState()) == null) {
             return Collections.emptyList();
         }
 
         ArrayList<RemoteAction> mediaActions = new ArrayList<>();
-        boolean isPlaying = mMediaController.getPlaybackState().isActive();
-        long actions = mMediaController.getPlaybackState().getActions();
+        boolean isPlaying = playbackState.isActive();
+        long actions = playbackState.getActions();
 
         // Prev action
         mPrevAction.setEnabled((actions & PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0);

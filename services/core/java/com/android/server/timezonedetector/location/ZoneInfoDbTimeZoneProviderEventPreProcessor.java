@@ -16,10 +16,13 @@
 
 package com.android.server.timezonedetector.location;
 
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_FAILED;
+
 import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.infoLog;
 
 import android.annotation.NonNull;
 import android.service.timezone.TimeZoneProviderEvent;
+import android.service.timezone.TimeZoneProviderStatus;
 
 import com.android.i18n.timezone.ZoneInfoDb;
 
@@ -53,7 +56,12 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessor
         // enables immediate failover to a secondary provider, one that might provide valid IDs for
         // the same location, which should provide better behavior than just ignoring the event.
         if (hasInvalidZones(event)) {
-            return TimeZoneProviderEvent.createUncertainEvent(event.getCreationElapsedMillis());
+            TimeZoneProviderStatus providerStatus = new TimeZoneProviderStatus.Builder(
+                    event.getTimeZoneProviderStatus())
+                    .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_FAILED)
+                    .build();
+            return TimeZoneProviderEvent.createUncertainEvent(
+                    event.getCreationElapsedMillis(), providerStatus);
         }
 
         return event;

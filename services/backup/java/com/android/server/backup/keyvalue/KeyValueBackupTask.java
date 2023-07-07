@@ -68,6 +68,7 @@ import com.android.server.backup.transport.BackupTransportClient;
 import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.utils.BackupEligibilityRules;
+import com.android.server.backup.utils.BackupManagerMonitorUtils;
 
 import libcore.io.IoUtils;
 
@@ -697,6 +698,8 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
         try {
             extractAgentData(mCurrentPackage);
+            BackupManagerMonitorUtils.monitorAgentLoggingResults(
+                    mReporter.getMonitor(), mCurrentPackage, mAgent);
             int status = sendDataToTransport(mCurrentPackage);
             cleanUpAgentForTransportStatus(status);
         } catch (AgentException | TaskException e) {
@@ -738,7 +741,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             agent =
                     mBackupManagerService.bindToAgentSynchronous(
                             packageInfo.applicationInfo, BACKUP_MODE_INCREMENTAL,
-                            mBackupEligibilityRules.getOperationType());
+                            mBackupEligibilityRules.getBackupDestination());
             if (agent == null) {
                 mReporter.onAgentError(packageName);
                 throw AgentException.transitory();
@@ -1243,7 +1246,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             delay = 0;
         }
         KeyValueBackupJob.schedule(mBackupManagerService.getUserId(),
-                mBackupManagerService.getContext(), delay, mBackupManagerService.getConstants());
+                mBackupManagerService.getContext(), delay, mBackupManagerService);
 
         for (String packageName : mOriginalQueue) {
             mBackupManagerService.dataChangedImpl(packageName);

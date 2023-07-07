@@ -149,11 +149,13 @@ public final class AccessibilityStatsLogUtils {
      *
      * @param mode The activated magnification mode.
      * @param duration The duration in milliseconds during the magnification is activated.
+     * @param scale The last magnification scale for the activation
      */
-    public static void logMagnificationUsageState(int mode, long duration) {
+    public static void logMagnificationUsageState(int mode, long duration, float scale) {
         FrameworkStatsLog.write(FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED,
                 convertToLoggingMagnificationMode(mode),
-                duration);
+                duration,
+                convertToLoggingMagnificationScale(scale));
     }
 
     /**
@@ -165,6 +167,29 @@ public final class AccessibilityStatsLogUtils {
     public static void logMagnificationModeWithImeOn(int mode) {
         FrameworkStatsLog.write(FrameworkStatsLog.MAGNIFICATION_MODE_WITH_IME_ON_REPORTED,
                 convertToLoggingMagnificationMode(mode));
+    }
+
+    /**
+     * Logs the duration for the window magnifier's following typing focus session.
+     *
+     * @param duration The duration of a triple-tap-and-hold activation session.
+     */
+    public static void logMagnificationFollowTypingFocusSession(long duration) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.MAGNIFICATION_FOLLOW_TYPING_FOCUS_ACTIVATED_SESSION_REPORTED,
+                duration);
+    }
+
+    /**
+     * Logs the duration for the magnification session which is activated by the triple tap and
+     * hold gesture.
+     *
+     * @param duration The duration of a triple-tap-and-hold activation session.
+     */
+    public static void logMagnificationTripleTapAndHoldSession(long duration) {
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.MAGNIFICATION_TRIPLE_TAP_AND_HOLD_ACTIVATED_SESSION_REPORTED,
+                duration);
     }
 
     /**
@@ -230,5 +255,13 @@ public final class AccessibilityStatsLogUtils {
             default:
                 return MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_UNKNOWN_MODE;
         }
+    }
+
+    private static int convertToLoggingMagnificationScale(float scale) {
+        // per b/269366674, we make every 10% a bucket for both privacy and readability concern.
+        // For example
+        // 1. both 2.30f(230%) and 2.36f(236%) would return 230 as bucket id.
+        // 2. bucket id 370 means scale range in [370%, 379%]
+        return ((int) (scale * 10)) * 10;
     }
 }

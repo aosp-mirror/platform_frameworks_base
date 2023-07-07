@@ -3143,6 +3143,128 @@ public class Paint {
         return result;
     }
 
+
+    /**
+     * Measure the advance of each character within a run of text and also return the cursor
+     * position within the run.
+     *
+     * @see #getRunAdvance(char[], int, int, int, int, boolean, int) for more details.
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the start index of the range to measure, inclusive
+     * @param end the end index of the range to measure, exclusive
+     * @param contextStart the start index of the shaping context, inclusive
+     * @param contextEnd the end index of the shaping context, exclusive
+     * @param isRtl whether the run is in RTL direction
+     * @param offset index of caret position
+     * @param advances the array that receives the computed character advances
+     * @param advancesIndex the start index from which the advances array is filled
+     * @return width measurement between start and offset
+     * @throws IndexOutOfBoundsException if a) contextStart or contextEnd is out of array's range
+     * or contextStart is larger than contextEnd,
+     * b) start or end is not within the range [contextStart, contextEnd), or start is larger than
+     * end,
+     * c) offset is not within the range [start, end),
+     * d) advances.length - advanceIndex is smaller than the length of the run, which equals to
+     * end - start.
+     *
+     */
+    public float getRunCharacterAdvance(@NonNull char[] text, int start, int end, int contextStart,
+            int contextEnd, boolean isRtl, int offset,
+            @Nullable float[] advances, int advancesIndex) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if (contextStart < 0 || contextEnd > text.length) {
+            throw new IndexOutOfBoundsException("Invalid Context Range: " + contextStart + ", "
+                    + contextEnd + " must be in 0, " + text.length);
+        }
+
+        if (start < contextStart || contextEnd < end) {
+            throw new IndexOutOfBoundsException("Invalid start/end range: " + start + ", " + end
+                    + " must be in " + contextStart + ", " + contextEnd);
+        }
+
+        if (offset < start || end < offset) {
+            throw new IndexOutOfBoundsException("Invalid offset position: " + offset
+                    + " must be in " + start + ", " + end);
+        }
+
+        if (advances != null && advances.length < advancesIndex - start + end) {
+            throw new IndexOutOfBoundsException("Given array doesn't have enough space to receive "
+                    + "the result, advances.length: " + advances.length + " advanceIndex: "
+                    + advancesIndex + " needed space: " + (offset - start));
+        }
+
+        if (end == start) {
+            return 0.0f;
+        }
+
+        return nGetRunCharacterAdvance(mNativePaint, text, start, end, contextStart, contextEnd,
+                isRtl, offset, advances, advancesIndex);
+    }
+
+    /**
+     * @see #getRunCharacterAdvance(char[], int, int, int, int, boolean, int, float[], int)
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the shaping context
+     * @param isRtl whether the run is in RTL direction
+     * @param offset index of caret position
+     * @param advances the array that receives the computed character advances
+     * @param advancesIndex the start index from which the advances array is filled
+     * @return width measurement between start and offset
+     * @throws IndexOutOfBoundsException if a) contextStart or contextEnd is out of array's range
+     * or contextStart is larger than contextEnd,
+     * b) start or end is not within the range [contextStart, contextEnd), or end is larger than
+     * start,
+     * c) offset is not within the range [start, end),
+     * d) advances.length - advanceIndex is smaller than the run length, which equals to
+     * end - start.
+     */
+    public float getRunCharacterAdvance(@NonNull CharSequence text, int start, int end,
+            int contextStart, int contextEnd, boolean isRtl, int offset,
+            @Nullable float[] advances, int advancesIndex) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if (contextStart < 0 || contextEnd > text.length()) {
+            throw new IndexOutOfBoundsException("Invalid Context Range: " + contextStart + ", "
+                    + contextEnd + " must be in 0, " + text.length());
+        }
+
+        if (start < contextStart || contextEnd < end) {
+            throw new IndexOutOfBoundsException("Invalid start/end range: " + start + ", " + end
+                    + " must be in " + contextStart + ", " + contextEnd);
+        }
+
+        if (offset < start || end < offset) {
+            throw new IndexOutOfBoundsException("Invalid offset position: " + offset
+                    + " must be in " + start + ", " + end);
+        }
+
+        if (advances != null && advances.length < advancesIndex - start + end) {
+            throw new IndexOutOfBoundsException("Given array doesn't have enough space to receive "
+                    + "the result, advances.length: " + advances.length + " advanceIndex: "
+                    + advancesIndex + " needed space: " + (offset - start));
+        }
+
+        if (end == start) {
+            return 0.0f;
+        }
+
+        char[] buf = TemporaryBuffer.obtain(contextEnd - contextStart);
+        TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+        final float result = getRunCharacterAdvance(buf, start - contextStart, end - contextStart,
+                0, contextEnd - contextStart, isRtl, offset - contextStart,
+                advances, advancesIndex);
+        TemporaryBuffer.recycle(buf);
+        return result;
+    }
+
     /**
      * Get the character offset within the string whose position is closest to the specified
      * horizontal position.
@@ -3254,6 +3376,9 @@ public class Paint {
     private static native boolean nHasGlyph(long paintPtr, int bidiFlags, String string);
     private static native float nGetRunAdvance(long paintPtr, char[] text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, int offset);
+    private static native float nGetRunCharacterAdvance(long paintPtr, char[] text, int start,
+            int end, int contextStart, int contextEnd, boolean isRtl, int offset, float[] advances,
+            int advancesIndex);
     private static native int nGetOffsetForAdvance(long paintPtr, char[] text, int start, int end,
             int contextStart, int contextEnd, boolean isRtl, float advance);
     private static native void nGetFontMetricsIntForText(long paintPtr, char[] text,

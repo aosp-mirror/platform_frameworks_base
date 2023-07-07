@@ -20,13 +20,19 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.assertThrows;
 
+import android.compat.testing.PlatformCompatChangeRule;
 import android.graphics.Insets;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.contentcapture.ViewNode.ViewStructureImpl;
 
+import libcore.junit.util.compat.CoreCompatChangeRule.DisableCompatChanges;
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -39,6 +45,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ContentCaptureSessionTest {
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     private ContentCaptureSession mSession1 = new MyContentCaptureSession(111);
 
@@ -47,6 +55,7 @@ public class ContentCaptureSessionTest {
     @Mock
     private View mMockView;
 
+    @DisableCompatChanges({ContentCaptureSession.NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS})
     @Test
     public void testNewAutofillId_invalid() {
         assertThrows(NullPointerException.class, () -> mSession1.newAutofillId(null, 42L));
@@ -78,6 +87,8 @@ public class ContentCaptureSessionTest {
     public void testNotifyXXX_null() {
         assertThrows(NullPointerException.class, () -> mSession1.notifyViewAppeared(null));
         assertThrows(NullPointerException.class, () -> mSession1.notifyViewDisappeared(null));
+        assertThrows(NullPointerException.class,
+                () -> mSession1.notifyViewsAppeared(null));
         assertThrows(NullPointerException.class,
                 () -> mSession1.notifyViewTextChanged(null, "whatever"));
     }
@@ -115,8 +126,29 @@ public class ContentCaptureSessionTest {
                 () -> mSession1.notifyViewsDisappeared(new AutofillId(42, 108), new long[] {666}));
     }
 
+    @Test
+    public void testNotifyViewsDisappeared_noSendTreeEventBeforeU() {
+        MyContentCaptureSession session = new MyContentCaptureSession(121);
+        session.notifyViewsDisappeared(new AutofillId(42), new long[] {42});
+
+        assertThat(session.mInternalNotifyViewTreeEventStartedCount).isEqualTo(0);
+        assertThat(session.mInternalNotifyViewTreeEventFinishedCount).isEqualTo(0);
+    }
+
+    @EnableCompatChanges({ContentCaptureSession.NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS})
+    @Test
+    public void testNotifyViewsDisappeared_sendTreeEventSinceU() {
+        MyContentCaptureSession session = new MyContentCaptureSession(122);
+        session.notifyViewsDisappeared(new AutofillId(42), new long[] {42});
+
+        assertThat(session.mInternalNotifyViewTreeEventStartedCount).isEqualTo(1);
+        assertThat(session.mInternalNotifyViewTreeEventFinishedCount).isEqualTo(1);
+    }
+
     // Cannot use @Spy because we need to pass the session id on constructor
     private class MyContentCaptureSession extends ContentCaptureSession {
+        int mInternalNotifyViewTreeEventStartedCount = 0;
+        int mInternalNotifyViewTreeEventFinishedCount = 0;
 
         private MyContentCaptureSession(int id) {
             super(id);
@@ -148,9 +180,7 @@ public class ContentCaptureSessionTest {
         }
 
         @Override
-        void internalNotifyViewDisappeared(AutofillId id) {
-            throw new UnsupportedOperationException("should not have been called");
-        }
+        void internalNotifyViewDisappeared(AutofillId id) {}
 
         @Override
         void internalNotifyViewTextChanged(AutofillId id, CharSequence text) {
@@ -159,7 +189,11 @@ public class ContentCaptureSessionTest {
 
         @Override
         public void internalNotifyViewTreeEvent(boolean started) {
-            throw new UnsupportedOperationException("should not have been called");
+            if (started) {
+                mInternalNotifyViewTreeEventStartedCount += 1;
+            } else {
+                mInternalNotifyViewTreeEventFinishedCount += 1;
+            }
         }
 
         @Override

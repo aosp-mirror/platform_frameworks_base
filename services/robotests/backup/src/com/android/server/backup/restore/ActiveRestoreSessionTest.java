@@ -78,6 +78,7 @@ import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(
@@ -196,7 +197,7 @@ public class ActiveRestoreSessionTest {
         mShadowApplication.grantPermissions(android.Manifest.permission.BACKUP);
         TransportMock transportMock = setUpTransport(mTransport);
         when(transportMock.transport.getAvailableRestoreSets())
-                .thenReturn(new RestoreSet[] {mRestoreSet1, mRestoreSet2});
+                .thenReturn(Arrays.asList(mRestoreSet1, mRestoreSet2));
         IRestoreSession restoreSession = createActiveRestoreSession(PACKAGE_1, mTransport);
 
         int result = restoreSession.getAvailableRestoreSets(mObserver, mMonitor);
@@ -214,7 +215,8 @@ public class ActiveRestoreSessionTest {
     public void testGetAvailableRestoreSets_forEmptyRestoreSets() throws Exception {
         mShadowApplication.grantPermissions(android.Manifest.permission.BACKUP);
         TransportMock transportMock = setUpTransport(mTransport);
-        when(transportMock.transport.getAvailableRestoreSets()).thenReturn(new RestoreSet[0]);
+        when(transportMock.transport.getAvailableRestoreSets()).thenReturn(
+                Arrays.asList(new RestoreSet[0]));
         IRestoreSession restoreSession = createActiveRestoreSession(PACKAGE_1, mTransport);
 
         int result = restoreSession.getAvailableRestoreSets(mObserver, mMonitor);
@@ -593,7 +595,7 @@ public class ActiveRestoreSessionTest {
                 new ActiveRestoreSession(
                         mBackupManagerService, packageName, transport.transportName,
                         mBackupEligibilityRules);
-        restoreSession.setRestoreSets(restoreSets);
+        restoreSession.setRestoreSets(Arrays.asList(restoreSets));
         return restoreSession;
     }
 

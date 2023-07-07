@@ -57,6 +57,7 @@ import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupAndRestoreFeatureFlags;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.BackupUtils;
 import com.android.server.backup.OperationStorage;
@@ -168,11 +169,13 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     private final BackupEligibilityRules mBackupEligibilityRules;
 
     @VisibleForTesting
-    PerformUnifiedRestoreTask(UserBackupManagerService backupManagerService) {
+    PerformUnifiedRestoreTask(
+            UserBackupManagerService backupManagerService,
+            TransportConnection transportConnection) {
         mListener = null;
         mAgentTimeoutParameters = null;
         mOperationStorage = null;
-        mTransportConnection = null;
+        mTransportConnection = transportConnection;
         mTransportManager = null;
         mEphemeralOpToken = 0;
         mUserId = 0;
@@ -404,6 +407,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
             BackupTransportClient transport =
                     mTransportConnection.connectOrThrow("PerformUnifiedRestoreTask.startRestore()");
+
+            // If the requester of the restore has not passed in a monitor, we ask the transport
+            // for one.
+            if (mMonitor == null) {
+                mMonitor = transport.getBackupManagerMonitor();
+            }
 
             mStatus = transport.startRestore(mToken, packages);
             if (mStatus != BackupTransport.TRANSPORT_OK) {
@@ -668,8 +677,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // Good to go!  Set up and bind the agent...
         mAgent = backupManagerService.bindToAgentSynchronous(
                 mCurrentPackage.applicationInfo,
-                ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL,
-                mBackupEligibilityRules.getOperationType());
+                ApplicationThreadConstants.BACKUP_MODE_RESTORE,
+                mBackupEligibilityRules.getBackupDestination());
         if (mAgent == null) {
             Slog.w(TAG, "Can't find backup agent for " + packageName);
             mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
@@ -725,13 +734,18 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                             ParcelFileDescriptor.MODE_TRUNCATE);
 
             if (transport.getRestoreData(stage) != BackupTransport.TRANSPORT_OK) {
-                // Transport-level failure, so we wind everything up and
-                // terminate the restore operation.
+                // Transport-level failure. This failure could be specific to package currently in
+                // restore.
                 Slog.e(TAG, "Error getting restore data for " + packageName);
                 EventLog.writeEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE);
                 stage.close();
                 downloadFile.delete();
-                executeNextState(UnifiedRestoreState.FINAL);
+                UnifiedRestoreState nextState =
+                        BackupAndRestoreFeatureFlags
+                                .getUnifiedRestoreContinueAfterTransportFailureInKvRestore()
+                                ? UnifiedRestoreState.RUNNING_QUEUE
+                                : UnifiedRestoreState.FINAL;
+                executeNextState(nextState);
                 return;
             }
 
@@ -885,6 +899,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                             OpType.RESTORE_WAIT);
             mAgent.doRestoreFinished(mEphemeralOpToken,
                     backupManagerService.getBackupManagerBinder());
+
             // If we get this far, the callback or timeout will schedule the
             // next restore state, so we're done
         } catch (Exception e) {
@@ -1150,8 +1165,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         if (mIsSystemRestore && mPmAgent != null) {
             backupManagerService.setAncestralPackages(mPmAgent.getRestoredPackages());
             backupManagerService.setAncestralToken(mToken);
-            backupManagerService.setAncestralOperationType(
-                    mBackupEligibilityRules.getOperationType());
+            backupManagerService.setAncestralBackupDestination(
+                    mBackupEligibilityRules.getBackupDestination());
             backupManagerService.writeRestoreTokens();
         }
 
@@ -1305,6 +1320,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 EventLog.writeEvent(EventLogTags.RESTORE_PACKAGE,
                         mCurrentPackage.packageName, size);
 
+                // Ask the agent for logs after doRestoreFinished() has completed executing to allow
+                // it to finalize its logs.
+                BackupManagerMonitorUtils.monitorAgentLoggingResults(mMonitor, mCurrentPackage,
+                        mAgent);
+
                 // Just go back to running the restore queue
                 keyValueAgentCleanup();
 
@@ -1348,6 +1368,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
     }
 
+    @VisibleForTesting
     void executeNextState(UnifiedRestoreState nextState) {
         if (MORE_DEBUG) {
             Slog.i(TAG, " => executing next step on "
@@ -1357,6 +1378,26 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         Message msg = backupManagerService.getBackupHandler().obtainMessage(
                 MSG_BACKUP_RESTORE_STEP, this);
         backupManagerService.getBackupHandler().sendMessage(msg);
+    }
+
+    @VisibleForTesting
+    UnifiedRestoreState getCurrentUnifiedRestoreStateForTesting() {
+        return mState;
+    }
+
+    @VisibleForTesting
+    void setCurrentUnifiedRestoreStateForTesting(UnifiedRestoreState state) {
+        mState = state;
+    }
+
+    @VisibleForTesting
+    void setStateDirForTesting(File stateDir) {
+        mStateDir = stateDir;
+    }
+
+    @VisibleForTesting
+    void initiateOneRestoreForTesting(PackageInfo app, long appVersionCode) {
+        initiateOneRestore(app, appVersionCode);
     }
 
     // restore observer support

@@ -18,19 +18,20 @@ package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_BY_ADMIN;
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_SUCCESS;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
-import android.app.admin.DevicePolicyManager;
+import android.app.role.RoleManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -41,12 +42,12 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.inputmethod.InputMethodManagerInternal;
-import com.android.settingslib.RestrictedLockUtils;
 
 import libcore.util.EmptyArray;
 
@@ -78,7 +79,8 @@ public class AccessibilitySecurityPolicy {
             | AccessibilityEvent.TYPE_VIEW_SCROLLED
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
-            | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
+            | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY
+            | AccessibilityEvent.TYPE_VIEW_TARGETED_BY_SCROLL;
 
     /**
      * Methods that should find their way into separate modules, but are still in AMS
@@ -90,10 +92,17 @@ public class AccessibilitySecurityPolicy {
          */
         int getCurrentUserIdLocked();
         // TODO: Should include resolveProfileParentLocked, but that was already in SecurityPolicy
+
+        // TODO(b/255426725): temporary hack; see comment on A11YMS.mVisibleBgUserIds
+        /**
+         * Returns the {@link android.os.UserManager#getVisibleUsers() visible users}.
+         */
+        @Nullable SparseBooleanArray getVisibleUserIdsLocked();
     }
 
     private final Context mContext;
     private final PackageManager mPackageManager;
+    private final PackageManagerInternal mPackageManagerInternal;
     private final UserManager mUserManager;
     private final AppOpsManager mAppOpsManager;
     private final AccessibilityUserManager mAccessibilityUserManager;
@@ -111,10 +120,12 @@ public class AccessibilitySecurityPolicy {
      */
     public AccessibilitySecurityPolicy(PolicyWarningUIController policyWarningUIController,
             @NonNull Context context,
-            @NonNull AccessibilityUserManager a11yUserManager) {
+            @NonNull AccessibilityUserManager a11yUserManager,
+            @NonNull PackageManagerInternal packageManagerInternal) {
         mContext = context;
         mAccessibilityUserManager = a11yUserManager;
         mPackageManager = mContext.getPackageManager();
+        mPackageManagerInternal = packageManagerInternal;
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mPolicyWarningUIController = policyWarningUIController;
@@ -419,78 +430,12 @@ public class AccessibilitySecurityPolicy {
 
         // TODO(b/207697949, b/208872785): Add cts test for managed device.
         //  Use RestrictedLockUtilsInternal in AccessibilitySecurityPolicy
-        if (checkIfInputMethodDisallowed(
+        if (RestrictedLockUtilsInternal.checkIfInputMethodDisallowed(
                 mContext, inputMethodInfo.getPackageName(), callingUserId) != null) {
             return ENABLE_IME_FAIL_BY_ADMIN;
         }
 
         return ENABLE_IME_SUCCESS;
-    }
-
-    /**
-     * @return the UserHandle for a userId. Return null for USER_NULL
-     */
-    private static UserHandle getUserHandleOf(@UserIdInt int userId) {
-        if (userId == UserHandle.USER_NULL) {
-            return null;
-        } else {
-            return UserHandle.of(userId);
-        }
-    }
-
-    private static int getManagedProfileId(Context context, int userId) {
-        UserManager um = context.getSystemService(UserManager.class);
-        List<UserInfo> userProfiles = um.getProfiles(userId);
-        for (UserInfo uInfo : userProfiles) {
-            if (uInfo.id == userId) {
-                continue;
-            }
-            if (uInfo.isManagedProfile()) {
-                return uInfo.id;
-            }
-        }
-        return UserHandle.USER_NULL;
-    }
-
-    private static RestrictedLockUtils.EnforcedAdmin checkIfInputMethodDisallowed(Context context,
-            String packageName, int userId) {
-        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        if (dpm == null) {
-            return null;
-        }
-        RestrictedLockUtils.EnforcedAdmin admin =
-                RestrictedLockUtils.getProfileOrDeviceOwner(context, getUserHandleOf(userId));
-        boolean permitted = true;
-        if (admin != null) {
-            permitted = dpm.isInputMethodPermittedByAdmin(admin.component,
-                    packageName, userId);
-        }
-
-        boolean permittedByParentAdmin = true;
-        RestrictedLockUtils.EnforcedAdmin profileAdmin = null;
-        int managedProfileId = getManagedProfileId(context, userId);
-        if (managedProfileId != UserHandle.USER_NULL) {
-            profileAdmin = RestrictedLockUtils.getProfileOrDeviceOwner(
-                    context, getUserHandleOf(managedProfileId));
-            // If the device is an organization-owned device with a managed profile, the
-            // managedProfileId will be used instead of the affected userId. This is because
-            // isInputMethodPermittedByAdmin is called on the parent DPM instance, which will
-            // return results affecting the personal profile.
-            if (profileAdmin != null && dpm.isOrganizationOwnedDeviceWithManagedProfile()) {
-                DevicePolicyManager parentDpm = dpm.getParentProfileInstance(
-                        UserManager.get(context).getUserInfo(managedProfileId));
-                permittedByParentAdmin = parentDpm.isInputMethodPermittedByAdmin(
-                        profileAdmin.component, packageName, managedProfileId);
-            }
-        }
-        if (!permitted && !permittedByParentAdmin) {
-            return RestrictedLockUtils.EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
-        } else if (!permitted) {
-            return admin;
-        } else if (!permittedByParentAdmin) {
-            return profileAdmin;
-        }
-        return null;
     }
 
     /**
@@ -576,10 +521,8 @@ public class AccessibilitySecurityPolicy {
         try {
             // Since we treat calls from a profile as if made by its parent, using
             // MATCH_ANY_USER to query the uid of the given package name.
-            return uid == mPackageManager.getPackageUidAsUser(
-                    packageName, PackageManager.MATCH_ANY_USER, UserHandle.getUserId(uid));
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
+            return mPackageManagerInternal.isSameApp(packageName, PackageManager.MATCH_ANY_USER,
+                    uid, UserHandle.getUserId(uid));
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -696,7 +639,7 @@ public class AccessibilitySecurityPolicy {
         final ResolveInfo resolveInfo = service.getServiceInfo().getResolveInfo();
 
         if (resolveInfo == null) {
-            // For InteractionBridge and UiAutomation
+            // For InteractionBridge, UiAutomation, and Proxy.
             return true;
         }
 
@@ -730,6 +673,42 @@ public class AccessibilitySecurityPolicy {
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller does not hold permission "
                     + permission);
+        }
+    }
+
+    /**
+     * Throws a SecurityException if the caller has neither the MANAGE_ACCESSIBILITY permission nor
+     * the COMPANION_DEVICE_APP_STREAMING role.
+     */
+    public void checkForAccessibilityPermissionOrRole() {
+        final boolean canManageAccessibility =
+                mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+                        == PackageManager.PERMISSION_GRANTED;
+        if (canManageAccessibility) {
+            return;
+        }
+        final int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+            if (roleManager != null) {
+                final List<String> holders = roleManager.getRoleHoldersAsUser(
+                        DEVICE_PROFILE_APP_STREAMING, UserHandle.getUserHandleForUid(callingUid));
+                final String[] packageNames = mPackageManager.getPackagesForUid(callingUid);
+                if (packageNames != null) {
+                    for (String packageName : packageNames) {
+                        if (holders.contains(packageName)) {
+                            return;
+                        }
+                    }
+                }
+            }
+            throw new SecurityException(
+                    "Cannot register a proxy for a device without the "
+                            + "android.app.role.COMPANION_DEVICE_APP_STREAMING role or the"
+                            + " MANAGE_ACCESSIBILITY permission.");
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 

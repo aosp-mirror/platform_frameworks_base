@@ -23,14 +23,14 @@ import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
-import com.android.server.pm.pkg.component.ParsedPermission;
 import android.os.Build;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.pm.PackageManagerService;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.component.ParsedPermission;
 
 import libcore.util.EmptyArray;
 
@@ -103,6 +103,15 @@ public final class Permission {
     public Permission(@NonNull PermissionInfo permissionInfo, @PermissionType int type) {
         mPermissionInfo = permissionInfo;
         mType = type;
+    }
+
+    public Permission(@NonNull PermissionInfo permissionInfo, @PermissionType int type,
+            boolean reconciled, int uid, int[] gids, boolean gidsPerUser) {
+        this(permissionInfo, type);
+        mReconciled = reconciled;
+        mUid = uid;
+        mGids = gids;
+        mGidsPerUser = gidsPerUser;
     }
 
     @NonNull
@@ -214,10 +223,6 @@ public final class Permission {
                 == PermissionInfo.PROTECTION_DANGEROUS;
     }
 
-    public boolean isInstalled() {
-        return (mPermissionInfo.flags & PermissionInfo.FLAG_INSTALLED) != 0;
-    }
-
     public boolean isRemoved() {
         return (mPermissionInfo.flags & PermissionInfo.FLAG_REMOVED) != 0;
     }
@@ -322,6 +327,10 @@ public final class Permission {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_COMPANION) != 0;
     }
 
+    public boolean isModule() {
+        return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_MODULE) != 0;
+    }
+
     public boolean isRetailDemo() {
         return (mPermissionInfo.protectionLevel & PermissionInfo.PROTECTION_FLAG_RETAIL_DEMO) != 0;
     }
@@ -399,31 +408,30 @@ public final class Permission {
         if (!permission.mReconciled) {
             return false;
         }
-        final AndroidPackage currentPackage = packageManagerInternal.getPackage(
+        var currentPackageState = packageManagerInternal.getPackageStateInternal(
                 permission.mPermissionInfo.packageName);
-        if (currentPackage == null) {
+        if (currentPackageState == null) {
             return false;
         }
-        return currentPackage.isSystem();
+        return currentPackageState.isSystem();
     }
 
     @NonNull
     public static Permission createOrUpdate(@Nullable Permission permission,
-            @NonNull PermissionInfo permissionInfo, @NonNull AndroidPackage pkg,
+            @NonNull PermissionInfo permissionInfo, @NonNull PackageState packageState,
             @NonNull Collection<Permission> permissionTrees, boolean isOverridingSystemPermission) {
         // Allow system apps to redefine non-system permissions
         boolean ownerChanged = false;
         if (permission != null && !Objects.equals(permission.mPermissionInfo.packageName,
                 permissionInfo.packageName)) {
-            if (pkg.isSystem()) {
+            if (packageState.isSystem()) {
                 if (permission.mType == Permission.TYPE_CONFIG && !permission.mReconciled) {
                     // It's a built-in permission and no owner, take ownership now
-                    permissionInfo.flags |= PermissionInfo.FLAG_INSTALLED;
                     permission.mPermissionInfo = permissionInfo;
                     permission.mReconciled = true;
-                    permission.mUid = pkg.getUid();
+                    permission.mUid = packageState.getAppId();
                 } else if (!isOverridingSystemPermission) {
-                    Slog.w(TAG, "New decl " + pkg + " of permission  "
+                    Slog.w(TAG, "New decl " + packageState + " of permission  "
                             + permissionInfo.name + " is system; overriding "
                             + permission.mPermissionInfo.packageName);
                     ownerChanged = true;
@@ -446,10 +454,9 @@ public final class Permission {
                 final Permission tree = findPermissionTree(permissionTrees, permissionInfo.name);
                 if (tree == null
                         || tree.mPermissionInfo.packageName.equals(permissionInfo.packageName)) {
-                    permissionInfo.flags |= PermissionInfo.FLAG_INSTALLED;
                     permission.mPermissionInfo = permissionInfo;
                     permission.mReconciled = true;
-                    permission.mUid = pkg.getUid();
+                    permission.mUid = packageState.getAppId();
                     if (PackageManagerService.DEBUG_PACKAGE_SCANNING) {
                         if (r == null) {
                             r = new StringBuilder(256);
@@ -557,6 +564,8 @@ public final class Permission {
             permissionInfo.packageName = mPermissionInfo.packageName;
             permissionInfo.nonLocalizedLabel = mPermissionInfo.name;
         }
+        // A Permission in PermissionRegistry is always installed.
+        permissionInfo.flags |= PermissionInfo.FLAG_INSTALLED;
         if (targetSdkVersion >= Build.VERSION_CODES.O) {
             permissionInfo.protectionLevel = mPermissionInfo.protectionLevel;
         } else {

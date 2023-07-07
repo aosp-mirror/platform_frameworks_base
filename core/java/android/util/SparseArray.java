@@ -71,7 +71,7 @@ public class SparseArray<E> implements Cloneable {
      * Creates a new SparseArray containing no mappings.
      */
     public SparseArray() {
-        this(10);
+        this(0);
     }
 
     /**
@@ -525,9 +525,10 @@ public class SparseArray<E> implements Cloneable {
             return false;
         }
 
+        // size() calls above took care about gc() compaction.
         for (int index = 0; index < size; index++) {
-            int key = keyAt(index);
-            if (!Objects.equals(valueAt(index), other.get(key))) {
+            if (mKeys[index] != other.mKeys[index]
+                    || !Objects.equals(mValues[index], other.mValues[index])) {
                 return false;
             }
         }
@@ -545,10 +546,11 @@ public class SparseArray<E> implements Cloneable {
     public int contentHashCode() {
         int hash = 0;
         int size = size();
+        // size() call above took care about gc() compaction.
         for (int index = 0; index < size; index++) {
-            int key = keyAt(index);
-            E value = valueAt(index);
-            hash = 31 * hash + Objects.hashCode(key);
+            int key = mKeys[index];
+            E value = (E) mValues[index];
+            hash = 31 * hash + key;
             hash = 31 * hash + Objects.hashCode(value);
         }
         return hash;

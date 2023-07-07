@@ -29,7 +29,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.annotation.Nullable;
 import android.platform.test.annotations.Presubmit;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayAddress;
@@ -37,6 +36,7 @@ import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
 
 import org.junit.After;

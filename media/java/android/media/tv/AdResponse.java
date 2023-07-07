@@ -25,7 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * An advertisement request which can be sent to TV interactive App service to inform AD status.
+ * An advertisement response which can be sent to TV interactive App service to inform AD status.
  */
 public final class AdResponse implements Parcelable {
     /** @hide */
@@ -34,7 +34,8 @@ public final class AdResponse implements Parcelable {
             RESPONSE_TYPE_PLAYING,
             RESPONSE_TYPE_FINISHED,
             RESPONSE_TYPE_STOPPED,
-            RESPONSE_TYPE_ERROR
+            RESPONSE_TYPE_ERROR,
+            RESPONSE_TYPE_BUFFERING
     })
     public @interface ResponseType {}
 
@@ -42,6 +43,7 @@ public final class AdResponse implements Parcelable {
     public static final int RESPONSE_TYPE_FINISHED = 2;
     public static final int RESPONSE_TYPE_STOPPED = 3;
     public static final int RESPONSE_TYPE_ERROR = 4;
+    public static final int RESPONSE_TYPE_BUFFERING = 5;
 
     public static final @NonNull Parcelable.Creator<AdResponse> CREATOR =
             new Parcelable.Creator<AdResponse>() {

@@ -25,7 +25,7 @@ namespace text {
 
 class Utf8Iterator {
  public:
-  explicit Utf8Iterator(const android::StringPiece& str);
+  explicit Utf8Iterator(android::StringPiece str);
 
   bool HasNext() const;
 

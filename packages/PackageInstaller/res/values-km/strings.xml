@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"បាន​ដំឡើង​កម្មវិធី។"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"តើ​អ្នក​ចង់​ដំឡើង​កម្មវិធី​នេះ​ដែរទេ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"តើអ្នកចង់ដំឡើងកំណែ​កម្មវិធីនេះដែរទេ?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"ដំឡើងកំណែកម្មវិធីនេះពី <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> ឬ?\n\nកម្មវិធីនេះជាធម្មតាទទួលបានកំណែថ្មីពី <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>។ តាមរយៈការដំឡើងកំណែពីប្រភពផ្សេង អ្នកអាចនឹងទទួលបានកំណែថ្មីនាពេលអនាគតពីប្រភពណាក៏បាននៅលើទូរសព្ទរបស់អ្នក។ មុខងារ​កម្មវិធីអាចមានការផ្លាស់ប្ដូរ។"</string>
     <string name="install_failed" msgid="5777824004474125469">"មិន​បាន​ដំឡើង​កម្មវិធីទេ។"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"កញ្ចប់ត្រូវបានទប់ស្កាត់​មិន​ឱ្យ​ដំឡើង។"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"កម្មវិធីមិនបានដំឡើងទេ ដោយសារកញ្ចប់កម្មវិធីមិនត្រូវគ្នាជាមួយកញ្ចប់ដែលមានស្រាប់។"</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"អ្នកប្រើប្រាស់​នេះ​មិនអាច​ដំឡើងកម្មវិធីមិនស្គាល់​​បាន​ទេ"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"មិន​អនុញ្ញាត​ឱ្យអ្នក​ប្រើ​ប្រាស់នេះ​ដំឡើងកម្មវិធីទេ"</string>
     <string name="ok" msgid="7871959885003339302">"យល់ព្រម"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"មិនអីទេ ដំឡើង​កំណែ​ចុះ"</string>
     <string name="manage_applications" msgid="5400164782453975580">"គ្រប់គ្រង​កម្មវិធី"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"អស់​ទំហំផ្ទុក"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"មិន​អាច​ដំឡើង <xliff:g id="APP_NAME">%1$s</xliff:g> បានទេ។ សូម​បង្កើន​ទំហំ​ផ្ទុក​ទំនេរ​មួយចំនួន​ រួច​ព្យាយាម​ម្ដង​ទៀត។"</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ជំនួសកម្មវិធីនេះដោយប្រើកំណែរោងចក្រ? ទិន្នន័យទាំងអស់នឹងត្រូវបានលុប។"</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ជំនួសកម្មវិធីនេះដោយប្រើកំណែរោងចក្រ? ទិន្នន័យទាំងអស់នឹងត្រូវបានលុប។ សកម្មភាព​នេះប៉ះពាល់ដល់អ្នកប្រើប្រាស់ទាំងអស់​របស់ឧបករណ៍នេះ រួម​ទាំងអ្នកប្រើប្រាស់ដែលមានកម្រង​ព័ត៌មាន​ការងារ​ផងដែរ។"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"រក្សាទុក​ទិន្នន័យ​កម្មវិធីទំហំ <xliff:g id="SIZE">%1$s</xliff:g>។"</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"តើអ្នកចង់លុបកម្មវិធីនេះដែរឬទេ?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"តើ​អ្នក​ចង់​លុប​កម្មវិធី​នេះ​ដែរឬទេ? ក្លូន <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ក៏នឹងត្រូវបានលុបផងដែរ។"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"កំពុង​ដំណើរការ​ការលុប"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ការលុប​ដែល​បរាជ័យ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"កំពុង​លុប…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"កំពុងលុប <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"បាន​បញ្ចប់​ការ​លុប។"</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"បានលុប <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"បានលុបក្លូន <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"មិន​អាច​លុប​បានទេ។"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"មិនអាចលុប <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> បានទេ។"</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"កំពុងលុបក្លូន <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"មិនអាច​លុប​កម្មវិធី​អ្នកគ្រប់គ្រង​ឧបករណ៍​ដែល​កំពុង​ដំណើការ​បានទេ"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"មិនអាច​លុប​កម្មវិធី​អ្នកគ្រប់គ្រង​ឧបករណ៍​ដែល​កំពុង​ដំណើការ​សម្រាប់ <xliff:g id="USERNAME">%1$s</xliff:g> បានទេ"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"កម្មវិធីនេះតម្រូវឱ្យ​មានសម្រាប់អ្នកប្រើប្រាស់ ឬកម្រង​ព័ត៌មានមួយចំនួន ហើយត្រូវបានលុបសម្រាប់អ្នកប្រើប្រាស់ផ្សេងទៀត"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"មិនស្គាល់"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"ដើម្បីសុវត្ថិភាពរបស់អ្នក បច្ចុប្បន្នទូរទស្សន៍របស់អ្នកមិនត្រូវបានអនុញ្ញាតឱ្យដំឡើងកម្មវិធីដែលមិនស្គាល់ពីប្រភពនេះទេ។ អ្នកអាច​ប្ដូរវាបាន​នៅក្នុងការ​កំណត់។"</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"ដើម្បីសុវត្ថិភាពរបស់អ្នក បច្ចុប្បន្នទូរទស្សន៍របស់អ្នកមិនត្រូវបានអនុញ្ញាតឱ្យដំឡើងកម្មវិធីដែលមិនស្គាល់ពីប្រភពនេះទេ។ អ្នកអាច​ប្ដូរវាបាន​នៅក្នុងការ​កំណត់។"</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"ដើម្បីសុវត្ថិភាពរបស់អ្នក បច្ចុប្បន្ននាឡិការបស់អ្នកមិនត្រូវបានអនុញ្ញាតឱ្យដំឡើងកម្មវិធីដែលមិនស្គាល់ពីប្រភពនេះទេ។ អ្នកអាច​ផ្លាស់ប្ដូរវាបាន​នៅក្នុងការ​កំណត់។"</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"ដើម្បីសុវត្ថិភាពរបស់អ្នក បច្ចុប្បន្នទូរសព្ទរបស់អ្នកមិនត្រូវបានអនុញ្ញាតឱ្យដំឡើងកម្មវិធីដែលមិនស្គាល់ពីប្រភពនេះទេ។ អ្នកអាច​ប្ដូរវាបាន​នៅក្នុងការ​កំណត់។"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ទូរសព្ទ និងទិន្នន័យផ្ទាល់ខ្លួនរបស់អ្នកកាន់តែងាយនឹងរងគ្រោះពីការវាយប្រហារពីកម្មវិធីដែលមិនស្គាល់។ ប្រសិនបើដំឡើងកម្មវិធីនេះ អ្នកយល់ព្រមថា អ្នកទទួលខុសត្រូវលើការខូចខាតទាំងឡាយមកលើទូរសព្ទរបស់អ្នក ឬការបាត់បង់ទិន្នន័យ ដែលអាចបណ្ដាលមកពីការប្រើប្រាស់កម្មវិធីនេះ។"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ថេប្លេត និងទិន្នន័យផ្ទាល់ខ្លួនរបស់អ្នកងាយនឹងរងគ្រោះពីការវាយប្រហារពីកម្មវិធីដែលមិនស្គាល់។ ប្រសិនបើដំឡើងកម្មវិធីនេះ មានន័យថាអ្នកទទួលខុសត្រូវលើការខូចខាតទាំងឡាយចំពោះថេប្លេត ឬការបាត់បង់ទិន្នន័យរបស់អ្នក ដែលអាចបណ្ដាលមកពីការប្រើប្រាស់កម្មវិធីនេះ។"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ទូរទស្សន៍ និងទិន្នន័យផ្ទាល់ខ្លួនរបស់អ្នកងាយនឹងរងគ្រោះពីការវាយប្រហារពីកម្មវិធីដែលមិនស្គាល់។ ប្រសិនបើដំឡើងកម្មវិធីនេះ មានន័យថាអ្នកទទួលខុសត្រូវលើការខូចខាតទាំងឡាយចំពោះទូរទស្សន៍ ឬការបាត់បង់ទិន្នន័យរបស់អ្នក ដែលអាចបណ្ដាលមកពីការប្រើប្រាស់កម្មវិធីនេះ។"</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"ក្លូន <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"បន្ត"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ការកំណត់"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ការដំឡើង/ការលុបកម្មវិធីឧបករណ៍​ពាក់​"</string>

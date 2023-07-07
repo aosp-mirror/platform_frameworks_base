@@ -76,7 +76,7 @@ bool ContainerWriter::AddResTableEntry(const pb::ResourceTable& table) {
   coded_out.WriteLittleEndian32(kResTable);
 
   // Write the aligned size.
-  const ::google::protobuf::uint64 size = table.ByteSize();
+  const size_t size = table.ByteSizeLong();
   const int padding = CalculatePaddingForAlignment(size);
   coded_out.WriteLittleEndian64(size);
 
@@ -109,7 +109,7 @@ bool ContainerWriter::AddResFileEntry(const pb::internal::CompiledFile& file,
   coded_out.WriteLittleEndian32(kResFile);
 
   // Write the aligned size.
-  const ::google::protobuf::uint32 header_size = file.ByteSize();
+  const size_t header_size = file.ByteSizeLong();
   const int header_padding = CalculatePaddingForAlignment(header_size);
   const ::google::protobuf::uint64 data_size = in->TotalSize();
   const int data_padding = CalculatePaddingForAlignment(data_size);

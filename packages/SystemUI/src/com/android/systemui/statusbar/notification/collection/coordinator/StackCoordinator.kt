@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
@@ -32,11 +33,13 @@ import javax.inject.Inject
  */
 @CoordinatorScope
 class StackCoordinator @Inject internal constructor(
+    private val groupExpansionManagerImpl: GroupExpansionManagerImpl,
     private val notificationIconAreaController: NotificationIconAreaController
 ) : Coordinator {
 
     override fun attach(pipeline: NotifPipeline) {
         pipeline.addOnAfterRenderListListener(::onAfterRenderList)
+        groupExpansionManagerImpl.attach(pipeline)
     }
 
     fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =

@@ -23,6 +23,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.telephony.ims.ImsException;
 import android.telephony.ims.RcsContactUceCapability;
+import android.telephony.ims.SipDetails;
 import android.telephony.ims.stub.CapabilityExchangeEventListener;
 import android.util.Log;
 
@@ -83,7 +84,11 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
     /**
      * Receives the status of changes in the publishing connection from ims service
      * and deliver this callback to the framework.
+     *
+     * @deprecated Replaced by {@link #onPublishUpdated(SipDetails)}, deprecated for
+     * sip information.
      */
+    @Deprecated
     public void onPublishUpdated(int reasonCode, @NonNull String reasonPhrase,
             int reasonHeaderCause, @NonNull String reasonHeaderText) throws ImsException {
         ICapabilityExchangeEventListener listener = mListenerBinder;
@@ -91,8 +96,29 @@ public class CapabilityExchangeAidlWrapper implements CapabilityExchangeEventLis
             return;
         }
         try {
-            listener.onPublishUpdated(reasonCode, reasonPhrase,
-                    reasonHeaderCause, reasonHeaderText);
+            SipDetails details = new SipDetails.Builder(SipDetails.METHOD_PUBLISH)
+                    .setSipResponseCode(reasonCode, reasonPhrase)
+                    .setSipResponseReasonHeader(reasonHeaderCause, reasonHeaderText)
+                    .build();
+            listener.onPublishUpdated(details);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "onPublishUpdated exception: " + e);
+            throw new ImsException("Remote is not available",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * Receives the status of changes in the publishing connection from ims service
+     * and deliver this callback to the framework.
+     */
+    public void onPublishUpdated(@NonNull SipDetails details) throws ImsException {
+        ICapabilityExchangeEventListener listener = mListenerBinder;
+        if (listener == null) {
+            return;
+        }
+        try {
+            listener.onPublishUpdated(details);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "onPublishUpdated exception: " + e);
             throw new ImsException("Remote is not available",

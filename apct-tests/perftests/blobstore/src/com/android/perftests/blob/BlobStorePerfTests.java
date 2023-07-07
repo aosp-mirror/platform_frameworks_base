@@ -25,12 +25,12 @@ import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.PerfManualStatusReporter;
 import android.perftests.utils.TraceMarkParser;
 import android.perftests.utils.TraceMarkParser.TraceMarkSlice;
-import android.support.test.uiautomator.UiDevice;
 import android.util.DataUnit;
 
 import androidx.benchmark.macro.MacrobenchmarkScope;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.utils.blob.FakeBlobData;
 
@@ -257,7 +257,7 @@ public class BlobStorePerfTests {
         runShellCommand(String.format(
                 "cmd blob_store delete-blob --algo %s --digest %s --label %s --expiry %d --tag %s",
                 blobHandle.algorithm,
-                Base64.getEncoder().encode(blobHandle.digest),
+                Base64.getEncoder().encodeToString(blobHandle.digest),
                 blobHandle.label,
                 blobHandle.expiryTimeMillis,
                 blobHandle.tag));

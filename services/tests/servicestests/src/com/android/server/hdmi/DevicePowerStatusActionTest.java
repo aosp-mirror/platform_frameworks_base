@@ -19,7 +19,6 @@ package com.android.server.hdmi;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_TV;
-import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -32,7 +31,6 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -47,7 +45,6 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 /** Tests for {@link DevicePowerStatusAction} */
@@ -65,7 +62,6 @@ public class DevicePowerStatusActionTest {
     private FakePowerManagerWrapper mPowerManager;
 
     private TestLooper mTestLooper = new TestLooper();
-    private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPhysicalAddress;
 
     private DevicePowerStatusAction mDevicePowerStatusAction;
@@ -79,18 +75,11 @@ public class DevicePowerStatusActionTest {
 
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
-        mHdmiControlService = new HdmiControlService(mContextSpy, Collections.emptyList(),
-                new FakeAudioDeviceVolumeManagerWrapper()) {
-            @Override
-            AudioManager getAudioManager() {
-                return new AudioManager() {
-                    @Override
-                    public void setWiredDeviceConnectionState(
-                            int type, int state, String address, String name) {
-                        // Do nothing.
-                    }
-                };
-            }
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
+        mHdmiControlService = new HdmiControlService(mContextSpy,
+                Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()) {
 
             @Override
             boolean isPowerStandby() {
@@ -106,6 +95,7 @@ public class DevicePowerStatusActionTest {
         Looper looper = mTestLooper.getLooper();
         mHdmiControlService.setIoLooper(looper);
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(mContextSpy));
+        mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
@@ -117,11 +107,8 @@ public class DevicePowerStatusActionTest {
         mHdmiControlService.setPowerManager(mPowerManager);
         mPhysicalAddress = 0x2000;
         mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
-        mPlaybackDevice = new HdmiCecLocalDevicePlayback(
-                mHdmiControlService);
-        mPlaybackDevice.init();
-        mLocalDevices.add(mPlaybackDevice);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+        mPlaybackDevice = mHdmiControlService.playback();
         mDevicePowerStatusAction = DevicePowerStatusAction.create(mPlaybackDevice, ADDR_TV,
                 mCallbackMock);
         mTestLooper.dispatchAll();
@@ -213,7 +200,6 @@ public class DevicePowerStatusActionTest {
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mPlaybackDevice.addAndStartAction(mDevicePowerStatusAction);
         mTestLooper.dispatchAll();
 
@@ -238,7 +224,6 @@ public class DevicePowerStatusActionTest {
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         HdmiCecMessage reportPhysicalAddress = HdmiCecMessageBuilder
                 .buildReportPhysicalAddressCommand(ADDR_TV, 0x0000, HdmiDeviceInfo.DEVICE_TV);
         mNativeWrapper.onCecMessage(reportPhysicalAddress);
@@ -263,7 +248,6 @@ public class DevicePowerStatusActionTest {
         mHdmiControlService.getHdmiCecConfig().setIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_VERSION,
                 HdmiControlManager.HDMI_CEC_VERSION_2_0);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         HdmiCecMessage reportPhysicalAddress = HdmiCecMessageBuilder
                 .buildReportPhysicalAddressCommand(ADDR_TV, 0x0000, HdmiDeviceInfo.DEVICE_TV);
         mNativeWrapper.onCecMessage(reportPhysicalAddress);
@@ -293,6 +277,12 @@ public class DevicePowerStatusActionTest {
 
     @Test
     public void pendingActionDoesNotBlockSendingStandby() throws Exception {
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(
+                mPlaybackDevice.getDeviceInfo().getLogicalAddress(),
+                mPhysicalAddress);
+        assertThat(mPlaybackDevice.handleActiveSource(message))
+                .isEqualTo(Constants.HANDLED);
+
         mPlaybackDevice.addAndStartAction(mDevicePowerStatusAction);
         mTestLooper.dispatchAll();
         mNativeWrapper.clearResultMessages();

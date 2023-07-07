@@ -1,0 +1,17 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksVoiceInteractionTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "FrameworksVoiceInteractionTests"
+    }
+  ]
+}

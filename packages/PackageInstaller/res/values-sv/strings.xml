@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Appen har installerats."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vill du installera den här appen?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vill du uppdatera den här appen?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Vill du uppdatera den här appen från <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nAppen tar vanligtvis emot uppdateringar från <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Genom att uppdatera från en annan källa kan du komma att ta emot framtida uppdateringar från olika källor på telefonen. Appfunktioner kan förändras."</string>
     <string name="install_failed" msgid="5777824004474125469">"Appen har inte installerats."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketet har blockerats för installation."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Appen har inte installerats på grund av en konflikt mellan detta paket och ett befintligt paket."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Denna användare får inte installera okända appar"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Användaren har inte behörighet att installera appar"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Uppdatera ändå"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Hantera appar"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Slut på utrymme"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Det gick inte att avinstallera <xliff:g id="APP_NAME">%1$s</xliff:g>. Frigör minne och försök igen."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Vill du ersätta den här appen med den version som var installerad när enheten var ny? All information tas bort."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Vill du ersätta den här appen med den version som var installerad när enheten var ny? All information tas bort. Detta påverkar alla som använder enheten, även dem med jobbprofiler."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Behåll <xliff:g id="SIZE">%1$s</xliff:g> appdata."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Vill du radera den här appen?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Vill du avinstallera den här appen? Klonen av <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> raderas också."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Avinstallationer som pågår"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Avinstallationer som misslyckats"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Avinstallerar …"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> avinstalleras …"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Avinstallationen har slutförts."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> har avinstallerats"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Klonen <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> har raderats"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Det gick inte att avinstallera."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Det gick inte att avinstallera <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Raderar klonen av <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> …"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Det går inte att avinstallera den aktiva appen för enhetsadministratör"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Det går inte att avinstallera den aktiva appen för enhetsadministratör för <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Den här appen är obligatorisk för vissa användare och profiler och har avinstallerats för andra"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Okänd"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Av säkerhetsskäl får okända appar från den här källan inte installeras på surfplattan. Du kan ändra det här i inställningarna."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Av säkerhetsskäl får okända appar från den här källan inte installeras på tv:n. Du kan ändra det här i inställningarna."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Av säkerhetsskäl får okända appar från den här källan inte installeras på klockan. Du kan ändra det här i inställningarna."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Av säkerhetsskäl får okända appar från den här källan inte installeras på telefonen. Du kan ändra det här i inställningarna."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Din mobil och personliga data är mer sårbara för attacker från okända appar. Genom att installera denna app bekräftar du att du är ansvarig för eventuella skador på mobilen och för dataförlust som kan uppstå vid användning av denna app."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Din surfplatta och personliga data är mer sårbara för attacker från okända appar. Genom att installera denna app bekräftar du att du är ansvarig för eventuella skador på surfplattan och för dataförlust som kan uppstå vid användning av denna app."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Din tv och personliga data är mer sårbar för attacker från okända appar. Genom att installera denna app bekräftar du att du är ansvarig för eventuella skador på tv:n och för dataförlust som kan uppstå vid användning av denna app."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Klon av <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Fortsätt"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Inställningar"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear-appar installeras/avinstalleras"</string>

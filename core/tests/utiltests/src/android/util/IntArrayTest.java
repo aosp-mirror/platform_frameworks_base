@@ -16,14 +16,16 @@
 
 package android.util;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -35,51 +37,65 @@ public class IntArrayTest {
         a.add(1);
         a.add(2);
         a.add(3);
-        verify(new int[]{1, 2, 3}, a);
+        verify(a, 1, 2, 3);
 
         IntArray b = IntArray.fromArray(new int[]{4, 5, 6, 7, 8}, 3);
         a.addAll(b);
-        verify(new int[]{1, 2, 3, 4, 5, 6}, a);
+        verify(a, 1, 2, 3, 4, 5, 6);
 
         a.resize(2);
-        verify(new int[]{1, 2}, a);
+        verify(a, 1, 2);
 
         a.resize(8);
-        verify(new int[]{1, 2, 0, 0, 0, 0, 0, 0}, a);
+        verify(a, 1, 2, 0, 0, 0, 0, 0, 0);
 
         a.set(5, 10);
-        verify(new int[]{1, 2, 0, 0, 0, 10, 0, 0}, a);
+        verify(a, 1, 2, 0, 0, 0, 10, 0, 0);
 
         a.add(5, 20);
-        assertEquals(20, a.get(5));
-        assertEquals(5, a.indexOf(20));
-        verify(new int[]{1, 2, 0, 0, 0, 20, 10, 0, 0}, a);
+        assertThat(a.get(5)).isEqualTo(20);
+        assertThat(a.indexOf(20)).isEqualTo(5);
+        verify(a, 1, 2, 0, 0, 0, 20, 10, 0, 0);
 
-        assertEquals(-1, a.indexOf(99));
+        assertThat(a.indexOf(99)).isEqualTo(-1);
 
         a.resize(15);
         a.set(14, 30);
-        verify(new int[]{1, 2, 0, 0, 0, 20, 10, 0, 0, 0, 0, 0, 0, 0, 30}, a);
+        verify(a, 1, 2, 0, 0, 0, 20, 10, 0, 0, 0, 0, 0, 0, 0, 30);
 
         int[] backingArray = new int[]{1, 2, 3, 4};
         a = IntArray.wrap(backingArray);
         a.set(0, 10);
-        assertEquals(10, backingArray[0]);
+        assertThat(backingArray[0]).isEqualTo(10);
         backingArray[1] = 20;
         backingArray[2] = 30;
-        verify(backingArray, a);
-        assertEquals(2, a.indexOf(30));
+        verify(a, backingArray);
+        assertThat(a.indexOf(30)).isEqualTo(2);
 
         a.resize(2);
-        assertEquals(0, backingArray[2]);
-        assertEquals(0, backingArray[3]);
+        assertThat(backingArray[2]).isEqualTo(0);
+        assertThat(backingArray[3]).isEqualTo(0);
 
         a.add(50);
-        verify(new int[]{10, 20, 50}, a);
+        verify(a, 10, 20, 50);
     }
 
-    public void verify(int[] expected, IntArray intArray) {
-        assertEquals(expected.length, intArray.size());
-        assertArrayEquals(expected, intArray.toArray());
+    @Test
+    public void testToString() {
+        IntArray a = new IntArray(10);
+        a.add(4);
+        a.add(8);
+        a.add(15);
+        a.add(16);
+        a.add(23);
+        a.add(42);
+
+        assertWithMessage("toString()").that(a.toString()).contains("4, 8, 15, 16, 23, 42");
+        assertWithMessage("toString()").that(a.toString()).doesNotContain("0");
+    }
+
+    public void verify(IntArray intArray, int... expected) {
+        assertWithMessage("contents of %s", intArray).that(intArray.toArray()).asList()
+                .containsExactlyElementsIn(Arrays.stream(expected).boxed().toList());
     }
 }

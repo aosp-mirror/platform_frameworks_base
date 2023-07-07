@@ -18,40 +18,51 @@ package com.android.systemui.controls.management
 
 import android.app.ActivityOptions
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
+import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.controls.ui.ControlsActivity
-import com.android.systemui.controls.ui.ControlsUiController
-import com.android.systemui.settings.CurrentUserTracker
-import com.android.systemui.util.LifecycleActivity
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.settings.UserTracker
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
  * Activity for rearranging and removing controls for a given structure
  */
-class ControlsEditingActivity @Inject constructor(
+open class ControlsEditingActivity @Inject constructor(
+    featureFlags: FeatureFlags,
+    @Main private val mainExecutor: Executor,
     private val controller: ControlsControllerImpl,
-    private val broadcastDispatcher: BroadcastDispatcher,
+    private val userTracker: UserTracker,
     private val customIconCache: CustomIconCache,
-    private val uiController: ControlsUiController
-) : LifecycleActivity() {
+) : ComponentActivity() {
 
     companion object {
+        private const val DEBUG = false
         private const val TAG = "ControlsEditingActivity"
-        private const val EXTRA_STRUCTURE = ControlsFavoritingActivity.EXTRA_STRUCTURE
+        const val EXTRA_STRUCTURE = ControlsFavoritingActivity.EXTRA_STRUCTURE
+        const val EXTRA_APP = ControlsFavoritingActivity.EXTRA_APP
+        const val EXTRA_FROM_FAVORITING = "extra_from_favoriting"
         private val SUBTITLE_ID = R.string.controls_favorite_rearrange
         private val EMPTY_TEXT_ID = R.string.controls_favorite_removed
     }
@@ -61,16 +72,28 @@ class ControlsEditingActivity @Inject constructor(
     private lateinit var model: FavoritesModel
     private lateinit var subtitle: TextView
     private lateinit var saveButton: View
+    private lateinit var addControls: View
 
-    private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
+    private var isFromFavoriting: Boolean = false
+
+    private val isNewFlowEnabled: Boolean =
+        featureFlags.isEnabled(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS)
+    private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
         private val startingUser = controller.currentUserId
 
-        override fun onUserSwitched(newUserId: Int) {
-            if (newUserId != startingUser) {
-                stopTracking()
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            if (newUser != startingUser) {
+                userTracker.removeCallback(this)
                 finish()
             }
         }
+    }
+
+    private val mOnBackInvokedCallback = OnBackInvokedCallback {
+        if (DEBUG) {
+            Log.d(TAG, "Predictive Back dispatcher called mOnBackInvokedCallback")
+        }
+        onBackPressed()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,7 +102,7 @@ class ControlsEditingActivity @Inject constructor(
         intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)?.let {
             component = it
         } ?: run(this::finish)
-
+        isFromFavoriting = intent.getBooleanExtra(EXTRA_FROM_FAVORITING, false)
         intent.getCharSequenceExtra(EXTRA_STRUCTURE)?.let {
             structure = it
         } ?: run(this::finish)
@@ -93,12 +116,23 @@ class ControlsEditingActivity @Inject constructor(
         super.onStart()
         setUpList()
 
-        currentUserTracker.startTracking()
+        userTracker.addCallback(userTrackerCallback, mainExecutor)
+
+        if (DEBUG) {
+            Log.d(TAG, "Registered onBackInvokedCallback")
+        }
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback)
     }
 
     override fun onStop() {
         super.onStop()
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
+
+        if (DEBUG) {
+            Log.d(TAG, "Unregistered onBackInvokedCallback")
+        }
+        onBackInvokedDispatcher.unregisterOnBackInvokedCallback(mOnBackInvokedCallback)
     }
 
     override fun onBackPressed() {
@@ -140,8 +174,42 @@ class ControlsEditingActivity @Inject constructor(
     }
 
     private fun bindButtons() {
+        addControls = requireViewById<Button>(R.id.addControls).apply {
+            isEnabled = true
+            visibility = if (isNewFlowEnabled) View.VISIBLE else View.GONE
+            setOnClickListener {
+                if (saveButton.isEnabled) {
+                    // The user has made changes
+                    Toast.makeText(
+                        applicationContext,
+                        R.string.controls_favorite_toast_no_changes,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                if (isFromFavoriting) {
+                    animateExitAndFinish()
+                } else {
+                    startActivity(Intent(context, ControlsFavoritingActivity::class.java).also {
+                        it.putExtra(ControlsFavoritingActivity.EXTRA_STRUCTURE, structure)
+                        it.putExtra(Intent.EXTRA_COMPONENT_NAME, component)
+                        it.putExtra(
+                            ControlsFavoritingActivity.EXTRA_APP,
+                            intent.getCharSequenceExtra(EXTRA_APP),
+                        )
+                        it.putExtra(
+                            ControlsFavoritingActivity.EXTRA_SOURCE,
+                            ControlsFavoritingActivity.EXTRA_SOURCE_VALUE_FROM_EDITING,
+                        )
+                    },
+                                  ActivityOptions.makeSceneTransitionAnimation(
+                                      this@ControlsEditingActivity
+                                  ).toBundle(),
+                    )
+                }
+            }
+        }
         saveButton = requireViewById<Button>(R.id.done).apply {
-            isEnabled = false
+            isEnabled = isFromFavoriting
             setText(R.string.save)
             setOnClickListener {
                 saveFavorites()
@@ -168,6 +236,8 @@ class ControlsEditingActivity @Inject constructor(
                 subtitle.setText(SUBTITLE_ID)
             }
         }
+
+        override fun onChange() = Unit
 
         override fun onFirstChange() {
             saveButton.isEnabled = true
@@ -226,7 +296,7 @@ class ControlsEditingActivity @Inject constructor(
     }
 
     override fun onDestroy() {
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
         super.onDestroy()
     }
 }

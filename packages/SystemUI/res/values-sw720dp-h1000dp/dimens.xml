@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2022 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!-- Intended for wide devices that are currently oriented with a lot of available height,
+     such as tablets. 'hxxxdp' is used instead of 'port' in order to avoid this being applied
+     to wide devices that are shorter in height, like foldables. -->
+<resources>
+    <!-- Space between status view and notification shelf -->
+    <dimen name="keyguard_status_view_bottom_margin">70dp</dimen>
+    <dimen name="keyguard_clock_top_margin">80dp</dimen>
+    <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">155dp</dimen>
+    <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">85dp</dimen>
+</resources>

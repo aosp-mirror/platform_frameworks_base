@@ -33,9 +33,9 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 
+import com.android.app.animation.Interpolators;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

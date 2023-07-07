@@ -30,4 +30,6 @@ interface IAppHibernationService {
     List<String> getHibernatingPackagesForUser(int userId);
     Map<String, HibernationStats> getHibernationStatsForUser(in List<String> packageNames,
             int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION)")
+    boolean isOatArtifactDeletionEnabled();
 }

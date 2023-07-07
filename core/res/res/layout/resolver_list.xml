@@ -23,6 +23,7 @@
     android:maxWidth="@dimen/resolver_max_width"
     android:maxCollapsedHeight="@dimen/resolver_max_collapsed_height"
     android:maxCollapsedHeightSmall="56dp"
+    android:ignoreOffsetTopLimit="@id/title_container"
     android:id="@id/contentPanel">
 
     <RelativeLayout

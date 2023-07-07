@@ -16,8 +16,14 @@
 
 package com.android.server.media;
 
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+
+import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
+import android.app.UserSwitchObserver;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -41,6 +47,7 @@ import android.media.MediaRouterClientState;
 import android.media.RemoteDisplayState;
 import android.media.RemoteDisplayState.RemoteDisplayInfo;
 import android.media.RouteDiscoveryPreference;
+import android.media.RouteListingPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Binder;
 import android.os.Bundle;
@@ -60,8 +67,12 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
+import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.pm.UserManagerInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -84,27 +95,33 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
-     * Timeout in milliseconds for a selected route to transition from a
-     * disconnected state to a connecting state.  If we don't observe any
-     * progress within this interval, then we will give up and unselect the route.
+     * Timeout in milliseconds for a selected route to transition from a disconnected state to a
+     * connecting state. If we don't observe any progress within this interval, then we will give up
+     * and unselect the route.
      */
-    static final long CONNECTING_TIMEOUT = 5000;
+    private static final long CONNECTING_TIMEOUT = 5000;
 
     /**
-     * Timeout in milliseconds for a selected route to transition from a
-     * connecting state to a connected state.  If we don't observe any
-     * progress within this interval, then we will give up and unselect the route.
+     * Timeout in milliseconds for a selected route to transition from a connecting state to a
+     * connected state. If we don't observe any progress within this interval, then we will give up
+     * and unselect the route.
      */
-    static final long CONNECTED_TIMEOUT = 60000;
+    private static final long CONNECTED_TIMEOUT = 60000;
 
     private final Context mContext;
 
     // State guarded by mLock.
     private final Object mLock = new Object();
 
+    private final UserManagerInternal mUserManagerInternal;
+
+    @GuardedBy("mLock")
     private final SparseArray<UserRecord> mUserRecords = new SparseArray<>();
+    @GuardedBy("mLock")
     private final ArrayMap<IBinder, ClientRecord> mAllClientRecords = new ArrayMap<>();
-    private int mCurrentUserId = -1;
+    @GuardedBy("mLock")
+    private int mCurrentActiveUserId = -1;
+
     private final IAudioService mAudioService;
     private final AudioPlayerStateMonitor mAudioPlayerStateMonitor;
     private final Handler mHandler = new Handler();
@@ -121,6 +138,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private final String mDefaultAudioRouteId;
     private final String mBluetoothA2dpRouteId;
 
+    @RequiresPermission(Manifest.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS)
     public MediaRouterService(Context context) {
         mService2 = new MediaRouter2ServiceImpl(context);
         mContext = context;
@@ -130,85 +148,15 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         mBluetoothA2dpRouteId =
                 res.getString(com.android.internal.R.string.bluetooth_a2dp_audio_route_id);
 
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mAudioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
         mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance(context);
         mAudioPlayerStateMonitor.registerListener(
-                new AudioPlayerStateMonitor.OnAudioPlayerActiveStateChangedListener() {
-            static final long WAIT_MS = 500;
-            final Runnable mRestoreBluetoothA2dpRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    restoreBluetoothA2dp();
-                }
-            };
+                new AudioPlayerActiveStateChangedListenerImpl(), mHandler);
 
-            @Override
-            public void onAudioPlayerActiveStateChanged(
-                    @NonNull AudioPlaybackConfiguration config, boolean isRemoved) {
-                final boolean active = !isRemoved && config.isActive();
-                final int pii = config.getPlayerInterfaceId();
-                final int uid = config.getClientUid();
-
-                final int idx = mActivePlayerMinPriorityQueue.indexOf(pii);
-                // Keep the latest active player and its uid at the end of the queue.
-                if (idx >= 0) {
-                    mActivePlayerMinPriorityQueue.remove(idx);
-                    mActivePlayerUidMinPriorityQueue.remove(idx);
-                }
-
-                int restoreUid = -1;
-                if (active) {
-                    mActivePlayerMinPriorityQueue.add(config.getPlayerInterfaceId());
-                    mActivePlayerUidMinPriorityQueue.add(uid);
-                    restoreUid = uid;
-                } else if (mActivePlayerUidMinPriorityQueue.size() > 0) {
-                    restoreUid = mActivePlayerUidMinPriorityQueue.get(
-                            mActivePlayerUidMinPriorityQueue.size() - 1);
-                }
-
-                mHandler.removeCallbacks(mRestoreBluetoothA2dpRunnable);
-                if (restoreUid >= 0) {
-                    restoreRoute(restoreUid);
-                    if (DEBUG) {
-                        Slog.d(TAG, "onAudioPlayerActiveStateChanged: " + "uid=" + uid
-                                + ", active=" + active + ", restoreUid=" + restoreUid);
-                    }
-                } else {
-                    mHandler.postDelayed(mRestoreBluetoothA2dpRunnable, WAIT_MS);
-                    if (DEBUG) {
-                        Slog.d(TAG, "onAudioPlayerActiveStateChanged: " + "uid=" + uid
-                                + ", active=" + active + ", delaying");
-                    }
-                }
-            }
-        }, mHandler);
-
-        AudioRoutesInfo audioRoutes = null;
         try {
-            audioRoutes = mAudioService.startWatchingRoutes(new IAudioRoutesObserver.Stub() {
-                @Override
-                public void dispatchAudioRoutesChanged(final AudioRoutesInfo newRoutes) {
-                    synchronized (mLock) {
-                        if (newRoutes.mainType != mAudioRouteMainType) {
-                            if ((newRoutes.mainType & (AudioRoutesInfo.MAIN_HEADSET
-                                    | AudioRoutesInfo.MAIN_HEADPHONES
-                                    | AudioRoutesInfo.MAIN_USB)) == 0) {
-                                // headset was plugged out.
-                                mGlobalBluetoothA2dpOn = (newRoutes.bluetoothName != null
-                                        || mActiveBluetoothDevice != null);
-                            } else {
-                                // headset was plugged in.
-                                mGlobalBluetoothA2dpOn = false;
-                            }
-                            mAudioRouteMainType = newRoutes.mainType;
-                        }
-                        // The new audio routes info could be delivered with several seconds delay.
-                        // In order to avoid such delay, Bluetooth device info will be updated
-                        // via MediaRouterServiceBroadcastReceiver.
-                    }
-                }
-            });
+            mAudioService.startWatchingRoutes(new AudioRoutesObserverImpl());
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException in the audio service.");
         }
@@ -217,18 +165,27 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         context.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
     }
 
-    public void systemRunning() {
-        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(Intent.ACTION_USER_SWITCHED)) {
-                    switchUser();
-                }
-            }
-        }, filter);
-
-        switchUser();
+    /**
+     * Initializes the MediaRouter service.
+     *
+     * @throws RemoteException If an error occurs while registering the {@link UserSwitchObserver}.
+     */
+    @RequiresPermission(
+            anyOf = {
+                "android.permission.INTERACT_ACROSS_USERS",
+                "android.permission.INTERACT_ACROSS_USERS_FULL"
+            })
+    public void systemRunning() throws RemoteException {
+        ActivityManager.getService()
+                .registerUserSwitchObserver(
+                        new UserSwitchObserver() {
+                            @Override
+                            public void onUserSwitchComplete(int newUserId) {
+                                updateRunningUserAndProfiles(newUserId);
+                            }
+                        },
+                        TAG);
+        updateRunningUserAndProfiles(ActivityManager.getCurrentUser());
     }
 
     @Override
@@ -239,10 +196,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void registerClientAsUser(IMediaRouterClient client, String packageName, int userId) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {
             throw new SecurityException("packageName must match the calling uid");
@@ -267,9 +220,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void registerClientGroupId(IMediaRouterClient client, String groupId) {
-        if (client == null) {
-            throw new NullPointerException("client must not be null");
-        }
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -290,10 +240,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void unregisterClient(IMediaRouterClient client) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -306,11 +252,31 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public MediaRouterClientState getState(IMediaRouterClient client) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
+    public boolean showMediaOutputSwitcher(String packageName) {
+        if (!validatePackageName(Binder.getCallingUid(), packageName)) {
+            throw new SecurityException("packageName must match the calling identity");
         }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            if (mContext.getSystemService(ActivityManager.class).getPackageImportance(packageName)
+                    > IMPORTANCE_FOREGROUND) {
+                Slog.w(TAG, "showMediaOutputSwitcher only works when called from foreground");
+                return false;
+            }
+            synchronized (mLock) {
+                StatusBarManagerInternal statusBar =
+                        LocalServices.getService(StatusBarManagerInternal.class);
+                statusBar.showMediaOutputSwitcher(packageName);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return true;
+    }
 
+    // Binder call
+    @Override
+    public MediaRouterClientState getState(IMediaRouterClient client) {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -324,10 +290,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public boolean isPlaybackActive(IMediaRouterClient client) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             ClientRecord clientRecord;
@@ -364,10 +326,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     @Override
     public void setDiscoveryRequest(IMediaRouterClient client,
             int routeTypes, boolean activeScan) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -386,10 +344,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // selected route or a default selection.
     @Override
     public void setSelectedRoute(IMediaRouterClient client, String routeId, boolean explicit) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -403,12 +357,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestSetVolume(IMediaRouterClient client, String routeId, int volume) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-        if (routeId == null) {
-            throw new IllegalArgumentException("routeId must not be null");
-        }
+        Objects.requireNonNull(routeId, "routeId must not be null");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -423,12 +372,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestUpdateVolume(IMediaRouterClient client, String routeId, int direction) {
-        if (client == null) {
-            throw new IllegalArgumentException("client must not be null");
-        }
-        if (routeId == null) {
-            throw new IllegalArgumentException("routeId must not be null");
-        }
+        Objects.requireNonNull(routeId, "routeId must not be null");
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -448,7 +392,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         pw.println("MEDIA ROUTER SERVICE (dumpsys media_router)");
         pw.println();
         pw.println("Global state");
-        pw.println("  mCurrentUserId=" + mCurrentUserId);
+        pw.println("  mCurrentUserId=" + mCurrentActiveUserId);
 
         synchronized (mLock) {
             final int count = mUserRecords.size();
@@ -458,12 +402,15 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 userRecord.dump(pw, "");
             }
         }
+
+        pw.println();
+        mService2.dump(pw, "");
     }
 
     // Binder call
     @Override
-    public void enforceMediaContentControlPermission() {
-        mService2.enforceMediaContentControlPermission();
+    public boolean verifyPackageExists(String clientPackageName) {
+        return mService2.verifyPackageExists(clientPackageName);
     }
 
     // Binder call
@@ -500,6 +447,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     public void setDiscoveryRequestWithRouter2(IMediaRouter2 router,
             RouteDiscoveryPreference request) {
         mService2.setDiscoveryRequestWithRouter2(router, request);
+    }
+
+    // Binder call
+    @Override
+    public void setRouteListingPreference(
+            @NonNull IMediaRouter2 router,
+            @Nullable RouteListingPreference routeListingPreference) {
+        mService2.setRouteListingPreference(router, routeListingPreference);
     }
 
     // Binder call
@@ -702,26 +657,33 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
-    void switchUser() {
+    /**
+     * Starts all {@link UserRecord user records} associated with the active user (whose ID is
+     * {@code newActiveUserId}) or the active user's profiles.
+     *
+     * <p>All other records are stopped, and those without associated client records are removed.
+     */
+    private void updateRunningUserAndProfiles(int newActiveUserId) {
         synchronized (mLock) {
-            int userId = ActivityManager.getCurrentUser();
-            if (mCurrentUserId != userId) {
-                final int oldUserId = mCurrentUserId;
-                mCurrentUserId = userId; // do this first
-
-                UserRecord oldUser = mUserRecords.get(oldUserId);
-                if (oldUser != null) {
-                    oldUser.mHandler.sendEmptyMessage(UserHandler.MSG_STOP);
-                    disposeUserIfNeededLocked(oldUser); // since no longer current user
-                }
-
-                UserRecord newUser = mUserRecords.get(userId);
-                if (newUser != null) {
-                    newUser.mHandler.sendEmptyMessage(UserHandler.MSG_START);
+            if (mCurrentActiveUserId != newActiveUserId) {
+                mCurrentActiveUserId = newActiveUserId;
+                // disposeUserIfNeededLocked might modify the collection, hence clone
+                final var userRecords = mUserRecords.clone();
+                for (int i = 0; i < userRecords.size(); i++) {
+                    int userId = userRecords.keyAt(i);
+                    UserRecord userRecord = userRecords.valueAt(i);
+                    if (isUserActiveLocked(userId)) {
+                        // userId corresponds to the active user, or one of its profiles. We
+                        // ensure the associated structures are initialized.
+                        userRecord.mHandler.sendEmptyMessage(UserHandler.MSG_START);
+                    } else {
+                        userRecord.mHandler.sendEmptyMessage(UserHandler.MSG_STOP);
+                        disposeUserIfNeededLocked(userRecord);
+                    }
                 }
             }
         }
-        mService2.switchUser();
+        mService2.updateRunningUserAndProfiles(newActiveUserId);
     }
 
     void clientDied(ClientRecord clientRecord) {
@@ -730,6 +692,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void registerClientLocked(IMediaRouterClient client,
             int uid, int pid, String packageName, int userId, boolean trusted) {
         final IBinder binder = client.asBinder();
@@ -759,6 +722,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void registerClientGroupIdLocked(IMediaRouterClient client, String groupId) {
         final IBinder binder = client.asBinder();
         ClientRecord clientRecord = mAllClientRecords.get(binder);
@@ -776,11 +740,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         clientRecord.mGroupId = groupId;
         if (groupId != null) {
             userRecord.addToGroup(groupId, clientRecord);
-            userRecord.mHandler.obtainMessage(UserHandler.MSG_NOTIFY_GROUP_ROUTE_SELECTED, groupId)
-                .sendToTarget();
+            userRecord
+                    .mHandler
+                    .obtainMessage(UserHandler.MSG_NOTIFY_GROUP_ROUTE_SELECTED, groupId)
+                    .sendToTarget();
         }
     }
 
+    @GuardedBy("mLock")
     private void unregisterClientLocked(IMediaRouterClient client, boolean died) {
         ClientRecord clientRecord = mAllClientRecords.remove(client.asBinder());
         if (clientRecord != null) {
@@ -795,6 +762,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private MediaRouterClientState getStateLocked(IMediaRouterClient client) {
         ClientRecord clientRecord = mAllClientRecords.get(client.asBinder());
         if (clientRecord != null) {
@@ -803,6 +771,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         return null;
     }
 
+    @GuardedBy("mLock")
     private void setDiscoveryRequestLocked(IMediaRouterClient client,
             int routeTypes, boolean activeScan) {
         final IBinder binder = client.asBinder();
@@ -827,6 +796,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void setSelectedRouteLocked(IMediaRouterClient client,
             String routeId, boolean explicit) {
         ClientRecord clientRecord = mAllClientRecords.get(client.asBinder());
@@ -863,9 +833,13 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                                 clientRecord.mUserRecord.mClientGroupMap.get(clientRecord.mGroupId);
                         if (group != null) {
                             group.mSelectedRouteId = routeId;
-                            clientRecord.mUserRecord.mHandler.obtainMessage(
-                                UserHandler.MSG_NOTIFY_GROUP_ROUTE_SELECTED, clientRecord.mGroupId)
-                                .sendToTarget();
+                            clientRecord
+                                    .mUserRecord
+                                    .mHandler
+                                    .obtainMessage(
+                                            UserHandler.MSG_NOTIFY_GROUP_ROUTE_SELECTED,
+                                            clientRecord.mGroupId)
+                                    .sendToTarget();
                         }
                     }
                 }
@@ -873,6 +847,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void requestSetVolumeLocked(IMediaRouterClient client,
             String routeId, int volume) {
         final IBinder binder = client.asBinder();
@@ -883,6 +858,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void requestUpdateVolumeLocked(IMediaRouterClient client,
             String routeId, int direction) {
         final IBinder binder = client.asBinder();
@@ -893,22 +869,23 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    @GuardedBy("mLock")
     private void initializeUserLocked(UserRecord userRecord) {
         if (DEBUG) {
             Slog.d(TAG, userRecord + ": Initialized");
         }
-        if (userRecord.mUserId == mCurrentUserId) {
+        if (isUserActiveLocked(userRecord.mUserId)) {
             userRecord.mHandler.sendEmptyMessage(UserHandler.MSG_START);
         }
     }
 
+    @GuardedBy("mLock")
     private void disposeUserIfNeededLocked(UserRecord userRecord) {
         // If there are no records left and the user is no longer current then go ahead
         // and purge the user record and all of its associated state.  If the user is current
         // then leave it alone since we might be connected to a route or want to query
         // the same route information again soon.
-        if (userRecord.mUserId != mCurrentUserId
-                && userRecord.mClientRecords.isEmpty()) {
+        if (!isUserActiveLocked(userRecord.mUserId) && userRecord.mClientRecords.isEmpty()) {
             if (DEBUG) {
                 Slog.d(TAG, userRecord + ": Disposed");
             }
@@ -917,12 +894,23 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         }
     }
 
+    /**
+     * Returns {@code true} if the given {@code userId} corresponds to the active user or a profile
+     * of the active user, returns {@code false} otherwise.
+     */
+    @GuardedBy("mLock")
+    private boolean isUserActiveLocked(int userId) {
+        return mUserManagerInternal.getProfileParentId(userId) == mCurrentActiveUserId;
+    }
+
+    @GuardedBy("mLock")
     private void initializeClientLocked(ClientRecord clientRecord) {
         if (DEBUG) {
             Slog.d(TAG, clientRecord + ": Registered");
         }
     }
 
+    @GuardedBy("mLock")
     private void disposeClientLocked(ClientRecord clientRecord, boolean died) {
         if (DEBUG) {
             if (died) {
@@ -956,7 +944,10 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED)) {
-                BluetoothDevice btDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                BluetoothDevice btDevice =
+                        intent.getParcelableExtra(
+                                BluetoothDevice.EXTRA_DEVICE,
+                                android.bluetooth.BluetoothDevice.class);
                 synchronized (mLock) {
                     mActiveBluetoothDevice = btDevice;
                     mGlobalBluetoothA2dpOn = btDevice != null;
@@ -1933,6 +1924,95 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 // presentation display.  So all we do here is canonicalize the null case.
                 final int displayId = descriptor.presentationDisplayId;
                 return displayId < 0 ? -1 : displayId;
+            }
+        }
+    }
+
+    private class AudioPlayerActiveStateChangedListenerImpl
+            implements AudioPlayerStateMonitor.OnAudioPlayerActiveStateChangedListener {
+
+        private static final long WAIT_MS = 500;
+        private final Runnable mRestoreBluetoothA2dpRunnable =
+                MediaRouterService.this::restoreBluetoothA2dp;
+
+        @Override
+        public void onAudioPlayerActiveStateChanged(
+                @NonNull AudioPlaybackConfiguration config, boolean isRemoved) {
+            boolean active = !isRemoved && config.isActive();
+            int uid = config.getClientUid();
+
+            int idx = mActivePlayerMinPriorityQueue.indexOf(config.getPlayerInterfaceId());
+            // Keep the latest active player and its uid at the end of the queue.
+            if (idx >= 0) {
+                mActivePlayerMinPriorityQueue.remove(idx);
+                mActivePlayerUidMinPriorityQueue.remove(idx);
+            }
+
+            int restoreUid = -1;
+            if (active) {
+                mActivePlayerMinPriorityQueue.add(config.getPlayerInterfaceId());
+                mActivePlayerUidMinPriorityQueue.add(uid);
+                restoreUid = uid;
+            } else if (mActivePlayerUidMinPriorityQueue.size() > 0) {
+                restoreUid =
+                        mActivePlayerUidMinPriorityQueue.get(
+                                mActivePlayerUidMinPriorityQueue.size() - 1);
+            }
+
+            mHandler.removeCallbacks(mRestoreBluetoothA2dpRunnable);
+            if (restoreUid >= 0) {
+                restoreRoute(restoreUid);
+                if (DEBUG) {
+                    Slog.d(
+                            TAG,
+                            "onAudioPlayerActiveStateChanged: "
+                                    + "uid="
+                                    + uid
+                                    + ", active="
+                                    + active
+                                    + ", restoreUid="
+                                    + restoreUid);
+                }
+            } else {
+                mHandler.postDelayed(mRestoreBluetoothA2dpRunnable, WAIT_MS);
+                if (DEBUG) {
+                    Slog.d(
+                            TAG,
+                            "onAudioPlayerActiveStateChanged: "
+                                    + "uid="
+                                    + uid
+                                    + ", active="
+                                    + active
+                                    + ", delaying");
+                }
+            }
+        }
+    }
+
+    private class AudioRoutesObserverImpl extends IAudioRoutesObserver.Stub {
+
+        private static final int HEADSET_FLAGS =
+                AudioRoutesInfo.MAIN_HEADSET
+                        | AudioRoutesInfo.MAIN_HEADPHONES
+                        | AudioRoutesInfo.MAIN_USB;
+
+        @Override
+        public void dispatchAudioRoutesChanged(final AudioRoutesInfo newRoutes) {
+            synchronized (mLock) {
+                if (newRoutes.mainType != mAudioRouteMainType) {
+                    if ((newRoutes.mainType & HEADSET_FLAGS) == 0) {
+                        // headset was plugged out.
+                        mGlobalBluetoothA2dpOn =
+                                newRoutes.bluetoothName != null || mActiveBluetoothDevice != null;
+                    } else {
+                        // headset was plugged in.
+                        mGlobalBluetoothA2dpOn = false;
+                    }
+                    mAudioRouteMainType = newRoutes.mainType;
+                }
+                // The new audio routes info could be delivered with several seconds delay.
+                // In order to avoid such delay, Bluetooth device info will be updated
+                // via MediaRouterServiceBroadcastReceiver.
             }
         }
     }

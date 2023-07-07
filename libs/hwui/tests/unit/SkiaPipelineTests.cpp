@@ -17,6 +17,7 @@
 #include <VectorDrawable.h>
 #include <gtest/gtest.h>
 
+#include <SkBlendMode.h>
 #include <SkClipStack.h>
 #include <SkSurface_Base.h>
 #include <string.h>
@@ -404,7 +405,9 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
     EXPECT_TRUE(pipeline->isSurfaceReady());
     renderThread.destroyRenderingContext();
     EXPECT_FALSE(pipeline->isSurfaceReady());
-    LOG_ALWAYS_FATAL_IF(pipeline->isSurfaceReady());
+
+    pipeline->makeCurrent();
+    EXPECT_TRUE(pipeline->isSurfaceReady());
 }
 
 RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, pictureCallback) {

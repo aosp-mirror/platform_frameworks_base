@@ -94,14 +94,17 @@ void PrettyPrintVisitor::visit(const IdmapData& data) {
   }
 
   for (auto& target_entry : data.GetTargetInlineEntries()) {
-    stream_ << TAB << base::StringPrintf("0x%08x -> ", target_entry.target_id)
-            << utils::DataTypeToString(target_entry.value.data_type);
+    for(auto iter = target_entry.values.begin(); iter != target_entry.values.end(); ++iter) {
+      auto value = iter->second;
+      stream_ << TAB << base::StringPrintf("0x%08x -> ", target_entry.target_id)
+              << utils::DataTypeToString(value.data_type);
 
-    if (target_entry.value.data_type == Res_value::TYPE_STRING) {
-      auto str = string_pool.stringAt(target_entry.value.data_value - string_pool_offset);
-      stream_ << " \"" << str.value_or(StringPiece16(u"")) << "\"";
-    } else {
-      stream_ << " " << base::StringPrintf("0x%08x", target_entry.value.data_value);
+      if (value.data_type == Res_value::TYPE_STRING) {
+        auto str = string_pool.stringAt(value.data_value - string_pool_offset);
+        stream_ << " \"" << str.value_or(StringPiece16(u"")) << "\"";
+      } else {
+        stream_ << " " << base::StringPrintf("0x%08x", value.data_value);
+      }
     }
 
     std::string target_name = kUnknownResourceName;

@@ -22,6 +22,7 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.window.extensions.embedding.SplitAttributes;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,5 +53,16 @@ public class WindowExtensionsTest {
     @Test
     public void testGetActivityEmbeddingComponent() {
         assertThat(mExtensions.getActivityEmbeddingComponent()).isNotNull();
+    }
+
+    @Test
+    public void testSplitAttributes_default() {
+        // Make sure the default value in the extensions aar.
+        final SplitAttributes splitAttributes = new SplitAttributes.Builder().build();
+        assertThat(splitAttributes.getLayoutDirection())
+                .isEqualTo(SplitAttributes.LayoutDirection.LOCALE);
+        assertThat(splitAttributes.getSplitType())
+                .isEqualTo(new SplitAttributes.SplitType.RatioSplitType(0.5f));
+        assertThat(splitAttributes.getAnimationBackgroundColor()).isEqualTo(0);
     }
 }

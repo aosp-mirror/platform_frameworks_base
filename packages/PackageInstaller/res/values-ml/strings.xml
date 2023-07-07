@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തു."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യണോ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ഈ ആപ്പ് അപ്‌ഡേറ്റ് ചെയ്യണോ?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> എന്നതിൽ നിന്ന് ഈ ആപ്പ് അപ്‌ഡേറ്റ് ചെയ്യണോ?\n\nഈ ആപ്പിന് സാധാരണയായി <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> എന്നതിൽ നിന്ന് അപ്‌ഡേറ്റുകൾ ലഭിക്കാറുണ്ട്. മറ്റൊരു ഉറവിടത്തിൽ നിന്ന് അപ്‌ഡേറ്റ് ചെയ്യുന്നത് വഴി, നിങ്ങളുടെ ഫോണിലെ ഏത് ഉറവിടത്തിൽ നിന്നും ഭാവിയിൽ അപ്‌ഡേറ്റുകൾ ലഭിക്കാൻ ഇടയുണ്ട്. ആപ്പ് ഫംഗ്ഷണാലിറ്റിയിൽ വ്യത്യാസം വന്നേക്കാം."</string>
     <string name="install_failed" msgid="5777824004474125469">"ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തിട്ടില്ല."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"പാക്കേജ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നത് ബ്ലോക്ക് ചെയ്‌തു."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"പാക്കേജിന് നിലവിലുള്ള പാക്കേജുമായി പൊരുത്തക്കേടുള്ളതിനാൽ, ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌തില്ല."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ഈ ഉപയോക്താവിന്, അജ്ഞാത ആപ്പുകൾ ഇൻസ്‌റ്റാൾ ചെയ്യാനാവില്ല"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ആപ്പുകൾ ഇൻ‌സ്‌റ്റാൾ ചെയ്യാൻ ഈ ഉപയോക്താവിന് അനുവാദമില്ല"</string>
     <string name="ok" msgid="7871959885003339302">"ശരി"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"എന്തായാലും അപ്‌ഡേറ്റ് ചെയ്യുക"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ആപ്പുകൾ മാനേജ് ചെയ്യുക"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ഇടമില്ല"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ഇൻസ്‌റ്റാൾ ചെയ്യാനായില്ല. കുറച്ച് ഇടമുണ്ടാക്കി, വീണ്ടും ശ്രമിക്കുക."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"ഫാക്‌ടറി പതിപ്പ് ഉപയോഗിച്ച് ഈ ആപ്പിന് പകരം വയ്ക്കണോ? എല്ലാ ഡാറ്റയും നീക്കം ചെയ്യപ്പെടും."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ഫാക്‌ടറി പതിപ്പ് ഉപയോഗിച്ച് ഈ ആപ്പിന് പകരം വയ്ക്കണോ? എല്ലാ ഡാറ്റയും നീക്കം ചെയ്യപ്പെടും. ഔദ്യോഗിക പ്രൊഫൈലുകൾ ഉള്ളവർ ഉൾപ്പെടെ, ഈ ഉപകരണത്തിന്റെ എല്ലാ ഉപയോക്താക്കളെയും ഇത് ബാധിക്കും."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ആപ്പ് ഡാറ്റ വയ്ക്കുക."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ഈ ആപ്പ് ഇല്ലാതാക്കണോ?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ഈ ആപ്പ് അൺഇൻസ്റ്റാൾ ചെയ്യണോ? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ക്ലോൺ ചെയ്യലും ഇല്ലാതാക്കും."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"നിലവിൽ അൺഇൻസ്‌റ്റാൾ ചെയ്യുന്നവ"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"അൺ ഇൻസ്‌റ്റാൾ ചെയ്യാൻ കഴിയാഞ്ഞവ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"അണ്‍‌ ഇൻസ്‌റ്റാൾ ചെയ്യുന്നു..."</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> അൺ ഇൻസ്‌റ്റാൾ ചെയ്യുന്നു…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"അൺ ഇൻസ്‌റ്റാൾ ചെയ്യൽ പൂർത്തിയായി."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> അൺ ഇൻസ്‌റ്റാൾ ചെയ്‌തു"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ക്ലോൺ ഇല്ലാതാക്കി"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"അൺ ഇൻസ്‌റ്റാൾ ചെയ്യാനായില്ല."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> അൺ ഇൻസ്‌റ്റാൾ ചെയ്യാനായില്ല."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ക്ലോൺ ചെയ്യൽ ഇല്ലാതാക്കുന്നു…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"സജീവ ഉപകരണ അഡ്‌മിൻ ആപ്പ് അൺ ഇൻസ്‌റ്റാൾ ചെയ്യാനാവില്ല"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിനായി, സജീവ ഉപകരണ അഡ്‌മിൻ ആപ്പ് അൺ ഇൻസ്‌റ്റാൾ ചെയ്യാനാവില്ല"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ചില ഉപയോക്താക്കൾക്കോ പ്രൊഫൈലുകൾക്കോ ഈ ആപ്പ് ആവശ്യമുണ്ട്, മറ്റുള്ളവർക്ക് അത് അൺ ഇൻസ്‌റ്റാൾ ചെയ്‌തു"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"അജ്ഞാതം"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"നിങ്ങളുടെ സുരക്ഷയ്‌ക്ക്, ഈ ഉറവിടത്തിൽ നിന്നുള്ള അജ്ഞാതമായ ആപ്പുകൾ ഇൻസ്‌റ്റാൾ ചെയ്യാൻ നിലവിൽ നിങ്ങളുടെ ടാബ്‌ലെറ്റിന് അനുമതിയില്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ മാറ്റാം."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"നിങ്ങളുടെ സുരക്ഷയ്‌ക്ക്, ഈ ഉറവിടത്തിൽ നിന്നുള്ള അജ്ഞാതമായ ആപ്പുകൾ ഇൻസ്‌റ്റാൾ ചെയ്യാൻ നിലവിൽ നിങ്ങളുടെ ടിവിക്ക് അനുമതിയില്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ മാറ്റാം."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"നിങ്ങളുടെ സുരക്ഷയ്‌ക്ക്, ഈ ഉറവിടത്തിൽ നിന്നുള്ള അജ്ഞാതമായ ആപ്പുകൾ ഇൻസ്‌റ്റാൾ ചെയ്യാൻ നിലവിൽ നിങ്ങളുടെ വാച്ചിന് അനുമതിയില്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ മാറ്റാം."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"നിങ്ങളുടെ സുരക്ഷയ്‌ക്ക്, ഈ ഉറവിടത്തിൽ നിന്നുള്ള അജ്ഞാതമായ ആപ്പുകൾ ഇൻസ്‌റ്റാൾ ചെയ്യാൻ നിലവിൽ നിങ്ങളുടെ ഫോണിന് അനുമതിയില്ല. നിങ്ങൾക്ക് ഇത് ക്രമീകരണത്തിൽ മാറ്റാം."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ഫോണും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ഫോണിന് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ടാബ്‌ലെറ്റും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ടാബ്‌ലെറ്റിന് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"അജ്ഞാതമായ ആപ്പുകളാൽ നിങ്ങളുടെ ടിവിയും വ്യക്തിഗത ഡാറ്റയും ആക്രമിക്കപ്പെടാനുള്ള സാധ്യത വളരെ കൂടുതലാണ്. ഈ ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്യുന്നതിലൂടെ, ഇത് ഉപയോഗിക്കുന്നതിനാൽ നിങ്ങളുടെ ടിവിക്ക് സംഭവിച്ചേക്കാവുന്ന ഏത് നാശനഷ്‌ടത്തിന്റെയും അല്ലെങ്കിൽ ഡാറ്റാ നഷ്‌ടത്തിന്റെയും ഉത്തരവാദിത്തം നിങ്ങൾക്കായിരിക്കുമെന്ന് അംഗീകരിക്കുന്നു."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ക്ലോൺ ചെയ്യൽ"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"തുടരുക"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ക്രമീകരണം"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear ആപ്പ് ഇൻസ്‌റ്റാൾ/അൺ ഇൻസ്‌റ്റാൾ ചെയ്യുന്നു"</string>

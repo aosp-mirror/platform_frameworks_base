@@ -70,20 +70,24 @@ public class UsageStats {
 
     private int mAcceptCount;
     private int mRejectCount;
-    private SparseIntArray mErrorCount;
+    private int mErrorCount;
+    private int mAuthAttemptCount;
+    private SparseIntArray mErrorFrequencyMap;
 
     private long mAcceptLatency;
     private long mRejectLatency;
-    private SparseLongArray mErrorLatency;
+    private long mErrorLatency;
+    private SparseLongArray mErrorLatencyMap;
 
     public UsageStats(Context context) {
         mAuthenticationEvents = new ArrayDeque<>();
-        mErrorCount = new SparseIntArray();
-        mErrorLatency = new SparseLongArray();
+        mErrorFrequencyMap = new SparseIntArray();
+        mErrorLatencyMap = new SparseLongArray();
         mContext = context;
     }
 
     public void addEvent(AuthenticationEvent event) {
+        mAuthAttemptCount++;
         if (mAuthenticationEvents.size() >= EVENT_LOG_SIZE) {
             mAuthenticationEvents.removeFirst();
         }
@@ -96,29 +100,38 @@ public class UsageStats {
             mRejectCount++;
             mRejectLatency += event.mLatency;
         } else {
-            mErrorCount.put(event.mError, mErrorCount.get(event.mError, 0) + 1);
-            mErrorLatency.put(event.mError, mErrorLatency.get(event.mError, 0L) + event.mLatency);
+            mErrorCount++;
+            mErrorLatency += event.mLatency;
+            mErrorFrequencyMap.put(event.mError, mErrorFrequencyMap.get(event.mError, 0) + 1);
+            mErrorLatencyMap.put(event.mError,
+                    mErrorLatencyMap.get(event.mError, 0L) + event.mLatency);
         }
     }
 
     public void print(PrintWriter pw) {
-        pw.println("Events since last reboot: " + mAuthenticationEvents.size());
+        pw.println("Printing most recent events since last reboot("
+                + mAuthenticationEvents.size() + " events)");
         for (AuthenticationEvent event : mAuthenticationEvents) {
             pw.println(event.toString(mContext));
         }
 
         // Dump aggregated usage stats
-        pw.println("Accept\tCount: " + mAcceptCount + "\tLatency: " + mAcceptLatency
+        pw.println("");
+        pw.println("Accept Count: " + mAcceptCount + "\tLatency: " + mAcceptLatency
                 + "\tAverage: " + (mAcceptCount > 0 ? mAcceptLatency / mAcceptCount : 0));
-        pw.println("Reject\tCount: " + mRejectCount + "\tLatency: " + mRejectLatency
+        pw.println("Reject Count: " + mRejectCount + "\tLatency: " + mRejectLatency
                 + "\tAverage: " + (mRejectCount > 0 ? mRejectLatency / mRejectCount : 0));
+        pw.println("Total Error Count: " + mErrorCount + "\tLatency: " + mErrorLatency
+                + "\tAverage: " + (mErrorCount > 0 ? mErrorLatency / mErrorCount : 0));
+        pw.println("Total Attempts: " + mAuthAttemptCount);
+        pw.println("");
 
-        for (int i = 0; i < mErrorCount.size(); i++) {
-            final int key = mErrorCount.keyAt(i);
-            final int count = mErrorCount.get(i);
+        for (int i = 0; i < mErrorFrequencyMap.size(); i++) {
+            final int key = mErrorFrequencyMap.keyAt(i);
+            final int count = mErrorFrequencyMap.get(key);
             pw.println("Error" + key + "\tCount: " + count
-                    + "\tLatency: " + mErrorLatency.get(key, 0L)
-                    + "\tAverage: " + (count > 0 ? mErrorLatency.get(key, 0L) / count : 0)
+                    + "\tLatency: " + mErrorLatencyMap.get(key, 0L)
+                    + "\tAverage: " + (count > 0 ? mErrorLatencyMap.get(key, 0L) / count : 0)
                     + "\t" + FaceManager.getErrorString(mContext, key, 0 /* vendorCode */));
         }
     }

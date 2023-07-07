@@ -1,25 +1,22 @@
 {
-  // Looking for unit test presubmit configuration?
-  // This currently lives in ATP config apct/system_ui/unit_test
-  "presubmit-large": [
-    {
-      "name": "PlatformScenarioTests",
-      "options": [
-        {
-            "include-filter": "android.platform.test.scenario.sysui"
-        },
-        {
-            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
-        },
-        {
-            "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-            "exclude-annotation": "android.platform.test.annotations.Postsubmit"
-        }
-      ]
-    }
-  ],
+  // Curious where your @Scenario tests will run?
+  //
+  // @Ignore: Will not run in any configuration
+  //
+  // @FlakyTest: Tests that don't block pre/postsubmit but are staged to run known failures
+  //
+  // @Postsubmit: Runs in platinum suite and blocks droidfood in postsubmit
+  //
+  // @PlatinumTest: As of May, 2023, running in postsubmit. Set to run in presubmit as part of
+  // v2/android-platinum/suite-test-mapping-platinum-sysui
+  // Please DO NOT annotate new or old tests with @PlatinumTest annotation without discussing
+  // with mdb:android-platinum
+  //
+  // As of May, 2023, If you don't use @Postsubmit, your new test will immediately
+  // block presubmit, which is probably NOT what you want. This will change effectively once
+  // we move to @PlatinumTest annotation.
+
+  // v2/sysui/test-mapping-presubmit-sysui_cloud-tf
   "presubmit-sysui": [
     {
       "name": "PlatformScenarioTests",
@@ -35,10 +32,14 @@
         },
         {
             "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
         }
       ]
     }
   ],
+  // v2/android-virtual-infra/test_mapping/presubmit-avd
   "presubmit": [
     {
       "name": "SystemUIGoogleTests",
@@ -52,14 +53,29 @@
       ]
     },
     {
-      // Permission indicators
-      "name": "CtsPermission4TestCases",
+      // TODO(b/251476085): Consider merging with SystemUIGoogleScreenshotTests (in U+)
+      "name": "SystemUIGoogleBiometricsScreenshotTests",
       "options": [
         {
           "exclude-annotation": "org.junit.Ignore"
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      // Permission indicators
+      "name": "CtsPermission3TestCases",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "include-filter": "android.permission3.cts.CameraMicIndicatorsPermissionTest"
         }
       ]
     },
@@ -72,56 +88,6 @@
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
-    }
-  ],
-
-  // Curious where your @Scenario tests will run?
-  //
-  // @Ignore: nowhere
-  // @Staging or @FlakyTest: in staged-postsubmit, but not postsubmit or
-  // 	presubmit
-  // @Postsubmit: in postsubmit and staged-postsubmit, but not presubmit
-  // none of the above: in presubmit, postsubmit, and staged-postsubmit
-  //
-  // Therefore, please annotate new tests with @Staging, then with @Postsubmit
-  // once they're ready for postsubmit, then with neither once they're ready
-  // for presubmit.
-  //
-  // If you don't use @Staging or @Postsubmit, your new test will immediately
-  // block presubmit, which is probably not what you want!
-  "platinum-postsubmit": [
-    {
-      "name": "PlatformScenarioTests",
-      "options": [
-        {
-            "include-filter": "android.platform.test.scenario.sysui"
-        },
-        {
-            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
-        },
-        {
-            "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-            "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
-    }
-  ],
-  "staged-platinum-postsubmit": [
-    {
-      "name": "PlatformScenarioTests",
-      "options": [
-        {
-            "include-filter": "android.platform.test.scenario.sysui"
-        },
-        {
-            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
-        },
-        {
-            "exclude-annotation": "org.junit.Ignore"
         }
       ]
     }
@@ -140,6 +106,28 @@
       "options" : [
         {
           "include-filter": "android.platform.tests.NotificationTest"
+        }
+      ]
+    }
+  ],
+  "silver-sysui": [
+   {
+      "name": "PlatformScenarioTests",
+      "options": [
+        {
+            "include-filter": "android.platform.test.scenario.sysui"
+        },
+        {
+            "include-annotation": "android.platform.test.scenario.annotation.Scenario"
+        },
+        {
+            "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.PlatinumTest"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
         }
       ]
     }

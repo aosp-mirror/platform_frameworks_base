@@ -19,10 +19,12 @@ package com.android.systemui.statusbar.notification.collection.render
 import android.content.Context
 import android.view.View
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
-import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable
+import com.android.systemui.statusbar.notification.collection.PipelineDumper
+import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.util.traceSection
 import dagger.assisted.Assisted
@@ -43,17 +45,23 @@ class ShadeViewManager @AssistedInject constructor(
     nodeSpecBuilderLogger: NodeSpecBuilderLogger,
     shadeViewDifferLogger: ShadeViewDifferLogger,
     private val viewBarn: NotifViewBarn
-) {
+) : PipelineDumpable {
     // We pass a shim view here because the listContainer may not actually have a view associated
     // with it and the differ never actually cares about the root node's view.
     private val rootController = RootNodeController(listContainer, View(context))
     private val specBuilder = NodeSpecBuilder(mediaContainerController, featureManager,
-            sectionHeaderVisibilityProvider, viewBarn, nodeSpecBuilderLogger)
+        sectionHeaderVisibilityProvider, viewBarn, nodeSpecBuilderLogger)
     private val viewDiffer = ShadeViewDiffer(rootController, shadeViewDifferLogger)
 
     /** Method for attaching this manager to the pipeline. */
     fun attach(renderStageManager: RenderStageManager) {
         renderStageManager.setViewRenderer(viewRenderer)
+    }
+
+    override fun dumpPipeline(d: PipelineDumper) = with(d) {
+        dump("rootController", rootController)
+        dump("specBuilder", specBuilder)
+        dump("viewDiffer", viewDiffer)
     }
 
     private val viewRenderer = object : NotifViewRenderer {

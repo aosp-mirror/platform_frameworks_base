@@ -27,8 +27,8 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import android.annotation.NonNull;
+import android.app.ApplicationExitInfo;
 import android.app.ResourcesManager;
-import android.content.IIntentReceiver;
 import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
 import android.content.pm.UserInfo;
@@ -49,7 +49,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
@@ -154,12 +154,13 @@ public final class StorageEventHelper extends StorageEventListener {
         }
 
         for (PackageStateInternal ps : packages) {
-            freezers.add(mPm.freezePackage(ps.getPackageName(), "loadPrivatePackagesInner"));
+            freezers.add(mPm.freezePackage(ps.getPackageName(), UserHandle.USER_ALL,
+                    "loadPrivatePackagesInner", ApplicationExitInfo.REASON_OTHER));
             synchronized (mPm.mInstallLock) {
                 final AndroidPackage pkg;
                 try {
-                    pkg = installPackageHelper.scanSystemPackageTracedLI(
-                            ps.getPath(), parseFlags, SCAN_INITIAL, null);
+                    pkg = installPackageHelper.initPackageTracedLI(
+                            ps.getPath(), parseFlags, SCAN_INITIAL);
                     loaded.add(pkg);
 
                 } catch (PackageManagerException e) {
@@ -197,8 +198,11 @@ public final class StorageEventHelper extends StorageEventListener {
                     appDataHelper.reconcileAppsDataLI(volumeUuid, user.id, flags,
                             true /* migrateAppData */);
                 }
-            } catch (IllegalStateException e) {
-                // Device was probably ejected, and we'll process that event momentarily
+            } catch (RuntimeException e) {
+                // The volume was probably already unmounted.  We'll probably process the unmount
+                // event momentarily.  TODO(b/256909937): ignoring errors from prepareUserStorage()
+                // is very dangerous.  Instead, we should fix the race condition that allows this
+                // code to run on an unmounted volume in the first place.
                 Slog.w(TAG, "Failed to prepare storage: " + e);
             }
         }
@@ -206,7 +210,7 @@ public final class StorageEventHelper extends StorageEventListener {
         synchronized (mPm.mLock) {
             final boolean isUpgrade = !PackagePartitions.FINGERPRINT.equals(ver.fingerprint);
             if (isUpgrade) {
-                logCriticalInfo(Log.INFO, "Build fingerprint changed from " + ver.fingerprint
+                logCriticalInfo(Log.INFO, "Partitions fingerprint changed from " + ver.fingerprint
                         + " to " + PackagePartitions.FINGERPRINT + "; regranting permissions for "
                         + volumeUuid);
             }
@@ -223,7 +227,7 @@ public final class StorageEventHelper extends StorageEventListener {
         }
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Loaded packages " + loaded);
-        sendResourcesChangedBroadcast(true, false, loaded, null);
+        sendResourcesChangedBroadcast(true /* mediaStatus */, false /* replacing */, loaded);
         synchronized (mLoadedVolumes) {
             mLoadedVolumes.add(vol.getId());
         }
@@ -254,7 +258,8 @@ public final class StorageEventHelper extends StorageEventListener {
                     final PackageRemovedInfo outInfo = new PackageRemovedInfo(mPm);
 
                     try (PackageFreezer freezer = mPm.freezePackageForDelete(ps.getPackageName(),
-                            deleteFlags, "unloadPrivatePackagesInner")) {
+                             UserHandle.USER_ALL, deleteFlags,
+                            "unloadPrivatePackagesInner", ApplicationExitInfo.REASON_OTHER)) {
                         if (mDeletePackageHelper.deletePackageLIF(ps.getPackageName(), null, false,
                                 userIds, deleteFlags, outInfo, false)) {
                             unloaded.add(pkg);
@@ -274,7 +279,7 @@ public final class StorageEventHelper extends StorageEventListener {
         }
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Unloaded packages " + unloaded);
-        sendResourcesChangedBroadcast(false, false, unloaded, null);
+        sendResourcesChangedBroadcast(false /* mediaStatus */, false /* replacing */, unloaded);
         synchronized (mLoadedVolumes) {
             mLoadedVolumes.remove(vol.getId());
         }
@@ -290,7 +295,7 @@ public final class StorageEventHelper extends StorageEventListener {
     }
 
     private void sendResourcesChangedBroadcast(boolean mediaStatus, boolean replacing,
-            ArrayList<AndroidPackage> packages, IIntentReceiver finishedReceiver) {
+            ArrayList<AndroidPackage> packages) {
         final int size = packages.size();
         final String[] packageNames = new String[size];
         final int[] packageUids = new int[size];
@@ -299,8 +304,8 @@ public final class StorageEventHelper extends StorageEventListener {
             packageNames[i] = pkg.getPackageName();
             packageUids[i] = pkg.getUid();
         }
-        mBroadcastHelper.sendResourcesChangedBroadcast(mediaStatus, replacing, packageNames,
-                packageUids, finishedReceiver);
+        mBroadcastHelper.sendResourcesChangedBroadcast(mPm::snapshotComputer, mediaStatus,
+                replacing, packageNames, packageUids);
     }
 
     /**
@@ -347,9 +352,7 @@ public final class StorageEventHelper extends StorageEventListener {
             for (int i = 0; i < fileToDeleteCount; i++) {
                 File fileToDelete = filesToDelete.get(i);
                 logCriticalInfo(Log.WARN, "Destroying orphaned at " + fileToDelete);
-                synchronized (mPm.mInstallLock) {
-                    mRemovePackageHelper.removeCodePathLI(fileToDelete);
-                }
+                mRemovePackageHelper.removeCodePath(fileToDelete);
             }
         }
     }

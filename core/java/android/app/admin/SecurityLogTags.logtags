@@ -45,3 +45,6 @@ option java_package android.app.admin
 210038 security_wifi_disconnection              (bssid|3),(reason|3)
 210039 security_bluetooth_connection            (addr|3),(success|1),(reason|3)
 210040 security_bluetooth_disconnection         (addr|3),(reason|3)
+210041 security_package_installed               (package_name|3),(version_code|1),(user_id|1)
+210042 security_package_updated                 (package_name|3),(version_code|1),(user_id|1)
+210043 security_package_uninstalled             (package_name|3),(version_code|1),(user_id|1)

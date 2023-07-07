@@ -22,12 +22,12 @@ import android.content.pm.SigningDetails;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.pkg.component.ParsedProcess;
 
 import java.util.List;
 
+/** @hide */
 public interface SharedUserApi {
 
     @NonNull

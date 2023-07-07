@@ -23,7 +23,6 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.InputConfig;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.view.InputApplicationHandle;
@@ -72,8 +71,8 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mWindowHandle.token = mClientChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
         mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        mWindowHandle.ownerPid = Process.myPid();
-        mWindowHandle.ownerUid = Process.myUid();
+        mWindowHandle.ownerPid = WindowManagerService.MY_PID;
+        mWindowHandle.ownerUid = WindowManagerService.MY_UID;
         mWindowHandle.scaleFactor = 1.0f;
         mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE | InputConfig.TRUSTED_OVERLAY;
 

@@ -24,24 +24,30 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
+import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -57,6 +63,8 @@ class BatterySaverTileTest : SysuiTestCase() {
     private lateinit var userContext: Context
     @Mock
     private lateinit var qsHost: QSHost
+    @Mock
+    private lateinit var uiEventLogger: QsEventLogger
     @Mock
     private lateinit var metricsLogger: MetricsLogger
     @Mock
@@ -77,6 +85,7 @@ class BatterySaverTileTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
+        `when`(qsHost.context).thenReturn(mContext)
         `when`(qsHost.userContext).thenReturn(userContext)
         `when`(userContext.userId).thenReturn(USER)
 
@@ -84,6 +93,7 @@ class BatterySaverTileTest : SysuiTestCase() {
 
         tile = BatterySaverTile(
                 qsHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 FalsingManagerFake(),
@@ -95,6 +105,12 @@ class BatterySaverTileTest : SysuiTestCase() {
                 secureSettings)
 
         tile.initialize()
+        testableLooper.processAllMessages()
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
         testableLooper.processAllMessages()
     }
 
@@ -132,5 +148,27 @@ class BatterySaverTileTest : SysuiTestCase() {
 
         tile.handleSetListening(false)
         verify(batteryController).clearLastPowerSaverStartView()
+    }
+
+    @Test
+    fun testIcon_whenBatterySaverDisabled_isOffState() {
+        val state = QSTile.BooleanState()
+        tile.onPowerSaveChanged(false)
+
+        tile.handleUpdateState(state, /* arg= */ null)
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_battery_saver_icon_off))
+    }
+
+    @Test
+    fun testIcon_whenBatterySaverEnabled_isOnState() {
+        val state = QSTile.BooleanState()
+        tile.onPowerSaveChanged(true)
+
+        tile.handleUpdateState(state, /* arg= */ null)
+
+        assertThat(state.icon)
+                .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_battery_saver_icon_on))
     }
 }

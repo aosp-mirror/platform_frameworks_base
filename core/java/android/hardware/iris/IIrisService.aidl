@@ -26,5 +26,6 @@ interface IIrisService {
     // Registers all HIDL and AIDL sensors. Only HIDL sensor properties need to be provided, because
     // AIDL sensor properties are retrieved directly from the available HALs. If no HIDL HALs exist,
     // hidlSensors must be non-null and empty. See AuthService.java
+    @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void registerAuthenticators(in List<SensorPropertiesInternal> hidlSensors);
 }

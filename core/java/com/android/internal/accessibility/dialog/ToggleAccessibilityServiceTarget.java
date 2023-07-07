@@ -29,11 +29,21 @@ import com.android.internal.accessibility.common.ShortcutConstants.Accessibility
 import com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuMode;
 import com.android.internal.accessibility.dialog.TargetAdapter.ViewHolder;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Extension for {@link AccessibilityServiceTarget} with {@link AccessibilityFragmentType#TOGGLE}
  * type.
  */
 class ToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
+
+    /** Float enum for view alpha setting. */
+    @Retention(RetentionPolicy.SOURCE)
+    @interface StatusViewAlphaScale {
+        float OPAQUE = 1.0f;
+        float DISABLED = 0.5f;
+    }
 
     ToggleAccessibilityServiceTarget(Context context, @ShortcutType int shortcutType,
             @NonNull AccessibilityServiceInfo serviceInfo) {
@@ -41,6 +51,11 @@ class ToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
                 shortcutType,
                 AccessibilityFragmentType.TOGGLE,
                 serviceInfo);
+
+        final int statusResId = isAccessibilityServiceEnabled(getContext(), getId())
+                ? R.string.accessibility_shortcut_menu_item_status_on
+                : R.string.accessibility_shortcut_menu_item_status_off;
+        setStateDescription(getContext().getString(statusResId));
     }
 
     @Override
@@ -48,17 +63,13 @@ class ToggleAccessibilityServiceTarget extends AccessibilityServiceTarget {
             @ShortcutMenuMode int shortcutMenuMode) {
         super.updateActionItem(holder, shortcutMenuMode);
 
+        final boolean isAllowed = AccessibilityTargetHelper.isAccessibilityTargetAllowed(
+                getContext(), getComponentName().getPackageName(), getUid());
         final boolean isEditMenuMode =
                 shortcutMenuMode == ShortcutMenuMode.EDIT;
         holder.mStatusView.setVisibility(isEditMenuMode ? View.GONE : View.VISIBLE);
         holder.mStatusView.setText(getStateDescription());
-    }
-
-    @Override
-    public CharSequence getStateDescription() {
-        final int statusResId = isAccessibilityServiceEnabled(getContext(), getId())
-                ? R.string.accessibility_shortcut_menu_item_status_on
-                : R.string.accessibility_shortcut_menu_item_status_off;
-        return getContext().getString(statusResId);
+        holder.mStatusView.setAlpha(isAllowed
+                ? StatusViewAlphaScale.OPAQUE : StatusViewAlphaScale.DISABLED);
     }
 }

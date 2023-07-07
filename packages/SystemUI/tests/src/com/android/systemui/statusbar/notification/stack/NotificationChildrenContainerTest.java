@@ -25,13 +25,17 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationHeaderViewWrapper;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -150,5 +154,40 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
         mChildrenContainer.recreateNotificationHeader(null, false);
         Assert.assertNotNull("Children container must have a header after recreation",
                 mChildrenContainer.getCurrentHeaderView());
+    }
+
+    @Test
+    public void applyRoundnessAndInvalidate_should_be_immediately_applied_on_last_child() {
+        List<ExpandableNotificationRow> children = mChildrenContainer.getAttachedChildren();
+        ExpandableNotificationRow notificationRow = children.get(children.size() - 1);
+        Assert.assertEquals(0f, mChildrenContainer.getBottomRoundness(), 0.001f);
+        Assert.assertEquals(0f, notificationRow.getBottomRoundness(), 0.001f);
+
+        mChildrenContainer.requestBottomRoundness(1f, SourceType.from(""), false);
+
+        Assert.assertEquals(1f, mChildrenContainer.getBottomRoundness(), 0.001f);
+        Assert.assertEquals(1f, notificationRow.getBottomRoundness(), 0.001f);
+    }
+
+    @Test
+    public void applyRoundnessAndInvalidate_should_be_immediately_applied_on_header() {
+        NotificationHeaderViewWrapper header = mChildrenContainer.getNotificationHeaderWrapper();
+        Assert.assertEquals(0f, header.getTopRoundness(), 0.001f);
+
+        mChildrenContainer.requestTopRoundness(1f, SourceType.from(""), false);
+
+        Assert.assertEquals(1f, header.getTopRoundness(), 0.001f);
+    }
+
+    @Test
+    public void applyRoundnessAndInvalidate_should_be_immediately_applied_on_headerLowPriority() {
+        mChildrenContainer.setIsLowPriority(true);
+
+        NotificationHeaderViewWrapper header = mChildrenContainer.getNotificationHeaderWrapper();
+        Assert.assertEquals(0f, header.getTopRoundness(), 0.001f);
+
+        mChildrenContainer.requestTopRoundness(1f, SourceType.from(""), false);
+
+        Assert.assertEquals(1f, header.getTopRoundness(), 0.001f);
     }
 }

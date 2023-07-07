@@ -16,13 +16,18 @@
 
 package com.android.server.autofill;
 
+import static com.android.server.autofill.Helper.sDebug;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
 import android.app.assist.AssistStructure.WindowNode;
 import android.content.ComponentName;
+import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.metrics.LogMaker;
+import android.os.UserManager;
 import android.service.autofill.Dataset;
 import android.service.autofill.InternalSanitizer;
 import android.service.autofill.SaveInfo;
@@ -30,6 +35,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.autofill.AutofillId;
@@ -37,8 +43,10 @@ import android.view.autofill.AutofillValue;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -279,6 +287,45 @@ public final class Helper {
             prevIndex = index;
         }
         return true;
+    }
+
+    /**
+     * Gets a context with the proper display id.
+     *
+     * <p>For most cases it will return the provided context, but on devices that
+     * {@link UserManager#isVisibleBackgroundUsersEnabled() support visible background users}, it
+     * will return a context with the display pased as parameter.
+     */
+    static Context getDisplayContext(Context context, int displayId) {
+        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            return context;
+        }
+        if (context.getDisplayId() == displayId) {
+            if (sDebug) {
+                Slogf.d(TAG, "getDisplayContext(): context %s already has displayId %d", context,
+                        displayId);
+            }
+            return context;
+        }
+        if (sDebug) {
+            Slogf.d(TAG, "Creating context for display %d", displayId);
+        }
+        Display display = context.getSystemService(DisplayManager.class).getDisplay(displayId);
+        if (display == null) {
+            Slogf.wtf(TAG, "Could not get context with displayId %d, Autofill operations will "
+                    + "probably fail)", displayId);
+            return context;
+        }
+
+        return context.createDisplayContext(display);
+    }
+
+    static <T> @Nullable T weakDeref(WeakReference<T> weakRef, String tag, String prefix) {
+        T deref = weakRef.get();
+        if (deref == null) {
+            Slog.wtf(tag, prefix + "fail to deref " + weakRef);
+        }
+        return deref;
     }
 
     private interface ViewNodeFilter {

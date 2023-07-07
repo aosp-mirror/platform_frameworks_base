@@ -25,13 +25,14 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.permission.IOnPermissionsChangeListener;
+import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,8 +77,8 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * @return a {@link PermissionInfo} containing information about the permission, or {@code null}
      *         if not found
      */
-    PermissionInfo getPermissionInfo(@NonNull String permName, @NonNull String opPackageName,
-            @PackageManager.PermissionInfoFlags int flags);
+    PermissionInfo getPermissionInfo(@NonNull String permName,
+            @PackageManager.PermissionInfoFlags int flags, @NonNull String opPackageName);
 
     /**
      * Query for all of the permissions associated with a particular group.
@@ -428,6 +429,13 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
             @UserIdInt int userId);
 
     /**
+     * Reset the runtime permission state changes for all packages in a user.
+     *
+     * @param userId the user ID
+     */
+    void resetRuntimePermissionsForUser(@UserIdInt int userId);
+
+    /**
      * Read legacy permission state from package settings.
      *
      * TODO(zhanghai): This is a temporary method because we should not expose
@@ -443,6 +451,18 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * for permission.
      */
     void writeLegacyPermissionStateTEMP();
+
+    /**
+     * Get all the permissions definitions from a package that's installed in the system.
+     * <p>
+     * A permission definition in a normal app may not be installed if it's overridden by the
+     * platform or system app that contains a conflicting definition after system upgrade.
+     *
+     * @param packageName the name of the package
+     * @return the names of the installed permissions
+     */
+    @NonNull
+    Set<String> getInstalledPermissions(@NonNull String packageName);
 
     /**
      * Get all the permissions granted to a package.
@@ -479,11 +499,11 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
 
     /** Get all permissions that have a certain protection */
     @NonNull
-    ArrayList<PermissionInfo> getAllPermissionsWithProtection(
+    List<PermissionInfo> getAllPermissionsWithProtection(
             @PermissionInfo.Protection int protection);
 
     /** Get all permissions that have certain protection flags */
-    @NonNull ArrayList<PermissionInfo> getAllPermissionsWithProtectionFlags(
+    @NonNull List<PermissionInfo> getAllPermissionsWithProtectionFlags(
             @PermissionInfo.ProtectionFlags int protectionFlags);
 
     /**
@@ -560,11 +580,11 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
     /**
      * Callback when a package has been added.
      *
-     * @param pkg the added package
+     * @param packageState the added package
      * @param isInstantApp whether the added package is an instant app
      * @param oldPkg the old package, or {@code null} if none
      */
-    void onPackageAdded(@NonNull AndroidPackage pkg, boolean isInstantApp,
+    void onPackageAdded(@NonNull PackageState packageState, boolean isInstantApp,
             @Nullable AndroidPackage oldPkg);
 
     /**
@@ -591,16 +611,16 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * Callback when a package has been uninstalled.
      * <p>
      * The package may have been fully removed from the system, or only marked as uninstalled for
-     * this user but still instlaled for other users.
-     *
-     * TODO: Pass PackageState instead.
+     * this user but still installed for other users.
      *
      * @param packageName the name of the uninstalled package
      * @param appId the app ID of the uninstalled package
-     * @param pkg the uninstalled package, or {@code null} if unavailable
+     * @param packageState the uninstalled package
+     * @param pkg the uninstalled package
      * @param sharedUserPkgs the packages that are in the same shared user
      * @param userId the user ID the package is uninstalled for
      */
-    void onPackageUninstalled(@NonNull String packageName, int appId, @Nullable AndroidPackage pkg,
+    void onPackageUninstalled(@NonNull String packageName, int appId,
+            @NonNull PackageState packageState, @NonNull AndroidPackage pkg,
             @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId);
 }

@@ -22,9 +22,9 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.view.MotionEvent;
+import com.android.internal.util.ScreenshotRequest;
 
 import com.android.systemui.shared.recents.model.Task;
-import com.android.systemui.shared.system.RemoteTransitionCompat;
 
 /**
  * Temporary callbacks into SystemUI.
@@ -34,25 +34,12 @@ interface ISystemUiProxy {
     /**
      * Begins screen pinning on the provided {@param taskId}.
      */
-    void startScreenPinning(int taskId) = 1;
+    oneway void startScreenPinning(int taskId) = 1;
 
     /**
      * Notifies SystemUI that Overview is shown.
      */
-    void onOverviewShown(boolean fromHome) = 6;
-
-    /**
-     * Get the secondary split screen app's rectangle when not minimized.
-     * @deprecated
-     */
-    Rect getNonMinimizedSplitScreenSecondaryBounds() = 7;
-
-    /**
-     * Control the {@param alpha} of the option nav bar button (back-button in 2 button mode
-     * and home handle & background in gestural mode).  The {@param animate} is currently only
-     * supported for 2 button mode.
-     */
-    void setNavBarButtonAlpha(float alpha, boolean animate) = 19;
+    oneway void onOverviewShown(boolean fromHome) = 6;
 
     /**
      * Proxies motion events from the homescreen UI to the status bar. Only called when
@@ -61,86 +48,57 @@ interface ISystemUiProxy {
      *
      * Normal gesture: DOWN, MOVE/POINTER_DOWN/POINTER_UP)*, UP or CANCLE
      */
-    void onStatusBarMotionEvent(in MotionEvent event) = 9;
+    oneway void onStatusBarMotionEvent(in MotionEvent event) = 9;
 
     /**
      * Proxies the assistant gesture's progress started from navigation bar.
      */
-    void onAssistantProgress(float progress) = 12;
+    oneway void onAssistantProgress(float progress) = 12;
 
     /**
     * Proxies the assistant gesture fling velocity (in pixels per millisecond) upon completion.
     * Velocity is 0 for drag gestures.
     */
-    void onAssistantGestureCompletion(float velocity) = 18;
+    oneway void onAssistantGestureCompletion(float velocity) = 18;
 
     /**
      * Start the assistant.
      */
-    void startAssistant(in Bundle bundle) = 13;
+    oneway void startAssistant(in Bundle bundle) = 13;
 
     /**
      * Notifies that the accessibility button in the system's navigation area has been clicked
      */
-    void notifyAccessibilityButtonClicked(int displayId) = 15;
+    oneway void notifyAccessibilityButtonClicked(int displayId) = 15;
 
     /**
      * Notifies that the accessibility button in the system's navigation area has been long clicked
      */
-    void notifyAccessibilityButtonLongClicked() = 16;
+    oneway void notifyAccessibilityButtonLongClicked() = 16;
 
     /**
      * Ends the system screen pinning.
      */
-    void stopScreenPinning() = 17;
-
-    /**
-     * Handle the provided image as if it was a screenshot.
-     *
-     * Deprecated, use handleImageBundleAsScreenshot with image bundle and UserTask
-     * @deprecated
-     */
-    void handleImageAsScreenshot(in Bitmap screenImage, in Rect locationInScreen,
-              in Insets visibleInsets, int taskId) = 21;
-
-    /**
-     * Sets the split-screen divider minimized state
-     * @deprecated
-     */
-    void setSplitScreenMinimized(boolean minimized) = 22;
-
-    /*
-     * Notifies that the swipe-to-home (recents animation) is finished.
-     */
-    void notifySwipeToHomeFinished() = 23;
+    oneway void stopScreenPinning() = 17;
 
     /**
      * Notifies that quickstep will switch to a new task
      * @param rotation indicates which Surface.Rotation the gesture was started in
      */
-    void notifyPrioritizedRotation(int rotation) = 25;
-
-    /**
-     * Handle the provided image as if it was a screenshot.
-     */
-    void handleImageBundleAsScreenshot(in Bundle screenImageBundle, in Rect locationInScreen,
-              in Insets visibleInsets, in Task.TaskKey task) = 28;
+    oneway void notifyPrioritizedRotation(int rotation) = 25;
 
     /**
      * Notifies to expand notification panel.
      */
-    void expandNotificationPanel() = 29;
+    oneway void expandNotificationPanel() = 29;
 
     /**
      * Notifies SystemUI to invoke Back.
      */
-    void onBackPressed() = 44;
+    oneway void onBackPressed() = 44;
 
     /** Sets home rotation enabled. */
-    void setHomeRotationEnabled(boolean enabled) = 45;
-
-    /** Notifies that a swipe-up gesture has started */
-    oneway void notifySwipeUpGestureStarted() = 46;
+    oneway void setHomeRotationEnabled(boolean enabled) = 45;
 
     /** Notifies when taskbar status updated */
     oneway void notifyTaskbarStatus(boolean visible, boolean stashed) = 47;
@@ -155,12 +113,17 @@ interface ISystemUiProxy {
     /**
      * Notifies SystemUI to invoke IME Switcher.
      */
-    void onImeSwitcherPressed() = 49;
+    oneway void onImeSwitcherPressed() = 49;
 
     /**
      * Notifies to toggle notification panel.
      */
-    void toggleNotificationPanel() = 50;
+    oneway void toggleNotificationPanel() = 50;
 
-    // Next id = 51
+    /**
+     * Handle the screenshot request.
+     */
+    oneway void takeScreenshot(in ScreenshotRequest request) = 51;
+
+    // Next id = 52
 }

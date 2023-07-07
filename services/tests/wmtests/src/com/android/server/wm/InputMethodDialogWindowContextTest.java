@@ -78,7 +78,7 @@ public class InputMethodDialogWindowContextTest extends WindowTestsBase {
     public void setUp() throws Exception {
         // Let the Display be created with the DualDisplay policy.
         final DisplayAreaPolicy.Provider policyProvider =
-                new DualDisplayAreaGroupPolicyTest.DualDisplayTestPolicyProvider();
+                new DualDisplayAreaGroupPolicyTest.DualDisplayTestPolicyProvider(mWm);
         Mockito.doReturn(policyProvider).when(mWm).getDisplayAreaPolicyProvider();
 
         mWindowContext = new InputMethodDialogWindowContext();

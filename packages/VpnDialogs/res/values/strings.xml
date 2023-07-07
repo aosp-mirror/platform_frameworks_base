@@ -128,4 +128,5 @@
         <xliff:g id="sanitized_vpn_label" example="My VPN app">%1$s</xliff:g> (
         <xliff:g id="sanitized_vpn_label" example="com.my.vpn.app">%2$s</xliff:g>)
     </string>
+
 </resources>

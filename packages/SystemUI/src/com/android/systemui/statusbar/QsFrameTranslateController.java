@@ -36,8 +36,7 @@ public abstract class QsFrameTranslateController {
     /**
      * Calculate and translate the QS Frame on the Y-axis.
      */
-    public abstract void translateQsFrame(View qsFrame, QS qs, float overExpansion,
-            float qsTranslationForFullShadeTransition);
+    public abstract void translateQsFrame(View qsFrame, QS qs, int bottomInset);
 
     /**
      * Calculate the top padding for notifications panel. This could be the supplied

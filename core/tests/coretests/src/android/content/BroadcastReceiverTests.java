@@ -49,7 +49,8 @@ public class BroadcastReceiverTests {
         final IntentFilter mockFilter = new IntentFilter("android.content.tests.TestAction");
         try {
             for (int i = 0; i < RECEIVER_LIMIT_PER_APP + 1; i++) {
-                mContext.registerReceiver(new EmptyReceiver(), mockFilter);
+                mContext.registerReceiver(new EmptyReceiver(), mockFilter,
+                        Context.RECEIVER_EXPORTED_UNAUDITED);
             }
             fail("No exception thrown when registering "
                     + (RECEIVER_LIMIT_PER_APP + 1) + " receivers");

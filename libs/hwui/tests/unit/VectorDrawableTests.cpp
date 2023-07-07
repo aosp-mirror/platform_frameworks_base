@@ -21,6 +21,12 @@
 #include "utils/MathUtils.h"
 #include "utils/VectorDrawableUtils.h"
 
+#include <SkBitmap.h>
+#include <SkCanvas.h>
+#include <SkPath.h>
+#include <SkRefCnt.h>
+#include <SkShader.h>
+
 #include <functional>
 
 namespace android {

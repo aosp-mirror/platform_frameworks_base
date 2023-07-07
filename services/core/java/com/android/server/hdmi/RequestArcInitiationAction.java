@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 
 /**
@@ -35,6 +37,16 @@ final class RequestArcInitiationAction extends RequestArcAction {
         super(source, avrAddress);
     }
 
+    /**
+     * @Constructor
+     *
+     * For more details look at {@link RequestArcAction#RequestArcAction}.
+     */
+    RequestArcInitiationAction(HdmiCecLocalDevice source, int avrAddress,
+            IHdmiControlCallback callback) {
+        super(source, avrAddress, callback);
+    }
+
     @Override
     boolean start() {
         // Seq #38
@@ -49,10 +61,34 @@ final class RequestArcInitiationAction extends RequestArcAction {
                 if (error != SendMessageResult.SUCCESS) {
                     // Turn off ARC status if <Request ARC Initiation> fails.
                     tv().disableArc();
-                    finish();
+                    finishWithCallback(HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
                 }
             }
         });
         return true;
+    }
+
+    @Override
+    boolean processCommand(HdmiCecMessage cmd) {
+        if (mState != STATE_WATING_FOR_REQUEST_ARC_REQUEST_RESPONSE
+                || !HdmiUtils.checkCommandSource(cmd, mAvrAddress, TAG)) {
+            return false;
+        }
+        int opcode = cmd.getOpcode();
+        switch (opcode) {
+            case Constants.MESSAGE_FEATURE_ABORT:
+                int originalOpcode = cmd.getParams()[0] & 0xFF;
+                if (originalOpcode == Constants.MESSAGE_REQUEST_ARC_INITIATION) {
+                    tv().disableArc();
+                    finishWithCallback(HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE);
+                    return true;
+                }
+                return false;
+            case Constants.MESSAGE_INITIATE_ARC:
+                finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
+                // This message still needs to be handled in HdmiCecLocalDeviceTv as well.
+                return false;
+        }
+        return false;
     }
 }

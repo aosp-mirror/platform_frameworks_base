@@ -45,4 +45,7 @@ cc_test {
     required: [
         "UidImportanceHelperApp",
     ],
+    data: [
+        ":UidImportanceHelperApp",
+    ],
 }

@@ -16,24 +16,36 @@
 
 package com.android.server.pm;
 
+import static android.os.Process.THREAD_PRIORITY_DEFAULT;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.Pair;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.internal.util.ConcurrentUtils;
+import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedComponent;
 import com.android.server.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.utils.WatchedArrayList;
+import com.android.server.utils.WatchedArraySet;
+import com.android.server.utils.WatchedSparseSetArray;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 final class AppsFilterUtils {
     public static boolean requestsQueryAllPackages(@NonNull AndroidPackage pkg) {
@@ -45,7 +57,7 @@ final class AppsFilterUtils {
 
     /** Returns true if the querying package may query for the potential target package */
     public static boolean canQueryViaComponents(AndroidPackage querying,
-            AndroidPackage potentialTarget, WatchedArrayList<String> protectedBroadcasts) {
+            AndroidPackage potentialTarget, WatchedArraySet<String> protectedBroadcasts) {
         if (!querying.getQueriesIntents().isEmpty()) {
             for (Intent intent : querying.getQueriesIntents()) {
                 if (matchesPackage(intent, potentialTarget, protectedBroadcasts)) {
@@ -69,11 +81,20 @@ final class AppsFilterUtils {
     public static boolean canQueryAsInstaller(PackageStateInternal querying,
             AndroidPackage potentialTarget) {
         final InstallSource installSource = querying.getInstallSource();
-        if (potentialTarget.getPackageName().equals(installSource.installerPackageName)) {
+        if (potentialTarget.getPackageName().equals(installSource.mInstallerPackageName)) {
             return true;
         }
-        if (!installSource.isInitiatingPackageUninstalled
-                && potentialTarget.getPackageName().equals(installSource.initiatingPackageName)) {
+        if (!installSource.mIsInitiatingPackageUninstalled
+                && potentialTarget.getPackageName().equals(installSource.mInitiatingPackageName)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean canQueryAsUpdateOwner(PackageStateInternal querying,
+            AndroidPackage potentialTarget) {
+        final InstallSource installSource = querying.getInstallSource();
+        if (potentialTarget.getPackageName().equals(installSource.mUpdateOwnerPackageName)) {
             return true;
         }
         return false;
@@ -117,7 +138,7 @@ final class AppsFilterUtils {
     }
 
     private static boolean matchesPackage(Intent intent, AndroidPackage potentialTarget,
-            WatchedArrayList<String> protectedBroadcasts) {
+            WatchedArraySet<String> protectedBroadcasts) {
         if (matchesAnyComponents(
                 intent, potentialTarget.getServices(), null /*protectedBroadcasts*/)) {
             return true;
@@ -138,7 +159,7 @@ final class AppsFilterUtils {
 
     private static boolean matchesAnyComponents(Intent intent,
             List<? extends ParsedMainComponent> components,
-            WatchedArrayList<String> protectedBroadcasts) {
+            WatchedArraySet<String> protectedBroadcasts) {
         for (int i = ArrayUtils.size(components) - 1; i >= 0; i--) {
             ParsedMainComponent component = components.get(i);
             if (!component.isExported()) {
@@ -152,7 +173,7 @@ final class AppsFilterUtils {
     }
 
     private static boolean matchesAnyFilter(Intent intent, ParsedComponent component,
-            WatchedArrayList<String> protectedBroadcasts) {
+            WatchedArraySet<String> protectedBroadcasts) {
         List<ParsedIntentInfo> intents = component.getIntents();
         for (int i = ArrayUtils.size(intents) - 1; i >= 0; i--) {
             IntentFilter intentFilter = intents.get(i).getIntentFilter();
@@ -164,9 +185,98 @@ final class AppsFilterUtils {
     }
 
     private static boolean matchesIntentFilter(Intent intent, IntentFilter intentFilter,
-            @Nullable WatchedArrayList<String> protectedBroadcasts) {
+            @Nullable WatchedArraySet<String> protectedBroadcasts) {
         return intentFilter.match(intent.getAction(), intent.getType(), intent.getScheme(),
                 intent.getData(), intent.getCategories(), "AppsFilter", true,
                 protectedBroadcasts != null ? protectedBroadcasts.untrackedStorage() : null) > 0;
+    }
+
+    /**
+     * A helper class for parallel computing of component visibility of all packages on the device.
+     */
+    public static final class ParallelComputeComponentVisibility {
+        private static final int MAX_THREADS = 4;
+
+        private final ArrayMap<String, ? extends PackageStateInternal> mExistingSettings;
+        private final WatchedArraySet<Integer> mForceQueryable;
+        private final WatchedArraySet<String> mProtectedBroadcasts;
+
+        ParallelComputeComponentVisibility(
+                @NonNull ArrayMap<String, ? extends PackageStateInternal> existingSettings,
+                @NonNull WatchedArraySet<Integer> forceQueryable,
+                @NonNull WatchedArraySet<String> protectedBroadcasts) {
+            mExistingSettings = existingSettings;
+            mForceQueryable = forceQueryable;
+            mProtectedBroadcasts = protectedBroadcasts;
+        }
+
+        /**
+         * Computes component visibility of all packages in parallel from a thread pool.
+         */
+        void execute(@NonNull WatchedSparseSetArray<Integer> outQueriesViaComponent) {
+            final ExecutorService pool = ConcurrentUtils.newFixedThreadPool(
+                    MAX_THREADS, ParallelComputeComponentVisibility.class.getSimpleName(),
+                    THREAD_PRIORITY_DEFAULT);
+            try {
+                final List<Pair<PackageState, Future<ArraySet<Integer>>>> futures =
+                        new ArrayList<>();
+                for (int i = mExistingSettings.size() - 1; i >= 0; i--) {
+                    final PackageStateInternal setting = mExistingSettings.valueAt(i);
+                    final AndroidPackage pkg = setting.getPkg();
+                    if (pkg == null || requestsQueryAllPackages(pkg)) {
+                        continue;
+                    }
+                    if (pkg.getQueriesIntents().isEmpty()
+                            && pkg.getQueriesProviders().isEmpty()) {
+                        continue;
+                    }
+                    futures.add(new Pair(setting,
+                            pool.submit(() -> getVisibleListOfQueryViaComponents(setting))));
+                }
+                for (int i = 0; i < futures.size(); i++) {
+                    final int appId = futures.get(i).first.getAppId();
+                    final Future<ArraySet<Integer>> future = futures.get(i).second;
+                    try {
+                        final ArraySet<Integer> visibleList = future.get();
+                        if (visibleList.size() != 0) {
+                            outQueriesViaComponent.addAll(appId, visibleList);
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            } finally {
+                pool.shutdownNow();
+            }
+        }
+
+        /**
+         * Returns a set of app IDs that contains components resolved by the queries intent
+         * or provider that declared in the manifest of the querying package.
+         *
+         * @param setting The package to query.
+         * @return A set of app IDs.
+         */
+        @NonNull
+        private ArraySet<Integer> getVisibleListOfQueryViaComponents(
+                @NonNull PackageStateInternal setting) {
+            final ArraySet<Integer> result = new ArraySet();
+            for (int i = mExistingSettings.size() - 1; i >= 0; i--) {
+                final PackageStateInternal otherSetting = mExistingSettings.valueAt(i);
+                if (setting.getAppId() == otherSetting.getAppId()) {
+                    continue;
+                }
+                if (otherSetting.getPkg() == null || mForceQueryable.contains(
+                        otherSetting.getAppId())) {
+                    continue;
+                }
+                final boolean canQuery = canQueryViaComponents(
+                        setting.getPkg(), otherSetting.getPkg(), mProtectedBroadcasts);
+                if (canQuery) {
+                    result.add(otherSetting.getAppId());
+                }
+            }
+            return result;
+        }
     }
 }

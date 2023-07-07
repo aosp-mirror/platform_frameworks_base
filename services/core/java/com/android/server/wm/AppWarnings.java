@@ -17,19 +17,27 @@
 package com.android.server.wm;
 
 import android.annotation.UiThread;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.util.AtomicFile;
 import android.util.DisplayMetrics;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
+
+import com.android.internal.util.ArrayUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -51,6 +59,7 @@ class AppWarnings {
     public static final int FLAG_HIDE_DISPLAY_SIZE = 0x01;
     public static final int FLAG_HIDE_COMPILE_SDK = 0x02;
     public static final int FLAG_HIDE_DEPRECATED_SDK = 0x04;
+    public static final int FLAG_HIDE_DEPRECATED_ABI = 0x08;
 
     private final HashMap<String, Integer> mPackageFlags = new HashMap<>();
 
@@ -63,6 +72,7 @@ class AppWarnings {
     private UnsupportedDisplaySizeDialog mUnsupportedDisplaySizeDialog;
     private UnsupportedCompileSdkDialog mUnsupportedCompileSdkDialog;
     private DeprecatedTargetSdkVersionDialog mDeprecatedTargetSdkVersionDialog;
+    private DeprecatedAbiDialog mDeprecatedAbiDialog;
 
     /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
     private HashSet<ComponentName> mAlwaysShowUnsupportedCompileSdkWarningActivities =
@@ -161,6 +171,39 @@ class AppWarnings {
     }
 
     /**
+     * Shows the "deprecated abi" warning, if necessary. This can only happen is the device
+     * supports both 64-bit and 32-bit ABIs, and the app only contains 32-bit libraries. The app
+     * cannot be installed if the device only supports 64-bit ABI while the app contains only 32-bit
+     * libraries.
+     *
+     * @param r activity record for which the warning may be displayed
+     */
+    public void showDeprecatedAbiDialogIfNeeded(ActivityRecord r) {
+        final boolean isUsingAbiOverride = (r.info.applicationInfo.privateFlagsExt
+                & ApplicationInfo.PRIVATE_FLAG_EXT_CPU_OVERRIDE) != 0;
+        if (isUsingAbiOverride) {
+            // The abiOverride flag was specified during installation, which means that if the app
+            // is currently running in 32-bit mode, it is intended. Do not show the warning dialog.
+            return;
+        }
+        // The warning dialog can also be disabled for debugging purpose
+        final boolean disableDeprecatedAbiDialog = SystemProperties.getBoolean(
+                "debug.wm.disable_deprecated_abi_dialog", false);
+        if (disableDeprecatedAbiDialog) {
+            return;
+        }
+        final String appPrimaryAbi = r.info.applicationInfo.primaryCpuAbi;
+        final String appSecondaryAbi = r.info.applicationInfo.secondaryCpuAbi;
+        final boolean appContainsOnly32bitLibraries =
+                (appPrimaryAbi != null && appSecondaryAbi == null && !appPrimaryAbi.contains("64"));
+        final boolean is64BitDevice =
+                ArrayUtils.find(Build.SUPPORTED_ABIS, abi -> abi.contains("64")) != null;
+        if (is64BitDevice && appContainsOnly32bitLibraries) {
+            mUiHandler.showDeprecatedAbiDialog(r);
+        }
+    }
+
+    /**
      * Called when an activity is being started.
      *
      * @param r record for the activity being started
@@ -169,6 +212,7 @@ class AppWarnings {
         showUnsupportedCompileSdkDialogIfNeeded(r);
         showUnsupportedDisplaySizeDialogIfNeeded(r);
         showDeprecatedTargetDialogIfNeeded(r);
+        showDeprecatedAbiDialogIfNeeded(r);
     }
 
     /**
@@ -294,6 +338,27 @@ class AppWarnings {
     }
 
     /**
+     * Shows the "deprecated abi" warning for the given application.
+     * <p>
+     * <strong>Note:</strong> Must be called on the UI thread.
+     *
+     * @param ar record for the activity that triggered the warning
+     */
+    @UiThread
+    private void showDeprecatedAbiDialogUiThread(ActivityRecord ar) {
+        if (mDeprecatedAbiDialog != null) {
+            mDeprecatedAbiDialog.dismiss();
+            mDeprecatedAbiDialog = null;
+        }
+        if (ar != null && !hasPackageFlag(
+                ar.packageName, FLAG_HIDE_DEPRECATED_ABI)) {
+            mDeprecatedAbiDialog = new DeprecatedAbiDialog(
+                    AppWarnings.this, mUiContext, ar.info.applicationInfo);
+            mDeprecatedAbiDialog.show();
+        }
+    }
+
+    /**
      * Dismisses all warnings for the given package.
      * <p>
      * <strong>Note:</strong> Must be called on the UI thread.
@@ -305,23 +370,30 @@ class AppWarnings {
     private void hideDialogsForPackageUiThread(String name) {
         // Hides the "unsupported display" dialog if necessary.
         if (mUnsupportedDisplaySizeDialog != null && (name == null || name.equals(
-                mUnsupportedDisplaySizeDialog.getPackageName()))) {
+                mUnsupportedDisplaySizeDialog.mPackageName))) {
             mUnsupportedDisplaySizeDialog.dismiss();
             mUnsupportedDisplaySizeDialog = null;
         }
 
         // Hides the "unsupported compile SDK" dialog if necessary.
         if (mUnsupportedCompileSdkDialog != null && (name == null || name.equals(
-                mUnsupportedCompileSdkDialog.getPackageName()))) {
+                mUnsupportedCompileSdkDialog.mPackageName))) {
             mUnsupportedCompileSdkDialog.dismiss();
             mUnsupportedCompileSdkDialog = null;
         }
 
         // Hides the "deprecated target sdk version" dialog if necessary.
         if (mDeprecatedTargetSdkVersionDialog != null && (name == null || name.equals(
-                mDeprecatedTargetSdkVersionDialog.getPackageName()))) {
+                mDeprecatedTargetSdkVersionDialog.mPackageName))) {
             mDeprecatedTargetSdkVersionDialog.dismiss();
             mDeprecatedTargetSdkVersionDialog = null;
+        }
+
+        // Hides the "deprecated abi" dialog if necessary.
+        if (mDeprecatedAbiDialog != null && (name == null || name.equals(
+                mDeprecatedAbiDialog.mPackageName))) {
+            mDeprecatedAbiDialog.dismiss();
+            mDeprecatedAbiDialog = null;
         }
     }
 
@@ -376,6 +448,7 @@ class AppWarnings {
         private static final int MSG_SHOW_UNSUPPORTED_COMPILE_SDK_DIALOG = 3;
         private static final int MSG_HIDE_DIALOGS_FOR_PACKAGE = 4;
         private static final int MSG_SHOW_DEPRECATED_TARGET_SDK_DIALOG = 5;
+        private static final int MSG_SHOW_DEPRECATED_ABI_DIALOG = 6;
 
         public UiHandler(Looper looper) {
             super(looper, null, true);
@@ -403,6 +476,10 @@ class AppWarnings {
                     final ActivityRecord ar = (ActivityRecord) msg.obj;
                     showDeprecatedTargetSdkDialogUiThread(ar);
                 } break;
+                case MSG_SHOW_DEPRECATED_ABI_DIALOG: {
+                    final ActivityRecord ar = (ActivityRecord) msg.obj;
+                    showDeprecatedAbiDialogUiThread(ar);
+                } break;
             }
         }
 
@@ -426,8 +503,56 @@ class AppWarnings {
             obtainMessage(MSG_SHOW_DEPRECATED_TARGET_SDK_DIALOG, r).sendToTarget();
         }
 
+        public void showDeprecatedAbiDialog(ActivityRecord r) {
+            removeMessages(MSG_SHOW_DEPRECATED_ABI_DIALOG);
+            obtainMessage(MSG_SHOW_DEPRECATED_ABI_DIALOG, r).sendToTarget();
+        }
+
         public void hideDialogsForPackage(String name) {
             obtainMessage(MSG_HIDE_DIALOGS_FOR_PACKAGE, name).sendToTarget();
+        }
+    }
+
+    static class BaseDialog {
+        final AppWarnings mManager;
+        final String mPackageName;
+        AlertDialog mDialog;
+        private BroadcastReceiver mCloseReceiver;
+
+        BaseDialog(AppWarnings manager, String packageName) {
+            mManager = manager;
+            mPackageName = packageName;
+        }
+
+        @UiThread
+        void show() {
+            if (mDialog == null) return;
+            if (mCloseReceiver == null) {
+                mCloseReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                            mManager.mUiHandler.hideDialogsForPackage(mPackageName);
+                        }
+                    }
+                };
+                mManager.mUiContext.registerReceiver(mCloseReceiver,
+                        new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
+                        Context.RECEIVER_EXPORTED);
+            }
+            Slog.w(TAG, "Showing " + getClass().getSimpleName() + " for package " + mPackageName);
+            mDialog.show();
+        }
+
+        @UiThread
+        void dismiss() {
+            if (mDialog == null) return;
+            if (mCloseReceiver != null) {
+                mManager.mUiContext.unregisterReceiver(mCloseReceiver);
+                mCloseReceiver = null;
+            }
+            mDialog.dismiss();
+            mDialog = null;
         }
     }
 

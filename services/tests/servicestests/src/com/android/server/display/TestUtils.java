@@ -28,13 +28,13 @@ import java.lang.reflect.Method;
 
 public final class TestUtils {
 
-    public static SensorEvent createSensorEvent(Sensor sensor, int lux) throws Exception {
+    public static SensorEvent createSensorEvent(Sensor sensor, int value) throws Exception {
         final Constructor<SensorEvent> constructor =
                 SensorEvent.class.getDeclaredConstructor(int.class);
         constructor.setAccessible(true);
         final SensorEvent event = constructor.newInstance(1);
         event.sensor = sensor;
-        event.values[0] = lux;
+        event.values[0] = value;
         event.timestamp = SystemClock.elapsedRealtimeNanos();
         return event;
     }
@@ -51,11 +51,27 @@ public final class TestUtils {
         }
     }
 
+    public static void setMaximumRange(Sensor sensor, float maximumRange) throws Exception {
+        Method setter = Sensor.class.getDeclaredMethod("setRange", Float.TYPE, Float.TYPE);
+        setter.setAccessible(true);
+        setter.invoke(sensor, maximumRange, 1);
+    }
+
     public static Sensor createSensor(int type, String strType) throws Exception {
         Constructor<Sensor> constr = Sensor.class.getDeclaredConstructor();
         constr.setAccessible(true);
         Sensor sensor = constr.newInstance();
         setSensorType(sensor, type, strType);
+        return sensor;
+    }
+
+    public static Sensor createSensor(int type, String strType, float maximumRange)
+            throws Exception {
+        Constructor<Sensor> constr = Sensor.class.getDeclaredConstructor();
+        constr.setAccessible(true);
+        Sensor sensor = constr.newInstance();
+        setSensorType(sensor, type, strType);
+        setMaximumRange(sensor, maximumRange);
         return sensor;
     }
 

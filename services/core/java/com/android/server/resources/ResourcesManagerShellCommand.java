@@ -62,13 +62,12 @@ public class ResourcesManagerShellCommand extends ShellCommand {
 
     private int dumpResources() throws RemoteException {
         String processId = getNextArgRequired();
-        try {
+        try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(getOutFileDescriptor())) {
             ConditionVariable lock = new ConditionVariable();
             RemoteCallback
                     finishCallback = new RemoteCallback(result -> lock.open(), null);
 
-            if (!mInterface.dumpResources(processId,
-                    ParcelFileDescriptor.dup(getOutFileDescriptor()), finishCallback)) {
+            if (!mInterface.dumpResources(processId, pfd, finishCallback)) {
                 getErrPrintWriter().println("RESOURCES DUMP FAILED on process " + processId);
                 return -1;
             }

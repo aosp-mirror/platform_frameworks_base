@@ -13,33 +13,28 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingVertical="@dimen/control_spinner_padding_vertical"
-    android:paddingHorizontal="@dimen/control_spinner_padding_horizontal">
+    android:layout_height="@dimen/control_apps_popup_item_height"
+    android:background="@drawable/controls_popup_item_background"
+    android:gravity="center_vertical|start"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/control_menu_horizontal_padding"
+    android:paddingEnd="@dimen/control_menu_horizontal_padding">
 
-  <LinearLayout
-      android:orientation="horizontal"
-      android:layout_width="match_parent"
+  <ImageView
+      android:id="@+id/app_icon"
+      android:layout_width="@dimen/controls_header_app_icon_size"
+      android:layout_height="@dimen/controls_header_app_icon_size"
+      android:layout_marginEnd="@dimen/control_menu_horizontal_padding"
+      android:contentDescription="@null"
+      tools:src="@drawable/ic_android" />
+
+  <TextView
+      android:id="@+id/controls_spinner_item"
+      style="@style/Control.Spinner.Item"
+      android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:gravity="center">
-
-    <ImageView
-        android:id="@+id/app_icon"
-        android:layout_gravity="center"
-        android:layout_width="@dimen/controls_header_app_icon_size"
-        android:layout_height="@dimen/controls_header_app_icon_size"
-        android:contentDescription="@null"
-        android:layout_marginEnd="10dp" />
-
-    <TextView
-        style="@style/Control.Spinner.Item"
-        android:id="@+id/controls_spinner_item"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
-  </LinearLayout>
-
+      tools:text="Android" />
 </LinearLayout>

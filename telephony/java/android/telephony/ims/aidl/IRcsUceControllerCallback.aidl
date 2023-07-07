@@ -17,7 +17,7 @@
 package android.telephony.ims.aidl;
 
 import android.telephony.ims.RcsContactUceCapability;
-
+import android.telephony.ims.SipDetails;
 /**
  * Provides interface for RCS UCE when receive a change.
  *
@@ -25,6 +25,6 @@ import android.telephony.ims.RcsContactUceCapability;
  */
 oneway interface IRcsUceControllerCallback {
     void onCapabilitiesReceived(in List<RcsContactUceCapability> contactCapabilities);
-    void onComplete();
-    void onError(int errorCode, long retryAfterMilliseconds);
+    void onComplete(in SipDetails details);
+    void onError(int errorCode, long retryAfterMilliseconds, in SipDetails details);
 }

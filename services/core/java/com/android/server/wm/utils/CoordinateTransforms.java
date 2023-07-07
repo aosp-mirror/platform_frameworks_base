@@ -22,11 +22,9 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import android.annotation.Dimension;
-import android.annotation.Nullable;
 import android.graphics.Matrix;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.Surface.Rotation;
 
 public class CoordinateTransforms {
@@ -137,19 +135,24 @@ public class CoordinateTransforms {
         out.postConcat(tmp);
     }
 
-    /**
-     * Transforms a rect using a transformation matrix
-     *
-     * @param transform the transformation to apply to the rect
-     * @param inOutRect the rect to transform
-     * @param tmp a temporary value, if null the function will allocate its own.
-     */
-    public static void transformRect(Matrix transform, Rect inOutRect, @Nullable RectF tmp) {
-        if (tmp == null) {
-            tmp = new RectF();
+    /** Computes the matrix that rotates the original w x h by the rotation delta. */
+    public static void computeRotationMatrix(int rotationDelta, int w, int h, Matrix outMatrix) {
+        switch (rotationDelta) {
+            case Surface.ROTATION_0:
+                outMatrix.reset();
+                break;
+            case Surface.ROTATION_90:
+                outMatrix.setRotate(90);
+                outMatrix.postTranslate(h, 0);
+                break;
+            case Surface.ROTATION_180:
+                outMatrix.setRotate(180);
+                outMatrix.postTranslate(w, h);
+                break;
+            case Surface.ROTATION_270:
+                outMatrix.setRotate(270);
+                outMatrix.postTranslate(0, w);
+                break;
         }
-        tmp.set(inOutRect);
-        transform.mapRect(tmp);
-        inOutRect.set((int) tmp.left, (int) tmp.top, (int) tmp.right, (int) tmp.bottom);
     }
 }

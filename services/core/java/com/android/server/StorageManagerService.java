@@ -47,7 +47,6 @@ import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -62,7 +61,6 @@ import android.app.PendingIntent;
 import android.app.admin.SecurityLog;
 import android.app.usage.StorageStatsManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -75,6 +73,9 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.ObbInfo;
 import android.database.ContentObserver;
+import android.media.MediaCodecList;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Binder;
@@ -94,7 +95,6 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.PersistableBundle;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -132,9 +132,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.TimeUtils;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -145,12 +144,12 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
-import com.android.internal.widget.LockPatternUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.storage.AppFuseBridge;
@@ -177,7 +176,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -283,7 +281,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private static final boolean DEBUG_EVENTS = false;
     private static final boolean DEBUG_OBB = false;
 
     /**
@@ -292,15 +289,6 @@ class StorageManagerService extends IStorageManager.Stub
      * to be async with callbacks, so we want watchdog to fire if vold wedges.
      */
     private static final boolean WATCHDOG_ENABLE = true;
-
-    /**
-     * Our goal is for all Android devices to be usable as development devices,
-     * which includes the new Direct Boot mode added in N. For devices that
-     * don't have native FBE support, we offer an emulation mode for developer
-     * testing purposes, but if it's prohibitively difficult to support this
-     * mode, it can be disabled for specific products using this flag.
-     */
-    private static final boolean EMULATE_FBE_SUPPORTED = true;
 
     private static final String TAG = "StorageManagerService";
     private static final boolean LOCAL_LOGV = Log.isLoggable(TAG, Log.VERBOSE);
@@ -328,11 +316,6 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String ATTR_LAST_SEEN_MILLIS = "lastSeenMillis";
     private static final String ATTR_LAST_TRIM_MILLIS = "lastTrimMillis";
     private static final String ATTR_LAST_BENCH_MILLIS = "lastBenchMillis";
-
-    private static final String[] ALL_STORAGE_PERMISSIONS = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
 
     @Nullable public static String sMediaStoreAuthorityProcessName;
 
@@ -368,6 +351,10 @@ class StorageManagerService extends IStorageManager.Stub
     private static final float DEFAULT_LOW_BATTERY_LEVEL = 20F;
     // Decide whether charging is required to turn on the feature
     private static final boolean DEFAULT_CHARGING_REQUIRED = true;
+    // Minimum GC interval sleep time in ms
+    private static final int DEFAULT_MIN_GC_SLEEPTIME = 10000;
+    // Target dirty segment ratio to aim to
+    private static final int DEFAULT_TARGET_DIRTY_RATIO = 80;
 
     private volatile int mLifetimePercentThreshold;
     private volatile int mMinSegmentsThreshold;
@@ -375,7 +362,9 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile float mSegmentReclaimWeight;
     private volatile float mLowBatteryLevel;
     private volatile boolean mChargingRequired;
-    private volatile boolean mNeedGC;
+    private volatile int mMinGCSleepTime;
+    private volatile int mTargetDirtyRatio;
+    private volatile boolean mNeedGC = true;
 
     private volatile boolean mPassedLifetimeThresh;
     // Tracking storage write amounts in one period
@@ -388,25 +377,13 @@ class StorageManagerService extends IStorageManager.Stub
     private final Object mLock = LockGuard.installNewLock(LockGuard.INDEX_STORAGE);
 
     /**
-     * Similar to {@link #mLock}, never hold this lock while performing downcalls into vold.
-     * Also, never hold this while calling into PackageManagerService since it is used in callbacks
-     * from PackageManagerService.
-     *
-     * If both {@link #mLock} and this lock need to be held, {@link #mLock} should be acquired
-     * before this.
-     *
-     * Use -PL suffix for methods that need to called with this lock held.
-     */
-    private final Object mPackagesLock = new Object();
-
-    /**
      * mLocalUnlockedUsers affects the return value of isUserUnlocked.  If
      * any value in the array changes, then the binder cache for
      * isUserUnlocked must be invalidated.  When adding mutating methods to
      * WatchedLockedUsers, be sure to invalidate the cache in the new
      * methods.
      */
-    private class WatchedLockedUsers {
+    private static class WatchedLockedUsers {
         private int[] users = EmptyArray.INT;
         public WatchedLockedUsers() {
             invalidateIsUserUnlockedCache();
@@ -493,7 +470,7 @@ class StorageManagerService extends IStorageManager.Stub
     @GuardedBy("mAppFuseLock")
     private AppFuseBridge mAppFuseBridge = null;
 
-    private HashMap<Integer, Integer> mUserSharesMediaWith = new HashMap<>();
+    private final SparseIntArray mUserSharesMediaWith = new SparseIntArray();
 
     /** Matches known application dir paths. The first group contains the generic part of the path,
      * the second group contains the user id (or null if it's a public volume without users), the
@@ -511,18 +488,6 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
         throw new IllegalArgumentException("No volume found for ID " + id);
-    }
-
-    private String findVolumeIdForPathOrThrow(String path) {
-        synchronized (mLock) {
-            for (int i = 0; i < mVolumes.size(); i++) {
-                final VolumeInfo vol = mVolumes.valueAt(i);
-                if (vol.path != null && path.startsWith(vol.path)) {
-                    return vol.id;
-                }
-            }
-        }
-        throw new IllegalArgumentException("No volume found for path " + path);
     }
 
     private VolumeRecord findRecordForPath(String path) {
@@ -568,30 +533,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private boolean shouldBenchmark() {
-        final long benchInterval = Settings.Global.getLong(mContext.getContentResolver(),
-                Settings.Global.STORAGE_BENCHMARK_INTERVAL, DateUtils.WEEK_IN_MILLIS);
-        if (benchInterval == -1) {
-            return false;
-        } else if (benchInterval == 0) {
-            return true;
-        }
-
-        synchronized (mLock) {
-            for (int i = 0; i < mVolumes.size(); i++) {
-                final VolumeInfo vol = mVolumes.valueAt(i);
-                final VolumeRecord rec = mRecords.get(vol.fsUuid);
-                if (vol.isMountedWritable() && rec != null) {
-                    final long benchAge = System.currentTimeMillis() - rec.lastBenchMillis;
-                    if (benchAge >= benchInterval) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-    }
-
     private CountDownLatch findOrCreateDiskScanLatch(String diskId) {
         synchronized (mLock) {
             CountDownLatch latch = mDiskScanLatches.get(diskId);
@@ -604,7 +545,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private final Context mContext;
-    private final ContentResolver mResolver;
 
     private volatile IVold mVold;
     private volatile IStoraged mStoraged;
@@ -619,7 +559,6 @@ class StorageManagerService extends IStorageManager.Stub
     private IAppOpsService mIAppOpsService;
 
     private final Callbacks mCallbacks;
-    private final LockPatternUtils mLockPatternUtils;
 
     private static final String ANR_DELAY_MILLIS_DEVICE_CONFIG_KEY =
             "anr_delay_millis";
@@ -648,7 +587,7 @@ class StorageManagerService extends IStorageManager.Stub
     @GuardedBy("mLock")
     private final Set<Integer> mUidsWithLegacyExternalStorage = new ArraySet<>();
     // Not guarded by lock, always used on the ActivityManager thread
-    private final Map<Integer, PackageMonitor> mPackageMonitorsForUser = new ArrayMap<>();
+    private final SparseArray<PackageMonitor> mPackageMonitorsForUser = new SparseArray<>();
 
 
     class ObbState implements IBinder.DeathRecipient {
@@ -736,6 +675,7 @@ class StorageManagerService extends IStorageManager.Stub
     private static final int H_COMPLETE_UNLOCK_USER = 14;
     private static final int H_VOLUME_STATE_CHANGED = 15;
     private static final int H_CLOUD_MEDIA_PROVIDER_CHANGED = 16;
+    private static final int H_SECURE_KEYGUARD_STATE_CHANGED = 17;
 
     class StorageManagerServiceHandler extends Handler {
         public StorageManagerServiceHandler(Looper looper) {
@@ -866,12 +806,28 @@ class StorageManagerService extends IStorageManager.Stub
                     break;
                 }
                 case H_CLOUD_MEDIA_PROVIDER_CHANGED: {
-                    final Object listener = msg.obj;
-                    if (listener instanceof StorageManagerInternal.CloudProviderChangeListener) {
-                        notifyCloudMediaProviderChangedAsync(
-                                (StorageManagerInternal.CloudProviderChangeListener) listener);
+                    // We send this message in two cases:
+                    // 1. After the cloud provider has been set/updated for a user.
+                    //    In this case Message's #arg1 is set to UserId, and #obj is set to the
+                    //    authority of the new cloud provider.
+                    // 2. After a new CloudProviderChangeListener is registered.
+                    //    In this case Message's #obj is set to the CloudProviderChangeListener.
+                    if (msg.obj instanceof StorageManagerInternal.CloudProviderChangeListener) {
+                        final StorageManagerInternal.CloudProviderChangeListener listener =
+                                (StorageManagerInternal.CloudProviderChangeListener) msg.obj;
+                        notifyCloudMediaProviderChangedAsync(listener);
                     } else {
-                        onCloudMediaProviderChangedAsync(msg.arg1);
+                        final int userId = msg.arg1;
+                        final String authority = (String) msg.obj;
+                        onCloudMediaProviderChangedAsync(userId, authority);
+                    }
+                    break;
+                }
+                case H_SECURE_KEYGUARD_STATE_CHANGED: {
+                    try {
+                        mVold.onSecureKeyguardStateChanged((boolean) msg.obj);
+                    } catch (Exception e) {
+                        Slog.wtf(TAG, e);
                     }
                     break;
                 }
@@ -892,9 +848,17 @@ class StorageManagerService extends IStorageManager.Stub
                 if (Intent.ACTION_USER_ADDED.equals(action)) {
                     final UserManager um = mContext.getSystemService(UserManager.class);
                     final int userSerialNumber = um.getUserSerialNumber(userId);
-                    mVold.onUserAdded(userId, userSerialNumber);
+                    final UserInfo userInfo = um.getUserInfo(userId);
+                    if (userInfo.isCloneProfile()) {
+                        // Only clone profiles share storage with their parent
+                        mVold.onUserAdded(userId, userSerialNumber,
+                                userInfo.profileGroupId /* sharesStorageWithUserId */);
+                    } else {
+                        mVold.onUserAdded(userId, userSerialNumber,
+                                -1 /* shareStorageWithUserId */);
+                    }
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                    synchronized (mVolumes) {
+                    synchronized (mLock) {
                         final int size = mVolumes.size();
                         for (int i = 0; i < size; i++) {
                             final VolumeInfo vol = mVolumes.valueAt(i);
@@ -993,10 +957,27 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    private boolean isHevcDecoderSupported() {
+        MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+        MediaCodecInfo[] codecInfos = codecList.getCodecInfos();
+        for (MediaCodecInfo codecInfo : codecInfos) {
+            if (codecInfo.isEncoder()) {
+                continue;
+            }
+            String[] supportedTypes = codecInfo.getSupportedTypes();
+            for (String type : supportedTypes) {
+                if (type.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void configureTranscoding() {
         // See MediaProvider TranscodeHelper#getBooleanProperty for more information
         boolean transcodeEnabled = false;
-        boolean defaultValue = true;
+        boolean defaultValue = isHevcDecoderSupported() ? true : false;
 
         if (SystemProperties.getBoolean("persist.sys.fuse.transcode_user_control", false)) {
             transcodeEnabled = SystemProperties.getBoolean("persist.sys.fuse.transcode_enabled",
@@ -1061,41 +1042,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    /**
-     * MediaProvider has a ton of code that makes assumptions about storage
-     * paths never changing, so we outright kill them to pick up new state.
-     */
-    @Deprecated
-    private void killMediaProvider(List<UserInfo> users) {
-        if (users == null) return;
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            for (UserInfo user : users) {
-                // System user does not have media provider, so skip.
-                if (user.isSystemOnly()) continue;
-
-                final ProviderInfo provider = mPmInternal.resolveContentProvider(
-                        MediaStore.AUTHORITY, PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        user.id, Process.SYSTEM_UID);
-                if (provider != null) {
-                    final IActivityManager am = ActivityManager.getService();
-                    try {
-                        am.killApplication(provider.applicationInfo.packageName,
-                                UserHandle.getAppId(provider.applicationInfo.uid),
-                                UserHandle.USER_ALL, "vold reset");
-                        // We only need to run this once. It will kill all users' media processes.
-                        break;
-                    } catch (RemoteException e) {
-                    }
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     @GuardedBy("mLock")
     private void addInternalVolumeLocked() {
         // Create a stub volume that represents internal storage
@@ -1104,31 +1050,6 @@ class StorageManagerService extends IStorageManager.Stub
         internal.state = VolumeInfo.STATE_MOUNTED;
         internal.path = Environment.getDataDirectory().getAbsolutePath();
         mVolumes.put(internal.id, internal);
-    }
-
-    private void initIfBootedAndConnected() {
-        Slog.d(TAG, "Thinking about init, mBootCompleted=" + mBootCompleted
-                + ", mDaemonConnected=" + mDaemonConnected);
-        if (mBootCompleted && mDaemonConnected
-                && !StorageManager.isFileEncryptedNativeOnly()) {
-            // When booting a device without native support, make sure that our
-            // user directories are locked or unlocked based on the current
-            // emulation status.
-            final boolean initLocked = StorageManager.isFileEncryptedEmulatedOnly();
-            Slog.d(TAG, "Setting up emulation state, initlocked=" + initLocked);
-            final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
-            for (UserInfo user : users) {
-                try {
-                    if (initLocked) {
-                        mVold.lockUserKey(user.id);
-                    } else {
-                        mVold.unlockUserKey(user.id, user.serialNumber, encodeBytes(null));
-                    }
-                } catch (Exception e) {
-                    Slog.wtf(TAG, e);
-                }
-            }
-        }
     }
 
     private void resetIfBootedAndConnected() {
@@ -1166,7 +1087,11 @@ class StorageManagerService extends IStorageManager.Stub
 
                 // Tell vold about all existing and started users
                 for (UserInfo user : users) {
-                    mVold.onUserAdded(user.id, user.serialNumber);
+                    if (user.isCloneProfile()) {
+                        mVold.onUserAdded(user.id, user.serialNumber, user.profileGroupId);
+                    } else {
+                        mVold.onUserAdded(user.id, user.serialNumber, -1);
+                    }
                 }
                 for (int userId : systemUnlockedUsers) {
                     mVold.onUserStarted(userId);
@@ -1316,14 +1241,13 @@ class StorageManagerService extends IStorageManager.Stub
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
-        PackageMonitor monitor = mPackageMonitorsForUser.remove(userId);
+        PackageMonitor monitor = mPackageMonitorsForUser.removeReturnOld(userId);
         if (monitor != null) {
             monitor.unregister();
         }
     }
 
     private void maybeRemountVolumes(int userId) {
-        boolean reset = false;
         List<VolumeInfo> volumesToRemount = new ArrayList<>();
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
@@ -1359,12 +1283,12 @@ class StorageManagerService extends IStorageManager.Stub
     public void onKeyguardStateChanged(boolean isShowing) {
         // Push down current secure keyguard status so that we ignore malicious
         // USB devices while locked.
-        mSecureKeyguardShowing = isShowing
+        boolean isSecureKeyguardShowing = isShowing
                 && mContext.getSystemService(KeyguardManager.class).isDeviceSecure(mCurrentUserId);
-        try {
-            mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
+        if (mSecureKeyguardShowing != isSecureKeyguardShowing) {
+            mSecureKeyguardShowing = isSecureKeyguardShowing;
+            mHandler.obtainMessage(H_SECURE_KEYGUARD_STATE_CHANGED, mSecureKeyguardShowing)
+                    .sendToTarget();
         }
     }
 
@@ -1372,10 +1296,12 @@ class StorageManagerService extends IStorageManager.Stub
         mHandler.sendMessage(mHandler.obtainMessage(H_FSTRIM, callback));
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
     // Binder entry point for kicking off an immediate fstrim
     @Override
     public void runMaintenance() {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        super.runMaintenance_enforcePermission();
+
         runIdleMaintenance(null);
     }
 
@@ -1390,7 +1316,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void handleDaemonConnected() {
-        initIfBootedAndConnected();
         resetIfBootedAndConnected();
     }
 
@@ -1469,7 +1394,7 @@ class StorageManagerService extends IStorageManager.Stub
                     args.argi1 = oldState;
                     args.argi2 = newState;
                     mHandler.obtainMessage(H_VOLUME_STATE_CHANGED, args).sendToTarget();
-                    onVolumeStateChangedLocked(vInfo, oldState, newState);
+                    onVolumeStateChangedLocked(vInfo, newState);
                 }
             }
         }
@@ -1555,10 +1480,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     @GuardedBy("mLock")
     private void onVolumeCreatedLocked(VolumeInfo vol) {
-        if (mPmInternal.isOnlyCoreApps()) {
-            Slog.d(TAG, "System booted in core-only mode; ignoring volume " + vol.getId());
-            return;
-        }
         final ActivityManagerInternal amInternal =
                 LocalServices.getService(ActivityManagerInternal.class);
 
@@ -1659,7 +1580,8 @@ class StorageManagerService extends IStorageManager.Stub
         return true;
     }
 
-    private void onVolumeStateChangedLocked(VolumeInfo vol, int oldState, int newState) {
+    @GuardedBy("mLock")
+    private void onVolumeStateChangedLocked(VolumeInfo vol, int newState) {
         if (vol.type == VolumeInfo.TYPE_EMULATED) {
             if (newState != VolumeInfo.STATE_MOUNTED) {
                 mFuseMountedUser.remove(vol.getMountUserId());
@@ -1679,7 +1601,9 @@ class StorageManagerService extends IStorageManager.Stub
 
                     // Add fuse mounted user after migration to prevent ProcessList tries to
                     // create obb directory before migration is done.
-                    mFuseMountedUser.add(userId);
+                    synchronized (mLock) {
+                        mFuseMountedUser.add(userId);
+                    }
 
                     Map<Integer, String> pidPkgMap = null;
                     // getProcessesWithPendingBindMounts() could fail when a new app process is
@@ -1708,6 +1632,23 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void onVolumeStateChangedAsync(VolumeInfo vol, int oldState, int newState) {
+        if (newState == VolumeInfo.STATE_MOUNTED) {
+            // Private volumes can be unmounted and re-mounted even after a user has
+            // been unlocked; on devices that support encryption keys tied to the filesystem,
+            // this requires setting up the keys again.
+            try {
+                prepareUserStorageIfNeeded(vol);
+            } catch (Exception e) {
+                // Unusable partition, unmount.
+                try {
+                    mVold.unmount(vol.id);
+                } catch (Exception ee) {
+                    Slog.wtf(TAG, ee);
+                }
+                return;
+            }
+        }
+
         synchronized (mLock) {
             // Remember that we saw this volume so we're ready to accept user
             // metadata, or so we can annoy them when a private volume is ejected
@@ -1731,13 +1672,6 @@ class StorageManagerService extends IStorageManager.Stub
                 rec.lastSeenMillis = System.currentTimeMillis();
                 writeSettingsLocked();
             }
-        }
-
-        if (newState == VolumeInfo.STATE_MOUNTED) {
-            // Private volumes can be unmounted and re-mounted even after a user has
-            // been unlocked; on devices that support encryption keys tied to the filesystem,
-            // this requires setting up the keys again.
-            prepareUserStorageIfNeeded(vol);
         }
 
         // This is a blocking call to Storage Service which needs to process volume state changed
@@ -1801,17 +1735,15 @@ class StorageManagerService extends IStorageManager.Stub
             @NonNull StorageManagerInternal.CloudProviderChangeListener listener) {
         synchronized (mCloudMediaProviders) {
             for (int i = mCloudMediaProviders.size() - 1; i >= 0; --i) {
-                listener.onCloudProviderChanged(
-                        mCloudMediaProviders.keyAt(i), mCloudMediaProviders.valueAt(i));
+                final int userId = mCloudMediaProviders.keyAt(i);
+                final String authority = mCloudMediaProviders.valueAt(i);
+                listener.onCloudProviderChanged(userId, authority);
             }
         }
     }
 
-    private void onCloudMediaProviderChangedAsync(int userId) {
-        final String authority;
-        synchronized (mCloudMediaProviders) {
-            authority = mCloudMediaProviders.get(userId);
-        }
+    private void onCloudMediaProviderChangedAsync(
+            @UserIdInt int userId, @Nullable String authority) {
         for (StorageManagerInternal.CloudProviderChangeListener listener :
                 mStorageManagerInternal.mCloudProviderChangeListeners) {
             listener.onCloudProviderChanged(userId, authority);
@@ -1922,9 +1854,7 @@ class StorageManagerService extends IStorageManager.Stub
         mVoldAppDataIsolationEnabled = SystemProperties.getBoolean(
                 ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
         mContext = context;
-        mResolver = mContext.getContentResolver();
         mCallbacks = new Callbacks(FgThread.get().getLooper());
-        mLockPatternUtils = new LockPatternUtils(mContext);
 
         HandlerThread hthread = new HandlerThread(TAG);
         hthread.start();
@@ -2146,19 +2076,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private static long getLastAccessTime(AppOpsManager manager,
-            int uid, String packageName, int[] ops) {
-        long maxTime = 0;
-        final List<AppOpsManager.PackageOps> pkgs = manager.getOpsForPackage(uid, packageName, ops);
-        for (AppOpsManager.PackageOps pkg : CollectionUtils.emptyIfNull(pkgs)) {
-            for (AppOpsManager.OpEntry op : CollectionUtils.emptyIfNull(pkg.getOps())) {
-                maxTime = Math.max(maxTime, op.getLastAccessTime(
-                    AppOpsManager.OP_FLAGS_ALL_TRUSTED));
-            }
-        }
-        return maxTime;
-    }
-
     private void systemReady() {
         LocalServices.getService(ActivityTaskManagerInternal.class)
                 .registerScreenObserver(this);
@@ -2172,7 +2089,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void handleBootCompleted() {
-        initIfBootedAndConnected();
         resetIfBootedAndConnected();
     }
 
@@ -2296,17 +2212,21 @@ class StorageManagerService extends IStorageManager.Stub
         mCallbacks.unregister(listener);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.SHUTDOWN)
     @Override
     public void shutdown(final IStorageShutdownObserver observer) {
-        enforcePermission(android.Manifest.permission.SHUTDOWN);
+
+        super.shutdown_enforcePermission();
 
         Slog.i(TAG, "Shutting down");
         mHandler.obtainMessage(H_SHUTDOWN, observer).sendToTarget();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
     @Override
     public void mount(String volId) {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+
+        super.mount_enforcePermission();
 
         final VolumeInfo vol = findVolumeByIdOrThrow(volId);
         if (isMountDisallowed(vol)) {
@@ -2372,9 +2292,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
     @Override
     public void unmount(String volId) {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+
+        super.unmount_enforcePermission();
 
         final VolumeInfo vol = findVolumeByIdOrThrow(volId);
         unmount(vol);
@@ -2396,9 +2318,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS)
     @Override
     public void format(String volId) {
-        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+
+        super.format_enforcePermission();
 
         final VolumeInfo vol = findVolumeByIdOrThrow(volId);
         final String fsUuid = vol.fsUuid;
@@ -2415,9 +2339,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS)
     @Override
     public void benchmark(String volId, IVoldTaskListener listener) {
-        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+
+        super.benchmark_enforcePermission();
 
         try {
             mVold.benchmark(volId, new IVoldTaskListener.Stub() {
@@ -2454,9 +2380,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS)
     @Override
     public void partitionPublic(String diskId) {
-        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+
+        super.partitionPublic_enforcePermission();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
         try {
@@ -2467,9 +2395,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS)
     @Override
     public void partitionPrivate(String diskId) {
-        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+        super.partitionPrivate_enforcePermission();
+
         enforceAdminUser();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
@@ -2481,9 +2411,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS)
     @Override
     public void partitionMixed(String diskId, int ratio) {
-        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+        super.partitionMixed_enforcePermission();
+
         enforceAdminUser();
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
@@ -2495,9 +2427,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
     @Override
     public void setVolumeNickname(String fsUuid, String nickname) {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+
+        super.setVolumeNickname_enforcePermission();
 
         Objects.requireNonNull(fsUuid);
         synchronized (mLock) {
@@ -2508,9 +2442,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
     @Override
     public void setVolumeUserFlags(String fsUuid, int flags, int mask) {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+
+        super.setVolumeUserFlags_enforcePermission();
 
         Objects.requireNonNull(fsUuid);
         synchronized (mLock) {
@@ -2521,9 +2457,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
     @Override
     public void forgetVolume(String fsUuid) {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+
+        super.forgetVolume_enforcePermission();
 
         Objects.requireNonNull(fsUuid);
 
@@ -2545,9 +2483,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
     @Override
     public void forgetAllVolumes() {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+
+        super.forgetAllVolumes_enforcePermission();
 
         synchronized (mLock) {
             for (int i = 0; i < mRecords.size(); i++) {
@@ -2577,9 +2517,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS)
     @Override
     public void fstrim(int flags, IVoldTaskListener listener) {
-        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+
+        super.fstrim_enforcePermission();
 
         try {
             // Block based checkpoint process runs fstrim. So, if checkpoint is in progress
@@ -2710,6 +2652,10 @@ class StorageManagerService extends IStorageManager.Stub
                 "low_battery_level", DEFAULT_LOW_BATTERY_LEVEL);
             mChargingRequired = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
                 "charging_required", DEFAULT_CHARGING_REQUIRED);
+            mMinGCSleepTime = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "min_gc_sleeptime", DEFAULT_MIN_GC_SLEEPTIME);
+            mTargetDirtyRatio = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "target_dirty_ratio", DEFAULT_TARGET_DIRTY_RATIO);
 
             // If we use the smart idle maintenance, we need to turn off GC in the traditional idle
             // maintenance to avoid the conflict
@@ -2827,30 +2773,37 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         try {
+            int avgWriteAmount = 0;
+            int targetDirtyRatio = mTargetDirtyRatio;
+            int latestWrite = mVold.getWriteAmount();
+            if (latestWrite == -1) {
+                Slog.w(TAG, "Failed to get storage write record");
+                return;
+            }
+
+            updateStorageWriteRecords(latestWrite);
+
             // Block based checkpoint process runs fstrim. So, if checkpoint is in progress
             // (first boot after OTA), We skip the smart idle maintenance
             if (!needsCheckpoint() || !supportsBlockCheckpoint()) {
                 if (!refreshLifetimeConstraint() || !checkChargeStatus()) {
-                    return;
+                    Slog.i(TAG, "Turn off gc_urgent based on checking lifetime and charge status");
+                    targetDirtyRatio = 100;
+                } else {
+                    avgWriteAmount = getAverageWriteAmount();
                 }
-
-                int latestWrite = mVold.getWriteAmount();
-                if (latestWrite == -1) {
-                    Slog.w(TAG, "Failed to get storage write record");
-                    return;
-                }
-
-                updateStorageWriteRecords(latestWrite);
-                int avgWriteAmount = getAverageWriteAmount();
 
                 Slog.i(TAG, "Set smart idle maintenance: " + "latest write amount: " +
                             latestWrite + ", average write amount: " + avgWriteAmount +
                             ", min segment threshold: " + mMinSegmentsThreshold +
                             ", dirty reclaim rate: " + mDirtyReclaimRate +
                             ", segment reclaim weight: " + mSegmentReclaimWeight +
-                            ", period: " + sSmartIdleMaintPeriod);
+                            ", period(min): " + sSmartIdleMaintPeriod +
+                            ", min gc sleep time(ms): " + mMinGCSleepTime +
+                            ", target dirty ratio: " + targetDirtyRatio);
                 mVold.setGCUrgentPace(avgWriteAmount, mMinSegmentsThreshold, mDirtyReclaimRate,
-                                      mSegmentReclaimWeight, sSmartIdleMaintPeriod);
+                                      mSegmentReclaimWeight, sSmartIdleMaintPeriod,
+                                      mMinGCSleepTime, targetDirtyRatio);
             } else {
                 Slog.i(TAG, "Skipping smart idle maintenance - block based checkpoint in progress");
             }
@@ -2863,35 +2816,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
     @Override
     public void setDebugFlags(int flags, int mask) {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
 
-        if ((mask & StorageManager.DEBUG_EMULATE_FBE) != 0) {
-            if (!EMULATE_FBE_SUPPORTED) {
-                throw new IllegalStateException(
-                        "Emulation not supported on this device");
-            }
-            if (StorageManager.isFileEncryptedNativeOnly()) {
-                throw new IllegalStateException(
-                        "Emulation not supported on device with native FBE");
-            }
-            if (mLockPatternUtils.isCredentialRequiredToDecrypt(false)) {
-                throw new IllegalStateException(
-                        "Emulation requires disabling 'Secure start-up' in Settings > Security");
-            }
-
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final boolean emulateFbe = (flags & StorageManager.DEBUG_EMULATE_FBE) != 0;
-                SystemProperties.set(StorageManager.PROP_EMULATE_FBE, Boolean.toString(emulateFbe));
-
-                // Perform hard reboot to kick policy into place
-                mContext.getSystemService(PowerManager.class).reboot(null);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
+        super.setDebugFlags_enforcePermission();
 
         if ((mask & (StorageManager.DEBUG_ADOPTABLE_FORCE_ON
                 | StorageManager.DEBUG_ADOPTABLE_FORCE_OFF)) != 0) {
@@ -2959,9 +2888,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS)
     @Override
     public void setPrimaryStorageUuid(String volumeUuid, IPackageMoveObserver callback) {
-        enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+
+        super.setPrimaryStorageUuid_enforcePermission();
 
         final VolumeInfo from;
         final VolumeInfo to;
@@ -2980,8 +2911,7 @@ class StorageManagerService extends IStorageManager.Stub
             // We need all the users unlocked to move their primary storage
             final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             for (UserInfo user : users) {
-                if (StorageManager.isFileEncryptedNativeOrEmulated()
-                        && !isUserKeyUnlocked(user.id)) {
+                if (StorageManager.isFileEncrypted() && !isUserKeyUnlocked(user.id)) {
                     Slog.w(TAG, "Failing move due to locked user " + user.id);
                     onMoveStatusLocked(PackageManager.MOVE_FAILED_LOCKED_USER);
                     return;
@@ -3166,12 +3096,14 @@ class StorageManagerService extends IStorageManager.Stub
         mVold.commitChanges();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS)
     /**
      * Check if we should be mounting with checkpointing or are checkpointing now
      */
     @Override
     public boolean needsCheckpoint() throws RemoteException {
-        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
+        super.needsCheckpoint_enforcePermission();
+
         return mVold.needsCheckpoint();
     }
 
@@ -3188,133 +3120,75 @@ class StorageManagerService extends IStorageManager.Stub
         mVold.abortChanges(message, retry);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
     public void createUserKey(int userId, int serialNumber, boolean ephemeral) {
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+
+        super.createUserKey_enforcePermission();
 
         try {
             mVold.createUserKey(userId, serialNumber, ephemeral);
+            // New keys are always unlocked.
+            synchronized (mLock) {
+                mLocalUnlockedUsers.append(userId);
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
     public void destroyUserKey(int userId) {
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+
+        super.destroyUserKey_enforcePermission();
 
         try {
             mVold.destroyUserKey(userId);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-        }
-    }
-
-    private String encodeBytes(byte[] bytes) {
-        if (ArrayUtils.isEmpty(bytes)) {
-            return "!";
-        } else {
-            return HexDump.toHexString(bytes);
-        }
-    }
-
-    /*
-     * Add this secret to the set of ways we can recover a user's disk
-     * encryption key.  Changing the secret for a disk encryption key is done in
-     * two phases.  First, this method is called to add the new secret binding.
-     * Second, fixateNewestUserKeyAuth is called to delete all other bindings.
-     * This allows other places where a credential is used, such as Gatekeeper,
-     * to be updated between the two calls.
-     */
-    @Override
-    public void addUserKeyAuth(int userId, int serialNumber, byte[] secret) {
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
-
-        try {
-            mVold.addUserKeyAuth(userId, serialNumber, encodeBytes(secret));
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-        }
-    }
-
-    /*
-     * Store a user's disk encryption key without secret binding.  Removing the
-     * secret for a disk encryption key is done in two phases.  First, this
-     * method is called to retrieve the key using the provided secret and store
-     * it encrypted with a keystore key not bound to the user.  Second,
-     * fixateNewestUserKeyAuth is called to delete the key's other bindings.
-     */
-    @Override
-    public void clearUserKeyAuth(int userId, int serialNumber, byte[] secret) {
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
-
-        try {
-            mVold.clearUserKeyAuth(userId, serialNumber, encodeBytes(secret));
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-        }
-    }
-
-    /*
-     * Delete all bindings of a user's disk encryption key except the most
-     * recently added one.
-     */
-    @Override
-    public void fixateNewestUserKeyAuth(int userId) {
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
-
-        try {
-            mVold.fixateNewestUserKeyAuth(userId);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
-        }
-    }
-
-    @Override
-    public void unlockUserKey(int userId, int serialNumber, byte[] secret) {
-        boolean isFsEncrypted = StorageManager.isFileEncryptedNativeOrEmulated();
-        Slog.d(TAG, "unlockUserKey: " + userId
-                + " isFileEncryptedNativeOrEmulated: " + isFsEncrypted
-                + " hasSecret: " + (secret != null));
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
-
-        if (isUserKeyUnlocked(userId)) {
-            Slog.d(TAG, "User " + userId + "'s CE storage is already unlocked");
-            return;
-        }
-
-        if (isFsEncrypted) {
-            // When a user has a secure lock screen, a secret is required to
-            // unlock the key, so don't bother trying to unlock it without one.
-            // This prevents misleading error messages from being logged.  This
-            // is also needed for emulated FBE to behave like native FBE.
-            if (mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(secret)) {
-                Slog.d(TAG, "Not unlocking user " + userId
-                        + "'s CE storage yet because a secret is needed");
-                return;
+            // Destroying a key also locks it.
+            synchronized (mLock) {
+                mLocalUnlockedUsers.remove(userId);
             }
-            try {
-                mVold.unlockUserKey(userId, serialNumber, encodeBytes(secret));
-            } catch (Exception e) {
-                Slog.wtf(TAG, e);
-                return;
-            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
+    }
 
+    /* Only for use by LockSettingsService */
+    @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
+    @Override
+    public void setUserKeyProtection(@UserIdInt int userId, byte[] secret) throws RemoteException {
+        super.setUserKeyProtection_enforcePermission();
+
+        mVold.setUserKeyProtection(userId, HexDump.toHexString(secret));
+    }
+
+    /* Only for use by LockSettingsService */
+    @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
+    @Override
+    public void unlockUserKey(@UserIdInt int userId, int serialNumber, byte[] secret)
+        throws RemoteException {
+        super.unlockUserKey_enforcePermission();
+
+        if (StorageManager.isFileEncrypted()) {
+            mVold.unlockUserKey(userId, serialNumber, HexDump.toHexString(secret));
+        }
         synchronized (mLock) {
             mLocalUnlockedUsers.append(userId);
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
     public void lockUserKey(int userId) {
         //  Do not lock user 0 data for headless system user
+        super.lockUserKey_enforcePermission();
+
         if (userId == UserHandle.USER_SYSTEM
                 && UserManager.isHeadlessSystemUserMode()) {
             throw new IllegalArgumentException("Headless system user data cannot be locked..");
         }
 
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
         if (!isUserKeyUnlocked(userId)) {
             Slog.d(TAG, "User " + userId + "'s CE storage is already locked");
@@ -3346,7 +3220,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void prepareUserStorageIfNeeded(VolumeInfo vol) {
+    private void prepareUserStorageIfNeeded(VolumeInfo vol) throws Exception {
         if (vol.type != VolumeInfo.TYPE_PRIVATE) {
             return;
         }
@@ -3369,15 +3243,21 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
     public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
-        prepareUserStorageInternal(volumeUuid, userId, serialNumber, flags);
+        super.prepareUserStorage_enforcePermission();
+
+        try {
+            prepareUserStorageInternal(volumeUuid, userId, serialNumber, flags);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void prepareUserStorageInternal(String volumeUuid, int userId, int serialNumber,
-            int flags) {
+            int flags) throws Exception {
         try {
             mVold.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
             // After preparing user storage, we should check if we should mount data mirror again,
@@ -3404,13 +3284,15 @@ class StorageManagerService extends IStorageManager.Stub
                         + "; device may be insecure!");
                 return;
             }
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.STORAGE_INTERNAL)
     @Override
     public void destroyUserStorage(String volumeUuid, int userId, int flags) {
-        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+
+        super.destroyUserStorage_enforcePermission();
 
         try {
             mVold.destroyUserStorage(volumeUuid, userId, flags);
@@ -3521,8 +3403,9 @@ class StorageManagerService extends IStorageManager.Stub
                     appInfo.manageSpaceActivityName);
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
 
-            final ActivityOptions options = ActivityOptions.makeBasic();
-            options.setIgnorePendingIntentCreatorForegroundState(true);
+            final ActivityOptions options = ActivityOptions.makeBasic()
+                    .setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
 
             PendingIntent activity = PendingIntent.getActivity(targetAppContext, requestCode,
                     intent,
@@ -3730,7 +3613,8 @@ class StorageManagerService extends IStorageManager.Stub
 
         try {
             final PackageManager.Property noAppStorageProp = mContext.getPackageManager()
-                    .getProperty(PackageManager.PROPERTY_NO_APP_DATA_STORAGE, callingPkg);
+                    .getPropertyAsUser(PackageManager.PROPERTY_NO_APP_DATA_STORAGE, callingPkg,
+                            null /* className */, userId);
             if (noAppStorageProp != null && noAppStorageProp.getBoolean()) {
                 throw new SecurityException(callingPkg + " should not have " + appPath);
             }
@@ -3799,6 +3683,13 @@ class StorageManagerService extends IStorageManager.Stub
         final boolean includeSharedProfile =
                 (flags & StorageManager.FLAG_INCLUDE_SHARED_PROFILE) != 0;
 
+        // When the caller is the app actually hosting external storage, we
+        // should never attempt to augment the actual storage volume state,
+        // otherwise we risk confusing it with race conditions as users go
+        // through various unlocked states
+        final boolean callerIsMediaStore = UserHandle.isSameApp(callingUid,
+                mMediaStoreAuthorityAppId);
+
         // Only Apps with MANAGE_EXTERNAL_STORAGE should call the API with includeSharedProfile
         if (includeSharedProfile) {
             try {
@@ -3811,8 +3702,13 @@ class StorageManagerService extends IStorageManager.Stub
                 // Checking first entry in packagesFromUid is enough as using "sharedUserId"
                 // mechanism is rare and discouraged. Also, Apps that share same UID share the same
                 // permissions.
-                if (!mStorageManagerInternal.hasExternalStorageAccess(callingUid,
-                        packagesFromUid[0])) {
+                // Allowing Media Provider is an exception, Media Provider process should be allowed
+                // to query users across profiles, even without MANAGE_EXTERNAL_STORAGE access.
+                // Note that ordinarily Media provider process has the above permission, but if they
+                // are revoked, Storage Volume(s) should still be returned.
+                if (!callerIsMediaStore
+                        && !mStorageManagerInternal.hasExternalStorageAccess(callingUid,
+                                packagesFromUid[0])) {
                     throw new SecurityException("Only File Manager Apps permitted");
                 }
             } catch (RemoteException re) {
@@ -3824,13 +3720,6 @@ class StorageManagerService extends IStorageManager.Stub
         // are no guarantees that callers will see a consistent view of the volume before that
         // point
         final boolean systemUserUnlocked = isSystemUnlocked(UserHandle.USER_SYSTEM);
-
-        // When the caller is the app actually hosting external storage, we
-        // should never attempt to augment the actual storage volume state,
-        // otherwise we risk confusing it with race conditions as users go
-        // through various unlocked states
-        final boolean callerIsMediaStore = UserHandle.isSameApp(callingUid,
-                mMediaStoreAuthorityAppId);
 
         final boolean userIsDemo;
         final boolean userKeyUnlocked;
@@ -3850,7 +3739,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final ArrayList<StorageVolume> res = new ArrayList<>();
         final ArraySet<String> resUuids = new ArraySet<>();
-        final int userIdSharingMedia = mUserSharesMediaWith.getOrDefault(userId, -1);
+        final int userIdSharingMedia = mUserSharesMediaWith.get(userId, -1);
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final String volId = mVolumes.keyAt(i);
@@ -3869,6 +3758,7 @@ class StorageManagerService extends IStorageManager.Stub
                             break;
                         }
                         // Skip if emulated volume not for userId
+                        continue;
                     default:
                         continue;
                 }
@@ -3881,8 +3771,12 @@ class StorageManagerService extends IStorageManager.Stub
                     // Return both read only and write only volumes. When includeSharedProfile is
                     // true, all the volumes of userIdSharingMedia should be returned when queried
                     // from the user it shares media with
+                    // Public Volumes will be also be returned if visible to the
+                    // userIdSharingMedia with.
                     match = vol.isVisibleForUser(userId)
                             || (!vol.isVisible() && includeInvisible && vol.getPath() != null)
+                            || (vol.getType() == VolumeInfo.TYPE_PUBLIC
+                                    && vol.isVisibleForUser(userIdSharingMedia))
                             || (includeSharedProfile && vol.isVisibleForUser(userIdSharingMedia));
                 }
                 if (!match) continue;
@@ -4024,8 +3918,8 @@ class StorageManagerService extends IStorageManager.Stub
             mContext.enforceCallingPermission(android.Manifest.permission.STORAGE_INTERNAL, TAG);
         }
         final long token = Binder.clearCallingIdentity();
-        final StorageStatsManager stats = mContext.getSystemService(StorageStatsManager.class);
         try {
+            final StorageStatsManager stats = mContext.getSystemService(StorageStatsManager.class);
             return stats.getCacheQuotaBytes(volumeUuid, uid);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -4234,7 +4128,7 @@ class StorageManagerService extends IStorageManager.Stub
                         Slog.i(TAG, "Flushing all OBB state for path " + path);
 
                     synchronized (mObbMounts) {
-                        final List<ObbState> obbStatesToRemove = new LinkedList<ObbState>();
+                        final List<ObbState> obbStatesToRemove = new ArrayList<>();
 
                         final Iterator<ObbState> i = mObbPathToStateMap.values().iterator();
                         while (i.hasNext()) {
@@ -4285,7 +4179,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    abstract class ObbAction {
+    private static abstract class ObbAction {
 
         ObbState mObbState;
 
@@ -4453,9 +4347,11 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.WRITE_MEDIA_STORAGE)
     @Override
     public int getExternalStorageMountMode(int uid, String packageName) {
-        enforcePermission(android.Manifest.permission.WRITE_MEDIA_STORAGE);
+        super.getExternalStorageMountMode_enforcePermission();
+
         return mStorageManagerInternal.getExternalStorageMountMode(uid, packageName);
     }
 
@@ -4990,7 +4886,7 @@ class StorageManagerService extends IStorageManager.Stub
         public void registerCloudProviderChangeListener(
                 @NonNull StorageManagerInternal.CloudProviderChangeListener listener) {
             mCloudProviderChangeListeners.add(listener);
-            mHandler.obtainMessage(H_CLOUD_MEDIA_PROVIDER_CHANGED, listener);
+            mHandler.obtainMessage(H_CLOUD_MEDIA_PROVIDER_CHANGED, listener).sendToTarget();
         }
     }
 }

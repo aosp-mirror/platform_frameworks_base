@@ -16,6 +16,8 @@
 
 package android.accounts;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+
 import android.annotation.BroadcastBehavior;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -27,7 +29,6 @@ import android.annotation.Size;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
-import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -37,6 +38,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.UserPackage;
 import android.content.res.Resources;
 import android.database.SQLException;
 import android.os.Build;
@@ -348,43 +350,11 @@ public class AccountManager {
     */
     public static final int CACHE_ACCOUNTS_DATA_SIZE = 4;
 
-    private static final class UserIdPackage
-    {
-        @UserIdInt
-        public int userId;
-        public String packageName;
-
-        public UserIdPackage(int UserId, String PackageName) {
-            this.userId = UserId;
-            this.packageName = PackageName;
-        }
-
-        @Override
-        public boolean equals(@Nullable Object o) {
-            if (o == null) {
-                return false;
-            }
-            if (o == this) {
-                return true;
-            }
-            if (o.getClass() != getClass()) {
-                return false;
-            }
-            UserIdPackage e = (UserIdPackage) o;
-            return e.userId == userId && e.packageName.equals(packageName);
-        }
-
-        @Override
-        public int hashCode() {
-            return userId ^ packageName.hashCode();
-        }
-    }
-
-    PropertyInvalidatedCache<UserIdPackage, Account[]> mAccountsForUserCache =
-                new PropertyInvalidatedCache<UserIdPackage, Account[]>(
+    PropertyInvalidatedCache<UserPackage, Account[]> mAccountsForUserCache =
+                new PropertyInvalidatedCache<UserPackage, Account[]>(
                 CACHE_ACCOUNTS_DATA_SIZE, CACHE_KEY_ACCOUNTS_DATA_PROPERTY) {
         @Override
-        public Account[] recompute(UserIdPackage userAndPackage) {
+        public Account[] recompute(UserPackage userAndPackage) {
             try {
                 return mService.getAccountsAsUser(null, userAndPackage.userId, userAndPackage.packageName);
             } catch (RemoteException e) {
@@ -392,7 +362,7 @@ public class AccountManager {
             }
         }
         @Override
-        public boolean bypass(UserIdPackage query) {
+        public boolean bypass(UserPackage query) {
             return query.userId < 0;
         }
         @Override
@@ -655,6 +625,9 @@ public class AccountManager {
      *
      * <p>No permission is required to call this method.
      *
+     * <p>Caller targeting API level 34 and above, the results are filtered
+     * by the rules of <a href="/training/basics/intents/package-visibility">package visibility</a>.
+     *
      * @return An array of {@link AuthenticatorDescription} for every
      *     authenticator known to the AccountManager service.  Empty (never
      *     null) if no authenticators are known.
@@ -731,7 +704,7 @@ public class AccountManager {
      */
     @NonNull
     public Account[] getAccountsAsUser(int userId) {
-        UserIdPackage userAndPackage = new UserIdPackage(userId, mContext.getOpPackageName());
+        UserPackage userAndPackage = UserPackage.of(userId, mContext.getOpPackageName());
         return mAccountsForUserCache.query(userAndPackage);
     }
 
@@ -920,15 +893,24 @@ public class AccountManager {
      * @return An {@link AccountManagerFuture} which resolves to a Boolean, true if the account
      *         exists and has all of the specified features.
      */
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+            requiresPermissionIfNotCaller = INTERACT_ACROSS_USERS_FULL)
     public AccountManagerFuture<Boolean> hasFeatures(final Account account,
             final String[] features,
             AccountManagerCallback<Boolean> callback, Handler handler) {
+        return hasFeaturesAsUser(account, features, callback, handler, mContext.getUserId());
+    }
+
+    private AccountManagerFuture<Boolean> hasFeaturesAsUser(
+            final Account account, final String[] features,
+            AccountManagerCallback<Boolean> callback, Handler handler, int userId) {
         if (account == null) throw new IllegalArgumentException("account is null");
         if (features == null) throw new IllegalArgumentException("features is null");
         return new Future2Task<Boolean>(handler, callback) {
             @Override
             public void doWork() throws RemoteException {
-                mService.hasFeatures(mResponse, account, features, mContext.getOpPackageName());
+                mService.hasFeatures(
+                        mResponse, account, features, userId, mContext.getOpPackageName());
             }
             @Override
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
@@ -1061,7 +1043,9 @@ public class AccountManager {
      * @param password The password to associate with the account, null for none
      * @param extras String values to use for the account's userdata, null for none
      * @param visibility Map from packageName to visibility values which will be set before account
-     *        is added. See {@link #getAccountVisibility} for possible values.
+     *        is added. See {@link #getAccountVisibility} for possible values. Declaring
+     *        <a href="/training/basics/intents/package-visibility">package visibility</a> needs for
+     *        package names in the map is needed, if the caller is targeting API level 34 and above.
      *
      * @return True if the account was successfully added, false if the account already exists, the
      *         account is null, or another error occurs.
@@ -1145,7 +1129,9 @@ public class AccountManager {
      * the specified account.
      *
      * @param account {@link Account} to update visibility
-     * @param packageName Package name of the application to modify account visibility
+     * @param packageName Package name of the application to modify account visibility. Declaring
+     *        <a href="/training/basics/intents/package-visibility">package visibility</a> needs
+     *        for it is needed, if the caller is targeting API level 34 and above.
      * @param visibility New visibility value
      *
      * @return True, if visibility value was successfully updated.
@@ -1177,7 +1163,9 @@ public class AccountManager {
      * @param account {@link Account} to get visibility
      * @param packageName Package name of the application to get account visibility
      *
-     * @return int Visibility of given account.
+     * @return int Visibility of given account. For the caller targeting API level 34 and above,
+     * {@link #VISIBILITY_NOT_VISIBLE} is returned if the given package is filtered by the rules of
+     * <a href="/training/basics/intents/package-visibility">package visibility</a>.
      */
     public @AccountVisibility int getAccountVisibility(Account account, String packageName) {
         if (account == null)
@@ -2450,7 +2438,7 @@ public class AccountManager {
                     onError(ERROR_CODE_INVALID_RESPONSE, "null bundle returned");
                     return;
                 }
-                Intent intent = bundle.getParcelable(KEY_INTENT);
+                Intent intent = bundle.getParcelable(KEY_INTENT, android.content.Intent.class);
                 if (intent != null && mActivity != null) {
                     // since the user provided an Activity we will silently start intents
                     // that we see
@@ -3342,7 +3330,7 @@ public class AccountManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @RequiresPermission(INTERACT_ACROSS_USERS_FULL)
     public AccountManagerFuture<Bundle> finishSessionAsUser(
             final Bundle sessionBundle,
             final Activity activity,

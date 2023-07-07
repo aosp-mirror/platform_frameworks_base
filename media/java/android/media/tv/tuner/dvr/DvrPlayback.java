@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.TunerUtils;
+import android.media.tv.tuner.TunerVersionChecker;
 import android.media.tv.tuner.filter.Filter;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -91,6 +92,7 @@ public class DvrPlayback implements AutoCloseable {
     private native int nativeAttachFilter(Filter filter);
     private native int nativeDetachFilter(Filter filter);
     private native int nativeConfigureDvr(DvrSettings settings);
+    private native int nativeSetStatusCheckIntervalHint(long durationInMs);
     private native int nativeStartDvr();
     private native int nativeStopDvr();
     private native int nativeFlushDvr();
@@ -174,6 +176,35 @@ public class DvrPlayback implements AutoCloseable {
     @Result
     public int configure(@NonNull DvrSettings settings) {
         return nativeConfigureDvr(settings);
+    }
+
+    /**
+     * Set playback buffer status check time interval.
+     *
+     * This status check time interval will be used by the Dvr to decide how often to evaluate
+     * data. The default value will be decided by HAL if it’s not set.
+     *
+     * <p>This functionality is only available in Tuner version 3.0 and higher and will otherwise
+     * return a {@link Tuner#RESULT_UNAVAILABLE}. Use {@link TunerVersionChecker#getTunerVersion()}
+     * to get the version information.
+     *
+     * @param durationInMs specifies the duration of the delay in milliseconds.
+     *
+     * @return one of the following results:
+     * {@link Tuner#RESULT_SUCCESS} if succeed,
+     * {@link Tuner#RESULT_UNAVAILABLE} if Dvr is unavailable or unsupported HAL versions,
+     * {@link Tuner#RESULT_NOT_INITIALIZED} if Dvr is not initialized,
+     * {@link Tuner#RESULT_INVALID_STATE} if Dvr is in a wrong state,
+     * {@link Tuner#RESULT_INVALID_ARGUMENT}  if the input parameter is invalid.
+     */
+    @Result
+    public int setPlaybackBufferStatusCheckIntervalHint(long durationInMs) {
+        if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_3_0, "Set status check interval hint")) {
+            // no-op
+            return Tuner.RESULT_UNAVAILABLE;
+        }
+        return nativeSetStatusCheckIntervalHint(durationInMs);
     }
 
     /**

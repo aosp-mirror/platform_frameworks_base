@@ -32,6 +32,7 @@ import android.system.keystore2.ResponseCode;
 import android.util.Log;
 
 import java.util.Calendar;
+import java.util.Objects;
 
 /**
  * @hide This should not be made public in its present form because it
@@ -137,13 +138,13 @@ public class KeyStore2 {
         return new KeyStore2();
     }
 
-    private synchronized IKeystoreService getService(boolean retryLookup) {
+    @NonNull private synchronized IKeystoreService getService(boolean retryLookup) {
         if (mBinder == null || retryLookup) {
             mBinder = IKeystoreService.Stub.asInterface(ServiceManager
                     .getService(KEYSTORE2_SERVICE_NAME));
             Binder.allowBlocking(mBinder.asBinder());
         }
-        return mBinder;
+        return Objects.requireNonNull(mBinder);
     }
 
     void delete(KeyDescriptor descriptor) throws KeyStoreException {
@@ -158,6 +159,15 @@ public class KeyStore2 {
      */
     public KeyDescriptor[] list(int domain, long namespace) throws KeyStoreException {
         return handleRemoteExceptionWithRetry((service) -> service.listEntries(domain, namespace));
+    }
+
+    /**
+     * List all entries in the keystore for in the given namespace.
+     */
+    public KeyDescriptor[] listBatch(int domain, long namespace, String startPastAlias)
+            throws KeyStoreException {
+        return handleRemoteExceptionWithRetry(
+                (service) -> service.listEntriesBatched(domain, namespace, startPastAlias));
     }
 
     /**
@@ -301,6 +311,13 @@ public class KeyStore2 {
         });
     }
 
+    /**
+     * Returns the number of Keystore entries for a given domain and namespace.
+     */
+    public int getNumberOfEntries(int domain, long namespace) throws KeyStoreException {
+        return handleRemoteExceptionWithRetry((service)
+                -> service.getNumberOfEntries(domain, namespace));
+    }
     protected static void interruptedPreservingSleep(long millis) {
         boolean wasInterrupted = false;
         Calendar calendar = Calendar.getInstance();

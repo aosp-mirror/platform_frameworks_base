@@ -51,8 +51,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -60,6 +58,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IntPair;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -171,6 +171,9 @@ public class SyncStorageEngine {
     private final PackageManagerInternal mPackageManagerInternal;
 
     private volatile boolean mIsClockValid;
+
+    private volatile boolean mIsJobNamespaceMigrated;
+    private volatile boolean mIsJobAttributionFixed;
 
     static {
         sAuthorityRenames = new HashMap<String, String>();
@@ -834,6 +837,34 @@ public class SyncStorageEngine {
                     ContentResolver.SYNC_EXEMPTION_NONE, callingUid, callingPid);
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, target);
+    }
+
+    void setJobNamespaceMigrated(boolean migrated) {
+        if (mIsJobNamespaceMigrated == migrated) {
+            return;
+        }
+        mIsJobNamespaceMigrated = migrated;
+        // This isn't urgent enough to write synchronously. Post it to the handler thread so
+        // SyncManager can move on with whatever it was doing.
+        mHandler.sendEmptyMessageDelayed(MSG_WRITE_STATUS, WRITE_STATUS_DELAY);
+    }
+
+    boolean isJobNamespaceMigrated() {
+        return mIsJobNamespaceMigrated;
+    }
+
+    void setJobAttributionFixed(boolean fixed) {
+        if (mIsJobAttributionFixed == fixed) {
+            return;
+        }
+        mIsJobAttributionFixed = fixed;
+        // This isn't urgent enough to write synchronously. Post it to the handler thread so
+        // SyncManager can move on with whatever it was doing.
+        mHandler.sendEmptyMessageDelayed(MSG_WRITE_STATUS, WRITE_STATUS_DELAY);
+    }
+
+    boolean isJobAttributionFixed() {
+        return mIsJobAttributionFixed;
     }
 
     public Pair<Long, Long> getBackoff(EndPoint info) {
@@ -1585,7 +1616,6 @@ public class SyncStorageEngine {
         }
     }
 
-
     /**
      * Remove an authority associated with a provider. Needs to be a standalone function for
      * backward compatibility.
@@ -2083,7 +2113,7 @@ public class SyncStorageEngine {
             try (FileInputStream in = mStatusFile.openRead()) {
                 readStatusInfoLocked(in);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "Unable to read status info file.", e);
         }
     }
@@ -2100,6 +2130,14 @@ public class SyncStorageEngine {
                         status.pending = false;
                         mSyncStatus.put(status.authorityId, status);
                     }
+                    break;
+                case (int) SyncStatusProto.IS_JOB_NAMESPACE_MIGRATED:
+                    mIsJobNamespaceMigrated =
+                            proto.readBoolean(SyncStatusProto.IS_JOB_NAMESPACE_MIGRATED);
+                    break;
+                case (int) SyncStatusProto.IS_JOB_ATTRIBUTION_FIXED:
+                    mIsJobAttributionFixed =
+                            proto.readBoolean(SyncStatusProto.IS_JOB_ATTRIBUTION_FIXED);
                     break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     return;
@@ -2368,6 +2406,10 @@ public class SyncStorageEngine {
             }
             proto.end(token);
         }
+
+        proto.write(SyncStatusProto.IS_JOB_NAMESPACE_MIGRATED, mIsJobNamespaceMigrated);
+        proto.write(SyncStatusProto.IS_JOB_ATTRIBUTION_FIXED, mIsJobAttributionFixed);
+
         proto.flush();
     }
 
@@ -2483,7 +2525,7 @@ public class SyncStorageEngine {
             try (FileInputStream in = mStatisticsFile.openRead()) {
                 readDayStatsLocked(in);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "Unable to read day stats file.", e);
         }
     }

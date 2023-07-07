@@ -17,37 +17,34 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.support.test.launcherhelper.ILauncherStrategy
-import android.support.test.launcherhelper.LauncherStrategyFactory
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.helpers.FIND_TIMEOUT
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-class NotificationAppHelper @JvmOverloads constructor(
+class NotificationAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
-    launcherName: String = ActivityOptions.NOTIFICATION_ACTIVITY_LAUNCHER_NAME,
-    component: FlickerComponentName =
-            ActivityOptions.NOTIFICATION_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
-    launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
-            .getInstance(instr)
-            .launcherStrategy
-) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
-    fun postNotification(device: UiDevice, wmHelper: WindowManagerStateHelper) {
-        val button = device.wait(
-                Until.findObject(By.res(getPackage(), "post_notification")),
-                FIND_TIMEOUT)
+    launcherName: String = ActivityOptions.Notification.LABEL,
+    component: ComponentNameMatcher = ActivityOptions.Notification.COMPONENT.toFlickerComponent()
+) : StandardAppHelper(instr, launcherName, component) {
+    fun postNotification(wmHelper: WindowManagerStateHelper) {
+        val button =
+            uiDevice.wait(Until.findObject(By.res(getPackage(), "post_notification")), FIND_TIMEOUT)
 
-        require(button != null) {
+        requireNotNull(button) {
             "Post notification button not found, this usually happens when the device " +
-                    "was left in an unknown state (e.g. in split screen)"
+                "was left in an unknown state (e.g. in split screen)"
         }
         button.click()
 
-        device.wait(Until.findObject(By.text("Flicker Test Notification")), FIND_TIMEOUT)
-                ?: error("Flicker Notification not found")
+        uiDevice.wait(Until.findObject(By.text("Flicker Test Notification")), FIND_TIMEOUT)
+            ?: error("Flicker Notification not found")
+        wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
     }
 }

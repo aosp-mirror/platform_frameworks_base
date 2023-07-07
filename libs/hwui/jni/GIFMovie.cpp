@@ -7,9 +7,11 @@
 
 
 #include "Movie.h"
+#include "SkBitmap.h"
 #include "SkColor.h"
 #include "SkColorPriv.h"
 #include "SkStream.h"
+#include "SkTypes.h"
 
 #include "gif_lib.h"
 

@@ -26,18 +26,18 @@ import android.perftests.utils.BenchmarkState
 import android.perftests.utils.PerfStatusReporter
 import androidx.test.filters.LargeTest
 import com.android.internal.util.ConcurrentUtils
-import com.android.server.pm.pkg.parsing.ParsingPackageImpl
+import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils
+import java.io.File
+import java.io.FileOutputStream
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.TimeUnit
 import libcore.io.IoUtils
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import java.io.File
-import java.io.FileOutputStream
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.TimeUnit
 
 @LargeTest
 @RunWith(Parameterized::class)
@@ -180,8 +180,8 @@ public class PackageParsingPerfTest {
         protected abstract fun parseImpl(file: File): PackageType
     }
 
-    class ParallelParser1(private val cacher: PackageCacher1? = null)
-        : ParallelParser<PackageParser.Package>(cacher) {
+    class ParallelParser1(private val cacher: PackageCacher1? = null) :
+        ParallelParser<PackageParser.Package>(cacher) {
         val parser = PackageParser().apply {
             setCallback { true }
         }
@@ -189,14 +189,13 @@ public class PackageParsingPerfTest {
         override fun parseImpl(file: File) = parser.parsePackage(file, 0, cacher != null)
     }
 
-    class ParallelParser2(cacher: PackageCacher2? = null)
-        : ParallelParser<ParsingPackageImpl>(cacher) {
+    class ParallelParser2(cacher: PackageCacher2? = null) :
+        ParallelParser<PackageImpl>(cacher) {
         val input = ThreadLocal.withInitial {
             // For testing, just disable enforcement to avoid hooking up to compat framework
             ParseTypeImpl(ParseInput.Callback { _, _, _ -> false })
         }
-        val parser = ParsingPackageUtils(false,
-            null,
+        val parser = ParsingPackageUtils(null,
             null,
             emptyList(),
             object :
@@ -209,17 +208,18 @@ public class PackageParsingPerfTest {
                     path: String,
                     manifestArray: TypedArray,
                     isCoreApp: Boolean
-                ) = ParsingPackageImpl(
+                ) = PackageImpl(
                     packageName,
                     baseApkPath,
                     path,
-                    manifestArray
+                    manifestArray,
+                    isCoreApp,
                 )
             })
 
         override fun parseImpl(file: File) =
-                parser.parsePackage(input.get()!!.reset(), file, 0, null).result
-                        as ParsingPackageImpl
+                parser.parsePackage(input.get()!!.reset(), file, 0).result
+                        as PackageImpl
     }
 
     abstract class PackageCacher<PackageType : Parcelable>(private val cacheDir: File) {
@@ -275,8 +275,8 @@ public class PackageParsingPerfTest {
     /**
      * Re-implementation of the server side PackageCacher, as it's inaccessible here.
      */
-    class PackageCacher2(cacheDir: File) : PackageCacher<ParsingPackageImpl>(cacheDir) {
+    class PackageCacher2(cacheDir: File) : PackageCacher<PackageImpl>(cacheDir) {
         override fun fromParcel(parcel: Parcel) =
-            ParsingPackageImpl(parcel)
+            PackageImpl(parcel)
     }
 }

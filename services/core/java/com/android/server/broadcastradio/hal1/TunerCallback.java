@@ -34,7 +34,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 class TunerCallback implements ITunerCallback {
-    private static final String TAG = "BroadcastRadioService.TunerCallback";
+
+    private static final String TAG = "BcRadio1Srv.TunerCallback";
 
     /**
      * This field is used by native code, do not access or modify.
@@ -173,8 +174,13 @@ class TunerCallback implements ITunerCallback {
     }
 
     @Override
+    public void onConfigFlagUpdated(int flag, boolean value) {
+        Slog.w(TAG, "Not applicable for HAL 1.x");
+    }
+
+    @Override
     public void onParametersUpdated(Map<String, String> parameters) {
-        Slog.e(TAG, "Not applicable for HAL 1.x");
+        Slog.w(TAG, "Not applicable for HAL 1.x");
     }
 
     @Override

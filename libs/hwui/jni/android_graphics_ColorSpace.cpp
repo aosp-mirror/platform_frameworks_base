@@ -18,7 +18,6 @@
 
 #include "SkColor.h"
 #include "SkColorSpace.h"
-#include "SkHalf.h"
 
 using namespace android;
 
@@ -40,15 +39,58 @@ static skcms_Matrix3x3 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#if defined(__ANDROID__) // __fp16 is not defined on non-Android builds
 static float halfToFloat(uint16_t bits) {
-#ifdef __ANDROID__ // __fp16 is not defined on non-Android builds
     __fp16 h;
     memcpy(&h, &bits, 2);
     return (float)h;
-#else
-    return SkHalfToFloat(bits);
-#endif
 }
+#else
+// This is Skia's implementation of SkHalfToFloat, which is
+// based on Fabien Giesen's half_to_float_fast2()
+// see https://fgiesen.wordpress.com/2012/03/28/half-to-float-done-quic/
+static uint16_t halfMantissa(uint16_t h) {
+    return h & 0x03ff;
+}
+
+static uint16_t halfExponent(uint16_t h) {
+    return (h >> 10) & 0x001f;
+}
+
+static uint16_t halfSign(uint16_t h) {
+    return h >> 15;
+}
+
+union FloatUIntUnion {
+    uint32_t mUInt;    // this must come first for the initializations below to work
+    float    mFloat;
+};
+
+static float halfToFloat(uint16_t bits) {
+    static const FloatUIntUnion magic = { 126 << 23 };
+    FloatUIntUnion o;
+
+    if (halfExponent(bits) == 0) {
+        // Zero / Denormal
+        o.mUInt = magic.mUInt + halfMantissa(bits);
+        o.mFloat -= magic.mFloat;
+    } else {
+        // Set mantissa
+        o.mUInt = halfMantissa(bits) << 13;
+        // Set exponent
+        if (halfExponent(bits) == 0x1f) {
+            // Inf/NaN
+            o.mUInt |= (255 << 23);
+        } else {
+            o.mUInt |= ((127 - 15 + halfExponent(bits)) << 23);
+        }
+    }
+
+    // Set sign
+    o.mUInt |= (halfSign(bits) << 31);
+    return o.mFloat;
+}
+#endif // defined(__ANDROID__)
 
 SkColor4f GraphicsJNI::convertColorLong(jlong color) {
     if ((color & 0x3f) == 0) {

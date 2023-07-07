@@ -23,13 +23,16 @@ import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.companion.AssociationInfo;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserManager;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.server.companion.AssociationStore;
 
@@ -57,7 +60,7 @@ import java.util.Set;
 public class CompanionDevicePresenceMonitor implements AssociationStore.OnChangeListener,
         BluetoothCompanionDeviceConnectionListener.Callback, BleCompanionDeviceScanner.Callback {
     static final boolean DEBUG = false;
-    private static final String TAG = "CompanionDevice_PresenceMonitor";
+    private static final String TAG = "CDM_CompanionDevicePresenceMonitor";
 
     /** Callback for notifying about changes to status of companion devices. */
     public interface Callback {
@@ -86,13 +89,12 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
     private final SimulatedDevicePresenceSchedulerHelper mSchedulerHelper =
             new SimulatedDevicePresenceSchedulerHelper();
 
-    public CompanionDevicePresenceMonitor(@NonNull AssociationStore associationStore,
-            @NonNull Callback callback) {
+    public CompanionDevicePresenceMonitor(UserManager userManager,
+            @NonNull AssociationStore associationStore, @NonNull Callback callback) {
         mAssociationStore = associationStore;
         mCallback = callback;
-
-        mBtConnectionListener = new BluetoothCompanionDeviceConnectionListener(associationStore,
-                /* BluetoothCompanionDeviceConnectionListener.Callback */ this);
+        mBtConnectionListener = new BluetoothCompanionDeviceConnectionListener(userManager,
+                associationStore, /* BluetoothCompanionDeviceConnectionListener.Callback */ this);
         mBleScanner = new BleCompanionDeviceScanner(associationStore,
                 /* BleCompanionDeviceScanner.Callback */ this);
     }
@@ -164,6 +166,12 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
 
     @Override
     public void onBluetoothCompanionDeviceDisconnected(int associationId) {
+        // If disconnected device is also a BLE device, skip the 2-minute timer and mark it as gone.
+        boolean isConnectableBleDevice = mNearbyBleDevices.remove(associationId);
+        if (DEBUG && isConnectableBleDevice) {
+            Log.d(TAG, "Bluetooth device disconnect was detected."
+                    + " Pre-emptively marking the BLE device as lost.");
+        }
         onDeviceGone(mConnectedBtDevices, associationId, /* sourceLoggingTag */ "bt");
     }
 
@@ -226,11 +234,14 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         }
 
         final boolean alreadyPresent = isDevicePresent(newDeviceAssociationId);
-        if (DEBUG && alreadyPresent) Log.i(TAG, "Device is already present.");
+        if (alreadyPresent) {
+            Log.i(TAG, "Device" + "id (" + newDeviceAssociationId + ") already present.");
+        }
 
         final boolean added = presentDevicesForSource.add(newDeviceAssociationId);
-        if (DEBUG && !added) {
-            Log.w(TAG, "Association with id " + newDeviceAssociationId + " is ALREADY reported as "
+        if (!added) {
+            Log.w(TAG, "Association with id "
+                    + newDeviceAssociationId + " is ALREADY reported as "
                     + "present by this source (" + sourceLoggingTag + ")");
         }
 
@@ -250,16 +261,17 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
 
         final boolean removed = presentDevicesForSource.remove(goneDeviceAssociationId);
         if (!removed) {
-            if (DEBUG) {
-                Log.w(TAG, "Association with id " + goneDeviceAssociationId + " was NOT reported "
-                        + "as present by this source (" + sourceLoggingTag + ")");
-            }
+            Log.w(TAG, "Association with id " + goneDeviceAssociationId + " was NOT reported "
+                    + "as present by this source (" + sourceLoggingTag + ")");
+
             return;
         }
 
         final boolean stillPresent = isDevicePresent(goneDeviceAssociationId);
         if (stillPresent) {
-            if (DEBUG) Log.i(TAG, "  Device is still present.");
+            if (DEBUG) {
+                Log.i(TAG, "  Device id (" + goneDeviceAssociationId + ") is still present.");
+            }
             return;
         }
 
@@ -286,6 +298,15 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         // Do NOT call mCallback.onDeviceDisappeared()!
         // CompanionDeviceManagerService will know that the association is removed, and will do
         // what's needed.
+    }
+
+    /**
+     * Return a set of devices that pending to report connectivity
+     */
+    public SparseArray<Set<BluetoothDevice>> getPendingConnectedDevices() {
+        synchronized (mBtConnectionListener.mPendingConnectedDevices) {
+            return mBtConnectionListener.mPendingConnectedDevices;
+        }
     }
 
     private static void enforceCallerShellOrRoot() {

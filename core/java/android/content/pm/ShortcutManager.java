@@ -15,6 +15,8 @@
  */
 package android.content.pm;
 
+import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
+
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -628,7 +630,12 @@ public class ShortcutManager {
         try {
             mService.createShortcutResultIntent(mContext.getPackageName(),
                     shortcut, injectMyUserId(), ret);
-            return getFutureOrThrow(ret);
+            Intent result = getFutureOrThrow(ret);
+            if (result != null) {
+                result.prepareToEnterProcess(LOCAL_FLAG_FROM_SYSTEM,
+                        mContext.getAttributionSource());
+            }
+            return result;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

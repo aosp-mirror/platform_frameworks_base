@@ -20,6 +20,8 @@
 #include "renderthread/RenderEffectCapabilityQuery.h"
 #include "tests/common/TestContext.h"
 
+#include <SkColorSpace.h>
+
 using namespace android;
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;

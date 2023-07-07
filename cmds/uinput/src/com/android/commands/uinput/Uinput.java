@@ -123,7 +123,7 @@ public class Uinput {
         }
         int id = e.getId();
         Device d = new Device(id, e.getName(), e.getVendorId(), e.getProductId(), e.getBus(),
-                e.getConfiguration(), e.getFfEffectsMax(), e.getAbsInfo());
+                e.getConfiguration(), e.getFfEffectsMax(), e.getAbsInfo(), e.getPort());
         mDevices.append(id, d);
     }
 

@@ -185,17 +185,7 @@ public final class SearchTarget implements Parcelable {
         mShortcutInfo = shortcutInfo;
         mAppWidgetProviderInfo = appWidgetProviderInfo;
         mSliceUri = sliceUri;
-        mExtras = extras;
-
-        int published = 0;
-        if (mSearchAction != null) published++;
-        if (mShortcutInfo != null) published++;
-        if (mAppWidgetProviderInfo != null) published++;
-        if (mSliceUri != null) published++;
-        if (published > 1) {
-            throw new IllegalStateException("Only one of SearchAction, ShortcutInfo,"
-                    + " AppWidgetProviderInfo, SliceUri can be assigned in a SearchTarget.");
-        }
+        mExtras = extras != null ? extras : new Bundle();
     }
 
     /**

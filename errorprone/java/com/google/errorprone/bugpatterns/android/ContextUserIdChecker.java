@@ -68,6 +68,8 @@ public final class ContextUserIdChecker extends BugChecker implements MethodInvo
                     .named("myUserId"),
             instanceMethod().onExactClass("android.content.pm.ShortcutManager")
                     .named("injectMyUserId"),
+            instanceMethod().onExactClass("android.os.UserManager")
+                    .named("getContextUserIfAppropriate"),
             instanceMethod().onDescendantOf("android.content.Context")
                     .named("getUserId")));
 

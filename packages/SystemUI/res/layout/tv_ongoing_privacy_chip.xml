@@ -15,30 +15,19 @@
   ~ limitations under the License.
   -->
 
-
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="center"
-    android:animateLayoutChanges="false"
-    android:padding="@dimen/privacy_chip_margin">
-
-    <ImageView
-        android:id="@+id/chip_drawable"
-        android:layout_width="@dimen/privacy_chip_max_width"
-        android:layout_height="@dimen/privacy_chip_height"
-        android:minWidth="@dimen/privacy_chip_dot_bg_width"
-        android:minHeight="@dimen/privacy_chip_dot_bg_height"
-        android:layout_gravity="top|end" />
-
+    android:layout_height="@dimen/privacy_chip_height"
+    android:minWidth="@dimen/privacy_chip_dot_bg_width"
+    android:gravity="center">
     <LinearLayout
         android:id="@+id/icons_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/privacy_chip_height"
+        android:minWidth="@dimen/privacy_chip_dot_bg_width"
         android:orientation="horizontal"
-        android:layout_gravity="center_vertical|end"
-        android:animateLayoutChanges="true"
-        android:paddingHorizontal="@dimen/privacy_chip_padding_horizontal" />
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/privacy_chip_padding_horizontal"
+        android:clipToPadding="false" />
 </FrameLayout>
-

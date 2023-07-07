@@ -16,60 +16,102 @@
   -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:screenReaderFocusable="true">
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
     <View
+        android:id="@+id/magnification_inner_border"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/magnification_outer_border_margin"
-        android:importantForAccessibility="no"
-        android:background="@android:color/black"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/magnification_inner_border_margin"
-        android:importantForAccessibility="no"
-        android:background="@color/magnification_border_color"/>
+        android:background="@drawable/accessibility_window_magnification_background"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:importantForAccessibility="noHideDescendants">
+        android:layout_height="match_parent">
 
         <View
             android:id="@+id/left_handle"
             android:layout_width="@dimen/magnification_border_drag_size"
             android:layout_height="match_parent"
-            android:layout_above="@+id/bottom_handle"/>
+            android:layout_alignParentStart="true"/>
 
         <View
             android:id="@+id/top_handle"
             android:layout_width="match_parent"
             android:layout_height="@dimen/magnification_border_drag_size"
-            android:layout_alignParentTop="true"/>
+            android:layout_alignParentTop="true"
+            android:accessibilityTraversalAfter="@id/left_handle"/>
 
         <View
             android:id="@+id/right_handle"
             android:layout_width="@dimen/magnification_border_drag_size"
             android:layout_height="match_parent"
-            android:layout_above="@+id/bottom_handle"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentEnd="true"
+            android:accessibilityTraversalAfter="@id/top_handle"/>
 
         <View
             android:id="@+id/bottom_handle"
             android:layout_width="match_parent"
             android:layout_height="@dimen/magnification_border_drag_size"
-            android:layout_alignParentBottom="true"/>
+            android:layout_alignParentBottom="true"
+            android:accessibilityTraversalAfter="@id/right_handle"/>
 
         <SurfaceView
             android:id="@+id/surface_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="@dimen/magnification_mirror_surface_margin"/>
-
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/top_right_corner"
+        android:background="@drawable/accessibility_window_magnification_drag_corner_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/magnification_drag_corner_margin"
+        android:layout_gravity="right|top"
+        android:scaleType="center"
+        android:contentDescription="@string/magnification_drag_corner_to_resize"
+        android:src="@drawable/ic_arrow_top_right_and_bottom_left"
+        android:accessibilityTraversalAfter="@id/top_left_corner"/>
+
+    <ImageView
+        android:id="@+id/top_left_corner"
+        android:background="@drawable/accessibility_window_magnification_drag_corner_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/magnification_drag_corner_margin"
+        android:layout_gravity="left|top"
+        android:scaleType="center"
+        android:contentDescription="@string/magnification_drag_corner_to_resize"
+        android:src="@drawable/ic_arrow_top_left_and_bottom_right"
+        android:accessibilityTraversalAfter="@id/bottom_handle"/>
+
+    <ImageView
+        android:id="@+id/bottom_right_corner"
+        android:background="@drawable/accessibility_window_magnification_drag_corner_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/magnification_drag_corner_margin"
+        android:layout_gravity="right|bottom"
+        android:scaleType="center"
+        android:contentDescription="@string/magnification_drag_corner_to_resize"
+        android:src="@drawable/ic_arrow_top_left_and_bottom_right"
+        android:accessibilityTraversalAfter="@id/top_right_corner"/>
+
+    <ImageView
+        android:id="@+id/bottom_left_corner"
+        android:background="@drawable/accessibility_window_magnification_drag_corner_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/magnification_drag_corner_margin"
+        android:layout_gravity="left|bottom"
+        android:scaleType="center"
+        android:contentDescription="@string/magnification_drag_corner_to_resize"
+        android:src="@drawable/ic_arrow_top_right_and_bottom_left"
+        android:accessibilityTraversalAfter="@id/bottom_right_corner"/>
 
     <ImageView
         android:id="@+id/drag_handle"
@@ -77,10 +119,20 @@
         android:layout_height="@dimen/magnification_drag_view_size"
         android:layout_margin="@dimen/magnification_inner_border_margin"
         android:layout_gravity="right|bottom"
-        android:paddingEnd="@dimen/magnifier_drag_handle_padding"
-        android:paddingBottom="@dimen/magnifier_drag_handle_padding"
+        android:padding="@dimen/magnifier_drag_handle_padding"
         android:scaleType="center"
-        android:importantForAccessibility="no"
-        android:src="@drawable/ic_move_magnification"/>
+        android:src="@drawable/ic_move_magnification"
+        android:background="@drawable/accessibility_window_magnification_drag_handle_background"/>
 
+    <ImageView
+        android:id="@+id/close_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="30dp"
+        android:padding="@dimen/magnification_switch_button_padding"
+        android:layout_gravity="right|bottom"
+        android:scaleType="center"
+        android:visibility="gone"
+        android:background="@drawable/accessibility_magnifier_btn_bg"
+        android:src="@drawable/ic_magnification_menu_close" />
 </FrameLayout>

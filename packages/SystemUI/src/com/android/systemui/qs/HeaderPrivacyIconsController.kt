@@ -26,7 +26,9 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.shade.ShadeModule.Companion.SHADE_HEADER
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import javax.inject.Named
 
 interface ChipVisibilityListener {
     fun onChipVisibilityRefreshed(visible: Boolean)
@@ -45,10 +47,10 @@ interface ChipVisibilityListener {
 class HeaderPrivacyIconsController @Inject constructor(
     private val privacyItemController: PrivacyItemController,
     private val uiEventLogger: UiEventLogger,
-    private val privacyChip: OngoingPrivacyChip,
+    @Named(SHADE_HEADER) private val privacyChip: OngoingPrivacyChip,
     private val privacyDialogController: PrivacyDialogController,
     private val privacyLogger: PrivacyLogger,
-    private val iconContainer: StatusIconContainer,
+    @Named(SHADE_HEADER) private val iconContainer: StatusIconContainer,
     private val permissionManager: PermissionManager,
     @Background private val backgroundExecutor: Executor,
     @Main private val uiExecutor: Executor,

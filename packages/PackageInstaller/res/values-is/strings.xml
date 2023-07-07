@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Forritið er uppsett."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Viltu setja upp þetta forrit?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Viltu uppfæra þetta forrit?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Uppfæra þetta forrit frá <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nÞetta forrit fær venjulega uppfærslur frá <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Með því að uppfæra frá öðrum uppruna gætirðu fengið framtíðaruppfærslur frá hvaða uppruna sem er í símanum. Forritseiginleikar kunna að breytast."</string>
     <string name="install_failed" msgid="5777824004474125469">"Forritið er ekki uppsett."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Lokað var á uppsetningu pakkans."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Forritið var ekki sett upp vegna árekstra á milli pakkans og annars pakka."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Þessi notandi getur ekki sett upp óþekkt forrit"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Þessi notandi hefur ekki leyfi til að setja upp forrit"</string>
     <string name="ok" msgid="7871959885003339302">"Í lagi"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Uppfæra samt"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Stj. forritum"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Ekkert pláss eftir"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Ekki tókst að setja <xliff:g id="APP_NAME">%1$s</xliff:g> upp. Losaðu um pláss og reyndu aftur."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Viltu skipta þessu forriti út fyrir verksmiðjuútgáfuna? Öll gögn verða fjarlægð."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Viltu skipta þessu forriti út fyrir verksmiðjuútgáfuna? Öll gögn verða fjarlægð. Þetta hefur áhrif á alla notendur tækisins, þar á meðal þá sem eru með vinnusnið."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Halda <xliff:g id="SIZE">%1$s</xliff:g> af forritagögnum."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Viltu eyða þessu forriti?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Viltu fjarlægja þetta forrit? Afriti af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> verður einnig eytt."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Fjarlægingar í gangi"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Fjarlægingar sem mistókust"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Fjarlægir…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Fjarlægir <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Forritið hefur verið fjarlægt."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Fjarlægði <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Afriti af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> var eytt"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Ekki tókst að fjarlægja forritið."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Ekki tókst að fjarlægja <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Eyðir afriti af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Ekki er hægt að fjarlægja virkt forrit tækjastjóra"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Ekki er hægt að fjarlægja virkt forrit tækjastjóra fyrir <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Þessa forrits er krafist hjá sumum notendum eða sniðum en það var fjarlægt hjá öðrum"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Óþekkt"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Af öryggisástæðum er ekki heimilt að setja upp óþekkt forrit frá þessum uppruna í spjaldtölvunni þinni. Þú getur breytt þessu í stillingum."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Af öryggisástæðum er ekki heimilt að setja upp óþekkt forrit frá þessum uppruna í sjónvarpinu þínu. Þú getur breytt þessu í stillingum."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Af öryggisástæðum er ekki heimilt að setja upp óþekkt forrit frá þessum uppruna í úrinu þínu. Þú getur breytt þessu í stillingunum."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Af öryggisástæðum er ekki heimilt að setja upp óþekkt forrit frá þessum uppruna í símanum þínum. Þú getur breytt þessu í stillingum."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Síminn þinn og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á símanum eða gagnatapi sem leiða kann af notkun þess."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Spjaldtölvan þín og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á spjaldtölvunni eða gagnatapi sem leiða kann af notkun þess."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Sjónvarpið þitt og persónuleg gögn eru berskjaldaðri fyrir árásum forrita af óþekktum uppruna. Með uppsetningu þessa forrits samþykkirðu að bera fulla ábyrgð á hverju því tjóni sem verða kann á sjónvarpinu eða gagnatapi sem leiða kann af notkun þess."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"Afrit af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Áfram"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Stillingar"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Uppsetning/fjarlæging Wear forrita"</string>

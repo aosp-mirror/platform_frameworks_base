@@ -37,8 +37,7 @@ class StackEducationView constructor(
     context: Context,
     positioner: BubblePositioner,
     controller: BubbleController
-)
-    : LinearLayout(context) {
+) : LinearLayout(context) {
 
     private val TAG = if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "BubbleStackEducationView"
         else BubbleDebugConfig.TAG_BUBBLES
@@ -53,7 +52,8 @@ class StackEducationView constructor(
     private val titleTextView by lazy { findViewById<TextView>(R.id.stack_education_title) }
     private val descTextView by lazy { findViewById<TextView>(R.id.stack_education_description) }
 
-    private var isHiding = false
+    var isHiding = false
+        private set
 
     init {
         LayoutInflater.from(context).inflate(R.layout.bubble_stack_user_education, this)

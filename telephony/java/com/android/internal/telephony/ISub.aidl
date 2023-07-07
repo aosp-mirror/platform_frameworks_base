@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.telephony.SubscriptionInfo;
 import android.os.ParcelUuid;
+import android.os.UserHandle;
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
 
 interface ISub {
@@ -28,14 +29,6 @@ interface ISub {
      * all subscriptions that have been seen.
      */
     List<SubscriptionInfo> getAllSubInfoList(String callingPackage, String callingFeatureId);
-
-    /**
-     * @param callingPackage The package maing the call.
-     * @param callingFeatureId The feature in the package
-     * @return the count of all subscriptions in the database, this includes
-     * all subscriptions that have been seen.
-     */
-    int getAllSubInfoCount(String callingPackage, String callingFeatureId);
 
     /**
      * Get the active SubscriptionInfo with the subId key
@@ -121,14 +114,6 @@ interface ISub {
     oneway void requestEmbeddedSubscriptionInfoListRefresh(int cardId);
 
     /**
-     * Add a new SubscriptionInfo to subinfo database if needed
-     * @param iccId the IccId of the SIM card
-     * @param slotIndex the slot which the SIM is inserted
-     * @return the URL of the newly created row or the updated row
-     */
-    int addSubInfoRecord(String iccId, int slotIndex);
-
-    /**
      * Add a new subscription info record, if needed
      * @param uniqueId This is the unique identifier for the subscription within the specific
      *                 subscription type.
@@ -144,17 +129,17 @@ interface ISub {
      * @param uniqueId This is the unique identifier for the subscription within the specific
      *                      subscription type.
      * @param subscriptionType the type of subscription to be removed
-     * @return 0 if success, < 0 on error.
+     * @return true if success, false on error.
      */
-    int removeSubInfo(String uniqueId, int subscriptionType);
+    boolean removeSubInfo(String uniqueId, int subscriptionType);
 
     /**
      * Set SIM icon tint color by simInfo index
-     * @param tint the icon tint color of the SIM
      * @param subId the unique SubscriptionInfo index in database
+     * @param tint the icon tint color of the SIM
      * @return the number of records updated
      */
-    int setIconTint(int tint, int subId);
+    int setIconTint(int subId, int tint);
 
     /**
      * Set display name by simInfo index with name source
@@ -251,11 +236,9 @@ interface ISub {
 
     int getSlotIndex(int subId);
 
-    int[] getSubId(int slotIndex);
+    int getSubId(int slotIndex);
 
     int getDefaultSubId();
-
-    int clearSubInfo();
 
     int getPhoneId(int subId);
 
@@ -277,21 +260,14 @@ interface ISub {
 
     int[] getActiveSubIdList(boolean visibleOnly);
 
-    int setSubscriptionProperty(int subId, String propKey, String propValue);
+    void setSubscriptionProperty(int subId, String propKey, String propValue);
 
     String getSubscriptionProperty(int subId, String propKey, String callingPackage,
             String callingFeatureId);
 
-    boolean setSubscriptionEnabled(boolean enable, int subId);
-
     boolean isSubscriptionEnabled(int subId);
 
     int getEnabledSubscriptionId(int slotIndex);
-    /**
-     * Get the SIM state for the slot index
-     * @return SIM state as the ordinal of IccCardConstants.State
-     */
-    int getSimStateForSlotIndex(int slotIndex);
 
     boolean isActiveSubId(int subId, String callingPackage, String callingFeatureId);
 
@@ -299,7 +275,7 @@ interface ISub {
 
     boolean canDisablePhysicalSubscription();
 
-    int setUiccApplicationsEnabled(boolean enabled, int subscriptionId);
+    void setUiccApplicationsEnabled(boolean enabled, int subscriptionId);
 
     int setDeviceToDeviceStatusSharing(int sharing, int subId);
 
@@ -324,4 +300,72 @@ interface ISub {
      * @throws SecurityException if doesn't have MODIFY_PHONE_STATE or Carrier Privileges
      */
     int setUsageSetting(int usageSetting, int subId, String callingPackage);
+
+     /**
+      * Set userHandle for this subscription.
+      *
+      * @param userHandle the user handle for this subscription
+      * @param subId the unique SubscriptionInfo index in database
+      *
+      * @throws SecurityException if doesn't have MANAGE_SUBSCRIPTION_USER_ASSOCIATION
+      * @throws IllegalArgumentException if subId is invalid.
+      */
+    int setSubscriptionUserHandle(in UserHandle userHandle, int subId);
+
+    /**
+     * Get UserHandle for this subscription
+     *
+     * @param subId the unique SubscriptionInfo index in database
+     * @return userHandle associated with this subscription.
+     *
+     * @throws SecurityException if doesn't have MANAGE_SUBSCRIPTION_USER_ASSOCIATION
+     * @throws IllegalArgumentException if subId is invalid.
+     */
+     UserHandle getSubscriptionUserHandle(int subId);
+
+     /**
+      * Check if subscription and user are associated with each other.
+      *
+      * @param subscriptionId the subId of the subscription
+      * @param userHandle user handle of the user
+      * @return {@code true} if subscription is associated with user
+      * {code true} if there are no subscriptions on device
+      * else {@code false} if subscription is not associated with user.
+      *
+      * @throws IllegalArgumentException if subscription is invalid.
+      * @throws SecurityException if the caller doesn't have permissions required.
+      * @throws IllegalStateException if subscription service is not available.
+      *
+      * @hide
+      */
+      boolean isSubscriptionAssociatedWithUser(int subscriptionId, in UserHandle userHandle);
+
+      /**
+       * Get list of subscriptions associated with user.
+       *
+       * @param userHandle user handle of the user
+       * @return list of subscriptionInfo associated with the user.
+       *
+       * @throws SecurityException if the caller doesn't have permissions required.
+       * @throws IllegalStateException if subscription service is not available.
+       *
+       * @hide
+       */
+       List<SubscriptionInfo> getSubscriptionInfoListAssociatedWithUser(in UserHandle userHandle);
+
+      /**
+       * Called during setup wizard restore flow to attempt to restore the backed up sim-specific
+       * configs to device for all existing SIMs in the subscription database
+       * {@link Telephony.SimInfo}. Internally, it will store the backup data in an internal file.
+       * This file will persist on device for device's lifetime and will be used later on when a SIM
+       * is inserted to restore that specific SIM's settings. End result is subscription database is
+       * modified to match any backed up configs for the appropriate inserted SIMs.
+       *
+       * <p>
+       * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any
+       * {@link Telephony.SimInfo} entry is updated as the result of this method call.
+       *
+       * @param data with the sim specific configs to be backed up.
+       */
+       void restoreAllSimSpecificSettingsFromBackup(in byte[] data);
 }

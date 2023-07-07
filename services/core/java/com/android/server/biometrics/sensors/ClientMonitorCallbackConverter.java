@@ -59,7 +59,7 @@ public class ClientMonitorCallbackConverter {
 
     // The following apply to all clients
 
-    void onAcquired(int sensorId, int acquiredInfo, int vendorCode) throws RemoteException {
+    public void onAcquired(int sensorId, int acquiredInfo, int vendorCode) throws RemoteException {
         if (mSensorReceiver != null) {
             mSensorReceiver.onAcquired(sensorId, acquiredInfo, vendorCode);
         } else if (mFaceServiceReceiver != null) {

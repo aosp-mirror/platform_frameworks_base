@@ -284,8 +284,10 @@ class TvPipKeepClearAlgorithm() {
     ): Rect? {
         val movementBounds = transformedMovementBounds
         val candidateEdgeRects = mutableListOf<Rect>()
+        val maxRestrictedXDistanceFraction =
+                if (isPipAnchoredToCorner()) maxRestrictedDistanceFraction else 0.0
         val minRestrictedLeft =
-            pipAnchorBounds.right - screenSize.width * maxRestrictedDistanceFraction
+                pipAnchorBounds.right - screenSize.width * maxRestrictedXDistanceFraction
 
         candidateEdgeRects.add(
             movementBounds.offsetCopy(movementBounds.width() + pipAreaPadding, 0)
@@ -296,7 +298,6 @@ class TvPipKeepClearAlgorithm() {
         // throw out edges that are too close to the left screen edge to fit the PiP
         val minLeft = movementBounds.left + pipAnchorBounds.width()
         candidateEdgeRects.retainAll { it.left - pipAreaPadding > minLeft }
-        candidateEdgeRects.sortBy { -it.left }
 
         val maxRestrictedDY = (screenSize.height * maxRestrictedDistanceFraction).roundToInt()
 
@@ -335,8 +336,7 @@ class TvPipKeepClearAlgorithm() {
             }
         }
 
-        candidateBounds.sortBy { candidateCost(it, pipAnchorBounds) }
-        return candidateBounds.firstOrNull()
+        return candidateBounds.minByOrNull { candidateCost(it, pipAnchorBounds) }
     }
 
     private fun getNearbyStashedPosition(bounds: Rect, keepClearAreas: Set<Rect>): Rect {

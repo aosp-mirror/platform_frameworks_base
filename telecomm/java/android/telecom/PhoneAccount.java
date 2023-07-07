@@ -418,7 +418,34 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_VOICE_CALLING_AVAILABLE = 0x20000;
 
-    /* NEXT CAPABILITY: 0x40000 */
+
+    /**
+     * Flag indicating that this {@link PhoneAccount} supports the use TelecomManager APIs that
+     * utilize {@link android.os.OutcomeReceiver}s or {@link java.util.function.Consumer}s.
+     * Be aware, if this capability is set, {@link #CAPABILITY_SELF_MANAGED} will be amended by
+     * Telecom when this {@link PhoneAccount} is registered via
+     * {@link TelecomManager#registerPhoneAccount(PhoneAccount)}.
+     *
+     * <p>
+     * {@link android.os.OutcomeReceiver}s and {@link java.util.function.Consumer}s represent
+     * transactional operations because the operation can succeed or fail.  An app wishing to use
+     * transactional operations should define behavior for a successful and failed TelecomManager
+     * API call.
+     *
+     * @see #CAPABILITY_SELF_MANAGED
+     * @see #getCapabilities
+     */
+    public static final int CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS = 0x40000;
+
+    /**
+     * Flag indicating that this voip app {@link PhoneAccount} supports the call streaming session
+     * to stream call audio to another remote device via streaming app.
+     *
+     * @see #getCapabilities
+     */
+    public static final int CAPABILITY_SUPPORTS_CALL_STREAMING = 0x80000;
+
+    /* NEXT CAPABILITY: [0x100000, 0x200000, 0x400000] */
 
     /**
      * URI scheme for telephone number URIs.
@@ -513,6 +540,11 @@ public final class PhoneAccount implements Parcelable {
 
         /**
          * Creates a builder with the specified {@link PhoneAccountHandle} and label.
+         * <p>
+         * Note: each CharSequence or String field is limited to 256 characters. This check is
+         * enforced when registering the PhoneAccount via
+         * {@link TelecomManager#registerPhoneAccount(PhoneAccount)} and will cause an
+         * {@link IllegalArgumentException} to be thrown if the character field limit is over 256.
          */
         public Builder(PhoneAccountHandle accountHandle, CharSequence label) {
             this.mAccountHandle = accountHandle;
@@ -543,6 +575,11 @@ public final class PhoneAccount implements Parcelable {
 
         /**
          * Sets the label. See {@link PhoneAccount#getLabel()}.
+         * <p>
+         * Note: Each CharSequence or String field is limited to 256 characters. This check is
+         * enforced when registering the PhoneAccount via
+         * {@link TelecomManager#registerPhoneAccount(PhoneAccount)} and will cause an
+         * {@link IllegalArgumentException} to be thrown if the character field limit is over 256.
          *
          * @param label The label of the phone account.
          * @return The builder.
@@ -618,6 +655,11 @@ public final class PhoneAccount implements Parcelable {
 
         /**
          * Sets the short description. See {@link PhoneAccount#getShortDescription}.
+         * <p>
+         * Note: Each CharSequence or String field is limited to 256 characters. This check is
+         * enforced when registering the PhoneAccount via
+         * {@link TelecomManager#registerPhoneAccount(PhoneAccount)} and will cause an
+         * {@link IllegalArgumentException} to be thrown if the character field limit is over 256.
          *
          * @param value The short description.
          * @return The builder.
@@ -672,6 +714,13 @@ public final class PhoneAccount implements Parcelable {
          * <p>
          * {@code PhoneAccount}s only support extra values of type: {@link String}, {@link Integer},
          * and {@link Boolean}.  Extras which are not of these types are ignored.
+         * <p>
+         * Note: Each Bundle (Key, Value) String field is limited to 256 characters. Additionally,
+         * the bundle is limited to 100 (Key, Value) pairs total.  This check is
+         * enforced when registering the PhoneAccount via
+         * {@link TelecomManager#registerPhoneAccount(PhoneAccount)} and will cause an
+         * {@link IllegalArgumentException} to be thrown if the character field limit is over 256
+         * or more than 100 (Key, Value) pairs are in the Bundle.
          *
          * @param extras
          * @return
@@ -703,6 +752,11 @@ public final class PhoneAccount implements Parcelable {
          * <p>
          * Note: This is an API specific to the Telephony stack; the group Id will be ignored for
          * callers not holding the correct permission.
+         * <p>
+         * Additionally, each CharSequence or String field is limited to 256 characters.
+         * This check is enforced when registering the PhoneAccount via
+         * {@link TelecomManager#registerPhoneAccount(PhoneAccount)} and will cause an
+         * {@link IllegalArgumentException} to be thrown if the character field limit is over 256.
          *
          * @param groupId The group Id of the {@link PhoneAccount} that will replace any other
          * registered {@link PhoneAccount} in Telecom with the same Group Id.
@@ -1172,6 +1226,12 @@ public final class PhoneAccount implements Parcelable {
         }
         if (hasCapabilities(CAPABILITY_VOICE_CALLING_AVAILABLE)) {
             sb.append("Voice ");
+        }
+        if (hasCapabilities(CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS)) {
+            sb.append("TransactOps ");
+        }
+        if (hasCapabilities(CAPABILITY_SUPPORTS_CALL_STREAMING)) {
+            sb.append("Stream ");
         }
         return sb.toString();
     }

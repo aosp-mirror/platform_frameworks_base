@@ -35,6 +35,8 @@ public interface NotificationManagerInternal {
 
     void removeForegroundServiceFlagFromNotification(String pkg, int notificationId, int userId);
 
+    void removeUserInitiatedJobFlagFromNotification(String pkg, int notificationId, int userId);
+
     void onConversationRemoved(String pkg, int uid, Set<String> shortcuts);
 
     /** Get the number of notification channels for a given package */
@@ -45,4 +47,6 @@ public interface NotificationManagerInternal {
 
     /** Send a notification to the user prompting them to review their notification permissions. */
     void sendReviewPermissionsNotification();
+
+    void cleanupHistoryFiles();
 }

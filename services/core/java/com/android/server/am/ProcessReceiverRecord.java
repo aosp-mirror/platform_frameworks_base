@@ -34,29 +34,61 @@ final class ProcessReceiverRecord {
      */
     private final ArraySet<BroadcastRecord> mCurReceivers = new ArraySet<BroadcastRecord>();
 
+    private int mCurReceiversSize;
+
     /**
      * All IIntentReceivers that are registered from this process.
      */
     private final ArraySet<ReceiverList> mReceivers = new ArraySet<>();
 
     int numberOfCurReceivers() {
-        return mCurReceivers.size();
+        return mCurReceiversSize;
     }
 
+    void incrementCurReceivers() {
+        mCurReceiversSize++;
+    }
+
+    void decrementCurReceivers() {
+        mCurReceiversSize--;
+    }
+
+    /**
+     * @deprecated we're moving towards tracking only a reference count to
+     *             improve performance.
+     */
+    @Deprecated
     BroadcastRecord getCurReceiverAt(int index) {
         return mCurReceivers.valueAt(index);
     }
 
+    /**
+     * @deprecated we're moving towards tracking only a reference count to
+     *             improve performance.
+     */
+    @Deprecated
     boolean hasCurReceiver(BroadcastRecord receiver) {
         return mCurReceivers.contains(receiver);
     }
 
+    /**
+     * @deprecated we're moving towards tracking only a reference count to
+     *             improve performance.
+     */
+    @Deprecated
     void addCurReceiver(BroadcastRecord receiver) {
         mCurReceivers.add(receiver);
+        mCurReceiversSize = mCurReceivers.size();
     }
 
+    /**
+     * @deprecated we're moving towards tracking only a reference count to
+     *             improve performance.
+     */
+    @Deprecated
     void removeCurReceiver(BroadcastRecord receiver) {
         mCurReceivers.remove(receiver);
+        mCurReceiversSize = mCurReceivers.size();
     }
 
     int numberOfReceivers() {

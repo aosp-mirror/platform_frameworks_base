@@ -16,12 +16,14 @@
 
 package com.android.server.restrictions;
 
+import android.annotation.UserIdInt;
 import android.app.AppGlobals;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IRestrictionsManager;
+import android.content.Intent;
 import android.content.RestrictionsManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
@@ -34,6 +36,9 @@ import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * SystemService wrapper for the RestrictionsManager implementation. Publishes the
@@ -60,16 +65,28 @@ public final class RestrictionsManagerService extends SystemService {
         final Context mContext;
         private final IUserManager mUm;
         private final IDevicePolicyManager mDpm;
+        private final DevicePolicyManagerInternal mDpmInternal;
 
         public RestrictionsManagerImpl(Context context) {
             mContext = context;
             mUm = (IUserManager) getBinderService(Context.USER_SERVICE);
             mDpm = (IDevicePolicyManager) getBinderService(Context.DEVICE_POLICY_SERVICE);
+            mDpmInternal = getLocalService(DevicePolicyManagerInternal.class);
         }
 
         @Override
+        @Deprecated
         public Bundle getApplicationRestrictions(String packageName) throws RemoteException {
             return mUm.getApplicationRestrictions(packageName);
+        }
+
+        @Override
+        public List<Bundle> getApplicationRestrictionsPerAdminForUser(
+                @UserIdInt int userId, String packageName) throws RemoteException {
+            if (mDpmInternal != null) {
+                return mDpmInternal.getApplicationRestrictionsPerAdminForUser(packageName, userId);
+            }
+            return new ArrayList<>();
         }
 
         @Override

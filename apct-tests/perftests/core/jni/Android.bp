@@ -9,7 +9,6 @@ package {
 
 cc_library_shared {
     name: "libperftestscore_jni",
-    sdk_version: "21",
 
     srcs: ["SystemPerfTest.cpp"],
 
@@ -20,4 +19,10 @@ cc_library_shared {
         "-Wunreachable-code",
     ],
     header_libs: ["jni_headers"],
+
+    shared_libs: [
+        "libandroid_runtime",
+        "liblog",
+        "libnativehelper",
+    ],
 }

@@ -227,7 +227,7 @@ public class PolicyWarningUIController {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             final ComponentName componentName = intent.getParcelableExtra(
-                    Intent.EXTRA_COMPONENT_NAME);
+                    Intent.EXTRA_COMPONENT_NAME, android.content.ComponentName.class);
             if (TextUtils.isEmpty(action) || componentName == null) {
                 return;
             }

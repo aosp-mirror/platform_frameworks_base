@@ -131,9 +131,19 @@
     <!-- For StatusIconContainer to tag its icon views -->
     <item type="id" name="status_bar_view_state_tag" />
 
+    <!-- Status bar -->
+    <item type="id" name="status_bar_dot" />
+
+    <!-- Default display cutout on the physical top of screen -->
     <item type="id" name="display_cutout" />
+    <item type="id" name="display_cutout_left" />
+    <item type="id" name="display_cutout_right" />
+    <item type="id" name="display_cutout_bottom" />
 
     <item type="id" name="row_tag_for_content_view" />
+
+    <!-- Chipbar -->
+    <item type="id" name="tag_chipbar_info"/>
 
     <!-- Optional cancel button on Keyguard -->
     <item type="id" name="cancel_button"/>
@@ -170,11 +180,31 @@
     <item type="id" name="action_move_bottom_right"/>
     <item type="id" name="action_move_to_edge_and_hide"/>
     <item type="id" name="action_move_out_edge_and_show"/>
+    <item type="id" name="action_remove_menu"/>
 
     <!-- rounded corner view id -->
     <item type="id" name="rounded_corner_top_left"/>
     <item type="id" name="rounded_corner_top_right"/>
     <item type="id" name="rounded_corner_bottom_left"/>
     <item type="id" name="rounded_corner_bottom_right"/>
+
+    <!-- face scanning view id -->
+    <item type="id" name="face_scanning_anim"/>
+
+    <item type="id" name="qqs_tile_layout"/>
+
+    <!-- The buttons in the Quick Settings footer actions.-->
+    <item type="id" name="multi_user_switch"/>
+    <item type="id" name="pm_lite"/>
+    <item type="id" name="settings_button_container"/>
+
+    <!--Keyboard Backlight Dialog -->
+    <item type="id" name="keyboard_backlight_dialog_container"/>
+
+    <item type="id" name="log_access_dialog_allow_button" />
+    <item type="id" name="log_access_dialog_deny_button" />
+
+    <!-- keyboard backlight indicator-->
+    <item type="id" name="backlight_icon" />
 </resources>
 

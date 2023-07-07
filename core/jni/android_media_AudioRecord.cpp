@@ -18,29 +18,25 @@
 
 #define LOG_TAG "AudioRecord-JNI"
 
-#include <inttypes.h>
-#include <jni.h>
-#include <nativehelper/JNIHelp.h>
-#include "core_jni_helpers.h"
-
-#include <utils/Log.h>
-#include <media/AudioRecord.h>
-#include <media/MicrophoneInfo.h>
-#include <vector>
-
 #include <android/content/AttributionSourceState.h>
 #include <android_os_Parcel.h>
-
+#include <inttypes.h>
+#include <jni.h>
+#include <media/AudioRecord.h>
+#include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include <utils/Log.h>
+
+#include <vector>
 
 #include "android_media_AudioAttributes.h"
-#include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
+#include "android_media_AudioFormat.h"
 #include "android_media_DeviceCallback.h"
 #include "android_media_JNIUtils.h"
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_MicrophoneInfo.h"
-
+#include "core_jni_helpers.h"
 
 // ----------------------------------------------------------------------------
 
@@ -149,7 +145,8 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
                                             jint channelIndexMask, jint audioFormat,
                                             jint buffSizeInBytes, jintArray jSession,
                                             jobject jAttributionSource, jlong nativeRecordInJavaObj,
-                                            jint sharedAudioHistoryMs) {
+                                            jint sharedAudioHistoryMs,
+                                            jint halFlags) {
     //ALOGV(">> Entering android_media_AudioRecord_setup");
     //ALOGV("sampleRate=%d, audioFormat=%d, channel mask=%x, buffSizeInBytes=%d "
     //     "nativeRecordInJavaObj=0x%llX",
@@ -161,13 +158,13 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
         return (jint) AUDIO_JAVA_ERROR;
     }
 
-    jint* nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    jint* nSession = env->GetIntArrayElements(jSession, nullptr /* isCopy */);
     if (nSession == NULL) {
         ALOGE("Error creating AudioRecord: Error retrieving session id pointer");
         return (jint) AUDIO_JAVA_ERROR;
     }
     audio_session_t sessionId = (audio_session_t) nSession[0];
-    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    env->ReleaseIntArrayElements(jSession, nSession, 0 /* mode */);
     nSession = NULL;
 
     sp<AudioRecord> lpRecorder;
@@ -239,10 +236,7 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
         }
         ALOGV("AudioRecord_setup for source=%d tags=%s flags=%08x", paa->source, paa->tags, paa->flags);
 
-        audio_input_flags_t flags = AUDIO_INPUT_FLAG_NONE;
-        if (paa->flags & AUDIO_FLAG_HW_HOTWORD) {
-            flags = AUDIO_INPUT_FLAG_HW_HOTWORD;
-        }
+        const auto flags = static_cast<audio_input_flags_t>(halFlags);
         // create the callback information:
         // this data will be passed with every AudioRecord callback
         // we use a weak reference so the AudioRecord object can be garbage collected.
@@ -288,14 +282,14 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
         // callbackData = sp<AudioRecordJNIStorage>::make(clazz, weak_this);
     }
 
-    nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    nSession = env->GetIntArrayElements(jSession, nullptr /* isCopy */);
     if (nSession == NULL) {
         ALOGE("Error creating AudioRecord: Error retrieving session id pointer");
         goto native_init_failure;
     }
     // read the audio session ID back from AudioRecord in case a new session was created during set()
     nSession[0] = lpRecorder->getSessionId();
-    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    env->ReleaseIntArrayElements(jSession, nSession, 0 /* mode */);
     nSession = NULL;
 
     {
@@ -721,7 +715,7 @@ static jint android_media_AudioRecord_get_active_microphones(JNIEnv *env,
     }
 
     jint jStatus = AUDIO_JAVA_SUCCESS;
-    std::vector<media::MicrophoneInfo> activeMicrophones;
+    std::vector<media::MicrophoneInfoFw> activeMicrophones;
     status_t status = lpRecorder->getActiveMicrophones(&activeMicrophones);
     if (status != NO_ERROR) {
         ALOGE_IF(status != NO_ERROR, "AudioRecord::getActiveMicrophones error %d", status);
@@ -831,7 +825,7 @@ static const JNINativeMethod gMethods[] = {
         {"native_start", "(II)I", (void *)android_media_AudioRecord_start},
         {"native_stop", "()V", (void *)android_media_AudioRecord_stop},
         {"native_setup",
-         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILandroid/os/Parcel;JI)I",
+         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILandroid/os/Parcel;JII)I",
          (void *)android_media_AudioRecord_setup},
         {"native_finalize", "()V", (void *)android_media_AudioRecord_finalize},
         {"native_release", "()V", (void *)android_media_AudioRecord_release},

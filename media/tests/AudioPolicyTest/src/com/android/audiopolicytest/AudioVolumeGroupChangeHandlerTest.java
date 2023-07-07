@@ -16,21 +16,48 @@
 
 package com.android.audiopolicytest;
 
+import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
+
+import static com.android.audiopolicytest.AudioVolumeTestUtil.DEFAULT_ATTRIBUTES;
+import static com.android.audiopolicytest.AudioVolumeTestUtil.incrementVolumeIndex;
+
 import static org.junit.Assert.assertEquals;
-import static org.testng.Assert.assertThrows;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.AudioVolumeGroupChangeHandler;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AudioVolumeGroupChangeHandlerTest extends AudioVolumesTestBase {
+@Presubmit
+@RunWith(AndroidJUnit4.class)
+public class AudioVolumeGroupChangeHandlerTest {
     private static final String TAG = "AudioVolumeGroupChangeHandlerTest";
 
-    public void testRegisterInvalidCallback() throws Exception {
+    @Rule
+    public final AudioVolumesTestRule rule = new AudioVolumesTestRule();
+
+    private AudioManager mAudioManager;
+
+    @Before
+    public void setUp() {
+        mAudioManager = getApplicationContext().getSystemService(AudioManager.class);
+    }
+
+    @Test
+    public void testRegisterInvalidCallback() {
         final AudioVolumeGroupChangeHandler audioAudioVolumeGroupChangedHandler =
                 new AudioVolumeGroupChangeHandler();
 
@@ -42,7 +69,8 @@ public class AudioVolumeGroupChangeHandlerTest extends AudioVolumesTestBase {
         });
     }
 
-    public void testUnregisterInvalidCallback() throws Exception {
+    @Test
+    public void testUnregisterInvalidCallback() {
         final AudioVolumeGroupChangeHandler audioAudioVolumeGroupChangedHandler =
                 new AudioVolumeGroupChangeHandler();
 
@@ -58,7 +86,8 @@ public class AudioVolumeGroupChangeHandlerTest extends AudioVolumesTestBase {
         audioAudioVolumeGroupChangedHandler.unregisterListener(cb);
     }
 
-    public void testRegisterUnregisterCallback() throws Exception {
+    @Test
+    public void testRegisterUnregisterCallback() {
         final AudioVolumeGroupChangeHandler audioAudioVolumeGroupChangedHandler =
                 new AudioVolumeGroupChangeHandler();
 
@@ -72,7 +101,8 @@ public class AudioVolumeGroupChangeHandlerTest extends AudioVolumesTestBase {
         audioAudioVolumeGroupChangedHandler.unregisterListener(validCb);
     }
 
-    public void testCallbackReceived() throws Exception {
+    @Test
+    public void testCallbackReceived() {
         final AudioVolumeGroupChangeHandler audioAudioVolumeGroupChangedHandler =
                 new AudioVolumeGroupChangeHandler();
 
@@ -90,7 +120,7 @@ public class AudioVolumeGroupChangeHandlerTest extends AudioVolumesTestBase {
 
                 List<AudioAttributes> avgAttributes = audioVolumeGroup.getAudioAttributes();
                 // Set the volume per attributes (if valid) and wait the callback
-                if (avgAttributes.size() == 0 || avgAttributes.get(0).equals(sDefaultAttributes)) {
+                if (avgAttributes.size() == 0 || avgAttributes.get(0).equals(DEFAULT_ATTRIBUTES)) {
                     // Some volume groups may not have valid attributes, used for internal
                     // volume management like patch/rerouting
                     // so bailing out strategy retrieval from attributes
@@ -118,7 +148,8 @@ public class AudioVolumeGroupChangeHandlerTest extends AudioVolumesTestBase {
         }
     }
 
-    public void testMultipleCallbackReceived() throws Exception {
+    @Test
+    public void testMultipleCallbackReceived() {
 
         final AudioVolumeGroupChangeHandler audioAudioVolumeGroupChangedHandler =
                 new AudioVolumeGroupChangeHandler();
@@ -144,7 +175,7 @@ public class AudioVolumeGroupChangeHandlerTest extends AudioVolumesTestBase {
 
                 List<AudioAttributes> avgAttributes = audioVolumeGroup.getAudioAttributes();
                 // Set the volume per attributes (if valid) and wait the callback
-                if (avgAttributes.size() == 0 || avgAttributes.get(0).equals(sDefaultAttributes)) {
+                if (avgAttributes.size() == 0 || avgAttributes.get(0).equals(DEFAULT_ATTRIBUTES)) {
                     // Some volume groups may not have valid attributes, used for internal
                     // volume management like patch/rerouting
                     // so bailing out strategy retrieval from attributes

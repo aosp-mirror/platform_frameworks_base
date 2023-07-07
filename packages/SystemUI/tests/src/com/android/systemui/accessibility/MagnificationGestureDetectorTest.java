@@ -19,6 +19,7 @@ package com.android.systemui.accessibility;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -27,6 +28,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
@@ -52,6 +54,7 @@ public class MagnificationGestureDetectorTest extends SysuiTestCase {
     private int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
     private MagnificationGestureDetector mGestureDetector;
     private MotionEventHelper mMotionEventHelper = new MotionEventHelper();
+    private View mSpyView;
     @Mock
     private MagnificationGestureDetector.OnGestureListener mListener;
     @Mock
@@ -66,6 +69,7 @@ public class MagnificationGestureDetectorTest extends SysuiTestCase {
             return null;
         }).when(mHandler).postAtTime(any(Runnable.class), anyLong());
         mGestureDetector = new MagnificationGestureDetector(mContext, mHandler, mListener);
+        mSpyView = Mockito.spy(new View(mContext));
     }
 
     @After
@@ -79,7 +83,7 @@ public class MagnificationGestureDetectorTest extends SysuiTestCase {
         final MotionEvent downEvent = mMotionEventHelper.obtainMotionEvent(downTime, downTime,
                 MotionEvent.ACTION_DOWN, ACTION_DOWN_X, ACTION_DOWN_Y);
 
-        mGestureDetector.onTouch(downEvent);
+        mGestureDetector.onTouch(mSpyView, downEvent);
 
         mListener.onStart(ACTION_DOWN_X, ACTION_DOWN_Y);
     }
@@ -92,14 +96,14 @@ public class MagnificationGestureDetectorTest extends SysuiTestCase {
         final MotionEvent upEvent = mMotionEventHelper.obtainMotionEvent(downTime, downTime,
                 MotionEvent.ACTION_UP, ACTION_DOWN_X, ACTION_DOWN_Y);
 
-        mGestureDetector.onTouch(downEvent);
-        mGestureDetector.onTouch(upEvent);
+        mGestureDetector.onTouch(mSpyView, downEvent);
+        mGestureDetector.onTouch(mSpyView, upEvent);
 
         InOrder inOrder = Mockito.inOrder(mListener);
         inOrder.verify(mListener).onStart(ACTION_DOWN_X, ACTION_DOWN_Y);
-        inOrder.verify(mListener).onSingleTap();
+        inOrder.verify(mListener).onSingleTap(mSpyView);
         inOrder.verify(mListener).onFinish(ACTION_DOWN_X, ACTION_DOWN_Y);
-        verify(mListener, never()).onDrag(anyFloat(), anyFloat());
+        verify(mListener, never()).onDrag(eq(mSpyView), anyFloat(), anyFloat());
     }
 
     @Test
@@ -110,10 +114,10 @@ public class MagnificationGestureDetectorTest extends SysuiTestCase {
         final MotionEvent cancelEvent = mMotionEventHelper.obtainMotionEvent(downTime, downTime,
                 MotionEvent.ACTION_CANCEL, ACTION_DOWN_X, ACTION_DOWN_Y);
 
-        mGestureDetector.onTouch(downEvent);
-        mGestureDetector.onTouch(cancelEvent);
+        mGestureDetector.onTouch(mSpyView, downEvent);
+        mGestureDetector.onTouch(mSpyView, cancelEvent);
 
-        verify(mListener, never()).onSingleTap();
+        verify(mListener, never()).onSingleTap(mSpyView);
     }
 
     @Test
@@ -124,10 +128,10 @@ public class MagnificationGestureDetectorTest extends SysuiTestCase {
         final MotionEvent upEvent = mMotionEventHelper.obtainMotionEvent(downTime, downTime,
                 MotionEvent.ACTION_POINTER_DOWN, ACTION_DOWN_X, ACTION_DOWN_Y);
 
-        mGestureDetector.onTouch(downEvent);
-        mGestureDetector.onTouch(upEvent);
+        mGestureDetector.onTouch(mSpyView, downEvent);
+        mGestureDetector.onTouch(mSpyView, upEvent);
 
-        verify(mListener, never()).onSingleTap();
+        verify(mListener, never()).onSingleTap(mSpyView);
     }
 
     @Test
@@ -138,15 +142,15 @@ public class MagnificationGestureDetectorTest extends SysuiTestCase {
         final MotionEvent upEvent = mMotionEventHelper.obtainMotionEvent(downTime, downTime,
                 MotionEvent.ACTION_UP, ACTION_DOWN_X, ACTION_DOWN_Y);
 
-        mGestureDetector.onTouch(downEvent);
+        mGestureDetector.onTouch(mSpyView, downEvent);
         // Execute the pending message for stopping single-tap detection.
         mCancelSingleTapRunnable.run();
-        mGestureDetector.onTouch(upEvent);
+        mGestureDetector.onTouch(mSpyView, upEvent);
 
         InOrder inOrder = Mockito.inOrder(mListener);
         inOrder.verify(mListener).onStart(ACTION_DOWN_X, ACTION_DOWN_Y);
         inOrder.verify(mListener).onFinish(ACTION_DOWN_X, ACTION_DOWN_Y);
-        verify(mListener, never()).onSingleTap();
+        verify(mListener, never()).onSingleTap(mSpyView);
     }
 
     @Test
@@ -160,14 +164,14 @@ public class MagnificationGestureDetectorTest extends SysuiTestCase {
         final MotionEvent upEvent = mMotionEventHelper.obtainMotionEvent(downTime, downTime,
                 MotionEvent.ACTION_UP, ACTION_DOWN_X, ACTION_DOWN_Y);
 
-        mGestureDetector.onTouch(downEvent);
-        mGestureDetector.onTouch(moveEvent);
-        mGestureDetector.onTouch(upEvent);
+        mGestureDetector.onTouch(mSpyView, downEvent);
+        mGestureDetector.onTouch(mSpyView, moveEvent);
+        mGestureDetector.onTouch(mSpyView, upEvent);
 
         InOrder inOrder = Mockito.inOrder(mListener);
         inOrder.verify(mListener).onStart(ACTION_DOWN_X, ACTION_DOWN_Y);
-        inOrder.verify(mListener).onDrag(dragOffset, 0);
+        inOrder.verify(mListener).onDrag(mSpyView, dragOffset, 0);
         inOrder.verify(mListener).onFinish(ACTION_DOWN_X, ACTION_DOWN_Y);
-        verify(mListener, never()).onSingleTap();
+        verify(mListener, never()).onSingleTap(mSpyView);
     }
 }

@@ -47,4 +47,5 @@ interface IImsServiceController {
     ISipTransport getSipTransport(int slotId);
     oneway void enableIms(int slotId, int subId);
     oneway void disableIms(int slotId, int subId);
+    oneway void resetIms(int slotId, int subId);
 }

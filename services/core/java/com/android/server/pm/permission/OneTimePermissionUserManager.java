@@ -22,6 +22,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +37,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
+import com.android.server.PermissionThread;
 
 /**
  * Class that handles one-time permissions for a user
@@ -84,7 +86,8 @@ public class OneTimePermissionUserManager {
         mIActivityManager = ActivityManager.getService();
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAlarmManager = context.getSystemService(AlarmManager.class);
-        mPermissionControllerManager = context.getSystemService(PermissionControllerManager.class);
+        mPermissionControllerManager = new PermissionControllerManager(
+                mContext, PermissionThread.getHandler());
         mHandler = context.getMainThreadHandler();
     }
 
@@ -166,7 +169,7 @@ public class OneTimePermissionUserManager {
 
         private final Object mInnerLock = new Object();
         private final Object mToken = new Object();
-        private final IUidObserver.Stub mObserver = new IUidObserver.Stub() {
+        private final IUidObserver mObserver = new UidObserver() {
             @Override
             public void onUidGone(int uid, boolean disabled) {
                 if (uid == mUid) {
@@ -185,15 +188,6 @@ public class OneTimePermissionUserManager {
                         PackageInactivityListener.this.updateUidState(STATE_ACTIVE);
                     }
                 }
-            }
-
-            public void onUidActive(int uid) {
-            }
-            public void onUidIdle(int uid, boolean disabled) {
-            }
-            public void onUidProcAdjChanged(int uid) {
-            }
-            public void onUidCachedChanged(int uid, boolean cached) {
             }
         };
 

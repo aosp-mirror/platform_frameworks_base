@@ -169,6 +169,18 @@ public final class AccessibilityManager {
      */
     public static final int ACCESSIBILITY_SHORTCUT_KEY = 1;
 
+    /** @hide */
+    public static final int FLASH_REASON_CALL = 1;
+
+    /** @hide */
+    public static final int FLASH_REASON_ALARM = 2;
+
+    /** @hide */
+    public static final int FLASH_REASON_NOTIFICATION = 3;
+
+    /** @hide */
+    public static final int FLASH_REASON_PREVIEW = 4;
+
     /**
      * Annotations for the shortcut type.
      * @hide
@@ -191,6 +203,19 @@ public final class AccessibilityManager {
             FLAG_CONTENT_CONTROLS
     })
     public @interface ContentFlag {}
+
+    /**
+     * Annotations for reason of Flash notification.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "FLASH_REASON_" }, value = {
+            FLASH_REASON_CALL,
+            FLASH_REASON_ALARM,
+            FLASH_REASON_NOTIFICATION,
+            FLASH_REASON_PREVIEW
+    })
+    public @interface FlashNotificationReason {}
 
     /**
      * Use this flag to indicate the content of a UI that times out contains icons.
@@ -276,10 +301,19 @@ public final class AccessibilityManager {
     private final ArrayMap<AudioDescriptionRequestedChangeListener, Executor>
             mAudioDescriptionRequestedChangeListeners = new ArrayMap<>();
 
+    private boolean mRequestFromAccessibilityTool;
+
     /**
      * Map from a view's accessibility id to the list of request preparers set for that view
      */
     private SparseArray<List<AccessibilityRequestPreparer>> mRequestPreparerLists;
+
+    /**
+     * Binder for flash notification.
+     *
+     * @see #startFlashNotificationSequence(Context, int)
+     */
+    private final Binder mBinder = new Binder();
 
     /**
      * Listener for the system accessibility state. To listen for changes to the
@@ -583,18 +617,46 @@ public final class AccessibilityManager {
 
     /**
      * Returns if the accessibility in the system is enabled.
+     * <p>
+     * <b>Note:</b> This query is used for sending {@link AccessibilityEvent}s, since events are
+     * only needed if accessibility is on. Avoid changing UI or app behavior based on the state of
+     * accessibility. While well-intentioned, doing this creates brittle, less
+     * well-maintained code that works for some users but not others. Shared code leads to more
+     * equitable experiences and less technical debt.
+     *
+     *<p>
+     * For example, if you want to expose a unique interaction with your app, use
+     * ViewCompat#addAccessibilityAction in AndroidX to make this interaction - ideally
+     * with the same code path used for non-accessibility users - available to accessibility
+     * services. Services can then expose this action in the way best fit for their users.
      *
      * @return True if accessibility is enabled, false otherwise.
      */
     public boolean isEnabled() {
         synchronized (mLock) {
-            return mIsEnabled || (mAccessibilityPolicy != null
-                    && mAccessibilityPolicy.isEnabled(mIsEnabled));
+            return mIsEnabled || hasAnyDirectConnection()
+                    || (mAccessibilityPolicy != null && mAccessibilityPolicy.isEnabled(mIsEnabled));
         }
     }
 
     /**
+     * @see AccessibilityInteractionClient#hasAnyDirectConnection
+     * @hide
+     */
+    @TestApi
+    public boolean hasAnyDirectConnection() {
+        return AccessibilityInteractionClient.hasAnyDirectConnection();
+    }
+
+    /**
      * Returns if the touch exploration in the system is enabled.
+     * <p>
+     * <b>Note:</b> This query is used for dispatching hover events, such as
+     * {@link android.view.MotionEvent#ACTION_HOVER_ENTER}, to accessibility services to manage
+     * touch exploration. Avoid changing UI or app behavior based on the state of accessibility.
+     * While well-intentioned, doing this creates brittle, less well-maintained code that works for
+     * som users but not others. Shared code leads to more equitable experiences and less technical
+     * debt.
      *
      * @return True if touch exploration is enabled, false otherwise.
      */
@@ -983,6 +1045,39 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Whether the current accessibility request comes from an
+     * {@link AccessibilityService} with the {@link AccessibilityServiceInfo#isAccessibilityTool}
+     * property set to true.
+     *
+     * <p>
+     * You can use this method inside {@link AccessibilityNodeProvider} to decide how to populate
+     * your nodes.
+     * </p>
+     *
+     * <p>
+     * <strong>Note:</strong> The return value is valid only when an {@link AccessibilityNodeInfo}
+     * request is in progress, can change from one request to another, and has no meaning when a
+     * request is not in progress.
+     * </p>
+     *
+     * @return True if the current request is from a tool that sets isAccessibilityTool.
+     */
+    public boolean isRequestFromAccessibilityTool() {
+        return mRequestFromAccessibilityTool;
+    }
+
+    /**
+     * Specifies whether the current accessibility request comes from an
+     * {@link AccessibilityService} with the {@link AccessibilityServiceInfo#isAccessibilityTool}
+     * property set to true.
+     *
+     * @hide
+     */
+    public void setRequestFromAccessibilityTool(boolean requestFromAccessibilityTool) {
+        mRequestFromAccessibilityTool = requestFromAccessibilityTool;
+    }
+
+    /**
      * Registers a {@link AccessibilityRequestPreparer}.
      */
     public void addAccessibilityRequestPreparer(AccessibilityRequestPreparer preparer) {
@@ -1144,6 +1239,15 @@ public final class AccessibilityManager {
      */
     public void notifyPerformingAction(int actionId) {
         mPerformingAction = actionId;
+    }
+
+    /**
+     * Get the id of {@link AccessibilityNodeInfo.AccessibilityAction} currently being performed.
+     *
+     * @hide
+     */
+    public int getPerformingAction() {
+        return mPerformingAction;
     }
 
     /**
@@ -1832,6 +1936,238 @@ public final class AccessibilityManager {
         }
     }
 
+
+    /**
+     * Sets the {@link AccessibilityWindowAttributes} to the window associated with the given
+     * window id.
+     *
+     * @param displayId The display id of the window.
+     * @param windowId  The id of the window.
+     * @param attributes The accessibility window attributes.
+     * @hide
+     */
+    public void setAccessibilityWindowAttributes(int displayId, int windowId,
+            AccessibilityWindowAttributes attributes) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return;
+            }
+        }
+        try {
+            service.setAccessibilityWindowAttributes(displayId, windowId, mUserId, attributes);
+        } catch (RemoteException re) {
+            re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Registers an {@link AccessibilityDisplayProxy}, so this proxy can access UI content specific
+     * to its display.
+     *
+     * @param proxy the {@link AccessibilityDisplayProxy} to register.
+     * @return {@code true} if the proxy is successfully registered.
+     *
+     * @throws IllegalArgumentException if the proxy's display is not currently tracked by a11y, is
+     * {@link android.view.Display#DEFAULT_DISPLAY}, is or lower than
+     * {@link android.view.Display#INVALID_DISPLAY}, or is already being proxy-ed.
+     *
+     * @throws SecurityException if the app does not hold the
+     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission or the
+     * {@link Manifest.permission#CREATE_VIRTUAL_DEVICE} permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {Manifest.permission.MANAGE_ACCESSIBILITY,
+            Manifest.permission.CREATE_VIRTUAL_DEVICE})
+    public boolean registerDisplayProxy(@NonNull AccessibilityDisplayProxy proxy) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.registerProxyForDisplay(proxy.mServiceClient, proxy.getDisplayId());
+        }  catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters an {@link AccessibilityDisplayProxy}.
+     *
+     * @return {@code true} if the proxy is successfully unregistered.
+     *
+     * @throws SecurityException if the app does not hold the
+     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission or the
+     * {@link Manifest.permission#CREATE_VIRTUAL_DEVICE} permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {Manifest.permission.MANAGE_ACCESSIBILITY,
+            Manifest.permission.CREATE_VIRTUAL_DEVICE})
+    public boolean unregisterDisplayProxy(@NonNull AccessibilityDisplayProxy proxy)  {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+        try {
+            return service.unregisterProxyForDisplay(proxy.getDisplayId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start sequence (infinite) type of flash notification. Use
+     * {@code Context.getOpPackageName()} as the identifier of this flash notification.
+     * The notification can be cancelled later by calling {@link #stopFlashNotificationSequence}
+     * with same {@code Context.getOpPackageName()}.
+     * If the binder associated with this {@link AccessibilityManager} instance dies then the
+     * sequence will stop automatically. It is strongly recommended to call
+     * {@link #stopFlashNotificationSequence} within a reasonable amount of time after calling
+     * this method.
+     *
+     * @param context The context in which this manager operates.
+     * @param reason The triggering reason of flash notification.
+     * @return {@code true} if flash notification works properly.
+     * @hide
+     */
+    public boolean startFlashNotificationSequence(@NonNull Context context,
+            @FlashNotificationReason int reason) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.startFlashNotificationSequence(context.getOpPackageName(),
+                    reason, mBinder);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while start flash notification sequence", re);
+            return false;
+        }
+    }
+
+    /**
+     * Stop sequence (infinite) type of flash notification. The flash notification with
+     * {@code Context.getOpPackageName()} as identifier will be stopped if exist.
+     * It is strongly recommended to call this method within a reasonable amount of time after
+     * calling {@link #startFlashNotificationSequence} method.
+     *
+     * @param context The context in which this manager operates.
+     * @return {@code true} if flash notification stops properly.
+     * @hide
+     */
+    public boolean stopFlashNotificationSequence(@NonNull Context context) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.stopFlashNotificationSequence(context.getOpPackageName());
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while stop flash notification sequence", re);
+            return false;
+        }
+    }
+
+    /**
+     * Start event (finite) type of flash notification.
+     *
+     * @param context The context in which this manager operates.
+     * @param reason The triggering reason of flash notification.
+     * @param reasonPkg The package that trigger the flash notification.
+     * @return {@code true} if flash notification works properly.
+     * @hide
+     */
+    public boolean startFlashNotificationEvent(@NonNull Context context,
+            @FlashNotificationReason int reason, @Nullable String reasonPkg) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.startFlashNotificationEvent(context.getOpPackageName(),
+                    reason, reasonPkg);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while start flash notification event", re);
+            return false;
+        }
+    }
+
+    /**
+     * Determines if the accessibility target is allowed.
+     *
+     * @param packageName The name of the application attempting to perform the operation.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param userId The id of the user for whom to perform the operation.
+     * @return {@code true} the accessibility target is allowed.
+     * @hide
+     */
+    public boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.isAccessibilityTargetAllowed(packageName, uid, userId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while check accessibility target status", re);
+            return false;
+        }
+    }
+
+    /**
+     * Sends restricted dialog intent if the accessibility target is disallowed.
+     *
+     * @param packageName The name of the application attempting to perform the operation.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param userId The id of the user for whom to perform the operation.
+     * @return {@code true} if the restricted dialog is shown.
+     * @hide
+     */
+    public boolean sendRestrictedDialogIntent(String packageName, int uid, int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.sendRestrictedDialogIntent(packageName, uid, userId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while show restricted dialog", re);
+            return false;
+        }
+    }
+
     private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);
@@ -1862,8 +2198,13 @@ public final class AccessibilityManager {
 
     /**
      * Notifies the registered {@link AccessibilityStateChangeListener}s.
+     *
+     * Note: this method notifies only the listeners of this single instance.
+     * AccessibilityManagerService is responsible for calling this method on all of
+     * its AccessibilityManager clients in order to notify all listeners.
+     * @hide
      */
-    private void notifyAccessibilityStateChanged() {
+    public void notifyAccessibilityStateChanged() {
         final boolean isEnabled;
         final ArrayMap<AccessibilityStateChangeListener, Handler> listeners;
         synchronized (mLock) {
@@ -2029,6 +2370,33 @@ public final class AccessibilityManager {
                 } break;
             }
             return true;
+        }
+    }
+
+    /**
+     * Retrieves the window's transformation matrix and magnification spec.
+     *
+     * <p>
+     * Used by callers outside of the AccessibilityManagerService process which need
+     * this information, like {@link android.view.accessibility.DirectAccessibilityConnection}.
+     * </p>
+     *
+     * @return The transformation spec
+     * @hide
+     */
+    public IAccessibilityManager.WindowTransformationSpec getWindowTransformationSpec(
+            int windowId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return null;
+            }
+        }
+        try {
+            return service.getWindowTransformationSpec(windowId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
     }
 }

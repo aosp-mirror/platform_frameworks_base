@@ -18,6 +18,8 @@ package com.android.internal.os;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
+
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
@@ -197,5 +199,15 @@ public class LongMultiStateCounterTest {
         newCounter.updateValue(316, 200);
 
         assertThat(newCounter.getCount(0)).isEqualTo(116);
+    }
+
+    @Test
+    public void createFromBadParcel() {
+        // Check we don't crash the runtime if the Parcel data is bad (b/243434675).
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(13);
+        parcel.setDataPosition(0);
+        assertThrows(RuntimeException.class,
+                () -> LongMultiStateCounter.CREATOR.createFromParcel(parcel));
     }
 }

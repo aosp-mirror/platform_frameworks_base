@@ -246,8 +246,7 @@ final class NavigationBarController {
         @Override
         public void updateTouchableInsets(@NonNull InputMethodService.Insets originalInsets,
                 @NonNull ViewTreeObserver.InternalInsetsInfo dest) {
-            if (!mImeDrawsImeNavBar || mNavigationBarFrame == null
-                    || mService.isExtractViewShown()) {
+            if (!mImeDrawsImeNavBar || mNavigationBarFrame == null) {
                 return;
             }
 
@@ -255,53 +254,58 @@ final class NavigationBarController {
             if (systemInsets != null) {
                 final Window window = mService.mWindow.getWindow();
                 final View decor = window.getDecorView();
-                Region touchableRegion = null;
-                final View inputFrame = mService.mInputFrame;
-                switch (originalInsets.touchableInsets) {
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
-                        if (inputFrame.getVisibility() == View.VISIBLE) {
-                            inputFrame.getLocationInWindow(mTempPos);
-                            mTempRect.set(mTempPos[0], mTempPos[1],
-                                    mTempPos[0] + inputFrame.getWidth(),
-                                    mTempPos[1] + inputFrame.getHeight());
-                            touchableRegion = new Region(mTempRect);
-                        }
-                        break;
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT:
-                        if (inputFrame.getVisibility() == View.VISIBLE) {
-                            inputFrame.getLocationInWindow(mTempPos);
-                            mTempRect.set(mTempPos[0], originalInsets.contentTopInsets,
-                                    mTempPos[0] + inputFrame.getWidth() ,
-                                    mTempPos[1] + inputFrame.getHeight());
-                            touchableRegion = new Region(mTempRect);
-                        }
-                        break;
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE:
-                        if (inputFrame.getVisibility() == View.VISIBLE) {
-                            inputFrame.getLocationInWindow(mTempPos);
-                            mTempRect.set(mTempPos[0], originalInsets.visibleTopInsets,
-                                    mTempPos[0] + inputFrame.getWidth(),
-                                    mTempPos[1] + inputFrame.getHeight());
-                            touchableRegion = new Region(mTempRect);
-                        }
-                        break;
-                    case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION:
-                        touchableRegion = new Region();
-                        touchableRegion.set(originalInsets.touchableRegion);
-                        break;
-                }
-                // Hereafter "mTempRect" means a navigation bar rect.
-                mTempRect.set(decor.getLeft(), decor.getBottom() - systemInsets.bottom,
-                        decor.getRight(), decor.getBottom());
-                if (touchableRegion == null) {
-                    touchableRegion = new Region(mTempRect);
-                } else {
-                    touchableRegion.union(mTempRect);
-                }
 
-                dest.touchableRegion.set(touchableRegion);
-                dest.setTouchableInsets(
-                        ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+                // If the extract view is shown, everything is touchable, so no need to update
+                // touchable insets, but we still update normal insets below.
+                if (!mService.isExtractViewShown()) {
+                    Region touchableRegion = null;
+                    final View inputFrame = mService.mInputFrame;
+                    switch (originalInsets.touchableInsets) {
+                        case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
+                            if (inputFrame.getVisibility() == View.VISIBLE) {
+                                inputFrame.getLocationInWindow(mTempPos);
+                                mTempRect.set(mTempPos[0], mTempPos[1],
+                                        mTempPos[0] + inputFrame.getWidth(),
+                                        mTempPos[1] + inputFrame.getHeight());
+                                touchableRegion = new Region(mTempRect);
+                            }
+                            break;
+                        case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT:
+                            if (inputFrame.getVisibility() == View.VISIBLE) {
+                                inputFrame.getLocationInWindow(mTempPos);
+                                mTempRect.set(mTempPos[0], originalInsets.contentTopInsets,
+                                        mTempPos[0] + inputFrame.getWidth(),
+                                        mTempPos[1] + inputFrame.getHeight());
+                                touchableRegion = new Region(mTempRect);
+                            }
+                            break;
+                        case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE:
+                            if (inputFrame.getVisibility() == View.VISIBLE) {
+                                inputFrame.getLocationInWindow(mTempPos);
+                                mTempRect.set(mTempPos[0], originalInsets.visibleTopInsets,
+                                        mTempPos[0] + inputFrame.getWidth(),
+                                        mTempPos[1] + inputFrame.getHeight());
+                                touchableRegion = new Region(mTempRect);
+                            }
+                            break;
+                        case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION:
+                            touchableRegion = new Region();
+                            touchableRegion.set(originalInsets.touchableRegion);
+                            break;
+                    }
+                    // Hereafter "mTempRect" means a navigation bar rect.
+                    mTempRect.set(decor.getLeft(), decor.getBottom() - systemInsets.bottom,
+                            decor.getRight(), decor.getBottom());
+                    if (touchableRegion == null) {
+                        touchableRegion = new Region(mTempRect);
+                    } else {
+                        touchableRegion.union(mTempRect);
+                    }
+
+                    dest.touchableRegion.set(touchableRegion);
+                    dest.setTouchableInsets(
+                            ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+                }
 
                 // TODO(b/215443343): See if we can use View#OnLayoutChangeListener().
                 // TODO(b/215443343): See if we can replace DecorView#mNavigationColorViewState.view

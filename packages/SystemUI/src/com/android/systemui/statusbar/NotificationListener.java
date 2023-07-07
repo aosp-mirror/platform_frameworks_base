@@ -31,9 +31,11 @@ import android.util.Log;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.dagger.CentralSurfacesModule;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
+import com.android.systemui.statusbar.notification.collection.PipelineDumper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 import com.android.systemui.util.time.SystemClock;
@@ -52,7 +54,8 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 @SuppressLint("OverrideAbstract")
-public class NotificationListener extends NotificationListenerWithPlugins {
+public class NotificationListener extends NotificationListenerWithPlugins implements
+        PipelineDumpable {
     private static final String TAG = "NotificationListener";
     private static final boolean DEBUG = CentralSurfaces.DEBUG;
     private static final long MAX_RANKING_DELAY_MILLIS = 500L;
@@ -255,34 +258,41 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         }
     }
 
+    @Override
+    public void dumpPipeline(@NonNull PipelineDumper d) {
+        d.dump("notificationHandlers", mNotificationHandlers);
+    }
+
     private static Ranking getRankingOrTemporaryStandIn(RankingMap rankingMap, String key) {
         Ranking ranking = new Ranking();
         if (!rankingMap.getRanking(key, ranking)) {
             ranking.populate(
                     key,
-                    0,
-                    false,
-                    0,
-                    0,
-                    0,
-                    null,
-                    null,
-                    null,
-                    new ArrayList<>(),
-                    new ArrayList<>(),
-                    false,
-                    0,
-                    false,
-                    0,
-                    false,
-                    new ArrayList<>(),
-                    new ArrayList<>(),
-                    false,
-                    false,
-                    false,
-                    null,
-                    0,
-                    false
+                    /* rank= */ 0,
+                    /* matchesInterruptionFilter= */ false,
+                    /* visibilityOverride= */ 0,
+                    /* suppressedVisualEffects= */ 0,
+                    /* importance= */ 0,
+                    /* explanation= */ null,
+                    /* overrideGroupKey= */ null,
+                    /* channel= */ null,
+                    /* overridePeople= */ new ArrayList<>(),
+                    /* snoozeCriteria= */ new ArrayList<>(),
+                    /* showBadge= */ false,
+                    /* userSentiment= */ 0,
+                    /* hidden= */ false,
+                    /* lastAudiblyAlertedMs= */ 0,
+                    /* noisy= */ false,
+                    /* smartActions= */ new ArrayList<>(),
+                    /* smartReplies= */ new ArrayList<>(),
+                    /* canBubble= */ false,
+                    /* isTextChanged= */ false,
+                    /* isConversation= */ false,
+                    /* shortcutInfo= */ null,
+                    /* rankingAdjustment= */ 0,
+                    /* isBubble= */ false,
+                    /* proposedImportance= */ 0,
+                    /* sensitiveContent= */ false
             );
         }
         return ranking;

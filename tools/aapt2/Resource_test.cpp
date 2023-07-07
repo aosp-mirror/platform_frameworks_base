@@ -135,13 +135,13 @@ TEST(ResourceTypeTest, ParseResourceNamedType) {
   type = ParseResourceNamedType("layout");
   EXPECT_THAT(type, Optional(Eq(ResourceNamedType("layout", ResourceType::kLayout))));
 
-  type = ParseResourceNamedType("layout:2");
-  EXPECT_THAT(type, Optional(Eq(ResourceNamedType("layout:2", ResourceType::kLayout))));
+  type = ParseResourceNamedType("layout.2");
+  EXPECT_THAT(type, Optional(Eq(ResourceNamedType("layout.2", ResourceType::kLayout))));
 
-  type = ParseResourceNamedType("layout:another");
-  EXPECT_THAT(type, Optional(Eq(ResourceNamedType("layout:another", ResourceType::kLayout))));
+  type = ParseResourceNamedType("layout.another");
+  EXPECT_THAT(type, Optional(Eq(ResourceNamedType("layout.another", ResourceType::kLayout))));
 
-  type = ParseResourceNamedType("layout:");
+  type = ParseResourceNamedType("layout.");
   EXPECT_THAT(type, Eq(std::nullopt));
 
   type = ParseResourceNamedType("layout2");

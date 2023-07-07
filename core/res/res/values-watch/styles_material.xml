@@ -97,4 +97,14 @@ please see styles_device_defaults.xml.
         <item name="gravity">center_horizontal|top</item>
         <item name="ellipsize">end</item>
     </style>
+
+    <style name="ProgressDialogMessage">
+        <item name="android:textAlignment">center</item>
+        <item name="textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
+        <item name="textSize">@dimen/message_progress_dialog_text_size</item>
+        <item name="paddingBottom">@dimen/message_progress_dialog_bottom_padding</item>
+        <item name="paddingEnd">@dimen/message_progress_dialog_end_padding</item>
+        <item name="paddingStart">@dimen/message_progress_dialog_start_padding</item>
+        <item name="paddingTop">@dimen/message_progress_dialog_top_padding</item>
+    </style>
 </resources>

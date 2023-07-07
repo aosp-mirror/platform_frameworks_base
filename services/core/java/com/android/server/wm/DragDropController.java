@@ -38,6 +38,8 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.server.wm.WindowManagerInternal.IDragDropCallback;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -99,13 +101,16 @@ class DragDropController {
             float thumbCenterX, float thumbCenterY, ClipData data) {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "perform drag: win=" + window + " surface=" + surface + " flags=" +
-                            Integer.toHexString(flags) + " data=" + data);
+                    Integer.toHexString(flags) + " data=" + data + " touch(" + touchX + ","
+                    + touchY + ") thumb center(" + thumbCenterX + "," + thumbCenterY + ")");
         }
 
         final IBinder dragToken = new Binder();
         final boolean callbackResult = mCallback.get().prePerformDrag(window, dragToken,
                 touchSource, touchX, touchY, thumbCenterX, thumbCenterY, data);
         try {
+            DisplayContent displayContent = null;
+            CompletableFuture<Boolean> touchFocusTransferredFuture = null;
             synchronized (mService.mGlobalLock) {
                 try {
                     if (!callbackResult) {
@@ -137,7 +142,7 @@ class DragDropController {
 
                     // !!! TODO(multi-display): support other displays
 
-                    final DisplayContent displayContent = callingWin.getDisplayContent();
+                    displayContent = callingWin.getDisplayContent();
                     if (displayContent == null) {
                         Slog.w(TAG_WM, "display content is null");
                         return null;
@@ -152,39 +157,16 @@ class DragDropController {
                     mDragState.mPid = callerPid;
                     mDragState.mUid = callerUid;
                     mDragState.mOriginalAlpha = alpha;
+                    mDragState.mAnimatedScale = callingWin.mGlobalScale;
                     mDragState.mToken = dragToken;
                     mDragState.mDisplayContent = displayContent;
                     mDragState.mData = data;
 
                     if ((flags & View.DRAG_FLAG_ACCESSIBILITY_ACTION) == 0) {
                         final Display display = displayContent.getDisplay();
-                        if (!mCallback.get().registerInputChannel(
+                        touchFocusTransferredFuture = mCallback.get().registerInputChannel(
                                 mDragState, display, mService.mInputManager,
-                                callingWin.mInputChannel)) {
-                            Slog.e(TAG_WM, "Unable to transfer touch focus");
-                            return null;
-                        }
-
-                        final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
-                        mDragState.broadcastDragStartedLocked(touchX, touchY);
-                        mDragState.overridePointerIconLocked(touchSource);
-                        // remember the thumb offsets for later
-                        mDragState.mThumbOffsetX = thumbCenterX;
-                        mDragState.mThumbOffsetY = thumbCenterY;
-
-                        // Make the surface visible at the proper location
-                        if (SHOW_LIGHT_TRANSACTIONS) {
-                            Slog.i(TAG_WM, ">>> OPEN TRANSACTION performDrag");
-                        }
-
-                        final SurfaceControl.Transaction transaction = mDragState.mTransaction;
-                        transaction.setAlpha(surfaceControl, mDragState.mOriginalAlpha);
-                        transaction.show(surfaceControl);
-                        displayContent.reparentToOverlay(transaction, surfaceControl);
-                        mDragState.updateDragSurfaceLocked(true, touchX, touchY);
-                        if (SHOW_LIGHT_TRANSACTIONS) {
-                            Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
-                        }
+                                callingWin.mInputChannel);
                     } else {
                         // Skip surface logic for a drag triggered by an AccessibilityAction
                         mDragState.broadcastDragStartedLocked(touchX, touchY);
@@ -194,14 +176,51 @@ class DragDropController {
                                 getAccessibilityManager().getRecommendedTimeoutMillis(
                                         A11Y_DRAG_TIMEOUT_DEFAULT_MS,
                                         AccessibilityManager.FLAG_CONTENT_CONTROLS));
+
+                        return dragToken;
                     }
                 } finally {
                     if (surface != null) {
                         surface.release();
                     }
-                    if (mDragState != null && !mDragState.isInProgress()) {
-                        mDragState.closeLocked();
-                    }
+                }
+            }
+
+            boolean touchFocusTransferred = false;
+            try {
+                touchFocusTransferred = touchFocusTransferredFuture.get(DRAG_TIMEOUT_MS,
+                        TimeUnit.MILLISECONDS);
+            } catch (Exception exception) {
+                Slog.e(TAG_WM, "Exception thrown while waiting for touch focus transfer",
+                        exception);
+            }
+
+            synchronized (mService.mGlobalLock) {
+                if (!touchFocusTransferred) {
+                    Slog.e(TAG_WM, "Unable to transfer touch focus");
+                    mDragState.closeLocked();
+                    return null;
+                }
+
+                final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
+                mDragState.broadcastDragStartedLocked(touchX, touchY);
+                mDragState.overridePointerIconLocked(touchSource);
+                // remember the thumb offsets for later
+                mDragState.mThumbOffsetX = thumbCenterX;
+                mDragState.mThumbOffsetY = thumbCenterY;
+
+                // Make the surface visible at the proper location
+                if (SHOW_LIGHT_TRANSACTIONS) {
+                    Slog.i(TAG_WM, ">>> OPEN TRANSACTION performDrag");
+                }
+
+                final SurfaceControl.Transaction transaction = mDragState.mTransaction;
+                transaction.setAlpha(surfaceControl, mDragState.mOriginalAlpha);
+                transaction.show(surfaceControl);
+                displayContent.reparentToOverlay(transaction, surfaceControl);
+                mDragState.updateDragSurfaceLocked(true, touchX, touchY);
+                if (SHOW_LIGHT_TRANSACTIONS) {
+                    Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
                 }
             }
             return dragToken;    // success!

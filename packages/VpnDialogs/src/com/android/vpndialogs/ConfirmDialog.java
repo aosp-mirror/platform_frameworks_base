@@ -33,6 +33,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AlertActivity;
 import com.android.internal.net.VpnConfig;
 
@@ -42,6 +43,7 @@ public class ConfirmDialog extends AlertActivity
 
     // Usually the label represents the app name, 150 code points might be enough to display the app
     // name, and 150 code points won't cover the warning message from VpnDialog.
+    @VisibleForTesting
     static final int MAX_VPN_LABEL_LENGTH = 150;
 
     @VpnManager.VpnType private final int mVpnType;
@@ -78,17 +80,18 @@ public class ConfirmDialog extends AlertActivity
     private String getSimplifiedLabel(String vpnLabel, String packageName) {
         if (vpnLabel.codePointCount(0, vpnLabel.length()) > 30) {
             return getString(R.string.sanitized_vpn_label_with_ellipsis,
-                vpnLabel.substring(0, vpnLabel.offsetByCodePoints(0, 30)),
-                packageName);
+                    vpnLabel.substring(0, vpnLabel.offsetByCodePoints(0, 30)),
+                            packageName);
         }
 
         return getString(R.string.sanitized_vpn_label, vpnLabel, packageName);
     }
 
+    @VisibleForTesting
     protected String getSanitizedVpnLabel(String vpnLabel, String packageName) {
         final String sanitizedVpnLabel = Html.escapeHtml(vpnLabel);
         final boolean exceedMaxVpnLabelLength = sanitizedVpnLabel.codePointCount(0,
-            sanitizedVpnLabel.length()) > MAX_VPN_LABEL_LENGTH;
+                sanitizedVpnLabel.length()) > MAX_VPN_LABEL_LENGTH;
         if (exceedMaxVpnLabelLength || !vpnLabel.equals(sanitizedVpnLabel)) {
             return getSimplifiedLabel(sanitizedVpnLabel, packageName);
         }
@@ -120,8 +123,8 @@ public class ConfirmDialog extends AlertActivity
         mView = View.inflate(this, R.layout.confirm, null);
         ((TextView) mView.findViewById(R.id.warning)).setText(
                 Html.fromHtml(getString(R.string.warning, getSanitizedVpnLabel(
-                    getVpnLabel().toString(), mPackage)),
-                    this /* imageGetter */, null /* tagHandler */));
+                        getVpnLabel().toString(), mPackage)),
+                        this /* imageGetter */, null /* tagHandler */));
         mAlertParams.mTitle = getText(R.string.prompt);
         mAlertParams.mPositiveButtonText = getText(android.R.string.ok);
         mAlertParams.mPositiveButtonListener = this;
@@ -133,6 +136,11 @@ public class ConfirmDialog extends AlertActivity
         getWindow().addPrivateFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         Button button = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
         button.setFilterTouchesWhenObscured(true);
+    }
+
+    @VisibleForTesting
+    public CharSequence getWarningText() {
+        return ((TextView) mView.findViewById(R.id.warning)).getText();
     }
 
     private CharSequence getVpnLabel() {

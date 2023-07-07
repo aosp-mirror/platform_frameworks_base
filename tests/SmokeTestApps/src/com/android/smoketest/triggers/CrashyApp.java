@@ -30,6 +30,7 @@ public class CrashyApp extends Activity {
         setContentView(tv);
     }
 
+    @SuppressWarnings("ReturnValueIgnored")
     @Override
     public void onResume() {
         ((String) null).length();

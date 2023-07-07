@@ -18,6 +18,7 @@ syntax = "proto2";
 package android.view;
 
 import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/view/displaycutout.proto";
 
 option java_multiple_files = true;
 
@@ -34,4 +35,5 @@ message DisplayInfoProto {
     // Eg: "Built-in Screen"
     optional string name = 5;
     optional int32 flags = 6;
+    optional DisplayCutoutProto cutout = 7;
 }

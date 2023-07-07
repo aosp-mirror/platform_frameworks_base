@@ -57,7 +57,7 @@ public class GraphicBuffer implements Parcelable {
     private final int mUsage;
     // Note: do not rename, this field is used by native code
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    private final long mNativeObject;
+    private long mNativeObject;
 
     // These two fields are only used by lock/unlockCanvas()
     private Canvas mCanvas;
@@ -219,6 +219,7 @@ public class GraphicBuffer implements Parcelable {
         if (!mDestroyed) {
             mDestroyed = true;
             nDestroyGraphicBuffer(mNativeObject);
+            mNativeObject = 0;
         }
     }
 
@@ -239,7 +240,7 @@ public class GraphicBuffer implements Parcelable {
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (!mDestroyed) nDestroyGraphicBuffer(mNativeObject);
+            destroy();
         } finally {
             super.finalize();
         }

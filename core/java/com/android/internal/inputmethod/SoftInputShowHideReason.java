@@ -19,8 +19,12 @@ package com.android.internal.inputmethod;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.os.IBinder;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ImeProtoEnums;
+import android.view.inputmethod.InputMethodManager;
 
 import java.lang.annotation.Retention;
 
@@ -31,9 +35,9 @@ import java.lang.annotation.Retention;
 @IntDef(value = {
         SoftInputShowHideReason.SHOW_SOFT_INPUT,
         SoftInputShowHideReason.ATTACH_NEW_INPUT,
-        SoftInputShowHideReason.SHOW_MY_SOFT_INPUT,
+        SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME,
         SoftInputShowHideReason.HIDE_SOFT_INPUT,
-        SoftInputShowHideReason.HIDE_MY_SOFT_INPUT,
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_IME,
         SoftInputShowHideReason.SHOW_AUTO_EDITOR_FORWARD_NAV,
         SoftInputShowHideReason.SHOW_STATE_VISIBLE_FORWARD_NAV,
         SoftInputShowHideReason.SHOW_STATE_ALWAYS_VISIBLE,
@@ -55,106 +59,123 @@ import java.lang.annotation.Retention;
         SoftInputShowHideReason.SHOW_TOGGLE_SOFT_INPUT,
         SoftInputShowHideReason.HIDE_TOGGLE_SOFT_INPUT,
         SoftInputShowHideReason.SHOW_SOFT_INPUT_BY_INSETS_API,
-        SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE})
+        SoftInputShowHideReason.HIDE_DISPLAY_IME_POLICY_HIDE,
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_INSETS_API,
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_BY_BACK_KEY,
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT,
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_EXTRACT_INPUT_CHANGED,
+        SoftInputShowHideReason.HIDE_SOFT_INPUT_IMM_DEPRECATION,
+        SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR,
+        SoftInputShowHideReason.SHOW_IME_SCREENSHOT_FROM_IMMS,
+        SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS,
+        SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE,
+})
 public @interface SoftInputShowHideReason {
     /** Show soft input by {@link android.view.inputmethod.InputMethodManager#showSoftInput}. */
-    int SHOW_SOFT_INPUT = 0;
+    int SHOW_SOFT_INPUT = ImeProtoEnums.REASON_SHOW_SOFT_INPUT;
 
     /** Show soft input when {@code InputMethodManagerService#attachNewInputLocked} called. */
-    int ATTACH_NEW_INPUT = 1;
+    int ATTACH_NEW_INPUT = ImeProtoEnums.REASON_ATTACH_NEW_INPUT;
 
-    /** Show soft input by {@code InputMethodManagerService#showMySoftInput}. */
-    int SHOW_MY_SOFT_INPUT = 2;
+    /** Show soft input by {@code InputMethodManagerService#showMySoftInput}. This is triggered when
+     *  the IME process try to show the keyboard.
+     *
+     * @see android.inputmethodservice.InputMethodService#requestShowSelf(int)
+     */
+    int SHOW_SOFT_INPUT_FROM_IME = ImeProtoEnums.REASON_SHOW_SOFT_INPUT_FROM_IME;
 
     /**
      * Hide soft input by
      * {@link android.view.inputmethod.InputMethodManager#hideSoftInputFromWindow}.
      */
-    int HIDE_SOFT_INPUT = 3;
+    int HIDE_SOFT_INPUT = ImeProtoEnums.REASON_HIDE_SOFT_INPUT;
 
-    /** Hide soft input by {@code InputMethodManagerService#hideMySoftInput}. */
-    int HIDE_MY_SOFT_INPUT = 4;
+    /**
+     * Hide soft input by
+     * {@link android.inputmethodservice.InputMethodService#requestHideSelf(int)}.
+     */
+    int HIDE_SOFT_INPUT_FROM_IME = ImeProtoEnums.REASON_HIDE_SOFT_INPUT_FROM_IME;
 
     /**
      * Show soft input when navigated forward to the window (with
-     * {@link LayoutParams#SOFT_INPUT_IS_FORWARD_NAVIGATION}} which the focused view is text
+     * {@link LayoutParams#SOFT_INPUT_IS_FORWARD_NAVIGATION}) which the focused view is text
      * editor and system will auto-show the IME when the window can resize or running on a large
      * screen.
      */
-    int SHOW_AUTO_EDITOR_FORWARD_NAV = 5;
+    int SHOW_AUTO_EDITOR_FORWARD_NAV = ImeProtoEnums.REASON_SHOW_AUTO_EDITOR_FORWARD_NAV;
 
     /**
      * Show soft input when navigated forward to the window with
      * {@link LayoutParams#SOFT_INPUT_IS_FORWARD_NAVIGATION} and
      * {@link LayoutParams#SOFT_INPUT_STATE_VISIBLE}.
      */
-    int SHOW_STATE_VISIBLE_FORWARD_NAV = 6;
+    int SHOW_STATE_VISIBLE_FORWARD_NAV = ImeProtoEnums.REASON_SHOW_STATE_VISIBLE_FORWARD_NAV;
 
     /**
      * Show soft input when the window with {@link LayoutParams#SOFT_INPUT_STATE_ALWAYS_VISIBLE}.
      */
-    int SHOW_STATE_ALWAYS_VISIBLE = 7;
+    int SHOW_STATE_ALWAYS_VISIBLE = ImeProtoEnums.REASON_SHOW_STATE_ALWAYS_VISIBLE;
 
     /**
      * Show soft input during {@code InputMethodManagerService} receive changes from
      * {@code SettingsProvider}.
      */
-    int SHOW_SETTINGS_ON_CHANGE = 8;
+    int SHOW_SETTINGS_ON_CHANGE = ImeProtoEnums.REASON_SHOW_SETTINGS_ON_CHANGE;
 
     /** Hide soft input during switching user. */
-    int HIDE_SWITCH_USER = 9;
+    int HIDE_SWITCH_USER = ImeProtoEnums.REASON_HIDE_SWITCH_USER;
 
     /** Hide soft input when the user is invalid. */
-    int HIDE_INVALID_USER = 10;
+    int HIDE_INVALID_USER = ImeProtoEnums.REASON_HIDE_INVALID_USER;
 
     /**
      * Hide soft input when the window with {@link LayoutParams#SOFT_INPUT_STATE_UNSPECIFIED} which
      * the focused view is not text editor.
      */
-    int HIDE_UNSPECIFIED_WINDOW = 11;
+    int HIDE_UNSPECIFIED_WINDOW = ImeProtoEnums.REASON_HIDE_UNSPECIFIED_WINDOW;
 
     /**
      * Hide soft input when navigated forward to the window with
      * {@link LayoutParams#SOFT_INPUT_IS_FORWARD_NAVIGATION} and
      * {@link LayoutParams#SOFT_INPUT_STATE_HIDDEN}.
      */
-    int HIDE_STATE_HIDDEN_FORWARD_NAV = 12;
+    int HIDE_STATE_HIDDEN_FORWARD_NAV = ImeProtoEnums.REASON_HIDE_STATE_HIDDEN_FORWARD_NAV;
 
     /**
      * Hide soft input when the window with {@link LayoutParams#SOFT_INPUT_STATE_ALWAYS_HIDDEN}.
      */
-    int HIDE_ALWAYS_HIDDEN_STATE = 13;
+    int HIDE_ALWAYS_HIDDEN_STATE = ImeProtoEnums.REASON_HIDE_ALWAYS_HIDDEN_STATE;
 
     /** Hide soft input when "adb shell ime <command>" called. */
-    int HIDE_RESET_SHELL_COMMAND = 14;
+    int HIDE_RESET_SHELL_COMMAND = ImeProtoEnums.REASON_HIDE_RESET_SHELL_COMMAND;
 
     /**
      * Hide soft input during {@code InputMethodManagerService} receive changes from
      * {@code SettingsProvider}.
      */
-    int HIDE_SETTINGS_ON_CHANGE = 15;
+    int HIDE_SETTINGS_ON_CHANGE = ImeProtoEnums.REASON_HIDE_SETTINGS_ON_CHANGE;
 
     /**
      * Hide soft input from {@link com.android.server.policy.PhoneWindowManager} when setting
      * {@link com.android.internal.R.integer#config_shortPressOnPowerBehavior} in config.xml as
      * dismiss IME.
      */
-    int HIDE_POWER_BUTTON_GO_HOME = 16;
+    int HIDE_POWER_BUTTON_GO_HOME = ImeProtoEnums.REASON_HIDE_POWER_BUTTON_GO_HOME;
 
     /** Hide soft input when attaching docked stack. */
-    int HIDE_DOCKED_STACK_ATTACHED = 17;
+    int HIDE_DOCKED_STACK_ATTACHED = ImeProtoEnums.REASON_HIDE_DOCKED_STACK_ATTACHED;
 
     /**
      * Hide soft input when {@link com.android.server.wm.RecentsAnimationController} starts
      * intercept touch from app window.
      */
-    int HIDE_RECENTS_ANIMATION = 18;
+    int HIDE_RECENTS_ANIMATION = ImeProtoEnums.REASON_HIDE_RECENTS_ANIMATION;
 
     /**
      * Hide soft input when {@link com.android.wm.shell.bubbles.BubbleController} is expanding,
      * switching, or collapsing Bubbles.
      */
-    int HIDE_BUBBLES = 19;
+    int HIDE_BUBBLES = ImeProtoEnums.REASON_HIDE_BUBBLES;
 
     /**
      * Hide soft input when focusing the same window (e.g. screen turned-off and turn-on) which no
@@ -167,40 +188,94 @@ public @interface SoftInputShowHideReason {
      * only the dialog focused as it's the latest window with input focus) makes we need to hide
      * soft-input when the same window focused again to align with the same behavior prior to R.
      */
-    int HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR = 20;
+    int HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR =
+            ImeProtoEnums.REASON_HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR;
 
     /**
-     * Hide soft input when a {@link com.android.internal.view.IInputMethodClient} is removed.
+     * Hide soft input when a {@link com.android.internal.inputmethod.IInputMethodClient} is
+     * removed.
      */
-    int HIDE_REMOVE_CLIENT = 21;
+    int HIDE_REMOVE_CLIENT = ImeProtoEnums.REASON_HIDE_REMOVE_CLIENT;
 
     /**
      * Show soft input when the system invoking
      * {@link com.android.server.wm.WindowManagerInternal#shouldRestoreImeVisibility}.
      */
-    int SHOW_RESTORE_IME_VISIBILITY = 22;
+    int SHOW_RESTORE_IME_VISIBILITY = ImeProtoEnums.REASON_SHOW_RESTORE_IME_VISIBILITY;
 
     /**
      * Show soft input by
      * {@link android.view.inputmethod.InputMethodManager#toggleSoftInput(int, int)};
      */
-    int SHOW_TOGGLE_SOFT_INPUT = 23;
+    int SHOW_TOGGLE_SOFT_INPUT = ImeProtoEnums.REASON_SHOW_TOGGLE_SOFT_INPUT;
 
     /**
      * Hide soft input by
      * {@link android.view.inputmethod.InputMethodManager#toggleSoftInput(int, int)};
      */
-    int HIDE_TOGGLE_SOFT_INPUT = 24;
+    int HIDE_TOGGLE_SOFT_INPUT = ImeProtoEnums.REASON_HIDE_TOGGLE_SOFT_INPUT;
 
     /**
      * Show soft input by
      * {@link android.view.InsetsController#show(int)};
      */
-    int SHOW_SOFT_INPUT_BY_INSETS_API = 25;
+    int SHOW_SOFT_INPUT_BY_INSETS_API = ImeProtoEnums.REASON_SHOW_SOFT_INPUT_BY_INSETS_API;
 
     /**
      * Hide soft input if Ime policy has been set to {@link WindowManager#DISPLAY_IME_POLICY_HIDE}.
      * See also {@code InputMethodManagerService#mImeHiddenByDisplayPolicy}.
      */
-    int HIDE_DISPLAY_IME_POLICY_HIDE = 26;
+    int HIDE_DISPLAY_IME_POLICY_HIDE = ImeProtoEnums.REASON_HIDE_DISPLAY_IME_POLICY_HIDE;
+
+    /**
+     * Hide soft input by {@link android.view.InsetsController#hide(int)}.
+     */
+    int HIDE_SOFT_INPUT_BY_INSETS_API = ImeProtoEnums.REASON_HIDE_SOFT_INPUT_BY_INSETS_API;
+
+    /**
+     * Hide soft input by {@link android.inputmethodservice.InputMethodService#handleBack(boolean)}.
+     */
+    int HIDE_SOFT_INPUT_BY_BACK_KEY = ImeProtoEnums.REASON_HIDE_SOFT_INPUT_BY_BACK_KEY;
+
+    /**
+     * Hide soft input by
+     * {@link android.inputmethodservice.InputMethodService#onToggleSoftInput(int, int)}.
+     */
+    int HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT =
+            ImeProtoEnums.REASON_HIDE_SOFT_INPUT_IME_TOGGLE_SOFT_INPUT;
+
+    /**
+     * Hide soft input by
+     * {@link android.inputmethodservice.InputMethodService#onExtractingInputChanged(EditorInfo)})}.
+     */
+    int HIDE_SOFT_INPUT_EXTRACT_INPUT_CHANGED =
+            ImeProtoEnums.REASON_HIDE_SOFT_INPUT_EXTRACT_INPUT_CHANGED;
+
+    /**
+     * Hide soft input by the deprecated
+     * {@link InputMethodManager#hideSoftInputFromInputMethod(IBinder, int)}.
+     */
+    int HIDE_SOFT_INPUT_IMM_DEPRECATION = ImeProtoEnums.REASON_HIDE_SOFT_INPUT_IMM_DEPRECATION;
+
+    /**
+     * Hide soft input when the window gained focus without an editor from the IME shown window.
+     */
+    int HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR =
+            ImeProtoEnums.REASON_HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR;
+
+    /**
+     * Shows ime screenshot by {@link com.android.server.inputmethod.InputMethodManagerService}.
+     */
+    int SHOW_IME_SCREENSHOT_FROM_IMMS = ImeProtoEnums.REASON_SHOW_IME_SCREENSHOT_FROM_IMMS;
+
+    /**
+     * Removes ime screenshot by {@link com.android.server.inputmethod.InputMethodManagerService}.
+     */
+    int REMOVE_IME_SCREENSHOT_FROM_IMMS = ImeProtoEnums.REASON_REMOVE_IME_SCREENSHOT_FROM_IMMS;
+
+    /**
+     * Hide soft input when the input target being removed or being obscured by an non-IME
+     * focusable overlay window.
+     */
+    int HIDE_WHEN_INPUT_TARGET_INVISIBLE = ImeProtoEnums.REASON_HIDE_WHEN_INPUT_TARGET_INVISIBLE;
 }

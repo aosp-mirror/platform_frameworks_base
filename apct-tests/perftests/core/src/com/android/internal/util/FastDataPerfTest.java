@@ -22,6 +22,9 @@ import android.perftests.utils.PerfStatusReporter;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.modules.utils.FastDataInput;
+import com.android.modules.utils.FastDataOutput;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,14 +55,34 @@ public class FastDataPerfTest {
         while (state.keepRunning()) {
             os.reset();
             final BufferedOutputStream bos = new BufferedOutputStream(os, BUFFER_SIZE);
-            final DataOutput out = new DataOutputStream(bos);
-            doWrite(out);
-            bos.flush();
+            final DataOutputStream out = new DataOutputStream(bos);
+            try {
+                doWrite(out);
+                out.flush();
+            } finally {
+                out.close();
+            }
         }
     }
 
     @Test
-    public void timeWrite_Local() throws IOException {
+    public void timeWrite_LocalUsing4ByteSequences() throws IOException {
+        final ByteArrayOutputStream os = new ByteArrayOutputStream(OUTPUT_SIZE);
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            os.reset();
+            final FastDataOutput out = ArtFastDataOutput.obtain(os);
+            try {
+                doWrite(out);
+                out.flush();
+            } finally {
+                out.release();
+            }
+        }
+    }
+
+    @Test
+    public void timeWrite_LocalUsing3ByteSequences() throws IOException {
         final ByteArrayOutputStream os = new ByteArrayOutputStream(OUTPUT_SIZE);
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
@@ -81,19 +104,42 @@ public class FastDataPerfTest {
         while (state.keepRunning()) {
             is.reset();
             final BufferedInputStream bis = new BufferedInputStream(is, BUFFER_SIZE);
-            final DataInput in = new DataInputStream(bis);
-            doRead(in);
+            final DataInputStream in = new DataInputStream(bis);
+            try {
+                doRead(in);
+            } finally {
+                in.close();
+            }
         }
     }
 
     @Test
-    public void timeRead_Local() throws Exception {
+    public void timeRead_LocalUsing4ByteSequences() throws Exception {
         final ByteArrayInputStream is = new ByteArrayInputStream(doWrite());
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             is.reset();
-            final DataInput in = new FastDataInput(is, BUFFER_SIZE);
-            doRead(in);
+            final FastDataInput in = ArtFastDataInput.obtain(is);
+            try {
+                doRead(in);
+            } finally {
+                in.release();
+            }
+        }
+    }
+
+    @Test
+    public void timeRead_LocalUsing3ByteSequences() throws Exception {
+        final ByteArrayInputStream is = new ByteArrayInputStream(doWrite());
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            is.reset();
+            final FastDataInput in = FastDataInput.obtain(is);
+            try {
+                doRead(in);
+            } finally {
+                in.release();
+            }
         }
     }
 

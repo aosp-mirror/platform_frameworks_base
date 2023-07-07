@@ -46,6 +46,7 @@ import com.android.server.EventLogTags;
 import com.android.server.power.BatterySaverStateMachineProto;
 
 import java.io.PrintWriter;
+import java.time.Duration;
 
 /**
  * Decides when to enable / disable battery saver.
@@ -105,6 +106,8 @@ public class BatterySaverStateMachine {
 
     /** Turn off adaptive battery saver if the device has charged above this level. */
     private static final int ADAPTIVE_AUTO_DISABLE_BATTERY_LEVEL = 80;
+
+    private static final long STICKY_DISABLED_NOTIFY_TIMEOUT_MS = Duration.ofHours(12).toMillis();
 
     private static final int STATE_OFF = BatterySaverStateMachineProto.STATE_OFF;
 
@@ -802,7 +805,8 @@ public class BatterySaverStateMachine {
         mBatterySaverController.enableBatterySaver(enable, intReason);
 
         // Handle triggering the notification to show/hide when appropriate
-        if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON) {
+        if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON
+                || intReason == BatterySaverController.REASON_PERCENTAGE_AUTOMATIC_ON) {
             triggerDynamicModeNotification();
         } else if (!enable) {
             hideDynamicModeNotification();
@@ -828,7 +832,7 @@ public class BatterySaverStateMachine {
                     buildNotification(DYNAMIC_MODE_NOTIF_CHANNEL_ID,
                             R.string.dynamic_mode_notification_title,
                             R.string.dynamic_mode_notification_summary,
-                            Intent.ACTION_POWER_USAGE_SUMMARY),
+                            Settings.ACTION_BATTERY_SAVER_SETTINGS, 0L),
                     UserHandle.ALL);
         });
     }
@@ -846,7 +850,8 @@ public class BatterySaverStateMachine {
                     buildNotification(BATTERY_SAVER_NOTIF_CHANNEL_ID,
                             R.string.battery_saver_off_notification_title,
                             R.string.battery_saver_charged_notification_summary,
-                            Settings.ACTION_BATTERY_SAVER_SETTINGS),
+                            Settings.ACTION_BATTERY_SAVER_SETTINGS,
+                            STICKY_DISABLED_NOTIFY_TIMEOUT_MS),
                     UserHandle.ALL);
         });
     }
@@ -861,7 +866,7 @@ public class BatterySaverStateMachine {
     }
 
     private Notification buildNotification(@NonNull String channelId, @StringRes int titleId,
-            @StringRes int summaryId, @NonNull String intentAction) {
+            @StringRes int summaryId, @NonNull String intentAction, long timeoutMs) {
         Resources res = mContext.getResources();
         Intent intent = new Intent(intentAction);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -879,6 +884,7 @@ public class BatterySaverStateMachine {
                 .setStyle(new Notification.BigTextStyle().bigText(summary))
                 .setOnlyAlertOnce(true)
                 .setAutoCancel(true)
+                .setTimeoutAfter(timeoutMs)
                 .build();
     }
 

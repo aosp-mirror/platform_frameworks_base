@@ -37,18 +37,18 @@
         <item>400</item>
     </integer-array>
 
-    <!-- Show mic or phone affordance on Keyguard -->
-    <bool name="config_keyguardShowLeftAffordance">false</bool>
-
-    <!-- Show camera affordance on Keyguard -->
-    <bool name="config_keyguardShowCameraAffordance">false</bool>
-
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>
     <integer name="navigation_bar_deadzone_decay">333</integer>
 
     <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
     <integer name="navigation_bar_deadzone_orientation">0</integer>
+
+    <!-- Whether or not lockscreen shortcuts can be customized -->
+    <bool name="custom_lockscreen_shortcuts_enabled">false</bool>
+
+    <!-- Whether or not long-pressing on keyguard will display to customize lockscreen -->
+    <bool name="long_press_keyguard_customize_lockscreen_enabled">false</bool>
 
     <bool name="config_dead_zone_flash">false</bool>
 
@@ -70,6 +70,10 @@
     <!-- The number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">4</integer>
 
+    <!-- If the dp width of the available space is <= this value, potentially adjust the number
+         of media recommendation items-->
+    <integer name="default_qs_media_rec_width_dp">380</integer>
+
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
 
     <!-- The default tiles to display in QuickSettings -->
@@ -87,7 +91,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream,font_scaling
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -105,6 +109,7 @@
         <item>accessibility_display_daltonizer_enabled:color_correction</item>
         <item>accessibility_display_inversion_enabled:inversion</item>
         <item>one_handed_mode_enabled:onehanded</item>
+        <item>accessibility_font_scaling_has_been_changed:font_scaling</item>
     </string-array>
 
     <!-- Use collapsed layout for media player in landscape QQS -->
@@ -125,6 +130,9 @@
 
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
+
+    <!-- Display time for a sticky heads up notification, in milliseconds. -->
+    <integer name="sticky_heads_up_notification_time">60000</integer>
 
     <!-- Whether to hide the notification header when the HUN is expanded. -->
     <bool name="heads_up_notification_hides_header">false</bool>
@@ -291,8 +299,11 @@
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
 
+    <!-- Determines whether the shell features all run on another thread. -->
+    <bool name="config_enableShellMainThread">true</bool>
+
     <!-- SystemUIFactory component -->
-    <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIFactory</string>
+    <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIInitializerImpl</string>
 
     <!-- QS tile shape store width. negative implies fill configuration instead of stroke-->
     <dimen name="config_qsTileStrokeWidthActive">-1dp</dimen>
@@ -342,9 +353,6 @@
     <!-- Whether or not to show the notification shelf that houses the icons of notifications that
      have been scrolled off-screen. -->
     <bool name="config_showNotificationShelf">true</bool>
-
-    <!-- Whether or not the notifications should always fade as they are dismissed. -->
-    <bool name="config_fadeNotificationsOnDismiss">false</bool>
 
     <!-- Whether or not the fade on the notification is based on the amount that it has been swiped
          off-screen. -->
@@ -438,10 +446,25 @@
          they were added. -->
     <integer name="config_smart_replies_in_notifications_onclick_init_delay">200</integer>
 
+    <!-- Smartspace trampoline activity that is used when the user taps smartspace. -->
+    <string name="config_smartspaceTrampolineActivityComponent" translatable="false">com.google.android.apps.gsa.staticplugins.opa.smartspace.ExportedSmartspaceTrampolineActivity</string>
+
     <!-- Screenshot editing default activity.  Must handle ACTION_EDIT image/png intents.
          Blank sends the user to the Chooser first.
          This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_screenshotEditor" translatable="false"></string>
+
+    <!-- ComponentName for the file browsing app that the system would expect to be used in work
+         profile. The icon for this app will be shown to the user when informing them that a
+         screenshot has been saved to work profile. If blank, a default icon will be shown. -->
+    <string name="config_sceenshotWorkProfileFilesApp" translatable="false"></string>
+
+    <!-- The component name of the screenshot editing activity that provides the App Clips flow.
+         The App Clips flow includes taking a screenshot, showing user screenshot cropping activity
+         and finally letting user send the screenshot to the calling notes app. This activity
+         should not send the screenshot to the calling activity without user consent. -->
+    <string name="config_screenshotAppClipsActivityComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.screenshot.appclips.AppClipsActivity</string>
 
     <!-- Remote copy default activity.  Must handle REMOTE_COPY_ACTION intents.
      This name is in the ComponentName flattened format (package/class)  -->
@@ -451,7 +474,7 @@
     <integer name="watch_heap_limit">256000</integer>
 
     <!-- SystemUI Plugins that can be loaded on user builds. -->
-    <string-array name="config_pluginWhitelist" translatable="false">
+    <string-array name="config_pluginAllowlist" translatable="false">
         <item>com.android.systemui</item>
     </string-array>
 
@@ -488,8 +511,14 @@
      space -->
     <bool name="config_showBatteryEstimateQSBH">false</bool>
 
-    <!-- Whether to show a severe low battery dialog. -->
-    <bool name="config_severe_battery_dialog">false</bool>
+    <!-- Whether to show extra battery saver confirmation dialog. -->
+    <bool name="config_extra_battery_saver_confirmation">false</bool>
+
+    <!-- A path representing a shield. Will sometimes be displayed with the battery icon when
+         needed. This path is a 10px wide and 13px tall. -->
+    <string name="config_batterymeterShieldPath" translatable="false">
+        M5 0L0 1.88V6.19C0 9.35 2.13 12.29 5 13.01C7.87 12.29 10 9.35 10 6.19V1.88L5 0Z
+    </string>
 
     <!-- A path similar to frameworks/base/core/res/res/values/config.xml
       config_mainBuiltInDisplayCutout that describes a path larger than the exact path of a display
@@ -551,6 +580,12 @@
     <!-- Package name of the preferred system app to perform eSOS action -->
     <string name="config_preferredEmergencySosPackage" translatable="false"></string>
 
+    <!-- Whether to show the side fps hint while on bouncer -->
+    <bool name="config_show_sidefps_hint_on_bouncer">true</bool>
+
+    <!-- Max number of lines we want to show for the bouncer secondary message -->
+    <integer name="bouncer_secondary_message_lines">2</integer>
+
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
 
@@ -575,17 +610,12 @@
         58.0001 29.2229,56.9551 26.8945,55.195
     </string>
 
-    <!-- The radius of the enrollment progress bar, in dp -->
-    <integer name="config_udfpsEnrollProgressBar" translatable="false">
-        280
-    </integer>
+    <!-- The time (in ms) needed to trigger the lock icon view's long-press affordance -->
+    <integer name="config_lockIconLongPress" translatable="false">200</integer>
 
     <!-- package name of a built-in camera app to use to restrict implicit intent resolution
          when the double-press power gesture is used. Ignored if empty. -->
     <string translatable="false" name="config_cameraGesturePackage"></string>
-
-    <!-- Determines whether to allow the nav bar handle to be forced to be opaque. -->
-    <bool name="allow_force_nav_bar_handle_opaque">true</bool>
 
     <!-- Whether a transition of ACTIVITY_TYPE_DREAM to the home app should play a home sound
          effect -->
@@ -611,6 +641,66 @@
          2 - Override the setting to never bypass keyguard -->
     <integer name="config_face_unlock_bypass_override">0</integer>
 
+    <!-- Messages that should NOT be shown to the user during face authentication on keyguard.
+         This includes both lockscreen and bouncer. This should be used to hide messages that may be
+         too chatty or messages that the user can't do much about. Entries are defined in
+         android.hardware.biometrics.face@1.0 types.hal.
+
+         Although not visibly shown to the user, these acquired messages (sent per face auth frame)
+         are still counted towards the total frames to determine whether a deferred message
+         (see config_face_help_msgs_defer_until_timeout) meets the threshold % of frames to show on
+         face timeout. -->
+     <integer-array name="config_face_acquire_device_entry_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- Which face help messages to defer until face auth times out. If face auth is cancelled
+         or ends on another error, then the message is never surfaced. May also never surface
+         if it doesn't meet a threshold % of authentication frames specified by.
+         config_face_help_msgs_defer_until_timeout_threshold. -->
+    <integer-array name="config_face_help_msgs_defer_until_timeout">
+    </integer-array>
+
+    <!-- Percentage of face auth frames received required to show a deferred message at
+         FACE_ERROR_TIMEOUT. See config_face_help_msgs_defer_until_timeout for messages
+         that are deferred.-->
+    <item name="config_face_help_msgs_defer_until_timeout_threshold"
+          translatable="false" format="float" type="dimen">
+        .75
+    </item>
+
+    <!-- Which face help messages to surface when fingerprint is also enrolled.
+         Message ids correspond with the acquired ids in BiometricFaceConstants -->
+    <integer-array name="config_face_help_msgs_when_fingerprint_enrolled">
+        <item>3</item> <!-- TOO_DARK -->
+        <item>25</item> <!-- DARK_GLASSES -->
+        <item>26</item> <!-- MOUTH_COVERING_DETECTED -->
+    </integer-array>
+
+    <!-- Which device wake-ups will trigger passive auth. These values correspond with
+         PowerManager#WakeReason. -->
+    <integer-array name="config_face_auth_wake_up_triggers">
+        <item>1</item> <!-- WAKE_REASON_POWER_BUTTON -->
+        <item>4</item> <!-- WAKE_REASON_GESTURE -->
+        <item>6</item> <!-- WAKE_REASON_WAKE_KEY -->
+        <item>7</item> <!-- WAKE_REASON_WAKE_MOTION -->
+        <item>9</item> <!-- WAKE_REASON_LID -->
+        <item>10</item> <!-- WAKE_REASON_DISPLAY_GROUP_ADDED -->
+        <item>12</item> <!-- WAKE_REASON_UNFOLD_DEVICE -->
+        <item>15</item> <!-- WAKE_REASON_TAP -->
+        <item>16</item> <!-- WAKE_REASON_LIFT -->
+        <item>17</item> <!-- WAKE_REASON_BIOMETRIC -->
+    </integer-array>
+
+    <!-- Whether to support posture listening for face auth, default is 0(DEVICE_POSTURE_UNKNOWN)
+         means systemui will try listening on all postures.
+         0 : DEVICE_POSTURE_UNKNOWN
+         1 : DEVICE_POSTURE_CLOSED
+         2 : DEVICE_POSTURE_HALF_OPENED
+         3 : DEVICE_POSTURE_OPENED
+         4 : DEVICE_POSTURE_FLIPPED
+    -->
+    <integer name="config_face_auth_supported_posture">0</integer>
+
     <!-- Whether the communal service should be enabled -->
     <bool name="config_communalServiceEnabled">false</bool>
 
@@ -619,11 +709,15 @@
 
     <!-- This value is used when calculating whether the device is in ambient light mode. It is
         light mode when the light sensor sample value exceeds above this value. -->
-    <integer name="config_ambientLightModeThreshold">5</integer>
+    <item name="config_ambientLightModeThreshold" translatable="false" format="float" type="dimen">
+        0.8
+    </item>
 
     <!-- This value is used when calculating whether the device is in ambient dark mode. It is
         dark mode when the light sensor sample value drops below this value. -->
-    <integer name="config_ambientDarkModeThreshold">2</integer>
+    <item name="config_ambientDarkModeThreshold" translatable="false" format="float" type="dimen">
+        0.4
+    </item>
 
     <!-- This value is used when calculating whether the device is in ambient light mode. Each
         sample contains light sensor events from this span of time duration. -->
@@ -680,14 +774,11 @@
     <!-- Flag to enable privacy dot views, it shall be true for normal case -->
     <bool name="config_enablePrivacyDot">true</bool>
 
-    <!-- Flag to enable dream overlay service and its registration -->
-    <bool name="config_dreamOverlayServiceEnabled">false</bool>
-
     <!-- Class for the communal source connector to be used -->
     <string name="config_communalSourceConnector" translatable="false"></string>
 
     <!-- How often in milliseconds to jitter the dream overlay in order to avoid burn-in. -->
-    <integer name="config_dreamOverlayBurnInProtectionUpdateIntervalMillis">500</integer>
+    <integer name="config_dreamOverlayBurnInProtectionUpdateIntervalMillis">1000</integer>
 
     <!-- How long in milliseconds before full burn-in protection is achieved. -->
     <integer name="config_dreamOverlayMillisUntilFullJitter">240000</integer>
@@ -697,6 +788,19 @@
     <integer name="complicationFadeInMs">500</integer>
 
     <integer name="complicationRestoreMs">1000</integer>
+
+    <integer name="complicationFadeOutDelayMs">200</integer>
+
+    <!-- Duration in milliseconds of the dream in un-blur animation. -->
+    <integer name="config_dreamOverlayInBlurDurationMs">250</integer>
+    <!-- Duration in milliseconds of the dream in complications fade-in animation. -->
+    <integer name="config_dreamOverlayInComplicationsDurationMs">250</integer>
+    <!-- Duration in milliseconds of the y-translation animation when entering a dream -->
+    <integer name="config_dreamOverlayInTranslationYDurationMs">1167</integer>
+
+    <!-- Delay in milliseconds before switching to the dock user and dreaming if a secondary user is
+    active when the device is locked and docked. 0 indicates disabled. Default is 1 minute. -->
+    <integer name="config_defaultDockUserTimeoutMs">60000</integer>
 
     <!-- Icons that don't show in a collapsed non-keyguard statusbar -->
     <string-array name="config_collapsed_statusbar_icon_blocklist" translatable="false">
@@ -717,4 +821,97 @@
         <item>com.android.keyguard</item>
         <item>com.android.systemui</item>
     </string-array>
+
+    <!-- Whether the device should display hotspot UI. If true, UI will display only when tethering
+         is available. If false, UI will never show regardless of tethering availability" -->
+    <bool name="config_show_wifi_tethering">true</bool>
+
+    <!-- A collection of "slots" for placing quick affordance actions on the lock screen when the
+    device is locked. Each item is a string consisting of two parts, separated by the ':' character.
+    The first part is the unique ID for the slot, it is not a human-visible name, but should still
+    be unique across all slots specified. The second part is the capacity and must be a positive
+    integer; this is how many quick affordance actions that user is allowed to add to the slot. -->
+    <string-array name="config_keyguardQuickAffordanceSlots" translatable="false">
+        <item>bottom_start:1</item>
+        <item>bottom_end:1</item>
+    </string-array>
+
+    <!-- A collection of defaults for the quick affordances on the lock screen. Each item must be a
+    string with two parts: the ID of the slot and the comma-delimited list of affordance IDs,
+    separated by a colon ':' character. For example: <item>bottom_end:home,wallet</item>. The
+    default is displayed by System UI as long as the user hasn't made a different choice for that
+    slot. If the user did make a choice, even if the choice is the "None" option, the default is
+    ignored. -->
+    <string-array name="config_keyguardQuickAffordanceDefaults" translatable="false">
+        <item>bottom_start:home</item>
+        <item>bottom_end:wallet</item>
+    </string-array>
+
+    <!-- Package name for the app that implements the wallpaper picker. -->
+    <string name="config_wallpaperPickerPackage" translatable="false">
+        com.android.wallpaper
+    </string>
+
+    <!-- Whether the floating rotation button should be on the left/right in the device's natural
+         orientation -->
+    <bool name="floating_rotation_button_position_left">true</bool>
+
+    <!-- Configuration to set Learn more in device logs as URL link -->
+    <bool name="log_access_confirmation_learn_more_as_link">true</bool>
+
+    <!-- [START] MULTI SHADE -->
+    <!-- Whether the device should use dual shade. If false, the device uses single shade. -->
+    <bool name="dual_shade_enabled">true</bool>
+    <!--
+    When in dual shade, where should the horizontal split be on the screen to help determine whether
+    the user is pulling down the left shade or the right shade. Must be between 0.0 and 1.0,
+    inclusive. In other words: how much of the left-hand side of the screen, when pulled down on,
+    would reveal the left-hand side shade.
+
+    More concretely:
+    A value of 0.67 means that the left two-thirds of the screen are dedicated to the left-hand side
+    shade and the remaining one-third of the screen on the right is dedicated to the right-hand side
+    shade.
+    -->
+    <dimen name="dual_shade_split_fraction">0.67</dimen>
+    <!-- Width of the left-hand side shade. -->
+    <dimen name="left_shade_width">436dp</dimen>
+    <!-- Width of the right-hand side shade. -->
+    <dimen name="right_shade_width">436dp</dimen>
+    <!--
+    Opaque version of the scrim that shows up behind dual shades. The alpha channel is driven
+    programmatically.
+    -->
+    <color name="opaque_scrim">#D9D9D9</color>
+    <!-- Maximum opacity when the scrim that shows up behind the dual shades is fully visible. -->
+    <dimen name="dual_shade_scrim_alpha">0.1</dimen>
+    <!--
+    The amount that the user must swipe down when the shade is fully collapsed to automatically
+    expand once the user lets go of the shade. If the user swipes less than this amount, the shade
+    will automatically revert back to fully collapsed once the user stops swiping.
+    -->
+    <dimen name="shade_swipe_expand_threshold">0.5</dimen>
+    <!--
+    The amount that the user must swipe up when the shade is fully expanded to automatically
+    collapse once the user lets go of the shade. If the user swipes less than this amount, the shade
+    will automatically revert back to fully expanded once the user stops swiping.
+    -->
+    <dimen name="shade_swipe_collapse_threshold">0.5</dimen>
+    <!-- [END] MULTI SHADE -->
+
+    <!-- Time (in ms) to delay the bouncer views from showing when passive auth may be used for
+    device entry. -->
+    <integer name="primary_bouncer_passive_auth_delay">500</integer>
+
+    <!--
+    The package name of the app store app. If empty, features using this should be gracefully
+    disabled.
+    -->
+    <string name="config_appStorePackageName" translatable="false"></string>
+
+    <!-- Template for a link that leads to an app page in the relevant app store. If empty,
+    features using this should be gracefully disabled. If not empty, it must include a
+    "$packageName" part that will be replaced by the code with the package name of the target app.
+    -->
+    <string name="config_appStoreAppLinkTemplate" translatable="false"></string>
 </resources>

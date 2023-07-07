@@ -37,6 +37,13 @@ public class ParcelTest {
     private static final String INTERFACE_TOKEN_2 = "Another IBinder interface token";
 
     @Test
+    public void testIsForRpc() {
+        Parcel p = Parcel.obtain();
+        assertEquals(false, p.isForRpc());
+        p.recycle();
+    }
+
+    @Test
     public void testCallingWorkSourceUidAfterWrite() {
         Parcel p = Parcel.obtain();
         // Method does not throw if replaceCallingWorkSourceUid is called before requests headers

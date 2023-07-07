@@ -90,11 +90,14 @@ public enum ScrimState {
     AUTH_SCRIMMED_SHADE {
         @Override
         public void prepare(ScrimState previousState) {
-            // notif & behind scrim alpha values are determined by ScrimController#applyState
+            // notif scrim alpha values are determined by ScrimController#applyState
             // based on the shade expansion
 
             mFrontTint = Color.BLACK;
             mFrontAlpha = .66f;
+
+            mBehindTint = Color.BLACK;
+            mBehindAlpha = 1f;
         }
     },
 
@@ -143,17 +146,11 @@ public enum ScrimState {
             mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
             mNotifAlpha = 1f;
             mFrontAlpha = 0f;
-            mBehindTint = Color.BLACK;
+            mBehindTint = mClipQsScrim ? Color.TRANSPARENT : Color.BLACK;
 
             if (mClipQsScrim) {
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
             }
-        }
-
-        // to make sure correct color is returned before "prepare" is called
-        @Override
-        public int getBehindTint() {
-            return Color.BLACK;
         }
     },
 
@@ -246,13 +243,18 @@ public enum ScrimState {
                     : CentralSurfaces.FADE_KEYGUARD_DURATION;
 
             boolean fromAod = previousState == AOD || previousState == PULSING;
-            mAnimateChange = !mLaunchingAffordanceWithPreview && !fromAod;
+            // If launch/occlude animations were playing, they already animated the scrim
+            // alpha to 0f as part of the animation. If we animate it now, we'll set it back
+            // to 1f and animate it back to 0f, causing an unwanted scrim flash.
+            mAnimateChange = !mLaunchingAffordanceWithPreview
+                    && !mOccludeAnimationPlaying
+                    && !fromAod;
 
             mFrontTint = Color.TRANSPARENT;
             mBehindTint = Color.BLACK;
             mBlankScreen = false;
 
-            if (previousState == ScrimState.AOD) {
+            if (mDisplayRequiresBlanking && previousState == ScrimState.AOD) {
                 // Set all scrims black, before they fade transparent.
                 updateScrimColor(mScrimInFront, 1f /* alpha */, Color.BLACK /* tint */);
                 updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK /* tint */);
@@ -311,6 +313,7 @@ public enum ScrimState {
     boolean mWallpaperSupportsAmbientMode;
     boolean mHasBackdrop;
     boolean mLaunchingAffordanceWithPreview;
+    boolean mOccludeAnimationPlaying;
     boolean mWakeLockScreenSensorActive;
     boolean mKeyguardFadingAway;
     long mKeyguardFadingAwayDuration;
@@ -412,6 +415,10 @@ public enum ScrimState {
 
     public void setLaunchingAffordanceWithPreview(boolean launchingAffordanceWithPreview) {
         mLaunchingAffordanceWithPreview = launchingAffordanceWithPreview;
+    }
+
+    public void setOccludeAnimationPlaying(boolean occludeAnimationPlaying) {
+        mOccludeAnimationPlaying = occludeAnimationPlaying;
     }
 
     public boolean isLowPowerState() {

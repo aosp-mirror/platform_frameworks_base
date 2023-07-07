@@ -42,7 +42,6 @@ import android.service.textclassifier.ITextClassifierService;
 import android.service.textclassifier.TextClassifierService;
 import android.service.textclassifier.TextClassifierService.ConnectionState;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.LruCache;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -74,7 +73,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -388,14 +387,13 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
         synchronized (mLock) {
             final StrippedTextClassificationContext textClassificationContext =
-                    mSessionCache.get(sessionId);
+                    mSessionCache.get(sessionId.getToken());
             final int userId = textClassificationContext != null
                     ? textClassificationContext.userId
                     : UserHandle.getCallingUserId();
             final boolean useDefaultTextClassifier =
-                    textClassificationContext != null
-                            ? textClassificationContext.useDefaultTextClassifier
-                            : true;
+                    textClassificationContext == null
+                            || textClassificationContext.useDefaultTextClassifier;
             final SystemTextClassifierMetadata sysTcMetadata = new SystemTextClassifierMetadata(
                     "", userId, useDefaultTextClassifier);
 
@@ -405,7 +403,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                     /* attemptToBind= */ false,
                     service -> {
                         service.onDestroyTextClassificationSession(sessionId);
-                        mSessionCache.remove(sessionId);
+                        mSessionCache.remove(sessionId.getToken());
                     },
                     "onDestroyTextClassificationSession",
                     NO_OP_CALLBACK);
@@ -676,14 +674,39 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
         @NonNull
         private final Object mLock;
+
+        @NonNull
+        private final DeathRecipient mDeathRecipient = new DeathRecipient() {
+            @Override
+            public void binderDied() {
+                // no-op
+            }
+
+            @Override
+            public void binderDied(IBinder who) {
+                if (DEBUG) {
+                    Slog.d(LOG_TAG, "binderDied for " + who);
+                }
+                remove(who);
+            }
+        };
         @NonNull
         @GuardedBy("mLock")
-        private final LruCache<TextClassificationSessionId, StrippedTextClassificationContext>
-                mCache = new LruCache<>(MAX_CACHE_SIZE);
-        @NonNull
-        @GuardedBy("mLock")
-        private final Map<TextClassificationSessionId, DeathRecipient> mDeathRecipients =
-                new ArrayMap<>();
+        private final LruCache<IBinder, StrippedTextClassificationContext>
+                mCache = new LruCache<>(MAX_CACHE_SIZE) {
+                    @Override
+                    protected void entryRemoved(boolean evicted,
+                            IBinder token,
+                            StrippedTextClassificationContext oldValue,
+                            StrippedTextClassificationContext newValue) {
+                        if (evicted) {
+                            // The remove(K) or put(K, V) should be handled
+                            token.unlinkToDeath(mDeathRecipient, /* flags= */ 0);
+                            // TODO(b/278160706): handle app process and TCS's behavior if the
+                            //  session is removed by system server
+                        }
+                    }
+                };
 
         SessionCache(@NonNull Object lock) {
             mLock = Objects.requireNonNull(lock);
@@ -692,12 +715,10 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         void put(@NonNull TextClassificationSessionId sessionId,
                 @NonNull TextClassificationContext textClassificationContext) {
             synchronized (mLock) {
-                mCache.put(sessionId,
+                mCache.put(sessionId.getToken(),
                         new StrippedTextClassificationContext(textClassificationContext));
                 try {
-                    DeathRecipient deathRecipient = () -> remove(sessionId);
-                    sessionId.getToken().linkToDeath(deathRecipient, /* flags= */ 0);
-                    mDeathRecipients.put(sessionId, deathRecipient);
+                    sessionId.getToken().linkToDeath(mDeathRecipient, /* flags= */ 0);
                 } catch (RemoteException e) {
                     Slog.w(LOG_TAG, "SessionCache: Failed to link to death", e);
                 }
@@ -705,22 +726,29 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         }
 
         @Nullable
-        StrippedTextClassificationContext get(@NonNull TextClassificationSessionId sessionId) {
-            Objects.requireNonNull(sessionId);
+        StrippedTextClassificationContext get(@NonNull IBinder token) {
+            Objects.requireNonNull(token);
             synchronized (mLock) {
-                return mCache.get(sessionId);
+                return mCache.get(token);
             }
         }
 
-        void remove(@NonNull TextClassificationSessionId sessionId) {
-            Objects.requireNonNull(sessionId);
+        void remove(@NonNull IBinder token) {
+            Objects.requireNonNull(token);
             synchronized (mLock) {
-                DeathRecipient deathRecipient = mDeathRecipients.get(sessionId);
-                if (deathRecipient != null) {
-                    sessionId.getToken().unlinkToDeath(deathRecipient, /* flags= */ 0);
+                if (DEBUG) {
+                    Slog.d(LOG_TAG, "SessionCache: remove for " + token);
                 }
-                mDeathRecipients.remove(sessionId);
-                mCache.remove(sessionId);
+                if (token != null) {
+                    try {
+                        token.unlinkToDeath(mDeathRecipient, /* flags= */ 0);
+                    } catch (NoSuchElementException e) {
+                        if (DEBUG) {
+                            Slog.d(LOG_TAG, "SessionCache: " + token + " was already unlinked.");
+                        }
+                    }
+                }
+                mCache.remove(token);
             }
         }
 
@@ -888,7 +916,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         @NonNull
         final TextClassifierServiceConnection mConnection;
         final boolean mIsTrusted;
-        @Context.BindServiceFlags
+        @Context.BindServiceFlagsBits
         final int mBindServiceFlags;
         @NonNull
         @GuardedBy("mLock")
@@ -925,7 +953,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             mEnabled = isServiceEnabledForUser();
         }
 
-        @Context.BindServiceFlags
+        @Context.BindServiceFlagsBits
         private int createBindServiceFlags(@NonNull String packageName) {
             int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
             if (!packageName.equals(mDefaultTextClassifierPackage)) {

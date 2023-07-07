@@ -35,15 +35,22 @@ public class SharedPreferencesLogger implements SharedPreferences {
     private static final String LOG_TAG = "SharedPreferencesLogger";
 
     private final String mTag;
+    private final int mMetricCategory;
     private final Context mContext;
     private final MetricsFeatureProvider mMetricsFeature;
     private final Set<String> mPreferenceKeySet;
 
     public SharedPreferencesLogger(Context context, String tag,
             MetricsFeatureProvider metricsFeature) {
+        this(context, tag, metricsFeature, SettingsEnums.PAGE_UNKNOWN);
+    }
+
+    public SharedPreferencesLogger(Context context, String tag,
+            MetricsFeatureProvider metricsFeature, int metricCategory) {
         mContext = context;
         mTag = tag;
         mMetricsFeature = metricsFeature;
+        mMetricCategory = metricCategory;
         mPreferenceKeySet = new ConcurrentSkipListSet<>();
     }
 
@@ -151,20 +158,15 @@ public class SharedPreferencesLogger implements SharedPreferences {
             return;
         }
         // Pref key exists in set, log its change in metrics.
-        mMetricsFeature.action(SettingsEnums.PAGE_UNKNOWN,
-                SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE,
-                SettingsEnums.PAGE_UNKNOWN,
-                prefKey,
-                intVal);
+        mMetricsFeature.changed(mMetricCategory, key, intVal);
     }
 
     @VisibleForTesting
     void logPackageName(String key, String value) {
-        final String prefKey = mTag + "/" + key;
-        mMetricsFeature.action(SettingsEnums.PAGE_UNKNOWN,
+        mMetricsFeature.action(mMetricCategory,
                 SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE,
                 SettingsEnums.PAGE_UNKNOWN,
-                prefKey + ":" + value,
+                key + ":" + value,
                 0);
     }
 

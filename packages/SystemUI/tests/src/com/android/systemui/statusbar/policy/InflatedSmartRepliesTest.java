@@ -574,7 +574,8 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
     private void setupAppGeneratedReplies(
             CharSequence[] smartReplies, boolean allowSystemGeneratedReplies) {
         PendingIntent pendingIntent =
-                PendingIntent.getBroadcast(mContext, 0, TEST_INTENT,
+                PendingIntent.getBroadcast(mContext, 0,
+                        TEST_INTENT.setPackage(mContext.getPackageName()),
                         PendingIntent.FLAG_MUTABLE);
         Notification.Action action =
                 new Notification.Action.Builder(null, "Test Action", pendingIntent).build();
@@ -606,7 +607,8 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
     }
 
     private Notification.Action.Builder createActionBuilder(String actionTitle, Intent intent) {
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent,
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
+                intent.setPackage(mContext.getPackageName()),
                 PendingIntent.FLAG_MUTABLE);
         return new Notification.Action.Builder(mActionIcon, actionTitle, pendingIntent);
     }

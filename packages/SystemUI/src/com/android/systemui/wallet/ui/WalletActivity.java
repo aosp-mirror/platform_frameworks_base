@@ -32,7 +32,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toolbar;
 
+import androidx.activity.ComponentActivity;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -48,7 +50,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.LifecycleActivity;
 
 import java.util.concurrent.Executor;
 
@@ -57,7 +58,7 @@ import javax.inject.Inject;
 /**
  * Displays Wallet carousel screen inside an activity.
  */
-public class WalletActivity extends LifecycleActivity implements
+public class WalletActivity extends ComponentActivity implements
         QuickAccessWalletClient.WalletServiceEventListener {
 
     private static final String TAG = "WalletActivity";
@@ -105,7 +106,7 @@ public class WalletActivity extends LifecycleActivity implements
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);

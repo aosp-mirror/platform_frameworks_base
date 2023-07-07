@@ -22,5 +22,4 @@ import android.companion.AssociationInfo;
 oneway interface ICompanionDeviceService {
     void onDeviceAppeared(in AssociationInfo associationInfo);
     void onDeviceDisappeared(in AssociationInfo associationInfo);
-    void onDispatchMessage(in int messageId, in int associationId, in byte[] message);
 }

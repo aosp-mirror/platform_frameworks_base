@@ -21,7 +21,6 @@ import static android.app.StatusBarManager.SESSION_BIOMETRIC_PROMPT;
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 
 import android.annotation.Nullable;
-import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -29,6 +28,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -48,9 +49,11 @@ import javax.inject.Inject;
  * session. Can be used across processes via StatusBarManagerService#registerSessionListener
  */
 @SysUISingleton
-public class SessionTracker extends CoreStartable {
+public class SessionTracker implements CoreStartable {
     private static final String TAG = "SessionTracker";
-    private static final boolean DEBUG = false;
+
+    // To enable logs: `adb shell setprop log.tag.SessionTracker DEBUG` & restart sysui
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     // At most 20 bits: ~1m possibilities, ~0.5% probability of collision in 100 values
     private final InstanceIdSequence mInstanceIdGenerator = new InstanceIdSequence(1 << 20);
@@ -59,23 +62,24 @@ public class SessionTracker extends CoreStartable {
     private final AuthController mAuthController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
+    private final UiEventLogger mUiEventLogger;
     private final Map<Integer, InstanceId> mSessionToInstanceId = new HashMap<>();
 
     private boolean mKeyguardSessionStarted;
 
     @Inject
     public SessionTracker(
-            Context context,
             IStatusBarService statusBarService,
             AuthController authController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardStateController keyguardStateController
+            KeyguardStateController keyguardStateController,
+            UiEventLogger uiEventLogger
     ) {
-        super(context);
         mStatusBarManagerService = statusBarService;
         mAuthController = authController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardStateController = keyguardStateController;
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -84,8 +88,8 @@ public class SessionTracker extends CoreStartable {
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mKeyguardStateController.addCallback(mKeyguardStateCallback);
 
-        mKeyguardSessionStarted = mKeyguardStateController.isShowing();
-        if (mKeyguardSessionStarted) {
+        if (mKeyguardStateController.isShowing()) {
+            mKeyguardSessionStarted = true;
             startSession(SESSION_KEYGUARD);
         }
     }
@@ -117,6 +121,10 @@ public class SessionTracker extends CoreStartable {
     }
 
     private void endSession(int type) {
+        endSession(type, null);
+    }
+
+    private void endSession(int type, @Nullable SessionUiEvent endSessionUiEvent) {
         if (mSessionToInstanceId.getOrDefault(type, null) == null) {
             Log.e(TAG, "session [" + getString(type) + "] was not started");
             return;
@@ -127,6 +135,9 @@ public class SessionTracker extends CoreStartable {
         try {
             if (DEBUG) {
                 Log.d(TAG, "Session end for [" + getString(type) + "] id=" + instanceId);
+            }
+            if (endSessionUiEvent != null) {
+                mUiEventLogger.log(endSessionUiEvent, instanceId);
             }
             mStatusBarManagerService.onSessionEnded(type, instanceId);
         } catch (RemoteException e) {
@@ -139,12 +150,11 @@ public class SessionTracker extends CoreStartable {
             new KeyguardUpdateMonitorCallback() {
         @Override
         public void onStartedGoingToSleep(int why) {
-            // we need to register to the KeyguardUpdateMonitor lifecycle b/c it gets called
-            // before the WakefulnessLifecycle
             if (mKeyguardSessionStarted) {
-                return;
+                endSession(SESSION_KEYGUARD, SessionUiEvent.KEYGUARD_SESSION_END_GOING_TO_SLEEP);
             }
 
+            // Start a new session whenever the device goes to sleep
             mKeyguardSessionStarted = true;
             startSession(SESSION_KEYGUARD);
         }
@@ -157,11 +167,15 @@ public class SessionTracker extends CoreStartable {
             boolean wasSessionStarted = mKeyguardSessionStarted;
             boolean keyguardShowing = mKeyguardStateController.isShowing();
             if (keyguardShowing && !wasSessionStarted) {
+                // the keyguard can start showing without the device going to sleep (ie: lockdown
+                // from the power button), so we start a new keyguard session when the keyguard is
+                // newly shown in addition to when the device starts going to sleep
                 mKeyguardSessionStarted = true;
                 startSession(SESSION_KEYGUARD);
             } else if (!keyguardShowing && wasSessionStarted) {
                 mKeyguardSessionStarted = false;
-                endSession(SESSION_KEYGUARD);
+                endSession(SESSION_KEYGUARD,
+                        SessionUiEvent.KEYGUARD_SESSION_END_KEYGUARD_GOING_AWAY);
             }
         }
     };
@@ -198,5 +212,23 @@ public class SessionTracker extends CoreStartable {
         }
 
         return "unknownType=" + sessionType;
+    }
+
+    enum SessionUiEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "A keyguard session ended due to the keyguard going away.")
+        KEYGUARD_SESSION_END_KEYGUARD_GOING_AWAY(1354),
+
+        @UiEvent(doc = "A keyguard session ended due to display going to sleep.")
+        KEYGUARD_SESSION_END_GOING_TO_SLEEP(1355);
+
+        private final int mId;
+        SessionUiEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
     }
 }

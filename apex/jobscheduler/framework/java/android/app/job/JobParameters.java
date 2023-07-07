@@ -19,6 +19,7 @@ package android.app.job;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.usage.UsageStatsManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -98,6 +99,19 @@ public class JobParameters implements Parcelable {
      */
     public static final int INTERNAL_STOP_REASON_SUCCESSFUL_FINISH =
             JobProtoEnums.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH; // 10.
+    /**
+     * The user stopped the job via some UI (eg. Task Manager).
+     * @hide
+     */
+    @TestApi
+    public static final int INTERNAL_STOP_REASON_USER_UI_STOP =
+            JobProtoEnums.INTERNAL_STOP_REASON_USER_UI_STOP; // 11.
+    /**
+     * The app didn't respond quickly enough from JobScheduler's perspective.
+     * @hide
+     */
+    public static final int INTERNAL_STOP_REASON_ANR =
+            JobProtoEnums.INTERNAL_STOP_REASON_ANR; // 12.
 
     /**
      * All the stop reason codes. This should be regarded as an immutable array at runtime.
@@ -121,6 +135,8 @@ public class JobParameters implements Parcelable {
             INTERNAL_STOP_REASON_DATA_CLEARED,
             INTERNAL_STOP_REASON_RTC_UPDATED,
             INTERNAL_STOP_REASON_SUCCESSFUL_FINISH,
+            INTERNAL_STOP_REASON_USER_UI_STOP,
+            INTERNAL_STOP_REASON_ANR,
     };
 
     /**
@@ -141,6 +157,8 @@ public class JobParameters implements Parcelable {
             case INTERNAL_STOP_REASON_DATA_CLEARED: return "data_cleared";
             case INTERNAL_STOP_REASON_RTC_UPDATED: return "rtc_updated";
             case INTERNAL_STOP_REASON_SUCCESSFUL_FINISH: return "successful_finish";
+            case INTERNAL_STOP_REASON_USER_UI_STOP: return "user_ui_stop";
+            case INTERNAL_STOP_REASON_ANR: return "anr";
             default: return "unknown:" + reasonCode;
         }
     }
@@ -230,7 +248,7 @@ public class JobParameters implements Parcelable {
     public static final int STOP_REASON_APP_STANDBY = 12;
     /**
      * The user stopped the job. This can happen either through force-stop, adb shell commands,
-     * or uninstalling.
+     * uninstalling, or some other UI.
      */
     public static final int STOP_REASON_USER = 13;
     /** The system is doing some processing that requires stopping this job. */
@@ -269,6 +287,8 @@ public class JobParameters implements Parcelable {
 
     @UnsupportedAppUsage
     private final int jobId;
+    @Nullable
+    private final String mJobNamespace;
     private final PersistableBundle extras;
     private final Bundle transientExtras;
     private final ClipData clipData;
@@ -277,18 +297,21 @@ public class JobParameters implements Parcelable {
     private final IBinder callback;
     private final boolean overrideDeadlineExpired;
     private final boolean mIsExpedited;
+    private final boolean mIsUserInitiated;
     private final Uri[] mTriggeredContentUris;
     private final String[] mTriggeredContentAuthorities;
-    private final Network network;
+    @Nullable
+    private Network mNetwork;
 
     private int mStopReason = STOP_REASON_UNDEFINED;
     private int mInternalStopReason = INTERNAL_STOP_REASON_UNKNOWN;
     private String debugStopReason; // Human readable stop reason for debugging.
 
     /** @hide */
-    public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
+    public JobParameters(IBinder callback, String namespace, int jobId, PersistableBundle extras,
             Bundle transientExtras, ClipData clipData, int clipGrantFlags,
-            boolean overrideDeadlineExpired, boolean isExpedited, Uri[] triggeredContentUris,
+            boolean overrideDeadlineExpired, boolean isExpedited,
+            boolean isUserInitiated, Uri[] triggeredContentUris,
             String[] triggeredContentAuthorities, Network network) {
         this.jobId = jobId;
         this.extras = extras;
@@ -298,9 +321,11 @@ public class JobParameters implements Parcelable {
         this.callback = callback;
         this.overrideDeadlineExpired = overrideDeadlineExpired;
         this.mIsExpedited = isExpedited;
+        this.mIsUserInitiated = isUserInitiated;
         this.mTriggeredContentUris = triggeredContentUris;
         this.mTriggeredContentAuthorities = triggeredContentAuthorities;
-        this.network = network;
+        this.mNetwork = network;
+        this.mJobNamespace = namespace;
     }
 
     /**
@@ -308,6 +333,18 @@ public class JobParameters implements Parcelable {
      */
     public int getJobId() {
         return jobId;
+    }
+
+    /**
+     * Get the namespace this job was placed in.
+     *
+     * @see JobScheduler#forNamespace(String)
+     * @return The namespace this job was scheduled in. Will be {@code null} if there was no
+     * explicit namespace set and this job is therefore in the default namespace.
+     */
+    @Nullable
+    public String getJobNamespace() {
+        return mJobNamespace;
     }
 
     /**
@@ -384,6 +421,20 @@ public class JobParameters implements Parcelable {
     }
 
     /**
+     * @return Whether this job is running as a user-initiated job or not. A job is guaranteed to
+     * have all user-initiated job guarantees for the duration of the job execution if this returns
+     * {@code true}. This will return {@code false} if the job wasn't requested to run as a
+     * user-initiated job, or if it was requested to run as a user-initiated job but the app didn't
+     * meet any of the requirements at the time of execution, such as having the
+     * {@link android.Manifest.permission#RUN_USER_INITIATED_JOBS} permission.
+     *
+     * @see JobInfo.Builder#setUserInitiated(boolean)
+     */
+    public boolean isUserInitiatedJob() {
+        return mIsUserInitiated;
+    }
+
+    /**
      * For jobs with {@link android.app.job.JobInfo.Builder#setOverrideDeadline(long)} set, this
      * provides an easy way to tell whether the job is being executed due to the deadline
      * expiring. Note: If the job is running because its deadline expired, it implies that its
@@ -430,6 +481,10 @@ public class JobParameters implements Parcelable {
      * such as allowing a {@link JobInfo#NETWORK_TYPE_UNMETERED} job to run over
      * a metered network when there is a surplus of metered data available.
      *
+     * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * this will return {@code null} if the app does not hold the permissions specified in
+     * {@link JobInfo.Builder#setRequiredNetwork(NetworkRequest)}.
+     *
      * @return the network that should be used to perform any network requests
      *         for this job, or {@code null} if this job didn't set any required
      *         network type or if the job executed when there was no available network to use.
@@ -437,7 +492,7 @@ public class JobParameters implements Parcelable {
      * @see JobInfo.Builder#setRequiredNetwork(NetworkRequest)
      */
     public @Nullable Network getNetwork() {
-        return network;
+        return mNetwork;
     }
 
     /**
@@ -515,6 +570,7 @@ public class JobParameters implements Parcelable {
 
     private JobParameters(Parcel in) {
         jobId = in.readInt();
+        mJobNamespace = in.readString();
         extras = in.readPersistableBundle();
         transientExtras = in.readBundle();
         if (in.readInt() != 0) {
@@ -527,16 +583,22 @@ public class JobParameters implements Parcelable {
         callback = in.readStrongBinder();
         overrideDeadlineExpired = in.readInt() == 1;
         mIsExpedited = in.readBoolean();
+        mIsUserInitiated = in.readBoolean();
         mTriggeredContentUris = in.createTypedArray(Uri.CREATOR);
         mTriggeredContentAuthorities = in.createStringArray();
         if (in.readInt() != 0) {
-            network = Network.CREATOR.createFromParcel(in);
+            mNetwork = Network.CREATOR.createFromParcel(in);
         } else {
-            network = null;
+            mNetwork = null;
         }
         mStopReason = in.readInt();
         mInternalStopReason = in.readInt();
         debugStopReason = in.readString();
+    }
+
+    /** @hide */
+    public void setNetwork(@Nullable Network network) {
+        mNetwork = network;
     }
 
     /** @hide */
@@ -555,6 +617,7 @@ public class JobParameters implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(jobId);
+        dest.writeString(mJobNamespace);
         dest.writePersistableBundle(extras);
         dest.writeBundle(transientExtras);
         if (clipData != null) {
@@ -567,11 +630,12 @@ public class JobParameters implements Parcelable {
         dest.writeStrongBinder(callback);
         dest.writeInt(overrideDeadlineExpired ? 1 : 0);
         dest.writeBoolean(mIsExpedited);
+        dest.writeBoolean(mIsUserInitiated);
         dest.writeTypedArray(mTriggeredContentUris, flags);
         dest.writeStringArray(mTriggeredContentAuthorities);
-        if (network != null) {
+        if (mNetwork != null) {
             dest.writeInt(1);
-            network.writeToParcel(dest, flags);
+            mNetwork.writeToParcel(dest, flags);
         } else {
             dest.writeInt(0);
         }

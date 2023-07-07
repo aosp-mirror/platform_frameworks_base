@@ -79,7 +79,9 @@ public enum ProtoLogGroup implements IProtoLogGroup {
             Consts.TAG_WM),
     WM_DEBUG_SYNC_ENGINE(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM),
-    WM_DEBUG_WINDOW_TRANSITIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
+    WM_DEBUG_WINDOW_TRANSITIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+            Consts.TAG_WM),
+    WM_DEBUG_WINDOW_TRANSITIONS_MIN(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
             Consts.TAG_WM),
     WM_DEBUG_WINDOW_INSETS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM),
@@ -88,6 +90,7 @@ public enum ProtoLogGroup implements IProtoLogGroup {
     WM_DEBUG_WALLPAPER(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false, Consts.TAG_WM),
     WM_DEBUG_BACK_PREVIEW(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
             "CoreBackPreview"),
+    WM_DEBUG_DREAM(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true, Consts.TAG_WM),
     TEST_GROUP(true, true, false, "WindowManagerProtoLogTest");
 
     private final boolean mEnabled;

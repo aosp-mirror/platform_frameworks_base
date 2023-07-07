@@ -39,9 +39,9 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.parsing.TestPackageParser2;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import org.junit.Assert;
 import org.junit.Before;

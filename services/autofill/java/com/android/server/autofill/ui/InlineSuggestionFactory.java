@@ -198,6 +198,11 @@ final class InlineSuggestionFactory {
                     public void onError() {
                         Slog.w(TAG, "An error happened on the tooltip");
                     }
+
+                    @Override
+                    public void onInflate() {
+                        /* nothing */
+                    }
                 };
 
         InlinePresentation tooltipInline = new InlinePresentation(tooltipPresentation.getSlice(),

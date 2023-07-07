@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.CONTROL_KEYGUARD;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
@@ -25,7 +27,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -44,6 +48,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.view.RemoteAnimationAdapter;
+import android.window.RemoteTransition;
 import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -114,6 +119,39 @@ public class SafeActivityOptions {
     }
 
     /**
+     * To ensure that two activities, one using this object, and the other using the
+     * SafeActivityOptions returned from this function, are launched into the same display/root task
+     * through ActivityStartController#startActivities, all display-related information, i.e.
+     * displayAreaToken, launchDisplayId, callerDisplayId and the launch root task are cloned.
+     */
+    @Nullable SafeActivityOptions selectiveCloneLaunchOptions() {
+        final ActivityOptions options = cloneLaunchingOptions(mOriginalOptions);
+        final ActivityOptions callerOptions = cloneLaunchingOptions(mCallerOptions);
+        if (options == null && callerOptions == null) {
+            return null;
+        }
+
+        final SafeActivityOptions safeOptions = new SafeActivityOptions(options,
+                mOriginalCallingPid, mOriginalCallingUid);
+        safeOptions.mCallerOptions = callerOptions;
+        safeOptions.mRealCallingPid = mRealCallingPid;
+        safeOptions.mRealCallingUid = mRealCallingUid;
+        return safeOptions;
+    }
+
+    private ActivityOptions cloneLaunchingOptions(ActivityOptions options) {
+        return options == null ? null : ActivityOptions.makeBasic()
+                .setLaunchTaskDisplayArea(options.getLaunchTaskDisplayArea())
+                .setLaunchDisplayId(options.getLaunchDisplayId())
+                .setCallerDisplayId(options.getCallerDisplayId())
+                .setLaunchRootTask(options.getLaunchRootTask())
+                .setPendingIntentBackgroundActivityStartMode(
+                        options.getPendingIntentBackgroundActivityStartMode())
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                        options.getPendingIntentCreatorBackgroundActivityStartMode());
+    }
+
+    /**
      * Overrides options with options from a caller and records {@link Binder#getCallingPid}/
      * {@link Binder#getCallingUid}. Thus, calling identity MUST NOT be cleared when calling this
      * method.
@@ -172,7 +210,7 @@ public class SafeActivityOptions {
         if (adapter == null) {
             return;
         }
-        if (callingPid == Process.myPid()) {
+        if (callingPid == WindowManagerService.MY_PID) {
             Slog.wtf(TAG, "Safe activity options constructed after clearing calling id");
             return;
         }
@@ -233,7 +271,7 @@ public class SafeActivityOptions {
             ActivityOptions options, int callingPid, int callingUid) {
         // If a launch task id is specified, then ensure that the caller is the recents
         // component or has the START_TASKS_FROM_RECENTS permission
-        if (options.getLaunchTaskId() != INVALID_TASK_ID
+        if ((options.getLaunchTaskId() != INVALID_TASK_ID || options.getDisableStartingWindow())
                 && !supervisor.mRecentTasks.isCallerRecents(callingUid)) {
             final int startInTaskPerm = ActivityTaskManagerService.checkPermission(
                     START_TASKS_FROM_RECENTS, callingPid, callingUid);
@@ -246,10 +284,35 @@ public class SafeActivityOptions {
                 throw new SecurityException(msg);
             }
         }
+        if (options.getTransientLaunch() && !supervisor.mRecentTasks.isCallerRecents(callingUid)
+                && ActivityTaskManagerService.checkPermission(
+                        MANAGE_ACTIVITY_TASKS, callingPid, callingUid) == PERMISSION_DENIED) {
+            final String msg = "Permission Denial: starting transient launch from " + callerApp
+                    + ", pid=" + callingPid + ", uid=" + callingUid;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
         // Check if the caller is allowed to launch on the specified display area.
         final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
-        final TaskDisplayArea taskDisplayArea = daToken != null
+        TaskDisplayArea taskDisplayArea = daToken != null
                 ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
+
+        // If we do not have a task display area token, check if the launch task display area
+        // feature id is specified.
+        if (taskDisplayArea == null) {
+            final int launchTaskDisplayAreaFeatureId = options.getLaunchTaskDisplayAreaFeatureId();
+            if (launchTaskDisplayAreaFeatureId != FEATURE_UNDEFINED) {
+                final int launchDisplayId = options.getLaunchDisplayId() == INVALID_DISPLAY
+                        ? DEFAULT_DISPLAY : options.getLaunchDisplayId();
+                final DisplayContent dc = supervisor.mRootWindowContainer
+                        .getDisplayContent(launchDisplayId);
+                if (dc != null) {
+                    taskDisplayArea = dc.getItemFromTaskDisplayAreas(tda ->
+                            tda.mFeatureId == launchTaskDisplayAreaFeatureId ? tda : null);
+                }
+            }
+        }
+
         if (aInfo != null && taskDisplayArea != null
                 && !supervisor.isCallerAllowedToLaunchOnTaskDisplayArea(callingPid, callingUid,
                 taskDisplayArea, aInfo)) {
@@ -297,6 +360,20 @@ public class SafeActivityOptions {
             }
         }
 
+        // Check if the caller is allowed to dismiss keyguard.
+        final boolean dismissKeyguard = options.getDismissKeyguard();
+        if (aInfo != null && dismissKeyguard) {
+            final int controlKeyguardPerm = ActivityTaskManagerService.checkPermission(
+                    CONTROL_KEYGUARD, callingPid, callingUid);
+            if (controlKeyguardPerm != PERMISSION_GRANTED) {
+                final String msg = "Permission Denial: starting " + getIntentString(intent)
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ") with dismissKeyguard=true";
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+        }
+
         // Check permission for remote animations
         final RemoteAnimationAdapter adapter = options.getRemoteAnimationAdapter();
         if (adapter != null && supervisor.mService.checkPermission(
@@ -305,6 +382,18 @@ public class SafeActivityOptions {
             final String msg = "Permission Denial: starting " + getIntentString(intent)
                     + " from " + callerApp + " (pid=" + callingPid
                     + ", uid=" + callingUid + ") with remoteAnimationAdapter";
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+
+        // Check permission for remote transitions
+        final RemoteTransition transition = options.getRemoteTransition();
+        if (transition != null && supervisor.mService.checkPermission(
+                CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS, callingPid, callingUid)
+                != PERMISSION_GRANTED) {
+            final String msg = "Permission Denial: starting " + getIntentString(intent)
+                    + " from " + callerApp + " (pid=" + callingPid
+                    + ", uid=" + callingUid + ") with remoteTransition";
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }

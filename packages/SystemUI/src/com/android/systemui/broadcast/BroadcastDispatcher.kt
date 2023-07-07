@@ -31,13 +31,18 @@ import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
+import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.BroadcastRunning
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 
 data class ReceiverData(
     val receiver: BroadcastReceiver,
@@ -51,7 +56,6 @@ private const val MSG_ADD_RECEIVER = 0
 private const val MSG_REMOVE_RECEIVER = 1
 private const val MSG_REMOVE_RECEIVER_FOR_USER = 2
 private const val TAG = "BroadcastDispatcher"
-private const val DEBUG = true
 
 /**
  * SystemUI master Broadcast Dispatcher.
@@ -60,8 +64,9 @@ private const val DEBUG = true
  * from SystemUI. That way the number of calls to [BroadcastReceiver.onReceive] can be reduced for
  * a given broadcast.
  *
- * Use only for IntentFilters with actions and optionally categories. It does not support,
- * permissions, schemes, data types, data authorities or priority different than 0.
+ * Use only for IntentFilters with actions and optionally categories. It does not support schemes,
+ * data types, data authorities or priority different than 0.
+ *
  * Cannot be used for getting sticky broadcasts (either as return of registering or as re-delivery).
  * Broadcast handling may be asynchronous *without* calling goAsync(), as it's running within sysui
  * and doesn't need to worry about being killed.
@@ -69,15 +74,16 @@ private const val DEBUG = true
 @SysUISingleton
 open class BroadcastDispatcher @Inject constructor(
     private val context: Context,
-    @Background private val bgLooper: Looper,
-    @Background private val bgExecutor: Executor,
+    @Main private val mainExecutor: Executor,
+    @BroadcastRunning private val broadcastLooper: Looper,
+    @BroadcastRunning private val broadcastExecutor: Executor,
     private val dumpManager: DumpManager,
     private val logger: BroadcastDispatcherLogger,
     private val userTracker: UserTracker,
     private val removalPendingStore: PendingRemovalStore
 ) : Dumpable {
 
-    // Only modify in BG thread
+    // Only modify in BroadcastRunning thread
     private val receiversByUser = SparseArray<UserBroadcastDispatcher>(20)
 
     fun initialize() {
@@ -144,7 +150,7 @@ open class BroadcastDispatcher @Inject constructor(
         val data = ReceiverData(
                 receiver,
                 filter,
-                executor ?: context.mainExecutor,
+                executor ?: mainExecutor,
                 user ?: context.user,
                 permission
             )
@@ -152,6 +158,55 @@ open class BroadcastDispatcher @Inject constructor(
                 .obtainMessage(MSG_ADD_RECEIVER, flags, 0, data)
                 .sendToTarget()
     }
+
+    /**
+     * Returns a [Flow] that, when collected, emits a new value whenever a broadcast matching
+     * [filter] is received. The value will be computed from the intent and the registered receiver
+     * using [map].
+     *
+     * @see registerReceiver
+     */
+    @JvmOverloads
+    fun <T> broadcastFlow(
+        filter: IntentFilter,
+        user: UserHandle? = null,
+        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED,
+        permission: String? = null,
+        map: (Intent, BroadcastReceiver) -> T,
+    ): Flow<T> = conflatedCallbackFlow {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                trySendWithFailureLogging(map(intent, this), TAG)
+            }
+        }
+
+        registerReceiver(
+            receiver,
+            filter,
+            broadcastExecutor,
+            user,
+            flags,
+            permission,
+        )
+
+        awaitClose {
+            unregisterReceiver(receiver)
+        }
+    }
+
+    /**
+     * Returns a [Flow] that, when collected, emits `Unit` whenever a broadcast matching [filter] is
+     * received.
+     *
+     * @see registerReceiver
+     */
+    @JvmOverloads
+    fun broadcastFlow(
+        filter: IntentFilter,
+        user: UserHandle? = null,
+        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED,
+        permission: String? = null,
+    ): Flow<Unit> = broadcastFlow(filter, user, flags, permission) { _, _ -> Unit }
 
     private fun checkFilter(filter: IntentFilter) {
         val sb = StringBuilder()
@@ -193,8 +248,8 @@ open class BroadcastDispatcher @Inject constructor(
             UserBroadcastDispatcher(
                 context,
                 userId,
-                bgLooper,
-                bgExecutor,
+                broadcastLooper,
+                broadcastExecutor,
                 logger,
                 removalPendingStore
             )
@@ -212,7 +267,7 @@ open class BroadcastDispatcher @Inject constructor(
         ipw.decreaseIndent()
     }
 
-    private val handler = object : Handler(bgLooper) {
+    private val handler = object : Handler(broadcastLooper) {
 
         override fun handleMessage(msg: Message) {
             when (msg.what) {
