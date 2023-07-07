@@ -81,6 +81,8 @@ constructor(
     val isDreaming: Flow<Boolean> = repository.isDreaming
     /** Whether the system is dreaming with an overlay active */
     val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
+    /** Whether the system is dreaming and the active dream is hosted in lockscreen */
+    val isActiveDreamLockscreenHosted: Flow<Boolean> = repository.isActiveDreamLockscreenHosted
     /** Event for when the camera gesture is detected */
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> = conflatedCallbackFlow {
         val callback =
@@ -196,6 +198,10 @@ constructor(
                 CameraLaunchSourceModel.QUICK_AFFORDANCE
             else -> throw IllegalArgumentException("Invalid CameraLaunchSourceModel value: $value")
         }
+    }
+
+    fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
+        repository.setIsActiveDreamLockscreenHosted(isLockscreenHosted)
     }
 
     /** Sets whether quick settings or quick-quick settings is visible. */
