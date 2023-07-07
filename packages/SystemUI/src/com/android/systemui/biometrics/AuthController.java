@@ -1113,7 +1113,8 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
                 if (DEBUG) Log.d(TAG, "onBiometricError, lockout");
                 mCurrentDialog.animateToCredentialUI();
             } else if (isSoftError) {
-                final String errorMessage = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED)
+                final String errorMessage = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED
+                        || error == BiometricConstants.BIOMETRIC_ERROR_TIMEOUT)
                         ? getNotRecognizedString(modality)
                         : getErrorString(modality, error, vendorCode);
                 if (DEBUG) Log.d(TAG, "onBiometricError, soft error: " + errorMessage);
