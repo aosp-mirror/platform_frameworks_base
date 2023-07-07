@@ -14830,7 +14830,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * view satisfies any of the following:
      * <ul>
      * <li>Is actionable, e.g. {@link #isClickable()},
-     * {@link #isLongClickable()}, or {@link #isFocusable()}
+     * {@link #isLongClickable()}, {@link #isContextClickable()},
+     * {@link #isScreenReaderFocusable()}, or {@link #isFocusable()}
      * <li>Has an {@link AccessibilityDelegate}
      * <li>Has an interaction listener, e.g. {@link OnTouchListener},
      * {@link OnKeyListener}, etc.
@@ -14839,6 +14840,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #ACCESSIBILITY_LIVE_REGION_NONE}.
      * </ul>
      * <li>Has an accessibility pane title, see {@link #setAccessibilityPaneTitle}</li>
+     * <li>Is an accessibility heading, see {@link #setAccessibilityHeading(boolean)}.</li>
      * </ol>
      *
      * @return Whether the view is exposed for accessibility.
@@ -14865,7 +14867,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return mode == IMPORTANT_FOR_ACCESSIBILITY_YES || isActionableForAccessibility()
                 || hasListenersForAccessibility() || mAccessibilityDelegate != null
                 || getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE
-                || isAccessibilityPane();
+                || isAccessibilityPane() || isAccessibilityHeading();
     }
 
     /**
@@ -15025,7 +15027,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public boolean isActionableForAccessibility() {
-        return (isClickable() || isLongClickable() || isFocusable());
+        return (isClickable() || isLongClickable() || isFocusable() || isContextClickable()
+                || isScreenReaderFocusable());
     }
 
     /**
