@@ -95,7 +95,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     @UnsupportedAppUsage
     public void register(Context context, Looper thread, UserHandle user,
             boolean externalStorage) {
-        register(context, user, externalStorage,
+        register(context, user,
                 (thread == null) ? BackgroundThread.getHandler() : new Handler(thread));
     }
 
