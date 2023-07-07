@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -102,10 +103,7 @@ public class BubblePositioner {
     private int[] mPaddings = new int[4];
 
     private boolean mShowingInBubbleBar;
-    private boolean mBubblesOnHome;
-    private int mBubbleBarSize;
-    private int mBubbleBarHomeAdjustment;
-    private final PointF mBubbleBarPosition = new PointF();
+    private final Point mBubbleBarPosition = new Point();
 
     public BubblePositioner(Context context, WindowManager windowManager) {
         mContext = context;
@@ -166,11 +164,9 @@ public class BubblePositioner {
         mSpacingBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
         mDefaultMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
-        mBubbleBarHomeAdjustment = mExpandedViewPadding / 2;
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreenAmount = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mBubbleBarSize = res.getDimensionPixelSize(R.dimen.bubblebar_size);
 
         if (mShowingInBubbleBar) {
             mExpandedViewLargeScreenWidth = isLandscape()
@@ -722,11 +718,9 @@ public class BubblePositioner {
         mShowingInBubbleBar = showingInBubbleBar;
     }
 
-    /**
-     * Sets whether bubbles are showing on launcher home, in which case positions are different.
-     */
-    public void setBubblesOnHome(boolean bubblesOnHome) {
-        mBubblesOnHome = bubblesOnHome;
+    /** Sets the position of the bubble bar in screen coordinates. */
+    public void setBubbleBarPosition(int x, int y) {
+        mBubbleBarPosition.set(x, y);
     }
 
     /**
@@ -747,11 +741,7 @@ public class BubblePositioner {
 
     /** The bottom position of the expanded view when showing above the bubble bar. */
     public int getExpandedViewBottomForBubbleBar() {
-        return getAvailableRect().height()
-                + mInsets.top
-                - mBubbleBarSize
-                - mExpandedViewPadding
-                - getBubbleBarHomeAdjustment();
+        return mBubbleBarPosition.y - mExpandedViewPadding;
     }
 
     /**
@@ -764,19 +754,7 @@ public class BubblePositioner {
     /**
      * Returns the on screen co-ordinates of the bubble bar.
      */
-    public PointF getBubbleBarPosition() {
-        mBubbleBarPosition.set(getAvailableRect().width() - mBubbleBarSize,
-                getAvailableRect().height() - mBubbleBarSize
-                        - mExpandedViewPadding - getBubbleBarHomeAdjustment());
+    public Point getBubbleBarPosition() {
         return mBubbleBarPosition;
-    }
-
-    /**
-     * When bubbles are shown on launcher home, there's an extra bit of padding that needs to
-     * be applied between the expanded view and the bubble bar. This returns the adjustment value
-     * if bubbles are showing on home.
-     */
-    private int getBubbleBarHomeAdjustment() {
-        return mBubblesOnHome ? mBubbleBarHomeAdjustment : 0;
     }
 }

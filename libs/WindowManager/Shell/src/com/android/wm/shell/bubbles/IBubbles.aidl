@@ -29,7 +29,8 @@ interface IBubbles {
 
     oneway void unregisterBubbleListener(in IBubblesListener listener) = 2;
 
-    oneway void showBubble(in String key, in boolean onLauncherHome) = 3;
+    oneway void showBubble(in String key, in int bubbleBarXCoordinate,
+                    in int bubbleBarYCoordinate) = 3;
 
     oneway void removeBubble(in String key, in int reason) = 4;
 

@@ -21,7 +21,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.PointF;
+import android.graphics.Point;
 import android.util.Log;
 import android.widget.FrameLayout;
 
@@ -136,7 +136,7 @@ public class BubbleBarAnimationHelper {
         bev.setVisibility(VISIBLE);
 
         // Set the pivot point for the scale, so the view animates out from the bubble bar.
-        PointF bubbleBarPosition = mPositioner.getBubbleBarPosition();
+        Point bubbleBarPosition = mPositioner.getBubbleBarPosition();
         mExpandedViewContainerMatrix.setScale(
                 1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
                 1f - EXPANDED_VIEW_ANIMATE_SCALE_AMOUNT,
