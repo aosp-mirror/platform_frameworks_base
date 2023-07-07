@@ -51,7 +51,6 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.TaskInfo;
 import android.app.UiModeManager;
-import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -977,16 +976,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
 
         createAndAddWindows(result);
-
-        if (mWallpaperSupported) {
-            // Make sure we always have the most current wallpaper info.
-            IntentFilter wallpaperChangedFilter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
-            mBroadcastDispatcher.registerReceiver(mWallpaperChangedReceiver, wallpaperChangedFilter,
-                    null /* handler */, UserHandle.ALL);
-            mWallpaperChangedReceiver.onReceive(mContext, null);
-        } else if (DEBUG) {
-            Log.v(TAG, "start(): no wallpaper service ");
-        }
 
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
@@ -2157,18 +2146,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         }
     };
-
-    /**
-     * Notify the shade controller that the current user changed
-     *
-     * @param newUserId userId of the new user
-     */
-    @Override
-    public void setLockscreenUser(int newUserId) {
-        if (mWallpaperSupported) {
-            mWallpaperChangedReceiver.onReceive(mContext, null);
-        }
-    }
 
     /**
      * Reload some of our resources when the configuration changes.
@@ -3547,23 +3524,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                             1.0f  /* speedUpFactor */);
                 }
             }
-        }
-    };
-
-    /**
-     * @deprecated See {@link com.android.systemui.wallpapers.data.repository.WallpaperRepository}
-     * instead.
-     */
-    private final BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!mWallpaperSupported) {
-                // Receiver should not have been registered at all...
-                Log.wtf(TAG, "WallpaperManager not supported");
-                return;
-            }
-            WallpaperInfo info = mWallpaperManager.getWallpaperInfoForUser(
-                    mUserTracker.getUserId());
         }
     };
 
