@@ -22,6 +22,7 @@ import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.internal.util.FunctionalUtils.ThrowingConsumer;
+import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -59,6 +60,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.VibrationAttributes;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -1184,7 +1186,52 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void fingerDown_falsingManagerInformed() throws RemoteException {
+        final Pair<TouchProcessorResult, TouchProcessorResult> touchProcessorResult =
+                givenAcceptFingerDownEvent();
+
+        // WHEN ACTION_DOWN is received
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                touchProcessorResult.first);
+        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricExecutor.runAllReady();
+        downEvent.recycle();
+
+        // THEN falsing manager is informed of the touch
+        verify(mFalsingManager).isFalseTouch(UDFPS_AUTHENTICATION);
+    }
+
+    @Test
     public void onTouch_withNewTouchDetection_shouldCallNewFingerprintManagerPath()
+            throws RemoteException {
+        final Pair<TouchProcessorResult, TouchProcessorResult> processorResultDownAndUp =
+                givenAcceptFingerDownEvent();
+
+        // WHEN ACTION_DOWN is received
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultDownAndUp.first);
+        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricExecutor.runAllReady();
+        downEvent.recycle();
+
+        // AND ACTION_UP is received
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultDownAndUp.second);
+        MotionEvent upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, upEvent);
+        mBiometricExecutor.runAllReady();
+        upEvent.recycle();
+
+        // THEN the new FingerprintManager path is invoked.
+        verify(mFingerprintManager).onPointerDown(anyLong(), anyInt(), anyInt(), anyFloat(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(), anyBoolean());
+        verify(mFingerprintManager).onPointerUp(anyLong(), anyInt(), anyInt(), anyFloat(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(), anyBoolean());
+    }
+
+    private Pair<TouchProcessorResult, TouchProcessorResult> givenAcceptFingerDownEvent()
             throws RemoteException {
         final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
                 0L);
@@ -1211,27 +1258,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
 
-        // WHEN ACTION_DOWN is received
-        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
-                processorResultDown);
-        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
-        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
-        mBiometricExecutor.runAllReady();
-        downEvent.recycle();
-
-        // AND ACTION_UP is received
-        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
-                processorResultUp);
-        MotionEvent upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
-        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, upEvent);
-        mBiometricExecutor.runAllReady();
-        upEvent.recycle();
-
-        // THEN the new FingerprintManager path is invoked.
-        verify(mFingerprintManager).onPointerDown(anyLong(), anyInt(), anyInt(), anyFloat(),
-                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(), anyBoolean());
-        verify(mFingerprintManager).onPointerUp(anyLong(), anyInt(), anyInt(), anyFloat(),
-                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(), anyBoolean());
+        return new Pair<>(processorResultDown, processorResultUp);
     }
 
     @Test
