@@ -81,7 +81,7 @@
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Потрібен додатковий захист. Пароль довго не використовувався."</string>
     <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Потрібен додатковий захист. Ключ довго не використовувався."</string>
     <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Потрібен додатковий захист. Пристрій довго не розблоковувався."</string>
-    <string name="kg_face_locked_out" msgid="2751559491287575">"Не розблоковано (фейсконтроль). Забагато спроб."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Не розблоковано (фейс-контроль). Забагато спроб."</string>
     <string name="kg_fp_locked_out" msgid="6228277682396768830">"Не розблоковано (відбиток пальця). Забагато спроб."</string>
     <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Довірчий агент недоступний"</string>
     <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Неправильний PIN-код введено забагато разів"</string>
