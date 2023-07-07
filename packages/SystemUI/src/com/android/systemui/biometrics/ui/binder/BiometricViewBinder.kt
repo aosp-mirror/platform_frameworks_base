@@ -522,6 +522,7 @@ private class Spaghetti(
             viewModel.showTemporaryError(
                 help,
                 messageAfterError = modalities.asDefaultHelpMessage(applicationContext),
+                hapticFeedback = false,
             )
         }
     }
@@ -534,7 +535,7 @@ private class Spaghetti(
             else -> false
         }
 
-    override fun startTransitionToCredentialUI() {
+    override fun startTransitionToCredentialUI(isError: Boolean) {
         applicationScope.launch {
             viewModel.onSwitchToCredential()
             legacyCallback?.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL)

@@ -32,6 +32,8 @@ import com.android.systemui.biometrics.extractAuthenticatorTypes
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
 import com.android.systemui.biometrics.fingerprintSensorPropertiesInternal
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -45,6 +47,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 4
@@ -58,6 +63,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @JvmField @Rule var mockitoRule = MockitoJUnit.rule()
 
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
+    @Mock private lateinit var vibrator: VibratorHelper
 
     private val testScope = TestScope()
     private val promptRepository = FakePromptRepository()
@@ -70,11 +76,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         selector = PromptSelectorInteractorImpl(promptRepository, lockPatternUtils)
         selector.resetPrompt()
 
-        viewModel = PromptViewModel(selector)
+        viewModel = PromptViewModel(selector, vibrator)
     }
 
     @Test
-    fun `start idle and show authenticating`() =
+    fun start_idle_and_show_authenticating() =
         runGenericTest(doNotStart = true) {
             val expectedSize =
                 if (testCase.shouldStartAsImplicitFlow) PromptSize.SMALL else PromptSize.MEDIUM
@@ -107,7 +113,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         }
 
     @Test
-    fun `shows authenticated - no errors`() = runGenericTest {
+    fun shows_authenticated_with_no_errors() = runGenericTest {
         // this case can't happen until fingerprint is started
         // trigger it now since no error has occurred in this test
         val forceError = testCase.isCoex && testCase.authenticatedByFingerprint
@@ -122,6 +128,22 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
             testCase.authenticatedModality,
             testCase.expectConfirmation(atLeastOneFailure = forceError),
         )
+    }
+
+    @Test
+    fun plays_haptic_on_authenticated() = runGenericTest {
+        viewModel.showAuthenticated(testCase.authenticatedModality, 1000L)
+
+        verify(vibrator).vibrateAuthSuccess(any())
+        verify(vibrator, never()).vibrateAuthError(any())
+    }
+
+    @Test
+    fun plays_no_haptic_on_confirm() = runGenericTest {
+        viewModel.confirmAuthenticated()
+
+        verify(vibrator, never()).vibrateAuthSuccess(any())
+        verify(vibrator, never()).vibrateAuthError(any())
     }
 
     private suspend fun TestScope.showAuthenticated(
@@ -172,12 +194,28 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun `shows temporary errors`() = runGenericTest {
+    fun shows_temporary_errors() = runGenericTest {
         val checkAtEnd = suspend { assertButtonsVisible(negative = true) }
 
         showTemporaryErrors(restart = false) { checkAtEnd() }
         showTemporaryErrors(restart = false, helpAfterError = "foo") { checkAtEnd() }
         showTemporaryErrors(restart = true) { checkAtEnd() }
+    }
+
+    @Test
+    fun plays_haptic_on_errors() = runGenericTest {
+        viewModel.showTemporaryError("so sad", hapticFeedback = true)
+
+        verify(vibrator).vibrateAuthError(any())
+        verify(vibrator, never()).vibrateAuthSuccess(any())
+    }
+
+    @Test
+    fun plays_haptic_on_errors_unless_skipped() = runGenericTest {
+        viewModel.showTemporaryError("still sad", hapticFeedback = false)
+
+        verify(vibrator, never()).vibrateAuthError(any())
+        verify(vibrator, never()).vibrateAuthSuccess(any())
     }
 
     private suspend fun TestScope.showTemporaryErrors(
@@ -233,7 +271,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun `no errors or temporary help after authenticated`() = runGenericTest {
+    fun no_errors_or_temporary_help_after_authenticated() = runGenericTest {
         val authenticating by collectLastValue(viewModel.isAuthenticating)
         val authenticated by collectLastValue(viewModel.isAuthenticated)
         val message by collectLastValue(viewModel.message)
@@ -277,7 +315,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun `authenticated at most once`() = runGenericTest {
+    fun authenticated_at_most_once() = runGenericTest {
         val authenticating by collectLastValue(viewModel.isAuthenticating)
         val authenticated by collectLastValue(viewModel.isAuthenticated)
 
@@ -293,7 +331,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun `authenticating cannot restart after authenticated`() = runGenericTest {
+    fun authenticating_cannot_restart_after_authenticated() = runGenericTest {
         val authenticating by collectLastValue(viewModel.isAuthenticating)
         val authenticated by collectLastValue(viewModel.isAuthenticated)
 
@@ -309,7 +347,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun `confirm authentication`() = runGenericTest {
+    fun confirm_authentication() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
         viewModel.showAuthenticated(testCase.authenticatedModality, 0)
@@ -341,7 +379,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun `cannot confirm unless authenticated`() = runGenericTest {
+    fun cannot_confirm_unless_authenticated() = runGenericTest {
         val authenticating by collectLastValue(viewModel.isAuthenticating)
         val authenticated by collectLastValue(viewModel.isAuthenticated)
 
@@ -360,7 +398,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun `shows help - before authenticated`() = runGenericTest {
+    fun shows_help_before_authenticated() = runGenericTest {
         val helpMessage = "please help yourself to some cookies"
         val message by collectLastValue(viewModel.message)
         val messageVisible by collectLastValue(viewModel.isIndicatorMessageVisible)
@@ -379,7 +417,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun `shows help - after authenticated`() = runGenericTest {
+    fun shows_help_after_authenticated() = runGenericTest {
         val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
         val helpMessage = "more cookies please"
         val authenticating by collectLastValue(viewModel.isAuthenticating)
@@ -409,7 +447,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun `retries after failure`() = runGenericTest {
+    fun retries_after_failure() = runGenericTest {
         val errorMessage = "bad"
         val helpMessage = "again?"
         val expectTryAgainButton = testCase.isFaceOnly
@@ -455,7 +493,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun `switch to credential fallback`() = runGenericTest {
+    fun switch_to_credential_fallback() = runGenericTest {
         val size by collectLastValue(viewModel.size)
 
         // TODO(b/251476085): remove Spaghetti, migrate logic, and update this test
