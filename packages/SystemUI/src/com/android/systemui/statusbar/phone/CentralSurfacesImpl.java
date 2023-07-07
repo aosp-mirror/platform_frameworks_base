@@ -1773,7 +1773,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 try {
                     EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_ESCALATION,
                             sbn.getKey());
-                    wakeUpForFullScreenIntent();
+                    mPowerInteractor.wakeUpForFullScreenIntent();
                     ActivityOptions opts = ActivityOptions.makeBasic();
                     opts.setPendingIntentBackgroundActivityStartMode(
                             ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
@@ -1784,16 +1784,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         });
         mHeadsUpManager.releaseAllImmediately();
-    }
-
-    @Override
-    public void wakeUpForFullScreenIntent() {
-        if (isGoingToSleep() || mDozing) {
-            mPowerManager.wakeUp(
-                    SystemClock.uptimeMillis(),
-                    PowerManager.WAKE_REASON_APPLICATION,
-                    "com.android.systemui:full_screen_intent");
-        }
     }
 
     /**

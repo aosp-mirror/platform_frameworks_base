@@ -21,6 +21,8 @@ import static android.service.notification.NotificationListenerService.REASON_CL
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -61,10 +63,14 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.power.data.repository.FakePowerRepository;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeControllerImpl;
@@ -118,6 +124,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private NotificationClickNotifier mClickNotifier;
     @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
@@ -150,6 +157,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private ActivityLaunchAnimator mActivityLaunchAnimator;
     @Mock
     private InteractionJankMonitor mJankMonitor;
+    private FakePowerRepository mPowerRepository;
+    private PowerInteractor mPowerInteractor;
     @Mock
     private UserTracker mUserTracker;
     private final FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -199,6 +208,14 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));
 
+        mPowerRepository = new FakePowerRepository();
+        mPowerInteractor = new PowerInteractor(
+                mPowerRepository,
+                new FakeKeyguardRepository(),
+                new FalsingCollectorFake(),
+                mScreenOffAnimationController,
+                mStatusBarStateController);
+
         HeadsUpManagerPhone headsUpManager = mock(HeadsUpManagerPhone.class);
         NotificationLaunchAnimatorControllerProvider notificationAnimationProvider =
                 new NotificationLaunchAnimatorControllerProvider(
@@ -238,6 +255,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mActivityLaunchAnimator,
                         notificationAnimationProvider,
                         mock(LaunchFullScreenIntentProvider.class),
+                        mPowerInteractor,
                         mock(FeatureFlags.class),
                         mUserTracker
                 );
@@ -402,11 +420,13 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(entry.getImportance()).thenReturn(NotificationManager.IMPORTANCE_HIGH);
         when(entry.getSbn()).thenReturn(sbn);
 
-        // WHEN
+        // WHEN the intent is launched while dozing
+        when(mStatusBarStateController.isDozing()).thenReturn(true);
         mNotificationActivityStarter.launchFullScreenIntent(entry);
 
         // THEN display should try wake up for the full screen intent
-        verify(mCentralSurfaces).wakeUpForFullScreenIntent();
+        assertThat(mPowerRepository.getLastWakeReason()).isNotNull();
+        assertThat(mPowerRepository.getLastWakeWhy()).isNotNull();
     }
 
     @Test

@@ -28,6 +28,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
@@ -89,6 +90,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
                 dockManager,
                 PowerInteractor(
                     powerRepository,
+                    FakeKeyguardRepository(),
                     falsingCollector,
                     screenOffAnimationController,
                     statusBarStateController,

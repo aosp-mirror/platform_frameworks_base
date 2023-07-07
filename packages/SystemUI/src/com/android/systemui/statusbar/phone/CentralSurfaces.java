@@ -362,8 +362,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     @VisibleForTesting
     void setBarStateForTest(int state);
 
-    void wakeUpForFullScreenIntent();
-
     void showTransientUnchecked();
 
     void clearTransient();

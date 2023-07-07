@@ -56,6 +56,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
@@ -126,6 +127,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
+    private final PowerInteractor mPowerInteractor;
     private final UserTracker mUserTracker;
     private final OnUserInteractionCallback mOnUserInteractionCallback;
 
@@ -163,6 +165,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             ActivityLaunchAnimator activityLaunchAnimator,
             NotificationLaunchAnimatorControllerProvider notificationAnimationProvider,
             LaunchFullScreenIntentProvider launchFullScreenIntentProvider,
+            PowerInteractor powerInteractor,
             FeatureFlags featureFlags,
             UserTracker userTracker) {
         mContext = context;
@@ -196,6 +199,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         mShadeViewController = shadeViewController;
         mActivityLaunchAnimator = activityLaunchAnimator;
         mNotificationAnimationProvider = notificationAnimationProvider;
+        mPowerInteractor = powerInteractor;
         mUserTracker = userTracker;
 
         launchFullScreenIntentProvider.registerListener(entry -> launchFullScreenIntent(entry));
@@ -592,7 +596,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
         try {
             EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
                     entry.getKey());
-            mCentralSurfaces.wakeUpForFullScreenIntent();
+            mPowerInteractor.wakeUpForFullScreenIntent();
 
             ActivityOptions options = ActivityOptions.makeBasic();
             options.setPendingIntentBackgroundActivityStartMode(
