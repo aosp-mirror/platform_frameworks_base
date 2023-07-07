@@ -43,6 +43,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -1103,7 +1104,10 @@ public final class VoiceInteractor {
         }
         try {
             boolean[] res = mInteractor.supportsCommands(mContext.getOpPackageName(), commands);
-            if (DEBUG) Log.d(TAG, "supportsCommands: cmds=" + commands + " res=" + res);
+            if (DEBUG) {
+                Log.d(TAG, "supportsCommands: cmds=" + Arrays.toString(commands) + " res="
+                        + Arrays.toString(res));
+            }
             return res;
         } catch (RemoteException e) {
             throw new RuntimeException("Voice interactor has died", e);

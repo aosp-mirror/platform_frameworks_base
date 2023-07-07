@@ -61,7 +61,7 @@ public class Device {
     }
 
     private static native long nativeOpenUinputDevice(String name, int id, int vid, int pid,
-            int bus, int ffEffectsMax, DeviceCallback callback);
+            int bus, int ffEffectsMax, String port, DeviceCallback callback);
     private static native void nativeCloseUinputDevice(long ptr);
     private static native void nativeInjectEvent(long ptr, int type, int code, int value);
     private static native void nativeConfigure(int handle, int code, int[] configs);
@@ -69,7 +69,7 @@ public class Device {
 
     public Device(int id, String name, int vid, int pid, int bus,
             SparseArray<int[]> configuration, int ffEffectsMax,
-            SparseArray<InputAbsInfo> absInfo) {
+            SparseArray<InputAbsInfo> absInfo, String port) {
         mId = id;
         mThread = new HandlerThread("UinputDeviceHandler");
         mThread.start();
@@ -87,6 +87,11 @@ public class Device {
             args.arg1 = name;
         } else {
             args.arg1 = id + ":" + vid + ":" + pid;
+        }
+        if (port != null) {
+            args.arg2 = port;
+        } else {
+            args.arg2 = "uinput:" + id + ":" + vid + ":" + pid;
         }
 
         mHandler.obtainMessage(MSG_OPEN_UINPUT_DEVICE, args).sendToTarget();
@@ -142,7 +147,7 @@ public class Device {
                 case MSG_OPEN_UINPUT_DEVICE:
                     SomeArgs args = (SomeArgs) msg.obj;
                     mPtr = nativeOpenUinputDevice((String) args.arg1, args.argi1, args.argi2,
-                            args.argi3, args.argi4, args.argi5,
+                            args.argi3, args.argi4, args.argi5, (String) args.arg2,
                             new DeviceCallback());
                     break;
                 case MSG_INJECT_EVENT:

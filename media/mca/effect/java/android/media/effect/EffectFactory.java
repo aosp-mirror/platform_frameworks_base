@@ -486,11 +486,9 @@ public class EffectFactory {
 
     private Effect instantiateEffect(Class effectClass, String name) {
         // Make sure this is an Effect subclass
-        try {
-            effectClass.asSubclass(Effect.class);
-        } catch (ClassCastException e) {
+        if (!Effect.class.isAssignableFrom(effectClass)) {
             throw new IllegalArgumentException("Attempting to allocate effect '" + effectClass
-                + "' which is not a subclass of Effect!", e);
+                + "' which is not a subclass of Effect!");
         }
 
         // Look for the correct constructor

@@ -21,13 +21,14 @@
 
 #include "TouchSpotController.h"
 
+#include <android-base/stringprintf.h>
+#include <input/PrintTools.h>
 #include <log/log.h>
 
-#include <SkBitmap.h>
-#include <SkBlendMode.h>
-#include <SkCanvas.h>
-#include <SkColor.h>
-#include <SkPaint.h>
+#include <mutex>
+
+#define INDENT "  "
+#define INDENT2 "    "
 
 namespace {
 // Time to spend fading out the spot completely.
@@ -57,6 +58,12 @@ void TouchSpotController::Spot::updateSprite(const SpriteIcon* icon, float x, fl
             sprite->setVisible(false);
         }
     }
+}
+
+void TouchSpotController::Spot::dump(std::string& out, const char* prefix) const {
+    out += prefix;
+    base::StringAppendF(&out, "Spot{id=%" PRIx32 ", alpha=%f, scale=%f, pos=[%f, %f]}\n", id, alpha,
+                        scale, x, y);
 }
 
 // --- TouchSpotController ---
@@ -259,6 +266,24 @@ void TouchSpotController::startAnimationLocked() REQUIRES(mLock) {
 
     std::function<bool(nsecs_t)> func = std::bind(&TouchSpotController::doAnimations, this, _1);
     mContext.addAnimationCallback(mDisplayId, func);
+}
+
+void TouchSpotController::dump(std::string& out, const char* prefix) const {
+    using base::StringAppendF;
+    out += prefix;
+    out += "SpotController:\n";
+    out += prefix;
+    StringAppendF(&out, INDENT "DisplayId: %" PRId32 "\n", mDisplayId);
+    std::scoped_lock lock(mLock);
+    out += prefix;
+    StringAppendF(&out, INDENT "Animating: %s\n", toString(mLocked.animating));
+    out += prefix;
+    out += INDENT "Spots:\n";
+    std::string spotPrefix = prefix;
+    spotPrefix += INDENT2;
+    for (const auto& spot : mLocked.displaySpots) {
+        spot->dump(out, spotPrefix.c_str());
+    }
 }
 
 } // namespace android

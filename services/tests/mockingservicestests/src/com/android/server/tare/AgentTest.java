@@ -18,8 +18,11 @@ package com.android.server.tare;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.server.tare.TareTestUtils.assertLedgersEqual;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 
 import android.app.AlarmManager;
@@ -87,12 +90,39 @@ public class AgentTest {
     }
 
     @Test
+    public void testAppRemoval() {
+        final long consumptionLimit = 1_000_000L;
+        final long remainingCakes = consumptionLimit / 2;
+        mScribe.setConsumptionLimitLocked(consumptionLimit);
+        mScribe.adjustRemainingConsumableCakesLocked(remainingCakes - consumptionLimit);
+        assertEquals(remainingCakes, mScribe.getRemainingConsumableCakesLocked());
+
+        final int userId = 0;
+        final String pkgName = "com.test";
+        final Agent agent = new Agent(mIrs, mScribe, mAnalyst);
+        final Ledger ledger = mScribe.getLedgerLocked(userId, pkgName);
+
+        doReturn(consumptionLimit).when(mIrs).getConsumptionLimitLocked();
+        doReturn(consumptionLimit).when(mEconomicPolicy)
+                .getMaxSatiatedBalance(anyInt(), anyString());
+
+        Ledger.Transaction transaction = new Ledger.Transaction(0, 0, 0, null, 5, 10);
+        agent.recordTransactionLocked(userId, pkgName, ledger, transaction, false);
+        assertEquals(5, ledger.getCurrentBalance());
+        assertEquals(remainingCakes - 10, mScribe.getRemainingConsumableCakesLocked());
+
+        agent.onPackageRemovedLocked(userId, pkgName);
+        assertEquals(remainingCakes - 10, mScribe.getRemainingConsumableCakesLocked());
+        assertLedgersEqual(new Ledger(), mScribe.getLedgerLocked(userId, pkgName));
+    }
+
+    @Test
     public void testRecordTransaction_UnderMax() {
         Agent agent = new Agent(mIrs, mScribe, mAnalyst);
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getConsumptionLimitLocked();
-        doReturn(1_000_000L).when(mEconomicPolicy).getMaxSatiatedBalance();
+        doReturn(1_000_000L).when(mEconomicPolicy).getMaxSatiatedBalance(anyInt(), anyString());
 
         Ledger.Transaction transaction = new Ledger.Transaction(0, 0, 0, null, 5, 0);
         agent.recordTransactionLocked(0, "com.test", ledger, transaction, false);
@@ -121,7 +151,7 @@ public class AgentTest {
         Ledger ledger = new Ledger();
 
         doReturn(1000L).when(mIrs).getConsumptionLimitLocked();
-        doReturn(1_000_000L).when(mEconomicPolicy).getMaxSatiatedBalance();
+        doReturn(1_000_000L).when(mEconomicPolicy).getMaxSatiatedBalance(anyInt(), anyString());
 
         Ledger.Transaction transaction = new Ledger.Transaction(0, 0, 0, null, 5, 0);
         agent.recordTransactionLocked(0, "com.test", ledger, transaction, false);
@@ -168,7 +198,7 @@ public class AgentTest {
         Ledger ledger = new Ledger();
 
         doReturn(1_000_000L).when(mIrs).getConsumptionLimitLocked();
-        doReturn(1000L).when(mEconomicPolicy).getMaxSatiatedBalance();
+        doReturn(1000L).when(mEconomicPolicy).getMaxSatiatedBalance(anyInt(), anyString());
 
         Ledger.Transaction transaction = new Ledger.Transaction(0, 0, 0, null, 5, 0);
         agent.recordTransactionLocked(0, "com.test", ledger, transaction, false);
@@ -187,7 +217,7 @@ public class AgentTest {
         assertEquals(1_000, ledger.getCurrentBalance());
 
         // Shouldn't change in normal operation, but adding test case in case it does.
-        doReturn(900L).when(mEconomicPolicy).getMaxSatiatedBalance();
+        doReturn(900L).when(mEconomicPolicy).getMaxSatiatedBalance(anyInt(), anyString());
 
         transaction = new Ledger.Transaction(0, 0, 0, null, 500, 0);
         agent.recordTransactionLocked(0, "com.test", ledger, transaction, false);

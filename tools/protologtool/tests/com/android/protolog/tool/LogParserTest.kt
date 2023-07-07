@@ -84,8 +84,8 @@ class LogParserTest {
 
     @Test
     fun parse_formatting() {
-        config[123] = ViewerConfigParser.ConfigEntry("Test completed successfully: %b %d %% %o" +
-                " %x %e %g %s %f", "ERROR", "WindowManager")
+        config[123] = ViewerConfigParser.ConfigEntry("Test completed successfully: %b %d %%" +
+                " %x %s %f", "ERROR", "WindowManager")
 
         val logBuilder = ProtoLogFileProto.newBuilder()
         val logMessageBuilder = ProtoLogMessage.newBuilder()
@@ -93,21 +93,21 @@ class LogParserTest {
                 .setMessageHash(123)
                 .setElapsedRealtimeNanos(0)
                 .addBooleanParams(true)
-                .addAllSint64Params(listOf(1000, 20000, 300000))
-                .addAllDoubleParams(listOf(0.1, 0.00001, 1000.1))
+                .addAllSint64Params(listOf(1000, 20000))
+                .addDoubleParams(1000.1)
                 .addStrParams("test")
         logBuilder.addLog(logMessageBuilder.build())
 
         parser.parse(buildProtoInput(logBuilder), getConfigDummyStream(), printStream)
 
         assertEquals("${testDate(0)} ERROR WindowManager: Test completed successfully: " +
-                "true 1000 % 47040 493e0 1.000000e-01 1.00000e-05 test 1000.100000\n",
+                "true 1000 % 4e20 test 1000.100000\n",
                 outStream.toString())
     }
 
     @Test
     fun parse_invalidParamsTooMany() {
-        config[123] = ViewerConfigParser.ConfigEntry("Test completed successfully: %b %d %% %o",
+        config[123] = ViewerConfigParser.ConfigEntry("Test completed successfully: %b %d %%",
                 "ERROR", "WindowManager")
 
         val logBuilder = ProtoLogFileProto.newBuilder()
@@ -129,8 +129,8 @@ class LogParserTest {
 
     @Test
     fun parse_invalidParamsNotEnough() {
-        config[123] = ViewerConfigParser.ConfigEntry("Test completed successfully: %b %d %% %o" +
-                " %x %e %g %s %f", "ERROR", "WindowManager")
+        config[123] = ViewerConfigParser.ConfigEntry("Test completed successfully: %b %d %%" +
+                " %x %s %f", "ERROR", "WindowManager")
 
         val logBuilder = ProtoLogFileProto.newBuilder()
         val logMessageBuilder = ProtoLogMessage.newBuilder()

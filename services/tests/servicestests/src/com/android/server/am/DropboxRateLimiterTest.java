@@ -106,6 +106,64 @@ public class DropboxRateLimiterTest {
                 mRateLimiter.shouldRateLimit("tag", "p").droppedCountSinceRateLimitActivated());
     }
 
+    @Test
+    public void testStrictRepeatedLimiting() throws Exception {
+        // The first 6 entries should not be rate limited.
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        // The 7th entry of the same process should be rate limited.
+        assertTrue(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+
+        // After 11 minutes there should be nothing left in the buffer and the same type of entry
+        // should not get rate limited anymore.
+        mClock.setOffsetMillis(11 * 60 * 1000);
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        // The first 6 entries should not be rate limited again.
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+
+        // The 7th entry of the same process should be rate limited.
+        assertTrue(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+
+        // After 11 more minutes there should be nothing left in the buffer and the same type of
+        // entry should not get rate limited anymore.
+        mClock.setOffsetMillis(22 * 60 * 1000);
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+
+        // Repeated crashes after the last reset being rate limited should be restricted faster.
+        assertTrue(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+
+        // We now need to wait 21 minutes for the buffer should be empty again.
+        mClock.setOffsetMillis(43 * 60 * 1000);
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+
+        // After yet another 21 minutes, this time without triggering rate limiting, the strict
+        // limiting should be turnd off.
+        mClock.setOffsetMillis(64 * 60 * 1000);
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+
+        // As rate limiting was not triggered in the last reset, after another 11 minutes the
+        // buffer should still act as normal.
+        mClock.setOffsetMillis(75 * 60 * 1000);
+        // The first 6 entries should not be rate limited.
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        assertFalse(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+        // The 7th entry of the same process should be rate limited.
+        assertTrue(mRateLimiter.shouldRateLimit("tag", "process").shouldRateLimit());
+    }
+
     private static class TestClock implements DropboxRateLimiter.Clock {
         long mOffsetMillis = 0L;
 

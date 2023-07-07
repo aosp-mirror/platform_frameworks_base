@@ -54,6 +54,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ArrayUtils;
+import com.android.security.SecureBox;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
@@ -677,8 +679,7 @@ public class KeySyncTaskTest {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
-        SecretKey applicationKey =
-                addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
 
         mKeySyncTask.run();
 
@@ -709,8 +710,7 @@ public class KeySyncTaskTest {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
-        SecretKey applicationKey =
-                addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
 
         mKeySyncTask.run();
 
@@ -835,7 +835,7 @@ public class KeySyncTaskTest {
         byte[] locallyEncryptedKey = SecureBox.decrypt(
                 TestData.getInsecurePrivateKeyForEndpoint1(),
                 /*sharedSecret=*/ KeySyncUtils.calculateThmKfHash(lockScreenHash),
-                /*header=*/ KeySyncUtils.concat(THM_ENCRYPTED_RECOVERY_KEY_HEADER, vaultParams),
+                /*header=*/ ArrayUtils.concat(THM_ENCRYPTED_RECOVERY_KEY_HEADER, vaultParams),
                 encryptedKey
         );
         return KeySyncUtils.decryptRecoveryKey(lockScreenHash, locallyEncryptedKey);

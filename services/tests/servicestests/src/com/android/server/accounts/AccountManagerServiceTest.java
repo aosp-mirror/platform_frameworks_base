@@ -25,6 +25,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.times;
@@ -38,7 +39,7 @@ import android.accounts.AccountManagerInternal;
 import android.accounts.CantAddAccountActivity;
 import android.accounts.IAccountManagerResponse;
 import android.app.AppOpsManager;
-import android.app.PropertyInvalidatedCache;
+import android.app.BroadcastOptions;
 import android.app.INotificationManager;
 import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
@@ -173,6 +174,16 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         setContext(mockContext);
         mTestInjector = new TestInjector(realTestContext, mockContext, mMockNotificationManager);
         mAms = new AccountManagerService(mTestInjector);
+        doAnswer(invocation -> {
+            final Intent intent = invocation.getArgument(0);
+            final Bundle options = invocation.getArgument(3);
+            if (AccountManager.LOGIN_ACCOUNTS_CHANGED_ACTION.endsWith(intent.getAction())) {
+                final BroadcastOptions bOptions = new BroadcastOptions(options);
+                assertEquals(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT,
+                        bOptions.getDeliveryGroupPolicy());
+            }
+            return null;
+        }).when(mMockContext).sendBroadcastAsUser(any(), any(), any(), any());
     }
 
     @Override
@@ -1329,10 +1340,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         unlockSystemUser();
         try {
             mAms.hasFeatures(
-                null, // response
-                AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
-                new String[] {"feature1", "feature2"}, // features
-                "testPackage"); // opPackageName
+                    null, // response
+                    AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS,
+                    new String[] {"feature1", "feature2"}, // features
+                    0, // userId
+                    "testPackage"); // opPackageName
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
             // IllegalArgumentException is expected.
@@ -1344,10 +1356,11 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         unlockSystemUser();
         try {
             mAms.hasFeatures(
-                mMockAccountManagerResponse, // response
-                null, // account
-                new String[] {"feature1", "feature2"}, // features
-                "testPackage"); // opPackageName
+                    mMockAccountManagerResponse, // response
+                    null, // account
+                    new String[] {"feature1", "feature2"}, // features
+                    0, // userId
+                    "testPackage"); // opPackageName
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
             // IllegalArgumentException is expected.
@@ -1362,6 +1375,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                     mMockAccountManagerResponse, // response
                     AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, // account
                     null, // features
+                    0, // userId
                     "testPackage"); // opPackageName
             fail("IllegalArgumentException expected. But no exception was thrown.");
         } catch (IllegalArgumentException e) {
@@ -1378,6 +1392,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 response, // response
                 AccountManagerServiceTestFixtures.ACCOUNT_ERROR, // account
                 AccountManagerServiceTestFixtures.ACCOUNT_FEATURES, // features
+                0, // userId
                 "testPackage"); // opPackageName
         waitForLatch(latch);
         verify(mMockAccountManagerResponse).onError(
@@ -1394,6 +1409,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
                 response, // response
                 AccountManagerServiceTestFixtures.ACCOUNT_SUCCESS, // account
                 AccountManagerServiceTestFixtures.ACCOUNT_FEATURES, // features
+                0, // userId
                 "testPackage"); // opPackageName
         waitForLatch(latch);
         verify(mMockAccountManagerResponse).onResult(mBundleCaptor.capture());
@@ -3174,7 +3190,7 @@ public class AccountManagerServiceTest extends AndroidTestCase {
         mAccountRemovedBroadcasts = 0;
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mMockContext, atLeast(expectedBroadcasts)).sendBroadcastAsUser(captor.capture(),
-            any(UserHandle.class));
+                any(UserHandle.class), any(), any());
         for (Intent intent : captor.getAllValues()) {
             if (AccountManager.ACTION_VISIBLE_ACCOUNTS_CHANGED.equals(intent.getAction())) {
                 mVisibleAccountsChangedBroadcasts++;
@@ -3507,7 +3523,8 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         @Override
         public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-            return mMockContext.registerReceiver(receiver, filter);
+            return mMockContext.registerReceiver(receiver, filter,
+                    Context.RECEIVER_EXPORTED_UNAUDITED);
         }
 
         @Override
@@ -3530,7 +3547,19 @@ public class AccountManagerServiceTest extends AndroidTestCase {
 
         @Override
         public void sendBroadcastAsUser(Intent intent, UserHandle user) {
-            mMockContext.sendBroadcastAsUser(intent, user);
+            sendBroadcastAsUser(intent, user, null, null);
+        }
+
+        @Override
+        public void sendBroadcastAsUser(Intent intent, UserHandle user, String receiverPermission,
+                Bundle options) {
+            mMockContext.sendBroadcastAsUser(intent, user, receiverPermission, options);
+        }
+
+        @Override
+        public Intent registerReceiver(BroadcastReceiver receiver,
+                IntentFilter filter, String broadcastPermission, Handler scheduler) {
+            return mMockContext.registerReceiver(receiver, filter, broadcastPermission, scheduler);
         }
 
         @Override

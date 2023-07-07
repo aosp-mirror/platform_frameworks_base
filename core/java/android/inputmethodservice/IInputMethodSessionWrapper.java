@@ -36,10 +36,10 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.InputMethodSession;
 
+import com.android.internal.inputmethod.IInputMethodSession;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodSession;
 
 class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         implements HandlerCaller.Callback {
@@ -144,7 +144,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 final SomeArgs args = (SomeArgs) msg.obj;
                 try {
                     mInputMethodSession.invalidateInputInternal((EditorInfo) args.arg1,
-                            (IInputContext) args.arg2, msg.arg1);
+                            (IRemoteInputConnection) args.arg2, msg.arg1);
                 } finally {
                     args.recycle();
                 }
@@ -221,9 +221,10 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     }
 
     @Override
-    public void invalidateInput(EditorInfo editorInfo, IInputContext inputContext,  int sessionId) {
+    public void invalidateInput(EditorInfo editorInfo, IRemoteInputConnection inputConnection,
+            int sessionId) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(
-                DO_INVALIDATE_INPUT, sessionId, editorInfo, inputContext));
+                DO_INVALIDATE_INPUT, sessionId, editorInfo, inputConnection));
     }
 
     @Override

@@ -23,7 +23,7 @@ import android.util.SparseArray;
 
 import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.List;
@@ -295,6 +295,7 @@ public final class DexoptUtils {
      * NOTE: Keep this in sync with the dexopt expectations! Right now that is either "PCL[path]"
      * for a PathClassLoader or "DLC[path]" for a DelegateLastClassLoader.
      */
+    @SuppressWarnings("ReturnValueIgnored")
     /*package*/ static String encodeClassLoader(String classpath, String classLoaderName) {
         classpath.getClass();  // Throw NPE if classpath is null
         String classLoaderDexoptEncoding = classLoaderName;

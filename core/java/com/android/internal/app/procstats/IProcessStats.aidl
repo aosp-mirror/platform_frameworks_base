@@ -21,7 +21,9 @@ import android.os.ParcelFileDescriptor;
 import com.android.internal.app.procstats.ProcessStats;
 
 interface IProcessStats {
+    @EnforcePermission("PACKAGE_USAGE_STATS")
     byte[] getCurrentStats(out List<ParcelFileDescriptor> historic);
+    @EnforcePermission("PACKAGE_USAGE_STATS")
     ParcelFileDescriptor getStatsOverTime(long minTime);
     int getCurrentMemoryState();
 
@@ -43,6 +45,7 @@ interface IProcessStats {
      * @param List of Files of individual commits in protobuf binary or one that is merged from them.
      * @param ProcessStats object that will be used to return the full set of merged stats.
      */
+     @EnforcePermission("PACKAGE_USAGE_STATS")
      long getCommittedStatsMerged(long highWaterMarkMs, int section, boolean doAggregate,
         out List<ParcelFileDescriptor> committedStats, out ProcessStats mergedStats);
 

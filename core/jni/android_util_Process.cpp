@@ -1238,6 +1238,11 @@ jint android_os_Process_killProcessGroup(JNIEnv* env, jobject clazz, jint uid, j
     return killProcessGroup(uid, pid, SIGKILL);
 }
 
+jint android_os_Process_sendSignalToProcessGroup(JNIEnv* env, jobject clazz, jint uid, jint pid,
+                                                 jint signal) {
+    return sendSignalToProcessGroup(uid, pid, signal);
+}
+
 void android_os_Process_removeAllProcessGroups(JNIEnv* env, jobject clazz)
 {
     return removeAllProcessGroups();
@@ -1250,6 +1255,20 @@ static jint android_os_Process_nativePidFdOpen(JNIEnv* env, jobject, jint pid, j
         return -1;
     }
     return fd;
+}
+
+void android_os_Process_freezeCgroupUID(JNIEnv* env, jobject clazz, jint uid, jboolean freeze) {
+    bool success = true;
+
+    if (freeze) {
+        success = SetUserProfiles(uid, {"Frozen"});
+    } else {
+        success = SetUserProfiles(uid, {"Unfrozen"});
+    }
+
+    if (!success) {
+        jniThrowRuntimeException(env, "Could not apply user profile");
+    }
 }
 
 static const JNINativeMethod methods[] = {
@@ -1291,8 +1310,10 @@ static const JNINativeMethod methods[] = {
         //{"setApplicationObject", "(Landroid/os/IBinder;)V",
         //(void*)android_os_Process_setApplicationObject},
         {"killProcessGroup", "(II)I", (void*)android_os_Process_killProcessGroup},
+        {"sendSignalToProcessGroup", "(III)I", (void*)android_os_Process_sendSignalToProcessGroup},
         {"removeAllProcessGroups", "()V", (void*)android_os_Process_removeAllProcessGroups},
         {"nativePidFdOpen", "(II)I", (void*)android_os_Process_nativePidFdOpen},
+        {"freezeCgroupUid", "(IZ)V", (void*)android_os_Process_freezeCgroupUID},
 };
 
 int register_android_os_Process(JNIEnv* env)

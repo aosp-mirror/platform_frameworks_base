@@ -17,6 +17,7 @@
 #ifndef ANDROIDFW_ASSETMANAGER2_H_
 #define ANDROIDFW_ASSETMANAGER2_H_
 
+#include "android-base/function_ref.h"
 #include "android-base/macros.h"
 
 #include <array>
@@ -104,7 +105,7 @@ class AssetManager2 {
   // new resource IDs.
   bool SetApkAssets(std::vector<const ApkAssets*> apk_assets, bool invalidate_caches = true);
 
-  inline const std::vector<const ApkAssets*> GetApkAssets() const {
+  inline const std::vector<const ApkAssets*>& GetApkAssets() const {
     return apk_assets_;
   }
 
@@ -124,8 +125,7 @@ class AssetManager2 {
   uint8_t GetAssignedPackageId(const LoadedPackage* package) const;
 
   // Returns a string representation of the overlayable API of a package.
-  bool GetOverlayablesToString(const android::StringPiece& package_name,
-                               std::string* out) const;
+  bool GetOverlayablesToString(android::StringPiece package_name, std::string* out) const;
 
   const std::unordered_map<std::string, std::string>* GetOverlayableMapForPackage(
       uint32_t package_id) const;
@@ -321,17 +321,8 @@ class AssetManager2 {
   // Creates a new Theme from this AssetManager.
   std::unique_ptr<Theme> NewTheme();
 
-  void ForEachPackage(const std::function<bool(const std::string&, uint8_t)> func,
-                      package_property_t excluded_property_flags = 0U) const {
-    for (const PackageGroup& package_group : package_groups_) {
-      const auto loaded_package = package_group.packages_.front().loaded_package_;
-      if ((loaded_package->GetPropertyFlags() & excluded_property_flags) == 0U
-          && !func(loaded_package->GetPackageName(),
-                   package_group.dynamic_ref_table->mAssignedPackageId)) {
-        return;
-      }
-    }
-  }
+  void ForEachPackage(base::function_ref<bool(const std::string&, uint8_t)> func,
+                      package_property_t excluded_property_flags = 0U) const;
 
   void DumpToLog() const;
 
@@ -572,6 +563,7 @@ class Theme {
   AssetManager2* asset_manager_ = nullptr;
   uint32_t type_spec_flags_ = 0u;
 
+  std::vector<uint32_t> keys_;
   std::vector<Entry> entries_;
 };
 

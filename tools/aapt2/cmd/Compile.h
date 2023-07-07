@@ -17,15 +17,15 @@
 #ifndef AAPT2_COMPILE_H
 #define AAPT2_COMPILE_H
 
-#include <optional>
-
 #include <androidfw/StringPiece.h>
 
+#include <optional>
+
+#include "Command.h"
+#include "ResourceTable.h"
+#include "androidfw/IDiagnostics.h"
 #include "format/Archive.h"
 #include "process/IResourceTableConsumer.h"
-#include "Command.h"
-#include "Diagnostics.h"
-#include "ResourceTable.h"
 
 namespace aapt {
 
@@ -47,8 +47,8 @@ struct CompileOptions {
 /** Parses flags and compiles resources to be used in linking.  */
 class CompileCommand : public Command {
  public:
-  explicit CompileCommand(IDiagnostics* diagnostic) : Command("compile", "c"),
-                                                      diagnostic_(diagnostic) {
+  explicit CompileCommand(android::IDiagnostics* diagnostic)
+      : Command("compile", "c"), diagnostic_(diagnostic) {
     SetDescription("Compiles resources to be linked into an apk.");
     AddRequiredFlag("-o", "Output path", &options_.output_path, Command::kPath);
     AddOptionalFlag("--dir", "Directory to scan for resources", &options_.res_dir, Command::kPath);
@@ -81,7 +81,7 @@ class CompileCommand : public Command {
   int Action(const std::vector<std::string>& args) override;
 
  private:
-  IDiagnostics* diagnostic_;
+  android::IDiagnostics* diagnostic_;
   CompileOptions options_;
   std::optional<std::string> visibility_;
   std::optional<std::string> trace_folder_;

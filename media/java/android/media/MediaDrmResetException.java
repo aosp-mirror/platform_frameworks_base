@@ -21,7 +21,7 @@ package android.media;
  * due to a restart of the mediaserver process.  To continue, the app must
  * release the MediaDrm object, then create and initialize a new one.
  */
-public class MediaDrmResetException extends IllegalStateException {
+public class MediaDrmResetException extends IllegalStateException implements MediaDrmThrowable {
     public MediaDrmResetException(String detailMessage) {
         super(detailMessage);
     }

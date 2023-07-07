@@ -27,6 +27,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -103,12 +104,15 @@ public final class CarrierRestrictionRules implements Parcelable {
     private int mCarrierRestrictionDefault;
     @MultiSimPolicy
     private int mMultiSimPolicy;
+    @TelephonyManager.CarrierRestrictionStatus
+    private int mCarrierRestrictionStatus;
 
     private CarrierRestrictionRules() {
         mAllowedCarriers = new ArrayList<CarrierIdentifier>();
         mExcludedCarriers = new ArrayList<CarrierIdentifier>();
         mCarrierRestrictionDefault = CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED;
         mMultiSimPolicy = MULTISIM_POLICY_NONE;
+        mCarrierRestrictionStatus = TelephonyManager.CARRIER_RESTRICTION_STATUS_UNKNOWN;
     }
 
     private CarrierRestrictionRules(Parcel in) {
@@ -119,6 +123,7 @@ public final class CarrierRestrictionRules implements Parcelable {
         in.readTypedList(mExcludedCarriers, CarrierIdentifier.CREATOR);
         mCarrierRestrictionDefault = in.readInt();
         mMultiSimPolicy = in.readInt();
+        mCarrierRestrictionStatus = in.readInt();
     }
 
     /**
@@ -276,8 +281,8 @@ public final class CarrierRestrictionRules implements Parcelable {
         if (str.length() != pattern.length()) {
             return false;
         }
-        String lowerCaseStr = str.toLowerCase();
-        String lowerCasePattern = pattern.toLowerCase();
+        String lowerCaseStr = str.toLowerCase(Locale.ROOT);
+        String lowerCasePattern = pattern.toLowerCase(Locale.ROOT);
 
         for (int i = 0; i < lowerCasePattern.length(); i++) {
             if (lowerCasePattern.charAt(i) != lowerCaseStr.charAt(i)
@@ -286,6 +291,11 @@ public final class CarrierRestrictionRules implements Parcelable {
             }
         }
         return true;
+    }
+
+    /** @hide */
+    public int getCarrierRestrictionStatus() {
+        return mCarrierRestrictionStatus;
     }
 
     /**
@@ -297,6 +307,7 @@ public final class CarrierRestrictionRules implements Parcelable {
         out.writeTypedList(mExcludedCarriers);
         out.writeInt(mCarrierRestrictionDefault);
         out.writeInt(mMultiSimPolicy);
+        out.writeInt(mCarrierRestrictionStatus);
     }
 
     /**
@@ -396,6 +407,18 @@ public final class CarrierRestrictionRules implements Parcelable {
          */
         public @NonNull Builder setMultiSimPolicy(@MultiSimPolicy int multiSimPolicy) {
             mRules.mMultiSimPolicy = multiSimPolicy;
+            return this;
+        }
+
+        /**
+         * Set the device's carrier restriction status
+         *
+         * @param carrierRestrictionStatus device restriction status
+         * @hide
+         */
+        public @NonNull
+        Builder setCarrierRestrictionStatus(int carrierRestrictionStatus) {
+            mRules.mCarrierRestrictionStatus = carrierRestrictionStatus;
             return this;
         }
     }

@@ -17,15 +17,15 @@ package com.android.systemui.statusbar;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -39,22 +39,18 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.collection.coordinator.RemoteInputCoordinator;
+import com.android.systemui.statusbar.notification.collection.notifcollection.InternalNotifUpdater;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.policy.RemoteInputUriController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -67,57 +63,50 @@ public class SmartReplyControllerTest extends SysuiTestCase {
     private static final int TEST_CHOICE_COUNT = 4;
     private static final int TEST_ACTION_COUNT = 3;
 
-    private Notification mNotification;
     private NotificationEntry mEntry;
     private SmartReplyController mSmartReplyController;
-    private NotificationRemoteInputManager mRemoteInputManager;
 
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
-    @Mock private RemoteInputController.Delegate mDelegate;
-    @Mock private NotificationRemoteInputManager.Callback mCallback;
     @Mock private StatusBarNotification mSbn;
-    @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private IStatusBarService mIStatusBarService;
-    @Mock private StatusBarStateController mStatusBarStateController;
-    @Mock private RemoteInputUriController mRemoteInputUriController;
     @Mock private NotificationClickNotifier mClickNotifier;
+    @Mock private InternalNotifUpdater mInternalNotifUpdater;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectTestDependency(NotificationEntryManager.class,
-                mNotificationEntryManager);
 
         mSmartReplyController = new SmartReplyController(
                 mock(DumpManager.class),
                 mVisibilityProvider,
                 mIStatusBarService,
                 mClickNotifier);
-        mDependency.injectTestDependency(SmartReplyController.class,
-                mSmartReplyController);
-
-        mRemoteInputManager = new NotificationRemoteInputManager(mContext,
-                mock(NotifPipelineFlags.class),
-                mock(NotificationLockscreenUserManager.class),
-                mSmartReplyController,
-                mVisibilityProvider,
-                mNotificationEntryManager,
+        RemoteInputCoordinator remoteInputCoordinator = new RemoteInputCoordinator(
+                mock(DumpManager.class),
                 new RemoteInputNotificationRebuilder(mContext),
-                () -> Optional.of(mock(CentralSurfaces.class)),
-                mStatusBarStateController,
-                Handler.createAsync(Looper.myLooper()),
-                mRemoteInputUriController,
-                mClickNotifier,
-                mock(ActionClickLogger.class),
-                mock(DumpManager.class));
-        mRemoteInputManager.setUpWithCallback(mCallback, mDelegate);
-        mNotification = new Notification.Builder(mContext, "")
+                mock(NotificationRemoteInputManager.class),
+                mock(Handler.class),
+                mSmartReplyController);
+        remoteInputCoordinator.setRemoteInputController(mock(RemoteInputController.class));
+        NotifPipeline notifPipeline = mock(NotifPipeline.class);
+        when(notifPipeline.getInternalNotifUpdater(anyString())).thenReturn(mInternalNotifUpdater);
+        remoteInputCoordinator.attach(notifPipeline);
+
+        Notification notification = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text").build();
-
-        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
-                0, mNotification, new UserHandle(ActivityManager.getCurrentUser()), null, 0);
+        mSbn = new StatusBarNotification(
+                TEST_PACKAGE_NAME,
+                TEST_PACKAGE_NAME,
+                0,
+                null,
+                TEST_UID,
+                0,
+                notification,
+                new UserHandle(ActivityManager.getCurrentUser()),
+                null,
+                0);
         mEntry = new NotificationEntryBuilder()
                 .setSbn(mSbn)
                 .build();
@@ -128,10 +117,9 @@ public class SmartReplyControllerTest extends SysuiTestCase {
         mSmartReplyController.smartReplySent(mEntry, TEST_CHOICE_INDEX, TEST_CHOICE_TEXT,
                 MetricsEvent.LOCATION_UNKNOWN, false /* modifiedBeforeSending */);
 
-        // Sending smart reply should make calls to NotificationEntryManager
-        // to update the notification with reply and spinner.
-        verify(mNotificationEntryManager).updateNotification(
-                argThat(sbn -> sbn.getKey().equals(mSbn.getKey())), isNull());
+        // Sending smart reply should update the notification with reply and spinner.
+        verify(mInternalNotifUpdater).onInternalNotificationUpdate(
+                argThat(sbn -> sbn.getKey().equals(mSbn.getKey())), anyString());
     }
 
     @Test

@@ -31,6 +31,7 @@ class NotifUiAdjustment internal constructor(
     val smartActions: List<Notification.Action>,
     val smartReplies: List<CharSequence>,
     val isConversation: Boolean,
+    val isSnoozeEnabled: Boolean,
     val isMinimized: Boolean,
     val needsRedaction: Boolean,
 ) {
@@ -42,6 +43,7 @@ class NotifUiAdjustment internal constructor(
         ): Boolean = when {
             oldAdjustment === newAdjustment -> false
             oldAdjustment.isConversation != newAdjustment.isConversation -> true
+            oldAdjustment.isSnoozeEnabled != newAdjustment.isSnoozeEnabled -> true
             oldAdjustment.isMinimized != newAdjustment.isMinimized -> true
             oldAdjustment.needsRedaction != newAdjustment.needsRedaction -> true
             areDifferent(oldAdjustment.smartActions, newAdjustment.smartActions) -> true
@@ -57,9 +59,9 @@ class NotifUiAdjustment internal constructor(
             first.size != second.size -> true
             else -> first.asSequence().zip(second.asSequence()).any {
                 (!TextUtils.equals(it.first.title, it.second.title)) ||
-                        (areDifferent(it.first.getIcon(), it.second.getIcon())) ||
-                        (it.first.actionIntent != it.second.actionIntent) ||
-                        (areDifferent(it.first.remoteInputs, it.second.remoteInputs))
+                    (areDifferent(it.first.getIcon(), it.second.getIcon())) ||
+                    (it.first.actionIntent != it.second.actionIntent) ||
+                    (areDifferent(it.first.remoteInputs, it.second.remoteInputs))
             }
         }
 
@@ -78,7 +80,7 @@ class NotifUiAdjustment internal constructor(
             first.size != second.size -> true
             else -> first.asSequence().zip(second.asSequence()).any {
                 (!TextUtils.equals(it.first.label, it.second.label)) ||
-                        (areDifferent(it.first.choices, it.second.choices))
+                    (areDifferent(it.first.choices, it.second.choices))
             }
         }
 

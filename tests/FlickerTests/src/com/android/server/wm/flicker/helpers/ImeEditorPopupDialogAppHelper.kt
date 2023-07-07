@@ -17,44 +17,40 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.helpers.FIND_TIMEOUT
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
-class ImeEditorPopupDialogAppHelper @JvmOverloads constructor(
+class ImeEditorPopupDialogAppHelper
+@JvmOverloads
+constructor(
     instr: Instrumentation,
-    private val rotation: Int,
-    private val imePackageName: String = IME_PACKAGE,
-    launcherName: String = ActivityOptions.EDITOR_POPUP_DIALOG_ACTIVITY_LAUNCHER_NAME,
-    component: FlickerComponentName =
-            ActivityOptions.EDITOR_POPUP_DIALOG_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
+    launcherName: String = ActivityOptions.Ime.EditorPopupDialogActivity.LABEL,
+    component: ComponentNameMatcher =
+        ActivityOptions.Ime.EditorPopupDialogActivity.COMPONENT.toFlickerComponent()
 ) : ImeAppHelper(instr, launcherName, component) {
-    override fun openIME(
-        device: UiDevice,
-        wmHelper: WindowManagerStateHelper?
-    ) {
-        val editText = device.wait(Until.findObject(By.text("focused editText")), FIND_TIMEOUT)
+    override fun openIME(wmHelper: WindowManagerStateHelper) {
+        val editText = uiDevice.wait(Until.findObject(By.text("focused editText")), FIND_TIMEOUT)
 
-        require(editText != null) {
+        requireNotNull(editText) {
             "Text field not found, this usually happens when the device " +
-                    "was left in an unknown state (e.g. in split screen)"
+                "was left in an unknown state (e.g. in split screen)"
         }
         editText.click()
-        waitIMEShown(device, wmHelper)
+        waitIMEShown(wmHelper)
     }
 
     fun dismissDialog(wmHelper: WindowManagerStateHelper) {
-        val dismissButton = uiDevice.wait(
-                Until.findObject(By.text("Dismiss")), FIND_TIMEOUT)
+        val dismissButton = uiDevice.wait(Until.findObject(By.text("Dismiss")), FIND_TIMEOUT)
 
         // Pressing back key to dismiss the dialog
         if (dismissButton != null) {
             dismissButton.click()
-            wmHelper.waitForAppTransitionIdle()
+            wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
         }
     }
 }

@@ -25,6 +25,8 @@ namespace android {
 // keep these values in sync with ExtraAudioDescriptor.java
 #define STANDARD_NONE 0
 #define STANDARD_EDID 1
+#define STANDARD_SADB 2
+#define STANDARD_VSADB 3
 
 static inline status_t audioStandardFromNative(audio_standard_t nStandard, int* standard) {
     status_t result = NO_ERROR;
@@ -34,6 +36,12 @@ static inline status_t audioStandardFromNative(audio_standard_t nStandard, int* 
             break;
         case AUDIO_STANDARD_EDID:
             *standard = STANDARD_EDID;
+            break;
+        case AUDIO_STANDARD_SADB:
+            *standard = STANDARD_SADB;
+            break;
+        case AUDIO_STANDARD_VSADB:
+            *standard = STANDARD_VSADB;
             break;
         default:
             result = BAD_VALUE;

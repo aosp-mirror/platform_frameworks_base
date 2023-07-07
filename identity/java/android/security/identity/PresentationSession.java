@@ -73,7 +73,8 @@ public abstract class PresentationSession {
      * <p>If called, this must be called before any calls to
      * {@link #getCredentialData(String, CredentialDataRequest)}.
      *
-     * <p>The X and Y coordinates of the public part of the key-pair returned by {@link
+     * <p>If mdoc session encryption is used (e.g. if {@link #getEphemeralKeyPair()} has been
+     * called) then the X and Y coordinates of the public part of the key-pair returned by {@link
      * #getEphemeralKeyPair()} must appear somewhere in the bytes of the passed in CBOR.  Each of
      * these coordinates must appear encoded with the most significant bits first and use the exact
      * amount of bits indicated by the key size of the ephemeral keys. For example, if the

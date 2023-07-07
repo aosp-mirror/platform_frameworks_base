@@ -36,6 +36,7 @@ import android.app.PendingIntent;
 import android.app.Person;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -62,7 +63,6 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     private static final int TEST_A11Y_AUTO_DISMISS_TIME = 600;
     private static final int TEST_A11Y_TIMEOUT_TIME = 5_000;
 
-    private AccessibilityManagerWrapper mAccessibilityMgr;
     private HeadsUpManager mHeadsUpManager;
     private boolean mLivesPastNormalTime;
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
@@ -71,11 +71,17 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     @Mock private StatusBarNotification mSbn;
     @Mock private Notification mNotification;
     @Mock private HeadsUpManagerLogger mLogger;
+    @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
 
     private final class TestableHeadsUpManager extends HeadsUpManager {
-        TestableHeadsUpManager(Context context, HeadsUpManagerLogger logger) {
-            super(context, logger);
+        TestableHeadsUpManager(Context context,
+                HeadsUpManagerLogger logger,
+                Handler handler,
+                AccessibilityManagerWrapper accessibilityManagerWrapper,
+                UiEventLogger uiEventLogger) {
+            super(context, logger, handler, accessibilityManagerWrapper, uiEventLogger);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
+            mStickyDisplayTime = TEST_STICKY_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }
     }
@@ -87,14 +93,11 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     @Before
     public void setUp() {
         initMocks(this);
-        mAccessibilityMgr = mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
-        mDependency.injectTestDependency(UiEventLogger.class, mUiEventLoggerFake);
         when(mEntry.getSbn()).thenReturn(mSbn);
         when(mSbn.getNotification()).thenReturn(mNotification);
-        mHeadsUpManager = new TestableHeadsUpManager(mContext, mLogger);
         super.setUp();
-        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
-        mHeadsUpManager.mHandler = mTestHandler;
+        mHeadsUpManager = new TestableHeadsUpManager(mContext, mLogger, mTestHandler,
+                mAccessibilityMgr, mUiEventLoggerFake);
     }
 
     @After
@@ -106,7 +109,55 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     public void testHunRemovedLogging() {
         mAlertEntry.mEntry = mEntry;
         mHeadsUpManager.onAlertEntryRemoved(mAlertEntry);
-        verify(mLogger, times(1)).logNotificationActuallyRemoved(eq(mEntry.getKey()));
+        verify(mLogger, times(1)).logNotificationActuallyRemoved(eq(mEntry));
+    }
+
+    @Test
+    public void testShouldHeadsUpBecomePinned_hasFSI_notUnpinned_true() {
+        // Set up NotifEntry with FSI
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+        notifEntry.getSbn().getNotification().fullScreenIntent = PendingIntent.getActivity(
+                getContext(), 0, new Intent(getContext(), this.getClass()),
+                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+
+        // Add notifEntry to ANM mAlertEntries map and make it NOT unpinned
+        mHeadsUpManager.showNotification(notifEntry);
+        HeadsUpManager.HeadsUpEntry headsUpEntry =
+                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
+        headsUpEntry.wasUnpinned = false;
+
+        assertTrue(mHeadsUpManager.shouldHeadsUpBecomePinned(notifEntry));
+    }
+
+    @Test
+    public void testShouldHeadsUpBecomePinned_wasUnpinned_false() {
+        // Set up NotifEntry with FSI
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+        notifEntry.getSbn().getNotification().fullScreenIntent = PendingIntent.getActivity(
+                getContext(), 0, new Intent(getContext(), this.getClass()),
+                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+
+        // Add notifEntry to ANM mAlertEntries map and make it unpinned
+        mHeadsUpManager.showNotification(notifEntry);
+        HeadsUpManager.HeadsUpEntry headsUpEntry =
+                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
+        headsUpEntry.wasUnpinned = true;
+
+        assertFalse(mHeadsUpManager.shouldHeadsUpBecomePinned(notifEntry));
+    }
+
+    @Test
+    public void testShouldHeadsUpBecomePinned_noFSI_false() {
+        // Set up NotifEntry with no FSI
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+
+        assertFalse(mHeadsUpManager.shouldHeadsUpBecomePinned(notifEntry));
     }
 
     @Test
@@ -125,6 +176,86 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
         assertFalse("Test timed out", mTimedOut);
         assertTrue("Heads up should live long enough", mLivesPastNormalTime);
         assertFalse(mHeadsUpManager.isAlerting(mEntry.getKey()));
+    }
+
+
+    @Test
+    public void testIsSticky_rowPinnedAndExpanded_true() {
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+
+        when(mRow.isPinned()).thenReturn(true);
+        notifEntry.setRow(mRow);
+
+        mHeadsUpManager.showNotification(notifEntry);
+
+        HeadsUpManager.HeadsUpEntry headsUpEntry =
+                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
+        headsUpEntry.setExpanded(true);
+
+        assertTrue(mHeadsUpManager.isSticky(notifEntry.getKey()));
+    }
+
+    @Test
+    public void testIsSticky_remoteInputActive_true() {
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+
+        mHeadsUpManager.showNotification(notifEntry);
+
+        HeadsUpManager.HeadsUpEntry headsUpEntry =
+                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
+
+        headsUpEntry.remoteInputActive = true;
+
+        assertTrue(mHeadsUpManager.isSticky(notifEntry.getKey()));
+    }
+
+    @Test
+    public void testIsSticky_hasFullScreenIntent_true() {
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+
+        mHeadsUpManager.showNotification(notifEntry);
+
+        HeadsUpManager.HeadsUpEntry headsUpEntry =
+                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
+
+        notifEntry.getSbn().getNotification().fullScreenIntent = PendingIntent.getActivity(
+                getContext(), 0, new Intent(getContext(), this.getClass()),
+                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+
+        assertTrue(mHeadsUpManager.isSticky(notifEntry.getKey()));
+    }
+
+    @Test
+    public void testIsSticky_stickyAndNotDemoted_true() {
+        NotificationEntry alertEntry = new NotificationEntryBuilder()
+                .setSbn(createStickySbn(0))
+                .build();
+
+        mHeadsUpManager.showNotification(alertEntry);
+
+        assertTrue(mHeadsUpManager.isSticky(alertEntry.getKey()));
+    }
+
+    @Test
+    public void testIsSticky_false() {
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+
+        mHeadsUpManager.showNotification(notifEntry);
+
+        HeadsUpManager.HeadsUpEntry headsUpEntry =
+                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
+        headsUpEntry.setExpanded(false);
+        headsUpEntry.remoteInputActive = false;
+
+        assertFalse(mHeadsUpManager.isSticky(notifEntry.getKey()));
     }
 
     @Test
@@ -195,7 +326,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     public void testPinEntry_logsPeek() {
         // Needs full screen intent in order to be pinned
         final PendingIntent fullScreenIntent = PendingIntent.getActivity(mContext, 0,
-                new Intent(), PendingIntent.FLAG_MUTABLE);
+                new Intent().setPackage(mContext.getPackageName()), PendingIntent.FLAG_MUTABLE);
 
         HeadsUpManager.HeadsUpEntry entryToPin = mHeadsUpManager.new HeadsUpEntry();
         entryToPin.setEntry(new NotificationEntryBuilder()
@@ -213,5 +344,18 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
         assertEquals(1, mUiEventLoggerFake.numLogs());
         assertEquals(HeadsUpManager.NotificationPeekEvent.NOTIFICATION_PEEK.getId(),
                 mUiEventLoggerFake.eventId(0));
+    }
+
+    @Test
+    public void testSetUserActionMayIndirectlyRemove() {
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+
+        mHeadsUpManager.showNotification(notifEntry);
+        assertFalse(mHeadsUpManager.canRemoveImmediately(notifEntry.getKey()));
+
+        mHeadsUpManager.setUserActionMayIndirectlyRemove(notifEntry);
+        assertTrue(mHeadsUpManager.canRemoveImmediately(notifEntry.getKey()));
     }
 }

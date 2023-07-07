@@ -64,6 +64,7 @@ public final class InputWindowHandle {
             InputConfig.DISABLE_USER_ACTIVITY,
             InputConfig.SPY,
             InputConfig.INTERCEPTS_STYLUS,
+            InputConfig.CLONE,
     })
     public @interface InputConfigFlags {}
 
@@ -158,9 +159,12 @@ public final class InputWindowHandle {
     public Matrix transform;
 
     /**
-     * Whether this window is a clone or the original window.
+     * The input token for the window to which focus should be transferred when this input window
+     * can be successfully focused. If null, this input window will not transfer its focus to
+     * any other window.
      */
-    public boolean isClone;
+    @Nullable
+    public IBinder focusTransferTarget;
 
     private native void nativeDispose();
 
@@ -199,6 +203,7 @@ public final class InputWindowHandle {
             transform = new Matrix();
             transform.set(other.transform);
         }
+        focusTransferTarget = other.focusTransferTarget;
     }
 
     @Override
@@ -210,7 +215,8 @@ public final class InputWindowHandle {
                 .append(", scaleFactor=").append(scaleFactor)
                 .append(", transform=").append(transform)
                 .append(", windowToken=").append(windowToken)
-                .append(", isClone=").append(isClone)
+                .append(", displayId=").append(displayId)
+                .append(", isClone=").append((inputConfig & InputConfig.CLONE) != 0)
                 .toString();
 
     }
@@ -246,6 +252,10 @@ public final class InputWindowHandle {
     public void setWindowToken(IWindow iwindow) {
         windowToken = iwindow.asBinder();
         window = iwindow;
+    }
+
+    public @Nullable IBinder getWindowToken() {
+        return windowToken;
     }
 
     public IWindow getWindow() {

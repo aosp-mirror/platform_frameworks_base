@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="app_name" msgid="2809080280462257271">"Komunikace s operátorem"</string>
     <string name="android_system_label" msgid="2797790869522345065">"Mobilní operátor"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"Mobilní data byla vyčerpána"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Mobilní data byla deaktivována"</string>
@@ -14,4 +14,10 @@
     <string name="ssl_error_warning" msgid="3127935140338254180">"Síť, ke které se pokoušíte připojit, má bezpečnostní problémy."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"Přihlašovací stránka například nemusí patřit zobrazované organizaci."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Přesto pokračovat prostřednictvím prohlížeče"</string>
+    <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Zvýšení výkonu"</string>
+    <string name="performance_boost_notification_title" msgid="3126203390685781861">"Možnosti 5G od vašeho operátora"</string>
+    <string name="performance_boost_notification_detail" msgid="216569851036236346">"Navštivte web operátora %s a podívejte se na možnosti pro vaši aplikaci"</string>
+    <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Teď ne"</string>
+    <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Spravovat"</string>
+    <string name="slice_purchase_app_label" msgid="7170191659233241166">"Kupte si zvýšení výkonu."</string>
 </resources>

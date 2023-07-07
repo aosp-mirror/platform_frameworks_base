@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -105,6 +106,14 @@ public class ResolveInfo implements Parcelable {
      * and {@link IntentFilter#MATCH_ADJUSTMENT_MASK IntentFiler.MATCH_ADJUSTMENT_MASK}.
      */
     public int match;
+
+    /**
+     * UserHandle of originating user for ResolveInfo. This will help caller distinguish cross
+     * profile results from intent resolution.
+     * @hide
+     */
+    @Nullable
+    public UserHandle userHandle;
 
     /**
      * Only set when returned by
@@ -418,6 +427,7 @@ public class ResolveInfo implements Parcelable {
         handleAllWebDataURI = orig.handleAllWebDataURI;
         mAutoResolutionAllowed = orig.mAutoResolutionAllowed;
         isInstantAppAvailable = orig.isInstantAppAvailable;
+        userHandle = orig.userHandle;
     }
 
     public String toString() {
@@ -441,6 +451,10 @@ public class ResolveInfo implements Parcelable {
             sb.append(" targetUserId=");
             sb.append(targetUserId);
         }
+
+        sb.append(" userHandle=");
+        sb.append(userHandle);
+
         sb.append('}');
         return sb.toString();
     }
@@ -483,6 +497,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(handleAllWebDataURI ? 1 : 0);
         dest.writeInt(mAutoResolutionAllowed ? 1 : 0);
         dest.writeInt(isInstantAppAvailable ? 1 : 0);
+        dest.writeInt(userHandle != null ? userHandle.getIdentifier() : UserHandle.USER_CURRENT);
     }
 
     public static final @android.annotation.NonNull Creator<ResolveInfo> CREATOR
@@ -532,6 +547,10 @@ public class ResolveInfo implements Parcelable {
         handleAllWebDataURI = source.readInt() != 0;
         mAutoResolutionAllowed = source.readInt() != 0;
         isInstantAppAvailable = source.readInt() != 0;
+        int userHandleId = source.readInt();
+        if (userHandleId != UserHandle.USER_CURRENT) {
+            userHandle = UserHandle.of(userHandleId);
+        }
     }
 
     public static class DisplayNameComparator

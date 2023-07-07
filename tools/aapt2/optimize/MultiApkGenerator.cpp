@@ -65,7 +65,7 @@ class ContextWrapper : public IAaptContext {
     return context_->GetExternalSymbols();
   }
 
-  IDiagnostics* GetDiagnostics() override {
+  android::IDiagnostics* GetDiagnostics() override {
     if (source_diag_) {
       return source_diag_.get();
     }
@@ -97,8 +97,8 @@ class ContextWrapper : public IAaptContext {
   }
 
   void SetSource(const std::string& source) {
-    source_diag_ =
-        util::make_unique<SourcePathDiagnostics>(Source{source}, context_->GetDiagnostics());
+    source_diag_ = util::make_unique<android::SourcePathDiagnostics>(android::Source{source},
+                                                                     context_->GetDiagnostics());
   }
 
   const std::set<std::string>& GetSplitNameDependencies() override {
@@ -107,18 +107,18 @@ class ContextWrapper : public IAaptContext {
 
  private:
   IAaptContext* context_;
-  std::unique_ptr<SourcePathDiagnostics> source_diag_;
+  std::unique_ptr<android::SourcePathDiagnostics> source_diag_;
 
   int min_sdk_ = -1;
 };
 
 class SignatureFilter : public IPathFilter {
-  bool Keep(const std::string& path) override {
+  bool Keep(std::string_view path) override {
     static std::regex signature_regex(R"regex(^META-INF/.*\.(RSA|DSA|EC|SF)$)regex");
-    if (std::regex_search(path, signature_regex)) {
+    if (std::regex_search(path.begin(), path.end(), signature_regex)) {
       return false;
     }
-    return !(path == "META-INF/MANIFEST.MF");
+    return path != "META-INF/MANIFEST.MF";
   }
 };
 
@@ -143,7 +143,8 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
       if (it == artifacts_to_keep.end()) {
         filtered_artifacts.insert(artifact.name);
         if (context_->IsVerbose()) {
-          context_->GetDiagnostics()->Note(DiagMessage(artifact.name) << "skipping artifact");
+          context_->GetDiagnostics()->Note(android::DiagMessage(artifact.name)
+                                           << "skipping artifact");
         }
         continue;
       } else {
@@ -158,28 +159,29 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
       return false;
     }
 
-    IDiagnostics* diag = wrapped_context.GetDiagnostics();
+    android::IDiagnostics* diag = wrapped_context.GetDiagnostics();
 
     std::unique_ptr<XmlResource> manifest;
     if (!UpdateManifest(artifact, &manifest, diag)) {
-      diag->Error(DiagMessage() << "could not update AndroidManifest.xml for output artifact");
+      diag->Error(android::DiagMessage()
+                  << "could not update AndroidManifest.xml for output artifact");
       return false;
     }
 
     std::string out = options.out_dir;
     if (!file::mkdirs(out)) {
-      diag->Warn(DiagMessage() << "could not create out dir: " << out);
+      diag->Warn(android::DiagMessage() << "could not create out dir: " << out);
     }
     file::AppendPath(&out, artifact.name);
 
     if (context_->IsVerbose()) {
-      diag->Note(DiagMessage() << "Generating split: " << out);
+      diag->Note(android::DiagMessage() << "Generating split: " << out);
     }
 
     std::unique_ptr<IArchiveWriter> writer = CreateZipFileArchiveWriter(diag, out);
 
     if (context_->IsVerbose()) {
-      diag->Note(DiagMessage() << "Writing output: " << out);
+      diag->Note(android::DiagMessage() << "Writing output: " << out);
     }
 
     filters.AddFilter(util::make_unique<SignatureFilter>());
@@ -192,22 +194,25 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
   // Make sure all of the requested artifacts were valid. If there are any kept artifacts left,
   // either the config or the command line was wrong.
   if (!artifacts_to_keep.empty()) {
-    context_->GetDiagnostics()->Error(
-        DiagMessage() << "The configuration and command line to filter artifacts do not match");
+    context_->GetDiagnostics()
+        ->Error(android::DiagMessage()
+                << "The configuration and command line to filter artifacts do not match");
 
-    context_->GetDiagnostics()->Error(DiagMessage() << kept_artifacts.size() << " kept:");
+    context_->GetDiagnostics()->Error(android::DiagMessage() << kept_artifacts.size() << " kept:");
     for (const auto& artifact : kept_artifacts) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "  " << artifact);
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "  " << artifact);
     }
 
-    context_->GetDiagnostics()->Error(DiagMessage() << filtered_artifacts.size() << " filtered:");
+    context_->GetDiagnostics()->Error(android::DiagMessage()
+                                      << filtered_artifacts.size() << " filtered:");
     for (const auto& artifact : filtered_artifacts) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "  " << artifact);
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "  " << artifact);
     }
 
-    context_->GetDiagnostics()->Error(DiagMessage() << artifacts_to_keep.size() << " missing:");
+    context_->GetDiagnostics()->Error(android::DiagMessage()
+                                      << artifacts_to_keep.size() << " missing:");
     for (const auto& artifact : artifacts_to_keep) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "  " << artifact);
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "  " << artifact);
     }
 
     return false;
@@ -250,7 +255,8 @@ std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(IAaptContext* cont
 
   VersionCollapser collapser;
   if (!collapser.Consume(&wrapped_context, table.get())) {
-    context->GetDiagnostics()->Error(DiagMessage() << "Failed to strip versioned resources");
+    context->GetDiagnostics()->Error(android::DiagMessage()
+                                     << "Failed to strip versioned resources");
     return {};
   }
 
@@ -261,7 +267,7 @@ std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(IAaptContext* cont
 
 bool MultiApkGenerator::UpdateManifest(const OutputArtifact& artifact,
                                        std::unique_ptr<XmlResource>* updated_manifest,
-                                       IDiagnostics* diag) {
+                                       android::IDiagnostics* diag) {
   const xml::XmlResource* apk_manifest = apk_->GetManifest();
   if (apk_manifest == nullptr) {
     return false;
@@ -277,20 +283,21 @@ bool MultiApkGenerator::UpdateManifest(const OutputArtifact& artifact,
   }
 
   if (!manifest_el->namespace_uri.empty() || manifest_el->name != "manifest") {
-    diag->Error(DiagMessage(manifest->file.source) << "root tag must be <manifest>");
+    diag->Error(android::DiagMessage(manifest->file.source) << "root tag must be <manifest>");
     return false;
   }
 
   // Retrieve the versionCode attribute.
   auto version_code = manifest_el->FindAttribute(kSchemaAndroid, "versionCode");
   if (!version_code) {
-    diag->Error(DiagMessage(manifest->file.source) << "manifest must have a versionCode attribute");
+    diag->Error(android::DiagMessage(manifest->file.source)
+                << "manifest must have a versionCode attribute");
     return false;
   }
 
   auto version_code_value = ValueCast<BinaryPrimitive>(version_code->compiled_value.get());
   if (!version_code_value) {
-    diag->Error(DiagMessage(manifest->file.source) << "versionCode is invalid");
+    diag->Error(android::DiagMessage(manifest->file.source) << "versionCode is invalid");
     return false;
   }
 
@@ -300,7 +307,7 @@ bool MultiApkGenerator::UpdateManifest(const OutputArtifact& artifact,
   if (version_code_major) {
     version_code_major_value = ValueCast<BinaryPrimitive>(version_code_major->compiled_value.get());
     if (!version_code_major_value) {
-      diag->Error(DiagMessage(manifest->file.source) << "versionCodeMajor is invalid");
+      diag->Error(android::DiagMessage(manifest->file.source) << "versionCodeMajor is invalid");
       return false;
     }
   }
@@ -325,13 +332,15 @@ bool MultiApkGenerator::UpdateManifest(const OutputArtifact& artifact,
       } else {
         // There was no minSdkVersion. This is strange since at this point we should have been
         // through the manifest fixer which sets the default minSdkVersion.
-        diag->Error(DiagMessage(manifest->file.source) << "missing minSdkVersion from <uses-sdk>");
+        diag->Error(android::DiagMessage(manifest->file.source)
+                    << "missing minSdkVersion from <uses-sdk>");
         return false;
       }
     } else {
       // No uses-sdk present. This is strange since at this point we should have been
       // through the manifest fixer which should have added it.
-      diag->Error(DiagMessage(manifest->file.source) << "missing <uses-sdk> from <manifest>");
+      diag->Error(android::DiagMessage(manifest->file.source)
+                  << "missing <uses-sdk> from <manifest>");
       return false;
     }
   }

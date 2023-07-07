@@ -20,12 +20,12 @@
 #include <regex>
 
 #include "Command.h"
-#include "Diagnostics.h"
 #include "Resource.h"
-#include "split/TableSplitter.h"
+#include "androidfw/IDiagnostics.h"
 #include "format/binary/TableFlattener.h"
 #include "format/proto/ProtoSerialize.h"
 #include "link/ManifestFixer.h"
+#include "split/TableSplitter.h"
 #include "trace/TraceBuffer.h"
 
 namespace aapt {
@@ -69,6 +69,7 @@ struct LinkOptions {
   bool no_resource_removal = false;
   bool no_xml_namespaces = false;
   bool do_not_compress_anything = false;
+  bool use_sparse_encoding = false;
   std::unordered_set<std::string> extensions_to_not_compress;
   std::optional<std::regex> regex_to_not_compress;
 
@@ -111,8 +112,7 @@ struct LinkOptions {
 
 class LinkCommand : public Command {
  public:
-  explicit LinkCommand(IDiagnostics* diag) : Command("link", "l"),
-                                             diag_(diag) {
+  explicit LinkCommand(android::IDiagnostics* diag) : Command("link", "l"), diag_(diag) {
     SetDescription("Links resources into an apk.");
     AddRequiredFlag("-o", "Output path.", &options_.output_path, Command::kPath);
     AddRequiredFlag("--manifest", "Path to the Android manifest to build.",
@@ -157,8 +157,11 @@ class LinkCommand : public Command {
             "defaults. Use this only when building runtime resource overlay packages.",
         &options_.no_resource_removal);
     AddOptionalSwitch("--enable-sparse-encoding",
-        "This decreases APK size at the cost of resource retrieval performance.",
-        &options_.table_flattener_options.use_sparse_entries);
+                      "This decreases APK size at the cost of resource retrieval performance.",
+                      &options_.use_sparse_encoding);
+    AddOptionalSwitch("--enable-compact-entries",
+        "This decreases APK size by using compact resource entries for simple data types.",
+        &options_.table_flattener_options.use_compact_entries);
     AddOptionalSwitch("-x", "Legacy flag that specifies to use the package identifier 0x01.",
         &legacy_x_flag_);
     AddOptionalSwitch("-z", "Require localization of strings marked 'suggested'.",
@@ -206,6 +209,13 @@ class LinkCommand : public Command {
     AddOptionalFlag("--compile-sdk-version-name",
         "Version name to inject into the AndroidManifest.xml if none is present.",
         &options_.manifest_fixer_options.compile_sdk_version_codename);
+    AddOptionalSwitch(
+        "--no-compile-sdk-metadata",
+        "Suppresses output of compile SDK-related attributes in AndroidManifest.xml,\n"
+        "including android:compileSdkVersion and platformBuildVersion.",
+        &options_.manifest_fixer_options.no_compile_sdk_metadata);
+    AddOptionalFlagList("--fingerprint-prefix", "Fingerprint prefix to add to install constraints.",
+                        &options_.manifest_fixer_options.fingerprint_prefixes);
     AddOptionalSwitch("--shared-lib", "Generates a shared Android runtime library.",
         &shared_lib_);
     AddOptionalSwitch("--static-lib", "Generate a static Android library.", &static_lib_);
@@ -270,6 +280,8 @@ class LinkCommand : public Command {
         "Changes the name of the target package for overlay. Most useful\n"
             "when used in conjunction with --rename-manifest-package.",
         &options_.manifest_fixer_options.rename_overlay_target_package);
+    AddOptionalFlag("--rename-overlay-category", "Changes the category for the overlay.",
+                    &options_.manifest_fixer_options.rename_overlay_category);
     AddOptionalFlagList("-0", "File suffix not to compress.",
         &options_.extensions_to_not_compress);
     AddOptionalSwitch("--no-compress", "Do not compress any resources.",
@@ -316,7 +328,7 @@ class LinkCommand : public Command {
   int Action(const std::vector<std::string>& args) override;
 
  private:
-  IDiagnostics* diag_;
+  android::IDiagnostics* diag_;
   LinkOptions options_;
 
   std::vector<std::string> overlay_arg_list_;

@@ -1,4 +1,3 @@
-
 package {
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
@@ -42,8 +41,10 @@ java_test_host {
     static_libs: [
         "truth-prebuilt",
         "kxml2-2.3.0",
+        "compile-testing-prebuilt",
         "error_prone_android_framework_lib",
         "error_prone_test_helpers",
+        "google_java_format",
         "hamcrest-library",
         "hamcrest",
         "platform-test-annotations",

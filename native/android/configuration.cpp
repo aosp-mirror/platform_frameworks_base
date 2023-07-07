@@ -234,6 +234,14 @@ void AConfiguration_setLayoutDirection(AConfiguration* config, int32_t value) {
             | ((value<<ResTable_config::SHIFT_LAYOUTDIR)&ResTable_config::MASK_LAYOUTDIR);
 }
 
+int32_t AConfiguration_getGrammaticalGender(AConfiguration* config) {
+    return config->grammaticalInflection;
+}
+
+void AConfiguration_setGrammaticalGender(AConfiguration* config, int32_t value) {
+    config->grammaticalInflection = value & ResTable_config::GRAMMATICAL_INFLECTION_GENDER_MASK;
+}
+
 // ----------------------------------------------------------------------
 
 int32_t AConfiguration_diff(AConfiguration* config1, AConfiguration* config2) {

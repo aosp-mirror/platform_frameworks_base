@@ -16,11 +16,14 @@
 
 package com.android.server.display.color;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +34,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.hardware.display.ColorDisplayManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.Time;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -74,6 +78,7 @@ public class ColorDisplayServiceTest {
 
     private MockTwilightManager mTwilightManager;
     private DisplayTransformManager mDisplayTransformManager;
+    private DisplayManagerInternal mDisplayManagerInternal;
 
     private ColorDisplayService mCds;
     private ColorDisplayService.BinderService mBinderService;
@@ -113,6 +118,10 @@ public class ColorDisplayServiceTest {
         doReturn(true).when(mDisplayTransformManager).needsLinearColorMatrix();
         LocalServices.addService(DisplayTransformManager.class, mDisplayTransformManager);
 
+        mDisplayManagerInternal = Mockito.mock(DisplayManagerInternal.class);
+        LocalServices.removeServiceForTest(DisplayManagerInternal.class);
+        LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternal);
+
         mCds = new ColorDisplayService(mContext);
         mBinderService = mCds.new BinderService();
         LocalServices.addService(ColorDisplayService.ColorDisplayServiceInternal.class,
@@ -139,6 +148,7 @@ public class ColorDisplayServiceTest {
         FakeSettingsProvider.clearSettingsProvider();
 
         LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
+        LocalServices.removeServiceForTest(DisplayManagerInternal.class);
     }
 
     @Test
@@ -1128,6 +1138,15 @@ public class ColorDisplayServiceTest {
         startService();
         verify(mDisplayTransformManager).setColorMode(
                 eq(ColorDisplayManager.COLOR_MODE_BOOSTED), any(), eq(Display.COLOR_MODE_INVALID));
+    }
+
+    @Test
+    public void getColorMode_noAvailableModes_returnsNotSet() {
+        when(mResourcesSpy.getIntArray(R.array.config_availableColorModes))
+                .thenReturn(new int[] {});
+        startService();
+        verify(mDisplayTransformManager, never()).setColorMode(anyInt(), any(), anyInt());
+        assertThat(mBinderService.getColorMode()).isEqualTo(-1);
     }
 
     /**

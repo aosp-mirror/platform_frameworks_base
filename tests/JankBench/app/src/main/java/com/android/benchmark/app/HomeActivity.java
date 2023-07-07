@@ -140,9 +140,9 @@ public class HomeActivity extends AppCompatActivity implements Button.OnClickLis
         handleNextBenchmark();
     }
 
+    @SuppressWarnings("MissingSuperCall") // TODO: Fix me
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
     }
 
     private void handleNextBenchmark() {

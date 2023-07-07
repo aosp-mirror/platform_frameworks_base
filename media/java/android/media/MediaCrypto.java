@@ -75,14 +75,17 @@ public final class MediaCrypto {
     public final native boolean requiresSecureDecoderComponent(@NonNull String mime);
 
     /**
-     * Associate a MediaDrm session with this MediaCrypto instance.  The
-     * MediaDrm session is used to securely load decryption keys for a
-     * crypto scheme.  The crypto keys loaded through the MediaDrm session
+     * Associate a new MediaDrm session with this MediaCrypto instance.
+     *
+     * <p>The MediaDrm session is used to securely load decryption keys for a
+     * crypto scheme. The crypto keys loaded through the MediaDrm session
      * may be selected for use during the decryption operation performed
      * by {@link android.media.MediaCodec#queueSecureInputBuffer} by specifying
-     * their key ids in the {@link android.media.MediaCodec.CryptoInfo#key} field.
-     * @param sessionId the MediaDrm sessionId to associate with this
-     * MediaCrypto instance
+     * their key IDs in the {@link android.media.MediaCodec.CryptoInfo#key} field.
+     *
+     * @param sessionId The MediaDrm sessionId to associate with this MediaCrypto
+     *         instance. The session's scheme must match the scheme UUID used when
+     *         constructing this MediaCrypto instance.
      * @throws MediaCryptoException on failure to set the sessionId
      */
     public final native void setMediaDrmSession(@NonNull byte[] sessionId)

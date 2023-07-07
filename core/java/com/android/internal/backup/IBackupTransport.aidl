@@ -16,6 +16,7 @@
 
 package com.android.internal.backup;
 
+import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.RestoreDescription;
 import android.app.backup.RestoreSet;
 import android.content.Intent;
@@ -400,4 +401,13 @@ oneway interface IBackupTransport {
      * <p>For supported flags see {@link android.app.backup.BackupAgent}.
      */
     void getTransportFlags(in AndroidFuture<int> resultFuture);
+
+    /**
+     * Ask the transport for a {@link IBackupManagerMonitor} instance which will be used by the
+     * framework to report logging events back to the transport.
+     *
+     * Backups requested from outside the framework may pass in a monitor with the request,
+     * however backups initiated by the framework will call this method to retrieve one.
+     */
+    void getBackupManagerMonitor(in AndroidFuture<IBackupManagerMonitor> resultFuture);
 }

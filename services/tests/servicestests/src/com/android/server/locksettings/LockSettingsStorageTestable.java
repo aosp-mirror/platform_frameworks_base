@@ -32,7 +32,7 @@ import java.util.Arrays;
 
 public class LockSettingsStorageTestable extends LockSettingsStorage {
 
-    public File mStorageDir;
+    public final File mStorageDir;
     public PersistentDataBlockManagerInternal mPersistentDataBlockManager;
     private byte[] mPersistentData;
 
@@ -64,52 +64,36 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
     }
 
     @Override
-    String getLockPatternFilename(int userId) {
-        return makeDirs(mStorageDir,
-                super.getLockPatternFilename(userId)).getAbsolutePath();
+    File getChildProfileLockFile(int userId) {
+        return remapToStorageDir(super.getChildProfileLockFile(userId));
     }
 
     @Override
-    String getLockPasswordFilename(int userId) {
-        return makeDirs(mStorageDir,
-                super.getLockPasswordFilename(userId)).getAbsolutePath();
+    File getRebootEscrowServerBlobFile() {
+        return remapToStorageDir(super.getRebootEscrowServerBlobFile());
     }
 
     @Override
-    String getChildProfileLockFile(int userId) {
-        return makeDirs(mStorageDir,
-                super.getChildProfileLockFile(userId)).getAbsolutePath();
-    }
-
-    @Override
-    String getRebootEscrowServerBlob() {
-        return makeDirs(mStorageDir, super.getRebootEscrowServerBlob()).getAbsolutePath();
-    }
-
-    @Override
-    String getRebootEscrowFile(int userId) {
-        return makeDirs(mStorageDir, super.getRebootEscrowFile(userId)).getAbsolutePath();
+    File getRebootEscrowFile(int userId) {
+        return remapToStorageDir(super.getRebootEscrowFile(userId));
     }
 
     @Override
     protected File getSyntheticPasswordDirectoryForUser(int userId) {
-        return makeDirs(mStorageDir, super.getSyntheticPasswordDirectoryForUser(
-                userId).getAbsolutePath());
+        return remapToStorageDir(super.getSyntheticPasswordDirectoryForUser(userId));
     }
 
     @Override
     PersistentDataBlockManagerInternal getPersistentDataBlockManager() {
         return mPersistentDataBlockManager;
     }
-
-    private File makeDirs(File baseDir, String filePath) {
-        File path = new File(filePath);
-        if (path.getParent() == null) {
-            return new File(baseDir, filePath);
-        } else {
-            File mappedDir = new File(baseDir, path.getParent());
-            mappedDir.mkdirs();
-            return new File(mappedDir, path.getName());
-        }
+    @Override
+    public boolean isAutoPinConfirmSettingEnabled(int userId) {
+        return true;
+    }
+    private File remapToStorageDir(File origPath) {
+        File mappedPath = new File(mStorageDir, origPath.toString());
+        mappedPath.getParentFile().mkdirs();
+        return mappedPath;
     }
 }

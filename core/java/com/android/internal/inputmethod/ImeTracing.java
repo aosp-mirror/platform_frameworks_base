@@ -17,16 +17,12 @@
 package com.android.internal.inputmethod;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.ActivityThread;
-import android.content.Context;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
-
-import com.android.internal.view.IInputMethodManager;
+import android.view.inputmethod.InputMethodManagerGlobal;
 
 import java.io.PrintWriter;
 
@@ -48,15 +44,11 @@ public abstract class ImeTracing {
 
     private static ImeTracing sInstance;
     static boolean sEnabled = false;
-    IInputMethodManager mService;
+
+    private final boolean mIsAvailable = InputMethodManagerGlobal.isImeTraceAvailable();
 
     protected boolean mDumpInProgress;
     protected final Object mDumpInProgressLock = new Object();
-
-    ImeTracing() throws ServiceNotFoundException {
-        mService = IInputMethodManager.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE));
-    }
 
     /**
      * Returns an instance of {@link ImeTracingServerImpl} when called from a server side class
@@ -67,11 +59,10 @@ public abstract class ImeTracing {
      */
     public static ImeTracing getInstance() {
         if (sInstance == null) {
-            try {
-                sInstance = isSystemProcess()
-                        ? new ImeTracingServerImpl() : new ImeTracingClientImpl();
-            } catch (RemoteException | ServiceNotFoundException e) {
-                Log.e(TAG, "Exception while creating ImeTracing instance", e);
+            if (isSystemProcess()) {
+                sInstance = new ImeTracingServerImpl();
+            } else {
+                sInstance = new ImeTracingClientImpl();
             }
         }
         return sInstance;
@@ -86,30 +77,25 @@ public abstract class ImeTracing {
      * and {@see #IME_TRACING_FROM_IMS}
      * @param where
      */
-    public void sendToService(byte[] protoDump, int source, String where) throws RemoteException {
-        mService.startProtoDump(protoDump, source, where);
+    public void sendToService(byte[] protoDump, int source, String where) {
+        InputMethodManagerGlobal.startProtoDump(protoDump, source, where,
+                e -> Log.e(TAG, "Exception while sending ime-related dump to server", e));
     }
 
     /**
-     * Calling {@link IInputMethodManager#startImeTrace()}} to capture IME trace.
+     * Start IME trace.
      */
+    @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     public final void startImeTrace() {
-        try {
-            mService.startImeTrace();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not start ime trace." + e);
-        }
+        InputMethodManagerGlobal.startImeTrace(e -> Log.e(TAG, "Could not start ime trace.", e));
     }
 
     /**
-     * Calling {@link IInputMethodManager#stopImeTrace()} to stop IME trace.
+     * Stop IME trace.
      */
+    @RequiresPermission(android.Manifest.permission.CONTROL_UI_TRACING)
     public final void stopImeTrace() {
-        try {
-            mService.stopImeTrace();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not stop ime trace." + e);
-        }
+        InputMethodManagerGlobal.stopImeTrace(e -> Log.e(TAG, "Could not stop ime trace.", e));
     }
 
     /**
@@ -190,7 +176,7 @@ public abstract class ImeTracing {
      * @return {@code true} if tracing is available, {@code false} otherwise.
      */
     public boolean isAvailable() {
-        return mService != null;
+        return mIsAvailable;
     }
 
     /**

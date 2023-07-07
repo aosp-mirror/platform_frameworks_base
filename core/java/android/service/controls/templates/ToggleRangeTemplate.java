@@ -43,7 +43,7 @@ public final class ToggleRangeTemplate extends ControlTemplate {
      */
     ToggleRangeTemplate(@NonNull Bundle b) {
         super(b);
-        mControlButton = b.getParcelable(KEY_BUTTON);
+        mControlButton = b.getParcelable(KEY_BUTTON, android.service.controls.templates.ControlButton.class);
         mRangeTemplate = new RangeTemplate(b.getBundle(KEY_RANGE));
     }
 

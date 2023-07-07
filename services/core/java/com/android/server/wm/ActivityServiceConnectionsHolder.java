@@ -16,13 +16,13 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityRecord.State.PAUSING;
-import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 
 import android.util.ArraySet;
 import android.util.Slog;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -38,8 +38,6 @@ import java.util.function.Consumer;
  */
 public class ActivityServiceConnectionsHolder<T> {
 
-    private final ActivityTaskManagerService mService;
-
     /** The activity the owns this service connection object. */
     private final ActivityRecord mActivity;
 
@@ -49,19 +47,19 @@ public class ActivityServiceConnectionsHolder<T> {
      * on the WM side since we don't perform operations on the object. Mainly here for communication
      * and booking with the AM side.
      */
+    @GuardedBy("mActivity")
     private ArraySet<T> mConnections;
 
     /** Whether all connections of {@link #mActivity} are being removed. */
     private volatile boolean mIsDisconnecting;
 
-    ActivityServiceConnectionsHolder(ActivityTaskManagerService service, ActivityRecord activity) {
-        mService = service;
+    ActivityServiceConnectionsHolder(ActivityRecord activity) {
         mActivity = activity;
     }
 
     /** Adds a connection record that the activity has bound to a specific service. */
     public void addConnection(T c) {
-        synchronized (mService.mGlobalLock) {
+        synchronized (mActivity) {
             if (mIsDisconnecting) {
                 // This is unlikely to happen because the caller should create a new holder.
                 if (DEBUG_CLEANUP) {
@@ -79,7 +77,7 @@ public class ActivityServiceConnectionsHolder<T> {
 
     /** Removed a connection record between the activity and a specific service. */
     public void removeConnection(T c) {
-        synchronized (mService.mGlobalLock) {
+        synchronized (mActivity) {
             if (mConnections == null) {
                 return;
             }
@@ -90,26 +88,26 @@ public class ActivityServiceConnectionsHolder<T> {
         }
     }
 
+    /** @see android.content.Context#BIND_ADJUST_WITH_ACTIVITY */
     public boolean isActivityVisible() {
-        synchronized (mService.mGlobalLock) {
-            return mActivity.mVisibleRequested || mActivity.isState(RESUMED, PAUSING);
-        }
+        return mActivity.mVisibleForServiceConnection;
     }
 
     public int getActivityPid() {
-        synchronized (mService.mGlobalLock) {
-            return mActivity.hasProcess() ? mActivity.app.getPid() : -1;
-        }
+        final WindowProcessController wpc = mActivity.app;
+        return wpc != null ? wpc.getPid() : -1;
     }
 
     public void forEachConnection(Consumer<T> consumer) {
-        synchronized (mService.mGlobalLock) {
+        final ArraySet<T> connections;
+        synchronized (mActivity) {
             if (mConnections == null || mConnections.isEmpty()) {
                 return;
             }
-            for (int i = mConnections.size() - 1; i >= 0; i--) {
-                consumer.accept(mConnections.valueAt(i));
-            }
+            connections = new ArraySet<>(mConnections);
+        }
+        for (int i = connections.size() - 1; i >= 0; i--) {
+            consumer.accept(connections.valueAt(i));
         }
     }
 
@@ -118,6 +116,7 @@ public class ActivityServiceConnectionsHolder<T> {
      * general, this method is used to clean up if the activity didn't unbind services before it
      * is destroyed.
      */
+    @GuardedBy("mActivity")
     void disconnectActivityFromServices() {
         if (mConnections == null || mConnections.isEmpty() || mIsDisconnecting) {
             return;
@@ -130,16 +129,14 @@ public class ActivityServiceConnectionsHolder<T> {
         // still in the message queue, so keep the reference of {@link #mConnections} to make sure
         // the connection list is up-to-date.
         mIsDisconnecting = true;
-        mService.mH.post(() -> {
-            mService.mAmInternal.disconnectActivityFromServices(this);
+        mActivity.mAtmService.mH.post(() -> {
+            mActivity.mAtmService.mAmInternal.disconnectActivityFromServices(this);
             mIsDisconnecting = false;
         });
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        synchronized (mService.mGlobalLock) {
-            pw.println(prefix + "activity=" + mActivity);
-        }
+        pw.println(prefix + "activity=" + mActivity);
     }
 
     /** Used by {@link ActivityRecord#dump}. */

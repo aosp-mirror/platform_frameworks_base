@@ -30,6 +30,18 @@
             <item res='@*android:color/profile_badge_2' />
         </badge-colors>
         <default-restrictions no_remove_user='true' no_bluetooth='true' />
+        <user-properties
+            showInLauncher='2020'
+            startWithParent='false'
+            useParentsContacts='false'
+            crossProfileIntentFilterAccessControl='20'
+            crossProfileIntentResolutionStrategy='0'
+            mediaSharedWithParent='true'
+            credentialShareableWithParent='false'
+            showInSettings='23'
+            inheritDevicePolicy='450'
+            deleteAppWithParent='false'
+        />
     </profile-type>
     <profile-type name='custom.test.1' max-allowed-per-parent='14' />
 

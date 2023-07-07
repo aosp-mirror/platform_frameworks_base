@@ -91,6 +91,21 @@ public abstract class NotificationAssistantService extends NotificationListenerS
             = "android.service.notification.NotificationAssistantService";
 
     /**
+     * Activity Action: Show notification assistant detail setting page in NAS app.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_ASSISTANT_DETAIL_SETTINGS =
+            "android.service.notification.action.NOTIFICATION_ASSISTANT_DETAIL_SETTINGS";
+
+
+    /**
      * Data type: int, the feedback rating score provided by user. The score can be any integer
      *            value depends on the experimental and feedback UX design.
      */
@@ -278,7 +293,10 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * their notifications the assistant can modify.
      * <p> Query {@link NotificationManager#getAllowedAssistantAdjustments()} to see what
      * {@link Adjustment adjustments} you are currently allowed to make.</p>
+     *
+     * @deprecated changing allowed adjustments is no longer supported.
      */
+    @Deprecated
     public void onAllowedAdjustmentsChanged() {
     }
 

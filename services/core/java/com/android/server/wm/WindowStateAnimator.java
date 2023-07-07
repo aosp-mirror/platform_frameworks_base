@@ -32,7 +32,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
-import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
@@ -151,17 +150,6 @@ class WindowStateAnimator {
 
     int mAttrType;
 
-    /**
-     * Handles surface changes synchronized to after the client has drawn the surface. This
-     * transaction is currently used to reparent the old surface children to the new surface once
-     * the client has completed drawing to the new surface.
-     * This transaction is also used to merge transactions parceled in by the client. The client
-     * uses the transaction to update the relative z of its children from the old parent surface
-     * to the new parent surface once window manager reparents its children.
-     */
-    private final SurfaceControl.Transaction mPostDrawTransaction =
-            new SurfaceControl.Transaction();
-
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mWmService;
 
@@ -217,8 +205,7 @@ class WindowStateAnimator {
         }
     }
 
-    boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction,
-            boolean forceApplyNow) {
+    boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction) {
         final boolean startingWindow =
                 mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
         if (startingWindow) {
@@ -240,14 +227,7 @@ class WindowStateAnimator {
         }
 
         if (postDrawTransaction != null) {
-            // If there is no surface, the last draw was for the previous surface. We don't want to
-            // wait until the new surface is shown and instead just apply the transaction right
-            // away.
-            if (mLastHidden && mDrawState != NO_SURFACE && !forceApplyNow) {
-                mPostDrawTransaction.merge(postDrawTransaction);
-            } else {
-                mWin.getSyncTransaction().merge(postDrawTransaction);
-            }
+            mWin.getSyncTransaction().merge(postDrawTransaction);
             layoutNeeded = true;
         }
 
@@ -329,8 +309,8 @@ class WindowStateAnimator {
 
             mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), format,
                     flags, this, attrs.type);
-            mSurfaceController.setColorSpaceAgnostic((attrs.privateFlags
-                    & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
+            mSurfaceController.setColorSpaceAgnostic(w.getPendingTransaction(),
+                    (attrs.privateFlags & LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
 
             w.setHasSurface(true);
             // The surface instance is changed. Make sure the input info can be applied to the
@@ -374,13 +354,6 @@ class WindowStateAnimator {
     }
 
     void destroySurfaceLocked(SurfaceControl.Transaction t) {
-        final ActivityRecord activity = mWin.mActivityRecord;
-        if (activity != null) {
-            if (mWin == activity.mStartingWindow) {
-                activity.startingDisplayed = false;
-            }
-        }
-
         if (mSurfaceController == null) {
             return;
         }
@@ -435,10 +408,6 @@ class WindowStateAnimator {
         mShownAlpha = mAlpha;
     }
 
-    private boolean isInBlastSync() {
-        return mService.useBLASTSync() && mWin.useBLASTSync();
-    }
-
     void prepareSurfaceLocked(SurfaceControl.Transaction t) {
         final WindowState w = mWin;
         if (!hasSurface()) {
@@ -454,7 +423,7 @@ class WindowStateAnimator {
 
         computeShownFrameLocked();
 
-        if (w.isParentWindowHidden() || !w.isOnScreen()) {
+        if (!w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");
             mWallpaperControllerLocked.hideWallpapers(w);
 
@@ -479,29 +448,21 @@ class WindowStateAnimator {
 
             if (prepared && mDrawState == HAS_DRAWN) {
                 if (mLastHidden) {
-                    if (showSurfaceRobustlyLocked(t)) {
-                        mAnimator.requestRemovalOfReplacedWindows(w);
-                        mLastHidden = false;
-                        final DisplayContent displayContent = w.getDisplayContent();
-                        if (!displayContent.getLastHasContent()) {
-                            // This draw means the difference between unique content and mirroring.
-                            // Run another pass through performLayout to set mHasContent in the
-                            // LogicalDisplay.
-                            displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
-                            if (DEBUG_LAYOUT_REPEATS) {
-                                mService.mWindowPlacerLocked.debugLayoutRepeats(
-                                        "showSurfaceRobustlyLocked " + w,
-                                        displayContent.pendingLayoutChanges);
-                            }
+                    mSurfaceController.showRobustly(t);
+                    mLastHidden = false;
+                    final DisplayContent displayContent = w.getDisplayContent();
+                    if (!displayContent.getLastHasContent()) {
+                        // This draw means the difference between unique content and mirroring.
+                        // Run another pass through performLayout to set mHasContent in the
+                        // LogicalDisplay.
+                        displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
+                        if (DEBUG_LAYOUT_REPEATS) {
+                            mService.mWindowPlacerLocked.debugLayoutRepeats(
+                                    "showSurfaceRobustlyLocked " + w,
+                                    displayContent.pendingLayoutChanges);
                         }
-                    } else {
-                        w.setOrientationChanging(false);
                     }
                 }
-            }
-        } else {
-            if (mWin.isAnimating(TRANSITION | PARENTS)) {
-                ProtoLog.v(WM_DEBUG_ANIM, "prepareSurface: No changes in animation for %s", this);
             }
         }
 
@@ -538,34 +499,10 @@ class WindowStateAnimator {
         if (mSurfaceController == null) {
             return;
         }
-        mSurfaceController.setColorSpaceAgnostic(agnostic);
-    }
-
-    /**
-     * Have the surface flinger show a surface, robustly dealing with
-     * error conditions.  In particular, if there is not enough memory
-     * to show the surface, then we will try to get rid of other surfaces
-     * in order to succeed.
-     *
-     * @return Returns true if the surface was successfully shown.
-     */
-    private boolean showSurfaceRobustlyLocked(SurfaceControl.Transaction t) {
-        boolean shown = mSurfaceController.showRobustly(t);
-        if (!shown)
-            return false;
-
-        t.merge(mPostDrawTransaction);
-        return true;
+        mSurfaceController.setColorSpaceAgnostic(mWin.getPendingTransaction(), agnostic);
     }
 
     void applyEnterAnimationLocked() {
-        // If we are the new part of a window replacement transition and we have requested
-        // not to animate, we instead want to make it seamless, so we don't want to apply
-        // an enter transition.
-        if (mWin.mSkipEnterAnimationForSeamlessReplacement) {
-            return;
-        }
-
         final int transit;
         if (mEnterAnimationPending) {
             mEnterAnimationPending = false;
@@ -602,11 +539,17 @@ class WindowStateAnimator {
             return true;
         }
 
-        final boolean isImeWindow = mWin.mAttrs.type == TYPE_INPUT_METHOD;
-        if (isEntrance && isImeWindow) {
+        if (mWin.mAttrs.type == TYPE_INPUT_METHOD) {
             mWin.getDisplayContent().adjustForImeIfNeeded();
-            mWin.setDisplayLayoutNeeded();
-            mService.mWindowPlacerLocked.requestTraversal();
+            if (isEntrance) {
+                mWin.setDisplayLayoutNeeded();
+                mService.mWindowPlacerLocked.requestTraversal();
+            }
+        }
+
+        if (mWin.mControllableInsetProvider != null) {
+            // All our animations should be driven by the insets control target.
+            return false;
         }
 
         // Only apply an animation if the display isn't frozen.  If it is
@@ -654,12 +597,8 @@ class WindowStateAnimator {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
                 mAnimationIsEntrance = isEntrance;
             }
-        } else if (!isImeWindow) {
+        } else {
             mWin.cancelAnimation();
-        }
-
-        if (!isEntrance && isImeWindow) {
-            mWin.getDisplayContent().adjustForImeIfNeeded();
         }
 
         return mWin.isAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION);
@@ -719,10 +658,6 @@ class WindowStateAnimator {
     }
 
     void destroySurface(SurfaceControl.Transaction t) {
-        // Since the SurfaceControl is getting torn down, it's safe to just clean up any
-        // pending transactions that were in mPostDrawTransaction, as well.
-        t.merge(mPostDrawTransaction);
-
         try {
             if (mSurfaceController != null) {
                 mSurfaceController.destroy(t);

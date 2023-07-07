@@ -245,6 +245,7 @@ final class RemoteAugmentedAutofillService
         });
     }
 
+    @SuppressWarnings("ReturnValueIgnored")
     private void maybeRequestShowInlineSuggestions(int sessionId,
             @Nullable InlineSuggestionsRequest request,
             @Nullable List<Dataset> inlineSuggestionsData, @Nullable Bundle clientState,
@@ -354,6 +355,11 @@ final class RemoteAugmentedAutofillService
                             @Override
                             public void onError() {
                                 onErrorCallback.run();
+                            }
+
+                            @Override
+                            public void onInflate() {
+                                /* nothing */
                             }
                         });
 

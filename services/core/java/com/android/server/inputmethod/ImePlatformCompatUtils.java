@@ -39,7 +39,7 @@ final class ImePlatformCompatUtils {
      *
      * @param imeUid The uid of the IME application
      */
-    public boolean shouldFinishInputWithReportToIme(int imeUid) {
+    public boolean shouldUseSetInteractiveProtocol(int imeUid) {
         return isChangeEnabledByUid(FINISH_INPUT_NO_FALLBACK_CONNECTION, imeUid);
     }
 

@@ -32,8 +32,6 @@ interface ActivityThreadInternal {
 
     boolean isInDensityCompatMode();
 
-    boolean isCachedProcessState();
-
     Application getApplication();
 
     ArrayList<ComponentCallbacks2> collectComponentCallbacks(boolean includeUiContexts);

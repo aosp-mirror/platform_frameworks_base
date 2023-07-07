@@ -18,6 +18,7 @@ package com.android.server.job.restrictions;
 
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
+import android.app.job.JobScheduler;
 import android.os.PowerManager;
 import android.os.PowerManager.OnThermalStatusChangedListener;
 import android.util.IndentingPrintWriter;
@@ -42,6 +43,7 @@ public class ThermalStatusRestriction extends JobRestriction {
 
     public ThermalStatusRestriction(JobSchedulerService service) {
         super(service, JobParameters.STOP_REASON_DEVICE_STATE,
+                JobScheduler.PENDING_JOB_REASON_DEVICE_STATE,
                 JobParameters.INTERNAL_STOP_REASON_DEVICE_THERMAL);
     }
 
@@ -73,9 +75,10 @@ public class ThermalStatusRestriction extends JobRestriction {
                                 // bucket (thus resulting in us beginning to enforce the tightest
                                 // restrictions).
                                 || (mThermalStatus < UPPER_THRESHOLD && status > UPPER_THRESHOLD);
+                final boolean increased = mThermalStatus < status;
                 mThermalStatus = status;
                 if (significantChange) {
-                    mService.onControllerStateChanged(null);
+                    mService.onRestrictionStateChanged(ThermalStatusRestriction.this, increased);
                 }
             }
         });
@@ -88,17 +91,35 @@ public class ThermalStatusRestriction extends JobRestriction {
         }
         final int priority = job.getEffectivePriority();
         if (mThermalStatus >= HIGHER_PRIORITY_THRESHOLD) {
-            // For moderate throttling, only let expedited jobs and high priority regular jobs that
-            // are already running run.
-            return !job.shouldTreatAsExpeditedJob()
-                    && !(priority == JobInfo.PRIORITY_HIGH
-                    && mService.isCurrentlyRunningLocked(job));
+            // For moderate throttling:
+            // Let all user-initiated jobs run.
+            // Only let expedited jobs run if:
+            // 1. They haven't previously run
+            // 2. They're already running and aren't yet in overtime
+            // Only let high priority jobs run if:
+            //   They are already running and aren't yet in overtime
+            // Don't let any other job run.
+            if (job.shouldTreatAsUserInitiatedJob()) {
+                return false;
+            }
+            if (job.shouldTreatAsExpeditedJob()) {
+                return job.getNumPreviousAttempts() > 0
+                        || (mService.isCurrentlyRunningLocked(job)
+                                && mService.isJobInOvertimeLocked(job));
+            }
+            if (priority == JobInfo.PRIORITY_HIGH) {
+                return !mService.isCurrentlyRunningLocked(job)
+                        || mService.isJobInOvertimeLocked(job);
+            }
+            return true;
         }
         if (mThermalStatus >= LOW_PRIORITY_THRESHOLD) {
             // For light throttling, throttle all min priority jobs and all low priority jobs that
-            // aren't already running.
-            return (priority == JobInfo.PRIORITY_LOW && !mService.isCurrentlyRunningLocked(job))
-                    || priority == JobInfo.PRIORITY_MIN;
+            // aren't already running or have been running for long enough.
+            return priority == JobInfo.PRIORITY_MIN
+                    || (priority == JobInfo.PRIORITY_LOW
+                        && (!mService.isCurrentlyRunningLocked(job)
+                            || mService.isJobInOvertimeLocked(job)));
         }
         return false;
     }

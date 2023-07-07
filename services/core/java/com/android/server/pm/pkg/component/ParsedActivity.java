@@ -96,4 +96,10 @@ public interface ParsedActivity extends ParsedMainComponent {
     ActivityInfo.WindowLayout getWindowLayout();
 
     boolean isSupportsSizeChanges();
+
+    /**
+     * Gets the required category of the display this activity is supposed to run on.
+     */
+    @Nullable
+    String getRequiredDisplayCategory();
 }

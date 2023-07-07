@@ -120,6 +120,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="ColorBitmapActivity"
+                  android:label="Bitmaps/BitmapColors"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="PathOffsetActivity"
              android:label="Path/Offset"
              android:exported="true">
@@ -429,6 +438,15 @@
 
         <activity android:name="VideoViewCaptureActivity"
              android:label="SurfaceView/GetBitmap with Video source"
+             android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name="SurfaceViewAlphaActivity"
+             android:label="SurfaceView/SurfaceView with Alpha"
              android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -1127,6 +1145,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="HardwareBufferRendererActivity"
+            android:label="HardwareRenderer/HardwareBufferRenderer"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="MyLittleTextureView"
              android:label="HardwareRenderer/MyLittleTextureView"
              android:screenOrientation="fullSensor"
@@ -1137,5 +1164,21 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="MeshActivity"
+                  android:label="Mesh/SimpleMesh"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="MeshLargeActivity"
+                             android:label="Mesh/LargeMesh"
+                             android:exported="true">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="com.android.test.hwui.TEST"/>
+        </intent-filter>
+    </activity>
     </application>
 </manifest>

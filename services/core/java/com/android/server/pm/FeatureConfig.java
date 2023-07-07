@@ -19,7 +19,7 @@ package com.android.server.pm;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 @VisibleForTesting(visibility = PRIVATE)

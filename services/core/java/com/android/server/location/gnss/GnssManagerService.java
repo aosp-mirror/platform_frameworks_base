@@ -83,8 +83,7 @@ public class GnssManagerService {
         mGnssMetrics = new GnssMetrics(mContext, IBatteryStats.Stub.asInterface(
                 ServiceManager.getService(BatteryStats.SERVICE_NAME)), mGnssNative);
 
-        mGnssLocationProvider = new GnssLocationProvider(mContext, injector, mGnssNative,
-                mGnssMetrics);
+        mGnssLocationProvider = new GnssLocationProvider(mContext, mGnssNative, mGnssMetrics);
         mGnssStatusProvider = new GnssStatusProvider(injector, mGnssNative);
         mGnssNmeaProvider = new GnssNmeaProvider(injector, mGnssNative);
         mGnssMeasurementsProvider = new GnssMeasurementsProvider(injector, mGnssNative);
@@ -296,6 +295,7 @@ public class GnssManagerService {
         }
 
         ipw.println("Capabilities: " + mGnssNative.getCapabilities());
+        ipw.println("GNSS Hardware Model Name: " + getGnssHardwareModelName());
 
         if (mGnssStatusProvider.isSupported()) {
             ipw.println("Status Provider:");

@@ -142,7 +142,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
-            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory));
+            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory, 0, 0));
     TreeInfo info(TreeInfo::MODE_FULL, *canvasContext.get());
     DamageAccumulator damageAccumulator;
     info.damageAccumulator = &damageAccumulator;
@@ -201,7 +201,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren_vdOffscr
     auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
-            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory));
+            CanvasContext::create(renderThread, false, rootNode.get(), &contextFactory, 0, 0));
 
     // Set up a Surface so that we can position the VectorDrawable offscreen.
     test::TestContext testContext;

@@ -16,6 +16,8 @@
 
 package com.android.internal.util;
 
+import static org.junit.Assert.assertThrows;
+
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 
@@ -170,10 +172,9 @@ public class TokenBucketTest extends TestCase {
     }
 
     void assertThrow(Fn fn) {
-        try {
+        assertThrows(Throwable.class, () -> {
             fn.call();
-            fail("expected n exception to be thrown.");
-        } catch (Throwable t) { }
+        });
     }
 
     interface Fn { void call(); }

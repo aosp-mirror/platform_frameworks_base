@@ -16,6 +16,8 @@
 
 package com.android.server.media;
 
+import static android.content.pm.PackageManager.GET_RESOLVED_FILTER;
+
 import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -34,6 +36,7 @@ import android.util.Slog;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * Watches changes of packages, or scan them for finding media route providers.
@@ -41,6 +44,8 @@ import java.util.Collections;
 final class MediaRoute2ProviderWatcher {
     private static final String TAG = "MR2ProviderWatcher";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final PackageManager.ResolveInfoFlags RESOLVE_INFO_FLAGS =
+            PackageManager.ResolveInfoFlags.of(GET_RESOLVED_FILTER);
 
     private final Context mContext;
     private final Callback mCallback;
@@ -61,10 +66,15 @@ final class MediaRoute2ProviderWatcher {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "Watcher");
-        pw.println(prefix + "  mUserId=" + mUserId);
-        pw.println(prefix + "  mRunning=" + mRunning);
-        pw.println(prefix + "  mProxies.size()=" + mProxies.size());
+        pw.println(prefix + "MediaRoute2ProviderWatcher");
+        prefix += "  ";
+        if (mProxies.isEmpty()) {
+            pw.println(prefix + "<no provider service proxies>");
+        } else {
+            for (MediaRoute2ProviderServiceProxy proxy : mProxies) {
+                proxy.dump(pw, prefix);
+            }
+        }
     }
 
     public void start() {
@@ -110,16 +120,27 @@ final class MediaRoute2ProviderWatcher {
         // Reorder the list so that providers left at the end will be the ones to remove.
         int targetIndex = 0;
         Intent intent = new Intent(MediaRoute2ProviderService.SERVICE_INTERFACE);
-        for (ResolveInfo resolveInfo : mPackageManager.queryIntentServicesAsUser(
-                intent, 0, mUserId)) {
+        for (ResolveInfo resolveInfo :
+                mPackageManager.queryIntentServicesAsUser(intent, RESOLVE_INFO_FLAGS, mUserId)) {
             ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             if (serviceInfo != null) {
+                boolean isSelfScanOnlyProvider = false;
+                Iterator<String> categoriesIterator = resolveInfo.filter.categoriesIterator();
+                if (categoriesIterator != null) {
+                    while (categoriesIterator.hasNext()) {
+                        isSelfScanOnlyProvider |=
+                                MediaRoute2ProviderService.CATEGORY_SELF_SCAN_ONLY.equals(
+                                        categoriesIterator.next());
+                    }
+                }
                 int sourceIndex = findProvider(serviceInfo.packageName, serviceInfo.name);
                 if (sourceIndex < 0) {
                     MediaRoute2ProviderServiceProxy proxy =
-                            new MediaRoute2ProviderServiceProxy(mContext,
-                            new ComponentName(serviceInfo.packageName, serviceInfo.name),
-                            mUserId);
+                            new MediaRoute2ProviderServiceProxy(
+                                    mContext,
+                                    new ComponentName(serviceInfo.packageName, serviceInfo.name),
+                                    isSelfScanOnlyProvider,
+                                    mUserId);
                     proxy.start();
                     mProxies.add(targetIndex++, proxy);
                     mCallback.onAddProviderService(proxy);

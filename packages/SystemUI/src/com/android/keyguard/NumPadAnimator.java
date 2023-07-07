@@ -15,12 +15,19 @@
  */
 package com.android.keyguard;
 
+import static com.android.settingslib.Utils.getColorAttrDefaultColor;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BACKGROUND;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BACKGROUND_PRESSED;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_BUTTON;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_KEY;
+import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.NUM_PAD_PRESSED;
 import static com.android.systemui.util.ColorUtilKt.getPrivateAttrColorIfUnset;
 
 import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -30,7 +37,7 @@ import android.widget.TextView;
 
 import androidx.annotation.StyleRes;
 
-import com.android.systemui.animation.Interpolators;
+import com.android.app.animation.Interpolators;
 
 /**
  * Provides background color and radius animations for key pad buttons.
@@ -48,6 +55,10 @@ class NumPadAnimator {
     private int mTextColorPrimary;
     private int mTextColorPressed;
     private int mStyle;
+    private float mStartRadius;
+    private float mEndRadius;
+    private int mHeight;
+
     private static final int EXPAND_ANIMATION_MS = 100;
     private static final int EXPAND_COLOR_ANIMATION_MS = 50;
     private static final int CONTRACT_ANIMATION_DELAY_MS = 33;
@@ -80,12 +91,24 @@ class NumPadAnimator {
         mContractAnimatorSet.start();
     }
 
+    public void setProgress(float progress) {
+        mBackground.setCornerRadius(mEndRadius + (mStartRadius - mEndRadius) * progress);
+        int height = (int) (mHeight * 0.7f + mHeight * 0.3 * progress);
+        int difference = mHeight - height;
+        mBackground.setBounds(0, difference / 2, mHeight, mHeight - difference / 2);
+    }
+
     void onLayout(int height) {
-        float startRadius = height / 2f;
-        float endRadius = height / 4f;
-        mBackground.setCornerRadius(startRadius);
-        mExpandAnimator.setFloatValues(startRadius, endRadius);
-        mContractAnimator.setFloatValues(endRadius, startRadius);
+        boolean shouldUpdateHeight = height != mHeight;
+        mHeight = height;
+        mStartRadius = height / 2f;
+        mEndRadius = height / 4f;
+        mExpandAnimator.setFloatValues(mStartRadius, mEndRadius);
+        mContractAnimator.setFloatValues(mEndRadius, mStartRadius);
+        // Set initial corner radius.
+        if (shouldUpdateHeight) {
+            mBackground.setCornerRadius(mStartRadius);
+        }
     }
 
     /**
@@ -96,20 +119,18 @@ class NumPadAnimator {
 
         int[] customAttrs = {android.R.attr.colorControlNormal};
         ContextThemeWrapper ctw = new ContextThemeWrapper(context, mStyle);
-        TypedArray a = ctw.obtainStyledAttributes(customAttrs);
+        @SuppressLint("ResourceType") TypedArray a = ctw.obtainStyledAttributes(customAttrs);
         mNormalBackgroundColor = getPrivateAttrColorIfUnset(ctw, a, 0, 0,
-                com.android.internal.R.attr.colorSurface);
+                       NUM_PAD_BACKGROUND);
         a.recycle();
-        mBackground.setColor(mNormalBackgroundColor);
 
-        mPressedBackgroundColor = context.getColor(android.R.color.system_accent1_200);
+        mPressedBackgroundColor = getColorAttrDefaultColor(context, NUM_PAD_BACKGROUND_PRESSED);
+        mTextColorPressed = getColorAttrDefaultColor(context, NUM_PAD_PRESSED);
+
+        mBackground.setColor(mNormalBackgroundColor);
         mTextColorPrimary = isNumPadKey
-                ? com.android.settingslib.Utils
-                .getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
-                : com.android.settingslib.Utils
-                        .getColorAttrDefaultColor(context, android.R.attr.textColorPrimaryInverse);
-        mTextColorPressed = com.android.settingslib.Utils
-                .getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorOnAccent);
+                ? getColorAttrDefaultColor(context, NUM_PAD_KEY)
+                : getColorAttrDefaultColor(context, NUM_PAD_BUTTON);
         createAnimators();
     }
 

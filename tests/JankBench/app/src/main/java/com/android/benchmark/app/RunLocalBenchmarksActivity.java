@@ -367,6 +367,7 @@ public class RunLocalBenchmarksActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressWarnings("MissingSuperCall") // TODO: Fix me
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {

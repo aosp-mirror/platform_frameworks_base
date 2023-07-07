@@ -32,9 +32,17 @@ AutoBackendTextureRelease::AutoBackendTextureRelease(GrDirectContext* context,
     bool createProtectedImage = 0 != (desc.usage & AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT);
     GrBackendFormat backendFormat =
             GrAHardwareBufferUtils::GetBackendFormat(context, buffer, desc.format, false);
+    LOG_ALWAYS_FATAL_IF(!backendFormat.isValid(),
+                        __FILE__ " Invalid GrBackendFormat. GrBackendApi==%" PRIu32
+                                 ", AHardwareBuffer_Format==%" PRIu32 ".",
+                        static_cast<int>(context->backend()), desc.format);
     mBackendTexture = GrAHardwareBufferUtils::MakeBackendTexture(
             context, buffer, desc.width, desc.height, &mDeleteProc, &mUpdateProc, &mImageCtx,
             createProtectedImage, backendFormat, false);
+    LOG_ALWAYS_FATAL_IF(!mBackendTexture.isValid(),
+                        __FILE__ " Invalid GrBackendTexture. Width==%" PRIu32 ", height==%" PRIu32
+                                 ", protected==%d",
+                        desc.width, desc.height, createProtectedImage);
 }
 
 void AutoBackendTextureRelease::unref(bool releaseImage) {
@@ -74,13 +82,13 @@ void AutoBackendTextureRelease::makeImage(AHardwareBuffer* buffer,
     AHardwareBuffer_Desc desc;
     AHardwareBuffer_describe(buffer, &desc);
     SkColorType colorType = GrAHardwareBufferUtils::GetSkColorTypeFromBufferFormat(desc.format);
+    // The following ref will be counteracted by Skia calling releaseProc, either during
+    // MakeFromTexture if there is a failure, or later when SkImage is discarded. It must
+    // be called before MakeFromTexture, otherwise Skia may remove HWUI's ref on failure.
+    ref();
     mImage = SkImage::MakeFromTexture(
             context, mBackendTexture, kTopLeft_GrSurfaceOrigin, colorType, kPremul_SkAlphaType,
             uirenderer::DataSpaceToColorSpace(dataspace), releaseProc, this);
-    if (mImage.get()) {
-        // The following ref will be counteracted by releaseProc, when SkImage is discarded.
-        ref();
-    }
 }
 
 void AutoBackendTextureRelease::newBufferContent(GrDirectContext* context) {

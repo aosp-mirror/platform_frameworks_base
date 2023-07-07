@@ -26,6 +26,7 @@ import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,16 +36,20 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.common.AuthenticateReason;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
 
@@ -54,10 +59,11 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.log.Probe;
+import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.LockoutCache;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -69,6 +75,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -81,15 +88,18 @@ public class FingerprintAuthenticationClientTest {
     private static final int USER_ID = 8;
     private static final long OP_ID = 7;
     private static final long REQUEST_ID = 88;
-    private static final int POINTER_ID = 0;
+    private static final int POINTER_ID = 3;
     private static final int TOUCH_X = 8;
     private static final int TOUCH_Y = 20;
     private static final float TOUCH_MAJOR = 4.4f;
     private static final float TOUCH_MINOR = 5.5f;
+    private static final int FINGER_UP = 111;
 
     @Rule
     public final TestableContext mContext = new TestableContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
 
     @Mock
     private ISession mHal;
@@ -103,8 +113,6 @@ public class FingerprintAuthenticationClientTest {
     private BiometricContext mBiometricContext;
     @Mock
     private BiometricManager mBiometricManager;
-    @Mock
-    private LockoutCache mLockoutCache;
     @Mock
     private IUdfpsOverlayController mUdfpsOverlayController;
     @Mock
@@ -121,20 +129,21 @@ public class FingerprintAuthenticationClientTest {
     private ICancellationSignal mCancellationSignal;
     @Mock
     private Probe mLuxProbe;
+    @Mock
+    private AuthSessionCoordinator mAuthSessionCoordinator;
+    @Mock
+    private Clock mClock;
     @Captor
-    private ArgumentCaptor<OperationContext> mOperationContextCaptor;
-    @Captor
-    private ArgumentCaptor<PointerContext> mPointerContextCaptor;
+    private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
     private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
-
-    @Rule
-    public final MockitoRule mockito = MockitoJUnit.rule();
+    private final TestLooper mLooper = new TestLooper();
 
     @Before
     public void setup() {
         mContext.addMockSystemService(BiometricManager.class, mBiometricManager);
-        when(mBiometricLogger.createALSCallback(anyBoolean())).thenAnswer(i ->
+        when(mBiometricContext.getAuthSessionCoordinator()).thenReturn(mAuthSessionCoordinator);
+        when(mBiometricLogger.getAmbientLightProbe(anyBoolean())).thenAnswer(i ->
                 new CallbackWithProbe<>(mLuxProbe, i.getArgument(0)));
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
                 i -> i.getArgument(0));
@@ -157,8 +166,12 @@ public class FingerprintAuthenticationClientTest {
         InOrder order = inOrder(mHal, mBiometricContext);
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
-        order.verify(mHal).authenticateWithContext(
-                eq(OP_ID), same(mOperationContextCaptor.getValue()));
+
+        final OperationContext aidlContext = mOperationContextCaptor.getValue().toAidlContext();
+        order.verify(mHal).authenticateWithContext(eq(OP_ID), same(aidlContext));
+        assertThat(aidlContext.authenticateReason.getFingerprintAuthenticateReason())
+                .isEqualTo(AuthenticateReason.Fingerprint.UNKNOWN);
+
         verify(mHal, never()).authenticate(anyLong());
     }
 
@@ -166,7 +179,10 @@ public class FingerprintAuthenticationClientTest {
     public void pointerUp_v1() throws RemoteException {
         final FingerprintAuthenticationClient client = createClient(1);
         client.start(mCallback);
-        client.onPointerUp();
+
+        PointerContext pc = new PointerContext();
+        pc.pointerId = POINTER_ID;
+        client.onPointerUp(pc);
 
         verify(mHal).onPointerUp(eq(POINTER_ID));
         verify(mHal, never()).onPointerUpWithContext(any());
@@ -176,10 +192,17 @@ public class FingerprintAuthenticationClientTest {
     public void pointerDown_v1() throws RemoteException {
         final FingerprintAuthenticationClient client = createClient(1);
         client.start(mCallback);
-        client.onPointerDown(TOUCH_X, TOUCH_Y, TOUCH_MAJOR, TOUCH_MINOR);
 
-        verify(mHal).onPointerDown(eq(0),
-                eq(TOUCH_X), eq(TOUCH_Y), eq(TOUCH_MAJOR), eq(TOUCH_MINOR));
+        PointerContext pc = new PointerContext();
+        pc.pointerId = POINTER_ID;
+        pc.x = TOUCH_X;
+        pc.y = TOUCH_Y;
+        pc.minor = TOUCH_MINOR;
+        pc.major = TOUCH_MAJOR;
+        client.onPointerDown(pc);
+
+        verify(mHal).onPointerDown(eq(POINTER_ID), eq(TOUCH_X), eq(TOUCH_Y), eq(TOUCH_MINOR),
+                eq(TOUCH_MAJOR));
         verify(mHal, never()).onPointerDownWithContext(any());
     }
 
@@ -187,44 +210,101 @@ public class FingerprintAuthenticationClientTest {
     public void pointerUpWithContext_v2() throws RemoteException {
         final FingerprintAuthenticationClient client = createClient(2);
         client.start(mCallback);
-        client.onPointerUp();
 
-        verify(mHal).onPointerUpWithContext(mPointerContextCaptor.capture());
+        PointerContext pc = new PointerContext();
+        pc.pointerId = POINTER_ID;
+        client.onPointerUp(pc);
+
+        verify(mHal).onPointerUpWithContext(eq(pc));
         verify(mHal, never()).onPointerUp(eq(POINTER_ID));
-
-        final PointerContext pContext = mPointerContextCaptor.getValue();
-        assertThat(pContext.pointerId).isEqualTo(POINTER_ID);
     }
 
     @Test
     public void pointerDownWithContext_v2() throws RemoteException {
         final FingerprintAuthenticationClient client = createClient(2);
         client.start(mCallback);
-        client.onPointerDown(TOUCH_X, TOUCH_Y, TOUCH_MAJOR, TOUCH_MINOR);
 
-        verify(mHal).onPointerDownWithContext(mPointerContextCaptor.capture());
+        PointerContext pc = new PointerContext();
+        pc.pointerId = POINTER_ID;
+        pc.x = TOUCH_X;
+        pc.y = TOUCH_Y;
+        pc.minor = TOUCH_MINOR;
+        pc.major = TOUCH_MAJOR;
+        client.onPointerDown(pc);
+
+        verify(mHal).onPointerDownWithContext(eq(pc));
         verify(mHal, never()).onPointerDown(anyInt(), anyInt(), anyInt(), anyFloat(), anyFloat());
-
-        final PointerContext pContext = mPointerContextCaptor.getValue();
-        assertThat(pContext.pointerId).isEqualTo(POINTER_ID);
     }
 
     @Test
-    public void luxProbeWhenFingerDown() throws RemoteException {
+    public void luxProbeWhenAwake() throws RemoteException {
+        when(mBiometricContext.isAwake()).thenReturn(false);
+        when(mBiometricContext.isAod()).thenReturn(false);
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
 
-        client.onPointerDown(TOUCH_X, TOUCH_Y, TOUCH_MAJOR, TOUCH_MINOR);
-        verify(mLuxProbe).enable();
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).authenticateWithContext(eq(OP_ID), captor.capture());
+        OperationContext opContext = captor.getValue();
+        verify(mBiometricContext).subscribe(
+                mOperationContextCaptor.capture(), mContextInjector.capture());
+        assertThat(mOperationContextCaptor.getValue().toAidlContext())
+                .isSameInstanceAs(opContext);
 
-        client.onAcquired(2, 0);
+        mContextInjector.getValue().accept(opContext);
+        verify(mLuxProbe, never()).enable();
+
+        reset(mLuxProbe);
+        when(mBiometricContext.isAwake()).thenReturn(true);
+
+        mContextInjector.getValue().accept(opContext);
+        verify(mLuxProbe).enable();
         verify(mLuxProbe, never()).disable();
 
-        client.onPointerUp();
-        verify(mLuxProbe).disable();
+        when(mBiometricContext.isAwake()).thenReturn(false);
 
-        client.onPointerDown(TOUCH_X, TOUCH_Y, TOUCH_MAJOR, TOUCH_MINOR);
-        verify(mLuxProbe, times(2)).enable();
+        mContextInjector.getValue().accept(opContext);
+        verify(mLuxProbe).disable();
+    }
+
+    @Test
+    public void luxProbeEnabledOnStartWhenWake() throws RemoteException {
+        luxProbeEnabledOnStart(true /* isAwake */);
+    }
+
+    @Test
+    public void luxProbeNotEnabledOnStartWhenNotWake() throws RemoteException {
+        luxProbeEnabledOnStart(false /* isAwake */);
+    }
+
+    private void luxProbeEnabledOnStart(boolean isAwake) throws RemoteException {
+        when(mBiometricContext.isAwake()).thenReturn(isAwake);
+        when(mBiometricContext.isAod()).thenReturn(false);
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+
+        verify(mLuxProbe, isAwake ? times(1) : never()).enable();
+    }
+
+    @Test
+    public void luxProbeDisabledOnAod() throws RemoteException {
+        when(mBiometricContext.isAwake()).thenReturn(false);
+        when(mBiometricContext.isAod()).thenReturn(true);
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).authenticateWithContext(eq(OP_ID), captor.capture());
+        OperationContext opContext = captor.getValue();
+        verify(mBiometricContext).subscribe(
+                mOperationContextCaptor.capture(), mContextInjector.capture());
+        assertThat(opContext).isSameInstanceAs(
+                mOperationContextCaptor.getValue().toAidlContext());
+
+        mContextInjector.getValue().accept(opContext);
+        verify(mLuxProbe, never()).enable();
     }
 
     @Test
@@ -233,6 +313,9 @@ public class FingerprintAuthenticationClientTest {
         client.start(mCallback);
         client.onAuthenticated(new Fingerprint("name", 2 /* enrollmentId */, SENSOR_ID),
                 true /* authenticated */, new ArrayList<>());
+
+        mLooper.moveTimeForward(10);
+        mLooper.dispatchAll();
         verify(mLuxProbe).destroy();
 
         client.onAcquired(2, 0);
@@ -244,16 +327,21 @@ public class FingerprintAuthenticationClientTest {
         final FingerprintAuthenticationClient client = createClient();
         client.start(mCallback);
 
-        verify(mHal).authenticateWithContext(eq(OP_ID), mOperationContextCaptor.capture());
-        OperationContext opContext = mOperationContextCaptor.getValue();
+        final ArgumentCaptor<OperationContext> captor =
+                ArgumentCaptor.forClass(OperationContext.class);
+        verify(mHal).authenticateWithContext(eq(OP_ID), captor.capture());
+        OperationContext opContext = captor.getValue();
 
         // fake an update to the context
-        verify(mBiometricContext).subscribe(eq(opContext), mContextInjector.capture());
+        verify(mBiometricContext).subscribe(
+                mOperationContextCaptor.capture(), mContextInjector.capture());
+        assertThat(opContext).isSameInstanceAs(
+                mOperationContextCaptor.getValue().toAidlContext());
         mContextInjector.getValue().accept(opContext);
-        verify(mHal).onContextChanged(eq(opContext));
+        verify(mHal).onContextChanged(same(opContext));
 
         client.stopHalOperation();
-        verify(mBiometricContext).unsubscribe(same(opContext));
+        verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
     }
 
     @Test
@@ -309,6 +397,8 @@ public class FingerprintAuthenticationClientTest {
         client.onAuthenticated(new Fingerprint("friendly", 1 /* fingerId */, 2 /* deviceId */),
                 true /* authenticated */, new ArrayList<>());
 
+        mLooper.moveTimeForward(10);
+        mLooper.dispatchAll();
         verify(mCancellationSignal).cancel();
     }
 
@@ -330,13 +420,21 @@ public class FingerprintAuthenticationClientTest {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final FingerprintAuthenticateOptions options = new FingerprintAuthenticateOptions.Builder()
+                .setOpPackageName("test-owner")
+                .setUserId(5)
+                .setSensorId(9)
+                .build();
         return new FingerprintAuthenticationClient(mContext, () -> aidl, mToken,
-                REQUEST_ID, mClientMonitorCallbackConverter, 5 /* targetUserId */, OP_ID,
-        false /* restricted */, "test-owner", 4 /* cookie */, false /* requireConfirmation */,
-        9 /* sensorId */, mBiometricLogger, mBiometricContext,
-        true /* isStrongBiometric */,
-        null /* taskStackListener */, mLockoutCache,
-        mUdfpsOverlayController, mSideFpsController, allowBackgroundAuthentication, mSensorProps) {
+                REQUEST_ID, mClientMonitorCallbackConverter, OP_ID,
+                false /* restricted */, options, 4 /* cookie */,
+                false /* requireConfirmation */,
+                mBiometricLogger, mBiometricContext,
+                true /* isStrongBiometric */,
+                null /* taskStackListener */, null /* lockoutCache */,
+                mUdfpsOverlayController, mSideFpsController, null, allowBackgroundAuthentication,
+                mSensorProps,
+                new Handler(mLooper.getLooper()), 0 /* biometricStrength */, mClock) {
             @Override
             protected ActivityTaskManager getActivityTaskManager() {
                 return mActivityTaskManager;

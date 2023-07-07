@@ -35,18 +35,20 @@ import java.util.ArrayList;
 public final class UserState {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "UserState" : TAG_AM;
 
+    // user doesn't exist.
+    public static final int STATE_NONE = -1;
     // User is first coming up.
-    public final static int STATE_BOOTING = 0;
+    public static final int STATE_BOOTING = 0;
     // User is in the locked state.
-    public final static int STATE_RUNNING_LOCKED = 1;
+    public static final int STATE_RUNNING_LOCKED = 1;
     // User is in the unlocking state.
-    public final static int STATE_RUNNING_UNLOCKING = 2;
+    public static final int STATE_RUNNING_UNLOCKING = 2;
     // User is in the running state.
-    public final static int STATE_RUNNING_UNLOCKED = 3;
+    public static final int STATE_RUNNING_UNLOCKED = 3;
     // User is in the initial process of being stopped.
-    public final static int STATE_STOPPING = 4;
+    public static final int STATE_STOPPING = 4;
     // User is in the final phase of stopping, sending Intent.ACTION_SHUTDOWN.
-    public final static int STATE_SHUTDOWN = 5;
+    public static final int STATE_SHUTDOWN = 5;
 
     public final UserHandle mHandle;
     public final ArrayList<IStopUserCallback> mStopCallbacks = new ArrayList<>();

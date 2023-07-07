@@ -31,9 +31,6 @@ import com.android.server.location.ClientManagerProto;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,11 +43,6 @@ import java.util.function.Consumer;
  */
 /* package */ class ContextHubClientManager {
     private static final String TAG = "ContextHubClientManager";
-
-    /*
-     * The DateFormat for printing RegistrationRecord.
-     */
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd HH:mm:ss.SSS");
 
     /*
      * The maximum host endpoint ID value that a client can be assigned.
@@ -125,14 +117,15 @@ import java.util.function.Consumer;
 
         @Override
         public String toString() {
-            String out = "";
-            out += DATE_FORMAT.format(new Date(mTimestamp)) + " ";
-            out += mAction == ACTION_REGISTERED ? "+ " : "- ";
-            out += mBroker;
+            StringBuilder sb = new StringBuilder();
+            sb.append(ContextHubServiceUtil.formatDateFromTimestamp(mTimestamp));
+            sb.append(" ");
+            sb.append(mAction == ACTION_REGISTERED ? "+ " : "- ");
+            sb.append(mBroker);
             if (mAction == ACTION_CANCELLED) {
-                out += " (cancelled)";
+                sb.append(" (cancelled)");
             }
-            return out;
+            return sb.toString();
         }
     }
 
@@ -247,14 +240,17 @@ import java.util.function.Consumer;
                         + message.getNanoAppId());
             }
 
-            broadcastMessage(
-                    contextHubId, message, nanoappPermissions, messagePermissions);
+            ContextHubEventLogger.getInstance().logMessageFromNanoapp(contextHubId, message, true);
+            broadcastMessage(contextHubId, message, nanoappPermissions, messagePermissions);
         } else {
             ContextHubClientBroker proxy = mHostEndPointIdToClientMap.get(hostEndpointId);
             if (proxy != null) {
-                proxy.sendMessageToClient(
-                        message, nanoappPermissions, messagePermissions);
+                ContextHubEventLogger.getInstance().logMessageFromNanoapp(contextHubId, message,
+                                                                          true);
+                proxy.sendMessageToClient(message, nanoappPermissions, messagePermissions);
             } else {
+                ContextHubEventLogger.getInstance().logMessageFromNanoapp(contextHubId, message,
+                                                                          false);
                 Log.e(TAG, "Cannot send message to unregistered client (host endpoint ID = "
                         + hostEndpointId + ")");
             }
@@ -414,17 +410,21 @@ import java.util.function.Consumer;
 
     @Override
     public String toString() {
-        String out = "";
+        StringBuilder sb = new StringBuilder();
         for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
-            out += broker + "\n";
+            sb.append(broker);
+            sb.append(System.lineSeparator());
         }
 
-        out += "\nRegistration history:\n";
+        sb.append(System.lineSeparator());
+        sb.append("Registration History:");
+        sb.append(System.lineSeparator());
         Iterator<RegistrationRecord> it = mRegistrationRecordDeque.descendingIterator();
         while (it.hasNext()) {
-            out += it.next() + "\n";
+            sb.append(it.next());
+            sb.append(System.lineSeparator());
         }
 
-        return out;
+        return sb.toString();
     }
 }

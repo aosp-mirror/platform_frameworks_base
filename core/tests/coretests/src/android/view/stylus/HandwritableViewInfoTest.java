@@ -70,7 +70,8 @@ public class HandwritableViewInfoTest {
     @Test
     public void update_viewDisableAutoHandwriting() {
         final Rect rect = new Rect(1, 2, 3, 4);
-        final View view = HandwritingTestUtil.createView(rect, false /* autoHandwritingEnabled */);
+        final View view = HandwritingTestUtil.createView(rect, false /* autoHandwritingEnabled */,
+                true  /* isStylusHandwritingAvailable */);
         final HandwritingInitiator.HandwritableViewInfo handwritableViewInfo =
                 new HandwritingInitiator.HandwritableViewInfo(view);
 

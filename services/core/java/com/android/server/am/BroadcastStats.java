@@ -20,6 +20,8 @@ import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.TimeUtils;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -106,6 +108,7 @@ public final class BroadcastStats {
         ve.mCount++;
     }
 
+    @NeverCompile
     public boolean dumpStats(PrintWriter pw, String prefix, String dumpPackage) {
         boolean printedSomething = false;
         ArrayList<ActionEntry> actions = new ArrayList<>(mActions.size());
@@ -155,6 +158,7 @@ public final class BroadcastStats {
         return printedSomething;
     }
 
+    @NeverCompile
     public void dumpCheckinStats(PrintWriter pw, String dumpPackage) {
         pw.print("broadcast-stats,1,");
         pw.print(mStartRealtime);

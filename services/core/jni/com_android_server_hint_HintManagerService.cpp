@@ -34,6 +34,7 @@
 #include "jni.h"
 
 using android::hardware::power::IPowerHintSession;
+using android::hardware::power::SessionHint;
 using android::hardware::power::WorkDuration;
 
 using android::base::StringPrintf;
@@ -79,6 +80,16 @@ static void reportActualWorkDuration(int64_t session_ptr,
                                      const std::vector<WorkDuration>& actualDurations) {
     sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
     appSession->reportActualWorkDuration(actualDurations);
+}
+
+static void sendHint(int64_t session_ptr, SessionHint hint) {
+    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    appSession->sendHint(hint);
+}
+
+static void setThreads(int64_t session_ptr, const std::vector<int32_t>& threadIds) {
+    sp<IPowerHintSession> appSession = reinterpret_cast<IPowerHintSession*>(session_ptr);
+    appSession->setThreads(threadIds);
 }
 
 static int64_t getHintSessionPreferredRate() {
@@ -139,6 +150,20 @@ static void nativeReportActualWorkDuration(JNIEnv* env, jclass /* clazz */, jlon
     reportActualWorkDuration(session_ptr, actualList);
 }
 
+static void nativeSendHint(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jint hint) {
+    sendHint(session_ptr, static_cast<SessionHint>(hint));
+}
+
+static void nativeSetThreads(JNIEnv* env, jclass /* clazz */, jlong session_ptr, jintArray tids) {
+    ScopedIntArrayRO arrayThreadIds(env, tids);
+
+    std::vector<int32_t> threadIds(arrayThreadIds.size());
+    for (size_t i = 0; i < arrayThreadIds.size(); i++) {
+        threadIds[i] = arrayThreadIds[i];
+    }
+    setThreads(session_ptr, threadIds);
+}
+
 static jlong nativeGetHintSessionPreferredRate(JNIEnv* /* env */, jclass /* clazz */) {
     return static_cast<jlong>(getHintSessionPreferredRate());
 }
@@ -153,6 +178,8 @@ static const JNINativeMethod sHintManagerServiceMethods[] = {
         {"nativeCloseHintSession", "(J)V", (void*)nativeCloseHintSession},
         {"nativeUpdateTargetWorkDuration", "(JJ)V", (void*)nativeUpdateTargetWorkDuration},
         {"nativeReportActualWorkDuration", "(J[J[J)V", (void*)nativeReportActualWorkDuration},
+        {"nativeSendHint", "(JI)V", (void*)nativeSendHint},
+        {"nativeSetThreads", "(J[I)V", (void*)nativeSetThreads},
         {"nativeGetHintSessionPreferredRate", "()J", (void*)nativeGetHintSessionPreferredRate},
 };
 

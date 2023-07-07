@@ -49,26 +49,6 @@ class ZygoteServer {
     // TODO (chriswailes): Change this so it is set with Zygote or ZygoteSecondary as appropriate
     public static final String TAG = "ZygoteServer";
 
-    /**
-     * The maximim value that will be accepted from the USAP_POOL_SIZE_MAX device property.
-     * is a mirror of USAP_POOL_MAX_LIMIT found in com_android_internal_os_Zygote.cpp.
-     */
-    private static final int USAP_POOL_SIZE_MAX_LIMIT = 100;
-
-    /**
-     * The minimum value that will be accepted from the USAP_POOL_SIZE_MIN device property.
-     */
-    private static final int USAP_POOL_SIZE_MIN_LIMIT = 1;
-
-    /** The default value used for the USAP_POOL_SIZE_MAX device property */
-    private static final String USAP_POOL_SIZE_MAX_DEFAULT = "10";
-
-    /** The default value used for the USAP_POOL_SIZE_MIN device property */
-    private static final String USAP_POOL_SIZE_MIN_DEFAULT = "1";
-
-    /** The default value used for the USAP_REFILL_DELAY_MS device property */
-    private static final String USAP_POOL_REFILL_DELAY_MS_DEFAULT = "3000";
-
     /** The "not a timestamp" value for the refill delay timestamp mechanism. */
     private static final int INVALID_TIMESTAMP = -1;
 
@@ -264,46 +244,35 @@ class ZygoteServer {
 
     private void fetchUsapPoolPolicyProps() {
         if (mUsapPoolSupported) {
-            final String usapPoolSizeMaxPropString = Zygote.getConfigurationProperty(
-                    ZygoteConfig.USAP_POOL_SIZE_MAX, USAP_POOL_SIZE_MAX_DEFAULT);
+            mUsapPoolSizeMax = Integer.min(
+                ZygoteConfig.getInt(
+                    ZygoteConfig.USAP_POOL_SIZE_MAX,
+                    ZygoteConfig.USAP_POOL_SIZE_MAX_DEFAULT),
+                ZygoteConfig.USAP_POOL_SIZE_MAX_LIMIT);
 
-            if (!usapPoolSizeMaxPropString.isEmpty()) {
-                mUsapPoolSizeMax = Integer.min(Integer.parseInt(
-                        usapPoolSizeMaxPropString), USAP_POOL_SIZE_MAX_LIMIT);
-            }
+            mUsapPoolSizeMin = Integer.max(
+                ZygoteConfig.getInt(
+                    ZygoteConfig.USAP_POOL_SIZE_MIN,
+                    ZygoteConfig.USAP_POOL_SIZE_MIN_DEFAULT),
+                ZygoteConfig.USAP_POOL_SIZE_MIN_LIMIT);
 
-            final String usapPoolSizeMinPropString = Zygote.getConfigurationProperty(
-                    ZygoteConfig.USAP_POOL_SIZE_MIN, USAP_POOL_SIZE_MIN_DEFAULT);
-
-            if (!usapPoolSizeMinPropString.isEmpty()) {
-                mUsapPoolSizeMin = Integer.max(
-                        Integer.parseInt(usapPoolSizeMinPropString), USAP_POOL_SIZE_MIN_LIMIT);
-            }
-
-            final String usapPoolRefillThresholdPropString = Zygote.getConfigurationProperty(
+            mUsapPoolRefillThreshold = Integer.min(
+                ZygoteConfig.getInt(
                     ZygoteConfig.USAP_POOL_REFILL_THRESHOLD,
-                    Integer.toString(mUsapPoolSizeMax / 2));
+                    ZygoteConfig.USAP_POOL_REFILL_THRESHOLD_DEFAULT),
+                mUsapPoolSizeMax);
 
-            if (!usapPoolRefillThresholdPropString.isEmpty()) {
-                mUsapPoolRefillThreshold = Integer.min(
-                        Integer.parseInt(usapPoolRefillThresholdPropString),
-                        mUsapPoolSizeMax);
-            }
-
-            final String usapPoolRefillDelayMsPropString = Zygote.getConfigurationProperty(
-                    ZygoteConfig.USAP_POOL_REFILL_DELAY_MS, USAP_POOL_REFILL_DELAY_MS_DEFAULT);
-
-            if (!usapPoolRefillDelayMsPropString.isEmpty()) {
-                mUsapPoolRefillDelayMs = Integer.parseInt(usapPoolRefillDelayMsPropString);
-            }
+            mUsapPoolRefillDelayMs = ZygoteConfig.getInt(
+                ZygoteConfig.USAP_POOL_REFILL_DELAY_MS,
+                ZygoteConfig.USAP_POOL_REFILL_DELAY_MS_DEFAULT);
 
             // Validity check
             if (mUsapPoolSizeMin >= mUsapPoolSizeMax) {
                 Log.w(TAG, "The max size of the USAP pool must be greater than the minimum size."
                         + "  Restoring default values.");
 
-                mUsapPoolSizeMax = Integer.parseInt(USAP_POOL_SIZE_MAX_DEFAULT);
-                mUsapPoolSizeMin = Integer.parseInt(USAP_POOL_SIZE_MIN_DEFAULT);
+                mUsapPoolSizeMax = ZygoteConfig.USAP_POOL_SIZE_MAX_DEFAULT;
+                mUsapPoolSizeMin = ZygoteConfig.USAP_POOL_SIZE_MIN_DEFAULT;
                 mUsapPoolRefillThreshold = mUsapPoolSizeMax / 2;
             }
         }

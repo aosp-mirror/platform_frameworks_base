@@ -17,4 +17,7 @@
 
 <resources>
     <dimen name="widget_big_font_size">54dp</dimen>
+
+    <!-- Margin above the ambient indication container -->
+    <dimen name="ambient_indication_container_margin_top">10dp</dimen>
 </resources>

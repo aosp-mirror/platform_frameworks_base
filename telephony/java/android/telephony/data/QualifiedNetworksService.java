@@ -68,6 +68,7 @@ public abstract class QualifiedNetworksService extends Service {
     private static final int QNS_REMOVE_ALL_NETWORK_AVAILABILITY_PROVIDERS          = 3;
     private static final int QNS_UPDATE_QUALIFIED_NETWORKS                          = 4;
     private static final int QNS_APN_THROTTLE_STATUS_CHANGED                        = 5;
+    private static final int QNS_EMERGENCY_DATA_NETWORK_PREFERRED_TRANSPORT_CHANGED = 6;
 
     private final HandlerThread mHandlerThread;
 
@@ -193,6 +194,20 @@ public abstract class QualifiedNetworksService extends Service {
         }
 
         /**
+         * The framework calls this method when the preferred transport type used to set up
+         * emergency data network is changed.
+         *
+         * This method is meant to be overridden.
+         *
+         * @param transportType transport type changed to be preferred
+         */
+        public void reportEmergencyDataNetworkPreferredTransportChanged(
+                @AccessNetworkConstants.TransportType int transportType) {
+            Log.d(TAG, "reportEmergencyDataNetworkPreferredTransportChanged: "
+                    + AccessNetworkConstants.transportTypeToString(transportType));
+        }
+
+        /**
          * Called when the qualified networks provider is removed. The extended class should
          * implement this method to perform cleanup works.
          */
@@ -234,6 +249,13 @@ public abstract class QualifiedNetworksService extends Service {
                     if (provider != null) {
                         List<ThrottleStatus> statuses = (List<ThrottleStatus>) message.obj;
                         provider.reportThrottleStatusChanged(statuses);
+                    }
+                    break;
+
+                case QNS_EMERGENCY_DATA_NETWORK_PREFERRED_TRANSPORT_CHANGED:
+                    if (provider != null) {
+                        int transportType = (int) message.arg2;
+                        provider.reportEmergencyDataNetworkPreferredTransportChanged(transportType);
                     }
                     break;
 
@@ -331,6 +353,14 @@ public abstract class QualifiedNetworksService extends Service {
                 List<ThrottleStatus> statuses) {
             mHandler.obtainMessage(QNS_APN_THROTTLE_STATUS_CHANGED, slotIndex, 0, statuses)
                     .sendToTarget();
+        }
+
+        @Override
+        public void reportEmergencyDataNetworkPreferredTransportChanged(int slotIndex,
+                @AccessNetworkConstants.TransportType int transportType) {
+            mHandler.obtainMessage(
+                    QNS_EMERGENCY_DATA_NETWORK_PREFERRED_TRANSPORT_CHANGED,
+                            slotIndex, transportType).sendToTarget();
         }
     }
 

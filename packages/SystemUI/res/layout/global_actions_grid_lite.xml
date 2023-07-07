@@ -33,7 +33,7 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       android:layout_weight="1">
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.android.systemui.common.ui.view.LaunchableConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@android:id/list"
@@ -55,6 +55,6 @@
           app:flow_horizontalGap="@dimen/global_actions_lite_padding"
           app:flow_verticalGap="@dimen/global_actions_lite_padding"
           app:flow_horizontalStyle="packed"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.android.systemui.common.ui.view.LaunchableConstraintLayout>
   </com.android.systemui.globalactions.GlobalActionsLayoutLite>
 </androidx.constraintlayout.widget.ConstraintLayout>

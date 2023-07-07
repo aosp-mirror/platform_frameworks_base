@@ -4,7 +4,6 @@
 
 The system selects a boot animation zipfile from the following locations, in order:
 
-    /system/media/bootanimation-encrypted.zip (if getprop("vold.decrypt") = '1')
     /system/media/bootanimation.zip
     /oem/media/bootanimation.zip
 

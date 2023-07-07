@@ -118,6 +118,7 @@
     <color name="ksh_application_group_color">#fff44336</color>
     <color name="ksh_key_item_color">@color/material_grey_600</color>
     <color name="ksh_key_item_background">@color/material_grey_100</color>
+    <color name="ksh_key_item_new_background">@color/transparent</color>
 
     <color name="instant_apps_color">#ff4d5a64</color>
 
@@ -129,19 +130,12 @@
     <color name="smart_reply_button_stroke">@*android:color/accent_device_default</color>
 
     <!-- Biometric dialog colors -->
-    <color name="biometric_dialog_dim_color">#80000000</color>              <!-- 50% black -->
     <color name="biometric_dialog_gray">#ff757575</color>
     <color name="biometric_dialog_accent">@color/material_dynamic_primary40</color>
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
 
-    <!-- UDFPS colors -->
-    <color name="udfps_enroll_icon">#7DA7F1</color>
-    <color name="udfps_moving_target_fill">#475670</color>
-    <!-- 50% of udfps_moving_target_fill-->
-    <color name="udfps_moving_target_fill_error">#80475670</color>
-    <color name="udfps_enroll_progress">#7DA7F1</color>
-    <color name="udfps_enroll_progress_help">#607DA7F1</color>
-    <color name="udfps_enroll_progress_help_with_talkback">#FFEE675C</color>
+    <!-- SFPS colors -->
+    <color name="sfps_chevron_fill">@color/material_dynamic_primary90</color>
 
     <!-- Floating overlay actions -->
     <color name="overlay_button_ripple">#1f000000</color>
@@ -159,6 +153,7 @@
 
     <color name="GM2_red_300">#F28B82</color>
     <color name="GM2_red_500">#EA4335</color>
+    <color name="GM2_red_600">#B3261E</color>
     <color name="GM2_red_700">#C5221F</color>
 
     <color name="GM2_blue_300">#8AB4F8</color>
@@ -166,9 +161,15 @@
     <color name="GM2_yellow_200">#FDE293</color>
 
     <!-- Window magnification colors -->
-    <color name="magnification_border_color">#FF9900</color>
-    <color name="magnification_switch_button_color">#7F000000</color>
-    <color name="magnification_drag_handle_color">#B3000000</color>
+    <color name="magnification_border_color">#F29900</color>
+    <color name="magnification_drag_corner_background">#E5FFFFFF</color>
+    <color name="magnification_drag_handle_stroke">#000000</color>
+    <color name="magnification_drag_handle_background_change">#111111</color>
+    <color name="accessibility_magnifier_bg">#FCFCFC</color>
+    <color name="accessibility_magnifier_bg_stroke">#E0E0E0</color>
+    <color name="accessibility_magnifier_icon_color">#252525</color>
+    <color name="accessibility_window_magnifier_icon_color">#FAFAFA</color>
+    <color name="accessibility_window_magnifier_corner_view_color">#0680FD</color>
 
     <!-- Volume dialog colors -->
     <color name="volume_dialog_background_color">@android:color/transparent</color>
@@ -183,7 +184,7 @@
     <color name="media_dialog_item_main_content">@color/material_dynamic_primary20</color>
     <color name="media_dialog_item_background">@color/material_dynamic_secondary95</color>
     <color name="media_dialog_connected_item_background">@color/material_dynamic_primary90</color>
-    <color name="media_dialog_seekbar_progress">@color/material_dynamic_secondary40</color>
+    <color name="media_dialog_seekbar_progress">@android:color/system_accent1_200</color>
     <color name="media_dialog_button_background">@color/material_dynamic_primary40</color>
     <color name="media_dialog_solid_button_text">@color/material_dynamic_neutral95</color>
 
@@ -204,6 +205,7 @@
     <color name="control_thumbnail_tint">#33000000</color>
     <color name="control_thumbnail_shadow_color">@*android:color/black</color>
     <color name="controls_task_view_bg">#CC191C1D</color>
+    <color name="control_popup_dim">#8A000000</color>
 
     <!-- Docked misalignment message -->
     <color name="misalignment_text_color">#F28B82</color>
@@ -216,6 +218,8 @@
     <!-- Accessibility floating menu -->
     <color name="accessibility_floating_menu_background">#CCFFFFFF</color> <!-- 80% -->
     <color name="accessibility_floating_menu_stroke_dark">#26FFFFFF</color> <!-- 15% -->
+    <color name="accessibility_floating_menu_message_background">@*android:color/background_material_light</color>
+    <color name="accessibility_floating_menu_message_text">@*android:color/primary_text_default_material_light</color>
 
     <!-- Wallet screen -->
     <color name="wallet_card_border">#33FFFFFF</color>
@@ -233,4 +237,14 @@
     <color name="connected_network_secondary_color">#41493D</color>
 
     <color name="dream_overlay_camera_mic_off_dot_color">#FCBE03</color>
+
+    <!-- Dream overlay text shadows -->
+    <color name="dream_overlay_clock_key_text_shadow_color">#4D000000</color>
+    <color name="dream_overlay_clock_ambient_text_shadow_color">#4D000000</color>
+    <color name="dream_overlay_status_bar_key_text_shadow_color">#66000000</color>
+    <color name="dream_overlay_status_bar_ambient_text_shadow_color">#59000000</color>
+
+    <!-- Rear Display Education -->
+    <color name="rear_display_overlay_animation_background_color">#1E1B17</color>
+    <color name="rear_display_overlay_dialog_background_color">#1E1B17</color>
 </resources>

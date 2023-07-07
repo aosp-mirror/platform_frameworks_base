@@ -39,19 +39,21 @@ public interface RankingConfig {
     Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid);
     void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
-            boolean fromTargetApp);
+            boolean fromTargetApp, int callingUid, boolean isSystemOrSystemUi);
     ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty);
     boolean createNotificationChannel(String pkg, int uid, NotificationChannel channel,
-            boolean fromTargetApp, boolean hasDndAccess);
-    void updateNotificationChannel(String pkg, int uid, NotificationChannel channel,
-            boolean fromUser);
+            boolean fromTargetApp, boolean hasDndAccess, int callingUid,
+            boolean isSystemOrSystemUi);
+    void updateNotificationChannel(String pkg, int uid, NotificationChannel updatedChannel,
+            boolean fromUser, int callingUid, boolean fromSystemOrSystemUi);
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId,
             boolean includeDeleted);
     NotificationChannel getConversationNotificationChannel(String pkg, int uid, String channelId,
             String conversationId, boolean returnParentIfNoConversationChannel,
             boolean includeDeleted);
-    boolean deleteNotificationChannel(String pkg, int uid, String channelId);
+    boolean deleteNotificationChannel(String pkg, int uid, String channelId,
+            int callingUid, boolean fromSystemOrSystemUi);
     void permanentlyDeleteNotificationChannel(String pkg, int uid, String channelId);
     void permanentlyDeleteNotificationChannels(String pkg, int uid);
     ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,

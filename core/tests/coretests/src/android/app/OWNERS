@@ -4,3 +4,6 @@ per-file Window*.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *Notification* = file:/packages/SystemUI/OWNERS
 per-file *Zen* = file:/packages/SystemUI/OWNERS
 per-file *StatusBar* = file:/packages/SystemUI/OWNERS
+
+# A11Y and related
+per-file *UiAutomation* = file:/services/accessibility/OWNERS

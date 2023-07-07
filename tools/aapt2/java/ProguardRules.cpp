@@ -517,7 +517,7 @@ bool CollectResourceReferences(aapt::IAaptContext* context, ResourceTable* table
     for (auto& type : pkg->types) {
       for (auto& entry : type->entries) {
         for (auto& config_value : entry->values) {
-          ResourceName from(pkg->name, type->type, entry->name);
+          ResourceName from(pkg->name, type->named_type, entry->name);
           ReferenceVisitor visitor(context, from, keep_set);
           config_value->value->Accept(&visitor);
         }

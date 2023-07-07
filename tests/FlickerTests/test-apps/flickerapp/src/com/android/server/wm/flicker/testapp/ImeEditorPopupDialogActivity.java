@@ -16,6 +16,8 @@
 
 package com.android.server.wm.flicker.testapp;
 
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
@@ -30,6 +32,7 @@ public class ImeEditorPopupDialogActivity extends Activity {
         WindowManager.LayoutParams p = getWindow().getAttributes();
         p.layoutInDisplayCutoutMode = WindowManager.LayoutParams
                 .LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        p.softInputMode = SOFT_INPUT_STATE_ALWAYS_HIDDEN;
         getWindow().setAttributes(p);
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);

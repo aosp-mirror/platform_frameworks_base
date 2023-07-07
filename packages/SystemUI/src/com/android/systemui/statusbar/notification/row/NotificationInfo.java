@@ -20,7 +20,7 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
-import static com.android.systemui.animation.Interpolators.FAST_OUT_SLOW_IN;
+import static com.android.app.animation.Interpolators.FAST_OUT_SLOW_IN;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -158,7 +158,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     // used by standard ui
     private OnClickListener mOnDismissSettings = v -> {
         mPressedApply = true;
-        mGutsContainer.closeControls(v, true);
+        mGutsContainer.closeControls(v, /* save= */ true);
     };
 
     public NotificationInfo(Context context, AttributeSet attrs) {
@@ -204,10 +204,11 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isDeviceProvisioned,
             boolean isNonblockable,
             boolean wasShownHighPriority,
-            AssistantFeedbackController assistantFeedbackController)
+            AssistantFeedbackController assistantFeedbackController,
+            MetricsLogger metricsLogger)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
-        mMetricsLogger = Dependency.get(MetricsLogger.class);
+        mMetricsLogger = metricsLogger;
         mOnUserInteractionCallback = onUserInteractionCallback;
         mChannelEditorDialogController = channelEditorDialogController;
         mAssistantFeedbackController = assistantFeedbackController;
@@ -541,10 +542,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     @Override
     public void onFinishedClosing() {
-        if (mChosenImportance != null) {
-            mStartingChannelImportance = mChosenImportance;
-        }
-
         bindInlineControls();
 
         logUiEvent(NotificationControlsEvent.NOTIFICATION_CONTROLS_CLOSE);
@@ -604,7 +601,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     @Override
-    public boolean shouldBeSaved() {
+    public boolean shouldBeSavedOnClose() {
         return mPressedApply;
     }
 
@@ -627,6 +624,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         if (save) {
             saveImportance();
         }
+
+        // Clear the selected importance when closing, so when when we open again,
+        // we starts from a clean state.
+        mChosenImportance = null;
+        mPressedApply = false;
+
         return false;
     }
 

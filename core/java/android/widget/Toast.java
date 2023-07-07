@@ -32,6 +32,7 @@ import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -49,6 +50,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -204,22 +206,24 @@ public class Toast {
         INotificationManager service = getService();
         String pkg = mContext.getOpPackageName();
         TN tn = mTN;
-        tn.mNextView = mNextView;
+        tn.mNextView = new WeakReference<>(mNextView);
+        final boolean isUiContext = mContext.isUiContext();
         final int displayId = mContext.getDisplayId();
 
         try {
             if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
                 if (mNextView != null) {
                     // It's a custom toast
-                    service.enqueueToast(pkg, mToken, tn, mDuration, displayId);
+                    service.enqueueToast(pkg, mToken, tn, mDuration, isUiContext, displayId);
                 } else {
                     // It's a text toast
                     ITransientNotificationCallback callback =
                             new CallbackBinder(mCallbacks, mHandler);
-                    service.enqueueTextToast(pkg, mToken, mText, mDuration, displayId, callback);
+                    service.enqueueTextToast(pkg, mToken, mText, mDuration, isUiContext, displayId,
+                            callback);
                 }
             } else {
-                service.enqueueToast(pkg, mToken, tn, mDuration, displayId);
+                service.enqueueToast(pkg, mToken, tn, mDuration, isUiContext, displayId);
             }
         } catch (RemoteException e) {
             // Empty
@@ -497,19 +501,39 @@ public class Toast {
      */
     public static Toast makeText(@NonNull Context context, @Nullable Looper looper,
             @NonNull CharSequence text, @Duration int duration) {
-        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
-            Toast result = new Toast(context, looper);
-            result.mText = text;
-            result.mDuration = duration;
-            return result;
-        } else {
-            Toast result = new Toast(context, looper);
-            View v = ToastPresenter.getTextToastView(context, text);
-            result.mNextView = v;
-            result.mDuration = duration;
+        Toast result = new Toast(context, looper);
 
-            return result;
+        if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
+            result.mText = text;
+        } else {
+            result.mNextView = ToastPresenter.getTextToastView(context, text);
         }
+
+        result.mDuration = duration;
+        return result;
+    }
+
+    /**
+     * Make a standard toast with an icon to display using the specified looper.
+     * If looper is null, Looper.myLooper() is used.
+     *
+     * The toast will be a custom view that's rendered by the app (instead of by SystemUI).
+     * In Android version R and above, non-system apps can only render the toast
+     * when it's in the foreground.
+     *
+     * @hide
+     */
+    public static Toast makeCustomToastWithIcon(@NonNull Context context, @Nullable Looper looper,
+            @NonNull CharSequence text, @Duration int duration, @NonNull Drawable icon) {
+        if (icon == null) {
+            throw new IllegalArgumentException("Drawable icon should not be null "
+                    + "for makeCustomToastWithIcon");
+        }
+
+        Toast result = new Toast(context, looper);
+        result.mNextView = ToastPresenter.getTextToastViewWithIcon(context, text, icon);
+        result.mDuration = duration;
+        return result;
     }
 
     /**
@@ -599,7 +623,7 @@ public class Toast {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         View mView;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-        View mNextView;
+        WeakReference<View> mNextView;
         int mDuration;
 
         WindowManager mWM;
@@ -609,7 +633,7 @@ public class Toast {
         private final ToastPresenter mPresenter;
 
         @GuardedBy("mCallbacks")
-        private final List<Callback> mCallbacks;
+        private final WeakReference<List<Callback>> mCallbacks;
 
         /**
          * Creates a {@link ITransientNotification} object.
@@ -626,7 +650,7 @@ public class Toast {
             mParams = mPresenter.getLayoutParams();
             mPackageName = packageName;
             mToken = token;
-            mCallbacks = callbacks;
+            mCallbacks = new WeakReference<>(callbacks);
 
             mHandler = new Handler(looper, null) {
                 @Override
@@ -662,7 +686,11 @@ public class Toast {
 
         private List<Callback> getCallbacks() {
             synchronized (mCallbacks) {
-                return new ArrayList<>(mCallbacks);
+                if (mCallbacks.get() != null) {
+                    return new ArrayList<>(mCallbacks.get());
+                } else {
+                    return new ArrayList<>();
+                }
             }
         }
 
@@ -698,13 +726,15 @@ public class Toast {
             if (mHandler.hasMessages(CANCEL) || mHandler.hasMessages(HIDE)) {
                 return;
             }
-            if (mView != mNextView) {
+            if (mNextView != null && mView != mNextView.get()) {
                 // remove the old view if necessary
                 handleHide();
-                mView = mNextView;
-                mPresenter.show(mView, mToken, windowToken, mDuration, mGravity, mX, mY,
-                        mHorizontalMargin, mVerticalMargin,
-                        new CallbackBinder(getCallbacks(), mHandler));
+                mView = mNextView.get();
+                if (mView != null) {
+                    mPresenter.show(mView, mToken, windowToken, mDuration, mGravity, mX, mY,
+                            mHorizontalMargin, mVerticalMargin,
+                            new CallbackBinder(getCallbacks(), mHandler));
+                }
             }
         }
 

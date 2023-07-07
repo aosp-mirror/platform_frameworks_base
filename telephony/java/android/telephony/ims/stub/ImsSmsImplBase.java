@@ -18,6 +18,7 @@ package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.telephony.SmsManager;
@@ -27,6 +28,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Base implementation for SMS over IMS.
@@ -128,6 +130,22 @@ public class ImsSmsImplBase {
     // Lock for feature synchronization
     private final Object mLock = new Object();
     private IImsSmsListener mListener;
+    private Executor mExecutor;
+
+    /**
+     * Create a new ImsSmsImplBase using the Executor set in MmTelFeature
+     */
+    public ImsSmsImplBase() {
+    }
+
+    /**
+     * Create a new ImsSmsImplBase with specified executor.
+     * <p>
+     * @param executor Default executor for ImsSmsImplBase
+     */
+    public ImsSmsImplBase(@NonNull Executor executor) {
+        mExecutor = executor;
+    }
 
     /**
      * Registers a listener responsible for handling tasks like delivering messages.
@@ -170,9 +188,28 @@ public class ImsSmsImplBase {
     }
 
     /**
+     * This method will be triggered by the platform when memory becomes available to receive SMS
+     * after a memory full event. This method should be implemented by IMS providers to
+     * send RP-SMMA notification from SMS Relay Layer to server over IMS as per section 7.3.2 of
+     * TS 124.11. Once the RP-SMMA Notification is sent to the network. The network will deliver all
+     * the pending messages which failed due to Unavailability of Memory.
+     *
+     * @param token unique token generated in {@link ImsSmsDispatcher#onMemoryAvailable(void)} that
+     *  should be used when triggering callbacks for this specific message.
+     *
+     * @hide
+     */
+    public void onMemoryAvailable(int token) {
+        // Base Implementation - Should be overridden
+    }
+
+    /**
      * This method will be triggered by the platform after
      * {@link #onSmsReceived(int, String, byte[])} has been called to deliver the result to the IMS
      * provider.
+     *
+     * If the framework needs to provide the PDU used to acknowledge the SMS,
+     * {@link #acknowledgeSms(int, int, int, byte[])} will be called.
      *
      * @param token token provided in {@link #onSmsReceived(int, String, byte[])}
      * @param messageRef the message reference, which may be 1 byte if it is in
@@ -183,6 +220,27 @@ public class ImsSmsImplBase {
     public void acknowledgeSms(int token, @IntRange(from = 0, to = 65535)  int messageRef,
             @DeliverStatusResult int result) {
         Log.e(LOG_TAG, "acknowledgeSms() not implemented.");
+    }
+
+    /**
+     * This method will be called by the platform after
+     * {@link #onSmsReceived(int, String, byte[])} has been called to acknowledge an incoming SMS.
+     *
+     * This method is only called in cases where the framework needs to provide the PDU such as the
+     * case where we provide the Short Message Transfer Layer PDU (see 3GPP TS 23.040). Otherwise,
+     * {@link #acknowledgeSms(int, int, int)} will be used.
+     *
+     * @param token token provided in {@link #onSmsReceived(int, String, byte[])}
+     * @param messageRef the message reference, which may be 1 byte if it is in
+     *     {@link SmsMessage#FORMAT_3GPP} format (see TS.123.040) or 2 bytes if it is in
+     *     {@link SmsMessage#FORMAT_3GPP2} format (see 3GPP2 C.S0015-B).
+     * @param result result of delivering the message.
+     * @param pdu PDU representing the contents of the message.
+     */
+    public void acknowledgeSms(int token, @IntRange(from = 0, to = 65535)  int messageRef,
+            @DeliverStatusResult int result, @NonNull byte[] pdu) {
+        Log.e(LOG_TAG, "acknowledgeSms() not implemented. acknowledgeSms(int, int, int) called.");
+        acknowledgeSms(token, messageRef, result);
     }
 
     /**
@@ -347,6 +405,38 @@ public class ImsSmsImplBase {
     }
 
     /**
+     * This API is used to report the result of sending
+     * RP-SMMA to framework based on received network responses(RP-ACK,
+     * RP-ERROR or SIP error).
+     *
+     * @param token provided in {@link #onMemoryAvailable()}.
+     * @param result based on RP-ACK or RP_ERROR
+     * @param networkErrorCode the error code reported by the carrier
+     * network if sending this SMS has resulted in an error or
+     * {@link #RESULT_NO_NETWORK_ERROR} if no network error was generated. See
+     * 3GPP TS 24.011 Section 7.3.4 for valid error codes and more
+     * information.
+     *
+     * @hide
+     */
+    public final void onMemoryAvailableResult(int token, @SendStatusResult int result,
+            int networkErrorCode) throws RuntimeException {
+        IImsSmsListener listener = null;
+        synchronized (mLock) {
+            listener = mListener;
+        }
+
+        if (listener == null) {
+            throw new RuntimeException("Feature not ready.");
+        }
+        try {
+            listener.onMemoryAvailableResult(token, result, networkErrorCode);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * This method should be triggered by the IMS providers when the status report of the sent
      * message is received. The platform will handle the report and notify the IMS provider of the
      * result by calling {@link #acknowledgeSmsReport(int, int, int)}.
@@ -442,5 +532,30 @@ public class ImsSmsImplBase {
      */
     public void onReady() {
         // Base Implementation - Should be overridden
+    }
+
+    /**
+     * Set default Executor for ImsSmsImplBase.
+     *
+     * @param executor The default executor for the framework to use when executing the methods
+     * overridden by the implementation of ImsSms.
+     * @hide
+     */
+    public final void setDefaultExecutor(@NonNull Executor executor) {
+        if (mExecutor == null) {
+            mExecutor = executor;
+        }
+    }
+
+    /**
+     * Get Executor from ImsSmsImplBase.
+     * If there is no settings for the executor, all ImsSmsImplBase method calls will use
+     * Runnable::run as default
+     *
+     * @return an Executor used to execute methods in ImsSms called remotely by the framework.
+     * @hide
+     */
+    public @NonNull Executor getExecutor() {
+        return mExecutor != null ? mExecutor : Runnable::run;
     }
 }

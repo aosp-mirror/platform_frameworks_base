@@ -23,8 +23,6 @@ import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import java.io.Closeable;
-
 /**
  * A virtual touchscreen representing a touch-based display input mechanism on a remote device.
  *
@@ -34,25 +32,10 @@ import java.io.Closeable;
  * @hide
  */
 @SystemApi
-public class VirtualTouchscreen implements Closeable {
-
-    private final IVirtualDevice mVirtualDevice;
-    private final IBinder mToken;
-
+public class VirtualTouchscreen extends VirtualInputDevice {
     /** @hide */
     public VirtualTouchscreen(IVirtualDevice virtualDevice, IBinder token) {
-        mVirtualDevice = virtualDevice;
-        mToken = token;
-    }
-
-    @Override
-    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void close() {
-        try {
-            mVirtualDevice.unregisterInputDevice(mToken);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        super(virtualDevice, token);
     }
 
     /**

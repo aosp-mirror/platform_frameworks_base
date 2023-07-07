@@ -1,2 +1,3 @@
 per-file *Notification* = file:/services/core/java/com/android/server/notification/OWNERS
 per-file *ContrastColor* = file:/services/core/java/com/android/server/notification/OWNERS
+per-file *LatencyTracker* = file:/core/java/com/android/internal/util/LATENCY_TRACKER_OWNERS

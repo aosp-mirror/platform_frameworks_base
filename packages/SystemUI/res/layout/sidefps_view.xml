@@ -23,4 +23,4 @@
     app:lottie_autoPlay="true"
     app:lottie_loop="true"
     app:lottie_rawRes="@raw/sfps_pulse"
-    android:contentDescription="@string/accessibility_fingerprint_label"/>
+    android:importantForAccessibility="no"/>

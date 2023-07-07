@@ -351,21 +351,26 @@ public final class ProviderMap {
 
     protected boolean dumpProvider(FileDescriptor fd, PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll) {
-        ArrayList<ContentProviderRecord> providers = getProvidersForName(name);
+        try {
+            mAm.mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
+            ArrayList<ContentProviderRecord> providers = getProvidersForName(name);
 
-        if (providers.size() <= 0) {
-            return false;
-        }
-
-        boolean needSep = false;
-        for (int i=0; i<providers.size(); i++) {
-            if (needSep) {
-                pw.println();
+            if (providers.size() <= 0) {
+                return false;
             }
-            needSep = true;
-            dumpProvider("", fd, pw, providers.get(i), args, dumpAll);
+
+            boolean needSep = false;
+            for (int i=0; i<providers.size(); i++) {
+                if (needSep) {
+                    pw.println();
+                }
+                needSep = true;
+                dumpProvider("", fd, pw, providers.get(i), args, dumpAll);
+            }
+            return true;
+        } finally {
+            mAm.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
         }
-        return true;
     }
 
     /**

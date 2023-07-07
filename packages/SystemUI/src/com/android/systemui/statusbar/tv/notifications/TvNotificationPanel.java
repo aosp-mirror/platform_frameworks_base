@@ -35,14 +35,15 @@ import javax.inject.Inject;
  * Offers control methods for the notification panel handler on TV devices.
  */
 @SysUISingleton
-public class TvNotificationPanel extends CoreStartable implements CommandQueue.Callbacks {
+public class TvNotificationPanel implements CoreStartable, CommandQueue.Callbacks {
     private static final String TAG = "TvNotificationPanel";
+    private final Context mContext;
     private final CommandQueue mCommandQueue;
     private final String mNotificationHandlerPackage;
 
     @Inject
     public TvNotificationPanel(Context context, CommandQueue commandQueue) {
-        super(context);
+        mContext = context;
         mCommandQueue = commandQueue;
         mNotificationHandlerPackage = mContext.getResources().getString(
                 com.android.internal.R.string.config_notificationHandlerPackage);

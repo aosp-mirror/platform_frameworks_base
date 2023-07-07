@@ -71,9 +71,9 @@ Any app can request any permission via adding an entry in the manifest file like
 
 A requested permission does not necessarily mean that the permission is granted. When and how a
 permission is granted depends on the protection level of the permission. If no protection level is
-set, the permission will always be granted. Such "normal" permissions can still be useful as it
-will be easy to find apps using a certain functionality on app stores and by checking `dumpsys
-package`.
+set, it will default to `normal` and the permission will always be granted if requested. Such
+`normal` permissions can still be useful as it will be easy to find apps using a certain
+functionality on app stores and by checking `dumpsys package`.
 
 #### Checking a permission
 
@@ -686,17 +686,37 @@ able to call APIs not available to other apps. This is implemented by granting p
 these system apps and then enforcing the permissions in the API similar to other [install time
 permissions](#checking-a-permission).
 
-System apps are not different from regular apps, but the protection levels (e.g.
+System apps are not different from regular apps, but the protection flags (e.g.
 [privileged](#privileged-permissions), [preinstalled](#preinstalled-permissions)) mentioned in this
 section are more commonly used by system apps.
 
-### Multiple permission levels
+### Permission protection level
 
-It is possible to assign multiple protection levels to a permission. Very common combinations are
-for example adding `signature` to all permissions to make sure the platform signed apps can be
-granted the permission, e.g. `privileged|signature`.
+Every permission has a protection level (`android:protectionlevel`), which is a combination of one
+required protection (`PermissionInfo.getProtection()`) and multiple optional protection flags
+(`PermissionInfo.getProtectionFlags()`).
 
-The permission will be granted if the app qualifies for _any_ of the permission levels.
+The protection can be one of the following:
+
+- [`normal`](#requesting-a-permission): The permission will be granted to apps requesting it in
+their manifest.
+- [`dangerous`](#runtime-permissions): The permission will be a runtime permission.
+- [`signature`](#signature-permissions): The permission will be granted to apps being signed with
+the same certificate as the app defining the permission. If the permission is a platform permission,
+it means those apps need to be platform-signed.
+- `internal`: This is a no-op protection so that it won't allow granting the permission by itself.
+However, it will be useful when defining permissions that should only be granted according to its
+protection flags, e.g. `internal|role` for a role-only permission.
+
+There are various optional protection flags that can be added to protection level, in addition to
+the required protection, e.g. [appop](#app_op-permissions),
+[preinstalled](#preinstalled-permissions), [privileged](#privileged-permissions),
+[installer](#limited-permissions), [role](#role-protected-permissions) and
+[development](#development-permissions).
+
+The permission will be granted to an app if it meets _any_ of the protection or protection flags (an
+`OR` relationship). For example, `signature|privileged` allows the permission to be granted to
+platform-signed apps as well as privileged apps.
 
 ### App-op permissions
 
@@ -716,17 +736,14 @@ and special behavior. Hence this section is a guideline, not a rule.
 #### Defining an app-op permission
 
 Only the platform can reasonably define an app-op permission. The permission is defined in the
-platforms manifest using the `appop` protection level
+platforms manifest using the `appop` protection flag:
 
 ```xml
 <manifest package="android">
     <permission android:name="android.permission.MY_APPOP_PERMISSION"
-        android:protectionLevel="appop|signature" />
+        android:protectionLevel="signature|appop" />
 </manifest>
 ```
-
-Almost always the protection level is app-op | something else, like
-[signature](#signature-permissions) (in the case above) or [privileged](#privileged-permissions).
 
 #### Checking an app-op permission
 
@@ -913,12 +930,12 @@ See
 
 > Not recommended
 
-By adding the `development` protection level to any permissions the permission can be granted via
+By adding the `development` protection flag to any permissions the permission can be granted via
 the `pm grant` shell command. This appears to be useful for development and testing, but it is very
 highly discouraged. Any user can grant them permanently via adb, hence adding this tag removes
 all guarantees the permission might otherwise provide.
 
-### Other protection levels
+### Other protection flags
 
 There are other levels (such as `runtime`) but they are for special purposes on should not be
 used by platform developers.

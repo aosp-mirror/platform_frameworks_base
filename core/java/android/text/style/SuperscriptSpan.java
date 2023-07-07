@@ -83,4 +83,9 @@ public class SuperscriptSpan extends MetricAffectingSpan implements ParcelableSp
     public void updateMeasureState(@NonNull TextPaint textPaint) {
         textPaint.baselineShift += (int) (textPaint.ascent() / 2);
     }
+
+    @Override
+    public String toString() {
+        return "SuperscriptSpan{}";
+    }
 }

@@ -132,24 +132,30 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         mRandom = new Random();
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void setTestHalEnabled(boolean enabled) {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
+
+        super.setTestHalEnabled_enforcePermission();
 
         mFingerprint21.setTestHalEnabled(enabled);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void startEnroll(int userId) {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
+
+        super.startEnroll_enforcePermission();
 
         mFingerprint21.scheduleEnroll(mSensorId, new Binder(), new byte[69], userId, mReceiver,
                 mContext.getOpPackageName(), FingerprintManager.ENROLL_ENROLL);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void finishEnroll(int userId) {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
+
+        super.finishEnroll_enforcePermission();
 
         int nextRandomId = mRandom.nextInt();
         while (mEnrollmentIds.contains(nextRandomId)) {
@@ -161,11 +167,13 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
                 nextRandomId /* fingerId */, userId, 0);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void acceptAuthentication(int userId)  {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         // Fake authentication with any of the existing fingers
+        super.acceptAuthentication_enforcePermission();
+
         List<Fingerprint> fingerprints = FingerprintUtils.getLegacyInstance(mSensorId)
                 .getBiometricsForUser(mContext, userId);
         if (fingerprints.isEmpty()) {
@@ -177,30 +185,38 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         mHalResultController.onAuthenticated(0 /* deviceId */, fid, userId, hat);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void rejectAuthentication(int userId)  {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
+
+        super.rejectAuthentication_enforcePermission();
 
         mHalResultController.onAuthenticated(0 /* deviceId */, 0 /* fingerId */, userId, null);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void notifyAcquired(int userId, int acquireInfo)  {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
+
+        super.notifyAcquired_enforcePermission();
 
         mHalResultController.onAcquired(0 /* deviceId */, acquireInfo, 0 /* vendorCode */);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void notifyError(int userId, int errorCode)  {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
+
+        super.notifyError_enforcePermission();
 
         mHalResultController.onError(0 /* deviceId */, errorCode, 0 /* vendorCode */);
     }
 
+    @android.annotation.EnforcePermission(android.Manifest.permission.TEST_BIOMETRIC)
     @Override
     public void cleanupInternalState(int userId)  {
-        Utils.checkPermission(mContext, TEST_BIOMETRIC);
+
+        super.cleanupInternalState_enforcePermission();
 
         mFingerprint21.scheduleInternalCleanup(mSensorId, userId, new ClientMonitorCallback() {
             @Override

@@ -34,7 +34,6 @@ import android.annotation.Nullable;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.EventList;
 import android.app.usage.EventStats;
-import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
@@ -50,6 +49,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArrayMap;
 import android.util.SparseIntArray;
+import android.util.TimeSparseArray;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A per-user UsageStatsService. All methods are meant to be called with the main lock held
@@ -1374,8 +1375,8 @@ class UserUsageStatsService {
         return mDatabase.getBackupPayload(key);
     }
 
-    void applyRestoredPayload(String key, byte[] payload){
+    Set<String> applyRestoredPayload(String key, byte[] payload) {
         checkAndGetTimeLocked();
-        mDatabase.applyRestoredPayload(key, payload);
+        return mDatabase.applyRestoredPayload(key, payload);
     }
 }

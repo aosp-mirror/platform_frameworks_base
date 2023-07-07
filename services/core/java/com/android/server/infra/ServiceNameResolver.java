@@ -22,6 +22,7 @@ import android.annotation.UserIdInt;
 import com.android.internal.infra.AbstractRemoteService;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * A helper class used to resolve the name of the app-provided service a
@@ -30,7 +31,6 @@ import java.io.PrintWriter;
  * @hide
  */
 public interface ServiceNameResolver {
-
     /**
      * Listener for name changes.
      */
@@ -75,6 +75,12 @@ public interface ServiceNameResolver {
         } else {
             return new String[] { getDefaultServiceName(userId) };
         }
+    }
+
+    /**
+     * Set the given list of services to the secure setting
+     */
+    default void setServiceNameList(List<String> services, int userId) {
     }
 
     /**

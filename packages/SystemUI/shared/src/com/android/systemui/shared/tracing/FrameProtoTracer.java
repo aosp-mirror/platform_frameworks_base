@@ -25,8 +25,8 @@ import com.android.internal.util.TraceBuffer;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.Consumer;
 
@@ -50,7 +50,7 @@ public class FrameProtoTracer<P, S extends P, T extends P, R>
     private final File mTraceFile;
     private final ProtoTraceParams<P, S, T, R> mParams;
     private Choreographer mChoreographer;
-    private final Queue<T> mPool = new LinkedList<>();
+    private final Queue<T> mPool = new ArrayDeque<>();
     private final ArrayList<ProtoTraceable<R>> mTraceables = new ArrayList<>();
     private final ArrayList<ProtoTraceable<R>> mTmpTraceables = new ArrayList<>();
 

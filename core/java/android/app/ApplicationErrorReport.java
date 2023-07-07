@@ -299,6 +299,12 @@ public class ApplicationErrorReport implements Parcelable {
      */
     public static class CrashInfo {
         /**
+         * The name of the exception handler that is installed.
+         * @hide
+         */
+        public String exceptionHandlerClassName;
+
+        /**
          * Class name of the exception that caused the crash.
          */
         public String exceptionClassName;
@@ -369,6 +375,14 @@ public class ApplicationErrorReport implements Parcelable {
                 }
             }
 
+            // Populate the currently installed exception handler.
+            Thread.UncaughtExceptionHandler handler = Thread.getDefaultUncaughtExceptionHandler();
+            if (handler != null) {
+                exceptionHandlerClassName = handler.getClass().getName();
+            } else {
+                exceptionHandlerClassName = "unknown";
+            }
+
             exceptionClassName = rootTr.getClass().getName();
             if (rootTr.getStackTrace().length > 0) {
                 StackTraceElement trace = rootTr.getStackTrace()[0];
@@ -416,6 +430,7 @@ public class ApplicationErrorReport implements Parcelable {
          * Create an instance of CrashInfo initialized from a Parcel.
          */
         public CrashInfo(Parcel in) {
+            exceptionHandlerClassName = in.readString();
             exceptionClassName = in.readString();
             exceptionMessage = in.readString();
             throwFileName = in.readString();
@@ -431,6 +446,7 @@ public class ApplicationErrorReport implements Parcelable {
          */
         public void writeToParcel(Parcel dest, int flags) {
             int start = dest.dataPosition();
+            dest.writeString(exceptionHandlerClassName);
             dest.writeString(exceptionClassName);
             dest.writeString(exceptionMessage);
             dest.writeString(throwFileName);
@@ -441,6 +457,7 @@ public class ApplicationErrorReport implements Parcelable {
             dest.writeString(crashTag);
             int total = dest.dataPosition()-start;
             if (Binder.CHECK_PARCEL_SIZE && total > 20*1024) {
+                Slog.d("Error", "ERR: exHandler=" + exceptionHandlerClassName);
                 Slog.d("Error", "ERR: exClass=" + exceptionClassName);
                 Slog.d("Error", "ERR: exMsg=" + exceptionMessage);
                 Slog.d("Error", "ERR: file=" + throwFileName);
@@ -455,6 +472,7 @@ public class ApplicationErrorReport implements Parcelable {
          * Dump a CrashInfo instance to a Printer.
          */
         public void dump(Printer pw, String prefix) {
+            pw.println(prefix + "exceptionHandlerClassName: " + exceptionHandlerClassName);
             pw.println(prefix + "exceptionClassName: " + exceptionClassName);
             pw.println(prefix + "exceptionMessage: " + exceptionMessage);
             pw.println(prefix + "throwFileName: " + throwFileName);

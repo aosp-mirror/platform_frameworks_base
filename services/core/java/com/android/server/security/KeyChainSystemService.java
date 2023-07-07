@@ -45,6 +45,7 @@ import com.android.server.SystemService;
  * <p>
  * TODO (b/35968281): take a more sophisticated look at what bits of KeyChain should be inside the
  *                    system server and which make sense inside a system app.
+ * @hide
  */
 public class KeyChainSystemService extends SystemService {
 

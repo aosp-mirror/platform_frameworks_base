@@ -61,7 +61,7 @@ public class SensorOverlaysTest {
 
     @Test
     public void noopWhenBothNull() {
-        final SensorOverlays useless = new SensorOverlays(null, null);
+        final SensorOverlays useless = new SensorOverlays(null, null, null);
         useless.show(SENSOR_ID, 2, null);
         useless.hide(SENSOR_ID);
     }
@@ -69,12 +69,12 @@ public class SensorOverlaysTest {
     @Test
     public void testProvidesUdfps() {
         final List<IUdfpsOverlayController> udfps = new ArrayList<>();
-        SensorOverlays sensorOverlays = new SensorOverlays(null, mSidefpsController);
+        SensorOverlays sensorOverlays = new SensorOverlays(null, mSidefpsController, null);
 
         sensorOverlays.ifUdfps(udfps::add);
         assertThat(udfps).isEmpty();
 
-        sensorOverlays = new SensorOverlays(mUdfpsOverlayController, mSidefpsController);
+        sensorOverlays = new SensorOverlays(mUdfpsOverlayController, mSidefpsController, null);
         sensorOverlays.ifUdfps(udfps::add);
         assertThat(udfps).containsExactly(mUdfpsOverlayController);
     }
@@ -96,7 +96,7 @@ public class SensorOverlaysTest {
 
     private void testShow(IUdfpsOverlayController udfps, ISidefpsController sidefps)
             throws Exception {
-        final SensorOverlays sensorOverlays = new SensorOverlays(udfps, sidefps);
+        final SensorOverlays sensorOverlays = new SensorOverlays(udfps, sidefps, null);
         final int reason = BiometricOverlayConstants.REASON_UNKNOWN;
         sensorOverlays.show(SENSOR_ID, reason, mAcquisitionClient);
 
@@ -126,7 +126,7 @@ public class SensorOverlaysTest {
 
     private void testHide(IUdfpsOverlayController udfps, ISidefpsController sidefps)
             throws Exception {
-        final SensorOverlays sensorOverlays = new SensorOverlays(udfps, sidefps);
+        final SensorOverlays sensorOverlays = new SensorOverlays(udfps, sidefps, null);
         sensorOverlays.hide(SENSOR_ID);
 
         if (udfps != null) {

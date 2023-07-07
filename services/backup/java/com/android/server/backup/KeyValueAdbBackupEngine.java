@@ -9,7 +9,7 @@ import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
-import android.app.backup.BackupManager;
+import android.app.backup.BackupAnnotations;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
 import android.app.backup.IBackupCallback;
@@ -148,7 +148,7 @@ public class KeyValueAdbBackupEngine {
         try {
             return mBackupManagerService.bindToAgentSynchronous(targetApp,
                     ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL,
-                    BackupManager.OperationType.BACKUP);
+                    BackupAnnotations.BackupDestination.CLOUD);
         } catch (SecurityException e) {
             Slog.e(TAG, "error in binding to agent for package " + targetApp.packageName
                     + ". " + e);

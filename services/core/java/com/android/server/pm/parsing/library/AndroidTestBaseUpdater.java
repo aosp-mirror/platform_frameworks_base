@@ -18,6 +18,7 @@ package com.android.server.pm.parsing.library;
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_BASE;
 import static com.android.server.pm.parsing.library.SharedLibraryNames.ANDROID_TEST_RUNNER;
 
+import android.annotation.NonNull;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
@@ -28,9 +29,9 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 
 /**
  * Updates a package to ensure that if it targets <= Q that the android.test.base library is
@@ -56,10 +57,10 @@ public class AndroidTestBaseUpdater extends PackageSharedLibraryUpdater {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long REMOVE_ANDROID_TEST_BASE = 133396946L;
 
-    private static boolean isChangeEnabled(AndroidPackage pkg) {
+    private static boolean isChangeEnabled(@NonNull AndroidPackage pkg, boolean isSystemApp) {
         // Do not ask platform compat for system apps to prevent a boot time regression in tests.
         // b/142558883.
-        if (!pkg.isSystem()) {
+        if (!isSystemApp) {
             IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
                     ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
             try {
@@ -74,11 +75,12 @@ public class AndroidTestBaseUpdater extends PackageSharedLibraryUpdater {
     }
 
     @Override
-    public void updatePackage(ParsedPackage pkg, boolean isUpdatedSystemApp) {
+    public void updatePackage(ParsedPackage pkg, boolean isSystemApp,
+            boolean isUpdatedSystemApp) {
         // Packages targeted at <= Q expect the classes in the android.test.base library
         // to be accessible so this maintains backward compatibility by adding the
         // android.test.base library to those packages.
-        if (!isChangeEnabled(pkg)) {
+        if (!isChangeEnabled(pkg, isSystemApp)) {
             prefixRequiredLibrary(pkg, ANDROID_TEST_BASE);
         } else {
             // If a package already depends on android.test.runner then add a dependency on

@@ -16,16 +16,14 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 
-import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.notification.InflationException;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 
 /**
- * Used by the {@link NotificationEntryManager}. When notifications are added or updated, the binder
+ * Used by the {@link NotifInflater}. When notifications are added or updated, the binder
  * is asked to (re)inflate and prepare their views. This inflation must occur off the main thread.
  */
 public interface NotificationRowBinder {
@@ -35,19 +33,12 @@ public interface NotificationRowBinder {
      */
     void inflateViews(
             NotificationEntry entry,
-            NotifInflater.Params params,
+            @NonNull NotifInflater.Params params,
             NotificationRowContentBinder.InflationCallback callback)
             throws InflationException;
 
     /**
-     * Called when the ranking has been updated (but not add or remove has been done). The binder
-     * should inspect the old and new adjustments and re-inflate the entry's views if necessary
-     * (e.g. if something important changed).
+     * Called when a notification is no longer likely to be displayed and can have its views freed.
      */
-    void onNotificationRankingUpdated(
-            NotificationEntry entry,
-            @Nullable Integer oldImportance,
-            NotificationUiAdjustment oldAdjustment,
-            NotificationUiAdjustment newAdjustment,
-            NotificationRowContentBinder.InflationCallback callback);
+    void releaseViews(NotificationEntry entry);
 }

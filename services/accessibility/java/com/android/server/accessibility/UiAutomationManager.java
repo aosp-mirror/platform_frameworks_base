@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.app.UiAutomation;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
@@ -34,6 +35,7 @@ import android.view.Display;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.util.DumpUtils;
+import com.android.server.utils.Slogf;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
@@ -51,11 +53,7 @@ class UiAutomationManager {
 
     private UiAutomationService mUiAutomationService;
 
-    private AccessibilityServiceInfo mUiAutomationServiceInfo;
-
     private AbstractAccessibilityServiceConnection.SystemSupport mSystemSupport;
-
-    private AccessibilityTrace mTrace;
 
     private int mUiAutomationFlags;
 
@@ -97,9 +95,10 @@ class UiAutomationManager {
             WindowManagerInternal windowManagerInternal,
             SystemActionPerformer systemActionPerformer,
             AccessibilityWindowManager awm, int flags) {
+        accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
+        Slogf.i(LOG_TAG, "Registering UiTestAutomationService (id=%s) when called by user %d",
+                accessibilityServiceInfo.getId(), Binder.getCallingUserHandle().getIdentifier());
         synchronized (mLock) {
-            accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
-
             if (mUiAutomationService != null) {
                 throw new IllegalStateException(
                         "UiAutomationService " + mUiAutomationService.mServiceInterface
@@ -116,7 +115,6 @@ class UiAutomationManager {
 
             mUiAutomationFlags = flags;
             mSystemSupport = systemSupport;
-            mTrace = trace;
             // Ignore registering UiAutomation if it is not allowed to use the accessibility
             // subsystem.
             if (!useAccessibility()) {
@@ -126,7 +124,6 @@ class UiAutomationManager {
                     mainHandler, mLock, securityPolicy, systemSupport, trace, windowManagerInternal,
                     systemActionPerformer, awm);
             mUiAutomationServiceOwner = owner;
-            mUiAutomationServiceInfo = accessibilityServiceInfo;
             mUiAutomationService.mServiceInterface = serviceClient;
             try {
                 mUiAutomationService.mServiceInterface.asBinder().linkToDeath(mUiAutomationService,
@@ -253,6 +250,7 @@ class UiAutomationManager {
                     securityPolicy, systemSupport, trace, windowManagerInternal,
                     systemActionPerformer, awm);
             mMainHandler = mainHandler;
+            setDisplayTypes(DISPLAY_TYPE_DEFAULT | DISPLAY_TYPE_PROXY);
         }
 
         void connectServiceUnknownThread() {

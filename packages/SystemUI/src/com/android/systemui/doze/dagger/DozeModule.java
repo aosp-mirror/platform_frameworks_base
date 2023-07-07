@@ -22,6 +22,7 @@ import android.os.Handler;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.doze.DozeAuthRemover;
 import com.android.systemui.doze.DozeBrightnessHostForwarder;
 import com.android.systemui.doze.DozeDockHandler;
@@ -35,6 +36,7 @@ import com.android.systemui.doze.DozeScreenStatePreventingAdapter;
 import com.android.systemui.doze.DozeSensors;
 import com.android.systemui.doze.DozeSuppressor;
 import com.android.systemui.doze.DozeSuspendScreenStatePreventingAdapter;
+import com.android.systemui.doze.DozeTransitionListener;
 import com.android.systemui.doze.DozeTriggers;
 import com.android.systemui.doze.DozeUi;
 import com.android.systemui.doze.DozeWallpaperState;
@@ -44,13 +46,14 @@ import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
+import dagger.Module;
+import dagger.Provides;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import dagger.Module;
-import dagger.Provides;
+import java.util.concurrent.Executor;
 
 /** Dagger module for use with {@link com.android.systemui.doze.dagger.DozeComponent}. */
 @Module
@@ -59,13 +62,13 @@ public abstract class DozeModule {
     @DozeScope
     @WrappedService
     static DozeMachine.Service providesWrappedService(DozeMachine.Service dozeMachineService,
-            DozeHost dozeHost, DozeParameters dozeParameters) {
+            DozeHost dozeHost, DozeParameters dozeParameters, @UiBackground Executor bgExecutor) {
         DozeMachine.Service wrappedService = dozeMachineService;
-        wrappedService = new DozeBrightnessHostForwarder(wrappedService, dozeHost);
+        wrappedService = new DozeBrightnessHostForwarder(wrappedService, dozeHost, bgExecutor);
         wrappedService = DozeScreenStatePreventingAdapter.wrapIfNeeded(
-                wrappedService, dozeParameters);
+                wrappedService, dozeParameters, bgExecutor);
         wrappedService = DozeSuspendScreenStatePreventingAdapter.wrapIfNeeded(
-                wrappedService, dozeParameters);
+                wrappedService, dozeParameters, bgExecutor);
 
         return wrappedService;
     }
@@ -83,7 +86,7 @@ public abstract class DozeModule {
             DozeUi dozeUi, DozeScreenState dozeScreenState,
             DozeScreenBrightness dozeScreenBrightness, DozeWallpaperState dozeWallpaperState,
             DozeDockHandler dozeDockHandler, DozeAuthRemover dozeAuthRemover,
-            DozeSuppressor dozeSuppressor) {
+            DozeSuppressor dozeSuppressor, DozeTransitionListener dozeTransitionListener) {
         return new DozeMachine.Part[]{
                 dozePauser,
                 dozeFalsingManagerAdapter,
@@ -94,7 +97,8 @@ public abstract class DozeModule {
                 dozeWallpaperState,
                 dozeDockHandler,
                 dozeAuthRemover,
-                dozeSuppressor
+                dozeSuppressor,
+                dozeTransitionListener
         };
     }
 

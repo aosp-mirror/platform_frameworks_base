@@ -20,6 +20,6 @@ license {
 
 java_binary {
     name: "telecom",
-    wrapper: "telecom",
+    wrapper: "telecom.sh",
     srcs: ["**/*.java"],
 }

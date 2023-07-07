@@ -229,7 +229,7 @@ Stream* Stream::getPairStream() const
    return mStreamManager->getPairStream(this);
 }
 
-Stream* Stream::playPairStream(std::vector<std::any>& garbage) {
+Stream* Stream::playPairStream(std::vector<std::any>& garbage, int32_t playerIId) {
     Stream* pairStream = getPairStream();
     LOG_ALWAYS_FATAL_IF(pairStream == nullptr, "No pair stream!");
     {
@@ -260,7 +260,7 @@ Stream* Stream::playPairStream(std::vector<std::any>& garbage) {
         const int pairState = pairStream->mState;
         pairStream->play_l(pairStream->mSound, pairStream->mStreamID,
                 pairStream->mLeftVolume, pairStream->mRightVolume, pairStream->mPriority,
-                pairStream->mLoop, pairStream->mRate, garbage);
+                pairStream->mLoop, pairStream->mRate, garbage, playerIId);
         if (pairStream->mState == IDLE) {
             return nullptr; // AudioTrack error
         }
@@ -274,16 +274,14 @@ Stream* Stream::playPairStream(std::vector<std::any>& garbage) {
 
 void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
         float leftVolume, float rightVolume, int32_t priority, int32_t loop, float rate,
-        std::vector<std::any>& garbage)
+        std::vector<std::any>& garbage, int32_t playerIId)
 {
     ALOGV("%s(%p)(soundID=%d, streamID=%d, leftVolume=%f, rightVolume=%f,"
-            " priority=%d, loop=%d, rate=%f)",
+            " priority=%d, loop=%d, rate=%f, playerIId=%d)",
             __func__, this, sound->getSoundID(), nextStreamID, leftVolume, rightVolume,
-            priority, loop, rate);
+            priority, loop, rate, playerIId);
 
     // initialize track
-    const audio_stream_type_t streamType =
-            AudioSystem::attributesToStreamType(*mStreamManager->getAttributes());
     const int32_t channelCount = sound->getChannelCount();
     const auto sampleRate = (uint32_t)lround(double(sound->getSampleRate()) * rate);
     size_t frameCount = 0;
@@ -328,8 +326,8 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
         attributionSource.token = sp<BBinder>::make();
         mCallback =  sp<StreamCallback>::make(this, toggle),
         // TODO b/182469354 make consistent with AudioRecord, add util for native source
-        mAudioTrack = new AudioTrack(streamType, sampleRate, sound->getFormat(),
-                channelMask, sound->getIMemory(), AUDIO_OUTPUT_FLAG_FAST,
+        mAudioTrack = new AudioTrack(AUDIO_STREAM_DEFAULT, sampleRate, sound->getFormat(),
+                channelMask, sound->getIMemory(), AUDIO_OUTPUT_FLAG_NONE,
                 mCallback,
                 0 /*default notification frames*/, AUDIO_SESSION_ALLOCATE,
                 AudioTrack::TRANSFER_DEFAULT,
@@ -339,6 +337,10 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
         // Set caller name so it can be logged in destructor.
         // MediaMetricsConstants.h: AMEDIAMETRICS_PROP_CALLERNAME_VALUE_SOUNDPOOL
         mAudioTrack->setCallerName("soundpool");
+
+        if (playerIId != PLAYER_PIID_INVALID) {
+            mAudioTrack->setPlayerIId(playerIId);
+        }
 
         if (status_t status = mAudioTrack->initCheck();
             status != NO_ERROR) {
@@ -379,6 +381,7 @@ int Stream::getCorrespondingStreamID() {
     std::lock_guard lock(mLock);
     return static_cast<int>(mAudioTrack ? mStreamID : getPairStream()->mStreamID);
 }
+
 size_t Stream::StreamCallback::onMoreData(const AudioTrack::Buffer&) {
     ALOGW("%s streamID %d Unexpected EVENT_MORE_DATA for static track",
             __func__, mStream->getCorrespondingStreamID());

@@ -64,6 +64,10 @@ class LaunchParamsController {
     void registerDefaultModifiers(ActivityTaskSupervisor supervisor) {
         // {@link TaskLaunchParamsModifier} handles window layout preferences.
         registerModifier(new TaskLaunchParamsModifier(supervisor));
+        if (DesktopModeLaunchParamsModifier.DESKTOP_MODE_SUPPORTED) {
+            // {@link DesktopModeLaunchParamsModifier} handles default task size changes
+            registerModifier(new DesktopModeLaunchParamsModifier());
+        }
     }
 
     /**

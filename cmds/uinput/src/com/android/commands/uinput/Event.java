@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import src.com.android.commands.uinput.InputAbsInfo;
 
@@ -64,6 +65,7 @@ public class Event {
     private SparseArray<int[]> mConfiguration;
     private int mDuration;
     private int mFfEffectsMax = 0;
+    private String mInputport;
     private SparseArray<InputAbsInfo> mAbsInfo;
 
     public int getId() {
@@ -110,6 +112,10 @@ public class Event {
         return mAbsInfo;
     }
 
+    public String getPort() {
+        return mInputport;
+    }
+
     /**
      * Convert an event to String.
      */
@@ -124,6 +130,7 @@ public class Event {
             + ", configuration=" + mConfiguration
             + ", duration=" + mDuration
             + ", ff_effects_max=" + mFfEffectsMax
+            + ", port=" + mInputport
             + "}";
     }
 
@@ -176,6 +183,10 @@ public class Event {
 
         public void setAbsInfo(SparseArray<InputAbsInfo> absInfo) {
             mEvent.mAbsInfo = absInfo;
+        }
+
+        public void setInputport(String port) {
+            mEvent.mInputport = port;
         }
 
         public Event build() {
@@ -262,6 +273,9 @@ public class Event {
                             case "duration":
                                 eb.setDuration(readInt());
                                 break;
+                            case "port":
+                                eb.setInputport(mReader.nextString());
+                                break;
                             default:
                                 mReader.skipValue();
                         }
@@ -325,7 +339,7 @@ public class Event {
                 mReader.beginArray();
                 while (mReader.hasNext()) {
                     int type = 0;
-                    int[] data = null;
+                    IntStream data = null;
                     mReader.beginObject();
                     while (mReader.hasNext()) {
                         String name = mReader.nextName();
@@ -334,8 +348,7 @@ public class Event {
                                 type = readInt();
                                 break;
                             case "data":
-                                data = readIntList().stream()
-                                            .mapToInt(Integer::intValue).toArray();
+                                data = readIntList().stream().mapToInt(Integer::intValue);
                                 break;
                             default:
                                 consumeRemainingElements();
@@ -346,7 +359,9 @@ public class Event {
                     }
                     mReader.endObject();
                     if (data != null) {
-                        configuration.put(type, data);
+                        final int[] existing = configuration.get(type);
+                        configuration.put(type, existing == null ? data.toArray()
+                                : IntStream.concat(IntStream.of(existing), data).toArray());
                     }
                 }
                 mReader.endArray();

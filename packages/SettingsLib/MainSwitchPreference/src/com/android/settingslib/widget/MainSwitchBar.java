@@ -161,6 +161,19 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
     }
 
     /**
+     * Set icon space reserved for title
+     */
+    public void setIconSpaceReserved(boolean iconSpaceReserved) {
+        if (mTextView != null && !BuildCompatUtils.isAtLeastS()) {
+            LayoutParams params = (LayoutParams) mTextView.getLayoutParams();
+            int iconSpace = getContext().getResources().getDimensionPixelSize(
+                    R.dimen.settingslib_switchbar_subsettings_margin_start);
+            params.setMarginStart(iconSpaceReserved ? iconSpace : 0);
+            mTextView.setLayoutParams(params);
+        }
+    }
+
+    /**
      * Show the MainSwitchBar
      */
     public void show() {

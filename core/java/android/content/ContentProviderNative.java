@@ -140,8 +140,10 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 case GET_TYPE_TRANSACTION:
                 {
                     data.enforceInterface(IContentProvider.descriptor);
+                    AttributionSource attributionSource = AttributionSource.CREATOR
+                            .createFromParcel(data);
                     Uri url = Uri.CREATOR.createFromParcel(data);
-                    String type = getType(url);
+                    String type = getType(attributionSource, url);
                     reply.writeNoException();
                     reply.writeString(type);
 
@@ -150,9 +152,19 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
 
                 case GET_TYPE_ASYNC_TRANSACTION: {
                     data.enforceInterface(IContentProvider.descriptor);
+                    AttributionSource attributionSource = AttributionSource.CREATOR
+                            .createFromParcel(data);
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     RemoteCallback callback = RemoteCallback.CREATOR.createFromParcel(data);
-                    getTypeAsync(url, callback);
+                    getTypeAsync(attributionSource, url, callback);
+                    return true;
+                }
+
+                case GET_TYPE_ANONYMOUS_ASYNC_TRANSACTION: {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    Uri url = Uri.CREATOR.createFromParcel(data);
+                    RemoteCallback callback = RemoteCallback.CREATOR.createFromParcel(data);
+                    getTypeAnonymousAsync(url, callback);
                     return true;
                 }
 
@@ -303,9 +315,11 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 case GET_STREAM_TYPES_TRANSACTION:
                 {
                     data.enforceInterface(IContentProvider.descriptor);
+                    AttributionSource attributionSource = AttributionSource.CREATOR
+                            .createFromParcel(data);
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     String mimeTypeFilter = data.readString();
-                    String[] types = getStreamTypes(url, mimeTypeFilter);
+                    String[] types = getStreamTypes(attributionSource, url, mimeTypeFilter);
                     reply.writeNoException();
                     reply.writeStringArray(types);
 
@@ -502,13 +516,13 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public String getType(Uri url) throws RemoteException
+    public String getType(AttributionSource attributionSource, Uri url) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
-
+            attributionSource.writeToParcel(data, 0);
             url.writeToParcel(data, 0);
 
             mRemote.transact(IContentProvider.GET_TYPE_TRANSACTION, data, reply, 0);
@@ -523,7 +537,25 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    /* oneway */ public void getTypeAsync(Uri uri, RemoteCallback callback) throws RemoteException {
+    /* oneway */ public void getTypeAsync(AttributionSource attributionSource,
+            Uri uri, RemoteCallback callback) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+            attributionSource.writeToParcel(data, 0);
+            uri.writeToParcel(data, 0);
+            callback.writeToParcel(data, 0);
+
+            mRemote.transact(IContentProvider.GET_TYPE_ASYNC_TRANSACTION, data, null,
+                    IBinder.FLAG_ONEWAY);
+        } finally {
+            data.recycle();
+        }
+    }
+
+    @Override
+    /* oneway */ public void getTypeAnonymousAsync(Uri uri, RemoteCallback callback)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
@@ -531,7 +563,7 @@ final class ContentProviderProxy implements IContentProvider
             uri.writeToParcel(data, 0);
             callback.writeToParcel(data, 0);
 
-            mRemote.transact(IContentProvider.GET_TYPE_ASYNC_TRANSACTION, data, null,
+            mRemote.transact(IContentProvider.GET_TYPE_ANONYMOUS_ASYNC_TRANSACTION, data, null,
                     IBinder.FLAG_ONEWAY);
         } finally {
             data.recycle();
@@ -739,12 +771,14 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException
+    public String[] getStreamTypes(AttributionSource attributionSource,
+            Uri url, String mimeTypeFilter) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
+            attributionSource.writeToParcel(data, 0);
 
             url.writeToParcel(data, 0);
             data.writeString(mimeTypeFilter);

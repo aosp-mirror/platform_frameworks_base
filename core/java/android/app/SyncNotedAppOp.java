@@ -56,7 +56,7 @@ public final class SyncNotedAppOp implements Parcelable {
      * The package this op applies to
      * @hide
      */
-    private final @NonNull String mPackageName;
+    private final @Nullable String mPackageName;
 
     /**
      * Native code relies on parcel ordering, do not change
@@ -64,7 +64,7 @@ public final class SyncNotedAppOp implements Parcelable {
      */
     @TestApi
     public SyncNotedAppOp(int opMode, @IntRange(from = 0L) int opCode,
-            @Nullable String attributionTag, @NonNull String packageName) {
+            @Nullable String attributionTag, @Nullable String packageName) {
         this.mOpCode = opCode;
         com.android.internal.util.AnnotationValidations.validate(
                 IntRange.class, null, mOpCode,
@@ -101,7 +101,7 @@ public final class SyncNotedAppOp implements Parcelable {
      * @hide
      */
     public SyncNotedAppOp(@IntRange(from = 0L) int opCode, @Nullable String attributionTag,
-            @NonNull String packageName) {
+            @Nullable String packageName) {
         this(AppOpsManager.MODE_IGNORED, opCode, attributionTag, packageName);
     }
 
@@ -152,7 +152,7 @@ public final class SyncNotedAppOp implements Parcelable {
      * @hide
      */
     @DataClass.Generated.Member
-    public @NonNull String getPackageName() {
+    public @Nullable String getPackageName() {
         return mPackageName;
     }
 
@@ -211,11 +211,12 @@ public final class SyncNotedAppOp implements Parcelable {
 
         byte flg = 0;
         if (mAttributionTag != null) flg |= 0x4;
+        if (mPackageName != null) flg |= 0x8;
         dest.writeByte(flg);
         dest.writeInt(mOpMode);
         dest.writeInt(mOpCode);
         if (mAttributionTag != null) dest.writeString(mAttributionTag);
-        dest.writeString(mPackageName);
+        if (mPackageName != null) dest.writeString(mPackageName);
     }
 
     @Override
@@ -233,7 +234,7 @@ public final class SyncNotedAppOp implements Parcelable {
         int opMode = in.readInt();
         int opCode = in.readInt();
         String attributionTag = (flg & 0x4) == 0 ? null : in.readString();
-        String packageName = in.readString();
+        String packageName = (flg & 0x8) == 0 ? null : in.readString();
 
         this.mOpMode = opMode;
         this.mOpCode = opCode;
@@ -243,8 +244,6 @@ public final class SyncNotedAppOp implements Parcelable {
                 "to", AppOpsManager._NUM_OP - 1);
         this.mAttributionTag = attributionTag;
         this.mPackageName = packageName;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mPackageName);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -264,10 +263,10 @@ public final class SyncNotedAppOp implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1643320427700L,
+            time = 1667247337573L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/app/SyncNotedAppOp.java",
-            inputSignatures = "private final  int mOpMode\nprivate final @android.annotation.IntRange int mOpCode\nprivate final @android.annotation.Nullable java.lang.String mAttributionTag\nprivate final @android.annotation.NonNull java.lang.String mPackageName\npublic @android.annotation.NonNull java.lang.String getOp()\npublic  int getOpMode()\nprivate  java.lang.String opCodeToString()\nclass SyncNotedAppOp extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genAidl=true, genConstructor=false, genToString=true)")
+            inputSignatures = "private final  int mOpMode\nprivate final @android.annotation.IntRange int mOpCode\nprivate final @android.annotation.Nullable java.lang.String mAttributionTag\nprivate final @android.annotation.Nullable java.lang.String mPackageName\npublic @android.annotation.NonNull java.lang.String getOp()\npublic  int getOpMode()\nprivate  java.lang.String opCodeToString()\nclass SyncNotedAppOp extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genAidl=true, genConstructor=false, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

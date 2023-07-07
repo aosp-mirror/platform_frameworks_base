@@ -47,7 +47,9 @@ public class ChooserActivityLoggerImpl implements ChooserActivityLogger {
                 /* num_app_provided_app_targets = 6 */ appProvidedApp,
                 /* is_workprofile = 7 */ isWorkprofile,
                 /* previewType = 8 */ typeFromPreviewInt(previewType),
-                /* intentType = 9 */ typeFromIntentString(intent));
+                /* intentType = 9 */ typeFromIntentString(intent),
+                /* num_provided_custom_actions = 10 */ 0,
+                /* reselection_action_provided = 11 */ false);
     }
 
     @Override

@@ -17,12 +17,15 @@
 package com.android.wm.shell.pip;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.PictureInPictureParams;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Used to keep track of PiP leash state as it appears and animates by {@link PipTaskOrganizer} and
@@ -36,6 +39,9 @@ public class PipTransitionState {
     public static final int ENTERING_PIP = 3;
     public static final int ENTERED_PIP = 4;
     public static final int EXITING_PIP = 5;
+
+    private final List<OnPipTransitionStateChangedListener> mOnPipTransitionStateChangedListeners =
+            new ArrayList<>();
 
     /**
      * If set to {@code true}, no entering PiP transition would be kicked off and most likely
@@ -65,7 +71,13 @@ public class PipTransitionState {
     }
 
     public void setTransitionState(@TransitionState int state) {
-        mState = state;
+        if (mState != state) {
+            for (int i = 0; i < mOnPipTransitionStateChangedListeners.size(); i++) {
+                mOnPipTransitionStateChangedListeners.get(i).onPipTransitionStateChanged(
+                        mState, state);
+            }
+            mState = state;
+        }
     }
 
     public @TransitionState int getTransitionState() {
@@ -73,8 +85,17 @@ public class PipTransitionState {
     }
 
     public boolean isInPip() {
-        return mState >= TASK_APPEARED
-                && mState != EXITING_PIP;
+        return isInPip(mState);
+    }
+
+    /** Returns true if activity has fully entered PiP mode. */
+    public boolean hasEnteredPip() {
+        return hasEnteredPip(mState);
+    }
+
+    /** Returns true if activity is currently entering PiP mode. */
+    public boolean isEnteringPip() {
+        return isEnteringPip(mState);
     }
 
     public void setInSwipePipToHomeTransition(boolean inSwipePipToHomeTransition) {
@@ -93,5 +114,52 @@ public class PipTransitionState {
     public boolean shouldBlockResizeRequest() {
         return mState < ENTERING_PIP
                 || mState == EXITING_PIP;
+    }
+
+    public void addOnPipTransitionStateChangedListener(
+            @NonNull OnPipTransitionStateChangedListener listener) {
+        mOnPipTransitionStateChangedListeners.add(listener);
+    }
+
+    public void removeOnPipTransitionStateChangedListener(
+            @NonNull OnPipTransitionStateChangedListener listener) {
+        mOnPipTransitionStateChangedListeners.remove(listener);
+    }
+
+    public static boolean isInPip(@TransitionState int state) {
+        return state >= TASK_APPEARED && state != EXITING_PIP;
+    }
+
+    /** Returns true if activity has fully entered PiP mode. */
+    public static boolean hasEnteredPip(@TransitionState int state) {
+        return state == ENTERED_PIP;
+    }
+
+    /** Returns true if activity is currently entering PiP mode. */
+    public static boolean isEnteringPip(@TransitionState int state) {
+        return state == ENTERING_PIP;
+    }
+
+    private String stateToString() {
+        switch (mState) {
+            case UNDEFINED: return "undefined";
+            case TASK_APPEARED: return "task-appeared";
+            case ENTRY_SCHEDULED: return "entry-scheduled";
+            case ENTERING_PIP: return "entering-pip";
+            case ENTERED_PIP: return "entered-pip";
+            case EXITING_PIP: return "exiting-pip";
+        }
+        throw new IllegalStateException("Unknown state: " + mState);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("PipTransitionState(mState=%s, mInSwipePipToHomeTransition=%b)",
+                stateToString(), mInSwipePipToHomeTransition);
+    }
+
+    public interface OnPipTransitionStateChangedListener {
+        void onPipTransitionStateChanged(@TransitionState int oldState,
+                @TransitionState int newState);
     }
 }

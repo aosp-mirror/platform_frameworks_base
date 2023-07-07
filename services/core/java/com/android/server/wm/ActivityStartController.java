@@ -19,7 +19,9 @@ package com.android.server.wm;
 import static android.app.ActivityManager.START_CANCELED;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 
@@ -29,7 +31,9 @@ import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -41,6 +45,7 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -90,6 +95,11 @@ public class ActivityStartController {
 
     boolean mCheckedForSetup = false;
 
+    /** Whether an {@link ActivityStarter} is currently executing (starting an Activity). */
+    private boolean mInExecution = false;
+
+    private final BackgroundActivityStartController mBalController;
+
     /**
      * TODO(b/64750076): Capture information necessary for dump and
      * {@link #postStartActivityProcessingForLastStarter} rather than keeping the entire object
@@ -112,6 +122,7 @@ public class ActivityStartController {
         mFactory.setController(this);
         mPendingRemoteAnimationRegistry = new PendingRemoteAnimationRegistry(service.mGlobalLock,
                 service.mH);
+        mBalController = new BackgroundActivityStartController(mService, mSupervisor);
     }
 
     /**
@@ -123,7 +134,15 @@ public class ActivityStartController {
         return mFactory.obtain().setIntent(intent).setReason(reason);
     }
 
+    void onExecutionStarted() {
+        mInExecution = true;
+    }
+
+    boolean isInExecution() {
+        return mInExecution;
+    }
     void onExecutionComplete(ActivityStarter starter) {
+        mInExecution = false;
         if (mLastStarter == null) {
             mLastStarter = mFactory.obtain();
         }
@@ -218,8 +237,8 @@ public class ActivityStartController {
                     vers = ri.activityInfo.applicationInfo.metaData.getString(
                             Intent.METADATA_SETUP_VERSION);
                 }
-                String lastVers = Settings.Secure.getString(
-                        resolver, Settings.Secure.LAST_SETUP_SHOWN);
+                String lastVers = Settings.Secure.getStringForUser(
+                        resolver, Settings.Secure.LAST_SETUP_SHOWN, resolver.getUserId());
                 if (vers != null && !vers.equals(lastVers)) {
                     intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                     intent.setComponent(new ComponentName(
@@ -258,7 +277,7 @@ public class ActivityStartController {
             String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, SafeActivityOptions options, int userId, Task inTask, String reason,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart) {
+            BackgroundStartPrivileges backgroundStartPrivileges) {
 
         userId = checkTargetUser(userId, validateIncomingUser, realCallingPid, realCallingUid,
                 reason);
@@ -279,7 +298,7 @@ public class ActivityStartController {
                 .setUserId(userId)
                 .setInTask(inTask)
                 .setOriginatingPendingIntent(originatingPendingIntent)
-                .setAllowBackgroundActivityStart(allowBackgroundActivityStart)
+                .setBackgroundStartPrivileges(backgroundStartPrivileges)
                 .execute();
     }
 
@@ -298,10 +317,11 @@ public class ActivityStartController {
     final int startActivitiesInPackage(int uid, String callingPackage,
             @Nullable String callingFeatureId, Intent[] intents, String[] resolvedTypes,
             IBinder resultTo, SafeActivityOptions options, int userId, boolean validateIncomingUser,
-            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
+            PendingIntentRecord originatingPendingIntent,
+            BackgroundStartPrivileges backgroundStartPrivileges) {
         return startActivitiesInPackage(uid, 0 /* realCallingPid */, -1 /* realCallingUid */,
                 callingPackage, callingFeatureId, intents, resolvedTypes, resultTo, options, userId,
-                validateIncomingUser, originatingPendingIntent, allowBackgroundActivityStart);
+                validateIncomingUser, originatingPendingIntent, backgroundStartPrivileges);
     }
 
     /**
@@ -321,7 +341,7 @@ public class ActivityStartController {
             String callingPackage, @Nullable String callingFeatureId, Intent[] intents,
             String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
             boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart) {
+            BackgroundStartPrivileges backgroundStartPrivileges) {
 
         final String reason = "startActivityInPackage";
 
@@ -331,14 +351,14 @@ public class ActivityStartController {
         // TODO: Switch to user app stacks here.
         return startActivities(null, uid, realCallingPid, realCallingUid, callingPackage,
                 callingFeatureId, intents, resolvedTypes, resultTo, options, userId, reason,
-                originatingPendingIntent, allowBackgroundActivityStart);
+                originatingPendingIntent, backgroundStartPrivileges);
     }
 
     int startActivities(IApplicationThread caller, int callingUid, int incomingRealCallingPid,
             int incomingRealCallingUid, String callingPackage, @Nullable String callingFeatureId,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options,
             int userId, String reason, PendingIntentRecord originatingPendingIntent,
-            boolean allowBackgroundActivityStart) {
+            BackgroundStartPrivileges backgroundStartPrivileges) {
         if (intents == null) {
             throw new NullPointerException("intents is null");
         }
@@ -369,6 +389,14 @@ public class ActivityStartController {
                 callingUid, realCallingUid, UserHandle.USER_NULL);
         final SparseArray<String> startingUidPkgs = new SparseArray<>();
         final long origId = Binder.clearCallingIdentity();
+
+        SafeActivityOptions bottomOptions = null;
+        if (options != null) {
+            // To ensure the first N-1 activities (N == total # of activities) are also launched
+            // into the correct display and root task, use a copy of the passed-in options (keeping
+            // only display-related and launch-root-task information) for these activities.
+            bottomOptions = options.selectiveCloneLaunchOptions();
+        }
         try {
             intents = ArrayUtils.filterNotNull(intents, Intent[]::new);
             final ActivityStarter[] starters = new ActivityStarter[intents.length];
@@ -390,7 +418,8 @@ public class ActivityStartController {
 
                 // Collect information about the target of the Intent.
                 ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i],
-                        0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid);
+                        0 /* startFlags */, null /* profilerInfo */, userId, filterCallingUid,
+                        callingPid);
                 aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
 
                 if (aInfo != null) {
@@ -417,7 +446,7 @@ public class ActivityStartController {
                 final boolean top = i == intents.length - 1;
                 final SafeActivityOptions checkedOptions = top
                         ? options
-                        : null;
+                        : bottomOptions;
                 starters[i] = obtainStarter(intent, reason)
                         .setIntentGrants(intentGrants)
                         .setCaller(caller)
@@ -437,7 +466,7 @@ public class ActivityStartController {
                         // top one as otherwise an activity below might consume it.
                         .setAllowPendingRemoteAnimationRegistryLookup(top /* allowLookup*/)
                         .setOriginatingPendingIntent(originatingPendingIntent)
-                        .setAllowBackgroundActivityStart(allowBackgroundActivityStart);
+                        .setBackgroundStartPrivileges(backgroundStartPrivileges);
             }
             // Log if the activities to be started have different uids.
             if (startingUidPkgs.size() > 1) {
@@ -526,6 +555,62 @@ public class ActivityStartController {
                 .execute();
     }
 
+    /**
+     * A quick path (skip general intent/task resolving) to start recents animation if the recents
+     * (or home) activity is available in background.
+     * @return {@code true} if the recents activity is moved to front.
+     */
+    boolean startExistingRecentsIfPossible(Intent intent, ActivityOptions options) {
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startExistingRecents");
+            if (startExistingRecents(intent, options)) {
+                return true;
+            }
+            // Else follow the standard launch procedure.
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
+        return false;
+    }
+
+    private boolean startExistingRecents(Intent intent, ActivityOptions options) {
+        final int activityType = mService.getRecentTasks().getRecentsComponent()
+                .equals(intent.getComponent()) ? ACTIVITY_TYPE_RECENTS : ACTIVITY_TYPE_HOME;
+        final Task rootTask = mService.mRootWindowContainer.getDefaultTaskDisplayArea()
+                .getRootTask(WINDOWING_MODE_UNDEFINED, activityType);
+        if (rootTask == null) return false;
+        final ActivityRecord r = rootTask.topRunningActivity();
+        if (r == null || r.isVisibleRequested() || !r.attachedToProcess()
+                || !r.mActivityComponent.equals(intent.getComponent())
+                || !mService.isCallerRecents(r.getUid())
+                // Recents keeps invisible while device is locked.
+                || r.mDisplayContent.isKeyguardLocked()) {
+            return false;
+        }
+        mService.mRootWindowContainer.startPowerModeLaunchIfNeeded(true /* forceSend */, r);
+        final ActivityMetricsLogger.LaunchingState launchingState =
+                mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
+        final Task task = r.getTask();
+        mService.deferWindowLayout();
+        try {
+            final TransitionController controller = r.mTransitionController;
+            final Transition transition = controller.getCollectingTransition();
+            if (transition != null) {
+                transition.setRemoteAnimationApp(r.app.getThread());
+                controller.setTransientLaunch(r, TaskDisplayArea.getRootTaskAbove(rootTask));
+            }
+            task.moveToFront("startExistingRecents");
+            task.mInResumeTopActivity = true;
+            task.resumeTopActivity(null /* prev */, options, true /* deferPause */);
+            mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
+                    ActivityManager.START_TASK_TO_FRONT, false, r, options);
+        } finally {
+            task.mInResumeTopActivity = false;
+            mService.continueWindowLayout();
+        }
+        return true;
+    }
+
     void registerRemoteAnimationForNextActivityStart(String packageName,
             RemoteAnimationAdapter adapter, @Nullable IBinder launchCookie) {
         mPendingRemoteAnimationRegistry.addPendingAnimation(packageName, adapter, launchCookie);
@@ -580,5 +665,9 @@ public class ActivityStartController {
             pw.print(prefix);
             pw.println("(nothing)");
         }
+    }
+
+    BackgroundActivityStartController getBackgroundActivityLaunchController() {
+        return mBalController;
     }
 }

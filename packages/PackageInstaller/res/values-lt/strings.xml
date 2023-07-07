@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Programa įdiegta."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ar norite įdiegti šią programą?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ar norite atnaujinti šią programą?"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Atnaujinti šią programą iš <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nŠi programa įprastai gauna naujinius iš <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Atnaujinę iš kito šaltinio, būsimus naujinius galite gauti iš bet kurio šaltinio telefone. Gali būti pakeistos programos funkcijos."</string>
     <string name="install_failed" msgid="5777824004474125469">"Programa neįdiegta."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Paketas užblokuotas ir negali būti įdiegtas."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Programa neįdiegta, nes paketas nesuderinamas su esamu paketu."</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Šis naudotojas negali diegti nežinomų programų"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Šiam naudotojui neleidžiama diegti programų"</string>
     <string name="ok" msgid="7871959885003339302">"Gerai"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"Vis tiek atnaujinti"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Tvark. progr."</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nėra vietos"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Nepavyko įdiegti programos „<xliff:g id="APP_NAME">%1$s</xliff:g>“. Atlaisvinkite vietos ir bandykite dar kartą."</string>
@@ -60,14 +62,18 @@
     <string name="uninstall_update_text" msgid="863648314632448705">"Pakeisti šios programos versiją į gamyklinę? Visi duomenys bus pašalinti."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Pakeisti šios programos versiją į gamyklinę? Visi duomenys bus pašalinti. Tai paveiks visus šio įrenginio naudotojus, įskaitant turinčius darbo profilius."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Palikti <xliff:g id="SIZE">%1$s</xliff:g> programų duomenų."</string>
+    <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"Ar norite ištrinti šią programą?"</string>
+    <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"Ar norite pašalinti šią programą? „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ kopija taip pat bus ištrinta."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Vykdomi pašalinimai"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Nepavykę pašalinimai"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Pašalinama…"</string>
     <string name="uninstalling_app" msgid="8866082646836981397">"Pašalinamas paketas „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Pašalinimas baigtas."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Paketas „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ pašalintas"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Ištrinta „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ kopija"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Nepavyko pašalinti."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Paketo „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ pašalinimo veiksmas nesėkmingas."</string>
+    <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Ištrinama „<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ kopija…"</string>
     <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Negalima pašalinti aktyvios įrenginio administravimo programos"</string>
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Negalima pašalinti aktyvios naudotojo <xliff:g id="USERNAME">%1$s</xliff:g> įrenginio administravimo programos"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Ši programa reikalinga kai kuriems naudotojams ar kai kuriuose profiliuose ir buvo pašalinta kitiems naudotojams"</string>
@@ -83,10 +89,12 @@
     <string name="app_name_unknown" msgid="6881210203354323926">"Nežinoma"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Saugos sumetimais šiuo metu planšetiniame kompiuteryje neleidžiama diegti nežinomų programų iš šio šaltinio. Tai galite pakeisti nustatymuose."</string>
     <string name="untrusted_external_source_warning" product="tv" msgid="7057271609532508035">"Saugos sumetimais šiuo metu televizoriuje neleidžiama diegti nežinomų programų iš šio šaltinio. Tai galite pakeisti nustatymuose."</string>
+    <string name="untrusted_external_source_warning" product="watch" msgid="7195163388090818636">"Saugos sumetimais šiuo metu laikrodyje neleidžiama diegti nežinomų programų iš šio šaltinio. Tai galite pakeisti nustatymuose."</string>
     <string name="untrusted_external_source_warning" product="default" msgid="8444191224459138919">"Saugos sumetimais šiuo metu telefone neleidžiama diegti nežinomų programų iš šio šaltinio. Tai galite pakeisti nustatymuose."</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefonas ir asmens duomenys labiau pažeidžiami įdiegus nežinomų programų. Įdiegdami šią programą sutinkate, kad patys esate atsakingi už žalą telefonui arba prarastus duomenis dėl šios programos naudojimo."</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Planšetinis kompiuteris ir asmens duomenys labiau pažeidžiami įdiegus nežinomų programų. Įdiegdami šią programą sutinkate, kad patys esate atsakingi už žalą planšetiniam kompiuteriui arba prarastus duomenis dėl šios programos naudojimo."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"TV ir asmens duomenys labiau pažeidžiami įdiegus nežinomų programų. Įdiegdami šią programą sutinkate, kad patys esate atsakingi už žalą TV arba prarastus duomenis dėl šios programos naudojimo."</string>
+    <string name="cloned_app_label" msgid="7503612829833756160">"„<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>“ kopija"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Tęsti"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Nustatymai"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Įdiegiamos / pašalinamos „Wear“ program."</string>

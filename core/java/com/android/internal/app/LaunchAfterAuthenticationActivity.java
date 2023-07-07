@@ -54,7 +54,7 @@ public class LaunchAfterAuthenticationActivity extends Activity {
         super.onCreate(icicle);
 
         final IntentSender onSuccessIntent = getIntent().getParcelableExtra(
-                EXTRA_ON_SUCCESS_INTENT);
+                EXTRA_ON_SUCCESS_INTENT, android.content.IntentSender.class);
         requestDismissKeyguardIfNeeded(onSuccessIntent);
     }
 

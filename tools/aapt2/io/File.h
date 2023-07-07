@@ -22,8 +22,7 @@
 #include <vector>
 
 #include "android-base/macros.h"
-
-#include "Source.h"
+#include "androidfw/Source.h"
 #include "io/Data.h"
 #include "util/Files.h"
 #include "util/Util.h"
@@ -49,7 +48,7 @@ class IFile {
   // Returns the source of this file. This is for presentation to the user and
   // may not be a valid file system path (for example, it may contain a '@' sign to separate
   // the files within a ZIP archive from the path to the containing ZIP archive.
-  virtual const Source& GetSource() const = 0;
+  virtual const android::Source& GetSource() const = 0;
 
   IFile* CreateFileSegment(size_t offset, size_t len);
 
@@ -76,7 +75,7 @@ class FileSegment : public IFile {
   std::unique_ptr<IData> OpenAsData() override;
   std::unique_ptr<io::InputStream> OpenInputStream() override;
 
-  const Source& GetSource() const override {
+  const android::Source& GetSource() const override {
     return file_->GetSource();
   }
 
@@ -102,7 +101,7 @@ class IFileCollection {
  public:
   virtual ~IFileCollection() = default;
 
-  virtual IFile* FindFile(const android::StringPiece& path) = 0;
+  virtual IFile* FindFile(android::StringPiece path) = 0;
   virtual std::unique_ptr<IFileCollectionIterator> Iterator() = 0;
   virtual char GetDirSeparator() = 0;
 };

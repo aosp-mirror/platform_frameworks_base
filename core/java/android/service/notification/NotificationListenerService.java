@@ -77,6 +77,7 @@ import java.util.Objects;
  * <pre>
  * &lt;service android:name=".NotificationListener"
  *          android:label="&#64;string/service_name"
+ *          android:exported="false"
  *          android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
  *     &lt;intent-filter>
  *         &lt;action android:name="android.service.notification.NotificationListenerService" />
@@ -139,6 +140,16 @@ public abstract class NotificationListenerService extends Service {
      */
     public static final String META_DATA_DISABLED_FILTER_TYPES
             = "android.service.notification.disabled_filter_types";
+
+    /**
+     * The name of the {@code meta-data} tag containing a boolean value that is used to decide if
+     * this listener should be automatically bound by default.
+     * If the value is 'false', the listener can be bound on demand using {@link #requestRebind}
+     * <p>An absent value means that the default is 'true'</p>
+     *
+     */
+    public static final String META_DATA_DEFAULT_AUTOBIND
+            = "android.service.notification.default_autobind_listenerservice";
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
@@ -258,6 +269,17 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_CLEAR_DATA = 21;
     /** Notification was canceled due to an assistant adjustment update. */
     public static final int REASON_ASSISTANT_CANCEL = 22;
+    /**
+     * Notification was canceled when entering lockdown mode, which turns off
+     * Smart Lock, fingerprint unlocking, and notifications on the lock screen.
+     * All the listeners shall ensure the canceled notifications are indeed removed
+     * on their end to prevent data leaking.
+     * When the user exits the lockdown mode, the removed notifications (due to lockdown)
+     * will be restored via NotificationListeners#notifyPostedLocked()
+     */
+    public static final int REASON_LOCKDOWN = 23;
+    // If adding a new notification cancellation reason, you must also add handling for it in
+    // NotificationCancelledEvent.fromCancelReason.
 
     /**
      * @hide
@@ -285,6 +307,7 @@ public abstract class NotificationListenerService extends Service {
             REASON_CHANNEL_REMOVED,
             REASON_CLEAR_DATA,
             REASON_ASSISTANT_CANCEL,
+            REASON_LOCKDOWN,
     })
     public @interface NotificationCancelReason{};
 
@@ -380,6 +403,15 @@ public abstract class NotificationListenerService extends Service {
      * int)}- the provided object was deleted.
      */
     public static final int NOTIFICATION_CHANNEL_OR_GROUP_DELETED = 3;
+
+    /**
+     * An optional activity intent action that shows additional settings for what notifications
+     * should be processed by this notification listener service. If defined, the OS may link to
+     * this activity from the system notification listener service filter settings page.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SETTINGS_HOME =
+            "android.service.notification.action.SETTINGS_HOME";
 
     private final Object mLock = new Object();
 
@@ -1305,6 +1337,21 @@ public abstract class NotificationListenerService extends Service {
     /**
      * Request that the service be unbound.
      *
+     * <p>This method will fail for components that are not part of the calling app.
+     */
+    public static void requestUnbind(@NonNull ComponentName componentName) {
+        INotificationManager noMan = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        try {
+            noMan.requestUnbindListenerComponent(componentName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request that the service be unbound.
+     *
      * <p>Once this is called, you will no longer receive updates and no method calls are
      * guaranteed to be successful, until you next receive the {@link #onListenerConnected()} event.
      * The service will likely be killed by the system after this call.
@@ -1373,8 +1420,8 @@ public abstract class NotificationListenerService extends Service {
     private void maybePopulatePeople(Notification notification) {
         if (getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P) {
             ArrayList<Person> people = notification.extras.getParcelableArrayList(
-                    Notification.EXTRA_PEOPLE_LIST);
-            if (people != null && people.isEmpty()) {
+                    Notification.EXTRA_PEOPLE_LIST, android.app.Person.class);
+            if (people != null && !people.isEmpty()) {
                 int size = people.size();
                 String[] peopleArray = new String[size];
                 for (int i = 0; i < size; i++) {
@@ -1709,10 +1756,15 @@ public abstract class NotificationListenerService extends Service {
         private ShortcutInfo mShortcutInfo;
         private @RankingAdjustment int mRankingAdjustment;
         private boolean mIsBubble;
+        // Notification assistant importance suggestion
+        private int mProposedImportance;
+        // Sensitive info detected by the notification assistant
+        private boolean mSensitiveContent;
 
         private static final int PARCEL_VERSION = 2;
 
-        public Ranking() { }
+        public Ranking() {
+        }
 
         // You can parcel it, but it's not Parcelable
         /** @hide */
@@ -1746,6 +1798,8 @@ public abstract class NotificationListenerService extends Service {
             out.writeParcelable(mShortcutInfo, flags);
             out.writeInt(mRankingAdjustment);
             out.writeBoolean(mIsBubble);
+            out.writeInt(mProposedImportance);
+            out.writeBoolean(mSensitiveContent);
         }
 
         /** @hide */
@@ -1784,6 +1838,8 @@ public abstract class NotificationListenerService extends Service {
             mShortcutInfo = in.readParcelable(cl, android.content.pm.ShortcutInfo.class);
             mRankingAdjustment = in.readInt();
             mIsBubble = in.readBoolean();
+            mProposedImportance = in.readInt();
+            mSensitiveContent = in.readBoolean();
         }
 
 
@@ -1873,6 +1929,34 @@ public abstract class NotificationListenerService extends Service {
          */
         public float getRankingScore() {
             return mRankingScore;
+        }
+
+        /**
+         * Returns the proposed importance provided by the {@link NotificationAssistantService}.
+         *
+         * This can be used to suggest that the user change the importance of this type of
+         * notification moving forward. A value of
+         * {@link NotificationManager#IMPORTANCE_UNSPECIFIED} means that the NAS has not recommended
+         * a change to the importance, and no UI should be shown to the user. See
+         * {@link Adjustment#KEY_IMPORTANCE_PROPOSAL}.
+         *
+         * @return the importance of the notification
+         * @hide
+         */
+        @SystemApi
+        public @NotificationManager.Importance int getProposedImportance() {
+            return mProposedImportance;
+        }
+
+        /**
+         * Returns true if the notification text is sensitive (e.g. containing an OTP).
+         *
+         * @return whether the notification contains sensitive content
+         * @hide
+         */
+        @SystemApi
+        public boolean hasSensitiveContent() {
+            return mSensitiveContent;
         }
 
         /**
@@ -2039,7 +2123,8 @@ public abstract class NotificationListenerService extends Service {
                 boolean noisy, ArrayList<Notification.Action> smartActions,
                 ArrayList<CharSequence> smartReplies, boolean canBubble,
                 boolean isTextChanged, boolean isConversation, ShortcutInfo shortcutInfo,
-                int rankingAdjustment, boolean isBubble) {
+                int rankingAdjustment, boolean isBubble, int proposedImportance,
+                boolean sensitiveContent) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -2065,6 +2150,8 @@ public abstract class NotificationListenerService extends Service {
             mShortcutInfo = shortcutInfo;
             mRankingAdjustment = rankingAdjustment;
             mIsBubble = isBubble;
+            mProposedImportance = proposedImportance;
+            mSensitiveContent = sensitiveContent;
         }
 
         /**
@@ -2105,7 +2192,9 @@ public abstract class NotificationListenerService extends Service {
                     other.mIsConversation,
                     other.mShortcutInfo,
                     other.mRankingAdjustment,
-                    other.mIsBubble);
+                    other.mIsBubble,
+                    other.mProposedImportance,
+                    other.mSensitiveContent);
         }
 
         /**
@@ -2164,7 +2253,9 @@ public abstract class NotificationListenerService extends Service {
                     &&  Objects.equals((mShortcutInfo == null ? 0 : mShortcutInfo.getId()),
                     (other.mShortcutInfo == null ? 0 : other.mShortcutInfo.getId()))
                     && Objects.equals(mRankingAdjustment, other.mRankingAdjustment)
-                    && Objects.equals(mIsBubble, other.mIsBubble);
+                    && Objects.equals(mIsBubble, other.mIsBubble)
+                    && Objects.equals(mProposedImportance, other.mProposedImportance)
+                    && Objects.equals(mSensitiveContent, other.mSensitiveContent);
         }
     }
 
@@ -2346,6 +2437,7 @@ public abstract class NotificationListenerService extends Service {
                     UserHandle user= (UserHandle) args.arg2;
                     NotificationChannel channel = (NotificationChannel) args.arg3;
                     int modificationType = (int) args.arg4;
+                    args.recycle();
                     onNotificationChannelModified(pkgName, user, channel, modificationType);
                 } break;
 
@@ -2355,6 +2447,7 @@ public abstract class NotificationListenerService extends Service {
                     UserHandle user = (UserHandle) args.arg2;
                     NotificationChannelGroup group = (NotificationChannelGroup) args.arg3;
                     int modificationType = (int) args.arg4;
+                    args.recycle();
                     onNotificationChannelGroupModified(pkgName, user, group, modificationType);
                 } break;
 

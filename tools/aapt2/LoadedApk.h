@@ -45,18 +45,20 @@ class LoadedApk {
   virtual ~LoadedApk() = default;
 
   // Loads both binary and proto APKs from disk.
-  static std::unique_ptr<LoadedApk> LoadApkFromPath(const ::android::StringPiece& path,
-                                                    IDiagnostics* diag);
+  static std::unique_ptr<LoadedApk> LoadApkFromPath(android::StringPiece path,
+                                                    android::IDiagnostics* diag);
 
   // Loads a proto APK from the given file collection.
   static std::unique_ptr<LoadedApk> LoadProtoApkFromFileCollection(
-      const Source& source, std::unique_ptr<io::IFileCollection> collection, IDiagnostics* diag);
+      const android::Source& source, std::unique_ptr<io::IFileCollection> collection,
+      android::IDiagnostics* diag);
 
   // Loads a binary APK from the given file collection.
   static std::unique_ptr<LoadedApk> LoadBinaryApkFromFileCollection(
-      const Source& source, std::unique_ptr<io::IFileCollection> collection, IDiagnostics* diag);
+      const android::Source& source, std::unique_ptr<io::IFileCollection> collection,
+      android::IDiagnostics* diag);
 
-  LoadedApk(const Source& source, std::unique_ptr<io::IFileCollection> apk,
+  LoadedApk(const android::Source& source, std::unique_ptr<io::IFileCollection> apk,
             std::unique_ptr<ResourceTable> table, std::unique_ptr<xml::XmlResource> manifest,
             const ApkFormat& format)
       : source_(source),
@@ -82,7 +84,7 @@ class LoadedApk {
     return table_.get();
   }
 
-  const Source& GetSource() {
+  const android::Source& GetSource() {
     return source_;
   }
 
@@ -111,12 +113,13 @@ class LoadedApk {
                               IArchiveWriter* writer, xml::XmlResource* manifest = nullptr);
 
   /** Loads the file as an xml document. */
-  std::unique_ptr<xml::XmlResource> LoadXml(const std::string& file_path, IDiagnostics* diag) const;
+  std::unique_ptr<xml::XmlResource> LoadXml(const std::string& file_path,
+                                            android::IDiagnostics* diag) const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedApk);
 
-  Source source_;
+  android::Source source_;
   std::unique_ptr<io::IFileCollection> apk_;
   std::unique_ptr<ResourceTable> table_;
   std::unique_ptr<xml::XmlResource> manifest_;

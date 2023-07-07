@@ -34,9 +34,16 @@ import android.hardware.usb.Status;
 import android.hardware.usb.IUsbCallback;
 import android.hardware.usb.PortRole;
 import android.hardware.usb.PortStatus;
+import android.hardware.usb.ComplianceWarning;
+import android.hardware.usb.DisplayPortAltModeInfo;
+import android.hardware.usb.AltModeData;
+import android.hardware.usb.AltModeData.DisplayPortAltModeData;
+import android.hardware.usb.DisplayPortAltModePinAssignment;
+import android.os.Build;
 import android.os.ServiceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
@@ -46,6 +53,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.usb.UsbPortManager;
 import com.android.server.usb.hal.port.RawPortInfo;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.NoSuchElementException;
@@ -76,38 +84,46 @@ public final class UsbPortAidl implements UsbPortHal {
     /**
      * USB data status is not known.
      */
-    public static final int USB_DATA_STATUS_UNKNOWN = 0;
+    public static final int AIDL_USB_DATA_STATUS_UNKNOWN = 0;
 
     /**
      * USB data is enabled.
      */
-    public static final int USB_DATA_STATUS_ENABLED = 1;
+    public static final int AIDL_USB_DATA_STATUS_ENABLED = 1;
 
     /**
      * USB data is disabled as the port is too hot.
      */
-    public static final int USB_DATA_STATUS_DISABLED_OVERHEAT = 2;
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_OVERHEAT = 2;
 
     /**
      * USB data is disabled due to contaminated port.
      */
-    public static final int USB_DATA_STATUS_DISABLED_CONTAMINANT = 3;
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_CONTAMINANT = 3;
 
     /**
-     * USB data is disabled due to docking event.
+     * USB data(both host mode and device mode) is disabled due to docking event.
      */
-    public static final int USB_DATA_STATUS_DISABLED_DOCK = 4;
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_DOCK = 4;
 
     /**
      * USB data is disabled by
      * {@link UsbPort#enableUsbData UsbPort.enableUsbData}.
      */
-    public static final int USB_DATA_STATUS_DISABLED_FORCE = 5;
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_FORCE = 5;
 
     /**
      * USB data is disabled for debug.
      */
-    public static final int USB_DATA_STATUS_DISABLED_DEBUG = 6;
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_DEBUG = 6;
+    /**
+     * USB host mode disabled due to docking event.
+     */
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_DOCK_HOST_MODE = 7;
+    /**
+     * USB device mode disabled due to docking event.
+     */
+    public static final int AIDL_USB_DATA_STATUS_DISABLED_DOCK_DEVICE_MODE = 8;
 
     public @UsbHalVersion int getUsbHalVersion() throws RemoteException {
         synchronized (mLock) {
@@ -525,23 +541,42 @@ public final class UsbPortAidl implements UsbPortHal {
             int usbDataStatus = UsbPortStatus.DATA_STATUS_UNKNOWN;
             for (int i = 0; i < usbDataStatusHal.length; i++) {
                 switch (usbDataStatusHal[i]) {
-                    case USB_DATA_STATUS_ENABLED:
+                    case AIDL_USB_DATA_STATUS_ENABLED:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_ENABLED;
                         break;
-                    case USB_DATA_STATUS_DISABLED_OVERHEAT:
+                    case AIDL_USB_DATA_STATUS_DISABLED_OVERHEAT:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_OVERHEAT;
                         break;
-                    case USB_DATA_STATUS_DISABLED_CONTAMINANT:
+                    case AIDL_USB_DATA_STATUS_DISABLED_CONTAMINANT:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_CONTAMINANT;
                         break;
-                    case USB_DATA_STATUS_DISABLED_DOCK:
+                    /* Indicates both host and gadget mode being disabled. */
+                    case AIDL_USB_DATA_STATUS_DISABLED_DOCK:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK;
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK_HOST_MODE;
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK_DEVICE_MODE;
                         break;
-                    case USB_DATA_STATUS_DISABLED_FORCE:
+                    case AIDL_USB_DATA_STATUS_DISABLED_FORCE:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
                         break;
-                    case USB_DATA_STATUS_DISABLED_DEBUG:
+                    case AIDL_USB_DATA_STATUS_DISABLED_DEBUG:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DEBUG;
+                        break;
+                    /*
+                     * Set DATA_STATUS_DISABLED_DOCK when DATA_STATUS_DISABLED_DOCK_HOST_MODE
+                     * is set.
+                     */
+                    case AIDL_USB_DATA_STATUS_DISABLED_DOCK_HOST_MODE:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK_HOST_MODE;
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK;
+                        break;
+                    /*
+                     * Set DATA_STATUS_DISABLED_DOCK when DATA_STATUS_DISABLED_DEVICE_DOCK
+                     * is set.
+                     */
+                    case AIDL_USB_DATA_STATUS_DISABLED_DOCK_DEVICE_MODE:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK_DEVICE_MODE;
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK;
                         break;
                     default:
                         usbDataStatus |= UsbPortStatus.DATA_STATUS_UNKNOWN;
@@ -549,6 +584,67 @@ public final class UsbPortAidl implements UsbPortHal {
             }
             UsbPortManager.logAndPrint(Log.INFO, mPw, "AIDL UsbDataStatus:" + usbDataStatus);
             return usbDataStatus;
+        }
+
+        private int[] formatComplianceWarnings(int[] complianceWarnings) {
+            Objects.requireNonNull(complianceWarnings);
+            IntArray newComplianceWarnings = new IntArray();
+            Arrays.sort(complianceWarnings);
+            for (int warning : complianceWarnings) {
+                if (newComplianceWarnings.indexOf(warning) == -1
+                        && warning >= UsbPortStatus.COMPLIANCE_WARNING_OTHER) {
+                    // ComplianceWarnings range from [1, 4] in Android U
+                    if (warning > UsbPortStatus.COMPLIANCE_WARNING_MISSING_RP) {
+                        newComplianceWarnings.add(UsbPortStatus.COMPLIANCE_WARNING_OTHER);
+                    } else {
+                        newComplianceWarnings.add(warning);
+                    }
+                }
+            }
+            return newComplianceWarnings.toArray();
+        }
+
+        private int toSupportedAltModesInt(android.hardware.usb.AltModeData[] supportedAltModes) {
+            int supportedAltModesInt = 0;
+            for (android.hardware.usb.AltModeData altModeData : supportedAltModes) {
+                switch (altModeData.getTag()) {
+                    case AltModeData.displayPortAltModeData:
+                        supportedAltModesInt |= UsbPort.FLAG_ALT_MODE_TYPE_DISPLAYPORT;
+                        break;
+                }
+            }
+            return supportedAltModesInt;
+        }
+
+        private int toDisplayPortAltModeNumLanesInt(int pinAssignment) {
+            switch (pinAssignment) {
+                case DisplayPortAltModePinAssignment.A:
+                case DisplayPortAltModePinAssignment.C:
+                case DisplayPortAltModePinAssignment.E:
+                    return 4;
+                case DisplayPortAltModePinAssignment.B:
+                case DisplayPortAltModePinAssignment.D:
+                case DisplayPortAltModePinAssignment.F:
+                    return 2;
+                default:
+                    return 0;
+            }
+        }
+
+        private DisplayPortAltModeInfo formatDisplayPortAltModeInfo(
+                android.hardware.usb.AltModeData[] supportedAltModes) {
+            for (android.hardware.usb.AltModeData altModeData : supportedAltModes) {
+                if (altModeData.getTag() == AltModeData.displayPortAltModeData) {
+                    DisplayPortAltModeData displayPortData =
+                            altModeData.getDisplayPortAltModeData();
+                    return new DisplayPortAltModeInfo(displayPortData.partnerSinkStatus,
+                            displayPortData.cableStatus,
+                            toDisplayPortAltModeNumLanesInt(displayPortData.pinAssignment),
+                            displayPortData.hpd,
+                            displayPortData.linkTrainingStatus);
+                }
+            }
+            return null;
         }
 
         @Override
@@ -584,7 +680,12 @@ public final class UsbPortAidl implements UsbPortHal {
                         current.contaminantDetectionStatus,
                         toUsbDataStatusInt(current.usbDataStatus),
                         current.powerTransferLimited,
-                        current.powerBrickStatus);
+                        current.powerBrickStatus,
+                        current.supportsComplianceWarnings,
+                        formatComplianceWarnings(current.complianceWarnings),
+                        current.plugOrientation,
+                        toSupportedAltModesInt(current.supportedAltModes),
+                        formatDisplayPortAltModeInfo(current.supportedAltModes));
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback AIDL V1: "
                         + current.portName);

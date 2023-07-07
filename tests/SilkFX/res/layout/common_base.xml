@@ -24,16 +24,6 @@
 
     <FrameLayout android:id="@+id/demo_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <com.android.test.silkfx.common.HDRIndicator
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_margin="8dp" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>

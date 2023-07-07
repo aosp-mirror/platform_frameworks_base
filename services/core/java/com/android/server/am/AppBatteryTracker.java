@@ -1388,7 +1388,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         final int mDefaultBgCurrentDrainPowerComponent;
 
         /**
-         * Default value to {@link #mBgCurrentDrainExmptedTypes}.
+         * Default value to {@link #mBgCurrentDrainExemptedTypes}.
          **/
         final int mDefaultBgCurrentDrainExemptedTypes;
 

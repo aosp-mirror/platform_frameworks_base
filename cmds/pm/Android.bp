@@ -20,5 +20,5 @@ license {
 
 sh_binary {
     name: "pm",
-    src: "pm",
+    src: "pm.sh",
 }

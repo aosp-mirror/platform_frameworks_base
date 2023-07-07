@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
+import android.view.InputEvent;
 import android.view.KeyEvent;
 
 import java.lang.annotation.Retention;
@@ -158,6 +160,7 @@ public final class VirtualKeyEvent implements Parcelable {
             KeyEvent.KEYCODE_DPAD_UP,
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_RIGHT,
+            KeyEvent.KEYCODE_DPAD_CENTER,
             KeyEvent.KEYCODE_MOVE_END,
             KeyEvent.KEYCODE_MOVE_HOME,
             KeyEvent.KEYCODE_PAGE_DOWN,
@@ -176,21 +179,25 @@ public final class VirtualKeyEvent implements Parcelable {
 
     private final @Action int mAction;
     private final int mKeyCode;
+    private final long mEventTimeNanos;
 
-    private VirtualKeyEvent(@Action int action, int keyCode) {
+    private VirtualKeyEvent(@Action int action, int keyCode, long eventTimeNanos) {
         mAction = action;
         mKeyCode = keyCode;
+        mEventTimeNanos = eventTimeNanos;
     }
 
     private VirtualKeyEvent(@NonNull Parcel parcel) {
         mAction = parcel.readInt();
         mKeyCode = parcel.readInt();
+        mEventTimeNanos = parcel.readLong();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int parcelableFlags) {
         parcel.writeInt(mAction);
         parcel.writeInt(mKeyCode);
+        parcel.writeLong(mEventTimeNanos);
     }
 
     @Override
@@ -213,12 +220,23 @@ public final class VirtualKeyEvent implements Parcelable {
     }
 
     /**
+     * Returns the time this event occurred, in the {@link SystemClock#uptimeMillis()} time base but
+     * with nanosecond (instead of millisecond) precision.
+     *
+     * @see InputEvent#getEventTime()
+     */
+    public long getEventTimeNanos() {
+        return mEventTimeNanos;
+    }
+
+    /**
      * Builder for {@link VirtualKeyEvent}.
      */
     public static final class Builder {
 
         private @Action int mAction = ACTION_UNKNOWN;
         private int mKeyCode = -1;
+        private long mEventTimeNanos = 0L;
 
         /**
          * Creates a {@link VirtualKeyEvent} object with the current builder configuration.
@@ -228,7 +246,7 @@ public final class VirtualKeyEvent implements Parcelable {
                 throw new IllegalArgumentException(
                         "Cannot build virtual key event with unset fields");
             }
-            return new VirtualKeyEvent(mAction, mKeyCode);
+            return new VirtualKeyEvent(mAction, mKeyCode, mEventTimeNanos);
         }
 
         /**
@@ -251,6 +269,23 @@ public final class VirtualKeyEvent implements Parcelable {
                 throw new IllegalArgumentException("Unsupported action type");
             }
             mAction = action;
+            return this;
+        }
+
+        /**
+         * Sets the time (in nanoseconds) when this specific event was generated. This may be
+         * obtained from {@link SystemClock#uptimeMillis()} (with nanosecond precision instead of
+         * millisecond), but can be different depending on the use case.
+         * This field is optional and can be omitted.
+         *
+         * @return this builder, to allow for chaining of calls
+         * @see InputEvent#getEventTime()
+         */
+        public @NonNull Builder setEventTimeNanos(long eventTimeNanos) {
+            if (eventTimeNanos < 0L) {
+                throw new IllegalArgumentException("Event time cannot be negative");
+            }
+            mEventTimeNanos = eventTimeNanos;
             return this;
         }
     }

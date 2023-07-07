@@ -24,6 +24,14 @@ internal class WifiState(
     @JvmField var isDefault: Boolean = false,
     @JvmField var statusLabel: String? = null,
     @JvmField var isCarrierMerged: Boolean = false,
+    /**
+     * True if the current default connection is validated for *any* transport, not just wifi.
+     * (Specifically TRANSPORT_CELLULAR *or* TRANSPORT_WIFI.)
+     *
+     * This should *only* be used when calculating information for the carrier merged connection and
+     * *not* for typical wifi connections. See b/225902574.
+     */
+    @JvmField var isDefaultConnectionValidated: Boolean = false,
     @JvmField var subId: Int = 0
 ) : ConnectivityState() {
 
@@ -35,6 +43,7 @@ internal class WifiState(
         isDefault = state.isDefault
         statusLabel = state.statusLabel
         isCarrierMerged = state.isCarrierMerged
+        isDefaultConnectionValidated = state.isDefaultConnectionValidated
         subId = state.subId
     }
 
@@ -45,6 +54,7 @@ internal class WifiState(
                 .append(",isDefault=").append(isDefault)
                 .append(",statusLabel=").append(statusLabel)
                 .append(",isCarrierMerged=").append(isCarrierMerged)
+                .append(",isDefaultConnectionValidated=").append(isDefaultConnectionValidated)
                 .append(",subId=").append(subId)
     }
 
@@ -54,6 +64,7 @@ internal class WifiState(
                 "isDefault",
                 "statusLabel",
                 "isCarrierMerged",
+                "isDefaultConnectionValidated",
                 "subId")
 
         return super.tableColumns() + columns
@@ -65,6 +76,7 @@ internal class WifiState(
         isDefault,
         statusLabel,
         isCarrierMerged,
+        isDefaultConnectionValidated,
         subId).map {
             it.toString()
         }
@@ -84,6 +96,7 @@ internal class WifiState(
         if (isDefault != other.isDefault) return false
         if (statusLabel != other.statusLabel) return false
         if (isCarrierMerged != other.isCarrierMerged) return false
+        if (isDefaultConnectionValidated != other.isDefaultConnectionValidated) return false
         if (subId != other.subId) return false
 
         return true
@@ -96,6 +109,7 @@ internal class WifiState(
         result = 31 * result + isDefault.hashCode()
         result = 31 * result + (statusLabel?.hashCode() ?: 0)
         result = 31 * result + isCarrierMerged.hashCode()
+        result = 31 * result + isDefaultConnectionValidated.hashCode()
         result = 31 * result + subId
         return result
     }

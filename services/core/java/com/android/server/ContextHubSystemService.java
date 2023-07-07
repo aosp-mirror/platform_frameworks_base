@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.android.internal.util.ConcurrentUtils;
 import com.android.server.location.contexthub.ContextHubService;
+import com.android.server.location.contexthub.IContextHubWrapper;
 
 import java.util.concurrent.Future;
 
@@ -35,7 +36,8 @@ class ContextHubSystemService extends SystemService {
     public ContextHubSystemService(Context context) {
         super(context);
         mInit = SystemServerInitThreadPool.submit(() -> {
-            mContextHubService = new ContextHubService(context);
+            mContextHubService = new ContextHubService(context,
+                    IContextHubWrapper.getContextHubWrapper());
         }, "Init ContextHubSystemService");
     }
 

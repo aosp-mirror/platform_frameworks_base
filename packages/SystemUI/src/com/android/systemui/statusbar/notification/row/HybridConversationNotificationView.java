@@ -67,6 +67,7 @@ public class HybridConversationNotificationView extends HybridNotificationView {
         mConversationIconView = requireViewById(com.android.internal.R.id.conversation_icon);
         mConversationFacePile = requireViewById(com.android.internal.R.id.conversation_face_pile);
         mConversationSenderName = requireViewById(R.id.conversation_notification_sender);
+        applyTextColor(mConversationSenderName, mSecondaryTextColor);
         mFacePileSize = getResources()
                 .getDimensionPixelSize(R.dimen.conversation_single_line_face_pile_size);
         mFacePileAvatarSize = getResources()
@@ -75,6 +76,9 @@ public class HybridConversationNotificationView extends HybridNotificationView {
                 .getDimensionPixelSize(R.dimen.conversation_single_line_avatar_size);
         mFacePileProtectionWidth = getResources().getDimensionPixelSize(
                 R.dimen.conversation_single_line_face_pile_protection_width);
+        mTransformationHelper.setCustomTransformation(
+                new FadeOutAndDownWithTitleTransformation(mConversationSenderName),
+                mConversationSenderName.getId());
         mTransformationHelper.addViewTransformingToSimilar(mConversationIconView);
         mTransformationHelper.addTransformedView(mConversationSenderName);
     }

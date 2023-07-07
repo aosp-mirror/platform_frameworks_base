@@ -16,23 +16,45 @@
 
 package com.android.server.backup.utils;
 
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_AGENT_LOGGING_RESULTS;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_OPERATION_TYPE;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT;
+import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING_RESULTS;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.IBackupAgent;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.BackupManagerMonitor;
+import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManagerMonitor;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.infra.AndroidFuture;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 /**
  * Utility methods to communicate with BackupManagerMonitor.
  */
 public class BackupManagerMonitorUtils {
+    /**
+     * Timeout for how long we wait before we give up on getting logs from a {@link IBackupAgent}.
+     * We expect this to be very fast since the agent immediately returns whatever logs have been
+     * accumulated. The timeout adds a bit more security and ensures we don't hang the B&R waiting
+     * for non-essential logs.
+     */
+    private static final int AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS = 500;
+
     /**
      * Notifies monitor about the event.
      *
@@ -77,6 +99,59 @@ public class BackupManagerMonitorUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Extracts logging results from the provided {@code agent} and notifies the {@code monitor}
+     * about them.
+     *
+     * <p>Note that this method does two separate binder calls (one to the agent and one to the
+     * monitor).
+     *
+     * @param monitor - implementation of {@link IBackupManagerMonitor} to notify.
+     * @param pkg - package the {@code agent} belongs to.
+     * @param agent - the {@link IBackupAgent} to retrieve logs from.
+     * @return {@code null} if the monitor is null. {@code monitor} if we fail to retrieve the logs
+     *     from the {@code agent}. Otherwise, the result of {@link
+     *     #monitorEvent(IBackupManagerMonitor, int, PackageInfo, int, Bundle)}.
+     */
+    public static IBackupManagerMonitor monitorAgentLoggingResults(
+            @Nullable IBackupManagerMonitor monitor, PackageInfo pkg, IBackupAgent agent) {
+        if (monitor == null) {
+            return null;
+        }
+
+        try {
+            AndroidFuture<List<DataTypeResult>> resultsFuture =
+                    new AndroidFuture<>();
+            AndroidFuture<Integer> operationTypeFuture = new AndroidFuture<>();
+            agent.getLoggerResults(resultsFuture);
+            agent.getOperationType(operationTypeFuture);
+            return sendAgentLoggingResults(monitor, pkg,
+                    resultsFuture.get(AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS),
+                    operationTypeFuture.get(AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS,
+                            TimeUnit.MILLISECONDS));
+        } catch (TimeoutException e) {
+            Slog.w(TAG, "Timeout while waiting to retrieve logging results from agent", e);
+        } catch (Exception e) {
+            Slog.w(TAG, "Failed to retrieve logging results from agent", e);
+        }
+        return monitor;
+    }
+
+    public static IBackupManagerMonitor sendAgentLoggingResults(
+            @NonNull IBackupManagerMonitor monitor, PackageInfo pkg, List<DataTypeResult> results,
+            @OperationType int operationType) {
+        Bundle loggerResultsBundle = new Bundle();
+        loggerResultsBundle.putParcelableList(
+                EXTRA_LOG_AGENT_LOGGING_RESULTS, results);
+        loggerResultsBundle.putInt(EXTRA_LOG_OPERATION_TYPE, operationType);
+        return monitorEvent(
+                monitor,
+                LOG_EVENT_ID_AGENT_LOGGING_RESULTS,
+                pkg,
+                LOG_EVENT_CATEGORY_AGENT,
+                loggerResultsBundle);
     }
 
     /**

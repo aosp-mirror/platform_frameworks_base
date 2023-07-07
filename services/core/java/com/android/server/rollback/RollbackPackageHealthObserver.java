@@ -17,10 +17,12 @@
 package com.android.server.rollback;
 
 import android.annotation.AnyThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -36,12 +38,14 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
+import com.android.server.SystemConfig;
 import com.android.server.pm.ApexManager;
 
 import java.io.BufferedReader;
@@ -66,6 +70,9 @@ import java.util.function.Consumer;
 final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
+    private static final String PROP_ATTEMPTING_REBOOT = "sys.attempting_reboot";
+    private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
+            | ApplicationInfo.FLAG_SYSTEM;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -103,42 +110,72 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     @Override
     public int onHealthCheckFailed(@Nullable VersionedPackage failedPackage,
             @FailureReasons int failureReason, int mitigationCount) {
-        // For native crashes, we will roll back any available rollbacks
+        boolean anyRollbackAvailable = !mContext.getSystemService(RollbackManager.class)
+                .getAvailableRollbacks().isEmpty();
+        int impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
+
         if (failureReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH
-                && !mContext.getSystemService(RollbackManager.class)
-                .getAvailableRollbacks().isEmpty()) {
-            return PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
-        }
-        if (getAvailableRollback(failedPackage) == null) {
-            // Don't handle the notification, no rollbacks available for the package
-            return PackageHealthObserverImpact.USER_IMPACT_NONE;
-        } else {
+                && anyRollbackAvailable) {
+            // For native crashes, we will directly roll back any available rollbacks
+            // Note: For non-native crashes the rollback-all step has higher impact
+            impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
+        } else if (getAvailableRollback(failedPackage) != null) {
             // Rollback is available, we may get a callback into #execute
-            return PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
+            impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_60;
+        } else if (anyRollbackAvailable) {
+            // If any rollbacks are available, we will commit them
+            impact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_70;
         }
+
+        return impact;
     }
 
     @Override
     public boolean execute(@Nullable VersionedPackage failedPackage,
             @FailureReasons int rollbackReason, int mitigationCount) {
         if (rollbackReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
-            mHandler.post(() -> rollbackAll());
+            mHandler.post(() -> rollbackAll(rollbackReason));
             return true;
         }
 
         RollbackInfo rollback = getAvailableRollback(failedPackage);
-        if (rollback == null) {
-            Slog.w(TAG, "Expected rollback but no valid rollback found for " + failedPackage);
-            return false;
+        if (rollback != null) {
+            mHandler.post(() -> rollbackPackage(rollback, failedPackage, rollbackReason));
+        } else {
+            mHandler.post(() -> rollbackAll(rollbackReason));
         }
-        mHandler.post(() -> rollbackPackage(rollback, failedPackage, rollbackReason));
-        // Assume rollback executed successfully
+
+        // Assume rollbacks executed successfully
         return true;
     }
 
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public boolean isPersistent() {
+        return true;
+    }
+
+    @Override
+    public boolean mayObservePackage(String packageName) {
+        if (mContext.getSystemService(RollbackManager.class)
+                .getAvailableRollbacks().isEmpty()) {
+            return false;
+        }
+        return isPersistentSystemApp(packageName);
+    }
+
+    private boolean isPersistentSystemApp(@NonNull String packageName) {
+        PackageManager pm = mContext.getPackageManager();
+        try {
+            ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
+            return (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     private void assertInWorkerThread() {
@@ -358,6 +395,13 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private void rollbackPackage(RollbackInfo rollback, VersionedPackage failedPackage,
             @FailureReasons int rollbackReason) {
         assertInWorkerThread();
+
+        if (isAutomaticRollbackDenied(SystemConfig.getInstance(), failedPackage)) {
+            Slog.d(TAG, "Automatic rollback not allowed for package "
+                    + failedPackage.getPackageName());
+            return;
+        }
+
         final RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         int reasonToLog = WatchdogRollbackLogger.mapFailureReasonToMetric(rollbackReason);
         final String failedPackageToLog;
@@ -406,6 +450,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
                 markStagedSessionHandled(rollback.getRollbackId());
                 // Wait for all pending staged sessions to get handled before rebooting.
                 if (isPendingStagedSessionsEmpty()) {
+                    SystemProperties.set(PROP_ATTEMPTING_REBOOT, "true");
                     mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
                 }
             }
@@ -417,6 +462,17 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
 
         rollbackManager.commitRollback(rollback.getRollbackId(),
                 Collections.singletonList(failedPackage), rollbackReceiver.getIntentSender());
+    }
+
+    /**
+     * Returns true if this package is not eligible for automatic rollback.
+     */
+    @VisibleForTesting
+    @AnyThread
+    public static boolean isAutomaticRollbackDenied(SystemConfig systemConfig,
+            VersionedPackage versionedPackage) {
+        return systemConfig.getAutomaticRollbackDenylistedPackages()
+            .contains(versionedPackage.getPackageName());
     }
 
     /**
@@ -448,7 +504,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     }
 
     @WorkerThread
-    private void rollbackAll() {
+    private void rollbackAll(@FailureReasons int rollbackReason) {
         assertInWorkerThread();
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         List<RollbackInfo> rollbacks = rollbackManager.getAvailableRollbacks();
@@ -467,7 +523,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
 
         for (RollbackInfo rollback : rollbacks) {
             VersionedPackage sample = rollback.getPackages().get(0).getVersionRolledBackFrom();
-            rollbackPackage(rollback, sample, PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
+            rollbackPackage(rollback, sample, rollbackReason);
         }
     }
 }

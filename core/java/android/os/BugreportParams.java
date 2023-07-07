@@ -21,6 +21,7 @@ import android.annotation.SystemApi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Parameters that specify what kind of bugreport should be taken.
@@ -30,13 +31,43 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public final class BugreportParams {
     private final int mMode;
+    private final int mFlags;
 
+    /**
+     * Constructs a BugreportParams object to specify what kind of bugreport should be taken.
+     *
+     * @param mode of the bugreport to request
+     */
     public BugreportParams(@BugreportMode int mode) {
         mMode = mode;
+        mFlags = 0;
     }
 
+    /**
+     * Constructs a BugreportParams object to specify what kind of bugreport should be taken.
+     *
+     * @param mode of the bugreport to request
+     * @param flags to customize the bugreport request
+     */
+    public BugreportParams(@BugreportMode int mode, @BugreportFlag int flags) {
+        mMode = mode;
+        mFlags = flags;
+    }
+
+    /**
+     * Returns the mode of the bugreport to request.
+     */
+    @BugreportMode
     public int getMode() {
         return mMode;
+    }
+
+    /**
+     * Returns the flags to customize the bugreport request.
+     */
+    @BugreportFlag
+    public int getFlags() {
+        return mFlags;
     }
 
     /**
@@ -88,4 +119,32 @@ public final class BugreportParams {
      * Wifi.
      */
     public static final int BUGREPORT_MODE_WIFI = IDumpstate.BUGREPORT_MODE_WIFI;
+
+    /**
+     * Defines acceptable flags for customizing bugreport requests.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "BUGREPORT_FLAG_" }, value = {
+            BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA,
+            BUGREPORT_FLAG_DEFER_CONSENT
+    })
+    public @interface BugreportFlag {}
+
+    /**
+     * Flag for reusing pre-dumped UI data. The pre-dump and bugreport request calls must be
+     * performed by the same UID, otherwise the flag is ignored.
+     */
+    public static final int BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA =
+            IDumpstate.BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA;
+
+    /**
+     * Flag for deferring user consent.
+     *
+     * <p>This flag should be used in cases where it may not be possible for the user to respond
+     * to a consent dialog immediately, such as when the user is driving. The generated bugreport
+     * may be retrieved at a later time using {@link BugreportManager#retrieveBugreport(
+     * String, ParcelFileDescriptor, Executor, BugreportManager.BugreportCallback)}.
+     */
+    public static final int BUGREPORT_FLAG_DEFER_CONSENT = IDumpstate.BUGREPORT_FLAG_DEFER_CONSENT;
 }

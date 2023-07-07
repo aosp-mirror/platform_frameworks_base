@@ -65,5 +65,10 @@ public interface TabStopSpan extends ParagraphStyle {
         public int getTabStop() {
             return mTabOffset;
         }
+
+        @Override
+        public String toString() {
+            return "TabStopSpan.Standard{tabOffset=" + getTabStop() + '}';
+        }
     }
 }

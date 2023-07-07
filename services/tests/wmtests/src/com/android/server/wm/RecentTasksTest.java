@@ -30,6 +30,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.os.Process.NOBODY_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -331,7 +332,7 @@ public class RecentTasksTest extends WindowTestsBase {
         // other task
         Task task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
-                .setParentTaskFragment(mTaskContainer.getRootHomeTask()).build();
+                .setParentTask(mTaskContainer.getRootHomeTask()).build();
         Task task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
                 .build();
@@ -447,12 +448,15 @@ public class RecentTasksTest extends WindowTestsBase {
         final String taskAffinity = "affinity";
         final int uid = 10123;
         final Task task1 = createTaskBuilder(".Task1").build();
-        task1.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE);
+        final ComponentName componentName = getUniqueComponentName();
+        task1.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE,
+                componentName);
         mRecentTasks.add(task1);
 
         // Add another task to recents, and make sure the previous task was removed.
         final Task task2 = createTaskBuilder(".Task2").build();
-        task2.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE);
+        task2.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE,
+                componentName);
         mRecentTasks.add(task2);
         assertEquals(1, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
                 true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
@@ -460,7 +464,7 @@ public class RecentTasksTest extends WindowTestsBase {
         // Add another single-instance task to recents, and make sure no task is removed.
         final Task task3 = createTaskBuilder(".Task3").build();
         task3.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid,
-                LAUNCH_SINGLE_INSTANCE);
+                LAUNCH_SINGLE_INSTANCE, componentName);
         mRecentTasks.add(task3);
         assertEquals(2, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
                 true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
@@ -471,8 +475,8 @@ public class RecentTasksTest extends WindowTestsBase {
         final Task root = createTaskBuilder(".CreatedByOrganizerRoot").build();
         root.mCreatedByOrganizer = true;
         // Add organized and non-organized child.
-        final Task child1 = createTaskBuilder(".Task1").setParentTaskFragment(root).build();
-        final Task child2 = createTaskBuilder(".Task2").setParentTaskFragment(root).build();
+        final Task child1 = createTaskBuilder(".Task1").setParentTask(root).build();
+        final Task child2 = createTaskBuilder(".Task2").setParentTask(root).build();
         doReturn(true).when(child1).isOrganized();
         doReturn(false).when(child2).isOrganized();
         mRecentTasks.add(root);
@@ -509,7 +513,7 @@ public class RecentTasksTest extends WindowTestsBase {
         mRecentTasks.add(task1);
         // Go home to trigger the removal of untracked tasks.
         mRecentTasks.add(createTaskBuilder(".Home")
-                .setParentTaskFragment(mTaskContainer.getRootHomeTask())
+                .setParentTask(mTaskContainer.getRootHomeTask())
                 .build());
         triggerIdleToTrim();
 
@@ -676,7 +680,7 @@ public class RecentTasksTest extends WindowTestsBase {
     public void testVisibleTasks_excludedFromRecents_firstTaskNotVisible() {
         // Create some set of tasks, some of which are visible and some are not
         Task homeTask = createTaskBuilder("com.android.pkg1", ".HomeTask")
-                .setParentTaskFragment(mTaskContainer.getRootHomeTask())
+                .setParentTask(mTaskContainer.getRootHomeTask())
                 .build();
         homeTask.mUserSetupComplete = true;
         mRecentTasks.add(homeTask);
@@ -711,7 +715,7 @@ public class RecentTasksTest extends WindowTestsBase {
         t1.mUserSetupComplete = true;
         mRecentTasks.add(t1);
         Task homeTask = createTaskBuilder("com.android.pkg1", ".HomeTask")
-                .setParentTaskFragment(mTaskContainer.getRootHomeTask())
+                .setParentTask(mTaskContainer.getRootHomeTask())
                 .build();
         homeTask.mUserSetupComplete = true;
         mRecentTasks.add(homeTask);
@@ -803,22 +807,9 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
-    public void testVisibleEmbeddedTask_expectNotVisible() {
-        Task task = createTaskBuilder(".Task")
-                .setFlags(FLAG_ACTIVITY_NEW_TASK)
-                .build();
-        doReturn(true).when(task).isEmbedded();
-        mRecentTasks.add(task);
-
-        assertThat(mCallbacksRecorder.mAdded).hasSize(1);
-        assertFalse("embedded task should not be visible recents",
-                mRecentTasks.isVisibleRecentTask(task));
-    }
-
-    @Test
     public void testVisibleTask_displayCanNotShowTaskFromRecents_expectNotVisible() {
         final DisplayContent displayContent = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        doReturn(false).when(displayContent).canShowTasksInRecents();
+        doReturn(false).when(displayContent).canShowTasksInHostDeviceRecents();
         final Task task = displayContent.getDefaultTaskDisplayArea().createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
         mRecentTasks.add(task);
@@ -933,6 +924,11 @@ public class RecentTasksTest extends WindowTestsBase {
 
     @Test
     public void testFreezeTaskListOrder_timeout() {
+        for (Task t : mTasks) {
+            // Make all the tasks non-empty
+            new ActivityBuilder(mAtm).setTask(t).build();
+        }
+
         // Add some tasks
         mRecentTasks.add(mTasks.get(0));
         mRecentTasks.add(mTasks.get(1));
@@ -975,10 +971,10 @@ public class RecentTasksTest extends WindowTestsBase {
 
         // Add a number of tasks (beyond the max) but ensure that nothing is trimmed because all
         // the tasks belong in stacks above the home stack
-        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTaskFragment(homeStack).build());
-        mRecentTasks.add(createTaskBuilder(".Task1").setParentTaskFragment(aboveHomeStack).build());
-        mRecentTasks.add(createTaskBuilder(".Task2").setParentTaskFragment(aboveHomeStack).build());
-        mRecentTasks.add(createTaskBuilder(".Task3").setParentTaskFragment(aboveHomeStack).build());
+        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTask(homeStack).build());
+        mRecentTasks.add(createTaskBuilder(".Task1").setParentTask(aboveHomeStack).build());
+        mRecentTasks.add(createTaskBuilder(".Task2").setParentTask(aboveHomeStack).build());
+        mRecentTasks.add(createTaskBuilder(".Task3").setParentTask(aboveHomeStack).build());
 
         triggerTrimAndAssertNoTasksTrimmed();
     }
@@ -996,11 +992,11 @@ public class RecentTasksTest extends WindowTestsBase {
         // Add a number of tasks (beyond the max) but ensure that only the task in the stack behind
         // the home stack is trimmed once a new task is added
         final Task behindHomeTask = createTaskBuilder(".Task1")
-                .setParentTaskFragment(behindHomeStack)
+                .setParentTask(behindHomeStack)
                 .build();
         mRecentTasks.add(behindHomeTask);
-        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTaskFragment(homeStack).build());
-        mRecentTasks.add(createTaskBuilder(".Task2").setParentTaskFragment(aboveHomeStack).build());
+        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTask(homeStack).build());
+        mRecentTasks.add(createTaskBuilder(".Task2").setParentTask(aboveHomeStack).build());
 
         triggerTrimAndAssertTrimmed(behindHomeTask);
     }
@@ -1016,12 +1012,12 @@ public class RecentTasksTest extends WindowTestsBase {
 
         // Add a number of tasks (beyond the max) on each display, ensure that the tasks are not
         // removed
-        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTaskFragment(homeTask).build());
-        mRecentTasks.add(createTaskBuilder(".Task1").setParentTaskFragment(otherDisplayRootTask)
+        mRecentTasks.add(createTaskBuilder(".HomeTask1").setParentTask(homeTask).build());
+        mRecentTasks.add(createTaskBuilder(".Task1").setParentTask(otherDisplayRootTask)
                 .build());
-        mRecentTasks.add(createTaskBuilder(".Task2").setParentTaskFragment(otherDisplayRootTask)
+        mRecentTasks.add(createTaskBuilder(".Task2").setParentTask(otherDisplayRootTask)
                 .build());
-        mRecentTasks.add(createTaskBuilder(".HomeTask2").setParentTaskFragment(homeTask).build());
+        mRecentTasks.add(createTaskBuilder(".HomeTask2").setParentTask(homeTask).build());
 
         triggerTrimAndAssertNoTasksTrimmed();
     }
@@ -1041,6 +1037,17 @@ public class RecentTasksTest extends WindowTestsBase {
                 fail("Expected com.android.pkg1 tasks to be removed");
             }
         }
+
+        // If the task has a non-stopped activity, the removal will wait for its onDestroy.
+        final Task task = tasks.get(0);
+        final ActivityRecord top = new ActivityBuilder(mAtm).setTask(task).build();
+        top.lastVisibleTime = 123;
+        top.setState(ActivityRecord.State.RESUMED, "test");
+        mRecentTasks.removeTasksByPackageName(task.getBasePackageName(), TEST_USER_0_ID);
+        assertTrue(task.mKillProcessesOnDestroyed);
+        top.setState(ActivityRecord.State.DESTROYING, "test");
+        top.destroyed("test");
+        assertFalse(task.mKillProcessesOnDestroyed);
     }
 
     @Test
@@ -1051,7 +1058,7 @@ public class RecentTasksTest extends WindowTestsBase {
         Task t1 = createTaskBuilder("com.android.pkg1", ".Task1").build();
         mRecentTasks.add(t1);
         mRecentTasks.add(createTaskBuilder("com.android.pkg1", ".HomeTask")
-                .setParentTaskFragment(mTaskContainer.getRootHomeTask()).build());
+                .setParentTask(mTaskContainer.getRootHomeTask()).build());
         Task t2 = createTaskBuilder("com.android.pkg2", ".Task2").build();
         mRecentTasks.add(t2);
         mRecentTasks.add(createTaskBuilder("com.android.pkg1", ".PipTask")
@@ -1220,44 +1227,56 @@ public class RecentTasksTest extends WindowTestsBase {
 
     @Test
     public void testCreateRecentTaskInfo_detachedTask() {
-        final Task task = createTaskBuilder(".Task").setCreateActivity(true).build();
+        final Task task = createTaskBuilder(".Task").build();
+        final ComponentName componentName = getUniqueComponentName();
+        new ActivityBuilder(mSupervisor.mService)
+                .setTask(task)
+                .setUid(NOBODY_UID)
+                .setComponent(componentName)
+                .build();
         final TaskDisplayArea tda = task.getDisplayArea();
 
         assertTrue(task.isAttached());
         assertTrue(task.supportsMultiWindow());
 
-        RecentTaskInfo info = mRecentTasks.createRecentTaskInfo(task, true);
+        RecentTaskInfo info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
+
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                false /* getTasksAllowed */);
+
+        assertFalse(info.topActivity.equals(componentName));
+        assertFalse(info.topActivityInfo.packageName.equals(componentName.getPackageName()));
+        assertFalse(info.baseActivity.equals(componentName));
 
         // The task can be put in split screen even if it is not attached now.
         task.removeImmediately();
 
-        info = mRecentTasks.createRecentTaskInfo(task, true);
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
 
         // Test non-resizable.
         // The non-resizable task cannot be put in split screen because of the config.
         doReturn(false).when(tda).supportsNonResizableMultiWindow();
         doReturn(false).when(task).isResizeable();
 
-        info = mRecentTasks.createRecentTaskInfo(task, true);
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertFalse(info.supportsMultiWindow);
-        assertFalse(info.supportsSplitScreenMultiWindow);
 
         // Even if it is not attached, the non-resizable task can be put in split screen as long as
         // the device supports it.
         doReturn(true).when(tda).supportsNonResizableMultiWindow();
 
-        info = mRecentTasks.createRecentTaskInfo(task, true);
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
-
     }
 
     private TaskSnapshot createSnapshot(Point taskSize, Point bufferSize) {
@@ -1267,7 +1286,7 @@ public class RecentTasksTest extends WindowTestsBase {
             doReturn(bufferSize.x).when(buffer).getWidth();
             doReturn(bufferSize.y).when(buffer).getHeight();
         }
-        return new TaskSnapshot(1, new ComponentName("", ""), buffer,
+        return new TaskSnapshot(1, 0 /* captureTime */, new ComponentName("", ""), buffer,
                 ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
                 Surface.ROTATION_0, taskSize, new Rect() /* contentInsets */,
                 new Rect() /* letterboxInsets*/, false /* isLowResolution */,
@@ -1337,7 +1356,7 @@ public class RecentTasksTest extends WindowTestsBase {
         });
         assertSecurityException(expectCallable,
                 () -> mAtm.startActivityFromRecents(0, new Bundle()));
-        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true));
+        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true, false));
         assertSecurityException(expectCallable, () -> mAtm.registerTaskStackListener(null));
         assertSecurityException(expectCallable,
                 () -> mAtm.unregisterTaskStackListener(null));
@@ -1536,10 +1555,10 @@ public class RecentTasksTest extends WindowTestsBase {
         public boolean mLastAllowed;
 
         @Override
-        void getTasks(int maxNum, List<RunningTaskInfo> list, int flags,
-                RootWindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
+        void getTasks(int maxNum, List<RunningTaskInfo> list, int flags, RecentTasks recentTasks,
+                WindowContainer<?> root, int callingUid, ArraySet<Integer> profileIds) {
             mLastAllowed = (flags & FLAG_ALLOWED) == FLAG_ALLOWED;
-            super.getTasks(maxNum, list, flags, root, callingUid, profileIds);
+            super.getTasks(maxNum, list, flags, recentTasks, root, callingUid, profileIds);
         }
     }
 }

@@ -116,9 +116,7 @@ import java.util.function.Predicate;
  * <p class="note">ListView attempts to reuse view objects in order to improve performance and
  * avoid a lag in response to user scrolls.  To take advantage of this feature, check if the
  * {@code convertView} provided to {@code getView(...)} is null before creating or inflating a new
- * view object.  See
- * <a href="{@docRoot}training/improving-layouts/smooth-scrolling.html">
- * Making ListView Scrolling Smooth</a> for more ways to ensure a smooth user experience.</p>
+ * view object.</p>
  *
  * <p>To specify an action when a user clicks or taps on a single list item, see
  * <a href="{@docRoot}guide/topics/ui/declaring-layout.html#HandlingUserSelections">

@@ -16,10 +16,11 @@
 
 package com.android.server.wm;
 
+import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
-import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetsType;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
+import android.view.inputmethod.ImeTracker;
 
 /**
  * Generalization of an object that can control insets state.
@@ -40,10 +41,17 @@ interface InsetsControlTarget {
     }
 
     /**
-     * @return The requested visibility of this target.
+     * @return {@code true} if any of the {@link InsetsType} is requested visible by this target.
      */
-    default boolean getRequestedVisibility(@InternalInsetsType int type) {
-        return InsetsState.getDefaultVisibility(type);
+    default boolean isRequestedVisible(@InsetsType int types) {
+        return (WindowInsets.Type.defaultVisible() & types) != 0;
+    }
+
+    /**
+     * @return {@link InsetsType}s which are requested visible by this target.
+     */
+    default @InsetsType int getRequestedVisibleTypes() {
+        return WindowInsets.Type.defaultVisible();
     }
 
     /**
@@ -51,8 +59,10 @@ interface InsetsControlTarget {
      *
      * @param types to specify which types of insets source window should be shown.
      * @param fromIme {@code true} if IME show request originated from {@link InputMethodService}.
+     * @param statsToken the token tracking the current IME show request or {@code null} otherwise.
      */
-    default void showInsets(@InsetsType int types, boolean fromIme) {
+    default void showInsets(@InsetsType int types, boolean fromIme,
+            @Nullable ImeTracker.Token statsToken) {
     }
 
     /**
@@ -60,8 +70,10 @@ interface InsetsControlTarget {
      *
      * @param types to specify which types of insets source window should be hidden.
      * @param fromIme {@code true} if IME hide request originated from {@link InputMethodService}.
+     * @param statsToken the token tracking the current IME hide request or {@code null} otherwise.
      */
-    default void hideInsets(@InsetsType int types, boolean fromIme) {
+    default void hideInsets(@InsetsType int types, boolean fromIme,
+            @Nullable ImeTracker.Token statsToken) {
     }
 
     /**

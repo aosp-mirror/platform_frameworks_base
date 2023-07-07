@@ -29,9 +29,13 @@ import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ContentResolver;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -51,18 +55,24 @@ public abstract class EconomicPolicy {
     static final int TYPE_ACTION = 1 << SHIFT_TYPE;
     static final int TYPE_REWARD = 2 << SHIFT_TYPE;
 
-    private static final int SHIFT_POLICY = 29;
-    static final int MASK_POLICY = 0b1 << SHIFT_POLICY;
-    static final int POLICY_AM = 0 << SHIFT_POLICY;
-    static final int POLICY_JS = 1 << SHIFT_POLICY;
+    private static final int SHIFT_POLICY = 28;
+    static final int MASK_POLICY = 0b11 << SHIFT_POLICY;
+    static final int ALL_POLICIES = MASK_POLICY;
+    // Reserve 0 for the base/common policy.
+    public static final int POLICY_ALARM = 1 << SHIFT_POLICY;
+    public static final int POLICY_JOB = 2 << SHIFT_POLICY;
 
-    static final int MASK_EVENT = ~0 - (0b111 << SHIFT_POLICY);
+    static final int MASK_EVENT = -1 ^ (MASK_TYPE | MASK_POLICY);
 
     static final int REGULATION_BASIC_INCOME = TYPE_REGULATION | 0;
     static final int REGULATION_BIRTHRIGHT = TYPE_REGULATION | 1;
     static final int REGULATION_WEALTH_RECLAMATION = TYPE_REGULATION | 2;
     static final int REGULATION_PROMOTION = TYPE_REGULATION | 3;
     static final int REGULATION_DEMOTION = TYPE_REGULATION | 4;
+    /** App is fully restricted from running in the background. */
+    static final int REGULATION_BG_RESTRICTED = TYPE_REGULATION | 5;
+    static final int REGULATION_BG_UNRESTRICTED = TYPE_REGULATION | 6;
+    static final int REGULATION_FORCE_STOP = TYPE_REGULATION | 8;
 
     static final int REWARD_NOTIFICATION_SEEN = TYPE_REWARD | 0;
     static final int REWARD_NOTIFICATION_INTERACTION = TYPE_REWARD | 1;
@@ -106,11 +116,21 @@ public abstract class EconomicPolicy {
     }
 
     @IntDef({
+            ALL_POLICIES,
+            POLICY_ALARM,
+            POLICY_JOB,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Policy {
+    }
+
+    @IntDef({
             REWARD_TOP_ACTIVITY,
             REWARD_NOTIFICATION_SEEN,
             REWARD_NOTIFICATION_INTERACTION,
             REWARD_WIDGET_INTERACTION,
             REWARD_OTHER_USER_INTERACTION,
+            JobSchedulerEconomicPolicy.REWARD_APP_INSTALL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UtilityReward {
@@ -129,11 +149,22 @@ public abstract class EconomicPolicy {
          * the action unless a modifier lowers the cost to produce.
          */
         public final long basePrice;
+        /**
+         * Whether the remaining stock limit affects an app's ability to perform this action.
+         * If {@code false}, then the action can be performed, even if the cost is higher
+         * than the remaining stock. This does not affect checking against an app's balance.
+         */
+        public final boolean respectsStockLimit;
 
         Action(int id, long costToProduce, long basePrice) {
+            this(id, costToProduce, basePrice, true);
+        }
+
+        Action(int id, long costToProduce, long basePrice, boolean respectsStockLimit) {
             this.id = id;
             this.costToProduce = costToProduce;
             this.basePrice = basePrice;
+            this.respectsStockLimit = respectsStockLimit;
         }
     }
 
@@ -165,9 +196,11 @@ public abstract class EconomicPolicy {
         }
     }
 
+    protected final InternalResourceService mIrs;
     private static final Modifier[] COST_MODIFIER_BY_INDEX = new Modifier[NUM_COST_MODIFIERS];
 
     EconomicPolicy(@NonNull InternalResourceService irs) {
+        mIrs = irs;
         for (int mId : getCostModifiers()) {
             initModifier(mId, irs);
         }
@@ -204,21 +237,27 @@ public abstract class EconomicPolicy {
      * exists to ensure that no single app accumulate all available resources and increases fairness
      * for all apps.
      */
-    abstract long getMaxSatiatedBalance();
+    abstract long getMaxSatiatedBalance(int userId, @NonNull String pkgName);
 
     /**
      * Returns the maximum number of cakes that should be consumed during a full 100% discharge
      * cycle. This is the initial limit. The system may choose to increase the limit over time,
      * but the increased limit should never exceed the value returned from
-     * {@link #getHardSatiatedConsumptionLimit()}.
+     * {@link #getMaxSatiatedConsumptionLimit()}.
      */
     abstract long getInitialSatiatedConsumptionLimit();
 
     /**
-     * Returns the maximum number of cakes that should be consumed during a full 100% discharge
-     * cycle. This is the hard limit that should never be exceeded.
+     * Returns the minimum number of cakes that should be available for consumption during a full
+     * 100% discharge cycle.
      */
-    abstract long getHardSatiatedConsumptionLimit();
+    abstract long getMinSatiatedConsumptionLimit();
+
+    /**
+     * Returns the maximum number of cakes that should be available for consumption during a full
+     * 100% discharge cycle.
+     */
+    abstract long getMaxSatiatedConsumptionLimit();
 
     /** Return the set of modifiers that should apply to this policy's costs. */
     @NonNull
@@ -236,7 +275,7 @@ public abstract class EconomicPolicy {
     @NonNull
     final Cost getCostOfAction(int actionId, int userId, @NonNull String pkgName) {
         final Action action = getAction(actionId);
-        if (action == null) {
+        if (action == null || mIrs.isVip(userId, pkgName)) {
             return new Cost(0, 0);
         }
         long ctp = action.costToProduce;
@@ -306,6 +345,10 @@ public abstract class EconomicPolicy {
         return eventId & MASK_TYPE;
     }
 
+    static boolean isReward(int eventId) {
+        return getEventType(eventId) == TYPE_REWARD;
+    }
+
     @NonNull
     static String eventToString(int eventId) {
         switch (eventId & MASK_TYPE) {
@@ -326,7 +369,7 @@ public abstract class EconomicPolicy {
     @NonNull
     static String actionToString(int eventId) {
         switch (eventId & MASK_POLICY) {
-            case POLICY_AM:
+            case POLICY_ALARM:
                 switch (eventId) {
                     case AlarmManagerEconomicPolicy.ACTION_ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE:
                         return "ALARM_WAKEUP_EXACT_ALLOW_WHILE_IDLE";
@@ -349,7 +392,7 @@ public abstract class EconomicPolicy {
                 }
                 break;
 
-            case POLICY_JS:
+            case POLICY_JOB:
                 switch (eventId) {
                     case JobSchedulerEconomicPolicy.ACTION_JOB_MAX_START:
                         return "JOB_MAX_START";
@@ -392,6 +435,12 @@ public abstract class EconomicPolicy {
                 return "PROMOTION";
             case REGULATION_DEMOTION:
                 return "DEMOTION";
+            case REGULATION_BG_RESTRICTED:
+                return "BG_RESTRICTED";
+            case REGULATION_BG_UNRESTRICTED:
+                return "BG_UNRESTRICTED";
+            case REGULATION_FORCE_STOP:
+                return "FORCE_STOP";
         }
         return "UNKNOWN_REGULATION:" + Integer.toHexString(eventId);
     }
@@ -409,24 +458,42 @@ public abstract class EconomicPolicy {
                 return "REWARD_WIDGET_INTERACTION";
             case REWARD_OTHER_USER_INTERACTION:
                 return "REWARD_OTHER_USER_INTERACTION";
+            case JobSchedulerEconomicPolicy.REWARD_APP_INSTALL:
+                return "REWARD_JOB_APP_INSTALL";
         }
         return "UNKNOWN_REWARD:" + Integer.toHexString(eventId);
     }
 
     protected long getConstantAsCake(@NonNull KeyValueListParser parser,
             @Nullable DeviceConfig.Properties properties, String key, long defaultValCake) {
+        return getConstantAsCake(parser, properties, key, defaultValCake, 0);
+    }
+
+    protected long getConstantAsCake(@NonNull KeyValueListParser parser,
+            @Nullable DeviceConfig.Properties properties, String key, long defaultValCake,
+            long minValCake) {
         // Don't cross the streams! Mixing Settings/local user config changes with DeviceConfig
         // config can cause issues since the scales may be different, so use one or the other.
         if (parser.size() > 0) {
             // User settings take precedence. Just stick with the Settings constants, even if there
             // are invalid values. It's not worth the time to evaluate all the key/value pairs to
             // make sure there are valid ones before deciding.
-            return parseCreditValue(parser.getString(key, null), defaultValCake);
+            return Math.max(minValCake,
+                parseCreditValue(parser.getString(key, null), defaultValCake));
         }
         if (properties != null) {
-            return parseCreditValue(properties.getString(key, null), defaultValCake);
+            return Math.max(minValCake,
+                parseCreditValue(properties.getString(key, null), defaultValCake));
         }
-        return defaultValCake;
+        return Math.max(minValCake, defaultValCake);
+    }
+
+    @VisibleForTesting
+    static class Injector {
+        @Nullable
+        String getSettingsGlobalString(@NonNull ContentResolver resolver, @NonNull String name) {
+            return Settings.Global.getString(resolver, name);
+        }
     }
 
     protected static void dumpActiveModifiers(IndentingPrintWriter pw) {

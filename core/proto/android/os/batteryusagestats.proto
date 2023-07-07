@@ -102,4 +102,21 @@ message BatteryUsageStatsAtomsProto {
 
     // Total amount of time battery was discharging during the reported session
     optional int64 discharge_duration_millis = 7;
+
+    // Notes the power model used for a power component.
+    message PowerComponentModel {
+        // Holds android.os.PowerComponentEnum, or custom component value between 1000 and 9999.
+        optional int32 component = 1;
+
+        enum PowerModel {
+            UNDEFINED = 0;
+            POWER_PROFILE = 1;
+            MEASURED_ENERGY = 2;
+        }
+
+        optional PowerModel power_model = 2;
+    }
+
+    // The power model used for each power component.
+    repeated PowerComponentModel component_models = 8;
 }

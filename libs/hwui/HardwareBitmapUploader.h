@@ -17,6 +17,9 @@
 #pragma once
 
 #include <hwui/Bitmap.h>
+#include <SkRefCnt.h>
+
+class SkBitmap;
 
 namespace android::uirenderer {
 

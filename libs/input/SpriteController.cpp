@@ -131,8 +131,9 @@ void SpriteController::doUpdateSprites() {
             update.state.surfaceHeight = update.state.icon.height();
             update.state.surfaceDrawn = false;
             update.state.surfaceVisible = false;
-            update.state.surfaceControl = obtainSurface(
-                    update.state.surfaceWidth, update.state.surfaceHeight);
+            update.state.surfaceControl =
+                    obtainSurface(update.state.surfaceWidth, update.state.surfaceHeight,
+                                  update.state.displayId);
             if (update.state.surfaceControl != NULL) {
                 update.surfaceChanged = surfaceChanged = true;
             }
@@ -168,8 +169,8 @@ void SpriteController::doUpdateSprites() {
             }
         }
 
-        // If surface is a new one, we have to set right layer stack.
-        if (update.surfaceChanged || update.state.dirty & DIRTY_DISPLAY_ID) {
+        // If surface has changed to a new display, we have to reparent it.
+        if (update.state.dirty & DIRTY_DISPLAY_ID) {
             t.reparent(update.state.surfaceControl, mParentSurfaceProvider(update.state.displayId));
             needApplyTransaction = true;
         }
@@ -242,15 +243,14 @@ void SpriteController::doUpdateSprites() {
                     && (becomingVisible
                             || (update.state.dirty & (DIRTY_HOTSPOT | DIRTY_ICON_STYLE)))) {
                 Parcel p;
-                p.writeInt32(update.state.icon.style);
+                p.writeInt32(static_cast<int32_t>(update.state.icon.style));
                 p.writeFloat(update.state.icon.hotSpotX);
                 p.writeFloat(update.state.icon.hotSpotY);
 
                 // Pass cursor metadata in the sprite surface so that when Android is running as a
                 // client OS (e.g. ARC++) the host OS can get the requested cursor metadata and
                 // update mouse cursor in the host OS.
-                t.setMetadata(
-                        update.state.surfaceControl, METADATA_MOUSE_CURSOR, p);
+                t.setMetadata(update.state.surfaceControl, gui::METADATA_MOUSE_CURSOR, p);
             }
 
             int32_t surfaceLayer = mOverlayLayer + update.state.layer;
@@ -331,20 +331,27 @@ void SpriteController::ensureSurfaceComposerClient() {
     }
 }
 
-sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height) {
+sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height,
+                                                   int32_t displayId) {
     ensureSurfaceComposerClient();
 
-    sp<SurfaceControl> surfaceControl = mSurfaceComposerClient->createSurface(
-            String8("Sprite"), width, height, PIXEL_FORMAT_RGBA_8888,
-            ISurfaceComposerClient::eHidden |
-            ISurfaceComposerClient::eCursorWindow);
-    if (surfaceControl == NULL || !surfaceControl->isValid()) {
+    const sp<SurfaceControl> parent = mParentSurfaceProvider(displayId);
+    if (parent == nullptr) {
+        ALOGE("Failed to get the parent surface for pointers on display %d", displayId);
+    }
+
+    const sp<SurfaceControl> surfaceControl =
+            mSurfaceComposerClient->createSurface(String8("Sprite"), width, height,
+                                                  PIXEL_FORMAT_RGBA_8888,
+                                                  ISurfaceComposerClient::eHidden |
+                                                          ISurfaceComposerClient::eCursorWindow,
+                                                  parent ? parent->getHandle() : nullptr);
+    if (surfaceControl == nullptr || !surfaceControl->isValid()) {
         ALOGE("Error creating sprite surface.");
-        return NULL;
+        return nullptr;
     }
     return surfaceControl;
 }
-
 
 // --- SpriteController::SpriteImpl ---
 

@@ -16,22 +16,20 @@
 
 package com.android.server.pm.snapshot;
 
-import android.annotation.NonNull;
-import android.content.pm.UserInfo;
-import android.util.ArrayMap;
+import android.content.pm.PackageManagerInternal;
 
-import com.android.server.pm.SharedUserSetting;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.Computer;
+import com.android.server.pm.PackageManagerService;
 
-import java.util.Collection;
-
+/**
+ * An empty interface provided as the type for a snapshot of {@link PackageManagerService} data.
+ * There should be no members of this interface, to discourage its usage beyond as an input to
+ * other package related APIs.
+ *
+ * Usage inside {@link PackageManagerInternal} and related should cast the object instance to
+ * a {@link Computer} to access data.
+ *
+ * @hide
+ */
 public interface PackageDataSnapshot {
-    @NonNull
-    ArrayMap<String, ? extends PackageStateInternal> getPackageStates();
-    @NonNull
-    UserInfo[] getUserInfos();
-    @NonNull
-    Collection<SharedUserSetting> getAllSharedUsers();
-    AndroidPackage getPackage(String packageName);
 }

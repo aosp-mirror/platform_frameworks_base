@@ -22,7 +22,6 @@ import static junit.framework.Assert.assertNull;
 
 import android.content.ContentResolver;
 import android.os.Bundle;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
@@ -180,14 +179,14 @@ public class DeviceConfigServiceTest {
             args.putBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY, true);
         }
         resolver.call(
-                DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, compositeName, args);
+                Settings.Config.CONTENT_URI, Settings.CALL_METHOD_PUT_CONFIG, compositeName, args);
     }
 
     private static String getFromContentProvider(ContentResolver resolver, String namespace,
             String key) {
         String compositeName = namespace + "/" + key;
         Bundle result = resolver.call(
-                DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, compositeName, null);
+                Settings.Config.CONTENT_URI, Settings.CALL_METHOD_GET_CONFIG, compositeName, null);
         assertNotNull(result);
         return result.getString(Settings.NameValueTable.VALUE);
     }
@@ -196,7 +195,8 @@ public class DeviceConfigServiceTest {
             String key) {
         String compositeName = namespace + "/" + key;
         Bundle result = resolver.call(
-                DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, compositeName, null);
+                Settings.Config.CONTENT_URI,
+                Settings.CALL_METHOD_DELETE_CONFIG, compositeName, null);
         assertNotNull(result);
         return compositeName.equals(result.getString(Settings.NameValueTable.VALUE));
     }

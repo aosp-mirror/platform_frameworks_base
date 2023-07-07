@@ -49,6 +49,12 @@ public class TaskInfo {
     private static final String TAG = "TaskInfo";
 
     /**
+     * The value to use when the property has not a specific value.
+     * @hide
+     */
+    public static final int PROPERTY_VALUE_UNSET = -1;
+
+    /**
      * The id of the user the task was running as if this is a leaf task. The id of the current
      * running user of the system otherwise.
      * @hide
@@ -140,13 +146,6 @@ public class TaskInfo {
     public LocusId mTopActivityLocusId;
 
     /**
-     * True if the task can go in the split-screen primary stack.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public boolean supportsSplitScreenMultiWindow;
-
-    /**
      * Whether this task supports multi windowing modes based on the device settings and the
      * root activity resizability and configuration.
      * @hide
@@ -195,6 +194,14 @@ public class TaskInfo {
     public int launchIntoPipHostTaskId;
 
     /**
+     * The task id of the parent Task of the launch-into-pip Activity, i.e., if task have more than
+     * one activity it will create new task for this activity, this id is the origin task id and
+     * the pip activity will be reparent to origin task when it exit pip mode.
+     * @hide
+     */
+    public int lastParentTaskIdBeforePip;
+
+    /**
      * The {@link Rect} copied from {@link DisplayCutout#getSafeInsets()} if the cutout is not of
      * (LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES, LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS),
      * {@code null} otherwise.
@@ -227,6 +234,46 @@ public class TaskInfo {
      * @hide
      */
     public boolean topActivityEligibleForLetterboxEducation;
+
+    /**
+     * Whether the double tap is enabled
+     * @hide
+     */
+    public boolean isLetterboxDoubleTapEnabled;
+
+    /**
+     * Whether the update comes from a letterbox double-tap action from the user or not.
+     * @hide
+     */
+    public boolean isFromLetterboxDoubleTap;
+
+    /**
+     * If {@link isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position or
+     * {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
+     * @hide
+     */
+    public int topActivityLetterboxVerticalPosition;
+
+    /**
+     * If {@link isLetterboxDoubleTapEnabled} it contains the current letterbox vertical position or
+     * {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise.
+     * @hide
+     */
+    public int topActivityLetterboxHorizontalPosition;
+
+    /**
+     * If {@link isLetterboxDoubleTapEnabled} it contains the current width of the letterboxed
+     * activity or {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise
+     * @hide
+     */
+    public int topActivityLetterboxWidth;
+
+    /**
+     * If {@link isLetterboxDoubleTapEnabled} it contains the current height of the letterboxed
+     * activity or {@link TaskInfo.PROPERTY_VALUE_UNSET} otherwise
+     * @hide
+     */
+    public int topActivityLetterboxHeight;
 
     /**
      * Whether this task is resizable. Unlike {@link #resizeMode} (which is what the top activity
@@ -285,6 +332,12 @@ public class TaskInfo {
      * @hide
      */
     public boolean isVisible;
+
+    /**
+     * Whether this task is request visible.
+     * @hide
+     */
+    public boolean isVisibleRequested;
 
     /**
      * Whether this task is sleeping due to sleeping display.
@@ -406,7 +459,8 @@ public class TaskInfo {
     /** @hide */
     public boolean hasCompatUI() {
         return hasCameraCompatControl() || topActivityInSizeCompat
-                || topActivityEligibleForLetterboxEducation;
+                || topActivityEligibleForLetterboxEducation
+                || isLetterboxDoubleTapEnabled;
     }
 
     /**
@@ -434,6 +488,15 @@ public class TaskInfo {
     }
 
     /**
+     * @return The id of the display this task is associated with.
+     * @hide
+     */
+    @TestApi
+    public int getDisplayId() {
+        return displayId;
+    }
+
+    /**
      * Returns {@code true} if the parameters that are important for task organizers are equal
      * between this {@link TaskInfo} and {@param that}.
      * @hide
@@ -446,17 +509,26 @@ public class TaskInfo {
                 && isResizeable == that.isResizeable
                 && supportsMultiWindow == that.supportsMultiWindow
                 && displayAreaFeatureId == that.displayAreaFeatureId
+                && isFromLetterboxDoubleTap == that.isFromLetterboxDoubleTap
+                && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
+                && topActivityLetterboxWidth == that.topActivityLetterboxWidth
+                && topActivityLetterboxHeight == that.topActivityLetterboxHeight
+                && topActivityLetterboxHorizontalPosition
+                    == that.topActivityLetterboxHorizontalPosition
                 && Objects.equals(positionInParent, that.positionInParent)
                 && Objects.equals(pictureInPictureParams, that.pictureInPictureParams)
                 && Objects.equals(shouldDockBigOverlays, that.shouldDockBigOverlays)
                 && Objects.equals(displayCutoutInsets, that.displayCutoutInsets)
                 && getWindowingMode() == that.getWindowingMode()
+                && configuration.uiMode == that.configuration.uiMode
                 && Objects.equals(taskDescription, that.taskDescription)
                 && isFocused == that.isFocused
                 && isVisible == that.isVisible
+                && isVisibleRequested == that.isVisibleRequested
                 && isSleeping == that.isSleeping
                 && Objects.equals(mTopActivityLocusId, that.mTopActivityLocusId)
-                && parentTaskId == that.parentTaskId;
+                && parentTaskId == that.parentTaskId
+                && Objects.equals(topActivity, that.topActivity);
     }
 
     /**
@@ -470,14 +542,21 @@ public class TaskInfo {
         return displayId == that.displayId
                 && taskId == that.taskId
                 && topActivityInSizeCompat == that.topActivityInSizeCompat
+                && isFromLetterboxDoubleTap == that.isFromLetterboxDoubleTap
                 && topActivityEligibleForLetterboxEducation
                     == that.topActivityEligibleForLetterboxEducation
+                && topActivityLetterboxVerticalPosition == that.topActivityLetterboxVerticalPosition
+                && topActivityLetterboxHorizontalPosition
+                    == that.topActivityLetterboxHorizontalPosition
+                && topActivityLetterboxWidth == that.topActivityLetterboxWidth
+                && topActivityLetterboxHeight == that.topActivityLetterboxHeight
                 && cameraCompatControlState == that.cameraCompatControlState
                 // Bounds are important if top activity has compat controls.
                 && (!hasCompatUI() || configuration.windowConfiguration.getBounds()
                     .equals(that.configuration.windowConfiguration.getBounds()))
                 && (!hasCompatUI() || configuration.getLayoutDirection()
                     == that.configuration.getLayoutDirection())
+                && (!hasCompatUI() || configuration.uiMode == that.configuration.uiMode)
                 && (!hasCompatUI() || isVisible == that.isVisible);
     }
 
@@ -499,7 +578,6 @@ public class TaskInfo {
         lastActiveTime = source.readLong();
 
         taskDescription = source.readTypedObject(ActivityManager.TaskDescription.CREATOR);
-        supportsSplitScreenMultiWindow = source.readBoolean();
         supportsMultiWindow = source.readBoolean();
         resizeMode = source.readInt();
         configuration.readFromParcel(source);
@@ -508,6 +586,7 @@ public class TaskInfo {
         pictureInPictureParams = source.readTypedObject(PictureInPictureParams.CREATOR);
         shouldDockBigOverlays = source.readBoolean();
         launchIntoPipHostTaskId = source.readInt();
+        lastParentTaskIdBeforePip = source.readInt();
         displayCutoutInsets = source.readTypedObject(Rect.CREATOR);
         topActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         isResizeable = source.readBoolean();
@@ -519,12 +598,19 @@ public class TaskInfo {
         parentTaskId = source.readInt();
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
+        isVisibleRequested = source.readBoolean();
         isSleeping = source.readBoolean();
         topActivityInSizeCompat = source.readBoolean();
         topActivityEligibleForLetterboxEducation = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
         cameraCompatControlState = source.readInt();
+        isLetterboxDoubleTapEnabled = source.readBoolean();
+        isFromLetterboxDoubleTap = source.readBoolean();
+        topActivityLetterboxVerticalPosition = source.readInt();
+        topActivityLetterboxHorizontalPosition = source.readInt();
+        topActivityLetterboxWidth = source.readInt();
+        topActivityLetterboxHeight = source.readInt();
     }
 
     /**
@@ -546,7 +632,6 @@ public class TaskInfo {
         dest.writeLong(lastActiveTime);
 
         dest.writeTypedObject(taskDescription, flags);
-        dest.writeBoolean(supportsSplitScreenMultiWindow);
         dest.writeBoolean(supportsMultiWindow);
         dest.writeInt(resizeMode);
         configuration.writeToParcel(dest, flags);
@@ -555,6 +640,7 @@ public class TaskInfo {
         dest.writeTypedObject(pictureInPictureParams, flags);
         dest.writeBoolean(shouldDockBigOverlays);
         dest.writeInt(launchIntoPipHostTaskId);
+        dest.writeInt(lastParentTaskIdBeforePip);
         dest.writeTypedObject(displayCutoutInsets, flags);
         dest.writeTypedObject(topActivityInfo, flags);
         dest.writeBoolean(isResizeable);
@@ -566,12 +652,19 @@ public class TaskInfo {
         dest.writeInt(parentTaskId);
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
+        dest.writeBoolean(isVisibleRequested);
         dest.writeBoolean(isSleeping);
         dest.writeBoolean(topActivityInSizeCompat);
         dest.writeBoolean(topActivityEligibleForLetterboxEducation);
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
         dest.writeInt(cameraCompatControlState);
+        dest.writeBoolean(isLetterboxDoubleTapEnabled);
+        dest.writeBoolean(isFromLetterboxDoubleTap);
+        dest.writeInt(topActivityLetterboxVerticalPosition);
+        dest.writeInt(topActivityLetterboxHorizontalPosition);
+        dest.writeInt(topActivityLetterboxWidth);
+        dest.writeInt(topActivityLetterboxHeight);
     }
 
     @Override
@@ -584,7 +677,6 @@ public class TaskInfo {
                 + " realActivity=" + realActivity
                 + " numActivities=" + numActivities
                 + " lastActiveTime=" + lastActiveTime
-                + " supportsSplitScreenMultiWindow=" + supportsSplitScreenMultiWindow
                 + " supportsMultiWindow=" + supportsMultiWindow
                 + " resizeMode=" + resizeMode
                 + " isResizeable=" + isResizeable
@@ -596,6 +688,7 @@ public class TaskInfo {
                 + " pictureInPictureParams=" + pictureInPictureParams
                 + " shouldDockBigOverlays=" + shouldDockBigOverlays
                 + " launchIntoPipHostTaskId=" + launchIntoPipHostTaskId
+                + " lastParentTaskIdBeforePip=" + lastParentTaskIdBeforePip
                 + " displayCutoutSafeInsets=" + displayCutoutInsets
                 + " topActivityInfo=" + topActivityInfo
                 + " launchCookies=" + launchCookies
@@ -603,10 +696,18 @@ public class TaskInfo {
                 + " parentTaskId=" + parentTaskId
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
+                + " isVisibleRequested=" + isVisibleRequested
                 + " isSleeping=" + isSleeping
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
                 + " topActivityEligibleForLetterboxEducation= "
                         + topActivityEligibleForLetterboxEducation
+                + " topActivityLetterboxed= " + isLetterboxDoubleTapEnabled
+                + " isFromDoubleTap= " + isFromLetterboxDoubleTap
+                + " topActivityLetterboxVerticalPosition= " + topActivityLetterboxVerticalPosition
+                + " topActivityLetterboxHorizontalPosition= "
+                        + topActivityLetterboxHorizontalPosition
+                + " topActivityLetterboxWidth=" + topActivityLetterboxWidth
+                + " topActivityLetterboxHeight=" + topActivityLetterboxHeight
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " cameraCompatControlState="

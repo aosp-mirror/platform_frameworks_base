@@ -179,8 +179,9 @@ public interface VolumeDialogController {
 
     @ProvidesInterface(version = Callbacks.VERSION)
     public interface Callbacks {
-        int VERSION = 1;
+        int VERSION = 2;
 
+        // requires version 1
         void onShowRequested(int reason, boolean keyguardLocked, int lockTaskModeState);
         void onDismissRequested(int reason);
         void onStateChanged(State state);
@@ -192,5 +193,7 @@ public interface VolumeDialogController {
         void onShowSafetyWarning(int flags);
         void onAccessibilityModeChanged(Boolean showA11yStream);
         void onCaptionComponentStateChanged(Boolean isComponentEnabled, Boolean fromTooltip);
+        // requires version 2
+        void onShowCsdWarning(@AudioManager.CsdWarning int csdWarning, int durationMs);
     }
 }

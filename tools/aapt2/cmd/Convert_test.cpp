@@ -17,13 +17,18 @@
 #include "Convert.h"
 
 #include "LoadedApk.h"
+#include "test/Common.h"
 #include "test/Test.h"
 #include "ziparchive/zip_archive.h"
 
+using testing::AnyOfArray;
 using testing::Eq;
 using testing::Ne;
+using testing::Not;
+using testing::SizeIs;
 
 namespace aapt {
+using namespace aapt::test;
 
 using ConvertTest = CommandTestFixture;
 
@@ -101,7 +106,8 @@ TEST_F(ConvertTest, KeepRawXmlStrings) {
   // Check that the raw string index has been set to the correct string pool entry
   int32_t raw_index = tree.getAttributeValueStringID(0);
   ASSERT_THAT(raw_index, Ne(-1));
-  EXPECT_THAT(util::GetString(tree.getStrings(), static_cast<size_t>(raw_index)), Eq("007"));
+  EXPECT_THAT(android::util::GetString(tree.getStrings(), static_cast<size_t>(raw_index)),
+              Eq("007"));
 }
 
 TEST_F(ConvertTest, DuplicateEntriesWrittenOnce) {
@@ -142,6 +148,78 @@ TEST_F(ConvertTest, DuplicateEntriesWrittenOnce) {
   EndIteration(cookie);
 
   EXPECT_THAT(count, Eq(1));
+}
+
+TEST_F(ConvertTest, ConvertWithResourceNameCollapsing) {
+  StdErrDiagnostics diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values.xml"),
+                          R"(<resources>
+                               <string name="first">string</string>
+                               <string name="second">string</string>
+                               <string name="third">another string</string>
+
+                               <bool name="bool1">true</bool>
+                               <bool name="bool2">true</bool>
+                               <bool name="bool3">true</bool>
+
+                               <integer name="int1">10</integer>
+                               <integer name="int2">10</integer>
+                             </resources>)",
+                          compiled_files_dir, &diag));
+  std::string resource_config_path = GetTestPath("resource-config");
+  WriteFile(resource_config_path, "integer/int1#no_collapse\ninteger/int2#no_collapse");
+
+  const std::string proto_apk = GetTestPath("proto.apk");
+  std::vector<std::string> link_args = {
+      "--proto-format", "--manifest", GetDefaultManifest(kDefaultPackageName), "-o", proto_apk,
+  };
+  ASSERT_TRUE(Link(link_args, compiled_files_dir, &diag));
+
+  const std::string binary_apk = GetTestPath("binary.apk");
+  std::vector<android::StringPiece> convert_args = {"-o",
+                                                    binary_apk,
+                                                    "--output-format",
+                                                    "binary",
+                                                    "--collapse-resource-names",
+                                                    "--deduplicate-entry-values",
+                                                    "--resources-config-path",
+                                                    resource_config_path,
+                                                    proto_apk};
+  ASSERT_THAT(ConvertCommand().Execute(convert_args, &std::cerr), Eq(0));
+
+  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(binary_apk, &diag);
+  for (const auto& package : apk->GetResourceTable()->packages) {
+    for (const auto& type : package->types) {
+      switch (type->named_type.type) {
+        case ResourceType::kBool:
+          EXPECT_THAT(type->entries, SizeIs(3));
+          for (const auto& entry : type->entries) {
+            auto value = ValueCast<BinaryPrimitive>(entry->FindValue({})->value.get())->value;
+            EXPECT_THAT(value.data, Eq(0xffffffffu));
+          }
+          break;
+        case ResourceType::kString:
+          EXPECT_THAT(type->entries, SizeIs(3));
+          for (const auto& entry : type->entries) {
+            auto value = ValueCast<String>(entry->FindValue({})->value.get())->value;
+            EXPECT_THAT(entry->name, Not(AnyOfArray({"first", "second", "third"})));
+            EXPECT_THAT(*value, AnyOfArray({"string", "another string"}));
+          }
+          break;
+        case ResourceType::kInteger:
+          EXPECT_THAT(type->entries, SizeIs(2));
+          for (const auto& entry : type->entries) {
+            auto value = ValueCast<BinaryPrimitive>(entry->FindValue({})->value.get())->value;
+            EXPECT_THAT(entry->name, AnyOfArray({"int1", "int2"}));
+            EXPECT_THAT(value.data, Eq(10));
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }
 }
 
 }  // namespace aapt

@@ -22,8 +22,8 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VER
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 
-import static com.android.server.pm.pkg.parsing.ParsingPackageImpl.sForInternedString;
-import static com.android.server.pm.pkg.parsing.ParsingPackageImpl.sForStringSet;
+import static com.android.server.pm.parsing.pkg.PackageImpl.sForInternedString;
+import static com.android.server.pm.parsing.pkg.PackageImpl.sForStringSet;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -96,6 +96,9 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
     @Nullable
     private ActivityInfo.WindowLayout windowLayout;
 
+    @Nullable
+    private String mRequiredDisplayCategory;
+
     public ParsedActivityImpl(ParsedActivityImpl other) {
         super(other);
         this.theme = other.theme;
@@ -122,6 +125,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
         this.colorMode = other.colorMode;
         this.windowLayout = other.windowLayout;
         this.mKnownActivityEmbeddingCerts = other.mKnownActivityEmbeddingCerts;
+        this.mRequiredDisplayCategory = other.mRequiredDisplayCategory;
     }
 
     /**
@@ -189,6 +193,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
         alias.requestedVrComponent = target.getRequestedVrComponent();
         alias.setDirectBootAware(target.isDirectBootAware());
         alias.setProcessName(target.getProcessName());
+        alias.setRequiredDisplayCategory(target.getRequiredDisplayCategory());
         return alias;
 
         // Not all attributes from the target ParsedActivity are copied to the alias.
@@ -316,6 +321,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
             dest.writeBoolean(false);
         }
         sForStringSet.parcel(this.mKnownActivityEmbeddingCerts, dest, flags);
+        dest.writeString8(this.mRequiredDisplayCategory);
     }
 
     public ParsedActivityImpl() {
@@ -350,6 +356,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
             windowLayout = new ActivityInfo.WindowLayout(in);
         }
         this.mKnownActivityEmbeddingCerts = sForStringSet.unparcel(in);
+        this.mRequiredDisplayCategory = in.readString8();
     }
 
     @NonNull
@@ -406,7 +413,8 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
             @Nullable String requestedVrComponent,
             int rotationAnimation,
             int colorMode,
-            @Nullable ActivityInfo.WindowLayout windowLayout) {
+            @Nullable ActivityInfo.WindowLayout windowLayout,
+            @Nullable String requiredDisplayCategory) {
         this.theme = theme;
         this.uiOptions = uiOptions;
         this.targetActivity = targetActivity;
@@ -431,6 +439,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
         this.rotationAnimation = rotationAnimation;
         this.colorMode = colorMode;
         this.windowLayout = windowLayout;
+        this.mRequiredDisplayCategory = requiredDisplayCategory;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -548,6 +557,11 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
     @DataClass.Generated.Member
     public @Nullable ActivityInfo.WindowLayout getWindowLayout() {
         return windowLayout;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable String getRequiredDisplayCategory() {
+        return mRequiredDisplayCategory;
     }
 
     @DataClass.Generated.Member
@@ -676,11 +690,17 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
         return this;
     }
 
+    @DataClass.Generated.Member
+    public @NonNull ParsedActivityImpl setRequiredDisplayCategory(@NonNull String value) {
+        mRequiredDisplayCategory = value;
+        return this;
+    }
+
     @DataClass.Generated(
-            time = 1644372875433L,
+            time = 1669437519576L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/component/ParsedActivityImpl.java",
-            inputSignatures = "private  int theme\nprivate  int uiOptions\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String targetActivity\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String parentActivityName\nprivate @android.annotation.Nullable java.lang.String taskAffinity\nprivate  int privateFlags\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String permission\nprivate @android.annotation.Nullable java.util.Set<java.lang.String> mKnownActivityEmbeddingCerts\nprivate  int launchMode\nprivate  int documentLaunchMode\nprivate  int maxRecents\nprivate  int configChanges\nprivate  int softInputMode\nprivate  int persistableMode\nprivate  int lockTaskLaunchMode\nprivate  int screenOrientation\nprivate  int resizeMode\nprivate  float maxAspectRatio\nprivate  float minAspectRatio\nprivate  boolean supportsSizeChanges\nprivate @android.annotation.Nullable java.lang.String requestedVrComponent\nprivate  int rotationAnimation\nprivate  int colorMode\nprivate @android.annotation.Nullable android.content.pm.ActivityInfo.WindowLayout windowLayout\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<com.android.server.pm.pkg.component.ParsedActivityImpl> CREATOR\nstatic @android.annotation.NonNull com.android.server.pm.pkg.component.ParsedActivityImpl makeAppDetailsActivity(java.lang.String,java.lang.String,int,java.lang.String,boolean)\nstatic @android.annotation.NonNull com.android.server.pm.pkg.component.ParsedActivityImpl makeAlias(java.lang.String,com.android.server.pm.pkg.component.ParsedActivity)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setMaxAspectRatio(int,float)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setMinAspectRatio(int,float)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setTargetActivity(java.lang.String)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setPermission(java.lang.String)\npublic @android.annotation.NonNull @java.lang.Override java.util.Set<java.lang.String> getKnownActivityEmbeddingCerts()\npublic  void setKnownActivityEmbeddingCerts(java.util.Set<java.lang.String>)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedActivityImpl extends com.android.server.pm.pkg.component.ParsedMainComponentImpl implements [com.android.server.pm.pkg.component.ParsedActivity, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
+            inputSignatures = "private  int theme\nprivate  int uiOptions\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String targetActivity\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String parentActivityName\nprivate @android.annotation.Nullable java.lang.String taskAffinity\nprivate  int privateFlags\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String permission\nprivate @android.annotation.Nullable java.util.Set<java.lang.String> mKnownActivityEmbeddingCerts\nprivate  int launchMode\nprivate  int documentLaunchMode\nprivate  int maxRecents\nprivate  int configChanges\nprivate  int softInputMode\nprivate  int persistableMode\nprivate  int lockTaskLaunchMode\nprivate  int screenOrientation\nprivate  int resizeMode\nprivate  float maxAspectRatio\nprivate  float minAspectRatio\nprivate  boolean supportsSizeChanges\nprivate @android.annotation.Nullable java.lang.String requestedVrComponent\nprivate  int rotationAnimation\nprivate  int colorMode\nprivate @android.annotation.Nullable android.content.pm.ActivityInfo.WindowLayout windowLayout\nprivate @android.annotation.Nullable java.lang.String mRequiredDisplayCategory\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<com.android.server.pm.pkg.component.ParsedActivityImpl> CREATOR\nstatic @android.annotation.NonNull com.android.server.pm.pkg.component.ParsedActivityImpl makeAppDetailsActivity(java.lang.String,java.lang.String,int,java.lang.String,boolean)\nstatic @android.annotation.NonNull com.android.server.pm.pkg.component.ParsedActivityImpl makeAlias(java.lang.String,com.android.server.pm.pkg.component.ParsedActivity)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setMaxAspectRatio(int,float)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setMinAspectRatio(int,float)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setTargetActivity(java.lang.String)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setPermission(java.lang.String)\npublic @android.annotation.NonNull @java.lang.Override java.util.Set<java.lang.String> getKnownActivityEmbeddingCerts()\npublic  void setKnownActivityEmbeddingCerts(java.util.Set<java.lang.String>)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedActivityImpl extends com.android.server.pm.pkg.component.ParsedMainComponentImpl implements [com.android.server.pm.pkg.component.ParsedActivity, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
     @Deprecated
     private void __metadata() {}
 

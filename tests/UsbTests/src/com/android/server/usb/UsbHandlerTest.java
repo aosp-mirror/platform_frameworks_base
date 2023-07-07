@@ -98,7 +98,7 @@ public class UsbHandlerTest {
         }
 
         @Override
-        protected void setEnabledFunctions(long functions, boolean force) {
+        protected void setEnabledFunctions(long functions, boolean force, int operationId) {
             mCurrentFunctions = functions;
         }
 
@@ -134,6 +134,24 @@ public class UsbHandlerTest {
         protected void sendStickyBroadcast(Intent intent) {
             mBroadcastedIntent = intent;
         }
+
+        @Override
+        public void handlerInitDone(int operationId) {
+        }
+
+        @Override
+        public void setCurrentUsbFunctionsCb(long functions,
+                    int status, int mRequest, long mFunctions, boolean mChargingFunctions){
+        }
+
+        @Override
+        public void getUsbSpeedCb(int speed){
+        }
+
+        @Override
+        public void resetCb(int status){
+        }
+
     }
 
     @Before
@@ -178,6 +196,14 @@ public class UsbHandlerTest {
         mUsbHandler.handleMessage(mUsbHandler.obtainMessage(MSG_SET_CURRENT_FUNCTIONS,
                 UsbManager.FUNCTION_RNDIS));
         assertNotEquals(mUsbHandler.getEnabledFunctions() & UsbManager.FUNCTION_RNDIS, 0);
+    }
+
+    @SmallTest
+    @Test
+    public void setFunctionsNcm() {
+        mUsbHandler.handleMessage(mUsbHandler.obtainMessage(MSG_SET_CURRENT_FUNCTIONS,
+                UsbManager.FUNCTION_NCM));
+        assertNotEquals(mUsbHandler.getEnabledFunctions() & UsbManager.FUNCTION_NCM, 0);
     }
 
     @SmallTest

@@ -40,13 +40,6 @@ interface AndroidPackageHidden {
     String getPrimaryCpuAbi();
 
     /**
-     * @see ApplicationInfo#seInfo
-     * TODO: This field is deriveable and might not have to be cached here.
-     */
-    @Nullable
-    String getSeInfo();
-
-    /**
      * @see ApplicationInfo#secondaryCpuAbi
      */
     @Nullable
@@ -66,4 +59,19 @@ interface AndroidPackageHidden {
 
     // TODO(b/135203078): Hide and enforce going through PackageInfoUtils
     ApplicationInfo toAppInfoWithoutState();
+
+    // TODO: Remove these booleans and store the value directly inside PackageState
+    boolean isSystem();
+
+    boolean isSystemExt();
+
+    boolean isPrivileged();
+
+    boolean isOem();
+
+    boolean isVendor();
+
+    boolean isProduct();
+
+    boolean isOdm();
 }

@@ -17,10 +17,13 @@
 package android.inputmethodservice;
 
 import android.annotation.AnyThread;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -28,31 +31,35 @@ import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.PreviewableHandwritingGesture;
 import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
+import android.view.inputmethod.TextBoundsInfoResult;
 
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.CompletableFutureUtil;
-import com.android.internal.inputmethod.IInputContextInvoker;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputConnectionProtoDumper;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethod;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * Takes care of remote method invocations of {@link InputConnection} in the IME side.
  *
  * <p>This class works as a proxy to forward API calls on {@link InputConnection} to
- * {@link com.android.internal.inputmethod.RemoteInputConnectionImpl} running on the IME client
+ * {@link android.view.inputmethod.RemoteInputConnectionImpl} running on the IME client
  * (editor app) process then waits replies as needed.</p>
  *
- * <p>See also {@link IInputContext} for the actual {@link android.os.Binder} IPC protocols under
- * the hood.</p>
+ * <p>See also {@link IRemoteInputConnection} for the actual {@link android.os.Binder} IPC protocols
+ * under the hood.</p>
  */
 final class RemoteInputConnection implements InputConnection {
     private static final String TAG = "RemoteInputConnection";
@@ -60,7 +67,7 @@ final class RemoteInputConnection implements InputConnection {
     private static final int MAX_WAIT_TIME_MILLIS = 2000;
 
     @NonNull
-    private final IInputContextInvoker mInvoker;
+    private final IRemoteInputConnectionInvoker mInvoker;
 
     private static final class InputMethodServiceInternalHolder {
         @NonNull
@@ -90,22 +97,22 @@ final class RemoteInputConnection implements InputConnection {
      * Signaled when the system decided to take away IME focus from the target app.
      *
      * <p>This is expected to be signaled immediately when the IME process receives
-     * {@link IInputMethod#unbindInput()}.</p>
+     * {@link com.android.internal.inputmethod.IInputMethod#unbindInput()}.</p>
      */
     @NonNull
     private final CancellationGroup mCancellationGroup;
 
     RemoteInputConnection(
             @NonNull WeakReference<InputMethodServiceInternal> inputMethodService,
-            IInputContext inputContext, @NonNull CancellationGroup cancellationGroup) {
+            IRemoteInputConnection inputConnection, @NonNull CancellationGroup cancellationGroup) {
         mImsInternal = new InputMethodServiceInternalHolder(inputMethodService);
-        mInvoker = IInputContextInvoker.create(inputContext);
+        mInvoker = IRemoteInputConnectionInvoker.create(inputConnection);
         mCancellationGroup = cancellationGroup;
     }
 
     @AnyThread
-    public boolean isSameConnection(@NonNull IInputContext inputContext) {
-        return mInvoker.isSameConnection(inputContext);
+    public boolean isSameConnection(@NonNull IRemoteInputConnection inputConnection) {
+        return mInvoker.isSameConnection(inputConnection);
     }
 
     RemoteInputConnection(@NonNull RemoteInputConnection original, int sessionId) {
@@ -413,6 +420,24 @@ final class RemoteInputConnection implements InputConnection {
     }
 
     @AnyThread
+    public void performHandwritingGesture(
+            @NonNull HandwritingGesture gesture, @Nullable @CallbackExecutor Executor executor,
+            @Nullable IntConsumer consumer) {
+        mInvoker.performHandwritingGesture(gesture, executor, consumer);
+    }
+
+    @AnyThread
+    public boolean previewHandwritingGesture(
+            @NonNull PreviewableHandwritingGesture gesture,
+            @Nullable CancellationSignal cancellationSignal) {
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            return false; // cancelled.
+        }
+
+        return mInvoker.previewHandwritingGesture(gesture, cancellationSignal);
+    }
+
+    @AnyThread
     public boolean requestCursorUpdates(int cursorUpdateMode) {
         if (mCancellationGroup.isCanceled()) {
             return false;
@@ -448,6 +473,13 @@ final class RemoteInputConnection implements InputConnection {
                 mInvoker.requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter, displayId);
         return CompletableFutureUtil.getResultOrFalse(value, TAG, "requestCursorUpdates()",
                 mCancellationGroup, MAX_WAIT_TIME_MILLIS);
+    }
+
+    @AnyThread
+    public void requestTextBoundsInfo(
+            @NonNull RectF bounds, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<TextBoundsInfoResult> consumer) {
+        mInvoker.requestTextBoundsInfo(bounds, executor, consumer);
     }
 
     @AnyThread
@@ -487,6 +519,17 @@ final class RemoteInputConnection implements InputConnection {
     @AnyThread
     public boolean setImeConsumesInput(boolean imeConsumesInput) {
         return mInvoker.setImeConsumesInput(imeConsumesInput);
+    }
+
+    /** See {@link InputConnection#replaceText(int, int, CharSequence, int, TextAttribute)}. */
+    @AnyThread
+    public boolean replaceText(
+            int start,
+            int end,
+            @NonNull CharSequence text,
+            int newCursorPosition,
+            @Nullable TextAttribute textAttribute) {
+        return mInvoker.replaceText(start, end, text, newCursorPosition, textAttribute);
     }
 
     @AnyThread

@@ -70,7 +70,7 @@ class ShareTargetPredictor extends AppTargetPredictor {
             @UserIdInt int callingUserId, @NonNull Context context) {
         super(predictionContext, updatePredictionsMethod, dataManager, callingUserId);
         mIntentFilter = predictionContext.getExtras().getParcelable(
-                ChooserActivity.APP_PREDICTION_INTENT_FILTER_KEY);
+                ChooserActivity.APP_PREDICTION_INTENT_FILTER_KEY, android.content.IntentFilter.class);
         if (DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.DARK_LAUNCH_REMOTE_PREDICTION_SERVICE_ENABLED,
                 false)) {

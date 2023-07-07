@@ -45,7 +45,7 @@ TEST(XmlDomTest, Inflate) {
 
   StdErrDiagnostics diag;
   StringInputStream in(input);
-  std::unique_ptr<XmlResource> doc = Inflate(&in, &diag, Source("test.xml"));
+  std::unique_ptr<XmlResource> doc = Inflate(&in, &diag, android::Source("test.xml"));
   ASSERT_THAT(doc, NotNull());
 
   Element* el = doc->root.get();
@@ -77,13 +77,13 @@ TEST(XmlDomTest, BinaryInflate) {
   decl.line_number = 2u;
   doc->root->namespace_decls.push_back(decl);
 
-  BigBuffer buffer(4096);
+  android::BigBuffer buffer(4096);
   XmlFlattenerOptions options;
   options.keep_raw_values = true;
   XmlFlattener flattener(&buffer, options);
   ASSERT_TRUE(flattener.Consume(context.get(), doc.get()));
 
-  auto block = util::Copy(buffer);
+  auto block = android::util::Copy(buffer);
   std::unique_ptr<XmlResource> new_doc = Inflate(block.get(), buffer.size(), nullptr);
   ASSERT_THAT(new_doc, NotNull());
 

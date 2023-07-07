@@ -213,6 +213,25 @@ public class PendingInsetsControllerTest {
     }
 
     @Test
+    public void testSystemDrivenInsetsAnimationLoggingListener() {
+        WindowInsetsAnimationControlListener listener =
+                mock(WindowInsetsAnimationControlListener.class);
+        mPendingInsetsController.setSystemDrivenInsetsAnimationLoggingListener(listener);
+        mPendingInsetsController.replayAndAttach(mReplayedController);
+        verify(mReplayedController).setSystemDrivenInsetsAnimationLoggingListener(eq(listener));
+    }
+
+    @Test
+    public void testSystemDrivenInsetsAnimationLoggingListener_direct() {
+        mPendingInsetsController.replayAndAttach(mReplayedController);
+        WindowInsetsAnimationControlListener listener =
+                mock(WindowInsetsAnimationControlListener.class);
+        mPendingInsetsController.setSystemDrivenInsetsAnimationLoggingListener(listener);
+        verify(mReplayedController).setSystemDrivenInsetsAnimationLoggingListener(
+                eq(listener));
+    }
+
+    @Test
     public void testDetachReattach() {
         mPendingInsetsController.show(systemBars());
         mPendingInsetsController.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);

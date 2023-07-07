@@ -16,6 +16,9 @@
 
 package com.android.settingslib.fuelgauge;
 
+import static android.provider.DeviceConfig.NAMESPACE_ACTIVITY_MANAGER;
+
+import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.DeviceConfig;
 import android.telecom.DefaultDialerManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -41,6 +45,10 @@ public class PowerAllowlistBackend {
     private static final String TAG = "PowerAllowlistBackend";
 
     private static final String DEVICE_IDLE_SERVICE = "deviceidle";
+
+    private static final String SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED =
+            "system_exempt_power_restrictions_enabled";
+    private static final boolean DEFAULT_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED = true;
 
     private static PowerAllowlistBackend sInstance;
 
@@ -76,12 +84,12 @@ public class PowerAllowlistBackend {
     /**
      * Check if target package is in allow list
      */
-    public boolean isAllowlisted(String pkg) {
+    public boolean isAllowlisted(String pkg, int uid) {
         if (mAllowlistedApps.contains(pkg)) {
             return true;
         }
 
-        if (isDefaultActiveApp(pkg)) {
+        if (isDefaultActiveApp(pkg, uid)) {
             return true;
         }
 
@@ -91,7 +99,7 @@ public class PowerAllowlistBackend {
     /**
      * Check if it is default active app in multiple area(i.e. SMS, Dialer, Device admin..)
      */
-    public boolean isDefaultActiveApp(String pkg) {
+    public boolean isDefaultActiveApp(String pkg, int uid) {
         // Additionally, check if pkg is default dialer/sms. They are considered essential apps and
         // should be automatically allowlisted (otherwise user may be able to set restriction on
         // them, leading to bad device behavior.)
@@ -106,7 +114,21 @@ public class PowerAllowlistBackend {
             return true;
         }
 
+        final AppOpsManager appOpsManager = mAppContext.getSystemService(AppOpsManager.class);
+        if (isSystemExemptFlagEnabled() && appOpsManager.checkOpNoThrow(
+                AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS, uid, pkg)
+                == AppOpsManager.MODE_ALLOWED) {
+            return true;
+        }
+
         return false;
+    }
+
+    private static boolean isSystemExemptFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_ACTIVITY_MANAGER,
+                SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED,
+                DEFAULT_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED);
     }
 
     /**
@@ -126,12 +148,12 @@ public class PowerAllowlistBackend {
      * @param pkgs a list of packageName
      * @return true when one of package is in allow list
      */
-    public boolean isAllowlisted(String[] pkgs) {
+    public boolean isAllowlisted(String[] pkgs, int uid) {
         if (ArrayUtils.isEmpty(pkgs)) {
             return false;
         }
         for (String pkg : pkgs) {
-            if (isAllowlisted(pkg)) {
+            if (isAllowlisted(pkg, uid)) {
                 return true;
             }
         }

@@ -154,7 +154,14 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
 
         if (mMaster.mServiceNameResolver != null
                 && mMaster.mServiceNameResolver.isConfiguredInMultipleMode()) {
-            updateServiceInfoListLocked();
+            // Update of multi configured mode should always happen in AbstractMasterSystemService
+            // as this class is not aware of the complete list of multiple backends. Since we
+            // should never end up in this state, it is safe to not do anything if we end up here
+            // through a different code path.
+            if (mMaster.debug) {
+                Slog.d(mTag, "Should not end up in updateLocked when "
+                        + "isConfiguredInMultipleMode is true");
+            }
         } else {
             updateServiceInfoLocked();
         }
@@ -182,8 +189,12 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
             final String componentName = getComponentNameLocked();
             return new ComponentName[] { getServiceComponent(componentName) };
         }
+
         final String[] componentNames = mMaster.mServiceNameResolver.getServiceNameList(
                 mUserId);
+        if (componentNames == null) {
+            return null;
+        }
         ComponentName[] serviceComponents = new ComponentName[componentNames.length];
         for (int i = 0; i < componentNames.length; i++) {
             serviceComponents[i] = getServiceComponent(componentNames[i]);

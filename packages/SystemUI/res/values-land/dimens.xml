@@ -40,6 +40,10 @@
     <dimen name="biometric_dialog_button_negative_max_width">140dp</dimen>
     <dimen name="biometric_dialog_button_positive_max_width">116dp</dimen>
 
+    <!-- Lock pattern view size, align sysui biometric_auth_pattern_view_size -->
+    <dimen name="biometric_auth_pattern_view_size">248dp</dimen>
+    <dimen name="biometric_auth_pattern_view_max_size">348dp</dimen>
+
     <dimen name="global_actions_power_dialog_item_height">130dp</dimen>
     <dimen name="global_actions_power_dialog_item_bottom_margin">35dp</dimen>
 
@@ -59,4 +63,23 @@
     <dimen name="large_dialog_width">348dp</dimen>
 
     <dimen name="qs_panel_padding_top">@dimen/qqs_layout_margin_top</dimen>
+
+    <dimen name="controls_header_horizontal_padding">12dp</dimen>
+    <dimen name="controls_content_margin_horizontal">16dp</dimen>
+
+    <!-- Rear Display Education dimens -->
+    <dimen name="rear_display_animation_width">246dp</dimen>
+    <dimen name="rear_display_animation_height">180dp</dimen>
+    <dimen name="rear_display_title_top_padding">4dp</dimen>
+    <dimen name="rear_display_title_bottom_padding">0dp</dimen>
+
+    <!-- Bouncer user switcher margins -->
+    <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>
+    <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">0dp</dimen>
+
+    <!-- Power Menu Lite -->
+    <!-- These values are for small screen landscape. For larger landscape screens, they are
+         overlaid -->
+    <dimen name="global_actions_button_size">72dp</dimen>
+    <dimen name="global_actions_button_padding">26dp</dimen>
 </resources>

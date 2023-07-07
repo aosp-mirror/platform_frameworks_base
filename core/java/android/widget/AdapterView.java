@@ -968,7 +968,8 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         final int position = getSelectedItemPosition();
         if (position >= 0) {
             // we fire selection events here not in View
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+            // posting the event should delay it long enough for UI changes to take effect.
+            post(() -> sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED));
         }
     }
 

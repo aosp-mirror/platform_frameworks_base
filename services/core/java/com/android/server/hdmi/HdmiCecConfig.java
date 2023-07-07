@@ -16,7 +16,7 @@
 
 package com.android.server.hdmi;
 
-import static android.hardware.hdmi.HdmiControlManager.CecSettingName;
+import static android.hardware.hdmi.HdmiControlManager.SettingName;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -45,7 +45,10 @@ import java.util.concurrent.Executor;
 
 /**
  * The {@link HdmiCecConfig} class is used for getting information about
- * available HDMI CEC settings.
+ * available HDMI control settings, including CEC settings and eARC settings.
+ *
+ * TODO(b/240379115): rename this class and related methods in this package to represent that the
+ * settings storage mechanism applies to all HDMI control settings and not just CEC settings.
  */
 public class HdmiCecConfig {
     private static final String TAG = "HdmiCecConfig";
@@ -105,7 +108,7 @@ public class HdmiCecConfig {
          *
          * @param setting name of a CEC setting that changed
          */
-        void onChange(@NonNull @CecSettingName String setting);
+        void onChange(@NonNull @SettingName String setting);
     }
 
     /**
@@ -204,21 +207,21 @@ public class HdmiCecConfig {
 
     protected class Setting {
         @NonNull private final Context mContext;
-        @NonNull private final @CecSettingName String mName;
+        @NonNull private final @SettingName String mName;
         private final boolean mUserConfigurable;
 
         private Value mDefaultValue = null;
         private List<Value> mAllowedValues = new ArrayList<>();
 
         Setting(@NonNull Context context,
-                @NonNull @CecSettingName String name,
+                @NonNull @SettingName String name,
                 int userConfResId) {
             mContext = context;
             mName = name;
             mUserConfigurable = mContext.getResources().getBoolean(userConfResId);
         }
 
-        public @CecSettingName String getName() {
+        public @SettingName String getName() {
             return mName;
         }
 
@@ -314,6 +317,16 @@ public class HdmiCecConfig {
         routingControlControl.registerValue(HdmiControlManager.ROUTING_CONTROL_DISABLED,
                 R.bool.config_cecRoutingControlDisabled_allowed,
                 R.bool.config_cecRoutingControlDisabled_default);
+
+        Setting soundbarMode = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE,
+                R.bool.config_cecSoundbarMode_userConfigurable);
+        soundbarMode.registerValue(HdmiControlManager.SOUNDBAR_MODE_ENABLED,
+                R.bool.config_cecSoundbarModeEnabled_allowed,
+                R.bool.config_cecSoundbarModeEnabled_default);
+        soundbarMode.registerValue(HdmiControlManager.SOUNDBAR_MODE_DISABLED,
+                R.bool.config_cecSoundbarModeDisabled_allowed,
+                R.bool.config_cecSoundbarModeDisabled_default);
 
         Setting powerControlMode = registerSetting(
                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
@@ -663,6 +676,16 @@ public class HdmiCecConfig {
                 R.bool.config_cecQuerySadMaxDisabled_allowed,
                 R.bool.config_cecQuerySadMaxDisabled_default);
 
+        Setting earcEnabled = registerSetting(
+                HdmiControlManager.SETTING_NAME_EARC_ENABLED,
+                R.bool.config_earcEnabled_userConfigurable);
+        earcEnabled.registerValue(HdmiControlManager.EARC_FEATURE_ENABLED,
+                R.bool.config_earcFeatureEnabled_allowed,
+                R.bool.config_earcFeatureEnabled_default);
+        earcEnabled.registerValue(HdmiControlManager.EARC_FEATURE_DISABLED,
+                R.bool.config_earcFeatureDisabled_allowed,
+                R.bool.config_earcFeatureDisabled_default);
+
         verifySettings();
     }
 
@@ -670,7 +693,7 @@ public class HdmiCecConfig {
         this(context, new StorageAdapter(context));
     }
 
-    private Setting registerSetting(@NonNull @CecSettingName String name,
+    private Setting registerSetting(@NonNull @SettingName String name,
                                int userConfResId) {
         Setting setting = new Setting(mContext, name, userConfResId);
         mSettings.put(name, setting);
@@ -701,6 +724,8 @@ public class HdmiCecConfig {
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
                 return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE:
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
@@ -759,6 +784,8 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX:
+                return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.SETTING_NAME_EARC_ENABLED:
                 return STORAGE_SHARED_PREFS;
             default:
                 throw new VerificationException("Invalid CEC setting '" + setting.getName()
@@ -774,6 +801,8 @@ public class HdmiCecConfig {
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_ROUTING_CONTROL:
                 return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_SOUNDBAR_MODE:
+                return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
@@ -832,6 +861,8 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_WMAPRO:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_QUERY_SAD_MAX:
+                return setting.getName();
+            case HdmiControlManager.SETTING_NAME_EARC_ENABLED:
                 return setting.getName();
             default:
                 throw new VerificationException("Invalid CEC setting '" + setting.getName()
@@ -871,14 +902,6 @@ public class HdmiCecConfig {
         }
     }
 
-    private void notifySettingChanged(@NonNull @CecSettingName String name) {
-        Setting setting = getSetting(name);
-        if (setting == null) {
-            throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
-        }
-        notifySettingChanged(setting);
-    }
-
     protected void notifySettingChanged(@NonNull Setting setting) {
         synchronized (mLock) {
             ArrayMap<SettingChangeListener, Executor> listeners =
@@ -902,7 +925,7 @@ public class HdmiCecConfig {
     /**
      * Register change listener for a given setting name using DirectExecutor.
      */
-    public void registerChangeListener(@NonNull @CecSettingName String name,
+    public void registerChangeListener(@NonNull @SettingName String name,
                                        SettingChangeListener listener) {
         registerChangeListener(name, listener, ConcurrentUtils.DIRECT_EXECUTOR);
     }
@@ -910,7 +933,7 @@ public class HdmiCecConfig {
     /**
      * Register change listener for a given setting name and executor.
      */
-    public void registerChangeListener(@NonNull @CecSettingName String name,
+    public void registerChangeListener(@NonNull @SettingName String name,
                                        SettingChangeListener listener,
                                        Executor executor) {
         Setting setting = getSetting(name);
@@ -933,7 +956,7 @@ public class HdmiCecConfig {
     /**
      * Remove change listener for a given setting name.
      */
-    public void removeChangeListener(@NonNull @CecSettingName String name,
+    public void removeChangeListener(@NonNull @SettingName String name,
                                      SettingChangeListener listener) {
         Setting setting = getSetting(name);
         if (setting == null) {
@@ -954,14 +977,14 @@ public class HdmiCecConfig {
     /**
      * Returns a list of all settings based on the XML metadata.
      */
-    public @CecSettingName List<String> getAllSettings() {
+    public @SettingName List<String> getAllSettings() {
         return new ArrayList<>(mSettings.keySet());
     }
 
     /**
      * Returns a list of user-modifiable settings based on the XML metadata.
      */
-    public @CecSettingName List<String> getUserSettings() {
+    public @SettingName List<String> getUserSettings() {
         List<String> settings = new ArrayList<>();
         for (Setting setting: mSettings.values()) {
             if (setting.getUserConfigurable()) {
@@ -975,7 +998,7 @@ public class HdmiCecConfig {
      * For a given setting name returns true if and only if the value type of that
      * setting is a string.
      */
-    public boolean isStringValueType(@NonNull @CecSettingName String name) {
+    public boolean isStringValueType(@NonNull @SettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -987,7 +1010,7 @@ public class HdmiCecConfig {
      * For a given setting name returns true if and only if the value type of that
      * setting is an int.
      */
-    public boolean isIntValueType(@NonNull @CecSettingName String name) {
+    public boolean isIntValueType(@NonNull @SettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -998,7 +1021,7 @@ public class HdmiCecConfig {
     /**
      * For a given setting name returns values that are allowed for that setting (string).
      */
-    public List<String> getAllowedStringValues(@NonNull @CecSettingName String name) {
+    public List<String> getAllowedStringValues(@NonNull @SettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -1017,7 +1040,7 @@ public class HdmiCecConfig {
     /**
      * For a given setting name returns values that are allowed for that setting (string).
      */
-    public List<Integer> getAllowedIntValues(@NonNull @CecSettingName String name) {
+    public List<Integer> getAllowedIntValues(@NonNull @SettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -1036,7 +1059,7 @@ public class HdmiCecConfig {
     /**
      * For a given setting name returns the default value for that setting (string).
      */
-    public String getDefaultStringValue(@NonNull @CecSettingName String name) {
+    public String getDefaultStringValue(@NonNull @SettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -1051,7 +1074,7 @@ public class HdmiCecConfig {
     /**
      * For a given setting name returns the default value for that setting (int).
      */
-    public int getDefaultIntValue(@NonNull @CecSettingName String name) {
+    public int getDefaultIntValue(@NonNull @SettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -1066,7 +1089,7 @@ public class HdmiCecConfig {
     /**
      * For a given setting name returns the current value of that setting (string).
      */
-    public String getStringValue(@NonNull @CecSettingName String name) {
+    public String getStringValue(@NonNull @SettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -1082,7 +1105,7 @@ public class HdmiCecConfig {
     /**
      * For a given setting name returns the current value of that setting (int).
      */
-    public int getIntValue(@NonNull @CecSettingName String name) {
+    public int getIntValue(@NonNull @SettingName String name) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -1100,7 +1123,7 @@ public class HdmiCecConfig {
     /**
      * For a given setting name and value sets the current value of that setting (string).
      */
-    public void setStringValue(@NonNull @CecSettingName String name, @NonNull String value) {
+    public void setStringValue(@NonNull @SettingName String name, @NonNull String value) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
@@ -1123,7 +1146,7 @@ public class HdmiCecConfig {
     /**
      * For a given setting name and value sets the current value of that setting (int).
      */
-    public void setIntValue(@NonNull @CecSettingName String name, int value) {
+    public void setIntValue(@NonNull @SettingName String name, int value) {
         Setting setting = getSetting(name);
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");

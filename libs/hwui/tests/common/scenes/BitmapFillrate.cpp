@@ -19,6 +19,7 @@
 #include "utils/Color.h"
 
 #include <SkBitmap.h>
+#include <SkBlendMode.h>
 
 using namespace android;
 using namespace android::uirenderer;

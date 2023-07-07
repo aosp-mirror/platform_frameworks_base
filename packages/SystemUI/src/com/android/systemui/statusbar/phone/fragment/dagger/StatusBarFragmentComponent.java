@@ -23,8 +23,11 @@ import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
+import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarDemoMode;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
+
+import java.util.Set;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -41,7 +44,10 @@ import dagger.Subcomponent;
  * should be included here or in {@link StatusBarFragmentModule}.
  */
 
-@Subcomponent(modules = {StatusBarFragmentModule.class})
+@Subcomponent(modules = {
+        StatusBarFragmentModule.class,
+        StatusBarStartablesModule.class
+})
 @StatusBarFragmentScope
 public interface StatusBarFragmentComponent {
     /** Simple factory. */
@@ -49,6 +55,18 @@ public interface StatusBarFragmentComponent {
     interface Factory {
         StatusBarFragmentComponent create(
                 @BindsInstance CollapsedStatusBarFragment collapsedStatusBarFragment);
+    }
+
+    /**
+     * Performs initialization logic after {@link StatusBarFragmentComponent} has been constructed.
+     */
+    interface Startable {
+        void start();
+        void stop();
+
+        enum State {
+            NONE, STARTING, STARTED, STOPPING, STOPPED
+        }
     }
 
     /**
@@ -92,4 +110,10 @@ public interface StatusBarFragmentComponent {
     /** */
     @StatusBarFragmentScope
     PhoneStatusBarTransitions getPhoneStatusBarTransitions();
+
+    /** */
+    Set<Startable> getStartables();
+
+    /** */
+    StatusBarBoundsProvider getBoundsProvider();
 }

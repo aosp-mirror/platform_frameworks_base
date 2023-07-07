@@ -17,8 +17,8 @@
 package android.view;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
+import android.hardware.input.HostUsiVersion;
 import android.os.Parcel;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -55,11 +55,15 @@ public class InputDeviceTest {
         assertEquals(device.isExternal(), outDevice.isExternal());
         assertEquals(device.getSources(), outDevice.getSources());
         assertEquals(device.getKeyboardType(), outDevice.getKeyboardType());
+        assertEquals(device.getKeyboardLanguageTag(), outDevice.getKeyboardLanguageTag());
+        assertEquals(device.getKeyboardLayoutType(), outDevice.getKeyboardLayoutType());
         assertEquals(device.getMotionRanges().size(), outDevice.getMotionRanges().size());
+        assertEquals(device.getHostUsiVersion(), outDevice.getHostUsiVersion());
+        assertEquals(device.getAssociatedDisplayId(), outDevice.getAssociatedDisplayId());
 
         KeyCharacterMap keyCharacterMap = device.getKeyCharacterMap();
         KeyCharacterMap outKeyCharacterMap = outDevice.getKeyCharacterMap();
-        assertTrue("keyCharacterMap not equal", keyCharacterMap.equals(outKeyCharacterMap));
+        assertEquals("keyCharacterMap not equal", keyCharacterMap, outKeyCharacterMap);
 
         for (int j = 0; j < device.getMotionRanges().size(); j++) {
             assertMotionRangeEquals(device.getMotionRanges().get(j),
@@ -68,12 +72,39 @@ public class InputDeviceTest {
     }
 
     private void assertInputDeviceParcelUnparcel(KeyCharacterMap keyCharacterMap) {
-        final InputDevice device =
-                new InputDevice(DEVICE_ID, 0 /* generation */, 0 /* controllerNumber */, "name",
-                0 /* vendorId */, 0 /* productId */, "descriptor", true /* isExternal */,
-                0 /* sources */, 0 /* keyboardType */, keyCharacterMap,
-                false /* hasVibrator */, false /* hasMicrophone */, false /* hasButtonUnderpad */,
-                true /* hasSensor */, false /* hasBattery */);
+        final InputDevice.Builder deviceBuilder = new InputDevice.Builder()
+                .setId(DEVICE_ID)
+                .setGeneration(42)
+                .setControllerNumber(43)
+                .setName("Test Device " + DEVICE_ID)
+                .setVendorId(44)
+                .setProductId(45)
+                .setDescriptor("descriptor")
+                .setExternal(true)
+                .setSources(InputDevice.SOURCE_HDMI)
+                .setKeyboardType(InputDevice.KEYBOARD_TYPE_NON_ALPHABETIC)
+                .setKeyCharacterMap(keyCharacterMap)
+                .setHasVibrator(true)
+                .setHasMicrophone(true)
+                .setHasButtonUnderPad(true)
+                .setHasSensor(true)
+                .setHasBattery(true)
+                .setKeyboardLanguageTag("en-US")
+                .setKeyboardLayoutType("qwerty")
+                .setUsiVersion(new HostUsiVersion(2, 0));
+
+        for (int i = 0; i < 30; i++) {
+            deviceBuilder.addMotionRange(
+                    MotionEvent.AXIS_GENERIC_1,
+                    InputDevice.SOURCE_UNKNOWN,
+                    i,
+                    i + 1,
+                    i + 2,
+                    i + 3,
+                    i + 4);
+        }
+
+        final InputDevice device = deviceBuilder.build();
 
         Parcel parcel = Parcel.obtain();
         device.writeToParcel(parcel, 0);

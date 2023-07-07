@@ -36,7 +36,9 @@ interface ITrustManager {
     void setDeviceLockedForUser(int userId, boolean locked);
     boolean isDeviceLocked(int userId, int displayId);
     boolean isDeviceSecure(int userId, int displayId);
+    @EnforcePermission("TRUST_LISTENER")
     boolean isTrustUsuallyManaged(int userId);
     void unlockedByBiometricForUser(int userId, in BiometricSourceType source);
     void clearAllBiometricRecognized(in BiometricSourceType target, int unlockedUser);
+    boolean isActiveUnlockRunning(int userId);
 }

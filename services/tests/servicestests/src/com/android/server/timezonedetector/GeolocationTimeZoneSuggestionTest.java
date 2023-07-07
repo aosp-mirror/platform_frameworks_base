@@ -44,11 +44,6 @@ public class GeolocationTimeZoneSuggestionTest {
         assertEquals(certain1v1, certain1v2);
         assertEquals(certain1v2, certain1v1);
 
-        // DebugInfo must not be considered in equals().
-        certain1v1.addDebugInfo("Debug info 1");
-        certain1v2.addDebugInfo("Debug info 2");
-        assertEquals(certain1v1, certain1v2);
-
         long time2 = 2222L;
         GeolocationTimeZoneSuggestion certain2 =
                 GeolocationTimeZoneSuggestion.createCertainSuggestion(time2, ARBITRARY_ZONE_IDS1);

@@ -772,7 +772,7 @@ public class AppTimeLimitController {
             observerApp.appUsageGroups.append(observerId, group);
 
             if (DEBUG) {
-                Slog.d(TAG, "addObserver " + observed + " for " + timeLimit);
+                Slog.d(TAG, "addObserver " + Arrays.toString(observed) + " for " + timeLimit);
             }
 
             user.addUsageGroup(group);
@@ -881,7 +881,7 @@ public class AppTimeLimitController {
             observerApp.appUsageLimitGroups.append(observerId, group);
 
             if (DEBUG) {
-                Slog.d(TAG, "addObserver " + observed + " for " + timeLimit);
+                Slog.d(TAG, "addObserver " + Arrays.toString(observed) + " for " + timeLimit);
             }
 
             user.addUsageGroup(group);

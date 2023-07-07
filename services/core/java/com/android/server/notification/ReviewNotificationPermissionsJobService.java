@@ -42,10 +42,6 @@ public class ReviewNotificationPermissionsJobService extends JobService {
      */
     public static void scheduleJob(Context context, long rescheduleTimeMillis) {
         JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
-        // if the job already exists for some reason, cancel & reschedule
-        if (jobScheduler.getPendingJob(JOB_ID) != null) {
-            jobScheduler.cancel(JOB_ID);
-        }
         ComponentName component = new ComponentName(
                 context, ReviewNotificationPermissionsJobService.class);
         JobInfo newJob = new JobInfo.Builder(JOB_ID, component)

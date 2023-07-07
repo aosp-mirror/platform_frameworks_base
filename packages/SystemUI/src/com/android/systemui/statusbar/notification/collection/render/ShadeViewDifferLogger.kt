@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
+import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
-import com.android.systemui.log.dagger.NotificationLog
 import java.lang.RuntimeException
 import javax.inject.Inject
 
@@ -43,12 +43,27 @@ class ShadeViewDifferLogger @Inject constructor(
         })
     }
 
-    fun logAttachingChild(key: String, parent: String) {
+    fun logSkipDetachingChild(
+            key: String,
+            parentKey: String?,
+            isTransfer: Boolean,
+            isParentRemoved: Boolean
+    ) {
+        buffer.log(TAG, LogLevel.DEBUG, {
+            str1 = key
+            str2 = parentKey
+            bool1 = isTransfer
+            bool2 = isParentRemoved
+        }, { "Skip detaching $str1 from $str2 isTransfer=$bool1 isParentRemoved=$bool2" })
+    }
+
+    fun logAttachingChild(key: String, parent: String, atIndex: Int) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = key
             str2 = parent
+            int1 = atIndex
         }, {
-            "Attaching view $str1 to $str2"
+            "Attaching view $str1 to $str2 at index $int1"
         })
     }
 

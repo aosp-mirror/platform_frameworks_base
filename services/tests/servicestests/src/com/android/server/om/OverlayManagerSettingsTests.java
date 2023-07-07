@@ -29,11 +29,12 @@ import static org.junit.Assert.fail;
 import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.text.TextUtils;
-import android.util.TypedXmlPullParser;
 import android.util.Xml;
 
 import androidx.annotation.NonNull;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.modules.utils.TypedXmlPullParser;
 
 import org.junit.Before;
 import org.junit.Test;

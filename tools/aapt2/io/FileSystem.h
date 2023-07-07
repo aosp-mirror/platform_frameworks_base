@@ -27,16 +27,16 @@ namespace io {
 // A regular file from the file system. Uses mmap to open the data.
 class RegularFile : public IFile {
  public:
-  explicit RegularFile(const Source& source);
+  explicit RegularFile(const android::Source& source);
 
   std::unique_ptr<IData> OpenAsData() override;
   std::unique_ptr<io::InputStream> OpenInputStream() override;
-  const Source& GetSource() const override;
+  const android::Source& GetSource() const override;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RegularFile);
 
-  Source source_;
+  android::Source source_;
 };
 
 class FileCollection;
@@ -60,12 +60,11 @@ class FileCollection : public IFileCollection {
   FileCollection() = default;
 
   /** Creates a file collection containing all files contained in the specified root directory. */
-  static std::unique_ptr<FileCollection> Create(const android::StringPiece& path,
-                                                std::string* outError);
+  static std::unique_ptr<FileCollection> Create(android::StringPiece path, std::string* outError);
 
   // Adds a file located at path. Returns the IFile representation of that file.
-  IFile* InsertFile(const android::StringPiece& path);
-  IFile* FindFile(const android::StringPiece& path) override;
+  IFile* InsertFile(android::StringPiece path);
+  IFile* FindFile(android::StringPiece path) override;
   std::unique_ptr<IFileCollectionIterator> Iterator() override;
   char GetDirSeparator() override;
 
@@ -74,7 +73,7 @@ class FileCollection : public IFileCollection {
 
   friend class FileCollectionIterator;
 
-  std::map<std::string, std::unique_ptr<IFile>> files_;
+  std::map<std::string, std::unique_ptr<IFile>, std::less<>> files_;
 };
 
 }  // namespace io

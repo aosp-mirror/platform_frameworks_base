@@ -19,6 +19,7 @@ package com.android.server.locksettings;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -30,8 +31,10 @@ import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -48,13 +51,14 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.PersistentDataBlockManagerInternal;
-import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -62,7 +66,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * atest FrameworksServicesTests:LockSettingsStorageTests
@@ -72,21 +79,21 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(AndroidJUnit4.class)
 public class LockSettingsStorageTests {
     private static final int SOME_USER_ID = 1034;
-    private final byte[] PASSWORD_0 = "thepassword0".getBytes();
-    private final byte[] PASSWORD_1 = "password1".getBytes();
-    private final byte[] PATTERN_0 = "123654".getBytes();
-    private final byte[] PATTERN_1 = "147852369".getBytes();
+    private final byte[] PASSWORD = "thepassword".getBytes();
 
     public static final byte[] PAYLOAD = new byte[] {1, 2, -1, -2, 33};
 
-    LockSettingsStorageTestable mStorage;
-    File mStorageDir;
-
+    private LockSettingsStorageTestable mStorage;
+    private File mStorageDir;
     private File mDb;
+    @Rule
+    public FakeSettingsProviderRule mSettingsRule = FakeSettingsProvider.rule();
 
     @Before
     public void setUp() throws Exception {
-        mStorageDir = new File(InstrumentationRegistry.getContext().getFilesDir(), "locksettings");
+        final Context origContext = InstrumentationRegistry.getContext();
+
+        mStorageDir = new File(origContext.getFilesDir(), "locksettings");
         mDb = InstrumentationRegistry.getContext().getDatabasePath("locksettings.db");
 
         assertTrue(mStorageDir.exists() || mStorageDir.mkdirs());
@@ -99,9 +106,9 @@ public class LockSettingsStorageTests {
         // User 3 is a profile of user 0.
         when(mockUserManager.getProfileParent(eq(3))).thenReturn(new UserInfo(0, "name", 0));
 
-        MockLockSettingsContext context = new MockLockSettingsContext(
-                InstrumentationRegistry.getContext(), mockUserManager,
-                mock(NotificationManager.class), mock(DevicePolicyManager.class),
+        MockLockSettingsContext context = new MockLockSettingsContext(origContext,
+                mock(Resources.class), mSettingsRule.mockContentResolver(origContext),
+                mockUserManager, mock(NotificationManager.class), mock(DevicePolicyManager.class),
                 mock(StorageManager.class), mock(TrustManager.class), mock(KeyguardManager.class),
                 mock(FingerprintManager.class), mock(FaceManager.class),
                 mock(PackageManager.class));
@@ -142,12 +149,12 @@ public class LockSettingsStorageTests {
     }
 
     @Test
-    public void testKeyValue_Concurrency() {
+    public void testKeyValue_ReadWriteConcurrency() {
         final CountDownLatch latch = new CountDownLatch(1);
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             final int threadId = i;
-            threads.add(new Thread("testKeyValue_Concurrency_" + i) {
+            threads.add(new Thread("testKeyValue_ReadWriteConcurrency_" + i) {
                 @Override
                 public void run() {
                     try {
@@ -169,12 +176,58 @@ public class LockSettingsStorageTests {
             });
             threads.get(i).start();
         }
-        mStorage.writeKeyValue("key", "initalValue", 0);
+        mStorage.writeKeyValue("key", "initialValue", 0);
         latch.countDown();
         joinAll(threads, 10000);
         assertEquals('5', mStorage.readKeyValue("key", "default", 0).charAt(0));
         mStorage.clearCache();
         assertEquals('5', mStorage.readKeyValue("key", "default", 0).charAt(0));
+    }
+
+    // Test that readKeyValue() doesn't pollute the cache when run concurrently with removeKey().
+    @Test
+    @SuppressWarnings("AssertionFailureIgnored") // intentional try-catch of AssertionError
+    public void testKeyValue_ReadRemoveConcurrency() {
+        final int numThreads = 2;
+        final int numIterations = 50;
+        final CyclicBarrier barrier = new CyclicBarrier(numThreads);
+        final List<Thread> threads = new ArrayList<>();
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        for (int threadId = 0; threadId < numThreads; threadId++) {
+            final boolean isWriter = (threadId == 0);
+            threads.add(new Thread("testKeyValue_ReadRemoveConcurrency_" + threadId) {
+                @Override
+                public void run() {
+                    try {
+                        for (int iter = 0; iter < numIterations; iter++) {
+                            if (isWriter) {
+                                mStorage.writeKeyValue("key", "value", 0);
+                                mStorage.clearCache();
+                            }
+                            barrier.await();
+                            if (isWriter) {
+                                mStorage.removeKey("key", 0);
+                            } else {
+                                mStorage.readKeyValue("key", "default", 0);
+                            }
+                            barrier.await();
+                            try {
+                                assertEquals("default", mStorage.readKeyValue("key", "default", 0));
+                            } catch (AssertionError e) {
+                                failure.compareAndSet(null, e);
+                            }
+                            barrier.await();
+                        }
+                    } catch (InterruptedException | BrokenBarrierException e) {
+                        failure.compareAndSet(null, e);
+                        return;
+                    }
+                }
+            });
+            threads.get(threadId).start();
+        }
+        joinAll(threads, 60000);
+        assertNull(failure.get());
     }
 
     @Test
@@ -214,163 +267,91 @@ public class LockSettingsStorageTests {
     }
 
     @Test
+    public void testNullKey() {
+        mStorage.setString(null, "value", 0);
+
+        // Verify that this doesn't throw an exception.
+        assertEquals("value", mStorage.readKeyValue(null, null, 0));
+
+        // The read that happens as part of prefetchUser shouldn't throw an exception either.
+        mStorage.clearCache();
+        mStorage.prefetchUser(0);
+
+        assertEquals("value", mStorage.readKeyValue(null, null, 0));
+    }
+
+    @Test
     public void testRemoveUser() {
         mStorage.writeKeyValue("key", "value", 0);
-        writePasswordBytes(PASSWORD_0, 0);
-        writePatternBytes(PATTERN_0, 0);
-
         mStorage.writeKeyValue("key", "value", 1);
-        writePasswordBytes(PASSWORD_1, 1);
-        writePatternBytes(PATTERN_1, 1);
 
         mStorage.removeUser(0);
 
         assertEquals("value", mStorage.readKeyValue("key", "default", 1));
         assertEquals("default", mStorage.readKeyValue("key", "default", 0));
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_NONE, mStorage.readCredentialHash(0).type);
-        assertPatternBytes(PATTERN_1, 1);
-    }
-
-    @Test
-    public void testCredential_Default() {
-        assertEquals(mStorage.readCredentialHash(0).type, LockPatternUtils.CREDENTIAL_TYPE_NONE);
-    }
-
-    @Test
-    public void testPassword_Write() {
-        writePasswordBytes(PASSWORD_0, 0);
-
-        assertPasswordBytes(PASSWORD_0, 0);
-        mStorage.clearCache();
-        assertPasswordBytes(PASSWORD_0, 0);
-    }
-
-    @Test
-    public void testPassword_WriteProfileWritesParent() {
-        writePasswordBytes(PASSWORD_0, 1);
-        writePasswordBytes(PASSWORD_1, 2);
-
-        assertPasswordBytes(PASSWORD_0, 1);
-        assertPasswordBytes(PASSWORD_1, 2);
-        mStorage.clearCache();
-        assertPasswordBytes(PASSWORD_0, 1);
-        assertPasswordBytes(PASSWORD_1, 2);
-    }
-
-    @Test
-    public void testLockType_WriteProfileWritesParent() {
-        writePasswordBytes(PASSWORD_0, 10);
-        writePatternBytes(PATTERN_0, 20);
-
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN,
-                mStorage.readCredentialHash(10).type);
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
-                mStorage.readCredentialHash(20).type);
-        mStorage.clearCache();
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN,
-                mStorage.readCredentialHash(10).type);
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
-                mStorage.readCredentialHash(20).type);
-    }
-
-    @Test
-    public void testPassword_WriteParentWritesProfile() {
-        writePasswordBytes(PASSWORD_0, 2);
-        writePasswordBytes(PASSWORD_1, 1);
-
-        assertPasswordBytes(PASSWORD_1, 1);
-        assertPasswordBytes(PASSWORD_0, 2);
-        mStorage.clearCache();
-        assertPasswordBytes(PASSWORD_1, 1);
-        assertPasswordBytes(PASSWORD_0, 2);
     }
 
     @Test
     public void testProfileLock_ReadWriteChildProfileLock() {
         assertFalse(mStorage.hasChildProfileLock(20));
-        mStorage.writeChildProfileLock(20, PASSWORD_0);
-        assertArrayEquals(PASSWORD_0, mStorage.readChildProfileLock(20));
+        mStorage.writeChildProfileLock(20, PASSWORD);
+        assertArrayEquals(PASSWORD, mStorage.readChildProfileLock(20));
         assertTrue(mStorage.hasChildProfileLock(20));
         mStorage.clearCache();
-        assertArrayEquals(PASSWORD_0, mStorage.readChildProfileLock(20));
+        assertArrayEquals(PASSWORD, mStorage.readChildProfileLock(20));
         assertTrue(mStorage.hasChildProfileLock(20));
-    }
-
-    @Test
-    public void testPattern_Write() {
-        writePatternBytes(PATTERN_0, 0);
-
-        assertPatternBytes(PATTERN_0, 0);
-        mStorage.clearCache();
-        assertPatternBytes(PATTERN_0, 0);
-    }
-
-    @Test
-    public void testPattern_WriteProfileWritesParent() {
-        writePatternBytes(PATTERN_0, 1);
-        writePatternBytes(PATTERN_1, 2);
-
-        assertPatternBytes(PATTERN_0, 1);
-        assertPatternBytes(PATTERN_1, 2);
-        mStorage.clearCache();
-        assertPatternBytes(PATTERN_0, 1);
-        assertPatternBytes(PATTERN_1, 2);
-    }
-
-    @Test
-    public void testPattern_WriteParentWritesProfile() {
-        writePatternBytes(PATTERN_1, 2);
-        writePatternBytes(PATTERN_0, 1);
-
-        assertPatternBytes(PATTERN_0, 1);
-        assertPatternBytes(PATTERN_1, 2);
-        mStorage.clearCache();
-        assertPatternBytes(PATTERN_0, 1);
-        assertPatternBytes(PATTERN_1, 2);
     }
 
     @Test
     public void testPrefetch() {
-        mStorage.writeKeyValue("key", "toBeFetched", 0);
-        writePatternBytes(PATTERN_0, 0);
+        mStorage.writeKeyValue("key1", "value1", 0);
+        mStorage.writeKeyValue("key2", "value2", 0);
 
         mStorage.clearCache();
+
+        assertFalse(mStorage.isUserPrefetched(0));
+        assertFalse(mStorage.isKeyValueCached("key1", 0));
+        assertFalse(mStorage.isKeyValueCached("key2", 0));
+
         mStorage.prefetchUser(0);
 
-        assertEquals("toBeFetched", mStorage.readKeyValue("key", "default", 0));
-        assertPatternBytes(PATTERN_0, 0);
+        assertTrue(mStorage.isUserPrefetched(0));
+        assertTrue(mStorage.isKeyValueCached("key1", 0));
+        assertTrue(mStorage.isKeyValueCached("key2", 0));
+        assertEquals("value1", mStorage.readKeyValue("key1", "default", 0));
+        assertEquals("value2", mStorage.readKeyValue("key2", "default", 0));
     }
 
     @Test
     public void testFileLocation_Owner() {
         LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
-        assertEquals("/data/system/gatekeeper.pattern.key", storage.getLockPatternFilename(0));
-        assertEquals("/data/system/gatekeeper.password.key", storage.getLockPasswordFilename(0));
+        assertEquals(new File("/data/system/gatekeeper.profile.key"),
+                storage.getChildProfileLockFile(0));
     }
 
     @Test
     public void testFileLocation_SecondaryUser() {
         LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
-        assertEquals("/data/system/users/1/gatekeeper.pattern.key", storage.getLockPatternFilename(1));
-        assertEquals("/data/system/users/1/gatekeeper.password.key", storage.getLockPasswordFilename(1));
+        assertEquals(new File("/data/system/users/1/gatekeeper.profile.key"),
+                storage.getChildProfileLockFile(1));
     }
 
     @Test
     public void testFileLocation_ProfileToSecondary() {
         LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
-        assertEquals("/data/system/users/2/gatekeeper.pattern.key", storage.getLockPatternFilename(2));
-        assertEquals("/data/system/users/2/gatekeeper.password.key", storage.getLockPasswordFilename(2));
+        assertEquals(new File("/data/system/users/2/gatekeeper.profile.key"),
+                storage.getChildProfileLockFile(2));
     }
 
     @Test
     public void testFileLocation_ProfileToOwner() {
         LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
-        assertEquals("/data/system/users/3/gatekeeper.pattern.key", storage.getLockPatternFilename(3));
-        assertEquals("/data/system/users/3/gatekeeper.password.key", storage.getLockPasswordFilename(3));
+        assertEquals(new File("/data/system/users/3/gatekeeper.profile.key"),
+                storage.getChildProfileLockFile(3));
     }
 
     @Test
@@ -423,11 +404,11 @@ public class LockSettingsStorageTests {
 
     @Test
     public void testPersistentData_serializeUnserialize() {
-        byte[] serialized = PersistentData.toBytes(PersistentData.TYPE_SP, SOME_USER_ID,
+        byte[] serialized = PersistentData.toBytes(PersistentData.TYPE_SP_GATEKEEPER, SOME_USER_ID,
                 DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, PAYLOAD);
         PersistentData deserialized = PersistentData.fromBytes(serialized);
 
-        assertEquals(PersistentData.TYPE_SP, deserialized.type);
+        assertEquals(PersistentData.TYPE_SP_GATEKEEPER, deserialized.type);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, deserialized.qualityForUi);
         assertArrayEquals(PAYLOAD, deserialized.payload);
     }
@@ -458,13 +439,13 @@ public class LockSettingsStorageTests {
         // the wire format in the future.
         byte[] serializedVersion1 = new byte[] {
                 1, /* PersistentData.VERSION_1 */
-                1, /* PersistentData.TYPE_SP */
+                1, /* PersistentData.TYPE_SP_GATEKEEPER */
                 0x00, 0x00, 0x04, 0x0A,  /* SOME_USER_ID */
                 0x00, 0x03, 0x00, 0x00,  /* PASSWORD_NUMERIC_COMPLEX */
                 1, 2, -1, -2, 33, /* PAYLOAD */
         };
         PersistentData deserialized = PersistentData.fromBytes(serializedVersion1);
-        assertEquals(PersistentData.TYPE_SP, deserialized.type);
+        assertEquals(PersistentData.TYPE_SP_GATEKEEPER, deserialized.type);
         assertEquals(SOME_USER_ID, deserialized.userId);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX,
                 deserialized.qualityForUi);
@@ -472,7 +453,7 @@ public class LockSettingsStorageTests {
 
         // Make sure the constants we use on the wire do not change.
         assertEquals(0, PersistentData.TYPE_NONE);
-        assertEquals(1, PersistentData.TYPE_SP);
+        assertEquals(1, PersistentData.TYPE_SP_GATEKEEPER);
         assertEquals(2, PersistentData.TYPE_SP_WEAVER);
     }
 
@@ -481,28 +462,6 @@ public class LockSettingsStorageTests {
             fail("expected:<" + Arrays.toString(expected) +
                     "> but was:<" + Arrays.toString(actual) + ">");
         }
-    }
-
-    private void writePasswordBytes(byte[] password, int userId) {
-        mStorage.writeCredentialHash(CredentialHash.create(
-                password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD), userId);
-    }
-
-    private void writePatternBytes(byte[] pattern, int userId) {
-        mStorage.writeCredentialHash(CredentialHash.create(
-                pattern, LockPatternUtils.CREDENTIAL_TYPE_PATTERN), userId);
-    }
-
-    private void assertPasswordBytes(byte[] password, int userId) {
-        CredentialHash cred = mStorage.readCredentialHash(userId);
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN, cred.type);
-        assertArrayEquals(password, cred.hash);
-    }
-
-    private void assertPatternBytes(byte[] pattern, int userId) {
-        CredentialHash cred = mStorage.readCredentialHash(userId);
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PATTERN, cred.type);
-        assertArrayEquals(pattern, cred.hash);
     }
 
     /**

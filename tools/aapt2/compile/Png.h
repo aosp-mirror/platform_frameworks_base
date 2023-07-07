@@ -21,13 +21,12 @@
 #include <string>
 
 #include "android-base/macros.h"
-
-#include "Diagnostics.h"
-#include "Source.h"
+#include "androidfw/BigBuffer.h"
+#include "androidfw/IDiagnostics.h"
+#include "androidfw/Source.h"
 #include "compile/Image.h"
 #include "io/Io.h"
 #include "process/IResourceTableConsumer.h"
-#include "util/BigBuffer.h"
 
 namespace aapt {
 
@@ -43,15 +42,16 @@ struct PngOptions {
  */
 class Png {
  public:
-  explicit Png(IDiagnostics* diag) : mDiag(diag) {}
+  explicit Png(android::IDiagnostics* diag) : mDiag(diag) {
+  }
 
-  bool process(const Source& source, std::istream* input, BigBuffer* outBuffer,
+  bool process(const android::Source& source, std::istream* input, android::BigBuffer* outBuffer,
                const PngOptions& options);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Png);
 
-  IDiagnostics* mDiag;
+  android::IDiagnostics* mDiag;
 };
 
 /**
@@ -59,7 +59,7 @@ class Png {
  */
 class PngChunkFilter : public io::InputStream {
  public:
-  explicit PngChunkFilter(const android::StringPiece& data);
+  explicit PngChunkFilter(android::StringPiece data);
   virtual ~PngChunkFilter() = default;
 
   bool Next(const void** buffer, size_t* len) override;
@@ -90,7 +90,8 @@ class PngChunkFilter : public io::InputStream {
 /**
  * Reads a PNG from the InputStream into memory as an RGBA Image.
  */
-std::unique_ptr<Image> ReadPng(IAaptContext* context, const Source& source, io::InputStream* in);
+std::unique_ptr<Image> ReadPng(IAaptContext* context, const android::Source& source,
+                               io::InputStream* in);
 
 /**
  * Writes the RGBA Image, with optional 9-patch meta-data, into the OutputStream

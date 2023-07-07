@@ -23,6 +23,7 @@ import android.widget.Switch;
 
 import androidx.annotation.Keep;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
@@ -130,6 +131,11 @@ public class PrimarySwitchPreference extends RestrictedPreference {
         if (mSwitch != null) {
             mSwitch.setEnabled(enabled);
         }
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public boolean isSwitchEnabled() {
+        return mEnableSwitch;
     }
 
     /**

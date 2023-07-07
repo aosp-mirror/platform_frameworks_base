@@ -18,6 +18,7 @@
 #define AAPT2_FILTER_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "util/Util.h"
@@ -30,7 +31,7 @@ class IPathFilter {
   virtual ~IPathFilter() = default;
 
   /** Returns true if the path should be kept. */
-  virtual bool Keep(const std::string& path) = 0;
+  virtual bool Keep(std::string_view path) = 0;
 };
 
 /**
@@ -42,7 +43,7 @@ class PrefixFilter : public IPathFilter {
   }
 
   /** Returns true if the provided path matches the prefix. */
-  bool Keep(const std::string& path) override {
+  bool Keep(std::string_view path) override {
     return util::StartsWith(path, prefix_);
   }
 
@@ -59,7 +60,7 @@ class FilterChain : public IPathFilter {
   }
 
   /** Returns true if all filters keep the path. */
-  bool Keep(const std::string& path) override {
+  bool Keep(std::string_view path) override {
     for (auto& filter : filters_) {
       if (!filter->Keep(path)) {
         return false;

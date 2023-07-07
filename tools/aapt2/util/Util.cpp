@@ -23,11 +23,12 @@
 
 #include "android-base/stringprintf.h"
 #include "android-base/strings.h"
+#include "androidfw/BigBuffer.h"
 #include "androidfw/StringPiece.h"
+#include "androidfw/Util.h"
 #include "build/version.h"
 #include "text/Unicode.h"
 #include "text/Utf8Iterator.h"
-#include "util/BigBuffer.h"
 #include "utils/Unicode.h"
 
 using ::aapt::text::Utf8Iterator;
@@ -42,15 +43,14 @@ namespace util {
 // See frameworks/base/core/java/android/content/pm/parsing/ParsingPackageUtils.java
 constexpr static const size_t kMaxPackageNameSize = 223;
 
-static std::vector<std::string> SplitAndTransform(
-    const StringPiece& str, char sep, const std::function<char(char)>& f) {
+static std::vector<std::string> SplitAndTransform(StringPiece str, char sep, char (*f)(char)) {
   std::vector<std::string> parts;
   const StringPiece::const_iterator end = std::end(str);
   StringPiece::const_iterator start = std::begin(str);
   StringPiece::const_iterator current;
   do {
     current = std::find(start, end, sep);
-    parts.emplace_back(str.substr(start, current).to_string());
+    parts.emplace_back(start, current);
     if (f) {
       std::string& part = parts.back();
       std::transform(part.begin(), part.end(), part.begin(), f);
@@ -60,29 +60,29 @@ static std::vector<std::string> SplitAndTransform(
   return parts;
 }
 
-std::vector<std::string> Split(const StringPiece& str, char sep) {
+std::vector<std::string> Split(StringPiece str, char sep) {
   return SplitAndTransform(str, sep, nullptr);
 }
 
-std::vector<std::string> SplitAndLowercase(const StringPiece& str, char sep) {
-  return SplitAndTransform(str, sep, ::tolower);
+std::vector<std::string> SplitAndLowercase(StringPiece str, char sep) {
+  return SplitAndTransform(str, sep, [](char c) -> char { return ::tolower(c); });
 }
 
-bool StartsWith(const StringPiece& str, const StringPiece& prefix) {
+bool StartsWith(StringPiece str, StringPiece prefix) {
   if (str.size() < prefix.size()) {
     return false;
   }
   return str.substr(0, prefix.size()) == prefix;
 }
 
-bool EndsWith(const StringPiece& str, const StringPiece& suffix) {
+bool EndsWith(StringPiece str, StringPiece suffix) {
   if (str.size() < suffix.size()) {
     return false;
   }
   return str.substr(str.size() - suffix.size(), suffix.size()) == suffix;
 }
 
-StringPiece TrimLeadingWhitespace(const StringPiece& str) {
+StringPiece TrimLeadingWhitespace(StringPiece str) {
   if (str.size() == 0 || str.data() == nullptr) {
     return str;
   }
@@ -96,7 +96,7 @@ StringPiece TrimLeadingWhitespace(const StringPiece& str) {
   return StringPiece(start, end - start);
 }
 
-StringPiece TrimTrailingWhitespace(const StringPiece& str) {
+StringPiece TrimTrailingWhitespace(StringPiece str) {
   if (str.size() == 0 || str.data() == nullptr) {
     return str;
   }
@@ -110,7 +110,7 @@ StringPiece TrimTrailingWhitespace(const StringPiece& str) {
   return StringPiece(start, end - start);
 }
 
-StringPiece TrimWhitespace(const StringPiece& str) {
+StringPiece TrimWhitespace(StringPiece str) {
   if (str.size() == 0 || str.data() == nullptr) {
     return str;
   }
@@ -129,9 +129,9 @@ StringPiece TrimWhitespace(const StringPiece& str) {
   return StringPiece(start, end - start);
 }
 
-static int IsJavaNameImpl(const StringPiece& str) {
+static int IsJavaNameImpl(StringPiece str) {
   int pieces = 0;
-  for (const StringPiece& piece : Tokenize(str, '.')) {
+  for (StringPiece piece : Tokenize(str, '.')) {
     pieces++;
     if (!text::IsJavaIdentifier(piece)) {
       return -1;
@@ -140,17 +140,17 @@ static int IsJavaNameImpl(const StringPiece& str) {
   return pieces;
 }
 
-bool IsJavaClassName(const StringPiece& str) {
+bool IsJavaClassName(StringPiece str) {
   return IsJavaNameImpl(str) >= 2;
 }
 
-bool IsJavaPackageName(const StringPiece& str) {
+bool IsJavaPackageName(StringPiece str) {
   return IsJavaNameImpl(str) >= 1;
 }
 
-static int IsAndroidNameImpl(const StringPiece& str) {
+static int IsAndroidNameImpl(StringPiece str) {
   int pieces = 0;
-  for (const StringPiece& piece : Tokenize(str, '.')) {
+  for (StringPiece piece : Tokenize(str, '.')) {
     if (piece.empty()) {
       return -1;
     }
@@ -172,15 +172,14 @@ static int IsAndroidNameImpl(const StringPiece& str) {
   return pieces;
 }
 
-bool IsAndroidPackageName(const StringPiece& str) {
+bool IsAndroidPackageName(StringPiece str) {
   if (str.size() > kMaxPackageNameSize) {
     return false;
   }
   return IsAndroidNameImpl(str) > 1 || str == "android";
 }
 
-bool IsAndroidSharedUserId(const android::StringPiece& package_name,
-                           const android::StringPiece& shared_user_id) {
+bool IsAndroidSharedUserId(android::StringPiece package_name, android::StringPiece shared_user_id) {
   if (shared_user_id.size() > kMaxPackageNameSize) {
     return false;
   }
@@ -188,25 +187,24 @@ bool IsAndroidSharedUserId(const android::StringPiece& package_name,
          package_name == "android";
 }
 
-bool IsAndroidSplitName(const StringPiece& str) {
+bool IsAndroidSplitName(StringPiece str) {
   return IsAndroidNameImpl(str) > 0;
 }
 
-std::optional<std::string> GetFullyQualifiedClassName(const StringPiece& package,
-                                                      const StringPiece& classname) {
+std::optional<std::string> GetFullyQualifiedClassName(StringPiece package, StringPiece classname) {
   if (classname.empty()) {
     return {};
   }
 
   if (util::IsJavaClassName(classname)) {
-    return classname.to_string();
+    return std::string(classname);
   }
 
   if (package.empty()) {
     return {};
   }
 
-  std::string result = package.to_string();
+  std::string result{package};
   if (classname.data()[0] != '.') {
     result += '.';
   }
@@ -250,7 +248,7 @@ static size_t ConsumeDigits(const char* start, const char* end) {
   return static_cast<size_t>(c - start);
 }
 
-bool VerifyJavaStringFormat(const StringPiece& str) {
+bool VerifyJavaStringFormat(StringPiece str) {
   const char* c = str.begin();
   const char* const end = str.end();
 
@@ -340,108 +338,7 @@ bool VerifyJavaStringFormat(const StringPiece& str) {
   return true;
 }
 
-std::string Utf8ToModifiedUtf8(const std::string& utf8) {
-  // Java uses Modified UTF-8 which only supports the 1, 2, and 3 byte formats of UTF-8. To encode
-  // 4 byte UTF-8 codepoints, Modified UTF-8 allows the use of surrogate pairs in the same format
-  // of CESU-8 surrogate pairs. Calculate the size of the utf8 string with all 4 byte UTF-8
-  // codepoints replaced with 2 3 byte surrogate pairs
-  size_t modified_size = 0;
-  const size_t size = utf8.size();
-  for (size_t i = 0; i < size; i++) {
-    if (((uint8_t) utf8[i] >> 4) == 0xF) {
-      modified_size += 6;
-      i += 3;
-    } else {
-      modified_size++;
-    }
-  }
-
-  // Early out if no 4 byte codepoints are found
-  if (size == modified_size) {
-    return utf8;
-  }
-
-  std::string output;
-  output.reserve(modified_size);
-  for (size_t i = 0; i < size; i++) {
-    if (((uint8_t) utf8[i] >> 4) == 0xF) {
-      int32_t codepoint = utf32_from_utf8_at(utf8.data(), size, i, nullptr);
-
-      // Calculate the high and low surrogates as UTF-16 would
-      int32_t high = ((codepoint - 0x10000) / 0x400) + 0xD800;
-      int32_t low = ((codepoint - 0x10000) % 0x400) + 0xDC00;
-
-      // Encode each surrogate in UTF-8
-      output.push_back((char) (0xE4 | ((high >> 12) & 0xF)));
-      output.push_back((char) (0x80 | ((high >> 6) & 0x3F)));
-      output.push_back((char) (0x80 | (high & 0x3F)));
-      output.push_back((char) (0xE4 | ((low >> 12) & 0xF)));
-      output.push_back((char) (0x80 | ((low >> 6) & 0x3F)));
-      output.push_back((char) (0x80 | (low & 0x3F)));
-      i += 3;
-    } else {
-      output.push_back(utf8[i]);
-    }
-  }
-
-  return output;
-}
-
-std::string ModifiedUtf8ToUtf8(const std::string& modified_utf8) {
-  // The UTF-8 representation will have a byte length less than or equal to the Modified UTF-8
-  // representation.
-  std::string output;
-  output.reserve(modified_utf8.size());
-
-  size_t index = 0;
-  const size_t modified_size = modified_utf8.size();
-  while (index < modified_size) {
-    size_t next_index;
-    int32_t high_surrogate = utf32_from_utf8_at(modified_utf8.data(), modified_size, index,
-                                                &next_index);
-    if (high_surrogate < 0) {
-      return {};
-    }
-
-    // Check that the first codepoint is within the high surrogate range
-    if (high_surrogate >= 0xD800 && high_surrogate <= 0xDB7F) {
-      int32_t low_surrogate = utf32_from_utf8_at(modified_utf8.data(), modified_size, next_index,
-                                                 &next_index);
-      if (low_surrogate < 0) {
-        return {};
-      }
-
-      // Check that the second codepoint is within the low surrogate range
-      if (low_surrogate >= 0xDC00 && low_surrogate <= 0xDFFF) {
-        const char32_t codepoint = (char32_t) (((high_surrogate - 0xD800) * 0x400)
-            + (low_surrogate - 0xDC00) + 0x10000);
-
-        // The decoded codepoint should represent a 4 byte, UTF-8 character
-        const size_t utf8_length = (size_t) utf32_to_utf8_length(&codepoint, 1);
-        if (utf8_length != 4) {
-          return {};
-        }
-
-        // Encode the UTF-8 representation of the codepoint into the string
-        char* start = &output[output.size()];
-        output.resize(output.size() + utf8_length);
-        utf32_to_utf8((char32_t*) &codepoint, 1, start, utf8_length + 1);
-
-        index = next_index;
-        continue;
-      }
-    }
-
-    // Append non-surrogate pairs to the output string
-    for (size_t i = index; i < next_index; i++) {
-      output.push_back(modified_utf8[i]);
-    }
-    index = next_index;
-  }
-  return output;
-}
-
-std::u16string Utf8ToUtf16(const StringPiece& utf8) {
+std::u16string Utf8ToUtf16(StringPiece utf8) {
   ssize_t utf16_length = utf8_to_utf16_length(
       reinterpret_cast<const uint8_t*>(utf8.data()), utf8.length());
   if (utf16_length <= 0) {
@@ -467,7 +364,7 @@ std::string Utf16ToUtf8(const StringPiece16& utf16) {
   return utf8;
 }
 
-bool WriteAll(std::ostream& out, const BigBuffer& buffer) {
+bool WriteAll(std::ostream& out, const android::BigBuffer& buffer) {
   for (const auto& b : buffer) {
     if (!out.write(reinterpret_cast<const char*>(b.buffer.get()), b.size)) {
       return false;
@@ -476,23 +373,12 @@ bool WriteAll(std::ostream& out, const BigBuffer& buffer) {
   return true;
 }
 
-std::unique_ptr<uint8_t[]> Copy(const BigBuffer& buffer) {
-  std::unique_ptr<uint8_t[]> data =
-      std::unique_ptr<uint8_t[]>(new uint8_t[buffer.size()]);
-  uint8_t* p = data.get();
-  for (const auto& block : buffer) {
-    memcpy(p, block.buffer.get(), block.size);
-    p += block.size;
-  }
-  return data;
-}
-
 typename Tokenizer::iterator& Tokenizer::iterator::operator++() {
   const char* start = token_.end();
   const char* end = str_.end();
   if (start == end) {
     end_ = true;
-    token_.assign(token_.end(), 0);
+    token_ = StringPiece(token_.end(), 0);
     return *this;
   }
 
@@ -500,12 +386,12 @@ typename Tokenizer::iterator& Tokenizer::iterator::operator++() {
   const char* current = start;
   while (current != end) {
     if (*current == separator_) {
-      token_.assign(start, current - start);
+      token_ = StringPiece(start, current - start);
       return *this;
     }
     ++current;
   }
-  token_.assign(start, end - start);
+  token_ = StringPiece(start, end - start);
   return *this;
 }
 
@@ -520,15 +406,17 @@ bool Tokenizer::iterator::operator!=(const iterator& rhs) const {
   return !(*this == rhs);
 }
 
-Tokenizer::iterator::iterator(const StringPiece& s, char sep, const StringPiece& tok, bool end)
-    : str_(s), separator_(sep), token_(tok), end_(end) {}
+Tokenizer::iterator::iterator(StringPiece s, char sep, StringPiece tok, bool end)
+    : str_(s), separator_(sep), token_(tok), end_(end) {
+}
 
-Tokenizer::Tokenizer(const StringPiece& str, char sep)
+Tokenizer::Tokenizer(StringPiece str, char sep)
     : begin_(++iterator(str, sep, StringPiece(str.begin() - 1, 0), false)),
-      end_(str, sep, StringPiece(str.end(), 0), true) {}
+      end_(str, sep, StringPiece(str.end(), 0), true) {
+}
 
-bool ExtractResFilePathParts(const StringPiece& path, StringPiece* out_prefix,
-                             StringPiece* out_entry, StringPiece* out_suffix) {
+bool ExtractResFilePathParts(StringPiece path, StringPiece* out_prefix, StringPiece* out_entry,
+                             StringPiece* out_suffix) {
   const StringPiece res_prefix("res/");
   if (!StartsWith(path, res_prefix)) {
     return false;
@@ -551,20 +439,6 @@ bool ExtractResFilePathParts(const StringPiece& path, StringPiece* out_prefix,
   *out_entry = StringPiece(last_occurence + 1, iter - last_occurence - 1);
   *out_prefix = StringPiece(path.begin(), last_occurence - path.begin() + 1);
   return true;
-}
-
-StringPiece16 GetString16(const android::ResStringPool& pool, size_t idx) {
-  if (auto str = pool.stringAt(idx); str.ok()) {
-    return *str;
-  }
-  return StringPiece16();
-}
-
-std::string GetString(const android::ResStringPool& pool, size_t idx) {
-  if (auto str = pool.string8At(idx); str.ok()) {
-    return ModifiedUtf8ToUtf8(str->to_string());
-  }
-  return Utf16ToUtf8(GetString16(pool, idx));
 }
 
 }  // namespace util

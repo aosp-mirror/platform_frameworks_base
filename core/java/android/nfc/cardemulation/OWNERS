@@ -1,4 +1,2 @@
 # Bug component: 48448
-
-zachoverflow@google.com
-alisher@google.com
+include platform/packages/apps/Nfc:/OWNERS

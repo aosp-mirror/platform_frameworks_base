@@ -17,57 +17,73 @@
 package com.android.systemui.controls.management
 
 import android.app.ActivityOptions
+import android.app.Dialog
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
 import android.widget.TextView
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
+import androidx.activity.ComponentActivity
+import androidx.annotation.VisibleForTesting
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.android.systemui.R
-import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.controls.panels.AuthorizedPanelsRepository
 import com.android.systemui.controls.ui.ControlsActivity
-import com.android.systemui.controls.ui.ControlsUiController
+import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.settings.CurrentUserTracker
-import com.android.systemui.util.LifecycleActivity
+import com.android.systemui.settings.UserTracker
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
  * Activity to select an application to favorite the [Control] provided by them.
  */
-class ControlsProviderSelectorActivity @Inject constructor(
+open class ControlsProviderSelectorActivity @Inject constructor(
     @Main private val executor: Executor,
     @Background private val backExecutor: Executor,
     private val listingController: ControlsListingController,
     private val controlsController: ControlsController,
-    private val broadcastDispatcher: BroadcastDispatcher,
-    private val uiController: ControlsUiController
-) : LifecycleActivity() {
+    private val userTracker: UserTracker,
+    private val authorizedPanelsRepository: AuthorizedPanelsRepository,
+    private val panelConfirmationDialogFactory: PanelConfirmationDialogFactory
+) : ComponentActivity() {
 
     companion object {
+        private const val DEBUG = false
         private const val TAG = "ControlsProviderSelectorActivity"
         const val BACK_SHOULD_EXIT = "back_should_exit"
     }
     private var backShouldExit = false
     private lateinit var recyclerView: RecyclerView
-    private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
+    private val userTrackerCallback: UserTracker.Callback = object : UserTracker.Callback {
         private val startingUser = listingController.currentUserId
 
-        override fun onUserSwitched(newUserId: Int) {
-            if (newUserId != startingUser) {
-                stopTracking()
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            if (newUser != startingUser) {
+                userTracker.removeCallback(this)
                 finish()
             }
         }
+    }
+    private var dialog: Dialog? = null
+
+    private val mOnBackInvokedCallback = OnBackInvokedCallback {
+        if (DEBUG) {
+            Log.d(TAG, "Predictive Back dispatcher called mOnBackInvokedCallback")
+        }
+        onBackPressed()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,7 +135,7 @@ class ControlsProviderSelectorActivity @Inject constructor(
 
     override fun onStart() {
         super.onStart()
-        currentUserTracker.startTracking()
+        userTracker.addCallback(userTrackerCallback, executor)
 
         recyclerView.alpha = 0.0f
         recyclerView.adapter = AppAdapter(
@@ -128,9 +144,11 @@ class ControlsProviderSelectorActivity @Inject constructor(
                 lifecycle,
                 listingController,
                 LayoutInflater.from(this),
-                ::launchFavoritingActivity,
+                ::onAppSelected,
                 FavoritesRenderer(resources, controlsController::countFavoritesForComponent),
-                resources).apply {
+                resources,
+                authorizedPanelsRepository.getAuthorizedPanels()
+        ).apply {
             registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 var hasAnimated = false
                 override fun onChanged() {
@@ -141,18 +159,51 @@ class ControlsProviderSelectorActivity @Inject constructor(
                 }
             })
         }
+
+        if (DEBUG) {
+            Log.d(TAG, "Registered onBackInvokedCallback")
+        }
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, mOnBackInvokedCallback)
     }
 
     override fun onStop() {
         super.onStop()
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
+
+        if (DEBUG) {
+            Log.d(TAG, "Unregistered onBackInvokedCallback")
+        }
+        onBackInvokedDispatcher.unregisterOnBackInvokedCallback(mOnBackInvokedCallback)
+        dialog?.cancel()
+    }
+
+    fun onAppSelected(serviceInfo: ControlsServiceInfo) {
+        dialog?.cancel()
+        if (serviceInfo.panelActivity == null) {
+            launchFavoritingActivity(serviceInfo.componentName)
+        } else {
+            val appName = serviceInfo.loadLabel() ?: ""
+            dialog = panelConfirmationDialogFactory.createConfirmationDialog(this, appName) { ok ->
+                if (ok) {
+                    authorizedPanelsRepository.addAuthorizedPanels(
+                            setOf(serviceInfo.componentName.packageName)
+                    )
+                    val selected = SelectedItem.PanelItem(appName, serviceInfo.componentName)
+                    controlsController.setPreferredSelection(selected)
+                    animateExitAndFinish()
+                    openControlsOrigin()
+                }
+                dialog = null
+            }.also { it.show() }
+        }
     }
 
     /**
      * Launch the [ControlsFavoritingActivity] for the specified component.
      * @param component a component name for a [ControlsProviderService]
      */
-    fun launchFavoritingActivity(component: ComponentName?) {
+    private fun launchFavoritingActivity(component: ComponentName?) {
         executor.execute {
             component?.let {
                 val intent = Intent(applicationContext, ControlsFavoritingActivity::class.java)
@@ -160,20 +211,30 @@ class ControlsProviderSelectorActivity @Inject constructor(
                     putExtra(ControlsFavoritingActivity.EXTRA_APP,
                             listingController.getAppLabel(it))
                     putExtra(Intent.EXTRA_COMPONENT_NAME, it)
-                    putExtra(ControlsFavoritingActivity.EXTRA_FROM_PROVIDER_SELECTOR, true)
+                    putExtra(
+                        ControlsFavoritingActivity.EXTRA_SOURCE,
+                        ControlsFavoritingActivity.EXTRA_SOURCE_VALUE_FROM_PROVIDER_SELECTOR,
+                    )
                 }
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
-                animateExitAndFinish()
             }
         }
     }
 
     override fun onDestroy() {
-        currentUserTracker.stopTracking()
+        userTracker.removeCallback(userTrackerCallback)
         super.onDestroy()
     }
 
-    private fun animateExitAndFinish() {
+    private fun openControlsOrigin() {
+        startActivity(
+                Intent(applicationContext, ControlsActivity::class.java),
+                ActivityOptions.makeSceneTransitionAnimation(this).toBundle()
+        )
+    }
+
+    @VisibleForTesting
+    internal open fun animateExitAndFinish() {
         val rootView = requireViewById<ViewGroup>(R.id.controls_management_root)
         ControlsAnimations.exitAnimation(
                 rootView,

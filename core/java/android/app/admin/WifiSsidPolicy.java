@@ -135,6 +135,10 @@ public final class WifiSsidPolicy implements Parcelable {
         dest.writeArraySet(mSsids);
     }
 
+    /**
+     * Two instances of WifiSsidPolicy are considered equal if they have
+     * the same WifiSsidPolicyType and the same set of WifiSsids
+     */
     @Override
     public boolean equals(Object thatObject) {
         if (this == thatObject) {
@@ -147,6 +151,9 @@ public final class WifiSsidPolicy implements Parcelable {
         return mPolicyType == that.mPolicyType && Objects.equals(mSsids, that.mSsids);
     }
 
+    /**
+     * Returns the hash code value of WifiSsidPolicyType and WifiSsid set
+     */
     @Override
     public int hashCode() {
         return Objects.hash(mPolicyType, mSsids);

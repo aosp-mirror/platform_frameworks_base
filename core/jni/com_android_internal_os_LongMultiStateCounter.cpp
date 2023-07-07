@@ -109,12 +109,13 @@ static void throwWriteRE(JNIEnv *env, binder_status_t status) {
     jniThrowRuntimeException(env, "Could not write LongMultiStateCounter to Parcel");
 }
 
-#define THROW_ON_WRITE_ERROR(expr)     \
-    {                                  \
-        binder_status_t status = expr; \
-        if (status != STATUS_OK) {     \
-            throwWriteRE(env, status); \
-        }                              \
+#define THROW_AND_RETURN_ON_WRITE_ERROR(expr) \
+    {                                         \
+        binder_status_t status = expr;        \
+        if (status != STATUS_OK) {            \
+            throwWriteRE(env, status);        \
+            return;                           \
+        }                                     \
     }
 
 static void native_writeToParcel(JNIEnv *env, jobject self, jlong nativePtr, jobject jParcel,
@@ -123,10 +124,10 @@ static void native_writeToParcel(JNIEnv *env, jobject self, jlong nativePtr, job
     ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));
 
     uint16_t stateCount = counter->getStateCount();
-    THROW_ON_WRITE_ERROR(AParcel_writeInt32(parcel.get(), stateCount));
+    THROW_AND_RETURN_ON_WRITE_ERROR(AParcel_writeInt32(parcel.get(), stateCount));
 
     for (battery::state_t state = 0; state < stateCount; state++) {
-        THROW_ON_WRITE_ERROR(AParcel_writeInt64(parcel.get(), counter->getCount(state)));
+        THROW_AND_RETURN_ON_WRITE_ERROR(AParcel_writeInt64(parcel.get(), counter->getCount(state)));
     }
 }
 
@@ -135,29 +136,30 @@ static void throwReadRE(JNIEnv *env, binder_status_t status) {
     jniThrowRuntimeException(env, "Could not read LongMultiStateCounter from Parcel");
 }
 
-#define THROW_ON_READ_ERROR(expr)      \
-    {                                  \
-        binder_status_t status = expr; \
-        if (status != STATUS_OK) {     \
-            throwReadRE(env, status);  \
-        }                              \
+#define THROW_AND_RETURN_ON_READ_ERROR(expr) \
+    {                                        \
+        binder_status_t status = expr;       \
+        if (status != STATUS_OK) {           \
+            throwReadRE(env, status);        \
+            return 0L;                       \
+        }                                    \
     }
 
 static jlong native_initFromParcel(JNIEnv *env, jclass theClass, jobject jParcel) {
     ndk::ScopedAParcel parcel(AParcel_fromJavaParcel(env, jParcel));
 
     int32_t stateCount;
-    THROW_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &stateCount));
+    THROW_AND_RETURN_ON_READ_ERROR(AParcel_readInt32(parcel.get(), &stateCount));
 
-    battery::LongMultiStateCounter *counter = new battery::LongMultiStateCounter(stateCount, 0);
+    auto counter = std::make_unique<battery::LongMultiStateCounter>(stateCount, 0);
 
     for (battery::state_t state = 0; state < stateCount; state++) {
         int64_t value;
-        THROW_ON_READ_ERROR(AParcel_readInt64(parcel.get(), &value));
+        THROW_AND_RETURN_ON_READ_ERROR(AParcel_readInt64(parcel.get(), &value));
         counter->setValue(state, value);
     }
 
-    return reinterpret_cast<jlong>(counter);
+    return reinterpret_cast<jlong>(counter.release());
 }
 
 static jint native_getStateCount(jlong nativePtr) {

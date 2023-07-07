@@ -88,26 +88,15 @@ public class SizeConfigurationBucketsTest {
     }
 
     /**
-     * Tests that null size configuration buckets unflips the correct configuration flags.
+     * Tests that {@code null} size configuration buckets do not unflip the configuration flags.
      */
     @Test
     public void testNullSizeConfigurationBuckets() {
-        // Check that all 3 size configurations are filtered out of the diff if the buckets are null
-        // and non-size attributes of screen layout are unchanged. Add a non-size related config
-        // change (i.e. CONFIG_LOCALE) to test that the diff is not set to zero.
         final int diff = CONFIG_SCREEN_SIZE | CONFIG_SMALLEST_SCREEN_SIZE | CONFIG_SCREEN_LAYOUT
                 | CONFIG_LOCALE;
         final int filteredDiffNonSizeLayoutUnchanged = SizeConfigurationBuckets.filterDiff(diff,
                 Configuration.EMPTY, Configuration.EMPTY, null);
-        assertEquals(CONFIG_LOCALE, filteredDiffNonSizeLayoutUnchanged);
-
-        // Check that only screen size and smallest screen size are filtered out of the diff if the
-        // buckets are null and non-size attributes of screen layout are changed.
-        final Configuration newConfig = new Configuration();
-        newConfig.screenLayout |= SCREENLAYOUT_ROUND_YES;
-        final int filteredDiffNonSizeLayoutChanged = SizeConfigurationBuckets.filterDiff(diff,
-                Configuration.EMPTY, newConfig, null);
-        assertEquals(CONFIG_SCREEN_LAYOUT | CONFIG_LOCALE, filteredDiffNonSizeLayoutChanged);
+        assertEquals(diff, filteredDiffNonSizeLayoutUnchanged);
     }
 
     /**

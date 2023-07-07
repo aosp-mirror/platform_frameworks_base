@@ -16,71 +16,59 @@
 
 package com.android.server.location.listeners;
 
-import android.annotation.Nullable;
-import android.location.util.identity.CallerIdentity;
-import android.os.Binder;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.NoSuchElementException;
+import java.util.concurrent.Executor;
+
 /**
  * A registration that works with IBinder keys, and registers a DeathListener to automatically
- * remove the registration if the binder dies. The key for this registration must either be an
- * {@link IBinder} or a {@link BinderKey}.
+ * remove the registration if the binder dies.
  *
- * @param <TRequest>  request type
+ * @param <TKey>      key type
  * @param <TListener> listener type
  */
-public abstract class BinderListenerRegistration<TRequest, TListener> extends
-        RemoteListenerRegistration<TRequest, TListener> implements Binder.DeathRecipient {
+public abstract class BinderListenerRegistration<TKey, TListener> extends
+        RemovableListenerRegistration<TKey, TListener> implements DeathRecipient {
 
-    /**
-     * Interface to allow binder retrieval when keys are not themselves IBinders.
-     */
-    public interface BinderKey {
-        /**
-         * Returns the binder associated with this key.
-         */
-        IBinder getBinder();
+    protected BinderListenerRegistration(Executor executor, TListener listener) {
+        super(executor, listener);
     }
 
-    protected BinderListenerRegistration(@Nullable TRequest request, CallerIdentity callerIdentity,
-            TListener listener) {
-        super(request, callerIdentity, listener);
-    }
+    protected abstract IBinder getBinderFromKey(TKey key);
 
     @Override
-    protected final void onRemovableListenerRegister() {
-        IBinder binder = getBinderFromKey(getKey());
+    protected void onRegister() {
+        super.onRegister();
+
         try {
-            binder.linkToDeath(this, 0);
+            getBinderFromKey(getKey()).linkToDeath(this, 0);
         } catch (RemoteException e) {
             remove();
         }
-
-        onBinderListenerRegister();
     }
 
     @Override
-    protected final void onRemovableListenerUnregister() {
-        onBinderListenerUnregister();
-        getBinderFromKey(getKey()).unlinkToDeath(this, 0);
+    protected void onUnregister() {
+        try {
+            getBinderFromKey(getKey()).unlinkToDeath(this, 0);
+        } catch (NoSuchElementException e) {
+            // the only way this exception can occur should be if another exception has been thrown
+            // prior to registration completing, and that exception is currently unwinding the call
+            // stack and causing this cleanup. since that exception should crash us anyways, drop
+            // this exception so we're not hiding the original exception.
+            Log.w(getTag(), "failed to unregister binder death listener", e);
+        }
+
+        super.onUnregister();
     }
 
-    /**
-     * May be overridden in place of {@link #onRemovableListenerRegister()}.
-     */
-    protected void onBinderListenerRegister() {}
-
-    /**
-     * May be overridden in place of {@link #onRemovableListenerUnregister()}.
-     */
-    protected void onBinderListenerUnregister() {}
-
-    @Override
     public void onOperationFailure(ListenerOperation<TListener> operation, Exception e) {
         if (e instanceof RemoteException) {
-            Log.w(getOwner().getTag(), "registration " + this + " removed", e);
+            Log.w(getTag(), "registration " + this + " removed", e);
             remove();
         } else {
             super.onOperationFailure(operation, e);
@@ -90,24 +78,15 @@ public abstract class BinderListenerRegistration<TRequest, TListener> extends
     @Override
     public void binderDied() {
         try {
-            if (Log.isLoggable(getOwner().getTag(), Log.DEBUG)) {
-                Log.d(getOwner().getTag(), "binder registration " + getIdentity() + " died");
+            if (Log.isLoggable(getTag(), Log.DEBUG)) {
+                Log.d(getTag(), "binder registration " + this + " died");
             }
+
             remove();
         } catch (RuntimeException e) {
             // the caller may swallow runtime exceptions, so we rethrow as assertion errors to
             // ensure the crash is seen
             throw new AssertionError(e);
-        }
-    }
-
-    private static IBinder getBinderFromKey(Object key) {
-        if (key instanceof IBinder) {
-            return (IBinder) key;
-        } else if (key instanceof BinderKey) {
-            return ((BinderKey) key).getBinder();
-        } else {
-            throw new IllegalArgumentException("key must be IBinder or BinderKey");
         }
     }
 }

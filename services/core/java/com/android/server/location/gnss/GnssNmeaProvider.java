@@ -34,7 +34,7 @@ import java.util.Collection;
 import java.util.function.Function;
 
 /**
- * Implementation of a handler for {@link IGnssNmeaListener}.
+ * GNSS NMEA HAL module and listener multiplexer.
  */
 class GnssNmeaProvider extends GnssListenerMultiplexer<Void, IGnssNmeaListener, Void> implements
         GnssNative.BaseCallbacks, GnssNative.NmeaCallbacks {
@@ -97,7 +97,7 @@ class GnssNmeaProvider extends GnssListenerMultiplexer<Void, IGnssNmeaListener, 
                         ListenerExecutor.ListenerOperation<IGnssNmeaListener>>() {
 
                     // only read in the nmea string if we need to
-                    private @Nullable String mNmea;
+                    @Nullable private String mNmea;
 
                     @Override
                     public ListenerExecutor.ListenerOperation<IGnssNmeaListener> apply(

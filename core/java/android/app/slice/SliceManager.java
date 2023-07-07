@@ -231,7 +231,7 @@ public class SliceManager {
                 extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
                 final Bundle res = provider.call(
                         SliceProvider.METHOD_GET_DESCENDANTS, null, extras);
-                return res.getParcelableArrayList(SliceProvider.EXTRA_SLICE_DESCENDANTS);
+                return res.getParcelableArrayList(SliceProvider.EXTRA_SLICE_DESCENDANTS, android.net.Uri.class);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to get slice descendants", e);
@@ -264,7 +264,7 @@ public class SliceManager {
             if (res == null) {
                 return null;
             }
-            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+            return res.getParcelable(SliceProvider.EXTRA_SLICE, android.app.slice.Slice.class);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
@@ -323,7 +323,7 @@ public class SliceManager {
             if (res == null) {
                 return null;
             }
-            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+            return res.getParcelable(SliceProvider.EXTRA_SLICE, android.net.Uri.class);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
@@ -403,7 +403,7 @@ public class SliceManager {
             if (res == null) {
                 return null;
             }
-            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+            return res.getParcelable(SliceProvider.EXTRA_SLICE, android.app.slice.Slice.class);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
@@ -439,8 +439,8 @@ public class SliceManager {
      */
     public @PermissionResult int checkSlicePermission(@NonNull Uri uri, int pid, int uid) {
         try {
-            return mService.checkSlicePermission(uri, mContext.getPackageName(), null, pid, uid,
-                    null);
+            return mService.checkSlicePermission(uri, mContext.getPackageName(), pid, uid,
+                    null /* autoGrantPermissions */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -488,17 +488,13 @@ public class SliceManager {
      * Does the permission check to see if a caller has access to a specific slice.
      * @hide
      */
-    public void enforceSlicePermission(Uri uri, String pkg, int pid, int uid,
-            String[] autoGrantPermissions) {
+    public void enforceSlicePermission(Uri uri, int pid, int uid, String[] autoGrantPermissions) {
         try {
             if (UserHandle.isSameApp(uid, Process.myUid())) {
                 return;
             }
-            if (pkg == null) {
-                throw new SecurityException("No pkg specified");
-            }
-            int result = mService.checkSlicePermission(uri, mContext.getPackageName(), pkg, pid,
-                    uid, autoGrantPermissions);
+            int result = mService.checkSlicePermission(uri, mContext.getPackageName(), pid, uid,
+                    autoGrantPermissions);
             if (result == PERMISSION_DENIED) {
                 throw new SecurityException("User " + uid + " does not have slice permission for "
                         + uri + ".");

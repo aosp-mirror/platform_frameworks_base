@@ -27,6 +27,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "android_view_InputDevice.h"
 #include "core_jni_helpers.h"
 #include "jni.h"
 #ifdef _WIN32
@@ -100,8 +101,10 @@ extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_jar_StrictJarFile(JNIEnv* env);
 extern int register_android_view_KeyCharacterMap(JNIEnv* env);
 extern int register_android_view_KeyEvent(JNIEnv* env);
+extern int register_android_view_InputDevice(JNIEnv* env);
 extern int register_android_view_MotionEvent(JNIEnv* env);
 extern int register_android_view_ThreadedRenderer(JNIEnv* env);
+extern int register_android_graphics_HardwareBufferRenderer(JNIEnv* env);
 extern int register_android_view_VelocityTracker(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 
@@ -141,6 +144,7 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.util.jar.StrictJarFile", REG_JNI(register_android_util_jar_StrictJarFile)},
         {"android.view.KeyCharacterMap", REG_JNI(register_android_view_KeyCharacterMap)},
         {"android.view.KeyEvent", REG_JNI(register_android_view_KeyEvent)},
+        {"android.view.InputDevice", REG_JNI(register_android_view_InputDevice)},
         {"android.view.MotionEvent", REG_JNI(register_android_view_MotionEvent)},
         {"android.view.VelocityTracker", REG_JNI(register_android_view_VelocityTracker)},
         {"com.android.internal.util.VirtualRefBasePtr",
@@ -319,6 +323,41 @@ static bool init_icu(const char* dataPath) {
     return true;
 }
 
+// Creates an array of InputDevice from key character map files
+static void init_keyboard(JNIEnv* env, const vector<string>& keyboardPaths) {
+    jclass inputDevice = FindClassOrDie(env, "android/view/InputDevice");
+    jobjectArray inputDevicesArray =
+            env->NewObjectArray(keyboardPaths.size(), inputDevice, nullptr);
+    int keyboardId = 1;
+
+    for (const string& path : keyboardPaths) {
+        base::Result<std::shared_ptr<KeyCharacterMap>> charMap =
+                KeyCharacterMap::load(path, KeyCharacterMap::Format::BASE);
+
+        InputDeviceInfo info = InputDeviceInfo();
+        info.initialize(keyboardId, 0, 0, InputDeviceIdentifier(),
+                        "keyboard " + std::to_string(keyboardId), true, false, 0);
+        info.setKeyboardType(AINPUT_KEYBOARD_TYPE_ALPHABETIC);
+        info.setKeyCharacterMap(*charMap);
+
+        jobject inputDeviceObj = android_view_InputDevice_create(env, info);
+        if (inputDeviceObj) {
+            env->SetObjectArrayElement(inputDevicesArray, keyboardId - 1, inputDeviceObj);
+            env->DeleteLocalRef(inputDeviceObj);
+        }
+        keyboardId++;
+    }
+
+    if (bridge == nullptr) {
+        bridge = FindClassOrDie(env, "com/android/layoutlib/bridge/Bridge");
+        bridge = MakeGlobalRefOrDie(env, bridge);
+    }
+    jmethodID setInputManager = GetStaticMethodIDOrDie(env, bridge, "setInputManager",
+                                                       "([Landroid/view/InputDevice;)V");
+    env->CallStaticVoidMethod(bridge, setInputManager, inputDevicesArray);
+    env->DeleteLocalRef(inputDevicesArray);
+}
+
 } // namespace android
 
 using namespace android;
@@ -409,6 +448,13 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
 
     // Use English locale for number format to ensure correct parsing of floats when using strtof
     setlocale(LC_NUMERIC, "en_US.UTF-8");
+
+    auto keyboardPathsString =
+            (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
+                                                 env->NewStringUTF("keyboard_paths"),
+                                                 env->NewStringUTF(""));
+    vector<string> keyboardPaths = parseCsv(env, keyboardPathsString);
+    init_keyboard(env, keyboardPaths);
 
     return JNI_VERSION_1_6;
 }

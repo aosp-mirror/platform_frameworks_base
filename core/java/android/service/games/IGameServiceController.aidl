@@ -20,5 +20,6 @@ package android.service.games;
  * @hide
  */
 oneway interface IGameServiceController {
+    @EnforcePermission("MANAGE_GAME_ACTIVITY")
     void createGameSession(int taskId);
 }

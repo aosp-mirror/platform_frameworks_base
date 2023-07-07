@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 <configuration description="Config for PreloadCheck">
-    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
         <option name="cleanup" value="true" />
         <option name="push" value="preload-check-device.jar->/data/local/tmp/preload-check-device.jar" />
     </target_preparer>

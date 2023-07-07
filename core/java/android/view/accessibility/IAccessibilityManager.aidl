@@ -25,8 +25,11 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManagerClient;
+import android.view.accessibility.AccessibilityWindowAttributes;
 import android.view.accessibility.IWindowMagnificationConnection;
+import android.view.InputEvent;
 import android.view.IWindow;
+import android.view.MagnificationSpec;
 
 /**
  * Interface implemented by the AccessibilityManagerService called by
@@ -59,12 +62,9 @@ interface IAccessibilityManager {
             in IAccessibilityInteractionConnection connection);
 
     void registerUiTestAutomationService(IBinder owner, IAccessibilityServiceClient client,
-        in AccessibilityServiceInfo info, int flags);
+        in AccessibilityServiceInfo info, int userId, int flags);
 
     void unregisterUiTestAutomationService(IAccessibilityServiceClient client);
-
-    void temporaryEnableAccessibilityStateUntilKeyguardRemoved(in ComponentName service,
-            boolean touchExplorationEnabled);
 
     // Used by UiAutomation
     IBinder getWindowToken(int windowId, int userId);
@@ -108,4 +108,28 @@ interface IAccessibilityManager {
 
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)")
     void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId);
+
+    oneway void setAccessibilityWindowAttributes(int displayId, int windowId, int userId, in AccessibilityWindowAttributes attributes);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    boolean registerProxyForDisplay(IAccessibilityServiceClient proxy, int displayId);
+
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    boolean unregisterProxyForDisplay(int displayId);
+
+    // Used by UiAutomation for tests on the InputFilter
+    void injectInputEventToInputFilter(in InputEvent event);
+
+    boolean startFlashNotificationSequence(String opPkg, int reason, IBinder token);
+    boolean stopFlashNotificationSequence(String opPkg);
+    boolean startFlashNotificationEvent(String opPkg, int reason, String reasonPkg);
+
+    boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId);
+    boolean sendRestrictedDialogIntent(String packageName, int uid, int userId);
+
+    parcelable WindowTransformationSpec {
+        float[] transformationMatrix;
+        MagnificationSpec magnificationSpec;
+    }
+    WindowTransformationSpec getWindowTransformationSpec(int windowId);
 }

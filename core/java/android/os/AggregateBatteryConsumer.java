@@ -17,8 +17,10 @@
 package android.os;
 
 import android.annotation.NonNull;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
+import android.util.proto.ProtoOutputStream;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -94,6 +96,19 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
                 }
             }
             eventType = parser.next();
+        }
+    }
+
+    void writePowerComponentModelProto(@NonNull ProtoOutputStream proto) {
+        for (int i = 0; i < POWER_COMPONENT_COUNT; i++) {
+            final int powerModel = getPowerModel(i);
+            if (powerModel == BatteryConsumer.POWER_MODEL_UNDEFINED) continue;
+
+            final long token = proto.start(BatteryUsageStatsAtomsProto.COMPONENT_MODELS);
+            proto.write(BatteryUsageStatsAtomsProto.PowerComponentModel.COMPONENT, i);
+            proto.write(BatteryUsageStatsAtomsProto.PowerComponentModel.POWER_MODEL,
+                    powerModelToProtoEnum(powerModel));
+            proto.end(token);
         }
     }
 

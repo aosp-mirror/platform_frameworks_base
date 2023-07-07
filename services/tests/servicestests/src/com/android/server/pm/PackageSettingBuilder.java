@@ -19,7 +19,8 @@ package com.android.server.pm;
 import android.content.pm.SigningDetails;
 import android.util.SparseArray;
 
-import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageUserStateImpl;
 
 import java.io.File;
@@ -166,7 +167,7 @@ public class PackageSettingBuilder {
         packageSetting.setSignatures(mSigningDetails != null
                 ? new PackageSignatures(mSigningDetails)
                 : new PackageSignatures());
-        packageSetting.setPkg(mPkg);
+        packageSetting.setPkg((ParsedPackage) mPkg);
         packageSetting.setAppId(mAppId);
         packageSetting.setVolumeUuid(this.mVolumeUuid);
         if (mInstallSource != null) {

@@ -37,6 +37,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -46,8 +47,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
+import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 /**
  * Divider for multi window splits.
@@ -55,9 +58,6 @@ import com.android.wm.shell.animation.Interpolators;
 public class DividerView extends FrameLayout implements View.OnTouchListener {
     public static final long TOUCH_ANIMATION_DURATION = 150;
     public static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
-
-    /** The task bar expanded height. Used to determine whether to insets divider bounds or not. */
-    private float mExpandedTaskBarHeight;
 
     private final int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
@@ -74,6 +74,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private GestureDetector mDoubleTapDetector;
     private boolean mInteractive;
     private boolean mSetTouchRegion = true;
+    private int mLastDraggingPosition;
 
     /**
      * Tracks divider bar visible bounds in screen-based coordination. Used to calculate with
@@ -206,18 +207,25 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mSplitLayout = layout;
         mSplitWindowManager = splitWindowManager;
         mViewHost = viewHost;
-        mDividerBounds.set(layout.getDividerBounds());
+        layout.getDividerBounds(mDividerBounds);
         onInsetsChanged(insetsState, false /* animate */);
     }
 
     void onInsetsChanged(InsetsState insetsState, boolean animate) {
-        mTempRect.set(mSplitLayout.getDividerBounds());
-        final InsetsSource taskBarInsetsSource =
-                insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        mSplitLayout.getDividerBounds(mTempRect);
         // Only insets the divider bar with task bar when it's expanded so that the rounded corners
         // will be drawn against task bar.
-        if (taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
-            mTempRect.inset(taskBarInsetsSource.calculateVisibleInsets(mTempRect));
+        // But there is no need to do it when IME showing because there are no rounded corners at
+        // the bottom. This also avoids the problem of task bar height not changing when IME
+        // floating.
+        if (!insetsState.isSourceOrDefaultVisible(InsetsSource.ID_IME, WindowInsets.Type.ime())) {
+            for (int i = insetsState.sourceSize() - 1; i >= 0; i--) {
+                final InsetsSource source = insetsState.sourceAt(i);
+                if (source.getType() == WindowInsets.Type.navigationBars()
+                        && source.insetsRoundedCornerFrame()) {
+                    mTempRect.inset(source.calculateVisibleInsets(mTempRect));
+                }
+            }
         }
 
         if (!mTempRect.equals(mDividerBounds)) {
@@ -242,8 +250,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mDividerBar = findViewById(R.id.divider_bar);
         mHandle = findViewById(R.id.docked_divider_handle);
         mBackground = findViewById(R.id.docked_divider_background);
-        mExpandedTaskBarHeight = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.taskbar_frame_height);
         mTouchElevation = getResources().getDimensionPixelSize(
                 R.dimen.docked_stack_divider_lift_elevation);
         mDoubleTapDetector = new GestureDetector(getContext(), new DoubleTapListener());
@@ -286,6 +292,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 setTouching();
                 mStartPos = touchPos;
                 mMoving = false;
+                mSplitLayout.onStartDragging();
                 break;
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
@@ -295,13 +302,17 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 }
                 if (mMoving) {
                     final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
+                    mLastDraggingPosition = position;
                     mSplitLayout.updateDivideBounds(position);
                 }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 releaseTouching();
-                if (!mMoving) break;
+                if (!mMoving) {
+                    mSplitLayout.onDraggingCancelled();
+                    break;
+                }
 
                 mVelocityTracker.addMovement(event);
                 mVelocityTracker.computeCurrentVelocity(1000 /* units */);
@@ -360,11 +371,30 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mViewHost.relayout(lp);
     }
 
-    void setInteractive(boolean interactive) {
+    /**
+     * Set divider should interactive to user or not.
+     *
+     * @param interactive divider interactive.
+     * @param hideHandle divider handle hidden or not, only work when interactive is false.
+     * @param from caller from where.
+     */
+    void setInteractive(boolean interactive, boolean hideHandle, String from) {
         if (interactive == mInteractive) return;
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                "Set divider bar %s from %s", interactive ? "interactive" : "non-interactive",
+                from);
         mInteractive = interactive;
+        if (!mInteractive && mMoving) {
+            final int position = mSplitLayout.getDividePosition();
+            mSplitLayout.flingDividePosition(
+                    mLastDraggingPosition,
+                    position,
+                    mSplitLayout.FLING_RESIZE_DURATION,
+                    () -> mSplitLayout.setDividePosition(position, true /* applyLayoutChange */));
+            mMoving = false;
+        }
         releaseTouching();
-        mHandle.setVisibility(mInteractive ? View.VISIBLE : View.INVISIBLE);
+        mHandle.setVisibility(!mInteractive && hideHandle ? View.INVISIBLE : View.VISIBLE);
     }
 
     private boolean isLandscape() {
@@ -377,6 +407,11 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             if (mSplitLayout != null) {
                 mSplitLayout.onDoubleTappedDivider();
             }
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTapEvent(@NonNull MotionEvent e) {
             return true;
         }
     }

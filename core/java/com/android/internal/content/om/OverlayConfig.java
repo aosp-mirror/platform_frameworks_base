@@ -140,7 +140,6 @@ public class OverlayConfig {
 
         ArrayMap<Integer, List<String>> activeApexesPerPartition = getActiveApexes(partitions);
 
-        boolean foundConfigFile = false;
         final Map<String, ParsedOverlayInfo> packageManagerOverlayInfos =
                 packageProvider == null ? null : getOverlayPackageInfos(packageProvider);
 
@@ -154,7 +153,6 @@ public class OverlayConfig {
                             activeApexesPerPartition.getOrDefault(partition.type,
                                     Collections.emptyList()));
             if (partitionOverlays != null) {
-                foundConfigFile = true;
                 overlays.addAll(partitionOverlays);
                 continue;
             }
@@ -183,18 +181,12 @@ public class OverlayConfig {
                 final ParsedOverlayInfo p = partitionOverlayInfos.get(j);
                 if (p.isStatic) {
                     partitionConfigs.add(new ParsedConfiguration(p.packageName,
-                            true /* enabled */, false /* mutable */, partition.policy, p));
+                            true /* enabled */, false /* mutable */, partition.policy, p, null));
                 }
             }
 
             partitionConfigs.sort(sStaticOverlayComparator);
             overlays.addAll(partitionConfigs);
-        }
-
-        if (!foundConfigFile) {
-            // If no overlay configuration files exist, disregard partition precedence and allow
-            // android:priority to reorder overlays across partition boundaries.
-            overlays.sort(sStaticOverlayComparator);
         }
 
         for (int i = 0, n = overlays.size(); i < n; i++) {

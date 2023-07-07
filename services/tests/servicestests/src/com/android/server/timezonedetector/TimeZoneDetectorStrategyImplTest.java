@@ -16,6 +16,12 @@
 
 package com.android.server.timezonedetector;
 
+import static android.app.time.DetectorStatusTypes.DETECTION_ALGORITHM_STATUS_RUNNING;
+import static android.app.time.DetectorStatusTypes.DETECTOR_STATUS_RUNNING;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_IS_CERTAIN;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_IS_UNCERTAIN;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_NOT_PRESENT;
+import static android.app.time.LocationTimeZoneAlgorithmStatus.PROVIDER_STATUS_NOT_READY;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYPE_EMULATOR_ZONE_ID;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYPE_NETWORK_COUNTRY_ONLY;
@@ -23,7 +29,12 @@ import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.MATCH_TYP
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET;
 import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS;
+import static android.service.timezone.TimeZoneProviderStatus.DEPENDENCY_STATUS_UNKNOWN;
+import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_UNKNOWN;
 
+import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
+import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_LOW;
 import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.TELEPHONY_SCORE_HIGH;
 import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.TELEPHONY_SCORE_HIGHEST;
 import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.TELEPHONY_SCORE_LOW;
@@ -32,31 +43,53 @@ import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.T
 import static com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.TELEPHONY_SCORE_USAGE_THRESHOLD;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.time.LocationTimeZoneAlgorithmStatus;
+import android.app.time.TelephonyTimeZoneAlgorithmStatus;
+import android.app.time.TimeZoneCapabilitiesAndConfig;
+import android.app.time.TimeZoneConfiguration;
+import android.app.time.TimeZoneDetectorStatus;
+import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.MatchType;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion.Quality;
+import android.service.timezone.TimeZoneProviderStatus;
 
+import com.android.server.SystemTimeZone.TimeZoneConfidence;
 import com.android.server.timezonedetector.TimeZoneDetectorStrategyImpl.QualifiedTelephonyTimeZoneSuggestion;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 /**
  * White-box unit tests for {@link TimeZoneDetectorStrategyImpl}.
  */
+@RunWith(JUnitParamsRunner.class)
 public class TimeZoneDetectorStrategyImplTest {
 
     private static final @UserIdInt int USER_ID = 9876;
@@ -86,7 +119,8 @@ public class TimeZoneDetectorStrategyImplTest {
     };
 
     private static final ConfigurationInternal CONFIG_USER_RESTRICTED_AUTO_DISABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
@@ -99,7 +133,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .build();
 
     private static final ConfigurationInternal CONFIG_USER_RESTRICTED_AUTO_ENABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
@@ -112,7 +147,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_DETECT_NOT_SUPPORTED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(false)
                     .setGeoDetectionFeatureSupported(false)
                     .setTelephonyFallbackSupported(false)
@@ -125,7 +161,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_DISABLED_GEO_DISABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
@@ -138,7 +175,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_ENABLED_GEO_DISABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
@@ -151,7 +189,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_ENABLED_GEO_ENABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder()
+                    .setUserId(USER_ID)
                     .setTelephonyDetectionFeatureSupported(true)
                     .setGeoDetectionFeatureSupported(true)
                     .setTelephonyFallbackSupported(false)
@@ -163,14 +202,204 @@ public class TimeZoneDetectorStrategyImplTest {
                     .setGeoDetectionEnabledSetting(true)
                     .build();
 
-    private TimeZoneDetectorStrategyImpl mTimeZoneDetectorStrategy;
+    private static final TelephonyTimeZoneAlgorithmStatus TELEPHONY_ALGORITHM_RUNNING_STATUS =
+            new TelephonyTimeZoneAlgorithmStatus(DETECTION_ALGORITHM_STATUS_RUNNING);
+
+    private FakeServiceConfigAccessor mFakeServiceConfigAccessorSpy;
     private FakeEnvironment mFakeEnvironment;
+
+    private TimeZoneDetectorStrategyImpl mTimeZoneDetectorStrategy;
 
     @Before
     public void setUp() {
         mFakeEnvironment = new FakeEnvironment();
-        mFakeEnvironment.initializeConfig(CONFIG_AUTO_DISABLED_GEO_DISABLED);
-        mTimeZoneDetectorStrategy = new TimeZoneDetectorStrategyImpl(mFakeEnvironment);
+        mFakeServiceConfigAccessorSpy = spy(new FakeServiceConfigAccessor());
+        mFakeServiceConfigAccessorSpy.initializeCurrentUserConfiguration(
+                CONFIG_AUTO_DISABLED_GEO_DISABLED);
+
+        mTimeZoneDetectorStrategy = new TimeZoneDetectorStrategyImpl(
+                mFakeServiceConfigAccessorSpy, mFakeEnvironment);
+    }
+
+    @Test
+    public void testChangeListenerBehavior_currentUser() throws Exception {
+        ConfigurationInternal currentUserConfig = CONFIG_AUTO_DISABLED_GEO_DISABLED;
+        // The strategy initializes itself with the current user's config during construction.
+        assertEquals(currentUserConfig,
+                mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+
+        TestStateChangeListener stateChangeListener = new TestStateChangeListener();
+        mTimeZoneDetectorStrategy.addChangeListener(stateChangeListener);
+
+        boolean bypassUserPolicyChecks = false;
+
+        // Report a config change, but not one that actually changes anything.
+        {
+            mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                    CONFIG_AUTO_DISABLED_GEO_DISABLED);
+            assertStateChangeNotificationsSent(stateChangeListener, 0);
+            assertEquals(CONFIG_AUTO_DISABLED_GEO_DISABLED,
+                    mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
+
+        // Report a config change that actually changes something.
+        {
+            mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                    CONFIG_AUTO_ENABLED_GEO_ENABLED);
+            assertStateChangeNotificationsSent(stateChangeListener, 1);
+            assertEquals(CONFIG_AUTO_ENABLED_GEO_ENABLED,
+                    mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
+
+        // Perform a (current user) update via the strategy.
+        {
+            TimeZoneConfiguration requestedChanges =
+                    new TimeZoneConfiguration.Builder().setGeoDetectionEnabled(false).build();
+            mTimeZoneDetectorStrategy.updateConfiguration(
+                    USER_ID, requestedChanges, bypassUserPolicyChecks);
+            assertStateChangeNotificationsSent(stateChangeListener, 1);
+        }
+    }
+
+    // Perform a (not current user) update via the strategy. There's no listener behavior for
+    // updates to "other" users.
+    @Test
+    public void testChangeListenerBehavior_otherUser() throws Exception {
+        ConfigurationInternal currentUserConfig = CONFIG_AUTO_DISABLED_GEO_DISABLED;
+        // The strategy initializes itself with the current user's config during construction.
+        assertEquals(currentUserConfig,
+                mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+
+        TestStateChangeListener stateChangeListener = new TestStateChangeListener();
+        mTimeZoneDetectorStrategy.addChangeListener(stateChangeListener);
+
+        boolean bypassUserPolicyChecks = false;
+
+        int otherUserId = currentUserConfig.getUserId() + 1;
+        ConfigurationInternal otherUserConfig = new ConfigurationInternal.Builder(currentUserConfig)
+                .setUserId(otherUserId)
+                .setGeoDetectionEnabledSetting(true)
+                .build();
+        mFakeServiceConfigAccessorSpy.initializeOtherUserConfiguration(otherUserConfig);
+
+        TimeZoneConfiguration requestedChanges =
+                new TimeZoneConfiguration.Builder().setGeoDetectionEnabled(false).build();
+        mTimeZoneDetectorStrategy.updateConfiguration(
+                otherUserId, requestedChanges, bypassUserPolicyChecks);
+
+        // Only changes to the current user's config are notified.
+        assertStateChangeNotificationsSent(stateChangeListener, 0);
+    }
+
+    // Current user behavior: the strategy caches and returns the latest configuration.
+    @Test
+    public void testReadAndWriteConfiguration_currentUser() throws Exception {
+        ConfigurationInternal currentUserConfig = CONFIG_AUTO_ENABLED_GEO_DISABLED;
+        mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                currentUserConfig);
+
+        int otherUserId = currentUserConfig.getUserId() + 1;
+        ConfigurationInternal otherUserConfig = new ConfigurationInternal.Builder(currentUserConfig)
+                .setUserId(otherUserId)
+                .setGeoDetectionEnabledSetting(true)
+                .build();
+        mFakeServiceConfigAccessorSpy.simulateOtherUserConfigurationInternalChange(otherUserConfig);
+        reset(mFakeServiceConfigAccessorSpy);
+
+        final boolean bypassUserPolicyChecks = false;
+
+        ConfigurationInternal cachedConfigurationInternal =
+                mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests();
+        assertEquals(currentUserConfig, cachedConfigurationInternal);
+
+        // Confirm getCapabilitiesAndConfig() does not call through to the ServiceConfigAccessor.
+        {
+            reset(mFakeServiceConfigAccessorSpy);
+            TimeZoneCapabilitiesAndConfig actualCapabilitiesAndConfig =
+                    mTimeZoneDetectorStrategy.getCapabilitiesAndConfig(
+                            currentUserConfig.getUserId(), bypassUserPolicyChecks);
+            verify(mFakeServiceConfigAccessorSpy, never()).getConfigurationInternal(
+                    currentUserConfig.getUserId());
+
+            assertEquals(currentUserConfig.asCapabilities(bypassUserPolicyChecks),
+                    actualCapabilitiesAndConfig.getCapabilities());
+            assertEquals(currentUserConfig.asConfiguration(),
+                    actualCapabilitiesAndConfig.getConfiguration());
+        }
+
+        // Confirm updateConfiguration() calls through to the ServiceConfigAccessor and updates
+        // the cached copy.
+        {
+            boolean newGeoDetectionEnabled =
+                    !cachedConfigurationInternal.asConfiguration().isGeoDetectionEnabled();
+            TimeZoneConfiguration requestedChanges = new TimeZoneConfiguration.Builder()
+                    .setGeoDetectionEnabled(newGeoDetectionEnabled)
+                    .build();
+            ConfigurationInternal expectedConfigAfterChange =
+                    new ConfigurationInternal.Builder(cachedConfigurationInternal)
+                            .setGeoDetectionEnabledSetting(newGeoDetectionEnabled)
+                            .build();
+
+            reset(mFakeServiceConfigAccessorSpy);
+            mTimeZoneDetectorStrategy.updateConfiguration(
+                    currentUserConfig.getUserId(), requestedChanges, bypassUserPolicyChecks);
+            verify(mFakeServiceConfigAccessorSpy, times(1)).updateConfiguration(
+                    currentUserConfig.getUserId(), requestedChanges, bypassUserPolicyChecks);
+            assertEquals(expectedConfigAfterChange,
+                    mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
+    }
+
+    // Not current user behavior: the strategy reads from the ServiceConfigAccessor.
+    @Test
+    public void testReadAndWriteConfiguration_otherUser() throws Exception {
+        ConfigurationInternal currentUserConfig = CONFIG_AUTO_ENABLED_GEO_DISABLED;
+        mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                currentUserConfig);
+
+        int otherUserId = currentUserConfig.getUserId() + 1;
+        ConfigurationInternal otherUserConfig = new ConfigurationInternal.Builder(currentUserConfig)
+                .setUserId(otherUserId)
+                .setGeoDetectionEnabledSetting(true)
+                .build();
+        mFakeServiceConfigAccessorSpy.simulateOtherUserConfigurationInternalChange(otherUserConfig);
+        reset(mFakeServiceConfigAccessorSpy);
+
+        final boolean bypassUserPolicyChecks = false;
+
+        // Confirm getCapabilitiesAndConfig() does not call through to the ServiceConfigAccessor.
+        {
+            reset(mFakeServiceConfigAccessorSpy);
+            TimeZoneCapabilitiesAndConfig actualCapabilitiesAndConfig =
+                    mTimeZoneDetectorStrategy.getCapabilitiesAndConfig(
+                            otherUserId, bypassUserPolicyChecks);
+            verify(mFakeServiceConfigAccessorSpy, times(1)).getConfigurationInternal(otherUserId);
+
+            assertEquals(otherUserConfig.asCapabilities(bypassUserPolicyChecks),
+                    actualCapabilitiesAndConfig.getCapabilities());
+            assertEquals(otherUserConfig.asConfiguration(),
+                    actualCapabilitiesAndConfig.getConfiguration());
+        }
+
+        // Confirm updateConfiguration() calls through to the ServiceConfigAccessor and doesn't
+        // touch the cached copy.
+        {
+            ConfigurationInternal cachedConfigBeforeChange =
+                    mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests();
+            boolean newGeoDetectionEnabled =
+                    !otherUserConfig.asConfiguration().isGeoDetectionEnabled();
+            TimeZoneConfiguration requestedChanges = new TimeZoneConfiguration.Builder()
+                    .setGeoDetectionEnabled(newGeoDetectionEnabled)
+                    .build();
+
+            reset(mFakeServiceConfigAccessorSpy);
+            mTimeZoneDetectorStrategy.updateConfiguration(
+                    currentUserConfig.getUserId(), requestedChanges, bypassUserPolicyChecks);
+            verify(mFakeServiceConfigAccessorSpy, times(1)).updateConfiguration(
+                    currentUserConfig.getUserId(), requestedChanges, bypassUserPolicyChecks);
+            assertEquals(cachedConfigBeforeChange,
+                    mTimeZoneDetectorStrategy.getCachedCapabilitiesAndConfigForTests());
+        }
     }
 
     @Test
@@ -180,7 +409,7 @@ public class TimeZoneDetectorStrategyImplTest {
         TelephonyTimeZoneSuggestion slotIndex2TimeZoneSuggestion =
                 createEmptySlotIndex2Suggestion();
         Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED_GEO_DISABLED)
                 .resetConfigurationTracking();
 
@@ -191,9 +420,9 @@ public class TimeZoneDetectorStrategyImplTest {
         QualifiedTelephonyTimeZoneSuggestion expectedSlotIndex1ScoredSuggestion =
                 new QualifiedTelephonyTimeZoneSuggestion(slotIndex1TimeZoneSuggestion,
                         TELEPHONY_SCORE_NONE);
-        assertEquals(expectedSlotIndex1ScoredSuggestion,
-                mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
-        assertNull(mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX2));
+        script.verifyLatestQualifiedTelephonySuggestionReceived(
+                SLOT_INDEX1, expectedSlotIndex1ScoredSuggestion)
+                .verifyLatestQualifiedTelephonySuggestionReceived(SLOT_INDEX2, null);
         assertEquals(expectedSlotIndex1ScoredSuggestion,
                 mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
 
@@ -204,10 +433,10 @@ public class TimeZoneDetectorStrategyImplTest {
         QualifiedTelephonyTimeZoneSuggestion expectedSlotIndex2ScoredSuggestion =
                 new QualifiedTelephonyTimeZoneSuggestion(slotIndex2TimeZoneSuggestion,
                         TELEPHONY_SCORE_NONE);
-        assertEquals(expectedSlotIndex1ScoredSuggestion,
-                mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
-        assertEquals(expectedSlotIndex2ScoredSuggestion,
-                mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX2));
+        script.verifyLatestQualifiedTelephonySuggestionReceived(
+                        SLOT_INDEX1, expectedSlotIndex1ScoredSuggestion)
+                .verifyLatestQualifiedTelephonySuggestionReceived(
+                        SLOT_INDEX2, expectedSlotIndex2ScoredSuggestion);
         // SlotIndex1 should always beat slotIndex2, all other things being equal.
         assertEquals(expectedSlotIndex1ScoredSuggestion,
                 mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
@@ -242,8 +471,8 @@ public class TimeZoneDetectorStrategyImplTest {
             QualifiedTelephonyTimeZoneSuggestion expectedScoredSuggestion =
                     new QualifiedTelephonyTimeZoneSuggestion(
                             lowQualitySuggestion, testCase.expectedScore);
-            assertEquals(expectedScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
+            script.verifyLatestQualifiedTelephonySuggestionReceived(
+                    SLOT_INDEX1, expectedScoredSuggestion);
             assertEquals(expectedScoredSuggestion,
                     mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
         }
@@ -259,8 +488,8 @@ public class TimeZoneDetectorStrategyImplTest {
             QualifiedTelephonyTimeZoneSuggestion expectedScoredSuggestion =
                     new QualifiedTelephonyTimeZoneSuggestion(
                             goodQualitySuggestion, testCase2.expectedScore);
-            assertEquals(expectedScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
+            script.verifyLatestQualifiedTelephonySuggestionReceived(
+                    SLOT_INDEX1, expectedScoredSuggestion);
             assertEquals(expectedScoredSuggestion,
                     mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
         }
@@ -276,8 +505,8 @@ public class TimeZoneDetectorStrategyImplTest {
             QualifiedTelephonyTimeZoneSuggestion expectedScoredSuggestion =
                     new QualifiedTelephonyTimeZoneSuggestion(
                             lowQualitySuggestion2, testCase.expectedScore);
-            assertEquals(expectedScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
+            script.verifyLatestQualifiedTelephonySuggestionReceived(
+                    SLOT_INDEX1, expectedScoredSuggestion);
             assertEquals(expectedScoredSuggestion,
                     mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
         }
@@ -293,7 +522,7 @@ public class TimeZoneDetectorStrategyImplTest {
 
         for (TelephonyTestCase testCase : TELEPHONY_TEST_CASES) {
             // Start with the device in a known state.
-            script.initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+            script.initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                     .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED_GEO_DISABLED)
                     .resetConfigurationTracking();
 
@@ -308,8 +537,8 @@ public class TimeZoneDetectorStrategyImplTest {
             // Assert internal service state.
             QualifiedTelephonyTimeZoneSuggestion expectedScoredSuggestion =
                     new QualifiedTelephonyTimeZoneSuggestion(suggestion, testCase.expectedScore);
-            assertEquals(expectedScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
+            script.verifyLatestQualifiedTelephonySuggestionReceived(
+                    SLOT_INDEX1, expectedScoredSuggestion);
             assertEquals(expectedScoredSuggestion,
                     mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
 
@@ -325,8 +554,8 @@ public class TimeZoneDetectorStrategyImplTest {
             }
 
             // Assert internal service state.
-            assertEquals(expectedScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
+            script.verifyLatestQualifiedTelephonySuggestionReceived(
+                    SLOT_INDEX1, expectedScoredSuggestion);
             assertEquals(expectedScoredSuggestion,
                     mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
 
@@ -335,8 +564,8 @@ public class TimeZoneDetectorStrategyImplTest {
                     .verifyTimeZoneNotChanged();
 
             // Assert internal service state.
-            assertEquals(expectedScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
+            script.verifyLatestQualifiedTelephonySuggestionReceived(
+                    SLOT_INDEX1, expectedScoredSuggestion);
             assertEquals(expectedScoredSuggestion,
                     mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
         }
@@ -345,7 +574,7 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testTelephonySuggestionsSingleSlotId() {
         Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED_GEO_DISABLED)
                 .resetConfigurationTracking();
 
@@ -387,8 +616,8 @@ public class TimeZoneDetectorStrategyImplTest {
         }
 
         // Assert internal service state.
-        assertEquals(expectedZoneSlotIndex1ScoredSuggestion,
-                mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
+        script.verifyLatestQualifiedTelephonySuggestionReceived(
+                SLOT_INDEX1, expectedZoneSlotIndex1ScoredSuggestion);
         assertEquals(expectedZoneSlotIndex1ScoredSuggestion,
                 mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
     }
@@ -411,7 +640,7 @@ public class TimeZoneDetectorStrategyImplTest {
                         TELEPHONY_SCORE_NONE);
 
         Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED_GEO_DISABLED)
                 .resetConfigurationTracking()
 
@@ -442,10 +671,10 @@ public class TimeZoneDetectorStrategyImplTest {
             }
 
             // Assert internal service state.
-            assertEquals(expectedZoneSlotIndex1ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
-            assertEquals(expectedEmptySlotIndex2ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX2));
+            script.verifyLatestQualifiedTelephonySuggestionReceived(
+                    SLOT_INDEX1, expectedZoneSlotIndex1ScoredSuggestion)
+                    .verifyLatestQualifiedTelephonySuggestionReceived(
+                            SLOT_INDEX2, expectedEmptySlotIndex2ScoredSuggestion);
             assertEquals(expectedZoneSlotIndex1ScoredSuggestion,
                     mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
 
@@ -455,10 +684,10 @@ public class TimeZoneDetectorStrategyImplTest {
             script.verifyTimeZoneNotChanged();
 
             // Assert internal service state.
-            assertEquals(expectedZoneSlotIndex1ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
-            assertEquals(expectedZoneSlotIndex2ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX2));
+            script.verifyLatestQualifiedTelephonySuggestionReceived(
+                            SLOT_INDEX1, expectedZoneSlotIndex1ScoredSuggestion)
+                    .verifyLatestQualifiedTelephonySuggestionReceived(
+                            SLOT_INDEX2, expectedZoneSlotIndex2ScoredSuggestion);
             // SlotIndex1 should always beat slotIndex2, all other things being equal.
             assertEquals(expectedZoneSlotIndex1ScoredSuggestion,
                     mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
@@ -474,20 +703,20 @@ public class TimeZoneDetectorStrategyImplTest {
             }
 
             // Assert internal service state.
-            assertEquals(expectedEmptySlotIndex1ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
-            assertEquals(expectedZoneSlotIndex2ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX2));
+            script.verifyLatestQualifiedTelephonySuggestionReceived(
+                            SLOT_INDEX1, expectedEmptySlotIndex1ScoredSuggestion)
+                    .verifyLatestQualifiedTelephonySuggestionReceived(
+                            SLOT_INDEX2, expectedZoneSlotIndex2ScoredSuggestion);
             assertEquals(expectedZoneSlotIndex2ScoredSuggestion,
                     mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
 
             // Reset the state for the next loop.
             script.simulateTelephonyTimeZoneSuggestion(emptySlotIndex2Suggestion)
                     .verifyTimeZoneNotChanged();
-            assertEquals(expectedEmptySlotIndex1ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
-            assertEquals(expectedEmptySlotIndex2ScoredSuggestion,
-                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX2));
+            script.verifyLatestQualifiedTelephonySuggestionReceived(
+                            SLOT_INDEX1, expectedEmptySlotIndex1ScoredSuggestion)
+                    .verifyLatestQualifiedTelephonySuggestionReceived(
+                            SLOT_INDEX2, expectedEmptySlotIndex2ScoredSuggestion);
         }
     }
 
@@ -550,60 +779,15 @@ public class TimeZoneDetectorStrategyImplTest {
                         .setGeoDetectionEnabledSetting(geoDetectionEnabled)
                         .build();
         Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(geoTzEnabledConfig)
                 .resetConfigurationTracking();
 
         // Auto time zone detection is enabled so the manual suggestion should be ignored.
-        script.simulateManualTimeZoneSuggestion(
-                USER_ID, createManualSuggestion("Europe/Paris"), false /* expectedResult */)
-                .verifyTimeZoneNotChanged();
-
-        assertNull(mTimeZoneDetectorStrategy.getLatestManualSuggestion());
-    }
-
-    @Test
-    public void testManualSuggestion_restricted_simulateAutoTimeZoneEnabled() {
-        Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
-                .simulateConfigurationInternalChange(CONFIG_USER_RESTRICTED_AUTO_ENABLED)
-                .resetConfigurationTracking();
-
-        // User is restricted so the manual suggestion should be ignored.
-        script.simulateManualTimeZoneSuggestion(
-                USER_ID, createManualSuggestion("Europe/Paris"), false /* expectedResult */)
-                .verifyTimeZoneNotChanged();
-
-        assertNull(mTimeZoneDetectorStrategy.getLatestManualSuggestion());
-    }
-
-    @Test
-    public void testManualSuggestion_unrestricted_autoTimeZoneDetectionDisabled() {
-        Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED_GEO_DISABLED)
-                .resetConfigurationTracking();
-
-        // Auto time zone detection is disabled so the manual suggestion should be used.
-        ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
-        script.simulateManualTimeZoneSuggestion(
-                USER_ID, manualSuggestion, true /* expectedResult */)
-            .verifyTimeZoneChangedAndReset(manualSuggestion);
-
-        assertEquals(manualSuggestion, mTimeZoneDetectorStrategy.getLatestManualSuggestion());
-    }
-
-    @Test
-    public void testManualSuggestion_restricted_autoTimeZoneDetectionDisabled() {
-        Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
-                .simulateConfigurationInternalChange(CONFIG_USER_RESTRICTED_AUTO_DISABLED)
-                .resetConfigurationTracking();
-
-        // Restricted users do not have the capability.
-        ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
-        script.simulateManualTimeZoneSuggestion(
-                USER_ID, manualSuggestion, false /* expectedResult */)
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = false;
+        script.simulateManualTimeZoneSuggestion(USER_ID, createManualSuggestion("Europe/Paris"),
+                        bypassUserPolicyChecks, expectedResult)
                 .verifyTimeZoneNotChanged();
 
         assertNull(mTimeZoneDetectorStrategy.getLatestManualSuggestion());
@@ -612,67 +796,249 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testManualSuggestion_autoDetectNotSupported() {
         Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(CONFIG_AUTO_DETECT_NOT_SUPPORTED)
                 .resetConfigurationTracking();
 
         // Unrestricted users have the capability.
         ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = true;
         script.simulateManualTimeZoneSuggestion(
-                USER_ID, manualSuggestion, true /* expectedResult */)
+                USER_ID, manualSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifyTimeZoneChangedAndReset(manualSuggestion);
 
         assertEquals(manualSuggestion, mTimeZoneDetectorStrategy.getLatestManualSuggestion());
     }
 
     @Test
-    public void testGeoSuggestion_uncertain() {
+    @Parameters({ "true,true", "true,false", "false,true", "false,false" })
+    public void testManualSuggestion_autoTimeEnabled_userRestrictions(
+            boolean userConfigAllowed, boolean bypassUserPolicyChecks) {
+        ConfigurationInternal config =
+                new ConfigurationInternal.Builder(CONFIG_USER_RESTRICTED_AUTO_ENABLED)
+                        .setUserConfigAllowed(userConfigAllowed)
+                        .build();
         Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED_GEO_ENABLED)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(config)
                 .resetConfigurationTracking();
 
-        GeolocationTimeZoneSuggestion uncertainSuggestion = createUncertainGeolocationSuggestion();
-
-        script.simulateGeolocationTimeZoneSuggestion(uncertainSuggestion)
+        // User is restricted so the manual suggestion should be ignored.
+        boolean expectedResult = false;
+        script.simulateManualTimeZoneSuggestion(USER_ID, createManualSuggestion("Europe/Paris"),
+                        bypassUserPolicyChecks, expectedResult)
                 .verifyTimeZoneNotChanged();
 
-        // Assert internal service state.
-        assertEquals(uncertainSuggestion,
-                mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
+        assertNull(mTimeZoneDetectorStrategy.getLatestManualSuggestion());
     }
 
     @Test
-    public void testGeoSuggestion_noZones() {
+    @Parameters({ "true,true", "true,false", "false,true", "false,false" })
+    public void testManualSuggestion_autoTimeDisabled_userRestrictions(
+            boolean userConfigAllowed, boolean bypassUserPolicyChecks) {
+        ConfigurationInternal config =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED_GEO_DISABLED)
+                        .setUserConfigAllowed(userConfigAllowed)
+                        .build();
         Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED_GEO_ENABLED)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(config)
                 .resetConfigurationTracking();
 
-        GeolocationTimeZoneSuggestion noZonesSuggestion = createCertainGeolocationSuggestion();
-
-        script.simulateGeolocationTimeZoneSuggestion(noZonesSuggestion)
-                .verifyTimeZoneNotChanged();
-
-        // Assert internal service state.
-        assertEquals(noZonesSuggestion, mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
+        ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Europe/Paris");
+        boolean expectedResult = userConfigAllowed || bypassUserPolicyChecks;
+        script.simulateManualTimeZoneSuggestion(
+                        USER_ID, manualSuggestion, bypassUserPolicyChecks, expectedResult);
+        if (expectedResult) {
+            script.verifyTimeZoneChangedAndReset(manualSuggestion);
+            assertEquals(manualSuggestion, mTimeZoneDetectorStrategy.getLatestManualSuggestion());
+        } else {
+            script.verifyTimeZoneNotChanged();
+            assertNull(mTimeZoneDetectorStrategy.getLatestManualSuggestion());
+        }
     }
 
     @Test
-    public void testGeoSuggestion_oneZone() {
-        GeolocationTimeZoneSuggestion suggestion =
-                createCertainGeolocationSuggestion("Europe/London");
-
+    public void testLocationAlgorithmEvent_statusChangesOnly() {
+        TestStateChangeListener stateChangeListener = new TestStateChangeListener();
         Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED_GEO_ENABLED)
-                .resetConfigurationTracking();
+                .resetConfigurationTracking()
+                .registerStateChangeListener(stateChangeListener);
 
-        script.simulateGeolocationTimeZoneSuggestion(suggestion)
-                .verifyTimeZoneChangedAndReset(suggestion);
+        TimeZoneDetectorStatus expectedInitialDetectorStatus = new TimeZoneDetectorStatus(
+                DETECTOR_STATUS_RUNNING,
+                TELEPHONY_ALGORITHM_RUNNING_STATUS,
+                LocationTimeZoneAlgorithmStatus.RUNNING_NOT_REPORTED);
+        script.verifyCachedDetectorStatus(expectedInitialDetectorStatus);
+
+        LocationTimeZoneAlgorithmStatus algorithmStatus1 = new LocationTimeZoneAlgorithmStatus(
+                DETECTION_ALGORITHM_STATUS_RUNNING, PROVIDER_STATUS_NOT_READY, null,
+                PROVIDER_STATUS_NOT_PRESENT, null);
+        LocationTimeZoneAlgorithmStatus algorithmStatus2 = new LocationTimeZoneAlgorithmStatus(
+                DETECTION_ALGORITHM_STATUS_RUNNING, PROVIDER_STATUS_NOT_PRESENT, null,
+                PROVIDER_STATUS_NOT_PRESENT, null);
+        assertNotEquals(algorithmStatus1, algorithmStatus2);
+
+        {
+            LocationAlgorithmEvent locationAlgorithmEvent =
+                    new LocationAlgorithmEvent(algorithmStatus1, null);
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneNotChanged();
+
+            assertStateChangeNotificationsSent(stateChangeListener, 1);
+
+            // Assert internal service state.
+            TimeZoneDetectorStatus expectedDetectorStatus = new TimeZoneDetectorStatus(
+                    DETECTOR_STATUS_RUNNING,
+                    TELEPHONY_ALGORITHM_RUNNING_STATUS,
+                    algorithmStatus1);
+            script.verifyCachedDetectorStatus(expectedDetectorStatus)
+                    .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
+
+            // Repeat the event to demonstrate the state change notifier is not triggered.
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneNotChanged();
+
+            assertStateChangeNotificationsSent(stateChangeListener, 0);
+
+            // Assert internal service state.
+            script.verifyCachedDetectorStatus(expectedDetectorStatus)
+                    .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
+        }
+
+        {
+            LocationAlgorithmEvent locationAlgorithmEvent =
+                    new LocationAlgorithmEvent(algorithmStatus2, null);
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneNotChanged();
+
+            assertStateChangeNotificationsSent(stateChangeListener, 1);
+
+            // Assert internal service state.
+            TimeZoneDetectorStatus expectedDetectorStatus = new TimeZoneDetectorStatus(
+                    DETECTOR_STATUS_RUNNING,
+                    TELEPHONY_ALGORITHM_RUNNING_STATUS,
+                    algorithmStatus2);
+            script.verifyCachedDetectorStatus(expectedDetectorStatus)
+                    .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
+
+            // Repeat the event to demonstrate the state change notifier is not triggered.
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneNotChanged();
+
+            assertStateChangeNotificationsSent(stateChangeListener, 0);
+
+            // Assert internal service state.
+            script.verifyCachedDetectorStatus(expectedDetectorStatus)
+                    .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
+        }
+    }
+
+    @Test
+    public void testLocationAlgorithmEvent_uncertain() {
+        TestStateChangeListener stateChangeListener = new TestStateChangeListener();
+        Script script = new Script()
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED_GEO_ENABLED)
+                .resetConfigurationTracking()
+                .registerStateChangeListener(stateChangeListener);
+
+        LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
+        script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                .verifyTimeZoneNotChanged();
+
+        assertStateChangeNotificationsSent(stateChangeListener, 1);
 
         // Assert internal service state.
-        assertEquals(suggestion, mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
+        TimeZoneDetectorStatus expectedDetectorStatus = new TimeZoneDetectorStatus(
+                DETECTOR_STATUS_RUNNING,
+                TELEPHONY_ALGORITHM_RUNNING_STATUS,
+                locationAlgorithmEvent.getAlgorithmStatus());
+        script.verifyCachedDetectorStatus(expectedDetectorStatus)
+                .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
+
+        // Repeat the event to demonstrate the state change notifier is not triggered.
+        script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                .verifyTimeZoneNotChanged();
+
+        // Detector remains running and location algorithm is still uncertain so nothing to report.
+        assertStateChangeNotificationsSent(stateChangeListener, 0);
+
+        // Assert internal service state.
+        script.verifyCachedDetectorStatus(expectedDetectorStatus)
+                .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
+    }
+
+    @Test
+    public void testLocationAlgorithmEvent_noZones() {
+        TestStateChangeListener stateChangeListener = new TestStateChangeListener();
+        Script script = new Script()
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED_GEO_ENABLED)
+                .resetConfigurationTracking()
+                .registerStateChangeListener(stateChangeListener);
+
+        LocationAlgorithmEvent locationAlgorithmEvent = createCertainLocationAlgorithmEvent();
+        script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                .verifyTimeZoneNotChanged();
+
+        assertStateChangeNotificationsSent(stateChangeListener, 1);
+
+        // Assert internal service state.
+        TimeZoneDetectorStatus expectedDetectorStatus = new TimeZoneDetectorStatus(
+                DETECTOR_STATUS_RUNNING,
+                TELEPHONY_ALGORITHM_RUNNING_STATUS,
+                locationAlgorithmEvent.getAlgorithmStatus());
+        script.verifyCachedDetectorStatus(expectedDetectorStatus)
+                .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
+
+        // Repeat the event to demonstrate the state change notifier is not triggered.
+        script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                .verifyTimeZoneNotChanged();
+
+        assertStateChangeNotificationsSent(stateChangeListener, 0);
+
+        // Assert internal service state.
+        script.verifyCachedDetectorStatus(expectedDetectorStatus)
+                .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
+    }
+
+    @Test
+    public void testLocationAlgorithmEvent_oneZone() {
+        TestStateChangeListener stateChangeListener = new TestStateChangeListener();
+        Script script = new Script()
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED_GEO_ENABLED)
+                .resetConfigurationTracking()
+                .registerStateChangeListener(stateChangeListener);
+
+        LocationAlgorithmEvent locationAlgorithmEvent =
+                createCertainLocationAlgorithmEvent("Europe/London");
+        script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                .verifyTimeZoneChangedAndReset(locationAlgorithmEvent);
+
+        assertStateChangeNotificationsSent(stateChangeListener, 1);
+
+        // Assert internal service state.
+        TimeZoneDetectorStatus expectedDetectorStatus = new TimeZoneDetectorStatus(
+                DETECTOR_STATUS_RUNNING,
+                TELEPHONY_ALGORITHM_RUNNING_STATUS,
+                locationAlgorithmEvent.getAlgorithmStatus());
+        script.verifyCachedDetectorStatus(expectedDetectorStatus)
+                .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
+
+        // Repeat the event to demonstrate the state change notifier is not triggered.
+        script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                .verifyTimeZoneNotChanged();
+
+        assertStateChangeNotificationsSent(stateChangeListener, 0);
+
+        // Assert internal service state.
+        script.verifyCachedDetectorStatus(expectedDetectorStatus)
+                .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
     }
 
     /**
@@ -681,41 +1047,35 @@ public class TimeZoneDetectorStrategyImplTest {
      * set to until that unambiguously can't be correct.
      */
     @Test
-    public void testGeoSuggestion_multiZone() {
-        GeolocationTimeZoneSuggestion londonOnlySuggestion =
-                createCertainGeolocationSuggestion("Europe/London");
-        GeolocationTimeZoneSuggestion londonOrParisSuggestion =
-                createCertainGeolocationSuggestion("Europe/Paris", "Europe/London");
-        GeolocationTimeZoneSuggestion parisOnlySuggestion =
-                createCertainGeolocationSuggestion("Europe/Paris");
-
+    public void testLocationAlgorithmEvent_multiZone() {
         Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED_GEO_ENABLED)
                 .resetConfigurationTracking();
 
-        script.simulateGeolocationTimeZoneSuggestion(londonOnlySuggestion)
-                .verifyTimeZoneChangedAndReset(londonOnlySuggestion);
-        assertEquals(londonOnlySuggestion,
-                mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
+        LocationAlgorithmEvent londonOnlyEvent =
+                createCertainLocationAlgorithmEvent("Europe/London");
+        script.simulateLocationAlgorithmEvent(londonOnlyEvent)
+                .verifyTimeZoneChangedAndReset(londonOnlyEvent)
+                .verifyLatestLocationAlgorithmEventReceived(londonOnlyEvent);
 
         // Confirm bias towards the current device zone when there's multiple zones to choose from.
-        script.simulateGeolocationTimeZoneSuggestion(londonOrParisSuggestion)
-                .verifyTimeZoneNotChanged();
-        assertEquals(londonOrParisSuggestion,
-                mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
+        LocationAlgorithmEvent londonOrParisEvent =
+                createCertainLocationAlgorithmEvent("Europe/Paris", "Europe/London");
+        script.simulateLocationAlgorithmEvent(londonOrParisEvent)
+                .verifyTimeZoneNotChanged()
+                .verifyLatestLocationAlgorithmEventReceived(londonOrParisEvent);
 
-        script.simulateGeolocationTimeZoneSuggestion(parisOnlySuggestion)
-                .verifyTimeZoneChangedAndReset(parisOnlySuggestion);
-        assertEquals(parisOnlySuggestion,
-                mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
+        LocationAlgorithmEvent parisOnlyEvent = createCertainLocationAlgorithmEvent("Europe/Paris");
+        script.simulateLocationAlgorithmEvent(parisOnlyEvent)
+                .verifyTimeZoneChangedAndReset(parisOnlyEvent)
+                .verifyLatestLocationAlgorithmEventReceived(parisOnlyEvent);
 
         // Now the suggestion that previously left the device on Europe/London will leave the device
         // on Europe/Paris.
-        script.simulateGeolocationTimeZoneSuggestion(londonOrParisSuggestion)
-                .verifyTimeZoneNotChanged();
-        assertEquals(londonOrParisSuggestion,
-                mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
+        script.simulateLocationAlgorithmEvent(londonOrParisEvent)
+                .verifyTimeZoneNotChanged()
+                .verifyLatestLocationAlgorithmEventReceived(londonOrParisEvent);
     }
 
     /**
@@ -724,29 +1084,32 @@ public class TimeZoneDetectorStrategyImplTest {
      */
     @Test
     public void testChangingGeoDetectionEnabled() {
-        GeolocationTimeZoneSuggestion geolocationSuggestion =
-                createCertainGeolocationSuggestion("Europe/London");
+        TestStateChangeListener stateChangeListener = new TestStateChangeListener();
+        LocationAlgorithmEvent locationAlgorithmEvent =
+                createCertainLocationAlgorithmEvent("Europe/London");
         TelephonyTimeZoneSuggestion telephonySuggestion = createTelephonySuggestion(
                 SLOT_INDEX1, MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
                 "Europe/Paris");
 
         Script script = new Script()
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED_GEO_DISABLED)
-                .resetConfigurationTracking();
+                .resetConfigurationTracking()
+                .registerStateChangeListener(stateChangeListener);
 
         // Add suggestions. Nothing should happen as time zone detection is disabled.
-        script.simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
-                .verifyTimeZoneNotChanged();
+        script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                .verifyTimeZoneNotChanged()
+                .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
 
-        assertEquals(geolocationSuggestion,
-                mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
+        // A detector status change is considered a "state change".
+        assertStateChangeNotificationsSent(stateChangeListener, 1);
 
         script.simulateTelephonyTimeZoneSuggestion(telephonySuggestion)
-                .verifyTimeZoneNotChanged();
+                .verifyTimeZoneNotChanged()
+                .verifyLatestTelephonySuggestionReceived(SLOT_INDEX1, telephonySuggestion);
 
-        assertEquals(telephonySuggestion,
-                mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1).suggestion);
+        assertStateChangeNotificationsSent(stateChangeListener, 0);
 
         // Toggling the time zone detection enabled setting on should cause the device setting to be
         // set from the telephony signal, as we've started with geolocation time zone detection
@@ -754,22 +1117,29 @@ public class TimeZoneDetectorStrategyImplTest {
         script.simulateSetAutoMode(true)
                 .verifyTimeZoneChangedAndReset(telephonySuggestion);
 
+        // A configuration change is considered a "state change".
+        assertStateChangeNotificationsSent(stateChangeListener, 1);
+
         // Changing the detection to enable geo detection will cause the device tz setting to
         // change to use the latest geolocation suggestion.
         script.simulateSetGeoDetectionEnabled(true)
-                .verifyTimeZoneChangedAndReset(geolocationSuggestion);
+                .verifyTimeZoneChangedAndReset(locationAlgorithmEvent);
+
+        // A configuration change is considered a "state change".
+        assertStateChangeNotificationsSent(stateChangeListener, 1);
 
         // Changing the detection to disable geo detection should cause the device tz setting to
         // change to the telephony suggestion.
         script.simulateSetGeoDetectionEnabled(false)
-                .verifyTimeZoneChangedAndReset(telephonySuggestion);
+                .verifyTimeZoneChangedAndReset(telephonySuggestion)
+                .verifyLatestLocationAlgorithmEventReceived(locationAlgorithmEvent);
 
-        assertEquals(geolocationSuggestion,
-                mTimeZoneDetectorStrategy.getLatestGeolocationSuggestion());
+        // A configuration change is considered a "state change".
+        assertStateChangeNotificationsSent(stateChangeListener, 1);
     }
 
     @Test
-    public void testTelephonyFallback() {
+    public void testTelephonyFallback_enableTelephonyTimeZoneFallbackCalled() {
         ConfigurationInternal config = new ConfigurationInternal.Builder(
                 CONFIG_AUTO_ENABLED_GEO_ENABLED)
                 .setTelephonyFallbackSupported(true)
@@ -777,7 +1147,7 @@ public class TimeZoneDetectorStrategyImplTest {
 
         Script script = new Script()
                 .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(config)
                 .resetConfigurationTracking();
 
@@ -799,21 +1169,22 @@ public class TimeZoneDetectorStrategyImplTest {
 
         // Receiving an "uncertain" geolocation suggestion should have no effect.
         {
-            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
-                    createUncertainGeolocationSuggestion();
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(true);
         }
 
         // Receiving a "certain" geolocation suggestion should disable telephony fallback mode.
         {
-            GeolocationTimeZoneSuggestion geolocationSuggestion =
-                    createCertainGeolocationSuggestion("Europe/London");
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
-                    .verifyTimeZoneChangedAndReset(geolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent =
+                    createCertainLocationAlgorithmEvent("Europe/London");
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneChangedAndReset(locationAlgorithmEvent)
                     .verifyTelephonyFallbackIsEnabled(false);
         }
 
@@ -836,22 +1207,24 @@ public class TimeZoneDetectorStrategyImplTest {
         // Geolocation suggestions should continue to be used as normal (previous telephony
         // suggestions are not used, even when the geolocation suggestion is uncertain).
         {
-            GeolocationTimeZoneSuggestion geolocationSuggestion =
-                    createCertainGeolocationSuggestion("Europe/Rome");
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
-                    .verifyTimeZoneChangedAndReset(geolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent certainLocationAlgorithmEvent =
+                    createCertainLocationAlgorithmEvent("Europe/Rome");
+            script.simulateLocationAlgorithmEvent(certainLocationAlgorithmEvent)
+                    .verifyTimeZoneChangedAndReset(certainLocationAlgorithmEvent)
                     .verifyTelephonyFallbackIsEnabled(false);
 
-            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
-                    createUncertainGeolocationSuggestion();
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent uncertainLocationAlgorithmEvent =
+                    createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(uncertainLocationAlgorithmEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(false);
 
             script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
+                    .simulateLocationAlgorithmEvent(certainLocationAlgorithmEvent)
                     // No change needed, device will already be set to Europe/Rome.
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(false);
@@ -868,21 +1241,22 @@ public class TimeZoneDetectorStrategyImplTest {
 
         // Make the geolocation algorithm uncertain.
         {
-            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
-                    createUncertainGeolocationSuggestion();
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneChangedAndReset(lastTelephonySuggestion)
                     .verifyTelephonyFallbackIsEnabled(true);
         }
 
         // Make the geolocation algorithm certain, disabling telephony fallback.
         {
-            GeolocationTimeZoneSuggestion geolocationSuggestion =
-                    createCertainGeolocationSuggestion("Europe/Lisbon");
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
-                    .verifyTimeZoneChangedAndReset(geolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent =
+                    createCertainLocationAlgorithmEvent("Europe/Lisbon");
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneChangedAndReset(locationAlgorithmEvent)
                     .verifyTelephonyFallbackIsEnabled(false);
 
         }
@@ -890,15 +1264,141 @@ public class TimeZoneDetectorStrategyImplTest {
         // Demonstrate what happens when geolocation is uncertain when telephony fallback is
         // enabled.
         {
-            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
-                    createUncertainGeolocationSuggestion();
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(false)
                     .simulateEnableTelephonyFallback()
                     .verifyTimeZoneChangedAndReset(lastTelephonySuggestion)
                     .verifyTelephonyFallbackIsEnabled(true);
+        }
+    }
+
+    @Test
+    public void testTelephonyFallback_locationAlgorithmEventSuggestsFallback() {
+        ConfigurationInternal config = new ConfigurationInternal.Builder(
+                CONFIG_AUTO_ENABLED_GEO_ENABLED)
+                .setTelephonyFallbackSupported(true)
+                .build();
+
+        Script script = new Script()
+                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(config)
+                .resetConfigurationTracking();
+
+        // Confirm initial state is as expected.
+        script.verifyTelephonyFallbackIsEnabled(true)
+                .verifyTimeZoneNotChanged();
+
+        // Although geolocation detection is enabled, telephony fallback should be used initially
+        // and until a suitable "certain" geolocation suggestion is received.
+        {
+            TelephonyTimeZoneSuggestion telephonySuggestion = createTelephonySuggestion(
+                    SLOT_INDEX1, MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
+                    "Europe/Paris");
+            script.simulateIncrementClock()
+                    .simulateTelephonyTimeZoneSuggestion(telephonySuggestion)
+                    .verifyTimeZoneChangedAndReset(telephonySuggestion)
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Receiving an "uncertain" geolocation suggestion without a status should have no effect.
+        {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Receiving a "certain" geolocation suggestion should disable telephony fallback mode.
+        {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent =
+                    createCertainLocationAlgorithmEvent("Europe/London");
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneChangedAndReset(locationAlgorithmEvent)
+                    .verifyTelephonyFallbackIsEnabled(false);
+        }
+
+        // Used to record the last telephony suggestion received, which will be used when fallback
+        // takes place.
+        TelephonyTimeZoneSuggestion lastTelephonySuggestion;
+
+        // Telephony suggestions should now be ignored and geolocation detection is "in control".
+        {
+            TelephonyTimeZoneSuggestion telephonySuggestion = createTelephonySuggestion(
+                    SLOT_INDEX1, MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET, QUALITY_SINGLE_ZONE,
+                    "Europe/Berlin");
+            script.simulateIncrementClock()
+                    .simulateTelephonyTimeZoneSuggestion(telephonySuggestion)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false);
+            lastTelephonySuggestion = telephonySuggestion;
+        }
+
+        // Geolocation suggestions should continue to be used as normal (previous telephony
+        // suggestions are not used, even when the geolocation suggestion is uncertain).
+        {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent certainLocationAlgorithmEvent =
+                    createCertainLocationAlgorithmEvent("Europe/Rome");
+            script.simulateLocationAlgorithmEvent(certainLocationAlgorithmEvent)
+                    .verifyTimeZoneChangedAndReset(certainLocationAlgorithmEvent)
+                    .verifyTelephonyFallbackIsEnabled(false);
+
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent uncertainLocationAlgorithmEvent =
+                    createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(uncertainLocationAlgorithmEvent)
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false);
+
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent certainLocationAlgorithmEvent2 =
+                    createCertainLocationAlgorithmEvent("Europe/Rome");
+            script.simulateLocationAlgorithmEvent(certainLocationAlgorithmEvent2)
+                    // No change needed, device will already be set to Europe/Rome.
+                    .verifyTimeZoneNotChanged()
+                    .verifyTelephonyFallbackIsEnabled(false);
+        }
+
+        // Enable telephony fallback via a LocationAlgorithmEvent containing an "uncertain"
+        // suggestion.
+        {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            TimeZoneProviderStatus primaryProviderReportedStatus =
+                    new TimeZoneProviderStatus.Builder()
+                            .setLocationDetectionDependencyStatus(
+                                    DEPENDENCY_STATUS_BLOCKED_BY_SETTINGS)
+                            .setConnectivityDependencyStatus(DEPENDENCY_STATUS_UNKNOWN)
+                            .setTimeZoneResolutionOperationStatus(OPERATION_STATUS_UNKNOWN)
+                            .build();
+            LocationAlgorithmEvent uncertainEventBlockedBySettings =
+                    createUncertainLocationAlgorithmEvent(primaryProviderReportedStatus);
+            script.simulateLocationAlgorithmEvent(uncertainEventBlockedBySettings)
+                    .verifyTimeZoneChangedAndReset(lastTelephonySuggestion)
+                    .verifyTelephonyFallbackIsEnabled(true);
+        }
+
+        // Make the geolocation algorithm certain, disabling telephony fallback.
+        {
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent =
+                    createCertainLocationAlgorithmEvent("Europe/Lisbon");
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
+                    .verifyTimeZoneChangedAndReset(locationAlgorithmEvent)
+                    .verifyTelephonyFallbackIsEnabled(false);
         }
     }
 
@@ -911,7 +1411,7 @@ public class TimeZoneDetectorStrategyImplTest {
 
         Script script = new Script()
                 .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
-                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(config)
                 .resetConfigurationTracking();
 
@@ -921,10 +1421,10 @@ public class TimeZoneDetectorStrategyImplTest {
 
         // Receiving an "uncertain" geolocation suggestion should have no effect.
         {
-            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
-                    createUncertainGeolocationSuggestion();
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(true);
         }
@@ -932,10 +1432,10 @@ public class TimeZoneDetectorStrategyImplTest {
         // Make an uncertain geolocation suggestion, there is no telephony suggestion to fall back
         // to
         {
-            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
-                    createUncertainGeolocationSuggestion();
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent locationAlgorithmEvent = createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(true);
         }
@@ -945,17 +1445,18 @@ public class TimeZoneDetectorStrategyImplTest {
         // Geolocation suggestions should continue to be used as normal (previous telephony
         // suggestions are not used, even when the geolocation suggestion is uncertain).
         {
-            GeolocationTimeZoneSuggestion geolocationSuggestion =
-                    createCertainGeolocationSuggestion("Europe/Rome");
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(geolocationSuggestion)
-                    .verifyTimeZoneChangedAndReset(geolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent certainEvent =
+                    createCertainLocationAlgorithmEvent("Europe/Rome");
+            script.simulateLocationAlgorithmEvent(certainEvent)
+                    .verifyTimeZoneChangedAndReset(certainEvent)
                     .verifyTelephonyFallbackIsEnabled(false);
 
-            GeolocationTimeZoneSuggestion uncertainGeolocationSuggestion =
-                    createUncertainGeolocationSuggestion();
-            script.simulateIncrementClock()
-                    .simulateGeolocationTimeZoneSuggestion(uncertainGeolocationSuggestion)
+            // Increment the clock before creating the event: the clock's value is used by the event
+            script.simulateIncrementClock();
+            LocationAlgorithmEvent uncertainEvent = createUncertainLocationAlgorithmEvent();
+            script.simulateLocationAlgorithmEvent(uncertainEvent)
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(false);
 
@@ -964,6 +1465,78 @@ public class TimeZoneDetectorStrategyImplTest {
                     .verifyTimeZoneNotChanged()
                     .verifyTelephonyFallbackIsEnabled(true);
         }
+    }
+
+    @Test
+    public void testGetTimeZoneState() {
+        Script script = new Script()
+                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED_GEO_DISABLED)
+                .resetConfigurationTracking();
+
+        String timeZoneId = "Europe/London";
+
+        // When confidence is low, the user should confirm.
+        script.initializeTimeZoneSetting(timeZoneId, TIME_ZONE_CONFIDENCE_LOW);
+        assertEquals(new TimeZoneState(timeZoneId, true),
+                mTimeZoneDetectorStrategy.getTimeZoneState());
+
+        // When confidence is high, no need for the user to confirm.
+        script.initializeTimeZoneSetting(timeZoneId, TIME_ZONE_CONFIDENCE_HIGH);
+
+        assertEquals(new TimeZoneState(timeZoneId, false),
+                mTimeZoneDetectorStrategy.getTimeZoneState());
+    }
+
+    @Test
+    public void testSetTimeZoneState() {
+        Script script = new Script()
+                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED_GEO_DISABLED)
+                .resetConfigurationTracking();
+
+        String timeZoneId = "Europe/London";
+        boolean userShouldConfirmId = false;
+        TimeZoneState state = new TimeZoneState(timeZoneId, userShouldConfirmId);
+        mTimeZoneDetectorStrategy.setTimeZoneState(state);
+
+        script.verifyTimeZoneChangedAndReset(timeZoneId, TIME_ZONE_CONFIDENCE_HIGH);
+        assertEquals(state, mTimeZoneDetectorStrategy.getTimeZoneState());
+    }
+
+    @Test
+    public void testConfirmTimeZone_autoDisabled() {
+        testConfirmTimeZone(CONFIG_AUTO_DISABLED_GEO_DISABLED);
+    }
+
+    @Test
+    public void testConfirmTimeZone_autoEnabled() {
+        testConfirmTimeZone(CONFIG_AUTO_ENABLED_GEO_DISABLED);
+    }
+
+    private void testConfirmTimeZone(ConfigurationInternal config) {
+        String timeZoneId = "Europe/London";
+        Script script = new Script()
+                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeTimeZoneSetting(timeZoneId, TIME_ZONE_CONFIDENCE_LOW)
+                .simulateConfigurationInternalChange(config)
+                .resetConfigurationTracking();
+
+        String incorrectTimeZoneId = "Europe/Paris";
+        assertFalse(mTimeZoneDetectorStrategy.confirmTimeZone(incorrectTimeZoneId));
+        script.verifyTimeZoneNotChanged();
+
+        assertTrue(mTimeZoneDetectorStrategy.confirmTimeZone(timeZoneId));
+        script.verifyTimeZoneChangedAndReset(timeZoneId, TIME_ZONE_CONFIDENCE_HIGH);
+
+        assertTrue(mTimeZoneDetectorStrategy.confirmTimeZone(timeZoneId));
+        // The strategy checks the current confidence and if it is already high it takes no action.
+        script.verifyTimeZoneNotChanged();
+
+        assertFalse(mTimeZoneDetectorStrategy.confirmTimeZone(incorrectTimeZoneId));
+        script.verifyTimeZoneNotChanged();
     }
 
     @Test
@@ -984,7 +1557,7 @@ public class TimeZoneDetectorStrategyImplTest {
         String expectedDeviceTimeZoneId = "InitialZoneId";
 
         Script script = new Script()
-                .initializeTimeZoneSetting(expectedDeviceTimeZoneId)
+                .initializeTimeZoneSetting(expectedDeviceTimeZoneId, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(expectedInternalConfig)
                 .resetConfigurationTracking();
 
@@ -993,8 +1566,10 @@ public class TimeZoneDetectorStrategyImplTest {
 
         // Make sure the manual suggestion is recorded.
         ManualTimeZoneSuggestion manualSuggestion = createManualSuggestion("Zone1");
-        script.simulateManualTimeZoneSuggestion(USER_ID, manualSuggestion,
-                true /* expectedResult */)
+        boolean bypassUserPolicyChecks = false;
+        boolean expectedResult = true;
+        script.simulateManualTimeZoneSuggestion(
+                USER_ID, manualSuggestion, bypassUserPolicyChecks, expectedResult)
                 .verifyTimeZoneChangedAndReset(manualSuggestion);
         expectedDeviceTimeZoneId = manualSuggestion.getZoneId();
         assertMetricsState(expectedInternalConfig, expectedDeviceTimeZoneId,
@@ -1005,15 +1580,15 @@ public class TimeZoneDetectorStrategyImplTest {
         TelephonyTimeZoneSuggestion telephonySuggestion =
                 createTelephonySuggestion(0 /* slotIndex */, MATCH_TYPE_NETWORK_COUNTRY_ONLY,
                         QUALITY_SINGLE_ZONE, "Zone2");
-        GeolocationTimeZoneSuggestion geolocationTimeZoneSuggestion =
-                createCertainGeolocationSuggestion("Zone3", "Zone2");
+        LocationAlgorithmEvent locationAlgorithmEvent =
+                createCertainLocationAlgorithmEvent("Zone3", "Zone2");
         script.simulateTelephonyTimeZoneSuggestion(telephonySuggestion)
                 .verifyTimeZoneNotChanged()
-                .simulateGeolocationTimeZoneSuggestion(geolocationTimeZoneSuggestion)
+                .simulateLocationAlgorithmEvent(locationAlgorithmEvent)
                 .verifyTimeZoneNotChanged();
 
         assertMetricsState(expectedInternalConfig, expectedDeviceTimeZoneId,
-                manualSuggestion, telephonySuggestion, geolocationTimeZoneSuggestion,
+                manualSuggestion, telephonySuggestion, locationAlgorithmEvent,
                 MetricsTimeZoneDetectorState.DETECTION_MODE_MANUAL);
 
         // Update the config and confirm that the config metrics state updates also.
@@ -1022,11 +1597,11 @@ public class TimeZoneDetectorStrategyImplTest {
                 .setGeoDetectionEnabledSetting(true)
                 .build();
 
-        expectedDeviceTimeZoneId = geolocationTimeZoneSuggestion.getZoneIds().get(0);
+        expectedDeviceTimeZoneId = locationAlgorithmEvent.getSuggestion().getZoneIds().get(0);
         script.simulateConfigurationInternalChange(expectedInternalConfig)
-                .verifyTimeZoneChangedAndReset(expectedDeviceTimeZoneId);
+                .verifyTimeZoneChangedAndReset(expectedDeviceTimeZoneId, TIME_ZONE_CONFIDENCE_HIGH);
         assertMetricsState(expectedInternalConfig, expectedDeviceTimeZoneId,
-                manualSuggestion, telephonySuggestion, geolocationTimeZoneSuggestion,
+                manualSuggestion, telephonySuggestion, locationAlgorithmEvent,
                 MetricsTimeZoneDetectorState.DETECTION_MODE_GEO);
     }
 
@@ -1038,7 +1613,7 @@ public class TimeZoneDetectorStrategyImplTest {
             ConfigurationInternal expectedInternalConfig,
             String expectedDeviceTimeZoneId, ManualTimeZoneSuggestion expectedManualSuggestion,
             TelephonyTimeZoneSuggestion expectedTelephonySuggestion,
-            GeolocationTimeZoneSuggestion expectedGeolocationTimeZoneSuggestion,
+            LocationAlgorithmEvent expectedLocationAlgorithmEvent,
             int expectedDetectionMode) {
 
         MetricsTimeZoneDetectorState actualState = mTimeZoneDetectorStrategy.generateMetricsState();
@@ -1051,7 +1626,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 MetricsTimeZoneDetectorState.create(
                         tzIdOrdinalGenerator, expectedInternalConfig, expectedDeviceTimeZoneId,
                         expectedManualSuggestion, expectedTelephonySuggestion,
-                        expectedGeolocationTimeZoneSuggestion);
+                        expectedLocationAlgorithmEvent);
         // Rely on MetricsTimeZoneDetectorState.equals() for time zone ID / ID ordinal comparisons.
         assertEquals(expectedState, actualState);
     }
@@ -1091,58 +1666,69 @@ public class TimeZoneDetectorStrategyImplTest {
         return new TelephonyTimeZoneSuggestion.Builder(SLOT_INDEX2).build();
     }
 
+    private LocationAlgorithmEvent createCertainLocationAlgorithmEvent(@NonNull String... zoneIds) {
+        GeolocationTimeZoneSuggestion suggestion = createCertainGeolocationSuggestion(zoneIds);
+        LocationTimeZoneAlgorithmStatus algorithmStatus = new LocationTimeZoneAlgorithmStatus(
+                DETECTION_ALGORITHM_STATUS_RUNNING, PROVIDER_STATUS_IS_CERTAIN, null,
+                PROVIDER_STATUS_NOT_PRESENT, null);
+        LocationAlgorithmEvent event = new LocationAlgorithmEvent(algorithmStatus, suggestion);
+        event.addDebugInfo("Test certain event");
+        return event;
+    }
+
+    private LocationAlgorithmEvent createUncertainLocationAlgorithmEvent() {
+        TimeZoneProviderStatus primaryProviderReportedStatus = null;
+        return createUncertainLocationAlgorithmEvent(primaryProviderReportedStatus);
+    }
+
+    private LocationAlgorithmEvent createUncertainLocationAlgorithmEvent(
+            TimeZoneProviderStatus primaryProviderReportedStatus) {
+        GeolocationTimeZoneSuggestion suggestion = createUncertainGeolocationSuggestion();
+        LocationTimeZoneAlgorithmStatus algorithmStatus = new LocationTimeZoneAlgorithmStatus(
+                DETECTION_ALGORITHM_STATUS_RUNNING,
+                PROVIDER_STATUS_IS_UNCERTAIN, primaryProviderReportedStatus,
+                PROVIDER_STATUS_NOT_PRESENT, null);
+        LocationAlgorithmEvent event = new LocationAlgorithmEvent(algorithmStatus, suggestion);
+        event.addDebugInfo("Test uncertain event");
+        return event;
+    }
+
     private GeolocationTimeZoneSuggestion createUncertainGeolocationSuggestion() {
-        return GeolocationTimeZoneSuggestion.createCertainSuggestion(
-                mFakeEnvironment.elapsedRealtimeMillis(), null);
+        return GeolocationTimeZoneSuggestion.createUncertainSuggestion(
+                mFakeEnvironment.elapsedRealtimeMillis());
     }
 
     private GeolocationTimeZoneSuggestion createCertainGeolocationSuggestion(
             @NonNull String... zoneIds) {
         assertNotNull(zoneIds);
 
-        GeolocationTimeZoneSuggestion suggestion =
-                GeolocationTimeZoneSuggestion.createCertainSuggestion(
-                        mFakeEnvironment.elapsedRealtimeMillis(), Arrays.asList(zoneIds));
-        suggestion.addDebugInfo("Test suggestion");
-        return suggestion;
+        return GeolocationTimeZoneSuggestion.createCertainSuggestion(
+                mFakeEnvironment.elapsedRealtimeMillis(), Arrays.asList(zoneIds));
     }
 
     static class FakeEnvironment implements TimeZoneDetectorStrategyImpl.Environment {
 
         private final TestState<String> mTimeZoneId = new TestState<>();
-        private ConfigurationInternal mConfigurationInternal;
+        private final TestState<Integer> mTimeZoneConfidence = new TestState<>();
+        private final List<Runnable> mAsyncRunnables = new ArrayList<>();
         private @ElapsedRealtimeLong long mElapsedRealtimeMillis;
-        private ConfigurationChangeListener mConfigurationInternalChangeListener;
 
-        void initializeConfig(ConfigurationInternal configurationInternal) {
-            mConfigurationInternal = configurationInternal;
+        FakeEnvironment() {
+            // Ensure the fake environment starts with the defaults a fresh device would.
+            initializeTimeZoneSetting("", TIME_ZONE_CONFIDENCE_LOW);
         }
 
         void initializeClock(@ElapsedRealtimeLong long elapsedRealtimeMillis) {
             mElapsedRealtimeMillis = elapsedRealtimeMillis;
         }
 
-        void initializeTimeZoneSetting(String zoneId) {
+        void initializeTimeZoneSetting(String zoneId, @TimeZoneConfidence int timeZoneConfidence) {
             mTimeZoneId.init(zoneId);
+            mTimeZoneConfidence.init(timeZoneConfidence);
         }
 
         void incrementClock() {
             mElapsedRealtimeMillis++;
-        }
-
-        @Override
-        public void setConfigurationInternalChangeListener(ConfigurationChangeListener listener) {
-            mConfigurationInternalChangeListener = listener;
-        }
-
-        @Override
-        public ConfigurationInternal getCurrentUserConfigurationInternal() {
-            return mConfigurationInternal;
-        }
-
-        @Override
-        public boolean isDeviceTimeZoneInitialized() {
-            return mTimeZoneId.getLatest() != null;
         }
 
         @Override
@@ -1151,27 +1737,35 @@ public class TimeZoneDetectorStrategyImplTest {
         }
 
         @Override
-        public void setDeviceTimeZone(String zoneId) {
-            mTimeZoneId.set(zoneId);
+        public int getDeviceTimeZoneConfidence() {
+            return mTimeZoneConfidence.getLatest();
         }
 
-        void simulateConfigurationInternalChange(ConfigurationInternal configurationInternal) {
-            mConfigurationInternal = configurationInternal;
-            mConfigurationInternalChangeListener.onChange();
+        @Override
+        public void setDeviceTimeZoneAndConfidence(
+                String zoneId, @TimeZoneConfidence int confidence, String logInfo) {
+            mTimeZoneId.set(zoneId);
+            mTimeZoneConfidence.set(confidence);
         }
 
         void assertTimeZoneNotChanged() {
             mTimeZoneId.assertHasNotBeenSet();
+            mTimeZoneConfidence.assertHasNotBeenSet();
         }
 
-        void assertTimeZoneChangedTo(String timeZoneId) {
+        void assertTimeZoneChangedTo(String timeZoneId, @TimeZoneConfidence int confidence) {
             mTimeZoneId.assertHasBeenSet();
             mTimeZoneId.assertChangeCount(1);
             mTimeZoneId.assertLatestEquals(timeZoneId);
+
+            mTimeZoneConfidence.assertHasBeenSet();
+            mTimeZoneConfidence.assertChangeCount(1);
+            mTimeZoneConfidence.assertLatestEquals(confidence);
         }
 
         void commitAllChanges() {
             mTimeZoneId.commitLatest();
+            mTimeZoneConfidence.commitLatest();
         }
 
         @Override
@@ -1179,6 +1773,36 @@ public class TimeZoneDetectorStrategyImplTest {
         public long elapsedRealtimeMillis() {
             return mElapsedRealtimeMillis;
         }
+
+        @Override
+        public void addDebugLogEntry(String logMsg) {
+            // No-op for tests
+        }
+
+        @Override
+        public void dumpDebugLog(PrintWriter printWriter) {
+            // No-op for tests
+        }
+
+        @Override
+        public void runAsync(Runnable runnable) {
+            mAsyncRunnables.add(runnable);
+        }
+
+        public void runAsyncRunnables() {
+            for (Runnable runnable : mAsyncRunnables) {
+                runnable.run();
+            }
+            mAsyncRunnables.clear();
+        }
+    }
+
+    private void assertStateChangeNotificationsSent(
+            TestStateChangeListener stateChangeListener, int expectedCount) {
+        // The fake environment needs to be told to run posted work.
+        mFakeEnvironment.runAsyncRunnables();
+
+        stateChangeListener.assertNotificationsReceivedAndReset(expectedCount);
     }
 
     /**
@@ -1187,13 +1811,19 @@ public class TimeZoneDetectorStrategyImplTest {
      */
     private class Script {
 
-        Script initializeTimeZoneSetting(String zoneId) {
-            mFakeEnvironment.initializeTimeZoneSetting(zoneId);
+        Script initializeTimeZoneSetting(
+                String zoneId, @TimeZoneConfidence int timeZoneConfidence) {
+            mFakeEnvironment.initializeTimeZoneSetting(zoneId, timeZoneConfidence);
             return this;
         }
 
         Script initializeClock(long elapsedRealtimeMillis) {
             mFakeEnvironment.initializeClock(elapsedRealtimeMillis);
+            return this;
+        }
+
+        Script registerStateChangeListener(StateChangeListener stateChangeListener) {
+            mTimeZoneDetectorStrategy.addChangeListener(stateChangeListener);
             return this;
         }
 
@@ -1206,7 +1836,8 @@ public class TimeZoneDetectorStrategyImplTest {
          * Simulates the user / user's configuration changing.
          */
         Script simulateConfigurationInternalChange(ConfigurationInternal configurationInternal) {
-            mFakeEnvironment.simulateConfigurationInternalChange(configurationInternal);
+            mFakeServiceConfigAccessorSpy.simulateCurrentUserConfigurationInternalChange(
+                    configurationInternal);
             return this;
         }
 
@@ -1215,7 +1846,7 @@ public class TimeZoneDetectorStrategyImplTest {
          */
         Script simulateSetAutoMode(boolean autoDetectionEnabled) {
             ConfigurationInternal newConfig = new ConfigurationInternal.Builder(
-                    mFakeEnvironment.getCurrentUserConfigurationInternal())
+                    mFakeServiceConfigAccessorSpy.getCurrentUserConfigurationInternal())
                     .setAutoDetectionEnabledSetting(autoDetectionEnabled)
                     .build();
             simulateConfigurationInternalChange(newConfig);
@@ -1227,7 +1858,7 @@ public class TimeZoneDetectorStrategyImplTest {
          */
         Script simulateSetGeoDetectionEnabled(boolean geoDetectionEnabled) {
             ConfigurationInternal newConfig = new ConfigurationInternal.Builder(
-                    mFakeEnvironment.getCurrentUserConfigurationInternal())
+                    mFakeServiceConfigAccessorSpy.getCurrentUserConfigurationInternal())
                     .setGeoDetectionEnabledSetting(geoDetectionEnabled)
                     .build();
             simulateConfigurationInternalChange(newConfig);
@@ -1235,20 +1866,19 @@ public class TimeZoneDetectorStrategyImplTest {
         }
 
         /**
-         * Simulates the time zone detection strategy receiving a geolocation-originated
-         * suggestion.
+         * Simulates the time zone detection strategy receiving a location algorithm event.
          */
-        Script simulateGeolocationTimeZoneSuggestion(GeolocationTimeZoneSuggestion suggestion) {
-            mTimeZoneDetectorStrategy.suggestGeolocationTimeZone(suggestion);
+        Script simulateLocationAlgorithmEvent(LocationAlgorithmEvent event) {
+            mTimeZoneDetectorStrategy.handleLocationAlgorithmEvent(event);
             return this;
         }
 
         /** Simulates the time zone detection strategy receiving a user-originated suggestion. */
         Script simulateManualTimeZoneSuggestion(
                 @UserIdInt int userId, ManualTimeZoneSuggestion manualTimeZoneSuggestion,
-                boolean expectedResult) {
+                boolean bypassUserPolicyChecks, boolean expectedResult) {
             boolean actualResult = mTimeZoneDetectorStrategy.suggestManualTimeZone(
-                    userId, manualTimeZoneSuggestion);
+                    userId, manualTimeZoneSuggestion, bypassUserPolicyChecks);
             assertEquals(expectedResult, actualResult);
             return this;
         }
@@ -1262,11 +1892,12 @@ public class TimeZoneDetectorStrategyImplTest {
         }
 
         /**
-         * Simulates the time zone detection strategty receiving a signal that allows it to do
+         * Simulates the time zone detection strategy receiving a signal that allows it to do
          * telephony fallback.
          */
         Script simulateEnableTelephonyFallback() {
-            mTimeZoneDetectorStrategy.enableTelephonyTimeZoneFallback();
+            mTimeZoneDetectorStrategy.enableTelephonyTimeZoneFallback(
+                    "simulateEnableTelephonyFallback()");
             return this;
         }
 
@@ -1280,29 +1911,29 @@ public class TimeZoneDetectorStrategyImplTest {
         }
 
         /** Verifies the device's time zone has been set and clears change tracking history. */
-        Script verifyTimeZoneChangedAndReset(String zoneId) {
-            mFakeEnvironment.assertTimeZoneChangedTo(zoneId);
+        Script verifyTimeZoneChangedAndReset(String zoneId, @TimeZoneConfidence int confidence) {
+            mFakeEnvironment.assertTimeZoneChangedTo(zoneId, confidence);
             mFakeEnvironment.commitAllChanges();
             return this;
         }
 
         Script verifyTimeZoneChangedAndReset(ManualTimeZoneSuggestion suggestion) {
-            mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneId());
-            mFakeEnvironment.commitAllChanges();
+            verifyTimeZoneChangedAndReset(suggestion.getZoneId(), TIME_ZONE_CONFIDENCE_HIGH);
             return this;
         }
 
         Script verifyTimeZoneChangedAndReset(TelephonyTimeZoneSuggestion suggestion) {
-            mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneId());
-            mFakeEnvironment.commitAllChanges();
+            verifyTimeZoneChangedAndReset(suggestion.getZoneId(), TIME_ZONE_CONFIDENCE_HIGH);
             return this;
         }
 
-        Script verifyTimeZoneChangedAndReset(GeolocationTimeZoneSuggestion suggestion) {
+        Script verifyTimeZoneChangedAndReset(LocationAlgorithmEvent event) {
+            GeolocationTimeZoneSuggestion suggestion = event.getSuggestion();
+            assertNotNull("Only events with suggestions can change the time zone", suggestion);
             assertEquals("Only use this method with unambiguous geo suggestions",
                     1, suggestion.getZoneIds().size());
-            mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneIds().get(0));
-            mFakeEnvironment.commitAllChanges();
+            verifyTimeZoneChangedAndReset(
+                    suggestion.getZoneIds().get(0), TIME_ZONE_CONFIDENCE_HIGH);
             return this;
         }
 
@@ -1310,6 +1941,32 @@ public class TimeZoneDetectorStrategyImplTest {
         Script verifyTelephonyFallbackIsEnabled(boolean expectedEnabled) {
             assertEquals(expectedEnabled,
                     mTimeZoneDetectorStrategy.isTelephonyFallbackEnabledForTests());
+            return this;
+        }
+
+        Script verifyCachedDetectorStatus(TimeZoneDetectorStatus expectedStatus) {
+            assertEquals(expectedStatus,
+                    mTimeZoneDetectorStrategy.getCachedDetectorStatusForTests());
+            return this;
+        }
+
+        Script verifyLatestLocationAlgorithmEventReceived(LocationAlgorithmEvent expectedEvent) {
+            assertEquals(expectedEvent,
+                    mTimeZoneDetectorStrategy.getLatestLocationAlgorithmEvent());
+            return this;
+        }
+
+        Script verifyLatestTelephonySuggestionReceived(int slotIndex,
+                TelephonyTimeZoneSuggestion expectedSuggestion) {
+            assertEquals(expectedSuggestion,
+                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(slotIndex).suggestion);
+            return this;
+        }
+
+        Script verifyLatestQualifiedTelephonySuggestionReceived(int slotIndex,
+                QualifiedTelephonyTimeZoneSuggestion expectedQualifiedSuggestion) {
+            assertEquals(expectedQualifiedSuggestion,
+                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(slotIndex));
             return this;
         }
 
@@ -1343,4 +2000,5 @@ public class TimeZoneDetectorStrategyImplTest {
             @MatchType int matchType, @Quality int quality, int expectedScore) {
         return new TelephonyTestCase(matchType, quality, expectedScore);
     }
+
 }

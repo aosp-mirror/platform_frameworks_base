@@ -21,6 +21,7 @@
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "androidfw/Util.h"
 #include "compile/Pseudolocalizer.h"
 #include "util/Util.h"
 
@@ -53,7 +54,7 @@ inline static bool operator<(const UnifiedSpan& left, const UnifiedSpan& right) 
   return false;
 }
 
-inline static UnifiedSpan SpanToUnifiedSpan(const StringPool::Span& span) {
+inline static UnifiedSpan SpanToUnifiedSpan(const android::StringPool::Span& span) {
   return UnifiedSpan{*span.name, span.first_char, span.last_char};
 }
 
@@ -111,7 +112,7 @@ static std::vector<UnifiedSpan> MergeSpans(const StyledString& string) {
 
 std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
                                                          Pseudolocalizer::Method method,
-                                                         StringPool* pool) {
+                                                         android::StringPool* pool) {
   Pseudolocalizer localizer(method);
 
   // Collect the spans and untranslatable sections into one set of spans, sorted by first_char.
@@ -121,7 +122,7 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
 
   // All Span indices are UTF-16 based, according to the resources.arsc format expected by the
   // runtime. So we will do all our processing in UTF-16, then convert back.
-  const std::u16string text16 = util::Utf8ToUtf16(string->value->value);
+  const std::u16string text16 = android::util::Utf8ToUtf16(string->value->value);
 
   // Convenient wrapper around the text that allows us to work with StringPieces.
   const StringPiece16 text(text16);
@@ -154,7 +155,7 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
         cursor += substr.size();
 
         // Pseudolocalize the substring.
-        std::string new_substr = util::Utf16ToUtf8(substr);
+        std::string new_substr = android::util::Utf16ToUtf8(substr);
         if (translatable) {
           new_substr = localizer.Text(new_substr);
         }
@@ -181,7 +182,7 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
       cursor += substr.size();
 
       // Pseudolocalize the substring.
-      std::string new_substr = util::Utf16ToUtf8(substr);
+      std::string new_substr = android::util::Utf16ToUtf8(substr);
       if (translatable) {
         new_substr = localizer.Text(new_substr);
       }
@@ -199,16 +200,18 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
   }
 
   // Finish the pseudolocalization at the end of the string.
-  new_string += localizer.Text(util::Utf16ToUtf8(text.substr(cursor, text.size() - cursor)));
+  new_string +=
+      localizer.Text(android::util::Utf16ToUtf8(text.substr(cursor, text.size() - cursor)));
   new_string += localizer.End();
 
-  StyleString localized;
+  android::StyleString localized;
   localized.str = std::move(new_string);
 
   // Convert the UnifiedSpans into regular Spans, skipping the UntranslatableSections.
   for (UnifiedSpan& span : merged_spans) {
     if (span.tag) {
-      localized.spans.push_back(Span{std::move(span.tag.value()), span.first_char, span.last_char});
+      localized.spans.push_back(
+          android::Span{std::move(span.tag.value()), span.first_char, span.last_char});
     }
   }
   return util::make_unique<StyledString>(pool->MakeRef(localized));
@@ -222,8 +225,9 @@ class Visitor : public ValueVisitor {
   std::unique_ptr<Value> value;
   std::unique_ptr<Item> item;
 
-  Visitor(StringPool* pool, Pseudolocalizer::Method method)
-      : pool_(pool), method_(method), localizer_(method) {}
+  Visitor(android::StringPool* pool, Pseudolocalizer::Method method)
+      : pool_(pool), method_(method), localizer_(method) {
+  }
 
   void Visit(Plural* plural) override {
     CloningValueTransformer cloner(pool_);
@@ -284,7 +288,7 @@ class Visitor : public ValueVisitor {
  private:
   DISALLOW_COPY_AND_ASSIGN(Visitor);
 
-  StringPool* pool_;
+  android::StringPool* pool_;
   Pseudolocalizer::Method method_;
   Pseudolocalizer localizer_;
 };
@@ -313,8 +317,8 @@ ConfigDescription ModifyConfigForPseudoLocale(const ConfigDescription& base,
 }
 
 void PseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
-                            ResourceConfigValue* original_value,
-                            StringPool* pool, ResourceEntry* entry) {
+                            ResourceConfigValue* original_value, android::StringPool* pool,
+                            ResourceEntry* entry) {
   Visitor visitor(pool, method);
   original_value->value->Accept(&visitor);
 

@@ -6,6 +6,7 @@ object ShadeInterpolation {
 
     /**
      * Interpolate alpha for notification background scrim during shade expansion.
+     *
      * @param fraction Shade expansion fraction
      */
     @JvmStatic
@@ -16,6 +17,7 @@ object ShadeInterpolation {
 
     /**
      * Interpolate alpha for shade content during shade expansion.
+     *
      * @param fraction Shade expansion fraction
      */
     @JvmStatic
@@ -31,7 +33,7 @@ object ShadeInterpolation {
         } else {
             val oneMinusFrac = 1f - mappedFraction
             (1f - 0.5f * (1f - Math.cos((3.14159f * oneMinusFrac * oneMinusFrac).toDouble())))
-                    .toFloat()
+                .toFloat()
         }
     }
 }

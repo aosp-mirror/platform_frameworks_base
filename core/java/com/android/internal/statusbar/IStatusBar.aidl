@@ -23,16 +23,17 @@ import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
-import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.view.KeyEvent;
 import android.service.notification.StatusBarNotification;
-import android.view.InsetsVisibilities;
 
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IUndoMediaTransferCallback;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
 
@@ -56,6 +57,7 @@ oneway interface IStatusBar
     void showRecentApps(boolean triggeredFromAltTab);
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecentApps();
+    void toggleTaskbar();
     void toggleSplitScreen();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
@@ -140,7 +142,7 @@ oneway interface IStatusBar
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);
     void clickQsTile(in ComponentName tile);
-    void handleSystemKey(in int key);
+    void handleSystemKey(in KeyEvent key);
 
     /**
      * Methods to show toast messages for screen pinning
@@ -155,7 +157,7 @@ oneway interface IStatusBar
     */
     void showAuthenticationDialog(in PromptInfo promptInfo, IBiometricSysuiReceiver sysuiReceiver,
             in int[] sensorIds, boolean credentialAllowed, boolean requireConfirmation, int userId,
-            long operationId, String opPackageName, long requestId, int multiSensorConfig);
+            long operationId, String opPackageName, long requestId);
     /**
     * Used to notify the authentication dialog that a biometric has been authenticated.
     */
@@ -174,9 +176,9 @@ oneway interface IStatusBar
     void setBiometicContextListener(in IBiometricContextListener listener);
 
     /**
-     * Sets an instance of IUdfpsHbmListener for UdfpsController.
+     * Sets an instance of IUdfpsRefreshRateRequestCallback for UdfpsController.
      */
-    void setUdfpsHbmListener(in IUdfpsHbmListener listener);
+    void setUdfpsRefreshRateCallback(in IUdfpsRefreshRateRequestCallback callback);
 
     /**
      * Notifies System UI that the display is ready to show system decorations.
@@ -200,23 +202,25 @@ oneway interface IStatusBar
      *                         stacks.
      * @param navbarColorManagedByIme {@code true} if navigation bar color is managed by IME.
      * @param behavior the behavior of the focused window.
-     * @param requestedVisibilities the collection of the requested visibilities of system insets.
+     * @param requestedVisibleTypes the collection of insets types requested visible.
      * @param packageName the package name of the focused app.
+     * @param letterboxDetails a set of letterbox details of apps visible on the screen.
      */
     void onSystemBarAttributesChanged(int displayId, int appearance,
             in AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            int behavior, in InsetsVisibilities requestedVisibilities, String packageName);
+            int behavior, int requestedVisibleTypes, String packageName,
+            in LetterboxDetails[] letterboxDetails);
 
     /**
      * Notifies System UI to show transient bars. The transient bars are system bars, e.g., status
      * bar and navigation bar which are temporarily visible to the user.
      *
      * @param displayId the ID of the display to notify.
-     * @param types the internal insets types of the bars are about to show transiently.
+     * @param types the insets types of the bars are about to show transiently.
      * @param isGestureOnSystemBar whether the gesture to show the transient bar was a gesture on
      *        one of the bars itself.
      */
-    void showTransient(int displayId, in int[] types, boolean isGestureOnSystemBar);
+    void showTransient(int displayId, int types, boolean isGestureOnSystemBar);
 
     /**
      * Notifies System UI to abort the transient state of system bars, which prevents the bars being
@@ -224,9 +228,9 @@ oneway interface IStatusBar
      * bars again.
      *
      * @param displayId the ID of the display to notify.
-     * @param types the internal insets types of the bars are about to abort the transient state.
+     * @param types the insets types of the bars are about to abort the transient state.
      */
-    void abortTransient(int displayId, in int[] types);
+    void abortTransient(int displayId, int types);
 
     /**
      * Show a warning that the device is about to go to sleep due to user inactivity.
@@ -259,11 +263,6 @@ oneway interface IStatusBar
      * Notifies SystemUI to stop tracing.
      */
     void stopTracing();
-
-    /**
-     * Handles a logging command from the WM shell command.
-     */
-    void handleWindowManagerLoggingCommand(in String[] args, in ParcelFileDescriptor outFd);
 
     /**
      * If true, suppresses the ambient display from showing. If false, re-enables the ambient
@@ -324,4 +323,27 @@ oneway interface IStatusBar
 
     /** Unregisters a nearby media devices provider. */
     void unregisterNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
+
+    /** Dump protos from SystemUI. The proto definition is defined there */
+    void dumpProto(in String[] args, in ParcelFileDescriptor pfd);
+
+    /** Shows rear display educational dialog */
+    void showRearDisplayDialog(int currentBaseState);
+
+    /** Called when requested to go to fullscreen from the active split app. */
+    void goToFullscreenFromSplit();
+
+    /**
+     * Enters stage split from a current running app.
+     *
+     * @param leftOrTop indicates where the stage split is.
+     */
+    void enterStageSplitFromRunningApp(boolean leftOrTop);
+
+    /**
+     * Shows the media output switcher dialog.
+     *
+     * @param packageName of the session for which the output switcher is shown.
+     */
+    void showMediaOutputSwitcher(String packageName);
 }

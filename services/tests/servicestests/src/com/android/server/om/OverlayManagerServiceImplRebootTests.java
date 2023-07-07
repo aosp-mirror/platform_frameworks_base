@@ -16,16 +16,17 @@
 
 package com.android.server.om;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
+import android.content.pm.UserPackage;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.google.common.truth.Expect;
+
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,6 +44,9 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     private static final String OVERLAY2 = OVERLAY + "2";
     private static final OverlayIdentifier IDENTIFIER2 = new OverlayIdentifier(OVERLAY2);
 
+    @Rule
+    public final Expect expect = Expect.create();
+
     @Test
     public void alwaysInitializeAllPackages() {
         final OverlayManagerServiceImpl impl = getImpl();
@@ -51,13 +55,11 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         addPackage(target(otherTarget), USER);
         addPackage(overlay(OVERLAY, TARGET), USER);
 
-        final Set<PackageAndUser> allPackages =
-                Set.of(new PackageAndUser(TARGET, USER),
-                        new PackageAndUser(otherTarget, USER),
-                        new PackageAndUser(OVERLAY, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        // The result should be the same for every time
+        assertThat(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
+        assertThat(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
     }
 
     @Test
@@ -66,29 +68,31 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         addPackage(target(TARGET), USER);
         addPackage(overlay(OVERLAY, TARGET), USER);
 
-        final Set<PackageAndUser> allPackages =
-                Set.of(new PackageAndUser(TARGET, USER), new PackageAndUser(OVERLAY, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
         configureSystemOverlay(OVERLAY, ConfigState.IMMUTABLE_DISABLED, 0 /* priority */);
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o1 = impl.getOverlayInfo(IDENTIFIER, USER);
-        assertNotNull(o1);
-        assertFalse(o1.isEnabled());
-        assertFalse(o1.isMutable);
+        expect.that(o1).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o1.isEnabled()).isFalse();
+        expect.that(o1.isMutable).isFalse();
 
         configureSystemOverlay(OVERLAY, ConfigState.IMMUTABLE_ENABLED, 0 /* priority */);
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o2 = impl.getOverlayInfo(IDENTIFIER, USER);
-        assertNotNull(o2);
-        assertTrue(o2.isEnabled());
-        assertFalse(o2.isMutable);
+        expect.that(o2).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o2.isEnabled()).isTrue();
+        expect.that(o2.isMutable).isFalse();
 
         configureSystemOverlay(OVERLAY, ConfigState.IMMUTABLE_DISABLED, 0 /* priority */);
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o3 = impl.getOverlayInfo(IDENTIFIER, USER);
-        assertNotNull(o3);
-        assertFalse(o3.isEnabled());
-        assertFalse(o3.isMutable);
+        expect.that(o3).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o3.isEnabled()).isFalse();
+        expect.that(o3.isMutable).isFalse();
     }
 
     @Test
@@ -98,28 +102,30 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         addPackage(overlay(OVERLAY, TARGET), USER);
         configureSystemOverlay(OVERLAY, ConfigState.MUTABLE_DISABLED, 0 /* priority */);
 
-        final Set<PackageAndUser> allPackages =
-                Set.of(new PackageAndUser(TARGET, USER), new PackageAndUser(OVERLAY, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o1 = impl.getOverlayInfo(IDENTIFIER, USER);
-        assertNotNull(o1);
-        assertFalse(o1.isEnabled());
-        assertTrue(o1.isMutable);
+        expect.that(o1).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o1.isEnabled()).isFalse();
+        expect.that(o1.isMutable).isTrue();
 
         configureSystemOverlay(OVERLAY, ConfigState.MUTABLE_ENABLED, 0 /* priority */);
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o2 = impl.getOverlayInfo(IDENTIFIER, USER);
-        assertNotNull(o2);
-        assertFalse(o2.isEnabled());
-        assertTrue(o2.isMutable);
+        expect.that(o2).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o2.isEnabled()).isFalse();
+        expect.that(o2.isMutable).isTrue();
 
         configureSystemOverlay(OVERLAY, ConfigState.MUTABLE_DISABLED, 0 /* priority */);
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o3 = impl.getOverlayInfo(IDENTIFIER, USER);
-        assertNotNull(o3);
-        assertFalse(o3.isEnabled());
-        assertTrue(o3.isMutable);
+        expect.that(o3).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o3.isEnabled()).isFalse();
+        expect.that(o3.isMutable).isTrue();
     }
 
     @Test
@@ -128,17 +134,17 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         addPackage(target(TARGET), USER);
         addPackage(overlay(OVERLAY, TARGET), USER);
 
-        final Set<PackageAndUser> allPackages =
-                Set.of(new PackageAndUser(TARGET, USER), new PackageAndUser(OVERLAY, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
         final Consumer<ConfigState> setOverlay = (state -> {
             configureSystemOverlay(OVERLAY, state, 0 /* priority */);
-            assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+            expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
             final OverlayInfo o = impl.getOverlayInfo(IDENTIFIER, USER);
-            assertNotNull(o);
-            assertEquals(o.isEnabled(), state == ConfigState.IMMUTABLE_ENABLED
+            expect.that(o).isNotNull();
+            assertThat(expect.hasFailures()).isFalse();
+            expect.that(o.isEnabled()).isEqualTo(state == ConfigState.IMMUTABLE_ENABLED
                     || state == ConfigState.MUTABLE_ENABLED);
-            assertEquals(o.isMutable, state == ConfigState.MUTABLE_DISABLED
+            expect.that(o.isMutable).isEqualTo(state == ConfigState.MUTABLE_DISABLED
                     || state == ConfigState.MUTABLE_ENABLED);
         });
 
@@ -180,20 +186,20 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         configureSystemOverlay(OVERLAY, ConfigState.MUTABLE_DISABLED, 0 /* priority */);
         configureSystemOverlay(OVERLAY2, ConfigState.MUTABLE_DISABLED, 1 /* priority */);
 
-        final Set<PackageAndUser> allPackages =
-                Set.of(new PackageAndUser(TARGET, USER), new PackageAndUser(OVERLAY, USER),
-                        new PackageAndUser(OVERLAY2, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o1 = impl.getOverlayInfo(IDENTIFIER, USER);
-        assertNotNull(o1);
-        assertEquals(0, o1.priority);
-        assertFalse(o1.isEnabled());
+        expect.that(o1).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o1.priority).isEqualTo(0);
+        expect.that(o1.isEnabled()).isFalse();
 
         final OverlayInfo o2 = impl.getOverlayInfo(IDENTIFIER2, USER);
-        assertNotNull(o2);
-        assertEquals(1, o2.priority);
-        assertFalse(o2.isEnabled());
+        expect.that(o2).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o2.priority).isEqualTo(1);
+        expect.that(o2.isEnabled()).isFalse();
 
         // Overlay priority changing between reboots should not affect enable state of mutable
         // overlays.
@@ -202,16 +208,18 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         // Reorder the overlays
         configureSystemOverlay(OVERLAY, ConfigState.MUTABLE_DISABLED, 1 /* priority */);
         configureSystemOverlay(OVERLAY2, ConfigState.MUTABLE_DISABLED, 0 /* priority */);
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o3 = impl.getOverlayInfo(IDENTIFIER, USER);
-        assertNotNull(o3);
-        assertEquals(1, o3.priority);
-        assertTrue(o3.isEnabled());
+        expect.that(o3).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o3.priority).isEqualTo(1);
+        expect.that(o3.isEnabled()).isTrue();
 
         final OverlayInfo o4 = impl.getOverlayInfo(IDENTIFIER2, USER);
-        assertNotNull(o4);
-        assertEquals(0, o4.priority);
-        assertFalse(o4.isEnabled());
+        expect.that(o4).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o4.priority).isEqualTo(0);
+        expect.that(o4.isEnabled()).isFalse();
     }
 
     @Test
@@ -223,33 +231,35 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         configureSystemOverlay(OVERLAY, ConfigState.IMMUTABLE_ENABLED, 0 /* priority */);
         configureSystemOverlay(OVERLAY2, ConfigState.IMMUTABLE_ENABLED, 1 /* priority */);
 
-        final Set<PackageAndUser> allPackages =
-                Set.of(new PackageAndUser(TARGET, USER), new PackageAndUser(OVERLAY, USER),
-                        new PackageAndUser(OVERLAY2, USER));
+        final Set<UserPackage> allPackages = Set.of(UserPackage.of(USER, TARGET));
 
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o1 = impl.getOverlayInfo(IDENTIFIER, USER);
-        assertNotNull(o1);
-        assertEquals(0, o1.priority);
-        assertTrue(o1.isEnabled());
+        expect.that(o1).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o1.priority).isEqualTo(0);
+        expect.that(o1.isEnabled()).isTrue();
 
         final OverlayInfo o2 = impl.getOverlayInfo(IDENTIFIER2, USER);
-        assertNotNull(o2);
-        assertEquals(1, o2.priority);
-        assertTrue(o2.isEnabled());
+        expect.that(o2).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o2.priority).isEqualTo(1);
+        expect.that(o2.isEnabled()).isTrue();
 
         // Reorder the overlays
         configureSystemOverlay(OVERLAY, ConfigState.IMMUTABLE_ENABLED, 1 /* priority */);
         configureSystemOverlay(OVERLAY2, ConfigState.IMMUTABLE_ENABLED, 0 /* priority */);
-        assertEquals(allPackages, impl.updateOverlaysForUser(USER));
+        expect.that(impl.updateOverlaysForUser(USER)).isEqualTo(allPackages);
         final OverlayInfo o3 = impl.getOverlayInfo(IDENTIFIER, USER);
-        assertNotNull(o3);
-        assertEquals(1, o3.priority);
-        assertTrue(o3.isEnabled());
+        expect.that(o3).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o3.priority).isEqualTo(1);
+        expect.that(o3.isEnabled()).isTrue();
 
         final OverlayInfo o4 = impl.getOverlayInfo(IDENTIFIER2, USER);
-        assertNotNull(o4);
-        assertEquals(0, o4.priority);
-        assertTrue(o4.isEnabled());
+        expect.that(o4).isNotNull();
+        assertThat(expect.hasFailures()).isFalse();
+        expect.that(o4.priority).isEqualTo(0);
+        expect.that(o4.isEnabled()).isTrue();
     }
 }

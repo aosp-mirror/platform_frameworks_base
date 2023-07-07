@@ -79,6 +79,7 @@ interface IPermissionManager {
     void startOneTimePermissionSession(String packageName, int userId, long timeout,
             long revokeAfterKilledDelay);
 
+    @EnforcePermission("MANAGE_ONE_TIME_PERMISSION_SESSIONS")
     void stopOneTimePermissionSession(String packageName, int userId);
 
     List<String> getAutoRevokeExemptionRequestedPackages(int userId);

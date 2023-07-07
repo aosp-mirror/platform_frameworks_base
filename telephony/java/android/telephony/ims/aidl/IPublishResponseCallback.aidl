@@ -17,6 +17,7 @@
 package android.telephony.ims.aidl;
 
 import java.util.List;
+import android.telephony.ims.SipDetails;
 
 /**
  * Interface used by the framework to receive the response of the publish
@@ -25,6 +26,5 @@ import java.util.List;
  */
 oneway interface IPublishResponseCallback {
     void onCommandError(int code);
-    void onNetworkResponse(int code, String reason);
-    void onNetworkRespHeader(int code, String reasonPhrase, int reasonHeaderCause, String reasonHeaderText);
+    void onNetworkResponse(in SipDetails details);
 }

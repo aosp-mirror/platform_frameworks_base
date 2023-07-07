@@ -223,7 +223,17 @@ public class PowerManagerServiceMockingTest {
 
             @Override
             PowerManagerService.Clock createClock() {
-                return () -> mClock.now();
+                return new PowerManagerService.Clock() {
+                    @Override
+                    public long uptimeMillis() {
+                        return mClock.now();
+                    }
+
+                    @Override
+                    public long elapsedRealtime() {
+                        return mClock.now();
+                    }
+                };
             }
 
             @Override

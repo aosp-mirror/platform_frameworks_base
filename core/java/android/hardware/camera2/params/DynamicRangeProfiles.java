@@ -181,13 +181,15 @@ public final class DynamicRangeProfiles {
      * for a given camera id in order to retrieve the device capabilities.</p>
      *
      * @param elements
-     *          An array of elements describing the map. It contains two elements per entry which
-     *          describe the supported dynamic range profile value in the first element and in the
-     *          second element a bitmap of concurrently supported dynamic range profiles within the
-     *          same capture request. Bitmap values of 0 indicate that there are no constraints.
+     *          An array of elements describing the map. It contains three elements per entry. The
+     *          first element describes the supported dynamic range profile value. The
+     *          second element contains a bitmap of concurrently supported dynamic range profiles
+     *          within the same capture request. The third element contains a hint about
+     *          extra latency associated with the corresponding dynamic range. Bitmap values of 0
+     *          indicate that there are no constraints.
      *
      * @throws IllegalArgumentException
-     *            if the {@code elements} array length is invalid, not divisible by 2 or contains
+     *            if the {@code elements} array length is invalid, not divisible by 3 or contains
      *            invalid element values
      * @throws NullPointerException
      *            if {@code elements} is {@code null}

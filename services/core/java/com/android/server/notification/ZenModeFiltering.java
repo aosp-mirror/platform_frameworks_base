@@ -101,23 +101,24 @@ public class ZenModeFiltering {
      */
     public static boolean matchesCallFilter(Context context, int zen, NotificationManager.Policy
             consolidatedPolicy, UserHandle userHandle, Bundle extras,
-            ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity) {
+            ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity,
+            int callingUid) {
         if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
-            ZenLog.traceMatchesCallFilter(false, "no interruptions");
+            ZenLog.traceMatchesCallFilter(false, "no interruptions", callingUid);
             return false; // nothing gets through
         }
         if (zen == Global.ZEN_MODE_ALARMS) {
-            ZenLog.traceMatchesCallFilter(false, "alarms only");
+            ZenLog.traceMatchesCallFilter(false, "alarms only", callingUid);
             return false; // not an alarm
         }
         if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             if (consolidatedPolicy.allowRepeatCallers()
                     && REPEAT_CALLERS.isRepeat(context, extras, null)) {
-                ZenLog.traceMatchesCallFilter(true, "repeat caller");
+                ZenLog.traceMatchesCallFilter(true, "repeat caller", callingUid);
                 return true;
             }
             if (!consolidatedPolicy.allowCalls()) {
-                ZenLog.traceMatchesCallFilter(false, "calls not allowed");
+                ZenLog.traceMatchesCallFilter(false, "calls not allowed", callingUid);
                 return false; // no other calls get through
             }
             if (validator != null) {
@@ -125,11 +126,12 @@ public class ZenModeFiltering {
                         contactsTimeoutMs, timeoutAffinity);
                 boolean match =
                         audienceMatches(consolidatedPolicy.allowCallsFrom(), contactAffinity);
-                ZenLog.traceMatchesCallFilter(match, "contact affinity " + contactAffinity);
+                ZenLog.traceMatchesCallFilter(match, "contact affinity " + contactAffinity,
+                        callingUid);
                 return match;
             }
         }
-        ZenLog.traceMatchesCallFilter(true, "no restrictions");
+        ZenLog.traceMatchesCallFilter(true, "no restrictions", callingUid);
         return true;
     }
 
@@ -147,80 +149,91 @@ public class ZenModeFiltering {
      */
     public boolean shouldIntercept(int zen, NotificationManager.Policy policy,
             NotificationRecord record) {
-        // Zen mode is ignored for critical notifications.
-        if (zen == ZEN_MODE_OFF || isCritical(record)) {
+        if (zen == ZEN_MODE_OFF) {
+            return false;
+        }
+
+        if (isCritical(record)) {
+            // Zen mode is ignored for critical notifications.
+            maybeLogInterceptDecision(record, false, "criticalNotification");
             return false;
         }
         // Make an exception to policy for the notification saying that policy has changed
         if (NotificationManager.Policy.areAllVisualEffectsSuppressed(policy.suppressedVisualEffects)
                 && "android".equals(record.getSbn().getPackageName())
                 && SystemMessageProto.SystemMessage.NOTE_ZEN_UPGRADE == record.getSbn().getId()) {
-            ZenLog.traceNotIntercepted(record, "systemDndChangedNotification");
+            maybeLogInterceptDecision(record, false, "systemDndChangedNotification");
             return false;
         }
         switch (zen) {
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 // #notevenalarms
-                ZenLog.traceIntercepted(record, "none");
+                maybeLogInterceptDecision(record, true, "none");
                 return true;
             case Global.ZEN_MODE_ALARMS:
                 if (isAlarm(record)) {
                     // Alarms only
+                    maybeLogInterceptDecision(record, false, "alarm");
                     return false;
                 }
-                ZenLog.traceIntercepted(record, "alarmsOnly");
+                maybeLogInterceptDecision(record, true, "alarmsOnly");
                 return true;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 // allow user-prioritized packages through in priority mode
                 if (record.getPackagePriority() == Notification.PRIORITY_MAX) {
-                    ZenLog.traceNotIntercepted(record, "priorityApp");
+                    maybeLogInterceptDecision(record, false, "priorityApp");
                     return false;
                 }
 
                 if (isAlarm(record)) {
                     if (!policy.allowAlarms()) {
-                        ZenLog.traceIntercepted(record, "!allowAlarms");
+                        maybeLogInterceptDecision(record, true, "!allowAlarms");
                         return true;
                     }
+                    maybeLogInterceptDecision(record, false, "allowedAlarm");
                     return false;
                 }
                 if (isEvent(record)) {
                     if (!policy.allowEvents()) {
-                        ZenLog.traceIntercepted(record, "!allowEvents");
+                        maybeLogInterceptDecision(record, true, "!allowEvents");
                         return true;
                     }
+                    maybeLogInterceptDecision(record, false, "allowedEvent");
                     return false;
                 }
                 if (isReminder(record)) {
                     if (!policy.allowReminders()) {
-                        ZenLog.traceIntercepted(record, "!allowReminders");
+                        maybeLogInterceptDecision(record, true, "!allowReminders");
                         return true;
                     }
+                    maybeLogInterceptDecision(record, false, "allowedReminder");
                     return false;
                 }
                 if (isMedia(record)) {
                     if (!policy.allowMedia()) {
-                        ZenLog.traceIntercepted(record, "!allowMedia");
+                        maybeLogInterceptDecision(record, true, "!allowMedia");
                         return true;
                     }
+                    maybeLogInterceptDecision(record, false, "allowedMedia");
                     return false;
                 }
                 if (isSystem(record)) {
                     if (!policy.allowSystem()) {
-                        ZenLog.traceIntercepted(record, "!allowSystem");
+                        maybeLogInterceptDecision(record, true, "!allowSystem");
                         return true;
                     }
+                    maybeLogInterceptDecision(record, false, "allowedSystem");
                     return false;
                 }
                 if (isConversation(record)) {
                     if (policy.allowConversations()) {
                         if (policy.priorityConversationSenders == CONVERSATION_SENDERS_ANYONE) {
-                            ZenLog.traceNotIntercepted(record, "conversationAnyone");
+                            maybeLogInterceptDecision(record, false, "conversationAnyone");
                             return false;
                         } else if (policy.priorityConversationSenders
                                 == NotificationManager.Policy.CONVERSATION_SENDERS_IMPORTANT
                                 && record.getChannel().isImportantConversation()) {
-                            ZenLog.traceNotIntercepted(record, "conversationMatches");
+                            maybeLogInterceptDecision(record, false, "conversationMatches");
                             return false;
                         }
                     }
@@ -231,27 +244,56 @@ public class ZenModeFiltering {
                     if (policy.allowRepeatCallers()
                             && REPEAT_CALLERS.isRepeat(
                                     mContext, extras(record), record.getPhoneNumbers())) {
-                        ZenLog.traceNotIntercepted(record, "repeatCaller");
+                        maybeLogInterceptDecision(record, false, "repeatCaller");
                         return false;
                     }
                     if (!policy.allowCalls()) {
-                        ZenLog.traceIntercepted(record, "!allowCalls");
+                        maybeLogInterceptDecision(record, true, "!allowCalls");
                         return true;
                     }
                     return shouldInterceptAudience(policy.allowCallsFrom(), record);
                 }
                 if (isMessage(record)) {
                     if (!policy.allowMessages()) {
-                        ZenLog.traceIntercepted(record, "!allowMessages");
+                        maybeLogInterceptDecision(record, true, "!allowMessages");
                         return true;
                     }
                     return shouldInterceptAudience(policy.allowMessagesFrom(), record);
                 }
 
-                ZenLog.traceIntercepted(record, "!priority");
+                maybeLogInterceptDecision(record, true, "!priority");
                 return true;
             default:
+                maybeLogInterceptDecision(record, false, "unknownZenMode");
                 return false;
+        }
+    }
+
+    // Consider logging the decision of shouldIntercept for the given record.
+    // This will log the outcome if one of the following is true:
+    //   - it's the first time the intercept decision is set for the record
+    //   - OR it's not the first time, but the intercept decision changed
+    private static void maybeLogInterceptDecision(NotificationRecord record, boolean intercept,
+            String reason) {
+        boolean interceptBefore = record.isIntercepted();
+        if (record.hasInterceptBeenSet() && (interceptBefore == intercept)) {
+            // this record has already been evaluated for whether it should be intercepted, and
+            // the decision has not changed.
+            return;
+        }
+
+        // add a note to the reason indicating whether it's new or updated
+        String annotatedReason = reason;
+        if (!record.hasInterceptBeenSet()) {
+            annotatedReason = "new:" + reason;
+        } else if (interceptBefore != intercept) {
+            annotatedReason = "updated:" + reason;
+        }
+
+        if (intercept) {
+            ZenLog.traceIntercepted(record, annotatedReason);
+        } else {
+            ZenLog.traceNotIntercepted(record, annotatedReason);
         }
     }
 
@@ -269,10 +311,12 @@ public class ZenModeFiltering {
     }
 
     private static boolean shouldInterceptAudience(int source, NotificationRecord record) {
-        if (!audienceMatches(source, record.getContactAffinity())) {
-            ZenLog.traceIntercepted(record, "!audienceMatches");
+        float affinity = record.getContactAffinity();
+        if (!audienceMatches(source, affinity)) {
+            maybeLogInterceptDecision(record, true, "!audienceMatches,affinity=" + affinity);
             return true;
         }
+        maybeLogInterceptDecision(record, false, "affinity=" + affinity);
         return false;
     }
 
@@ -419,6 +463,7 @@ public class ZenModeFiltering {
 
         private synchronized void recordCallers(String[] people, ArraySet<String> phoneNumbers,
                 long now) {
+            boolean recorded = false, hasTel = false, hasOther = false;
             for (int i = 0; i < people.length; i++) {
                 String person = people[i];
                 if (person == null) continue;
@@ -427,10 +472,16 @@ public class ZenModeFiltering {
                     // while ideally we should not need to decode this, sometimes we have seen tel
                     // numbers given in an encoded format
                     String tel = Uri.decode(uri.getSchemeSpecificPart());
-                    if (tel != null) mTelCalls.put(tel, now);
+                    if (tel != null) {
+                        mTelCalls.put(tel, now);
+                        recorded = true;
+                        hasTel = true;
+                    }
                 } else {
                     // for non-tel calls, store the entire string, uri-component and all
                     mOtherCalls.put(person, now);
+                    recorded = true;
+                    hasOther = true;
                 }
             }
 
@@ -438,8 +489,15 @@ public class ZenModeFiltering {
             // provided; these are in the format of just a phone number string
             if (phoneNumbers != null) {
                 for (String num : phoneNumbers) {
-                    if (num != null) mTelCalls.put(num, now);
+                    if (num != null) {
+                        mTelCalls.put(num, now);
+                        recorded = true;
+                        hasTel = true;
+                    }
                 }
+            }
+            if (recorded) {
+                ZenLog.traceRecordCaller(hasTel, hasOther);
             }
         }
 
@@ -468,6 +526,8 @@ public class ZenModeFiltering {
         // previously recorded phone call.
         private synchronized boolean checkCallers(Context context, String[] people,
                 ArraySet<String> phoneNumbers) {
+            boolean found = false, checkedTel = false, checkedOther = false;
+
             // get the default country code for checking telephone numbers
             final String defaultCountryCode =
                     context.getSystemService(TelephonyManager.class).getNetworkCountryIso();
@@ -477,12 +537,14 @@ public class ZenModeFiltering {
                 final Uri uri = Uri.parse(person);
                 if ("tel".equals(uri.getScheme())) {
                     String number = uri.getSchemeSpecificPart();
+                    checkedTel = true;
                     if (checkForNumber(number, defaultCountryCode)) {
-                        return true;
+                        found = true;
                     }
                 } else {
+                    checkedOther = true;
                     if (mOtherCalls.containsKey(person)) {
-                        return true;
+                        found = true;
                     }
                 }
             }
@@ -490,14 +552,16 @@ public class ZenModeFiltering {
             // also check any passed-in phone numbers
             if (phoneNumbers != null) {
                 for (String num : phoneNumbers) {
+                    checkedTel = true;
                     if (checkForNumber(num, defaultCountryCode)) {
-                        return true;
+                        found = true;
                     }
                 }
             }
 
             // no matches
-            return false;
+            ZenLog.traceCheckRepeatCaller(found, checkedTel, checkedOther);
+            return found;
         }
     }
 

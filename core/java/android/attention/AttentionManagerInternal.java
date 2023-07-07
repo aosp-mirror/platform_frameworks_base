@@ -83,11 +83,11 @@ public abstract class AttentionManagerInternal {
     }
 
     /** Internal interface for proximity callback. */
-    public abstract static class ProximityUpdateCallbackInternal {
+    public interface ProximityUpdateCallbackInternal {
         /**
          * @param distance the estimated distance of the user (in meter)
          * The distance will be PROXIMITY_UNKNOWN if the proximity sensing was inconclusive.
          */
-        public abstract void onProximityUpdate(double distance);
+        void onProximityUpdate(double distance);
     }
 }

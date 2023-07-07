@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -115,12 +116,24 @@ public class BluetoothUtils {
         }
 
         List<LocalBluetoothProfile> profiles = cachedDevice.getProfiles();
+        int resId = 0;
         for (LocalBluetoothProfile profile : profiles) {
-            int resId = profile.getDrawableResource(btClass);
-            if (resId != 0) {
-                return new Pair<>(getBluetoothDrawable(context, resId), null);
+            int profileResId = profile.getDrawableResource(btClass);
+            if (profileResId != 0) {
+                // The device should show hearing aid icon if it contains any hearing aid related
+                // profiles
+                if (profile instanceof HearingAidProfile || profile instanceof HapClientProfile) {
+                    return new Pair<>(getBluetoothDrawable(context, profileResId), null);
+                }
+                if (resId == 0) {
+                    resId = profileResId;
+                }
             }
         }
+        if (resId != 0) {
+            return new Pair<>(getBluetoothDrawable(context, resId), null);
+        }
+
         if (btClass != null) {
             if (doesClassMatch(btClass, BluetoothClass.PROFILE_HEADSET)) {
                 return new Pair<>(
@@ -162,14 +175,21 @@ public class BluetoothUtils {
                     resources, ((BitmapDrawable) pair.first).getBitmap()), pair.second);
         }
 
+        int hashCode;
+        if ((cachedDevice.getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID)) {
+            hashCode = new Integer(cachedDevice.getGroupId()).hashCode();
+        } else {
+            hashCode = cachedDevice.getAddress().hashCode();
+        }
+
         return new Pair<>(buildBtRainbowDrawable(context,
-                pair.first, cachedDevice.getAddress().hashCode()), pair.second);
+                pair.first, hashCode), pair.second);
     }
 
     /**
      * Build Bluetooth device icon with rainbow
      */
-    public static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
+    private static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
             int hashCode) {
         final Resources resources = context.getResources();
 
@@ -237,14 +257,10 @@ public class BluetoothUtils {
      * @return true if it supports advanced metadata, false otherwise.
      */
     public static boolean isAdvancedDetailsHeader(@NonNull BluetoothDevice bluetoothDevice) {
-        if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SETTINGS_UI, BT_ADVANCED_HEADER_ENABLED,
-                true)) {
-            Log.d(TAG, "isAdvancedDetailsHeader: advancedEnabled is false");
+        if (!isAdvancedHeaderEnabled()) {
             return false;
         }
-        // The metadata is for Android R
-        if (getBooleanMetaData(bluetoothDevice, BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)) {
-            Log.d(TAG, "isAdvancedDetailsHeader: untetheredHeadset is true");
+        if (isUntetheredHeadset(bluetoothDevice)) {
             return true;
         }
         // The metadata is for Android S
@@ -252,8 +268,62 @@ public class BluetoothUtils {
                 BluetoothDevice.METADATA_DEVICE_TYPE);
         if (TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET)
                 || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_WATCH)
-                || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_DEFAULT)) {
+                || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_DEFAULT)
+                || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_STYLUS)) {
             Log.d(TAG, "isAdvancedDetailsHeader: deviceType is " + deviceType);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if the Bluetooth device is supports advanced metadata and an untethered headset
+     *
+     * @param bluetoothDevice the BluetoothDevice to get metadata
+     * @return true if it supports advanced metadata and an untethered headset, false otherwise.
+     */
+    public static boolean isAdvancedUntetheredDevice(@NonNull BluetoothDevice bluetoothDevice) {
+        if (!isAdvancedHeaderEnabled()) {
+            return false;
+        }
+        if (isUntetheredHeadset(bluetoothDevice)) {
+            return true;
+        }
+        // The metadata is for Android S
+        String deviceType = getStringMetaData(bluetoothDevice,
+                BluetoothDevice.METADATA_DEVICE_TYPE);
+        if (TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET)) {
+            Log.d(TAG, "isAdvancedUntetheredDevice: is untethered device ");
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if a device class matches with a defined BluetoothClass device.
+     *
+     * @param device Must be one of the public constants in {@link BluetoothClass.Device}
+     * @return true if device class matches, false otherwise.
+     */
+    public static boolean isDeviceClassMatched(@NonNull BluetoothDevice bluetoothDevice,
+            int device) {
+        return bluetoothDevice.getBluetoothClass() != null
+                && bluetoothDevice.getBluetoothClass().getDeviceClass() == device;
+    }
+
+    private static boolean isAdvancedHeaderEnabled() {
+        if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SETTINGS_UI, BT_ADVANCED_HEADER_ENABLED,
+                true)) {
+            Log.d(TAG, "isAdvancedDetailsHeader: advancedEnabled is false");
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isUntetheredHeadset(@NonNull BluetoothDevice bluetoothDevice) {
+        // The metadata is for Android R
+        if (getBooleanMetaData(bluetoothDevice, BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)) {
+            Log.d(TAG, "isAdvancedDetailsHeader: untetheredHeadset is true");
             return true;
         }
         return false;

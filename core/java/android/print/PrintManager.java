@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -529,13 +530,17 @@ public final class PrintManager {
             Bundle result = mService.print(printJobName, delegate,
                     attributes, mContext.getPackageName(), mAppId, mUserId);
             if (result != null) {
-                PrintJobInfo printJob = result.getParcelable(EXTRA_PRINT_JOB);
-                IntentSender intent = result.getParcelable(EXTRA_PRINT_DIALOG_INTENT);
+                PrintJobInfo printJob = result.getParcelable(EXTRA_PRINT_JOB, android.print.PrintJobInfo.class);
+                IntentSender intent = result.getParcelable(EXTRA_PRINT_DIALOG_INTENT, android.content.IntentSender.class);
                 if (printJob == null || intent == null) {
                     return null;
                 }
                 try {
-                    mContext.startIntentSender(intent, null, 0, 0, 0);
+                    ActivityOptions activityOptions = ActivityOptions.makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                    mContext.startIntentSender(intent, null, 0, 0, 0,
+                            activityOptions.toBundle());
                     return new PrintJob(printJob, this);
                 } catch (SendIntentException sie) {
                     Log.e(LOG_TAG, "Couldn't start print job config activity.", sie);

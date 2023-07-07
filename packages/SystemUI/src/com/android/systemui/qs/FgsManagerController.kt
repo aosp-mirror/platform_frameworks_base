@@ -18,6 +18,9 @@ package com.android.systemui.qs
 
 import android.app.IActivityManager
 import android.app.IForegroundServiceObserver
+import android.app.job.IUserVisibleJobObserver
+import android.app.job.JobScheduler
+import android.app.job.UserVisibleJobSummary
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -40,21 +43,28 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.GuardedBy
+import androidx.annotation.VisibleForTesting
+import androidx.annotation.WorkerThread
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_FOOTER_DOT
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.Dumpable
 import com.android.systemui.R
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.indentIfPossible
@@ -64,35 +74,113 @@ import java.util.Objects
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.math.max
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+/** A controller for the dealing with services running in the foreground. */
+interface FgsManagerController {
+
+    /** The number of packages with a service running in the foreground. */
+    val numRunningPackages: Int
+
+    /**
+     * Whether there were new changes to the foreground services since the last [shown][showDialog]
+     * dialog was dismissed.
+     */
+    val newChangesSinceDialogWasDismissed: Boolean
+
+    /**
+     * Whether we should show a dot to indicate when [newChangesSinceDialogWasDismissed] is true.
+     */
+    val showFooterDot: StateFlow<Boolean>
+
+    val includesUserVisibleJobs: Boolean
+
+    /**
+     * Initialize this controller. This should be called once, before this controller is used for
+     * the first time.
+     */
+    fun init()
+
+    /**
+     * Show the foreground services dialog. The dialog will be expanded from [expandable] if
+     * it's not `null`.
+     */
+    fun showDialog(expandable: Expandable?)
+
+    /** Add a [OnNumberOfPackagesChangedListener]. */
+    fun addOnNumberOfPackagesChangedListener(listener: OnNumberOfPackagesChangedListener)
+
+    /** Remove a [OnNumberOfPackagesChangedListener]. */
+    fun removeOnNumberOfPackagesChangedListener(listener: OnNumberOfPackagesChangedListener)
+
+    /** Add a [OnDialogDismissedListener]. */
+    fun addOnDialogDismissedListener(listener: OnDialogDismissedListener)
+
+    /** Remove a [OnDialogDismissedListener]. */
+    fun removeOnDialogDismissedListener(listener: OnDialogDismissedListener)
+
+    @VisibleForTesting
+    fun visibleButtonsCount(): Int
+
+    interface OnNumberOfPackagesChangedListener {
+        /** Called when [numRunningPackages] changed. */
+        fun onNumberOfPackagesChanged(numPackages: Int)
+    }
+
+    interface OnDialogDismissedListener {
+        /** Called when a dialog shown using [showDialog] was dismissed. */
+        fun onDialogDismissed()
+    }
+}
 
 @SysUISingleton
-class FgsManagerController @Inject constructor(
+class FgsManagerControllerImpl @Inject constructor(
     private val context: Context,
     @Main private val mainExecutor: Executor,
     @Background private val backgroundExecutor: Executor,
     private val systemClock: SystemClock,
     private val activityManager: IActivityManager,
+    private val jobScheduler: JobScheduler,
     private val packageManager: PackageManager,
     private val userTracker: UserTracker,
     private val deviceConfigProxy: DeviceConfigProxy,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val dumpManager: DumpManager
-) : IForegroundServiceObserver.Stub(), Dumpable {
+) : Dumpable, FgsManagerController {
 
     companion object {
-        private val LOG_TAG = FgsManagerController::class.java.simpleName
-        private const val DEFAULT_TASK_MANAGER_ENABLED = true
+        private const val INTERACTION_JANK_TAG = "active_background_apps"
         private const val DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT = false
+        private const val DEFAULT_TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS = true
+        private const val DEFAULT_TASK_MANAGER_SHOW_USER_VISIBLE_JOBS = true
+        private const val DEFAULT_TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP = true
     }
 
-    var changesSinceDialog = false
+    override var newChangesSinceDialogWasDismissed = false
         private set
 
-    var isAvailable = false
-        private set
-    var showFooterDot = false
-        private set
+    val _showFooterDot = MutableStateFlow(false)
+    override val showFooterDot: StateFlow<Boolean> = _showFooterDot.asStateFlow()
+
+    private var showStopBtnForUserAllowlistedApps = false
+
+    private var showUserVisibleJobs = DEFAULT_TASK_MANAGER_SHOW_USER_VISIBLE_JOBS
+
+    private var informJobSchedulerOfPendingAppStop =
+        DEFAULT_TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP
+
+    override val includesUserVisibleJobs: Boolean
+        get() = showUserVisibleJobs
+
+    override val numRunningPackages: Int
+        get() {
+            synchronized(lock) {
+                return getNumVisiblePackagesLocked()
+            }
+        }
 
     private val lock = Any()
 
@@ -106,7 +194,7 @@ class FgsManagerController @Inject constructor(
     private var currentProfileIds = mutableSetOf<Int>()
 
     @GuardedBy("lock")
-    private val runningServiceTokens = mutableMapOf<UserPackage, StartTimeAndTokens>()
+    private val runningTaskIdentifiers = mutableMapOf<UserPackage, StartTimeAndIdentifiers>()
 
     @GuardedBy("lock")
     private var dialog: SystemUIDialog? = null
@@ -114,7 +202,7 @@ class FgsManagerController @Inject constructor(
     @GuardedBy("lock")
     private val appListAdapter: AppListAdapter = AppListAdapter()
 
-    @GuardedBy("lock")
+    /* Only mutate on the background thread */
     private var runningApps: ArrayMap<UserPackage, RunningApp> = ArrayMap()
 
     private val userTrackerCallback = object : UserTracker.Callback {
@@ -130,21 +218,34 @@ class FgsManagerController @Inject constructor(
         }
     }
 
-    interface OnNumberOfPackagesChangedListener {
-        fun onNumberOfPackagesChanged(numPackages: Int)
-    }
+    private val foregroundServiceObserver = ForegroundServiceObserver()
 
-    interface OnDialogDismissedListener {
-        fun onDialogDismissed()
-    }
+    private val userVisibleJobObserver = UserVisibleJobObserver()
 
-    fun init() {
+    override fun init() {
         synchronized(lock) {
             if (initialized) {
                 return
             }
+
+            showUserVisibleJobs = deviceConfigProxy.getBoolean(
+                NAMESPACE_SYSTEMUI,
+                TASK_MANAGER_SHOW_USER_VISIBLE_JOBS, DEFAULT_TASK_MANAGER_SHOW_USER_VISIBLE_JOBS)
+
+            informJobSchedulerOfPendingAppStop = deviceConfigProxy.getBoolean(
+                NAMESPACE_SYSTEMUI,
+                TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP,
+                DEFAULT_TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP)
+
             try {
-                activityManager.registerForegroundServiceObserver(this)
+                activityManager.registerForegroundServiceObserver(foregroundServiceObserver)
+                // Clumping FGS and user-visible jobs here and showing a single entry and button
+                // for them is the easiest way to get user-visible jobs showing in Task Manager.
+                // Ideally, we would have dedicated UI in task manager for the user-visible jobs.
+                // TODO(255768978): distinguish jobs from FGS and give users more control
+                if (showUserVisibleJobs) {
+                    jobScheduler.registerUserVisibleJobObserver(userVisibleJobObserver)
+                }
             } catch (e: RemoteException) {
                 e.rethrowFromSystemServer()
             }
@@ -153,99 +254,95 @@ class FgsManagerController @Inject constructor(
 
             currentProfileIds.addAll(userTracker.userProfiles.map { it.id })
 
-            deviceConfigProxy.addOnPropertiesChangedListener(NAMESPACE_SYSTEMUI,
-                    backgroundExecutor) {
-                isAvailable = it.getBoolean(TASK_MANAGER_ENABLED, isAvailable)
-                showFooterDot =
-                        it.getBoolean(TASK_MANAGER_SHOW_FOOTER_DOT, showFooterDot)
+            deviceConfigProxy.addOnPropertiesChangedListener(
+                NAMESPACE_SYSTEMUI,
+                backgroundExecutor
+            ) {
+                _showFooterDot.value =
+                    it.getBoolean(TASK_MANAGER_SHOW_FOOTER_DOT, _showFooterDot.value)
+                showStopBtnForUserAllowlistedApps = it.getBoolean(
+                    TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS,
+                    showStopBtnForUserAllowlistedApps)
+                var wasShowingUserVisibleJobs = showUserVisibleJobs
+                showUserVisibleJobs = it.getBoolean(
+                    TASK_MANAGER_SHOW_USER_VISIBLE_JOBS, showUserVisibleJobs)
+                if (showUserVisibleJobs != wasShowingUserVisibleJobs) {
+                    onShowUserVisibleJobsFlagChanged()
+                }
+                informJobSchedulerOfPendingAppStop = it.getBoolean(
+                    TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS,
+                    informJobSchedulerOfPendingAppStop)
             }
-
-            isAvailable = deviceConfigProxy.getBoolean(NAMESPACE_SYSTEMUI,
-                    TASK_MANAGER_ENABLED, DEFAULT_TASK_MANAGER_ENABLED)
-            showFooterDot = deviceConfigProxy.getBoolean(NAMESPACE_SYSTEMUI,
-                    TASK_MANAGER_SHOW_FOOTER_DOT, DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT)
+            _showFooterDot.value = deviceConfigProxy.getBoolean(
+                NAMESPACE_SYSTEMUI,
+                TASK_MANAGER_SHOW_FOOTER_DOT, DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT
+            )
+            showStopBtnForUserAllowlistedApps = deviceConfigProxy.getBoolean(
+                NAMESPACE_SYSTEMUI,
+                TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS,
+                DEFAULT_TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS)
 
             dumpManager.registerDumpable(this)
 
             broadcastDispatcher.registerReceiver(
-                    object : BroadcastReceiver() {
-                        override fun onReceive(context: Context, intent: Intent) {
-                            if (intent.action == Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER) {
-                                showDialog(null)
-                            }
+                object : BroadcastReceiver() {
+                    override fun onReceive(context: Context, intent: Intent) {
+                        if (intent.action == Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER) {
+                            showDialog(null)
                         }
-                    },
-                    IntentFilter(Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER),
-                    executor = mainExecutor,
-                    flags = Context.RECEIVER_NOT_EXPORTED)
+                    }
+                },
+                IntentFilter(Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER),
+                executor = mainExecutor,
+                flags = Context.RECEIVER_NOT_EXPORTED
+            )
 
             initialized = true
         }
     }
 
-    override fun onForegroundStateChanged(
-        token: IBinder,
-        packageName: String,
-        userId: Int,
-        isForeground: Boolean
+    @GuardedBy("lock")
+    private val onNumberOfPackagesChangedListeners =
+        mutableSetOf<FgsManagerController.OnNumberOfPackagesChangedListener>()
+
+    @GuardedBy("lock")
+    private val onDialogDismissedListeners =
+        mutableSetOf<FgsManagerController.OnDialogDismissedListener>()
+
+    override fun addOnNumberOfPackagesChangedListener(
+        listener: FgsManagerController.OnNumberOfPackagesChangedListener
     ) {
-        synchronized(lock) {
-            val userPackageKey = UserPackage(userId, packageName)
-            if (isForeground) {
-                runningServiceTokens.getOrPut(userPackageKey) { StartTimeAndTokens(systemClock) }
-                        .addToken(token)
-            } else {
-                if (runningServiceTokens[userPackageKey]?.also {
-                            it.removeToken(token) }?.isEmpty() == true) {
-                    runningServiceTokens.remove(userPackageKey)
-                }
-            }
-
-            updateNumberOfVisibleRunningPackagesLocked()
-
-            updateAppItemsLocked()
-        }
-    }
-
-    @GuardedBy("lock")
-    val onNumberOfPackagesChangedListeners: MutableSet<OnNumberOfPackagesChangedListener> =
-            mutableSetOf()
-
-    @GuardedBy("lock")
-    val onDialogDismissedListeners: MutableSet<OnDialogDismissedListener> = mutableSetOf()
-
-    fun addOnNumberOfPackagesChangedListener(listener: OnNumberOfPackagesChangedListener) {
         synchronized(lock) {
             onNumberOfPackagesChangedListeners.add(listener)
         }
     }
 
-    fun removeOnNumberOfPackagesChangedListener(listener: OnNumberOfPackagesChangedListener) {
+    override fun removeOnNumberOfPackagesChangedListener(
+        listener: FgsManagerController.OnNumberOfPackagesChangedListener
+    ) {
         synchronized(lock) {
             onNumberOfPackagesChangedListeners.remove(listener)
         }
     }
 
-    fun addOnDialogDismissedListener(listener: OnDialogDismissedListener) {
+    override fun addOnDialogDismissedListener(
+        listener: FgsManagerController.OnDialogDismissedListener
+    ) {
         synchronized(lock) {
             onDialogDismissedListeners.add(listener)
         }
     }
 
-    fun removeOnDialogDismissedListener(listener: OnDialogDismissedListener) {
+    override fun removeOnDialogDismissedListener(
+        listener: FgsManagerController.OnDialogDismissedListener
+    ) {
         synchronized(lock) {
             onDialogDismissedListeners.remove(listener)
         }
     }
 
-    fun getNumRunningPackages(): Int {
-        synchronized(lock) {
-            return getNumVisiblePackagesLocked()
-        }
-    }
-
     private fun getNumVisiblePackagesLocked(): Int {
-        return runningServiceTokens.keys.count {
+        return runningTaskIdentifiers.keys.count {
             it.uiControl != UIControl.HIDE_ENTRY && currentProfileIds.contains(it.userId)
         }
     }
@@ -254,7 +351,7 @@ class FgsManagerController @Inject constructor(
         val num = getNumVisiblePackagesLocked()
         if (num != lastNumberOfVisiblePackages) {
             lastNumberOfVisiblePackages = num
-            changesSinceDialog = true
+            newChangesSinceDialogWasDismissed = true
             onNumberOfPackagesChangedListeners.forEach {
                 backgroundExecutor.execute {
                     it.onNumberOfPackagesChanged(num)
@@ -263,16 +360,21 @@ class FgsManagerController @Inject constructor(
         }
     }
 
-    fun shouldUpdateFooterVisibility() = dialog == null
+    override fun visibleButtonsCount(): Int {
+        synchronized(lock) {
+            return getNumVisibleButtonsLocked()
+        }
+    }
 
-    fun showDialog(viewLaunchedFrom: View?) {
+    private fun getNumVisibleButtonsLocked(): Int {
+        return runningTaskIdentifiers.keys.count {
+            it.uiControl != UIControl.HIDE_BUTTON && currentProfileIds.contains(it.userId)
+        }
+    }
+
+    override fun showDialog(expandable: Expandable?) {
         synchronized(lock) {
             if (dialog == null) {
-
-                runningServiceTokens.keys.forEach {
-                    it.updateUiControl()
-                }
-
                 val dialog = SystemUIDialog(context)
                 dialog.setTitle(R.string.fgs_manager_dialog_title)
                 dialog.setMessage(R.string.fgs_manager_dialog_message)
@@ -284,13 +386,13 @@ class FgsManagerController @Inject constructor(
                 recyclerView.adapter = appListAdapter
 
                 val topSpacing = dialogContext.resources
-                        .getDimensionPixelSize(R.dimen.fgs_manager_list_top_spacing)
+                    .getDimensionPixelSize(R.dimen.fgs_manager_list_top_spacing)
                 dialog.setView(recyclerView, 0, topSpacing, 0, 0)
 
                 this.dialog = dialog
 
                 dialog.setOnDismissListener {
-                    changesSinceDialog = false
+                    newChangesSinceDialogWasDismissed = false
                     synchronized(lock) {
                         this.dialog = null
                         updateAppItemsLocked()
@@ -301,39 +403,72 @@ class FgsManagerController @Inject constructor(
                 }
 
                 mainExecutor.execute {
-                    viewLaunchedFrom
-                            ?.let { dialogLaunchAnimator.showFromView(dialog, it) } ?: dialog.show()
-                }
-
-                backgroundExecutor.execute {
-                    synchronized(lock) {
-                        updateAppItemsLocked()
+                    val controller =
+                        expandable?.dialogLaunchController(
+                            DialogCuj(
+                                InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                INTERACTION_JANK_TAG,
+                            )
+                        )
+                    if (controller != null) {
+                        dialogLaunchAnimator.show(dialog, controller)
+                    } else {
+                        dialog.show()
                     }
                 }
+
+                updateAppItemsLocked(refreshUiControls = true)
             }
         }
     }
 
     @GuardedBy("lock")
-    private fun updateAppItemsLocked() {
+    private fun updateAppItemsLocked(refreshUiControls: Boolean = false) {
         if (dialog == null) {
-            runningApps.clear()
+            backgroundExecutor.execute {
+                clearRunningApps()
+            }
             return
         }
 
-        val addedPackages = runningServiceTokens.keys.filter {
-            currentProfileIds.contains(it.userId) &&
+        val packagesToStartTime = runningTaskIdentifiers.mapValues { it.value.startTime }
+        val profileIds = currentProfileIds.toSet()
+        backgroundExecutor.execute {
+            updateAppItems(packagesToStartTime, profileIds, refreshUiControls)
+        }
+    }
+
+    /**
+     * Must be called on the background thread.
+     */
+    @WorkerThread
+    private fun updateAppItems(
+        packages: Map<UserPackage, Long>,
+        profileIds: Set<Int>,
+        refreshUiControls: Boolean = true
+    ) {
+        if (refreshUiControls) {
+            packages.forEach { (pkg, _) ->
+                pkg.updateUiControl()
+            }
+        }
+
+        val addedPackages = packages.keys.filter {
+            profileIds.contains(it.userId) &&
                     it.uiControl != UIControl.HIDE_ENTRY && runningApps[it]?.stopped != true
         }
-        val removedPackages = runningApps.keys.filter { !runningServiceTokens.containsKey(it) }
+        val removedPackages = runningApps.keys.filter { it !in packages }
 
         addedPackages.forEach {
             val ai = packageManager.getApplicationInfoAsUser(it.packageName, 0, it.userId)
-            runningApps[it] = RunningApp(it.userId, it.packageName,
-                    runningServiceTokens[it]!!.startTime, it.uiControl,
-                    packageManager.getApplicationLabel(ai),
-                    packageManager.getUserBadgedIcon(
-                            packageManager.getApplicationIcon(ai), UserHandle.of(it.userId)))
+            runningApps[it] = RunningApp(
+                it.userId, it.packageName,
+                packages[it]!!, it.uiControl,
+                packageManager.getApplicationLabel(ai),
+                packageManager.getUserBadgedIcon(
+                    packageManager.getApplicationIcon(ai), UserHandle.of(it.userId)
+                )
+            )
             logEvent(stopped = false, it.packageName, it.userId, runningApps[it]!!.timeStarted)
         }
 
@@ -349,13 +484,52 @@ class FgsManagerController @Inject constructor(
 
         mainExecutor.execute {
             appListAdapter
-                    .setData(runningApps.values.toList().sortedByDescending { it.timeStarted })
+                .setData(runningApps.values.toList().sortedByDescending { it.timeStarted })
         }
+    }
+
+    /**
+     * Must be called on the background thread.
+     */
+    @WorkerThread
+    private fun clearRunningApps() {
+        runningApps.clear()
     }
 
     private fun stopPackage(userId: Int, packageName: String, timeStarted: Long) {
         logEvent(stopped = true, packageName, userId, timeStarted)
+        val userPackageKey = UserPackage(userId, packageName)
+        if (showUserVisibleJobs || informJobSchedulerOfPendingAppStop) {
+            // TODO(255768978): allow fine-grained job control
+            jobScheduler.notePendingUserRequestedAppStop(packageName, userId, "task manager")
+        }
         activityManager.stopAppForUser(packageName, userId)
+    }
+
+    private fun onShowUserVisibleJobsFlagChanged() {
+        if (showUserVisibleJobs) {
+            jobScheduler.registerUserVisibleJobObserver(userVisibleJobObserver)
+        } else {
+            jobScheduler.unregisterUserVisibleJobObserver(userVisibleJobObserver)
+
+            synchronized(lock) {
+                for ((userPackage, startTimeAndIdentifiers) in runningTaskIdentifiers) {
+                    if (startTimeAndIdentifiers.hasFgs()) {
+                        // The app still has FGS running, so all we need to do is remove
+                        // the job summaries
+                        startTimeAndIdentifiers.clearJobSummaries()
+                    } else {
+                        // The app only has user-visible jobs running, so remove it from
+                        // the map altogether
+                        runningTaskIdentifiers.remove(userPackage)
+                    }
+                }
+
+                updateNumberOfVisibleRunningPackagesLocked()
+
+                updateAppItemsLocked()
+            }
+        }
     }
 
     private fun logEvent(stopped: Boolean, packageName: String, userId: Int, timeStarted: Long) {
@@ -367,8 +541,10 @@ class FgsManagerController @Inject constructor(
         }
         backgroundExecutor.execute {
             val uid = packageManager.getPackageUidAsUser(packageName, userId)
-            SysUiStatsLog.write(SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED, uid, event,
-                    timeLogged - timeStarted)
+            SysUiStatsLog.write(
+                SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED, uid, event,
+                timeLogged - timeStarted
+            )
         }
     }
 
@@ -379,8 +555,10 @@ class FgsManagerController @Inject constructor(
         private var data: List<RunningApp> = listOf()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppItemViewHolder {
-            return AppItemViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.fgs_manager_app_item, parent, false))
+            return AppItemViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.fgs_manager_app_item, parent, false)
+            )
         }
 
         override fun onBindViewHolder(holder: AppItemViewHolder, position: Int) {
@@ -392,8 +570,9 @@ class FgsManagerController @Inject constructor(
                 iconView.setImageDrawable(runningApp.icon)
                 appLabelView.text = runningApp.appLabel
                 durationView.text = DateUtils.formatDuration(
-                        max(systemClock.elapsedRealtime() - runningApp.timeStarted, 60000),
-                        DateUtils.LENGTH_MEDIUM)
+                    max(systemClock.elapsedRealtime() - runningApp.timeStarted, 60000),
+                    DateUtils.LENGTH_MEDIUM
+                )
                 stopButton.setOnClickListener {
                     stopButton.setText(R.string.fgs_manager_app_item_stop_button_stopped_label)
                     stopPackage(runningApp.userId, runningApp.packageName, runningApp.timeStarted)
@@ -431,15 +610,72 @@ class FgsManagerController @Inject constructor(
                 }
 
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int):
-                        Boolean {
+                    Boolean {
                     return oldData[oldItemPosition] == newData[newItemPosition]
                 }
 
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int):
-                        Boolean {
+                    Boolean {
                     return oldData[oldItemPosition].stopped == newData[newItemPosition].stopped
                 }
             }).dispatchUpdatesTo(this)
+        }
+    }
+
+    private inner class ForegroundServiceObserver : IForegroundServiceObserver.Stub() {
+        override fun onForegroundStateChanged(
+                token: IBinder,
+                packageName: String,
+                userId: Int,
+                isForeground: Boolean
+        ) {
+            synchronized(lock) {
+                val userPackageKey = UserPackage(userId, packageName)
+                if (isForeground) {
+                    runningTaskIdentifiers
+                            .getOrPut(userPackageKey) { StartTimeAndIdentifiers(systemClock) }
+                            .addFgsToken(token)
+                } else {
+                    if (runningTaskIdentifiers[userPackageKey]?.also {
+                                it.removeFgsToken(token)
+                            }?.isEmpty() == true
+                    ) {
+                        runningTaskIdentifiers.remove(userPackageKey)
+                    }
+                }
+
+                updateNumberOfVisibleRunningPackagesLocked()
+
+                updateAppItemsLocked()
+            }
+        }
+    }
+
+    private inner class UserVisibleJobObserver : IUserVisibleJobObserver.Stub() {
+        override fun onUserVisibleJobStateChanged(
+                summary: UserVisibleJobSummary,
+                isRunning: Boolean
+        ) {
+            synchronized(lock) {
+                val userPackageKey = UserPackage(
+                        UserHandle.getUserId(summary.callingUid), summary.callingPackageName)
+                if (isRunning) {
+                    runningTaskIdentifiers
+                            .getOrPut(userPackageKey) { StartTimeAndIdentifiers(systemClock) }
+                            .addJobSummary(summary)
+                } else {
+                    if (runningTaskIdentifiers[userPackageKey]?.also {
+                                it.removeJobSummary(summary)
+                            }?.isEmpty() == true
+                    ) {
+                        runningTaskIdentifiers.remove(userPackageKey)
+                    }
+                }
+
+                updateNumberOfVisibleRunningPackagesLocked()
+
+                updateAppItemsLocked()
+            }
         }
     }
 
@@ -462,7 +698,7 @@ class FgsManagerController @Inject constructor(
 
         fun updateUiControl() {
             backgroundRestrictionExemptionReason =
-                    activityManager.getBackgroundRestrictionExemptionReason(uid)
+                activityManager.getBackgroundRestrictionExemptionReason(uid)
             uiControl = when (backgroundRestrictionExemptionReason) {
                 PowerExemptionManager.REASON_SYSTEM_UID,
                 PowerExemptionManager.REASON_DEVICE_DEMO_MODE -> UIControl.HIDE_ENTRY
@@ -476,7 +712,15 @@ class FgsManagerController @Inject constructor(
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT,
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI,
                 PowerExemptionManager.REASON_ROLE_DIALER,
-                PowerExemptionManager.REASON_SYSTEM_MODULE -> UIControl.HIDE_BUTTON
+                PowerExemptionManager.REASON_SYSTEM_MODULE,
+                PowerExemptionManager.REASON_SYSTEM_EXEMPT_APP_OP -> UIControl.HIDE_BUTTON
+
+                PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE ->
+                    if (showStopBtnForUserAllowlistedApps) {
+                        UIControl.NORMAL
+                    } else {
+                        UIControl.HIDE_BUTTON
+                    }
                 else -> UIControl.NORMAL
             }
             uiControlInitialized = true
@@ -502,33 +746,62 @@ class FgsManagerController @Inject constructor(
         }
     }
 
-    private data class StartTimeAndTokens(
+    private data class StartTimeAndIdentifiers(
         val systemClock: SystemClock
     ) {
         val startTime = systemClock.elapsedRealtime()
-        val tokens = mutableSetOf<IBinder>()
+        val fgsTokens = mutableSetOf<IBinder>()
+        val jobSummaries = mutableSetOf<UserVisibleJobSummary>()
 
-        fun addToken(token: IBinder) {
-            tokens.add(token)
+        fun addJobSummary(summary: UserVisibleJobSummary) {
+            jobSummaries.add(summary)
         }
 
-        fun removeToken(token: IBinder) {
-            tokens.remove(token)
+        fun clearJobSummaries() {
+            jobSummaries.clear()
+        }
+
+        fun removeJobSummary(summary: UserVisibleJobSummary) {
+            jobSummaries.remove(summary)
+        }
+
+        fun addFgsToken(token: IBinder) {
+            fgsTokens.add(token)
+        }
+
+        fun removeFgsToken(token: IBinder) {
+            fgsTokens.remove(token)
+        }
+
+        fun hasFgs(): Boolean {
+            return !fgsTokens.isEmpty()
+        }
+
+        fun hasRunningJobs(): Boolean {
+            return !jobSummaries.isEmpty()
         }
 
         fun isEmpty(): Boolean {
-            return tokens.isEmpty()
+            return fgsTokens.isEmpty() && jobSummaries.isEmpty()
         }
 
         fun dump(pw: PrintWriter) {
-            pw.println("StartTimeAndTokens: [")
+            pw.println("StartTimeAndIdentifiers: [")
             pw.indentIfPossible {
-                pw.println("startTime=$startTime (time running =" +
-                        " ${systemClock.elapsedRealtime() - startTime}ms)")
-                pw.println("tokens: [")
+                pw.println(
+                    "startTime=$startTime (time running =" +
+                        " ${systemClock.elapsedRealtime() - startTime}ms)"
+                )
+                pw.println("fgs tokens: [")
                 pw.indentIfPossible {
-                    for (token in tokens) {
+                    for (token in fgsTokens) {
                         pw.println("$token")
+                    }
+                }
+                pw.println("job summaries: [")
+                pw.indentIfPossible {
+                    for (summary in jobSummaries) {
+                        pw.println("$summary")
                     }
                 }
                 pw.println("]")
@@ -572,8 +845,10 @@ class FgsManagerController @Inject constructor(
             pw.indentIfPossible {
                 pw.println("userId=$userId")
                 pw.println("packageName=$packageName")
-                pw.println("timeStarted=$timeStarted (time since start =" +
-                        " ${systemClock.elapsedRealtime() - timeStarted}ms)")
+                pw.println(
+                    "timeStarted=$timeStarted (time since start =" +
+                        " ${systemClock.elapsedRealtime() - timeStarted}ms)"
+                )
                 pw.println("uiControl=$uiControl")
                 pw.println("appLabel=$appLabel")
                 pw.println("icon=$icon")
@@ -591,14 +866,14 @@ class FgsManagerController @Inject constructor(
         val pw = IndentingPrintWriter(printwriter)
         synchronized(lock) {
             pw.println("current user profiles = $currentProfileIds")
-            pw.println("changesSinceDialog=$changesSinceDialog")
-            pw.println("Running service tokens: [")
+            pw.println("newChangesSinceDialogWasShown=$newChangesSinceDialogWasDismissed")
+            pw.println("Running task identifiers: [")
             pw.indentIfPossible {
-                runningServiceTokens.forEach { (userPackage, startTimeAndTokens) ->
+                runningTaskIdentifiers.forEach { (userPackage, startTimeAndIdentifiers) ->
                     pw.println("{")
                     pw.indentIfPossible {
                         userPackage.dump(pw)
-                        startTimeAndTokens.dump(pw)
+                        startTimeAndIdentifiers.dump(pw)
                     }
                     pw.println("}")
                 }

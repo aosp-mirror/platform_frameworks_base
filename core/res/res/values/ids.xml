@@ -70,6 +70,12 @@
   <item type="id" name="cut" />
   <item type="id" name="copy" />
   <item type="id" name="paste" />
+  <!-- Editor action that makes selected text bold. -->
+  <item type="id" name="bold" />
+  <!-- Editor action that makes selected text italic. -->
+  <item type="id" name="italic" />
+  <!-- Editor action that makes selected text underline. -->
+  <item type="id" name="underline" />
   <item type="id" name="copyUrl" />
   <item type="id" name="selectTextMode" />
   <item type="id" name="switchInputMethod" />
@@ -272,6 +278,9 @@
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_TEXT_SUGGESTIONS}. -->
   <item type="id" name="accessibilityActionShowTextSuggestions" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_IN_DIRECTION}. -->
+  <item type="id" name="accessibilityActionScrollInDirection" />
 
   <!-- View tag for remote views to store the index of the next child when adding nested remote views dynamically. -->
   <item type="id" name="remote_views_next_child" />

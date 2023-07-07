@@ -22,5 +22,6 @@ package android.hardware.biometrics;
  */
 oneway interface IBiometricStateListener {
     void onStateChanged(int newState);
+    void onBiometricAction(int action);
     void onEnrollmentsChanged(int userId, int sensorId, boolean hasEnrollments);
 }

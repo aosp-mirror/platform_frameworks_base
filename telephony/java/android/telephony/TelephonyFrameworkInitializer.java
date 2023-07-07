@@ -23,6 +23,7 @@ import android.os.TelephonyServiceManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsManager;
+import android.telephony.satellite.SatelliteManager;
 
 import com.android.internal.util.Preconditions;
 
@@ -97,6 +98,11 @@ public class TelephonyFrameworkInitializer {
                 SmsManager.class,
                 context -> SmsManager.getSmsManagerForContextAndSubscriptionId(context,
                         SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)
+        );
+        SystemServiceRegistry.registerContextAwareService(
+                Context.SATELLITE_SERVICE,
+                SatelliteManager.class,
+                context -> new SatelliteManager(context)
         );
     }
 

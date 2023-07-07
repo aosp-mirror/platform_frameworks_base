@@ -28,6 +28,7 @@ import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManager.isProcStateConsideredInteraction;
+import static android.app.ActivityManager.printCapabilitiesSummary;
 import static android.app.ActivityManager.procStateToString;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
@@ -123,6 +124,7 @@ import static android.telephony.CarrierConfigManager.KEY_DATA_RAPID_NOTIFICATION
 import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_NOTIFICATION_BOOL;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -152,6 +154,7 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.UidObserver;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -238,8 +241,6 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 import android.util.SparseSetArray;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -254,6 +255,8 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.net.module.util.NetworkIdentityUtils;
 import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
@@ -1116,7 +1119,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
+    final private IUidObserver mUidObserver = new UidObserver() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
                 @ProcessCapability int capability) {
             synchronized (mUidStateCallbackInfos) {
@@ -1131,24 +1134,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (!callbackInfo.isPending) {
                     mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED, callbackInfo)
                             .sendToTarget();
+                    callbackInfo.isPending = true;
                 }
             }
         }
 
         @Override public void onUidGone(int uid, boolean disabled) {
             mUidEventHandler.obtainMessage(UID_MSG_GONE, uid, 0).sendToTarget();
-        }
-
-        @Override public void onUidActive(int uid) {
-        }
-
-        @Override public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 
@@ -1165,6 +1157,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             this.procState = procState;
             this.procStateSeq = procStateSeq;
             this.capability = capability;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("{");
+            sb.append("uid=").append(uid).append(",");
+            sb.append("proc_state=").append(procStateToString(procState)).append(",");
+            sb.append("seq=").append(procStateSeq).append(",");
+            sb.append("cap="); printCapabilitiesSummary(sb, capability); sb.append(",");
+            sb.append("pending=").append(isPending);
+            sb.append("}");
+            return sb.toString();
         }
     }
 
@@ -1299,7 +1304,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // on background handler thread, and verified MANAGE_NETWORK_POLICY
             // permission above.
 
-            final NetworkTemplate template = intent.getParcelableExtra(EXTRA_NETWORK_TEMPLATE);
+            final NetworkTemplate template = intent.getParcelableExtra(EXTRA_NETWORK_TEMPLATE, android.net.NetworkTemplate.class);
             if (ACTION_SNOOZE_WARNING.equals(intent.getAction())) {
                 performSnooze(template, TYPE_WARNING);
             } else if (ACTION_SNOOZE_RAPID.equals(intent.getAction())) {
@@ -1367,8 +1372,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final boolean roamingChanged = updateCapabilityChange(
                         mNetworkRoaming, newRoaming, network);
 
-                if (meteredChanged || roamingChanged) {
+                final boolean shouldUpdateNetworkRules = meteredChanged || roamingChanged;
+
+                if (meteredChanged) {
                     mLogger.meterednessChanged(network.getNetId(), newMetered);
+                }
+
+                if (roamingChanged) {
+                    mLogger.roamingChanged(network.getNetId(), newRoaming);
+                }
+
+                if (shouldUpdateNetworkRules) {
                     updateNetworkRulesNL();
                 }
             }
@@ -1381,6 +1395,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final boolean ifacesChanged = updateNetworkToIfacesNL(network.getNetId(),
                         newIfaces);
                 if (ifacesChanged) {
+                    mLogger.interfacesChanged(network.getNetId(), newIfaces);
                     updateNetworkRulesNL();
                 }
             }
@@ -1639,15 +1654,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mContext, 0, snoozeIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (UserManager.isHeadlessSystemUserMode()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-                }
+                setContentIntent(builder, viewIntent);
                 break;
             }
             case TYPE_LIMIT: {
@@ -1668,15 +1675,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setSmallIcon(R.drawable.stat_notify_disabled_data);
 
                 final Intent intent = buildNetworkOverLimitIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (UserManager.isHeadlessSystemUserMode()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-                }
+                setContentIntent(builder, intent);
                 break;
             }
             case TYPE_LIMIT_SNOOZED: {
@@ -1700,15 +1699,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setChannelId(SystemNotificationChannels.NETWORK_STATUS);
 
                 final Intent intent = buildViewDataUsageIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (UserManager.isHeadlessSystemUserMode()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-                }
+                setContentIntent(builder, intent);
                 break;
             }
             case TYPE_RAPID: {
@@ -1728,15 +1719,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mContext, 0, snoozeIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
 
                 final Intent viewIntent = buildViewDataUsageIntent(res, policy.template);
-                // TODO: Resolve to single code path.
-                if (UserManager.isHeadlessSystemUserMode()) {
-                    builder.setContentIntent(PendingIntent.getActivityAsUser(
-                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
-                            /* options= */ null, UserHandle.CURRENT));
-                } else {
-                    builder.setContentIntent(PendingIntent.getActivity(
-                            mContext, 0, viewIntent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
-                }
+                setContentIntent(builder, viewIntent);
                 break;
             }
             default: {
@@ -1752,6 +1735,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mContext.getSystemService(NotificationManager.class).notifyAsUser(notificationId.getTag(),
                 notificationId.getId(), builder.build(), UserHandle.ALL);
         mActiveNotifs.add(notificationId);
+    }
+
+    private void setContentIntent(Notification.Builder builder, Intent intent) {
+        if (UserManager.isHeadlessSystemUserMode()) {
+            builder.setContentIntent(PendingIntent.getActivityAsUser(
+                    mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE,
+                    /* options= */ null, UserHandle.CURRENT));
+        } else {
+            builder.setContentIntent(PendingIntent.getActivity(
+                    mContext, 0, intent, FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE));
+        }
     }
 
     private void cancelNotification(NotificationId notificationId) {
@@ -3148,7 +3142,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * active merge set [A,B], we'd return a new template that primarily matches
      * A, but also matches B.
      */
-    private static NetworkTemplate normalizeTemplate(@NonNull NetworkTemplate template,
+    @VisibleForTesting(visibility = PRIVATE)
+    static NetworkTemplate normalizeTemplate(@NonNull NetworkTemplate template,
             @NonNull List<String[]> mergedList) {
         // Now there are several types of network which uses Subscriber Id to store network
         // information. For instance:
@@ -3158,6 +3153,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (template.getSubscriberIds().isEmpty()) return template;
 
         for (final String[] merged : mergedList) {
+            // In some rare cases (e.g. b/243015487), merged subscriberId list might contain
+            // duplicated items. Deduplication for better error handling.
+            final ArraySet mergedSet = new ArraySet(merged);
+            if (mergedSet.size() != merged.length) {
+                Log.wtf(TAG, "Duplicated merged list detected: " + Arrays.toString(merged));
+            }
             // TODO: Handle incompatible subscriberIds if that happens in practice.
             for (final String subscriberId : template.getSubscriberIds()) {
                 if (com.android.net.module.util.CollectionUtils.contains(merged, subscriberId)) {
@@ -3165,7 +3166,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     // a template that matches all merged subscribers.
                     return new NetworkTemplate.Builder(template.getMatchRule())
                             .setWifiNetworkKeys(template.getWifiNetworkKeys())
-                            .setSubscriberIds(Set.of(merged))
+                            .setSubscriberIds(mergedSet)
                             .setMeteredness(template.getMeteredness())
                             .build();
                 }
@@ -3996,31 +3997,31 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 synchronized (mUidBlockedState) {
                     collectKeys(mUidBlockedState, knownUids);
                 }
+                synchronized (mUidStateCallbackInfos) {
+                    collectKeys(mUidStateCallbackInfos, knownUids);
+                }
 
                 fout.println("Status for all known UIDs:");
                 fout.increaseIndent();
                 size = knownUids.size();
                 for (int i = 0; i < size; i++) {
                     final int uid = knownUids.keyAt(i);
-                    fout.print("UID=");
-                    fout.print(uid);
+                    fout.print("UID", uid);
 
                     final UidState uidState = mUidState.get(uid);
-                    if (uidState == null) {
-                        fout.print(" state={null}");
-                    } else {
-                        fout.print(" state=");
-                        fout.print(uidState.toString());
-                    }
+                    fout.print("state", uidState);
 
                     synchronized (mUidBlockedState) {
                         final UidBlockedState uidBlockedState = mUidBlockedState.get(uid);
-                        if (uidBlockedState == null) {
-                            fout.print(" blocked_state={null}");
-                        } else {
-                            fout.print(" blocked_state=");
-                            fout.print(uidBlockedState);
-                        }
+                        fout.print("blocked_state", uidBlockedState);
+                    }
+
+                    synchronized (mUidStateCallbackInfos) {
+                        final UidStateCallbackInfo callbackInfo = mUidStateCallbackInfos.get(uid);
+                        fout.println();
+                        fout.increaseIndent();
+                        fout.print("callback_info", callbackInfo);
+                        fout.decreaseIndent();
                     }
                     fout.println();
                 }
@@ -4032,6 +4033,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 for (int i = 0; i < size; ++i) {
                     fout.print("u" + mMeteredRestrictedUids.keyAt(i) + ": ");
                     fout.println(mMeteredRestrictedUids.valueAt(i));
+                }
+                fout.decreaseIndent();
+
+                fout.println("Network to interfaces:");
+                fout.increaseIndent();
+                for (int i = 0; i < mNetworkToIfaces.size(); ++i) {
+                    final int key = mNetworkToIfaces.keyAt(i);
+                    fout.println(key + ": " + mNetworkToIfaces.get(key));
                 }
                 fout.decreaseIndent();
 
@@ -4058,27 +4067,49 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @VisibleForTesting
-    boolean isUidForeground(int uid) {
-        synchronized (mUidRulesFirstLock) {
-            return isProcStateAllowedWhileIdleOrPowerSaveMode(mUidState.get(uid));
+    @GuardedBy("mUidRulesFirstLock")
+    boolean isUidForegroundOnRestrictBackgroundUL(int uid) {
+        final UidState uidState = mUidState.get(uid);
+        if (isProcStateAllowedWhileOnRestrictBackground(uidState)) {
+            return true;
         }
+        // Check if there is any pending state change.
+        synchronized (mUidStateCallbackInfos) {
+            final UidStateCallbackInfo callbackInfo = mUidStateCallbackInfos.get(uid);
+            final long prevProcStateSeq = uidState != null ? uidState.procStateSeq : -1;
+            if (callbackInfo != null && callbackInfo.isPending
+                    && callbackInfo.procStateSeq >= prevProcStateSeq) {
+                return isProcStateAllowedWhileOnRestrictBackground(callbackInfo.procState,
+                        callbackInfo.capability);
+            }
+        }
+        return false;
     }
 
+    @VisibleForTesting
     @GuardedBy("mUidRulesFirstLock")
-    private boolean isUidForegroundOnRestrictBackgroundUL(int uid) {
+    boolean isUidForegroundOnRestrictPowerUL(int uid) {
         final UidState uidState = mUidState.get(uid);
-        return isProcStateAllowedWhileOnRestrictBackground(uidState);
-    }
-
-    @GuardedBy("mUidRulesFirstLock")
-    private boolean isUidForegroundOnRestrictPowerUL(int uid) {
-        final UidState uidState = mUidState.get(uid);
-        return isProcStateAllowedWhileIdleOrPowerSaveMode(uidState);
+        if (isProcStateAllowedWhileIdleOrPowerSaveMode(uidState)) {
+            return true;
+        }
+        // Check if there is any pending state change.
+        synchronized (mUidStateCallbackInfos) {
+            final UidStateCallbackInfo callbackInfo = mUidStateCallbackInfos.get(uid);
+            final long prevProcStateSeq = uidState != null ? uidState.procStateSeq : -1;
+            if (callbackInfo != null && callbackInfo.isPending
+                    && callbackInfo.procStateSeq >= prevProcStateSeq) {
+                return isProcStateAllowedWhileIdleOrPowerSaveMode(callbackInfo.procState,
+                        callbackInfo.capability);
+            }
+        }
+        return false;
     }
 
     @GuardedBy("mUidRulesFirstLock")
     private boolean isUidTop(int uid) {
         final UidState uidState = mUidState.get(uid);
+        // TODO: Consider taking pending uid state change into account.
         return isProcStateAllowedWhileInLowPowerStandby(uidState);
     }
 
@@ -5545,7 +5576,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // Do this without the lock held. handleUidChanged() and handleUidGone() are
             // called from the handler, so there's no multi-threading issue.
             if (updated) {
-                updateNetworkStats(uid, isProcStateAllowedWhileOnRestrictBackground(procState));
+                updateNetworkStats(uid,
+                        isProcStateAllowedWhileOnRestrictBackground(procState, capability));
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);

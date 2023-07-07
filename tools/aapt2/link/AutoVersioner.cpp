@@ -75,7 +75,7 @@ bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {
   CloningValueTransformer cloner(&table->string_pool);
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
-      if (type->type != ResourceType::kStyle) {
+      if (type->named_type.type != ResourceType::kStyle) {
         continue;
       }
 

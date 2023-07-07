@@ -16,7 +16,7 @@
 
 #include "NinePatchPeeker.h"
 
-#include <SkBitmap.h>
+#include <SkScalar.h>
 #include <cutils/compiler.h>
 
 using namespace android;

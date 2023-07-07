@@ -53,8 +53,6 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
-import android.util.TypedXmlPullParser;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -65,6 +63,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.ShortcutOperation;
 import com.android.server.pm.ShortcutService.Stats;
@@ -907,7 +907,12 @@ class ShortcutPackage extends ShortcutPackageItem {
      * available ShareTarget definitions in this package.
      */
     public List<ShortcutManager.ShareShortcutInfo> getMatchingShareTargets(
-            @NonNull IntentFilter filter) {
+            @NonNull final IntentFilter filter) {
+        return getMatchingShareTargets(filter, null);
+    }
+
+    List<ShortcutManager.ShareShortcutInfo> getMatchingShareTargets(
+            @NonNull final IntentFilter filter, @Nullable final String pkgName) {
         synchronized (mLock) {
             final List<ShareTargetInfo> matchedTargets = new ArrayList<>();
             for (int i = 0; i < mShareTargets.size(); i++) {
@@ -931,8 +936,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             // included in the result
             findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
                     ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION,
-                    mShortcutUser.mService.mContext.getPackageName(),
-                    0, /*getPinnedByAnyLauncher=*/ false);
+                    pkgName, 0, /*getPinnedByAnyLauncher=*/ false);
 
             final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
             for (int i = 0; i < shortcuts.size(); i++) {
@@ -1130,7 +1134,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // Now prepare to publish manifest shortcuts.
         List<ShortcutInfo> newManifestShortcutList = null;
-        final int shareTargetSize;
+        int shareTargetSize = 0;
         synchronized (mLock) {
             try {
                 shareTargetSize = mShareTargets.size();
@@ -2044,6 +2048,9 @@ class ShortcutPackage extends ShortcutPackageItem {
                                         shortcutUser.getUserId(), fromBackup);
                                 // Don't use addShortcut(), we don't need to save the icon.
                                 ret.mShortcuts.put(si.getId(), si);
+                            } catch (IOException e) {
+                                // Don't ignore IO exceptions.
+                                throw e;
                             } catch (Exception e) {
                                 // b/246540168 malformed shortcuts should be ignored
                                 Slog.e(TAG, "Failed parsing shortcut.", e);
