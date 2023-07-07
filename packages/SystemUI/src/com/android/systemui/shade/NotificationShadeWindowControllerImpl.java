@@ -480,7 +480,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void applyWindowLayoutParams() {
         if (mDeferWindowLayoutParams == 0 && mLp != null && mLp.copyFrom(mLpChanged) != 0) {
-            mLogger.logApplyingWindowLayoutParams(mLp);
             Trace.beginSection("updateViewLayout");
             mWindowManager.updateViewLayout(mWindowRootView, mLp);
             Trace.endSection();
