@@ -23,17 +23,13 @@ import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
 
-import com.android.settingslib.testutils.shadow.ShadowSecure;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = {ShadowSecure.class})
 public class AccessibilityUtilsTest {
 
     private Context mContext;
@@ -50,7 +46,7 @@ public class AccessibilityUtilsTest {
 
     @Test
     public void getEnabledServicesFromSettings_badFormat_emptyResult() {
-        ShadowSecure.putStringForUser(
+        Settings.Secure.putStringForUser(
                 mContext.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                 ":",
                 UserHandle.myUserId());
@@ -61,7 +57,7 @@ public class AccessibilityUtilsTest {
     @Test
     public void getEnabledServicesFromSettings_1Service_1result() {
         final ComponentName cn = new ComponentName("pkg", "serv");
-        ShadowSecure.putStringForUser(
+        Settings.Secure.putStringForUser(
                 mContext.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                 cn.flattenToString() + ":",
                 UserHandle.myUserId());
@@ -74,7 +70,7 @@ public class AccessibilityUtilsTest {
     public void getEnabledServicesFromSettings_2Services_2results() {
         final ComponentName cn1 = new ComponentName("pkg", "serv");
         final ComponentName cn2 = new ComponentName("pkg", "serv2");
-        ShadowSecure.putStringForUser(
+        Settings.Secure.putStringForUser(
                 mContext.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                 cn1.flattenToString() + ":" + cn2.flattenToString(),
                 UserHandle.myUserId());
