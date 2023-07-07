@@ -26,6 +26,7 @@ import android.util.TypedValue
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.ViewTreeObserver
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
@@ -88,6 +89,15 @@ constructor(
 ) {
     var clock: ClockController? = null
         set(value) {
+            smallClockOnAttachStateChangeListener?.let {
+                field?.smallClock?.view?.removeOnAttachStateChangeListener(it)
+                smallClockFrame?.viewTreeObserver
+                        ?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
+            }
+            largeClockOnAttachStateChangeListener?.let {
+                field?.largeClock?.view?.removeOnAttachStateChangeListener(it)
+            }
+
             field = value
             if (value != null) {
                 smallLogBuffer?.log(TAG, DEBUG, {}, { "New Clock" })
@@ -130,43 +140,61 @@ constructor(
                     }
                     value.events.onWeatherDataChanged(it)
                 }
-                value.smallClock.view.addOnAttachStateChangeListener(
+
+                smallClockOnAttachStateChangeListener =
                     object : OnAttachStateChangeListener {
                         var pastVisibility: Int? = null
                         override fun onViewAttachedToWindow(view: View?) {
                             value.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
                             if (view != null) {
-                                val smallClockFrame = view.parent as FrameLayout
-                                pastVisibility = smallClockFrame.visibility
-                                smallClockFrame.viewTreeObserver.addOnGlobalLayoutListener(
-                                        ViewTreeObserver.OnGlobalLayoutListener {
-                                    val currentVisibility = smallClockFrame.visibility
-                                    if (pastVisibility != currentVisibility) {
-                                        pastVisibility = currentVisibility
-                                        // when small clock  visible, recalculate bounds and sample
-                                        if (currentVisibility == View.VISIBLE) {
-                                            smallRegionSampler?.stopRegionSampler()
-                                            smallRegionSampler?.startRegionSampler()
+                                smallClockFrame = view.parent as FrameLayout
+                                smallClockFrame?.let {frame ->
+                                    pastVisibility = frame.visibility
+                                    onGlobalLayoutListener = OnGlobalLayoutListener {
+                                        val currentVisibility = frame.visibility
+                                        if (pastVisibility != currentVisibility) {
+                                            pastVisibility = currentVisibility
+                                            // when small clock  visible,
+                                            // recalculate bounds and sample
+                                            if (currentVisibility == View.VISIBLE) {
+                                                smallRegionSampler?.stopRegionSampler()
+                                                smallRegionSampler?.startRegionSampler()
+                                            }
                                         }
                                     }
-                                })
+                                    frame.viewTreeObserver
+                                            .addOnGlobalLayoutListener(onGlobalLayoutListener)
+                                }
                             }
                         }
 
                         override fun onViewDetachedFromWindow(p0: View?) {
+                            smallClockFrame?.viewTreeObserver
+                                    ?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
                         }
-                })
-                value.largeClock.view.addOnAttachStateChangeListener(
+                }
+                value.smallClock.view
+                        .addOnAttachStateChangeListener(smallClockOnAttachStateChangeListener)
+
+                largeClockOnAttachStateChangeListener =
                     object : OnAttachStateChangeListener {
                         override fun onViewAttachedToWindow(p0: View?) {
                             value.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
                         }
-
                         override fun onViewDetachedFromWindow(p0: View?) {
                         }
-                })
+                }
+                value.largeClock.view
+                        .addOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
             }
         }
+
+    @VisibleForTesting
+    var smallClockOnAttachStateChangeListener: OnAttachStateChangeListener? = null
+    @VisibleForTesting
+    var largeClockOnAttachStateChangeListener: OnAttachStateChangeListener? = null
+    private var smallClockFrame: FrameLayout? = null
+    private var onGlobalLayoutListener: OnGlobalLayoutListener? = null
 
     private var isDozing = false
         private set
@@ -307,7 +335,6 @@ constructor(
             return
         }
         isRegistered = true
-
         broadcastDispatcher.registerReceiver(
             localeBroadcastReceiver,
             IntentFilter(Intent.ACTION_LOCALE_CHANGED)
@@ -346,6 +373,12 @@ constructor(
         largeRegionSampler?.stopRegionSampler()
         smallTimeListener?.stop()
         largeTimeListener?.stop()
+        clock?.smallClock?.view
+                ?.removeOnAttachStateChangeListener(smallClockOnAttachStateChangeListener)
+        smallClockFrame?.viewTreeObserver
+                ?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
+        clock?.largeClock?.view
+                ?.removeOnAttachStateChangeListener(largeClockOnAttachStateChangeListener)
     }
 
     private fun updateTimeListeners() {
