@@ -1258,7 +1258,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Запуск прыкладанняў."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Завяршэнне загрузкі."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Вы націснулі кнопку сілкавання. Звычайна ў выніку гэтага дзеяння выключаецца экран.\n\nПадчас наладжвання адбітка пальца злёгку дакраніцеся да кнопкі."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Каб завяршыць наладку, выключыце экран"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Каб скончыць наладку, выключыце экран"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Выключыць"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Працягнуць спраўджанне адбітка пальца?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Вы націснулі кнопку сілкавання. Звычайна ў выніку гэтага дзеяння выключаецца экран.\n\nКаб спраўдзіць адбітак пальца, злёгку дакраніцеся да кнопкі."</string>
