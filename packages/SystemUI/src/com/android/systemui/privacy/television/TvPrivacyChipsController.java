@@ -348,9 +348,16 @@ public class TvPrivacyChipsController
             return;
         }
 
-        TransitionManager.beginDelayedTransition(mChipsContainer, mCollapseTransition);
+        boolean hasExpandedChip = false;
         for (PrivacyItemsChip chip : mChips) {
-            chip.collapse();
+            hasExpandedChip |= chip.isExpanded();
+        }
+
+        if (mChipsContainer != null && hasExpandedChip) {
+            TransitionManager.beginDelayedTransition(mChipsContainer, mCollapseTransition);
+            for (PrivacyItemsChip chip : mChips) {
+                chip.collapse();
+            }
         }
     }
 
