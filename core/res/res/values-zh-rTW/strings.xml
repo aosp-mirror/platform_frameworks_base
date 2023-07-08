@@ -1392,7 +1392,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"拒絕"</string>
     <string name="select_input_method" msgid="3971267998568587025">"選擇輸入法"</string>
-    <string name="show_ime" msgid="6406112007347443383">"使用實體鍵盤時仍繼續顯示虛擬鍵盤"</string>
+    <string name="show_ime" msgid="6406112007347443383">"使用實體鍵盤時仍繼續顯示螢幕小鍵盤"</string>
     <string name="hardware" msgid="1800597768237606953">"顯示虛擬鍵盤"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"設定「<xliff:g id="DEVICE_NAME">%s</xliff:g>」"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"設定實體鍵盤"</string>
