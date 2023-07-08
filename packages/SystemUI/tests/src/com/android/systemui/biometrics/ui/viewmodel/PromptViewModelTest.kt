@@ -49,6 +49,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.mockito.Mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
@@ -131,20 +132,22 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     }
 
     @Test
-    fun plays_haptic_on_authenticated() = runGenericTest {
-        viewModel.showAuthenticated(testCase.authenticatedModality, 1000L)
+    fun play_haptic_on_confirm_when_confirmation_required_otherwise_on_authenticated() =
+        runGenericTest {
+            val expectConfirmation = testCase.expectConfirmation(atLeastOneFailure = false)
 
-        verify(vibrator).vibrateAuthSuccess(any())
-        verify(vibrator, never()).vibrateAuthError(any())
-    }
+            viewModel.showAuthenticated(testCase.authenticatedModality, 1_000L)
 
-    @Test
-    fun plays_no_haptic_on_confirm() = runGenericTest {
-        viewModel.confirmAuthenticated()
+            verify(vibrator, if (expectConfirmation) never() else times(1))
+                .vibrateAuthSuccess(any())
 
-        verify(vibrator, never()).vibrateAuthSuccess(any())
-        verify(vibrator, never()).vibrateAuthError(any())
-    }
+            if (expectConfirmation) {
+                viewModel.confirmAuthenticated()
+            }
+
+            verify(vibrator).vibrateAuthSuccess(any())
+            verify(vibrator, never()).vibrateAuthError(any())
+        }
 
     private suspend fun TestScope.showAuthenticated(
         authenticatedModality: BiometricModality,

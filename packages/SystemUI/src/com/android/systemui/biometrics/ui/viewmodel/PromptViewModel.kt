@@ -372,7 +372,9 @@ constructor(
                 AuthBiometricView.STATE_AUTHENTICATED
             }
 
-        vibrator.success(modality)
+        if (!needsUserConfirmation) {
+            vibrator.success(modality)
+        }
 
         messageJob?.cancel()
         messageJob = null
@@ -417,6 +419,8 @@ constructor(
         _isAuthenticated.value = authState.asExplicitlyConfirmed()
         _message.value = PromptMessage.Empty
         _legacyState.value = AuthBiometricView.STATE_AUTHENTICATED
+
+        vibrator.success(authState.authenticatedModality)
 
         messageJob?.cancel()
         messageJob = null
