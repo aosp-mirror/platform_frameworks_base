@@ -1042,7 +1042,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"ពង្រីក​តំបន់​ដោះ​សោ។"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"រុញ​ដោះ​សោ។"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"លំនាំ​ដោះ​សោ​។"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ដោះ​សោ​តាម​​ទម្រង់​មុខ។"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ការដោះ​សោ​ដោយស្កេន​មុខ។"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"កូដ PIN ដោះ​សោ។"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"ដោះ​កូដ Pin របស់​សីុម។"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"ដោះ​កូដ Puk របស់​សីុម។"</string>
@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"បដិសេធ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ជ្រើស​វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="show_ime" msgid="6406112007347443383">"ទុកវានៅលើអេក្រង់ខណៈពេលក្តារចុចពិតប្រាកដកំពុងសកម្ម"</string>
-    <string name="hardware" msgid="1800597768237606953">"បង្ហាញក្ដារចុចនិម្មិត"</string>
+    <string name="hardware" msgid="3611039921284836033">"ប្រើក្ដារចុច​លើអេក្រង់"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"កំណត់រចនាសម្ព័ន្ធ <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"កំណត់រចនាសម្ព័ន្ធ​ក្ដារចុចរូបវន្ត"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ប៉ះដើម្បីជ្រើសភាសា និងប្លង់"</string>

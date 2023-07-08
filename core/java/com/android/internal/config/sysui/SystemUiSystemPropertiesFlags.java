@@ -89,6 +89,9 @@ public class SystemUiSystemPropertiesFlags {
         /** Gating storing NotificationRankingUpdate ranking map in shared memory. */
         public static final Flag RANKING_UPDATE_ASHMEM = devFlag(
                 "persist.sysui.notification.ranking_update_ashmem");
+
+        public static final Flag PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS = devFlag(
+                "persist.sysui.notification.propagate_channel_updates_to_conversations");
     }
 
     //// == End of flags.  Everything below this line is the implementation. == ////

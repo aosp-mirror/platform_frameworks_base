@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Мени дугмета за укључивање"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. страна од <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Закључан екран"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон се искључио због топлоте"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефон сада нормално ради.\nДодирните за више информација"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефон је био преврућ, па се искључио да се охлади. Сада ради нормално.\n\nТелефон може превише да се угреје ако:\n	• Користите апликације које захтевају пуно ресурса (нпр. видео игре, видео или апликације за навигацију)\n	• Преузимате/отпремате велике датотеке\n	• Користите телефон на високој температури"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Погледајте упозорења"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Телефон се загрејао"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Неке функције су ограничене док се телефон не охлади.\nДодирните за више информација"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефон ће аутоматски покушати да се охлади. И даље ћете моћи да користите телефон, али ће спорије реаговати.\n\nКада се телефон охлади, нормално ће радити."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Погледајте упозорења"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Искључите уређај"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Уређај се загрева у близини порта за пуњење. Ако је повезан са пуњачем или USB опремом, искључите је и будите пажљиви јер и кабл може да буде врућ."</string>

@@ -1395,7 +1395,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"REFUZ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Alege metoda de introducere de text"</string>
     <string name="show_ime" msgid="6406112007347443383">"Se păstrează pe ecran cât timp este activată tastatura fizică"</string>
-    <string name="hardware" msgid="1800597768237606953">"Afișează tastatura virtuală"</string>
+    <string name="hardware" msgid="3611039921284836033">"Folosește tastatura pe ecran"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configurează <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configurează tastaturi fizice"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Atinge pentru a selecta limba și aspectul"</string>
@@ -1952,7 +1952,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Momentan, aplicația <xliff:g id="APP_NAME_0">%1$s</xliff:g> nu este disponibilă. Aceasta este gestionată de <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Află mai multe"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anulează întreruperea aplicației"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"Reactivezi aplicații lucru?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Reactivezi aplicații de lucru?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Reactivează"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgență"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplicația nu este disponibilă"</string>

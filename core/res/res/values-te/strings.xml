@@ -657,7 +657,7 @@
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు. రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Power button pressed"</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"వేలు <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>వ వేలు"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"వేలిముద్రను ఉపయోగించండి"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"వేలిముద్ర లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"కొనసాగించడానికి మీ వేలిముద్రను ఉపయోగించండి"</string>
@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"తిరస్కరిస్తున్నాను"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ఇన్‌పుట్ పద్ధతిని ఎంచుకోండి"</string>
     <string name="show_ime" msgid="6406112007347443383">"దీన్ని భౌతిక కీబోర్డ్ యాక్టివ్‌గా ఉన్నప్పుడు స్క్రీన్‌పై ఉంచుతుంది"</string>
-    <string name="hardware" msgid="1800597768237606953">"వర్చువల్ కీబోర్డ్‌ను చూపు"</string>
+    <string name="hardware" msgid="3611039921284836033">"స్క్రీన్‌పై కీబోర్డ్ ఉపయోగించు"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>‌ను కాన్ఫిగర్ చేయండి"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"ఫిజికల్ కీబోర్డ్‌లను కాన్ఫిగ‌ర్ చేయండి"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"భాషను, లేఅవుట్‌ను ఎంచుకోవడానికి ట్యాప్ చేయండి"</string>

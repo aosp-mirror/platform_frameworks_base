@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.NotificationManager;
@@ -33,6 +34,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.ActivityUnitTestCase;
+import android.webkit.WebView;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -45,6 +47,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Base64;
 
 @RunWith(AndroidJUnit4.class)
 public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchaseActivity> {
@@ -59,6 +63,7 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
     @Mock CarrierConfigManager mCarrierConfigManager;
     @Mock NotificationManager mNotificationManager;
     @Mock PersistableBundle mPersistableBundle;
+    @Mock WebView mWebView;
 
     private SlicePurchaseActivity mSlicePurchaseActivity;
     private Context mContext;
@@ -152,5 +157,24 @@ public class SlicePurchaseActivityTest extends ActivityUnitTestCase<SlicePurchas
     public void testOnDismissFlow() throws Exception {
         mSlicePurchaseActivity.onDismissFlow();
         verify(mRequestFailedIntent).send();
+    }
+
+    @Test
+    public void testStartWebView() {
+        // unspecified contents type
+        SlicePurchaseActivity.startWebView(mWebView, URL, 0 /* CONTENTS_TYPE_UNSPECIFIED */, null);
+        verify(mWebView).loadUrl(eq(URL));
+
+        // specified contents type with user data
+        String userData = "userData";
+        byte[] userDataBytes = userData.getBytes();
+        SlicePurchaseActivity.startWebView(mWebView, URL, 1 /* CONTENTS_TYPE_JSON */, userData);
+        verify(mWebView).postUrl(eq(URL), eq(userDataBytes));
+
+        // specified contents type with encoded user data
+        byte[] encodedUserData = Base64.getEncoder().encode(userDataBytes);
+        userData = "encodedValue=" + new String(encodedUserData);
+        SlicePurchaseActivity.startWebView(mWebView, URL, 1 /* CONTENTS_TYPE_JSON */, userData);
+        verify(mWebView, times(2)).postUrl(eq(URL), eq(userDataBytes));
     }
 }

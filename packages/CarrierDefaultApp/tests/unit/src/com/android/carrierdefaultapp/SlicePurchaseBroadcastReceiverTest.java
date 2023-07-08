@@ -160,14 +160,35 @@ public class SlicePurchaseBroadcastReceiverTest {
                 "file:///android_asset/slice_store_test.html"
         };
 
+        // test invalid URLs
         for (String url : invalidUrls) {
-            URL purchaseUrl = SlicePurchaseBroadcastReceiver.getPurchaseUrl(url);
+            URL purchaseUrl = SlicePurchaseBroadcastReceiver.getPurchaseUrl(url, null, false);
             assertNull(purchaseUrl);
         }
 
+        // test asset URL
         assertEquals(SlicePurchaseController.SLICE_PURCHASE_TEST_FILE,
                 SlicePurchaseBroadcastReceiver.getPurchaseUrl(
-                        SlicePurchaseController.SLICE_PURCHASE_TEST_FILE).toString());
+                        SlicePurchaseController.SLICE_PURCHASE_TEST_FILE, null, false).toString());
+
+        // test normal URL
+        String validUrl = "http://www.google.com";
+        assertEquals(validUrl,
+                SlicePurchaseBroadcastReceiver.getPurchaseUrl(validUrl, null, false).toString());
+
+        // test normal URL with user data but no append
+        String userData = "encryptedUserData=data";
+        assertEquals(validUrl,
+                SlicePurchaseBroadcastReceiver.getPurchaseUrl(validUrl, userData, false)
+                        .toString());
+
+        // test normal URL with user data and append
+        assertEquals(validUrl + "?" + userData,
+                SlicePurchaseBroadcastReceiver.getPurchaseUrl(validUrl, userData, true).toString());
+
+        // test normal URL without user data and append
+        assertEquals(validUrl,
+                SlicePurchaseBroadcastReceiver.getPurchaseUrl(validUrl, null, true).toString());
     }
 
     @Test

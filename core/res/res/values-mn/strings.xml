@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ТАТГАЛЗАХ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Оруулах аргыг сонгоно уу"</string>
     <string name="show_ime" msgid="6406112007347443383">"Биет гар идэвхтэй үед үүнийг дэлгэцэд харуулна уу"</string>
-    <string name="hardware" msgid="1800597768237606953">"Хийсвэр гарыг харуулах"</string>
+    <string name="hardware" msgid="3611039921284836033">"Дэлгэц дээрх гарыг ашиглах"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>-г тохируулна уу"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Биет гарыг тохируулна уу"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Хэл болон бүдүүвчийг сонгохын тулд дарна уу"</string>
