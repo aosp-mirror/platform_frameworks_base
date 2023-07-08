@@ -231,7 +231,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Reštartuje sa…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Obnovenie výrobných nastavení"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Reštartuje sa…"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"Prebieha vypínanie..."</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"Vypína sa..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Váš tablet bude vypnutý."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Zariadenie Android TV sa vypne."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Hodinky sa vypnú."</string>
@@ -1398,7 +1398,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODMIETNUŤ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Zvoliť metódu vstupu"</string>
     <string name="show_ime" msgid="6406112007347443383">"Ponechať na obrazovke, keď je aktívna fyzická klávesnica"</string>
-    <string name="hardware" msgid="1800597768237606953">"Zobraziť virtuálnu klávesnicu"</string>
+    <string name="hardware" msgid="3611039921284836033">"Použiť klávesnicu na obrazovke"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Nakonfigurujte <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Nakonfigurujte fyzické klávesnice"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Klepnutím vyberte jazyk a rozloženie"</string>
@@ -1961,8 +1961,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nie je k dispozícii"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Žiadosť o povolenie bola zablokovaná"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera nie je k dispozícii"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Pokračujte v telefóne"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofón nie je k dispozícii"</string>
@@ -1973,12 +1972,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť zariadenie Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste použiť telefón."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Táto aplikácia požaduje ďalšie povolenia, ale povolenia nie je možné udeliť v relácii streamovania. Najprv udeľte povolenie v zariadení Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Táto aplikácia požaduje ďalšie povolenia, ale povolenia nie je možné udeliť v relácii streamovania. Najprv udeľte povolenie v tablete."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Táto aplikácia požaduje ďalšie povolenia, ale povolenia nie je možné udeliť v relácii streamovania. Najprv udeľte povolenie v telefóne."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste namiesto toho použiť zariadenie Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste namiesto toho použiť tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste použiť telefón."</string>

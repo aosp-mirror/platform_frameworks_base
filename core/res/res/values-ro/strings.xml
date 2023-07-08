@@ -1397,7 +1397,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"REFUZ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Alege metoda de introducere de text"</string>
     <string name="show_ime" msgid="6406112007347443383">"Se păstrează pe ecran cât timp este activată tastatura fizică"</string>
-    <string name="hardware" msgid="1800597768237606953">"Afișează tastatura virtuală"</string>
+    <string name="hardware" msgid="3611039921284836033">"Folosește tastatura pe ecran"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configurează <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configurează tastaturi fizice"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Atinge pentru a selecta limba și aspectul"</string>
@@ -1954,14 +1954,13 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Momentan, aplicația <xliff:g id="APP_NAME_0">%1$s</xliff:g> nu este disponibilă. Aceasta este gestionată de <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Află mai multe"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anulează întreruperea aplicației"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"Reactivezi aplicații lucru?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Reactivezi aplicații de lucru?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Reactivează"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgență"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplicația nu este disponibilă"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu este disponibilă momentan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nu este disponibilă"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Solicitarea de permisiune s-a suprimat"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Camera video nu este disponibilă"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continuă pe telefon"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfon indisponibil"</string>
@@ -1972,12 +1971,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încearcă pe dispozitivul Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încearcă pe tabletă."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Aplicația nu poate fi accesată pe <xliff:g id="DEVICE">%1$s</xliff:g> momentan. Încearcă pe telefon."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Aplicația solicită permisiuni suplimentare, dar acestea nu pot fi acordate într-o sesiune de streaming. Acordă permisiunea întâi pe dispozitivul Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Aplicația solicită permisiuni suplimentare, dar acestea nu pot fi acordate într-o sesiune de streaming. Acordă permisiunea întâi pe tabletă."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Aplicația solicită permisiuni suplimentare, dar acestea nu pot fi acordate într-o sesiune de streaming. Acordă permisiunea întâi pe telefon."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Aplicația necesită securitate suplimentară. Încearcă pe dispozitivul Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Aplicația necesită securitate suplimentară. Încearcă pe tabletă."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Aplicația necesită securitate suplimentară. Încearcă pe telefon."</string>

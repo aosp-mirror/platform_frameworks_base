@@ -1396,7 +1396,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ΑΠΟΡΡΙΨΗ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Επιλογή μεθόδου εισόδου"</string>
     <string name="show_ime" msgid="6406112007347443383">"Να παραμένει στην οθόνη όταν είναι ενεργό το κανονικό πληκτρολόγιο"</string>
-    <string name="hardware" msgid="1800597768237606953">"Εμφάνιση εικονικού πληκτρολ."</string>
+    <string name="hardware" msgid="3611039921284836033">"Χρήση πληκτρολογίου οθόνης"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Διαμόρφωση <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Διαμόρφωση φυσικών πληκτρολογίων"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Πατήστε για να επιλέξετε γλώσσα και διάταξη"</string>
@@ -1959,8 +1959,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Η εφαρμογή δεν είναι διαθέσιμη"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> δεν διατίθεται"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Το αίτημα άδειας ανεστάλη"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Η κάμερα δεν είναι διαθέσιμη"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Συνέχεια στο τηλέφωνο"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Το μικρόφωνο δεν είναι διαθέσιμο"</string>
@@ -1971,12 +1970,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στη συσκευή Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο tablet σας."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Δεν είναι δυνατή η πρόσβαση στη συγκεκριμένη εφαρμογή από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g> αυτήν τη στιγμή. Δοκιμάστε στο τηλέφωνό σας."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Αυτή η εφαρμογή ζητά πρόσθετες άδειες, αλλά οι άδειες δεν μπορούν να παραχωρηθούν σε μια περίοδο σύνδεσης ροής. Εκχωρήστε πρώτα την άδεια στη συσκευή Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Αυτή η εφαρμογή ζητά πρόσθετες άδειες, αλλά οι άδειες δεν μπορούν να παραχωρηθούν σε μια περίοδο σύνδεσης ροής. Εκχωρήστε πρώτα την άδεια στο tablet σας."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Αυτή η εφαρμογή ζητά πρόσθετες άδειες, αλλά οι άδειες δεν μπορούν να παραχωρηθούν σε μια περίοδο σύνδεσης ροής. Εκχωρήστε πρώτα την άδεια στο τηλέφωνό σας."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Αυτή η εφαρμογή ζητά πρόσθετη ασφάλεια. Δοκιμάστε στη συσκευή Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Αυτή η εφαρμογή ζητά πρόσθετη ασφάλεια. Δοκιμάστε στο tablet σας."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Αυτή η εφαρμογή ζητά πρόσθετη ασφάλεια. Δοκιμάστε στο τηλέφωνό σας."</string>

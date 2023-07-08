@@ -1396,7 +1396,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ОТХВЪРЛЯНЕ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Избор на метод на въвеждане"</string>
     <string name="show_ime" msgid="6406112007347443383">"Показване на екрана, докато физическата клавиатура е активна"</string>
-    <string name="hardware" msgid="1800597768237606953">"Показване на вирт. клавиатура"</string>
+    <string name="hardware" msgid="3611039921284836033">"Ползв. на екранната клавиатура"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Конфигуриране на <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Конфигуриране на физически клавиатури"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Докоснете, за да изберете език и подредба"</string>
@@ -1959,8 +1959,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Приложението не е достъпно"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"В момента няма достъп до <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> не е налице"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Заявката за разрешения е блокирана"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Няма достъп до камерата"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Продължете на телефона"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Микрофонът не е достъпен"</string>
@@ -1971,12 +1970,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Понастоящем не може да се осъществи достъп от устройството ви <xliff:g id="DEVICE">%1$s</xliff:g>. Вместо това опитайте от устройството си с Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Понастоящем не може да се осъществи достъп от устройството ви <xliff:g id="DEVICE">%1$s</xliff:g>. Вместо това опитайте от таблета си."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Понастоящем не може да се осъществи достъп от устройството ви <xliff:g id="DEVICE">%1$s</xliff:g>. Вместо това опитайте от телефона си."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Това приложение изисква допълнителни разрешения, но те не могат да бъдат предоставени в сесия за поточно предаване. Първо ги предоставете на устройството си с Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Това приложение изисква допълнителни разрешения, но те не могат да бъдат предоставени в сесия за поточно предаване. Първо ги предоставете на таблета си."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Това приложение изисква допълнителни разрешения, но те не могат да бъдат предоставени в сесия за поточно предаване. Първо ги предоставете на телефона си."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Това приложение изисква допълнителна стъпка за сигурност. Вместо това опитайте от устройството си с Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Това приложение изисква допълнителна стъпка за сигурност. Вместо това опитайте от таблета си."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Това приложение изисква допълнителна стъпка за сигурност. Вместо това опитайте от телефона си."</string>

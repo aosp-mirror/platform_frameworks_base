@@ -1397,7 +1397,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECUSAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Escolher o método de entrada"</string>
     <string name="show_ime" msgid="6406112007347443383">"Manter no ecrã enquanto o teclado físico estiver ativo"</string>
-    <string name="hardware" msgid="1800597768237606953">"Mostrar o teclado virtual"</string>
+    <string name="hardware" msgid="3611039921284836033">"Usar o teclado no ecrã"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configure o dispositivo <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configure teclados físicos"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Toque para selecionar o idioma e o esquema"</string>
@@ -1960,8 +1960,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"A app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"De momento, a app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> indisponível"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"Pedido de autorização suprimido"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Câmara indisponível"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continue no telemóvel"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfone indisponível"</string>
@@ -1972,12 +1971,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"De momento, não é possível aceder a esta app no seu <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"De momento, não é possível aceder a esta app no seu <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no tablet."</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"De momento, não é possível aceder a esta app no seu <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no telemóvel."</string>
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"Esta app está a pedir autorizações adicionais, mas não é possível conceder autorizações numa sessão de streaming. Comece por conceder a autorização no seu dispositivo Android TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"Esta app está a pedir autorizações adicionais, mas não é possível conceder autorizações numa sessão de streaming. Comece por conceder a autorização no seu tablet."</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"Esta app está a pedir autorizações adicionais, mas não é possível conceder autorizações numa sessão de streaming. Comece por conceder a autorização no seu telemóvel."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Esta app está a solicitar segurança adicional. Em alternativa, experimente no dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Esta app está a solicitar segurança adicional. Em alternativa, experimente no tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Esta app está a solicitar segurança adicional. Em alternativa, experimente no telemóvel."</string>

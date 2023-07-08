@@ -229,7 +229,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"ରିଷ୍ଟାର୍ଟ କରାଯାଉଛି…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"ଫ୍ୟାକ୍ଟୋରୀ ଡାଟା ରିସେଟ୍‌"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"ରିଷ୍ଟାର୍ଟ କରାଯାଉଛି…"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"ବନ୍ଦ କରାଯାଉଛି…"</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"ବନ୍ଦ ହେଉଛି…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"ଆପଣଙ୍କ ଟାବଲେଟ୍ ବନ୍ଦ ହୋଇଯିବ।"</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"ଆପଣଙ୍କର Android TV ଡିଭାଇସ୍ ବନ୍ଦ ହୋଇଯିବ।"</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"ଆପଣଙ୍କ ଘଣ୍ଟା ବନ୍ଦ ହୋଇଯିବ।"</string>
@@ -1396,7 +1396,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ଅଗ୍ରାହ୍ୟ କରନ୍ତୁ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ଇନପୁଟ୍ ପଦ୍ଧତି ବାଛନ୍ତୁ"</string>
     <string name="show_ime" msgid="6406112007347443383">"ଫିଜିକାଲ୍‌ କୀବୋର୍ଡ ସକ୍ରିୟ ଥିବାବେଳେ ଏହାକୁ ସ୍କ୍ରିନ୍‌ ଉପରେ ରଖନ୍ତୁ"</string>
-    <string name="hardware" msgid="1800597768237606953">"ଭର୍ଚୁଆଲ୍ କୀ’ବୋର୍ଡ ଦେଖାନ୍ତୁ"</string>
+    <string name="hardware" msgid="3611039921284836033">"ଅନ-ସ୍କ୍ରିନ କୀବୋର୍ଡ ବ୍ୟବହାର କର"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>କୁ କନଫିଗର କରନ୍ତୁ"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"ଫିଜିକାଲ କୀବୋର୍ଡଗୁଡ଼ିକୁ କନଫିଗର କରନ୍ତୁ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ଭାଷା ଓ ଲେଆଉଟ ଚୟନ କରିବା ପାଇଁ ଟାପ କରନ୍ତୁ"</string>
@@ -1959,8 +1959,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ଆପ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବର୍ତ୍ତମାନ ଉପଲବ୍ଧ ନାହିଁ।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <!-- no translation found for app_streaming_blocked_title_for_permission_dialog (3805704317624448487) -->
-    <skip />
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="3805704317624448487">"ଅନୁମତି ଅନୁରୋଧକୁ ବନ୍ଦ କରାଯାଇଛି"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"କ୍ୟାମେରା ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ଫୋନରେ ଜାରି ରଖନ୍ତୁ"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ମାଇକ୍ରୋଫୋନ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -1971,12 +1970,9 @@
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ବର୍ତ୍ତମାନ ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (4706276040125072077) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (1824604581465771629) -->
-    <skip />
-    <!-- no translation found for app_streaming_blocked_message_for_permission_request (7755223160363292105) -->
-    <skip />
+    <string name="app_streaming_blocked_message_for_permission_request" product="tv" msgid="4706276040125072077">"ଏହି ଆପ ଅତିରିକ୍ତ ଅନୁମତି ପାଇଁ ଅନୁରୋଧ କରୁଛି, ଏକ ଷ୍ଟ୍ରିମିଂ ସେସନରେ ଅନୁମତି ଦିଆଯାଇପାରିବ ନାହିଁ। ପ୍ରଥମେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="tablet" msgid="1824604581465771629">"ଏହି ଆପ ଅତିରିକ୍ତ ଅନୁମତି ପାଇଁ ଅନୁରୋଧ କରୁଛି, ଏକ ଷ୍ଟ୍ରିମିଂ ସେସନରେ ଅନୁମତି ଦିଆଯାଇପାରିବ ନାହିଁ। ପ୍ରଥମେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
+    <string name="app_streaming_blocked_message_for_permission_request" product="default" msgid="7755223160363292105">"ଏହି ଆପ ଅତିରିକ୍ତ ଅନୁମତି ପାଇଁ ଅନୁରୋଧ କରୁଛି, ଏକ ଷ୍ଟ୍ରିମିଂ ସେସନରେ ଅନୁମତି ଦିଆଯାଇପାରିବ ନାହିଁ। ପ୍ରଥମେ ଆପଣଙ୍କ ଫୋନରେ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ Android TV ଡିଭାଇସରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଟାବଲେଟରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ଏହି ଆପ ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ଅନୁରୋଧ କରୁଛି। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
