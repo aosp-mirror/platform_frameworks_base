@@ -27,7 +27,9 @@ public class TestableFlagResolver implements SystemUiSystemPropertiesFlags.FlagR
         return mOverrides.getOrDefault(flag.mSysPropKey, flag.mDefaultValue);
     }
 
-    public void setFlagOverride(SystemUiSystemPropertiesFlags.Flag flag, boolean isEnabled) {
+    public TestableFlagResolver setFlagOverride(SystemUiSystemPropertiesFlags.Flag flag,
+            boolean isEnabled) {
         mOverrides.put(flag.mSysPropKey, isEnabled);
+        return this;
     }
 }
