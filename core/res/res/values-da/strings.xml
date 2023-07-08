@@ -1046,7 +1046,7 @@
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"tilføje telefonsvarer"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"Tillader, at appen kan tilføje beskeder på din telefonsvarer."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"skifte tilladelser til geoplacering i Browser"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"Tillader, at appen kan ændre browserens tilladelser angående geoplacering. Ondsindede apps kan benytte dette til at sende oplysninger om sted til vilkårlige websites."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"Tillader, at appen kan ændre browserens tilladelser angående geolokation. Ondsindede apps kan benytte dette til at sende lokationsoplysninger om sted til vilkårlige websites."</string>
     <string name="save_password_message" msgid="2146409467245462965">"Ønsker du, at browseren skal huske denne adgangskode?"</string>
     <string name="save_password_notnow" msgid="2878327088951240061">"Ikke nu"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"Husk"</string>
