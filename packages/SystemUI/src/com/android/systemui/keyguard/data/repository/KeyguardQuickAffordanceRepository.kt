@@ -18,6 +18,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.content.Context
+import android.content.Intent
 import android.os.UserHandle
 import android.util.LayoutDirection
 import com.android.systemui.Dumpable
@@ -170,16 +171,27 @@ constructor(
                     pickerState as? KeyguardQuickAffordanceConfig.PickerScreenState.Disabled
                 KeyguardQuickAffordancePickerRepresentation(
                     id = config.key,
-                    name = config.pickerName,
+                    name = config.pickerName(),
                     iconResourceId = config.pickerIconResourceId,
                     isEnabled =
                         pickerState is KeyguardQuickAffordanceConfig.PickerScreenState.Default,
-                    instructions = disabledPickerState?.instructions,
+                    explanation = disabledPickerState?.explanation,
                     actionText = disabledPickerState?.actionText,
-                    actionComponentName = disabledPickerState?.actionComponentName,
-                    configureIntent = defaultPickerState?.configureIntent,
+                    actionIntent =
+                        disabledPickerState?.actionIntent?.apply {
+                            addFlags(
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                            )
+                        },
+                    configureIntent =
+                        defaultPickerState?.configureIntent?.apply {
+                            addFlags(
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                            )
+                        },
                 )
             }
+            .sortedBy { it.name }
     }
 
     /**
@@ -234,7 +246,9 @@ constructor(
                 pw.println("    $slotId$selectionText (capacity = $capacity)")
             }
             pw.println("Available affordances on device:")
-            configs.forEach { config -> pw.println("    ${config.key} (\"${config.pickerName}\")") }
+            configs.forEach { config ->
+                pw.println("    ${config.key} (\"${config.pickerName()}\")")
+            }
         }
     }
 

@@ -110,6 +110,9 @@ interface MobileIconInteractor {
 
     /** See [MobileIconsInteractor.isForceHidden]. */
     val isForceHidden: Flow<Boolean>
+
+    /** True when in carrier network change mode */
+    val carrierNetworkChangeActive: StateFlow<Boolean>
 }
 
 /** Interactor for a single mobile connection. This connection _should_ have one subscription ID */
@@ -134,6 +137,9 @@ class MobileIconInteractorImpl(
     override val activity = connectionRepository.dataActivityDirection
 
     override val isDataEnabled: StateFlow<Boolean> = connectionRepository.dataEnabled
+
+    override val carrierNetworkChangeActive: StateFlow<Boolean> =
+        connectionRepository.carrierNetworkChangeActive
 
     // True if there exists _any_ icon override for this carrierId. Note that overrides can include
     // any or none of the icon groups defined in MobileMappings, so we still need to check on a

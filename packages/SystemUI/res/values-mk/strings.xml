@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Лицето е проверено"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Потврдено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Допрете „Потврди“ за да се заврши"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Отклучено со лик"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Отклучено со лик. Притиснете за да продолжите."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Лицето е препознаено. Притиснете за да продолжите."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Лицето е препознаено. Притиснете ја иконата за отклучување за да продолжите."</string>
@@ -171,15 +170,15 @@
     <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Ова е потребно за да се подобрат сигурноста и изведбата"</string>
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Поставете „Отклучување со отпечаток“ повторно"</string>
     <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Отклучување со отпечаток"</string>
-    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Поставување „Отклучување со отпечаток“"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Поставете „Отклучување со отпечаток“"</string>
     <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"За да поставите „Отклучување со отпечаток“ повторно, вашите сегашни слики и модели на отпечаток ќе се избришат.\n\nОткако ќе се избришат, ќе треба повторно да поставите „Отклучување со отпечаток“ за да го користите отпечатокот за отклучување на телефонот или потврда дека сте вие."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"За да поставите „Отклучување со отпечаток“ повторно, вашите сегашните слики и модели на отпечаток ќе бидат избришат.\n\nОткако ќе се избришат, ќе треба повторно да поставите „Отклучување со отпечаток“ за да го користите отпечатокот за да го отклучите телефонот или да потврдите дека сте вие."</string>
-    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Не можеше да се постави „Отклучување со отпечаток“. Одете во „Поставки“ за да се обидете повторно."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Не можеше да се постави „Отклучување со отпечаток“. Отворете „Поставки“ за да се обидете повторно."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Поставете „Отклучување со лик“ повторно"</string>
     <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Отклучување со лик"</string>
     <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Поставување „Отклучување со лик“"</string>
-    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Избришете го моменталниот модел на лице за да поставите „Отклучување со лик“ повторно.\n\nЌе треба повторно да ја поставите функцијава за да го користите ликот за да го отклучите телефонот."</string>
-    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Не можеше да се постави „Отклучување со лик“. Одете во „Поставки“ за да се обидете повторно."</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"За да може одново да поставите „Отклучување со лик“, вашиот сегашен модел на лик ќе се избрише.\n\nЗа да го користите ликот за отклучување на телефонот, ќе треба повторно да ја поставите функцијава."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Не можеше да се постави „Отклучување со лик“. Отворете „Поставки“ за да се обидете повторно."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Допрете го сензорот за отпечатоци"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Не се препознава ликот. Користете отпечаток."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -210,7 +209,7 @@
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Панел за известување"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Брзи поставки."</string>
     <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"„Брзи поставки“ и „Панел со известувања“."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Заклучи екран."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Заклучен екран."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Работен заклучен екран"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Затвори"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"целосна тишина"</string>
@@ -400,7 +399,7 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинките, деталите за плаќање, фотографиите, пораките и аудиото што го пуштате."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Цел екран"</string>
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Една апликација"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Споделете или снимете апликација"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Споделување или снимање апликација"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Да почне снимање или емитување со <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Кога споделувате, снимате или емитувате, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има пристап до сѐ што е видливо на вашиот екран или пуштено на вашиот уред. Затоа, бидете внимателни со работи како лозинки, детали за плаќање, пораки, фотографии и аудио и видео."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Кога споделувате, снимате или емитувате апликација, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има пристап до сѐ што се прикажува или пушта на таа апликација. Затоа, бидете внимателни со работи како лозинки, детали за плаќање, пораки, фотографии и аудио и видео."</string>
@@ -888,7 +887,7 @@
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Премести горе десно"</string>
     <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"Премести долу лево"</string>
     <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"Премести долу десно"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Премести до работ и сокриј"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Премести до работ и скриј"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Премести над работ и прикажи"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Отстрани"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"вклучување/исклучување"</string>
@@ -906,7 +905,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"означите како неомилена"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Преместете на позиција <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Контроли"</string>
-    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Изберете контроли на уреди за брз пристап"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Изберете контроли за уредите до кои ќе имате брз пристап"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржете и влечете за да ги преуредите контролите"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Сите контроли се отстранети"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не се зачувани"</string>
@@ -968,7 +967,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"Не е најдено"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Контролата не е достапна"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"Не може да се пристапи до <xliff:g id="DEVICE">%1$s</xliff:g>. Проверете ја апликацијата <xliff:g id="APPLICATION">%2$s</xliff:g> за да се уверите дека контролата е сѐ уште достапна и дека поставките за апликацијата не се сменети."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"Отвори апликација"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Отворете ја апликацијата"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Не може да се вчита статусот"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Грешка, обидете се повторно"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Додајте контроли"</string>
@@ -1004,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Не може да се зачува. Обидете се повторно."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Не може да се зачува."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Употребете најмалку 4 знаци"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Употребете помалку од 16 знаци"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Употребете помалку од <xliff:g id="LENGTH">%1$d</xliff:g> знаци"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Број на верзија"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Бројот на верзијата е копиран во привремената меморија."</string>
     <string name="basic_status" msgid="2315371112182658176">"Започни разговор"</string>
@@ -1124,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Дознајте повеќе"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Дознајте повеќе на <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Отворете ја <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• апликацијата е поставена"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• најмалку една картичка е додадена во Wallet"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• инсталирана е апликација за камера"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• апликацијата е поставена"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• достапен е најмалку еден уред"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Изберете стандардна апликација за белешки за да ја користите кратенката за фаќање белешки"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"За да ја додадете апликацијата Wallet како кратенка, апликацијата мора да е инсталирана"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"За да ја додадете апликацијата Wallet како кратенка, мора да имате додадено најмалку една картичка"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"За да го додадете скенерот на QR-кодови како кратенка, погрижете се дека имате инсталирано апликација за камера"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"За да ја додадете апликацијата Home како кратенка, апликацијата мора да е инсталирана"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• достапен е најмалку еден уред"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Изберете стандардна апликација за белешки за да ја користите кратенката за фаќање белешки"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Изберете апликација"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Допрете и задржете ја кратенката"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Откажи"</string>
@@ -1145,7 +1144,7 @@
     <string name="stylus_battery_low" msgid="7134370101603167096">"Слаба батерија на пенкало"</string>
     <string name="video_camera" msgid="7654002575156149298">"Видеокамера"</string>
     <string name="call_from_work_profile_title" msgid="5418253516453177114">"Не може да повикувате од лична апликација"</string>
-    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Вашата организацијата ви дозволува да упатувате повици само од работни апликации"</string>
+    <string name="call_from_work_profile_text" msgid="2856337395968118274">"Вашата организација ви дозволува да упатувате повици само од работни апликации"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Префрли се на работен профил"</string>
     <string name="install_dialer_on_work_profile_action" msgid="2014659711597862506">"Инсталирајте работна апликација на телефон"</string>
     <string name="call_from_work_profile_close" msgid="5830072964434474143">"Откажи"</string>
@@ -1158,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Приоритетниот режим е вклучен"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Вниманието на „Помошникот“ е вклучено"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Поставете стандардна апликација за белешки во „Поставки“"</string>
+    <string name="install_app" msgid="5066668100199613936">"Инсталирајте ја апликацијата"</string>
 </resources>

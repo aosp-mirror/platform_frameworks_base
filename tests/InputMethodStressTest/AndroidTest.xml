@@ -19,6 +19,7 @@
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
 
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="setprop debug.wm.disable_deprecated_abi_dialog 1" />
         <option name="run-command" value="settings put secure show_ime_with_hard_keyboard 1" />
         <option name="teardown-command" value="settings delete secure show_ime_with_hard_keyboard" />
     </target_preparer>

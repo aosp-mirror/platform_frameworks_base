@@ -199,19 +199,7 @@ class SplitScreenTransitions {
             boolean isOpening = TransitionUtil.isOpeningType(info.getType());
             if (!isOpening && (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK)) {
                 // fade out
-                if (change.getSnapshot() != null) {
-                    // This case is happened if task is going to reparent to TDA, the origin leash
-                    // doesn't rendor so we use snapshot to replace it animating.
-                    t.reparent(change.getSnapshot(), info.getRoot(rootIdx).getLeash());
-                    // Use origin leash layer.
-                    t.setLayer(change.getSnapshot(), info.getChanges().size() - i);
-                    t.setPosition(change.getSnapshot(), change.getStartAbsBounds().left,
-                            change.getStartAbsBounds().top);
-                    t.show(change.getSnapshot());
-                    startFadeAnimation(change.getSnapshot(), false /* show */);
-                } else {
-                    startFadeAnimation(leash, false /* show */);
-                }
+                startFadeAnimation(leash, false /* show */);
             } else if (mode == TRANSIT_CHANGE && change.getSnapshot() != null) {
                 t.reparent(change.getSnapshot(), info.getRoot(rootIdx).getLeash());
                 // Ensure snapshot it on the top of all transition surfaces
@@ -348,8 +336,6 @@ class SplitScreenTransitions {
             WindowContainerTransaction wct,
             @Nullable RemoteTransition remoteTransition,
             Transitions.TransitionHandler handler,
-            @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishedCallback,
             int extraTransitType, boolean resizeAnim) {
         if (mPendingEnter != null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
@@ -357,20 +343,16 @@ class SplitScreenTransitions {
             return null;
         }
         final IBinder transition = mTransitions.startTransition(transitType, wct, handler);
-        setEnterTransition(transition, remoteTransition, consumedCallback, finishedCallback,
-                extraTransitType, resizeAnim);
+        setEnterTransition(transition, remoteTransition, extraTransitType, resizeAnim);
         return transition;
     }
 
     /** Sets a transition to enter split. */
     void setEnterTransition(@NonNull IBinder transition,
             @Nullable RemoteTransition remoteTransition,
-            @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishedCallback,
             int extraTransitType, boolean resizeAnim) {
         mPendingEnter = new EnterSession(
-                transition, consumedCallback, finishedCallback, remoteTransition, extraTransitType,
-                resizeAnim);
+                transition, remoteTransition, extraTransitType, resizeAnim);
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                 + " deduced Enter split screen");
@@ -608,12 +590,10 @@ class SplitScreenTransitions {
         final boolean mResizeAnim;
 
         EnterSession(IBinder transition,
-                @Nullable TransitionConsumedCallback consumedCallback,
-                @Nullable TransitionFinishedCallback finishedCallback,
                 @Nullable RemoteTransition remoteTransition,
                 int extraTransitType, boolean resizeAnim) {
-            super(transition, consumedCallback, finishedCallback, remoteTransition,
-                    extraTransitType);
+            super(transition, null /* consumedCallback */, null /* finishedCallback */,
+                    remoteTransition, extraTransitType);
             this.mResizeAnim = resizeAnim;
         }
     }

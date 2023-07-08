@@ -3568,6 +3568,8 @@ package android.view {
     field public static final int ACCESSIBILITY_TITLE_CHANGED = 33554432; // 0x2000000
     field public static final int FLAG_SLIPPERY = 536870912; // 0x20000000
     field public CharSequence accessibilityTitle;
+    field public float preferredMaxDisplayRefreshRate;
+    field public float preferredMinDisplayRefreshRate;
     field public int privateFlags;
   }
 
@@ -4155,6 +4157,7 @@ package android.window {
 
   public static class WindowInfosListenerForTest.WindowInfo {
     field @NonNull public final android.graphics.Rect bounds;
+    field public final int displayId;
     field public final boolean isTrustedOverlay;
     field public final boolean isVisible;
     field @NonNull public final String name;

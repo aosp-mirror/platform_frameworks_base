@@ -76,4 +76,10 @@
     <!-- Bouncer user switcher margins -->
     <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>
     <dimen name="bouncer_user_switcher_view_mode_view_flipper_bottom_margin">0dp</dimen>
+
+    <!-- Power Menu Lite -->
+    <!-- These values are for small screen landscape. For larger landscape screens, they are
+         overlaid -->
+    <dimen name="global_actions_button_size">72dp</dimen>
+    <dimen name="global_actions_button_padding">26dp</dimen>
 </resources>

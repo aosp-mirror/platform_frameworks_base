@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.KeyEvent;
@@ -182,5 +183,16 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
     public void testResume() {
         mKeyguardAbsKeyInputViewController.onResume(KeyguardSecurityView.VIEW_REVEALED);
         verify(mLockPatternUtils).getLockoutAttemptDeadline(anyInt());
+    }
+
+    @Test
+    public void testLockedOut_verifyPasswordAndUnlock_doesNotEnableViewInput() {
+        mKeyguardAbsKeyInputViewController.handleAttemptLockout(
+                SystemClock.elapsedRealtime() + 1000);
+        mKeyguardAbsKeyInputViewController.verifyPasswordAndUnlock();
+        verify(mAbsKeyInputView).setPasswordEntryInputEnabled(false);
+        verify(mAbsKeyInputView).setPasswordEntryEnabled(false);
+        verify(mAbsKeyInputView, never()).setPasswordEntryInputEnabled(true);
+        verify(mAbsKeyInputView, never()).setPasswordEntryEnabled(true);
     }
 }

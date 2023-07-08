@@ -3025,7 +3025,7 @@ public class AppStandbyController
         public static final long DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT =
                 COMPRESS_TIME ? ONE_MINUTE : 30 * ONE_MINUTE;
         public static final long DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS =
-                COMPRESS_TIME ? ONE_MINUTE : ONE_DAY;
+                COMPRESS_TIME ? ONE_MINUTE : ONE_HOUR;
         public static final boolean DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS = true;
         public static final long DEFAULT_BROADCAST_RESPONSE_WINDOW_DURATION_MS =
                 2 * ONE_MINUTE;

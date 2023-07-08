@@ -353,7 +353,6 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_PLAY_SOUND_EFFECT = 5;
     private static final int MSG_LOAD_SOUND_EFFECTS = 7;
     private static final int MSG_SET_FORCE_USE = 8;
-    private static final int MSG_BT_HEADSET_CNCT_FAILED = 9;
     private static final int MSG_SET_ALL_VOLUMES = 10;
     private static final int MSG_UNLOAD_SOUND_EFFECTS = 15;
     private static final int MSG_SYSTEM_READY = 16;
@@ -1368,6 +1367,7 @@ public class AudioService extends IAudioService.Stub
         intentFilter.addAction(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION);
         intentFilter.addAction(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION);
         intentFilter.addAction(ACTION_CHECK_MUSIC_ACTIVE);
+        intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null,
                 Context.RECEIVER_EXPORTED);
@@ -3277,6 +3277,7 @@ public class AudioService extends IAudioService.Stub
             if (mUserSelectedVolumeControlStream) { // implies mVolumeControlStream != -1
                 streamType = mVolumeControlStream;
             } else {
+                // TODO discard activity on a muted stream?
                 final int maybeActiveStreamType = getActiveStreamType(suggestedStreamType);
                 final boolean activeForReal;
                 if (maybeActiveStreamType == AudioSystem.STREAM_RING
@@ -3480,9 +3481,10 @@ public class AudioService extends IAudioService.Stub
             }
         } else if (isStreamMutedByRingerOrZenMode(streamTypeAlias) && streamState.mIsMuted) {
             // if the stream is currently muted streams by ringer/zen mode
-            // then it cannot be unmuted (without FLAG_ALLOW_RINGER_MODES)
+            // then it cannot be unmuted (without FLAG_ALLOW_RINGER_MODES) with an unmute or raise
             if (direction == AudioManager.ADJUST_TOGGLE_MUTE
-                    || direction == AudioManager.ADJUST_UNMUTE) {
+                    || direction == AudioManager.ADJUST_UNMUTE
+                    || direction == AudioManager.ADJUST_RAISE) {
                 adjustVolume = false;
             }
         }
@@ -3664,25 +3666,29 @@ public class AudioService extends IAudioService.Stub
      * and aliases before mute change changed and after.
      */
     private void muteAliasStreams(int streamAlias, boolean state) {
-        synchronized (VolumeStreamState.class) {
-            List<Integer> streamsToMute = new ArrayList<>();
-            for (int stream = 0; stream < mStreamStates.length; stream++) {
-                VolumeStreamState vss = mStreamStates[stream];
-                if (streamAlias == mStreamVolumeAlias[stream] && vss.isMutable()) {
-                    if (!(mCameraSoundForced
-                            && (vss.getStreamType()
-                                    == AudioSystem.STREAM_SYSTEM_ENFORCED))) {
-                        boolean changed = vss.mute(state, /* apply= */ false, "muteAliasStreams");
-                        if (changed) {
-                            streamsToMute.add(stream);
+        // Locking mSettingsLock to avoid inversion when calling doMute -> updateVolumeGroupIndex
+        synchronized (mSettingsLock) {
+            synchronized (VolumeStreamState.class) {
+                List<Integer> streamsToMute = new ArrayList<>();
+                for (int stream = 0; stream < mStreamStates.length; stream++) {
+                    VolumeStreamState vss = mStreamStates[stream];
+                    if (streamAlias == mStreamVolumeAlias[stream] && vss.isMutable()) {
+                        if (!(mCameraSoundForced
+                                && (vss.getStreamType()
+                                == AudioSystem.STREAM_SYSTEM_ENFORCED))) {
+                            boolean changed = vss.mute(state, /* apply= */ false,
+                                    "muteAliasStreams");
+                            if (changed) {
+                                streamsToMute.add(stream);
+                            }
                         }
                     }
                 }
+                streamsToMute.forEach(streamToMute -> {
+                    mStreamStates[streamToMute].doMute();
+                    broadcastMuteSetting(streamToMute, state);
+                });
             }
-            streamsToMute.forEach(streamToMute -> {
-                mStreamStates[streamToMute].doMute();
-                broadcastMuteSetting(streamToMute, state);
-            });
         }
     }
 
@@ -3697,18 +3703,22 @@ public class AudioService extends IAudioService.Stub
     // Called after a delay when volume down is pressed while muted
     private void onUnmuteStream(int stream, int flags) {
         boolean wasMuted;
-        synchronized (VolumeStreamState.class) {
-            final VolumeStreamState streamState = mStreamStates[stream];
-            // if unmuting causes a change, it was muted
-            wasMuted = streamState.mute(false, "onUnmuteStream");
+        // Locking mSettingsLock to avoid inversion when calling vss.mute -> vss.doMute ->
+        // vss.updateVolumeGroupIndex
+        synchronized (mSettingsLock) {
+            synchronized (VolumeStreamState.class) {
+                final VolumeStreamState streamState = mStreamStates[stream];
+                // if unmuting causes a change, it was muted
+                wasMuted = streamState.mute(false, "onUnmuteStream");
 
-            final int device = getDeviceForStream(stream);
-            final int index = streamState.getIndex(device);
-            sendVolumeUpdate(stream, index, index, flags, device);
-        }
-        if (stream == AudioSystem.STREAM_MUSIC && wasMuted) {
-            synchronized (mHdmiClientLock) {
-                maybeSendSystemAudioStatusCommand(true);
+                final int device = getDeviceForStream(stream);
+                final int index = streamState.getIndex(device);
+                sendVolumeUpdate(stream, index, index, flags, device);
+            }
+            if (stream == AudioSystem.STREAM_MUSIC && wasMuted) {
+                synchronized (mHdmiClientLock) {
+                    maybeSendSystemAudioStatusCommand(true);
+                }
             }
         }
     }
@@ -7609,7 +7619,11 @@ public class AudioService extends IAudioService.Stub
                 Log.i(TAG, String.format("onAccessoryPlugMediaUnmute unmuting device=%d [%s]",
                         newDevice, AudioSystem.getOutputDeviceName(newDevice)));
             }
-            mStreamStates[AudioSystem.STREAM_MUSIC].mute(false, "onAccessoryPlugMediaUnmute");
+            // Locking mSettingsLock to avoid inversion when calling vss.mute -> vss.doMute ->
+            // vss.updateVolumeGroupIndex
+            synchronized (mSettingsLock) {
+                mStreamStates[AudioSystem.STREAM_MUSIC].mute(false, "onAccessoryPlugMediaUnmute");
+            }
         }
     }
 
@@ -7644,9 +7658,14 @@ public class AudioService extends IAudioService.Stub
                 continue;
             }
         }
-        for (int i = 0; i < sVolumeGroupStates.size(); i++) {
-            final VolumeGroupState vgs = sVolumeGroupStates.valueAt(i);
-            vgs.applyAllVolumes(/* userSwitch= */ false);
+
+        // need mSettingsLock for vgs.applyAllVolumes -> vss.setIndex which grabs this lock after
+        // VSS.class. Locking order needs to be preserved
+        synchronized (mSettingsLock) {
+            for (int i = 0; i < sVolumeGroupStates.size(); i++) {
+                final VolumeGroupState vgs = sVolumeGroupStates.valueAt(i);
+                vgs.applyAllVolumes(/* userSwitch= */ false);
+            }
         }
     }
 
@@ -7683,9 +7702,14 @@ public class AudioService extends IAudioService.Stub
         if (DEBUG_VOL) {
             Log.v(TAG, "restoreVolumeGroups");
         }
-        for (int i = 0; i < sVolumeGroupStates.size(); i++) {
-            final VolumeGroupState vgs = sVolumeGroupStates.valueAt(i);
-            vgs.applyAllVolumes(false/*userSwitch*/);
+
+        // need mSettingsLock for vgs.applyAllVolumes -> vss.setIndex which grabs this lock after
+        // VSS.class. Locking order needs to be preserved
+        synchronized (mSettingsLock) {
+            for (int i = 0; i < sVolumeGroupStates.size(); i++) {
+                final VolumeGroupState vgs = sVolumeGroupStates.valueAt(i);
+                vgs.applyAllVolumes(false/*userSwitch*/);
+            }
         }
     }
 
@@ -7822,49 +7846,51 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void adjustVolume(int direction, int flags) {
-            synchronized (AudioService.VolumeStreamState.class) {
-                int device = getDeviceForVolume();
-                int previousIndex = getIndex(device);
-                if (isMuteAdjust(direction) && !isMutable()) {
-                    // Non mutable volume group
-                    if (DEBUG_VOL) {
-                        Log.d(TAG, "invalid mute on unmutable volume group " + name());
-                    }
-                    return;
-                }
-                switch (direction) {
-                    case AudioManager.ADJUST_TOGGLE_MUTE: {
-                        // Note: If muted by volume 0, unmute will restore volume 0.
-                        mute(!mIsMuted);
-                        break;
-                    }
-                    case AudioManager.ADJUST_UNMUTE:
-                        // Note: If muted by volume 0, unmute will restore volume 0.
-                        mute(false);
-                        break;
-                    case AudioManager.ADJUST_MUTE:
-                        // May be already muted by setvolume 0, prevent from setting same value
-                        if (previousIndex != 0) {
-                            // bypass persist
-                            mute(true);
+            synchronized (mSettingsLock) {
+                synchronized (AudioService.VolumeStreamState.class) {
+                    int device = getDeviceForVolume();
+                    int previousIndex = getIndex(device);
+                    if (isMuteAdjust(direction) && !isMutable()) {
+                        // Non mutable volume group
+                        if (DEBUG_VOL) {
+                            Log.d(TAG, "invalid mute on unmutable volume group " + name());
                         }
-                        mIsMuted = true;
-                        break;
-                    case AudioManager.ADJUST_RAISE:
-                        // As for stream, RAISE during mute will increment the index
-                        setVolumeIndex(Math.min(previousIndex + 1, mIndexMax),  device, flags);
-                        break;
-                    case AudioManager.ADJUST_LOWER:
-                        // For stream, ADJUST_LOWER on a muted VSS is a no-op
-                        // If we decide to unmute on ADJUST_LOWER, cannot fallback on
-                        // adjustStreamVolume for group associated to legacy stream type
-                        if (isMuted() && previousIndex != 0) {
+                        return;
+                    }
+                    switch (direction) {
+                        case AudioManager.ADJUST_TOGGLE_MUTE: {
+                            // Note: If muted by volume 0, unmute will restore volume 0.
+                            mute(!mIsMuted);
+                            break;
+                        }
+                        case AudioManager.ADJUST_UNMUTE:
+                            // Note: If muted by volume 0, unmute will restore volume 0.
                             mute(false);
-                        } else {
-                            int newIndex = Math.max(previousIndex - 1, mIndexMin);
-                            setVolumeIndex(newIndex, device, flags);
-                        }
-                        break;
+                            break;
+                        case AudioManager.ADJUST_MUTE:
+                            // May be already muted by setvolume 0, prevent from setting same value
+                            if (previousIndex != 0) {
+                                // bypass persist
+                                mute(true);
+                            }
+                            mIsMuted = true;
+                            break;
+                        case AudioManager.ADJUST_RAISE:
+                            // As for stream, RAISE during mute will increment the index
+                            setVolumeIndex(Math.min(previousIndex + 1, mIndexMax),  device, flags);
+                            break;
+                        case AudioManager.ADJUST_LOWER:
+                            // For stream, ADJUST_LOWER on a muted VSS is a no-op
+                            // If we decide to unmute on ADJUST_LOWER, cannot fallback on
+                            // adjustStreamVolume for group associated to legacy stream type
+                            if (isMuted() && previousIndex != 0) {
+                                mute(false);
+                            } else {
+                                int newIndex = Math.max(previousIndex - 1, mIndexMin);
+                                setVolumeIndex(newIndex, device, flags);
+                            }
+                            break;
+                    }
                 }
             }
         }
@@ -7876,11 +7902,13 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void setVolumeIndex(int index, int flags) {
-            synchronized (AudioService.VolumeStreamState.class) {
-                if (mUseFixedVolume) {
-                    return;
+            synchronized (mSettingsLock) {
+                synchronized (AudioService.VolumeStreamState.class) {
+                    if (mUseFixedVolume) {
+                        return;
+                    }
+                    setVolumeIndex(index, getDeviceForVolume(), flags);
                 }
-                setVolumeIndex(index, getDeviceForVolume(), flags);
             }
         }
 
@@ -8687,24 +8715,30 @@ public class AudioService extends IAudioService.Stub
 
         // If associated to volume group, update group cache
         private void updateVolumeGroupIndex(int device, boolean forceMuteState) {
-            synchronized (VolumeStreamState.class) {
-                if (mVolumeGroupState != null) {
-                    int groupIndex = (getIndex(device) + 5) / 10;
-                    if (DEBUG_VOL) {
-                        Log.d(TAG, "updateVolumeGroupIndex for stream " + mStreamType
-                                + ", muted=" + mIsMuted + ", device=" + device + ", index="
-                                + getIndex(device) + ", group " + mVolumeGroupState.name()
-                                + " Muted=" + mVolumeGroupState.isMuted() + ", Index=" + groupIndex
-                                + ", forceMuteState=" + forceMuteState);
-                    }
-                    mVolumeGroupState.updateVolumeIndex(groupIndex, device);
-                    // Only propage mute of stream when applicable
-                    if (isMutable()) {
-                        // For call stream, align mute only when muted, not when index is set to 0
-                        mVolumeGroupState.mute(
-                                forceMuteState ? mIsMuted :
-                                        (groupIndex == 0 && !isCallStream(mStreamType))
-                                                || mIsMuted);
+            // need mSettingsLock when called from setIndex for vgs.mute -> vgs.applyAllVolumes ->
+            // vss.setIndex which grabs this lock after VSS.class. Locking order needs to be
+            // preserved
+            synchronized (mSettingsLock) {
+                synchronized (VolumeStreamState.class) {
+                    if (mVolumeGroupState != null) {
+                        int groupIndex = (getIndex(device) + 5) / 10;
+                        if (DEBUG_VOL) {
+                            Log.d(TAG, "updateVolumeGroupIndex for stream " + mStreamType
+                                    + ", muted=" + mIsMuted + ", device=" + device + ", index="
+                                    + getIndex(device) + ", group " + mVolumeGroupState.name()
+                                    + " Muted=" + mVolumeGroupState.isMuted() + ", Index="
+                                    + groupIndex + ", forceMuteState=" + forceMuteState);
+                        }
+                        mVolumeGroupState.updateVolumeIndex(groupIndex, device);
+                        // Only propage mute of stream when applicable
+                        if (isMutable()) {
+                            // For call stream, align mute only when muted, not when index is set to
+                            // 0
+                            mVolumeGroupState.mute(
+                                    forceMuteState ? mIsMuted :
+                                            (groupIndex == 0 && !isCallStream(mStreamType))
+                                                    || mIsMuted);
+                        }
                     }
                 }
             }

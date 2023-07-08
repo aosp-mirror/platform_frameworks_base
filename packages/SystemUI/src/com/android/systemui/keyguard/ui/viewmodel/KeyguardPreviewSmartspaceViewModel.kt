@@ -24,6 +24,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 /** View model for the smartspace. */
@@ -34,13 +35,29 @@ constructor(
     interactor: KeyguardClockInteractor,
 ) {
 
-    val smartSpaceTopPadding: Flow<Int> =
+    val smartspaceTopPadding: Flow<Int> =
         interactor.selectedClockSize.map {
             when (it) {
                 SettingsClockSize.DYNAMIC -> getLargeClockSmartspaceTopPadding(context.resources)
                 SettingsClockSize.SMALL -> getSmallClockSmartspaceTopPadding(context.resources)
             }
         }
+
+    val shouldHideSmartspace: Flow<Boolean> =
+        combine(
+                interactor.selectedClockSize,
+                interactor.currentClockId,
+                ::Pair,
+            )
+            .map { (size, currentClockId) ->
+                when (size) {
+                    // TODO (b/284122375) This is temporary. We should use clockController
+                    //      .largeClock.config.hasCustomWeatherDataDisplay instead, but
+                    //      ClockRegistry.createCurrentClock is not reliable.
+                    SettingsClockSize.DYNAMIC -> currentClockId == "DIGITAL_CLOCK_WEATHER"
+                    SettingsClockSize.SMALL -> false
+                }
+            }
 
     companion object {
         fun getLargeClockSmartspaceTopPadding(resources: Resources): Int {

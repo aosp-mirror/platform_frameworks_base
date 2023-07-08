@@ -1256,7 +1256,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ऐप्स  प्रारंभ होने वाले हैं"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बूट खत्म हो रहा है."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"आपने पावर बटन दबाया - आम तौर पर, इससे स्क्रीन बंद हो जाती है.\n\nअपना फ़िंगरप्रिंट सेट अप करते समय, बटन को हल्के से टैप करके देखें."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"सेटअप पूरा होने पर, स्क्रीन बंद करें"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"सेटअप रोकने के लिए, स्क्रीन बंद करें"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"बंद करें"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"फ़िंगरप्रिंट की पुष्टि करना जारी रखना है?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"आपने पावर बटन दबाया - आम तौर पर, इससे स्क्रीन बंद हो जाती है.\n\nअपने फ़िंगरप्रिंट की पुष्टि करने के लिए, बटन पर हल्के से टैप करके देखें."</string>
@@ -1715,7 +1715,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"रंग में सुधार करने की सुविधा"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"वन-हैंडेड मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"स्क्रीन की रोशनी को सामान्य लेवल से और कम करने की सुविधा"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"सुनने में मदद करने वाले डिवाइस"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"कान की मशीन"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को चालू कर दिया गया."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को बंद कर दिया गया."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"आवाज़ बटन को छोड़ें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> की सुविधा चालू करने के लिए, आवाज़ वाले दोनों बटन तीन सेकंड तक दबाकर रखें."</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहर निकलने के लिए, ऊपर से नीचे स्वा‍इप करें."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ठीक है"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"बेहतर व्यू पाने के लिए, डिवाइस की स्क्रीन को घुमाएं"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"बेहतर व्यू पाने के लिए, स्प्लिट स्क्रीन मोड बंद करें"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"बेहतर व्यू पाने के लिए <xliff:g id="NAME">%s</xliff:g> को फ़ुल स्क्रीन में खोलें"</string>
     <string name="done_label" msgid="7283767013231718521">"हो गया"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"घंटो का चक्राकार स्लाइडर"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"मिनटों का चक्राकार स्लाइडर"</string>
@@ -1975,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> पर इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर ऐक्सेस करने की कोशिश करें."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"यह ऐप्लिकेशन, Android के पुराने वर्शन के लिए बनाया गया था. इसमें सिक्योरिटी और निजता सुरक्षा से जुड़ी नई सुविधाएं शामिल नहीं हैं. साथ ही, ऐसा हो सकता है कि यह ठीक से काम न करे. अपडेट के बारे में पता करें या ऐप्लिकेशन के डेवलपर से संपर्क करें."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"देखें कि अपडेट मौजूद है या नहीं"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"यह ऐप्लिकेशन, Android के सबसे नए वर्शन पर काम नहीं करता है. अपडेट के बारे में पता करें या ऐप्लिकेशन के डेवलपर से संपर्क करें."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"आपके पास नए संदेश हैं"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"देखने के लिए मैसेज (एसएमएस) ऐप खोलें"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"शायद कुछ सुविधाएं काम न करें"</string>
@@ -2156,7 +2157,7 @@
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"आपके आईटी एडमिन ने इस कॉन्टेंट को शेयर करने की सुविधा ब्लॉक कर रखी है"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"इस कॉन्टेंट को ऑफ़िस के काम से जुड़े ऐप्लिकेशन का इस्तेमाल करके, शेयर नहीं किया जा सकता"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"इस कॉन्टेंट को ऑफ़िस के काम से जुड़े ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
-    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"इस कॉन्टेंट को निजी ऐप्लिकेशन का इस्तेमाल करके, शेयर नहीं किया जा सकता"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"इस कॉन्टेंट को निजी ऐप्लिकेशन के ज़रिए शेयर नहीं किया जा सकता"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"इस कॉन्टेंट को निजी ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
     <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"वर्क ऐप्लिकेशन बंद किए गए हैं"</string>
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"चालू करें"</string>
@@ -2166,7 +2167,7 @@
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"निजी प्रोफ़ाइल वाले <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन में जाकर खोलें?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"वर्क प्रोफ़ाइल वाले <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन में जाकर खोलें?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"क्या आपको वर्क ऐप्लिकेशन से कॉल करना है?"</string>
-    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"क्या आपको वर्क ऐप्लिकेशन में स्विच करना है?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"क्या आपको वर्क ऐप्लिकेशन पर स्विच करना है?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"आपके संगठन ने, सिर्फ़ वर्क ऐप्लिकेशन से कॉल करने की अनुमति दी है"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"आपके संगठन ने, सिर्फ़ वर्क ऐप्लिकेशन से मैसेज भेजने की अनुमति दी है"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"निजी ब्राउज़र का इस्तेमाल करें"</string>

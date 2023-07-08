@@ -11,7 +11,6 @@ import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -23,9 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.atLeastOnce
-import org.mockito.Mockito.eq
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -92,16 +89,10 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testWakeUpCallsExecutor() {
-        val mockExecutor: DelayableExecutor = mock()
-        val mockCallback: Runnable = mock()
+    fun testWakeUpSetsExitAnimationsRunning() {
+        controller.wakeUp()
 
-        controller.wakeUp(
-            doneCallback = mockCallback,
-            executor = mockExecutor,
-        )
-
-        verify(mockExecutor).executeDelayed(eq(mockCallback), anyLong())
+        verify(stateController).setExitAnimationsRunning(true)
     }
 
     @Test
@@ -112,10 +103,7 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
 
         verify(mockStartAnimator, never()).cancel()
 
-        controller.wakeUp(
-            doneCallback = mock(),
-            executor = mock(),
-        )
+        controller.wakeUp()
 
         // Verify that we cancelled the start animator in favor of the exit
         // animator.

@@ -1852,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ukončíte potiahnutím zhora nadol."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Dobre"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Otočte zariadenie pre lepšie zobrazenie"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Ukončite rozdelenú obrazovku pre lepšie zobrazenie"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Otvorte <xliff:g id="NAME">%s</xliff:g> na celej obrazovke pre lepšie zobrazenie"</string>
     <string name="done_label" msgid="7283767013231718521">"Hotovo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kruhový posúvač hodín"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kruhový posúvač minút"</string>
@@ -1977,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste použiť telefón."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Táto aplikácia bola vytvorená pre staršiu verziu Androidu. Nemusí správne fungovať a obsahovať najnovšie prvky zabezpečenia a ochrany súkromia. Skontrolujte dostupnosť aktualizácie alebo kontaktujte jej vývojára."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Skontrolovať dostupnosť aktualizácie"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Táto aplikácia nie je kompatibilná s najnovšou verziou Androidu. Skontrolujte dostupnosť aktualizácie alebo kontaktujte jej vývojára."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové správy."</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Otvorte aplikáciu pre SMS a zobrazte správu"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Niektoré funkcie môžu byť obmedzené"</string>

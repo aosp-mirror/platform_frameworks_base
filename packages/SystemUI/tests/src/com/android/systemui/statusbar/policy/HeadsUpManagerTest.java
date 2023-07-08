@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -345,5 +344,18 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
         assertEquals(1, mUiEventLoggerFake.numLogs());
         assertEquals(HeadsUpManager.NotificationPeekEvent.NOTIFICATION_PEEK.getId(),
                 mUiEventLoggerFake.eventId(0));
+    }
+
+    @Test
+    public void testSetUserActionMayIndirectlyRemove() {
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createNewNotification(/* id= */ 0))
+                .build();
+
+        mHeadsUpManager.showNotification(notifEntry);
+        assertFalse(mHeadsUpManager.canRemoveImmediately(notifEntry.getKey()));
+
+        mHeadsUpManager.setUserActionMayIndirectlyRemove(notifEntry);
+        assertTrue(mHeadsUpManager.canRemoveImmediately(notifEntry.getKey()));
     }
 }

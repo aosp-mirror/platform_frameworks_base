@@ -17,6 +17,7 @@
 package com.android.wm.shell.taskview;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -25,16 +26,19 @@ import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.transition.Transitions;
@@ -45,6 +49,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SmallTest
@@ -294,5 +299,35 @@ public class TaskViewTransitionsTest extends ShellTestCase {
 
         mTaskViewTransitions.setTaskBounds(mTaskViewTaskController,
                 new Rect(0, 0, 100, 100));
+    }
+
+    @Test
+    public void test_startAnimation_setsTaskNotFound() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        TransitionInfo.Change change = mock(TransitionInfo.Change.class);
+        when(change.getTaskInfo()).thenReturn(mTaskInfo);
+        when(change.getMode()).thenReturn(TRANSIT_OPEN);
+
+        List<TransitionInfo.Change> changes = new ArrayList<>();
+        changes.add(change);
+
+        TransitionInfo info = mock(TransitionInfo.class);
+        when(info.getChanges()).thenReturn(changes);
+
+        mTaskViewTransitions.startTaskView(new WindowContainerTransaction(),
+                mTaskViewTaskController,
+                mock(IBinder.class));
+
+        TaskViewTransitions.PendingTransition pending =
+                mTaskViewTransitions.findPendingOpeningTransition(mTaskViewTaskController);
+
+        mTaskViewTransitions.startAnimation(pending.mClaimed,
+                info,
+                new SurfaceControl.Transaction(),
+                new SurfaceControl.Transaction(),
+                mock(Transitions.TransitionFinishCallback.class));
+
+        verify(mTaskViewTaskController).setTaskNotFound();
     }
 }

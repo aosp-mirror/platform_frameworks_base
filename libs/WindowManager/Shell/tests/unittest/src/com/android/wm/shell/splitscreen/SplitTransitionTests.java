@@ -75,6 +75,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -101,6 +102,7 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private SurfaceSession mSurfaceSession;
     @Mock private IconProvider mIconProvider;
     @Mock private ShellExecutor mMainExecutor;
+    @Mock private DefaultMixedHandler mMixedHandler;
     private SplitLayout mSplitLayout;
     private MainStage mMainStage;
     private SideStage mSideStage;
@@ -131,6 +133,7 @@ public class SplitTransitionTests extends ShellTestCase {
                 mSyncQueue, mTaskOrganizer, mMainStage, mSideStage, mDisplayController,
                 mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
                 mTransactionPool, mMainExecutor, Optional.empty());
+        mStageCoordinator.setMixedHandler(mMixedHandler);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();
         doAnswer((Answer<IBinder>) invocation -> mock(IBinder.class))
                 .when(mTransitions).startTransition(anyInt(), any(), any());
@@ -185,7 +188,7 @@ public class SplitTransitionTests extends ShellTestCase {
 
         IBinder transition = mSplitScreenTransitions.startEnterTransition(
                 TRANSIT_OPEN, new WindowContainerTransaction(),
-                new RemoteTransition(testRemote, "Test"), mStageCoordinator, null, null,
+                new RemoteTransition(testRemote, "Test"), mStageCoordinator,
                 TRANSIT_SPLIT_SCREEN_PAIR_OPEN, false);
         mMainStage.onTaskAppeared(mMainChild, createMockSurface());
         mSideStage.onTaskAppeared(mSideChild, createMockSurface());
@@ -412,7 +415,7 @@ public class SplitTransitionTests extends ShellTestCase {
         IBinder enterTransit = mSplitScreenTransitions.startEnterTransition(
                 TRANSIT_OPEN, new WindowContainerTransaction(),
                 new RemoteTransition(new TestRemoteTransition(), "Test"),
-                mStageCoordinator, null, null, TRANSIT_SPLIT_SCREEN_PAIR_OPEN, false);
+                mStageCoordinator, TRANSIT_SPLIT_SCREEN_PAIR_OPEN, false);
         mMainStage.onTaskAppeared(mMainChild, createMockSurface());
         mSideStage.onTaskAppeared(mSideChild, createMockSurface());
         mStageCoordinator.startAnimation(enterTransit, enterInfo,

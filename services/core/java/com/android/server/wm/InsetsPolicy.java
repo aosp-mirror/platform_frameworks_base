@@ -567,8 +567,7 @@ class InsetsPolicy {
                 return focusedWin;
             }
         }
-        if (mPolicy.isForceShowNavigationBarEnabled() && focusedWin != null
-                && focusedWin.getActivityType() == ACTIVITY_TYPE_STANDARD) {
+        if (forcesShowingNavigationBars(focusedWin)) {
             // When "force show navigation bar" is enabled, it means both force visible is true, and
             // we are in 3-button navigation. In this mode, the navigation bar is forcibly shown
             // when activity type is ACTIVITY_TYPE_STANDARD which means Launcher or Recent could
@@ -602,6 +601,11 @@ class InsetsPolicy {
             return mPolicy.getTopFullscreenOpaqueWindow();
         }
         return focusedWin;
+    }
+
+    boolean forcesShowingNavigationBars(WindowState win) {
+        return mPolicy.isForceShowNavigationBarEnabled() && win != null
+                && win.getActivityType() == ACTIVITY_TYPE_STANDARD;
     }
 
     /**

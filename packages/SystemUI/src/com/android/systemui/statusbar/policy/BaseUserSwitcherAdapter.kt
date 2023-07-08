@@ -35,7 +35,10 @@ protected constructor(
 ) : BaseAdapter() {
 
     protected open val users: List<UserRecord>
-        get() = controller.users.filter { !controller.isKeyguardShowing || !it.isRestricted }
+        get() = controller.users.filter {
+            (!controller.isKeyguardShowing || !it.isRestricted) &&
+                (controller.isUserSwitcherEnabled || it.isCurrent)
+        }
 
     init {
         controller.addAdapter(WeakReference(this))

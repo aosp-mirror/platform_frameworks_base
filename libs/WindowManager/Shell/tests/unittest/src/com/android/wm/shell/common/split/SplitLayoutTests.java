@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
@@ -41,6 +42,7 @@ import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
+import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 
 import org.junit.Before;
@@ -57,6 +59,7 @@ import org.mockito.MockitoAnnotations;
 public class SplitLayoutTests extends ShellTestCase {
     @Mock SplitLayout.SplitLayoutHandler mSplitLayoutHandler;
     @Mock SplitWindowManager.ParentContainerCallbacks mCallbacks;
+    @Mock DisplayController mDisplayController;
     @Mock DisplayImeController mDisplayImeController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock WindowContainerTransaction mWct;
@@ -72,6 +75,7 @@ public class SplitLayoutTests extends ShellTestCase {
                 getConfiguration(),
                 mSplitLayoutHandler,
                 mCallbacks,
+                mDisplayController,
                 mDisplayImeController,
                 mTaskOrganizer,
                 SplitLayout.PARALLAX_NONE));
@@ -100,6 +104,10 @@ public class SplitLayoutTests extends ShellTestCase {
         // Verify updateConfiguration returns true if the density changed.
         config.densityDpi = 123;
         assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
+
+        // Verify updateConfiguration checks the current DisplayLayout
+        verify(mDisplayController, times(5)) // init * 1 + updateConfiguration * 4
+                .getDisplayLayout(anyInt());
     }
 
     @Test
@@ -166,6 +174,14 @@ public class SplitLayoutTests extends ShellTestCase {
 
         verify(mWct).setSmallestScreenWidthDp(eq(task1.token), anyInt());
         verify(mWct).setSmallestScreenWidthDp(eq(task2.token), anyInt());
+    }
+
+    @Test
+    public void testRoateTo_checksDisplayLayout() {
+        mSplitLayout.rotateTo(90);
+
+        verify(mDisplayController, times(2)) // init * 1 + rotateTo * 1
+                .getDisplayLayout(anyInt());
     }
 
     private void waitDividerFlingFinished() {

@@ -167,7 +167,7 @@ final class PolicyEnforcerCallbacks {
                             packages == null ? null : packages.stream().toList());
             LocalServices.getService(UsageStatsManagerInternal.class)
                             .setAdminProtectedPackages(
-                            packages == null ? null : new ArraySet(packages), userId);
+                            packages == null ? null : new ArraySet<>(packages), userId);
         });
         return true;
     }

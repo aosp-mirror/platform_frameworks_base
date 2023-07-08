@@ -22,14 +22,10 @@ import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_P
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
-import android.app.ActivityManagerInternal;
 import android.companion.AssociationInfo;
 import android.companion.IOnMessageReceivedListener;
 import android.companion.IOnTransportsChangedListener;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Binder;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
@@ -38,7 +34,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.LocalServices;
 import com.android.server.companion.AssociationStore;
 
 import java.io.FileDescriptor;
@@ -137,44 +132,15 @@ public class CompanionTransportManager {
         synchronized (mTransports) {
             for (int i = 0; i < associationIds.length; i++) {
                 if (mTransports.contains(associationIds[i])) {
-                    try {
-                        mTransports.get(associationIds[i]).sendMessage(message, data);
-                    } catch (IOException e) {
-                        Slog.e(TAG, "Failed to send message 0x" + Integer.toHexString(message)
-                                + " data length " + data.length + " to association "
-                                + associationIds[i]);
-                    }
+                    mTransports.get(associationIds[i]).requestForResponse(message, data);
                 }
             }
         }
     }
 
-    /**
-     * For the moment, we only offer transporting of system data to built-in
-     * companion apps; future work will improve the security model to support
-     * third-party companion apps.
-     */
-    private void enforceCallerCanTransportSystemData(String packageName, int userId) {
-        mContext.enforceCallingOrSelfPermission(DELIVER_COMPANION_MESSAGES, TAG);
-
-        try {
-            final ApplicationInfo info = mContext.getPackageManager().getApplicationInfoAsUser(
-                    packageName, 0, userId);
-            final int instrumentationUid = LocalServices.getService(ActivityManagerInternal.class)
-                    .getInstrumentationSourceUid(Binder.getCallingUid());
-            if (!Build.isDebuggable() && !info.isSystemApp()
-                    && instrumentationUid == android.os.Process.INVALID_UID) {
-                throw new SecurityException("Transporting of system data currently only available "
-                        + "to built-in companion apps or tests");
-            }
-        } catch (NameNotFoundException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
     public void attachSystemDataTransport(String packageName, int userId, int associationId,
             ParcelFileDescriptor fd) {
-        enforceCallerCanTransportSystemData(packageName, userId);
+        mContext.enforceCallingOrSelfPermission(DELIVER_COMPANION_MESSAGES, TAG);
         synchronized (mTransports) {
             if (mTransports.contains(associationId)) {
                 detachSystemDataTransport(packageName, userId, associationId);
@@ -188,7 +154,7 @@ public class CompanionTransportManager {
     }
 
     public void detachSystemDataTransport(String packageName, int userId, int associationId) {
-        enforceCallerCanTransportSystemData(packageName, userId);
+        mContext.enforceCallingOrSelfPermission(DELIVER_COMPANION_MESSAGES, TAG);
         synchronized (mTransports) {
             final Transport transport = mTransports.get(associationId);
             if (transport != null) {
@@ -244,6 +210,7 @@ public class CompanionTransportManager {
         }
 
         addMessageListenersToTransport(transport);
+        transport.setOnTransportClosedListener(this::detachSystemDataTransport);
         transport.start();
         synchronized (mTransports) {
             mTransports.put(associationId, transport);
@@ -319,6 +286,16 @@ public class CompanionTransportManager {
     private void addMessageListenersToTransport(Transport transport) {
         for (int i = 0; i < mMessageListeners.size(); i++) {
             transport.addListener(mMessageListeners.keyAt(i), mMessageListeners.valueAt(i));
+        }
+    }
+
+    void detachSystemDataTransport(Transport transport) {
+        int associationId = transport.mAssociationId;
+        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        if (association != null) {
+            detachSystemDataTransport(association.getPackageName(),
+                    association.getUserId(),
+                    association.getId());
         }
     }
 }

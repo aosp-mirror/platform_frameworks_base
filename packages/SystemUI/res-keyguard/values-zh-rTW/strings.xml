@@ -125,4 +125,10 @@
     <string name="clock_title_bubble" msgid="2204559396790593213">"泡泡"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"類比"</string>
     <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"解鎖裝置才能繼續操作"</string>
+    <string name="kg_prompt_unattended_update_pin" msgid="5979434876768801873">"請輸入 PIN 碼，系統稍後會安裝更新"</string>
+    <string name="kg_prompt_unattended_update_password" msgid="8805664437604967210">"請輸入密碼，系統稍後會安裝更新"</string>
+    <string name="kg_prompt_unattended_update_pattern" msgid="8580479377489546091">"請畫出解鎖圖案，系統稍後會安裝更新"</string>
+    <string name="kg_prompt_after_update_pin" msgid="7051709651908643013">"裝置已更新。如要繼續操作，請輸入 PIN 碼。"</string>
+    <string name="kg_prompt_after_update_password" msgid="153703052501352094">"裝置已更新。如要繼續操作，請輸入密碼。"</string>
+    <string name="kg_prompt_after_update_pattern" msgid="1484084551298241992">"裝置已更新。如要繼續操作，請畫出解鎖圖案。"</string>
 </resources>

@@ -1365,7 +1365,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB ମାଧ୍ୟମରେ MIDIକୁ ଚାଲୁ କରାଗଲା"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ୱେବକେମ ଭାବେ ଡିଭାଇସ କନେକ୍ଟ କରାଯାଇଛି"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ଆକ୍ସେସୋରୀ ଯୋଡ଼ାଗଲା"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ଯୋଡ଼ାଯାଇଥିବା ଡିଭାଇସ୍ ଚାର୍ଜ ହେଉଛି। ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ଆନାଲଗ୍‍ ଅଡିଓ ଆକ୍ସେସରୀ ଚିହ୍ନଟ ହେଲା"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ଏହି ଫୋନ୍‌ରେ କନେକ୍ଟ ଥିବା ଡିଭାଇସ୍‍ କମ୍ପାଟିବଲ୍‍ ନୁହେଁ। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ।"</string>
@@ -1430,7 +1430,7 @@
     <string name="ext_media_nomedia_notification_message" msgid="2832724384636625852">"କିଛି କାର୍ଯ୍ୟକ୍ଷମତା ଠିକ୍ ଭାବେ କାମ ନକରିପାରେ। ନୂଆ ଷ୍ଟୋରେଜ୍ ଭର୍ତ୍ତି କରନ୍ତୁ।"</string>
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g>କୁ ଇଜେକ୍ଟ କରାଯାଉଛି"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"କାଢ଼ନ୍ତୁ ନାହିଁ"</string>
-    <string name="ext_media_init_action" msgid="2312974060585056709">"ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
+    <string name="ext_media_init_action" msgid="2312974060585056709">"ସେଟ ଅପ କରନ୍ତୁ"</string>
     <string name="ext_media_unmount_action" msgid="966992232088442745">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"ଖୋଜନ୍ତୁ"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"ଆଉଟ୍‌ପୁଟ୍ ସ୍ୱିଚ୍‌ କରନ୍ତୁ"</string>
@@ -1607,7 +1607,7 @@
     <string name="fingerprints" msgid="148690767172613723">"ଆଙ୍ଗୁଠି ଚିହ୍ନ:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 ଆଙ୍ଗୁଠି ଚିହ୍ନ:"</string>
     <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 ଟିପଚିହ୍ନ:"</string>
-    <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"ସମସ୍ତ ଦେଖନ୍ତୁ"</string>
+    <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"ସବୁ ଦେଖନ୍ତୁ"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"ଗତିବିଧି ଚୟନ କରନ୍ତୁ"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"ଏହାଙ୍କ ସହ ସେୟାର୍‍ କରନ୍ତୁ"</string>
     <string name="sending" msgid="206925243621664438">"ପଠାଯାଉଛି…"</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"ବାହାରିବା ପାଇଁ, ଉପରୁ ତଳକୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ବୁଝିଗଲି"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ରୋଟେଟ କରନ୍ତୁ"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନରୁ ବାହାରି ଯାଆନ୍ତୁ"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନରେ <xliff:g id="NAME">%s</xliff:g> ଖୋଲନ୍ତୁ"</string>
     <string name="done_label" msgid="7283767013231718521">"ହୋଇଗଲା"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ଘଣ୍ଟା ସର୍କୁଲାର୍‍ ସ୍ଲାଇଡର୍‍"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ମିନିଟ୍ସ ସର୍କୁଲାର୍‍ ସ୍ଲାଇଡର୍‍"</string>
@@ -1975,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ଏହାକୁ ଆପଣଙ୍କ <xliff:g id="DEVICE">%1$s</xliff:g>ରେ ଆକ୍ସେସ କରାଯାଇପାରିବ ନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ ଆପଣଙ୍କ ଫୋନରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"ଏହି ଆପକୁ Androidର ଏକ ପୁରୁଣା ସଂସ୍କରଣ ପାଇଁ ତିଆରି କରାଯାଇଛି। ଏହା ସଠିକ୍ ଭାବେ କାମ କରିନପାରେ ଏବଂ ଏଥିରେ ନବୀନତମ ସୁରକ୍ଷା ଏବଂ ଗୋପନୀୟତା ସୁରକ୍ଷାଗୁଡ଼ିକ ଅନ୍ତର୍ଭୁକ୍ତ ନାହିଁ। ଏକ ଅପଡେଟ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ କିମ୍ବା ଆପର ଡେଭେଲପରଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ଅପଡେଟ୍‌ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"ଏହି ଆପ Androidର ନବୀନତମ ଭର୍ସନ ସହ କମ୍ପାଟିବଲ ନୁହେଁ। ଏକ ଅପଡେଟ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ କିମ୍ବା ଆପର ଡେଭେଲପରଙ୍କ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ଆପଣଙ୍କ ପାଖରେ ନୂଆ ମେସେଜ୍‍ ରହିଛି"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"ଦେଖିବା ପାଇଁ SMS ଆପ୍‍ ଖୋଲନ୍ତୁ"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"ହୁଏତ କିଛି ପ୍ରକାର୍ଯ୍ୟ ସୀମିତ ହୋଇପାରେ"</string>

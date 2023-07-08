@@ -43,8 +43,8 @@
             app:layout_constraintBottom_toBottomOf="@id/carrier_group"
         />
         <Transform
-            android:scaleX="2.57"
-            android:scaleY="2.57"
+            android:scaleX="@dimen/qqs_expand_clock_scale"
+            android:scaleY="@dimen/qqs_expand_clock_scale"
             />
     </Constraint>
 

@@ -1588,7 +1588,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mShuttingDown = false;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
-        mDefaultWallpaperComponent = WallpaperManager.getCmfDefaultWallpaperComponent(context);
+        mDefaultWallpaperComponent = WallpaperManager.getDefaultWallpaperComponent(context);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mIPackageManager = AppGlobals.getPackageManager();
@@ -3050,7 +3050,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (which == FLAG_SYSTEM && systemIsStatic && systemIsBoth) {
                 Slog.i(TAG, "Migrating current wallpaper to be lock-only before"
                         + " updating system wallpaper");
-                migrateStaticSystemToLockWallpaperLocked(userId);
+                if (!migrateStaticSystemToLockWallpaperLocked(userId)
+                        && !isLockscreenLiveWallpaperEnabled()) {
+                    which |= FLAG_LOCK;
+                }
             }
 
             wallpaper = getWallpaperSafeLocked(userId, which);
@@ -3078,13 +3081,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void migrateStaticSystemToLockWallpaperLocked(int userId) {
+    private boolean migrateStaticSystemToLockWallpaperLocked(int userId) {
         WallpaperData sysWP = mWallpaperMap.get(userId);
         if (sysWP == null) {
             if (DEBUG) {
                 Slog.i(TAG, "No system wallpaper?  Not tracking for lock-only");
             }
-            return;
+            return true;
         }
 
         // We know a-priori that there is no lock-only wallpaper currently
@@ -3105,11 +3108,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 SELinux.restorecon(lockWP.wallpaperFile);
                 mLastLockWallpaper = lockWP;
             }
+            return true;
         } catch (ErrnoException e) {
-            Slog.e(TAG, "Can't migrate system wallpaper: " + e.getMessage());
+            // can happen when migrating default wallpaper (which is not stored in wallpaperFile)
+            Slog.w(TAG, "Couldn't migrate system wallpaper: " + e.getMessage());
             lockWP.wallpaperFile.delete();
             lockWP.cropFile.delete();
-            return;
+            return false;
         }
     }
 
@@ -3293,7 +3298,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData wallpaper;
 
         synchronized (mLock) {
-            Slog.v(TAG, "setWallpaperComponent name=" + name);
+            Slog.v(TAG, "setWallpaperComponent name=" + name + ", which=" + which);
             wallpaper = mWallpaperMap.get(userId);
             if (wallpaper == null) {
                 throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
@@ -3310,7 +3315,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     // therefore it's a shared system+lock image that we need to migrate.
                     Slog.i(TAG, "Migrating current wallpaper to be lock-only before"
                             + "updating system wallpaper");
-                    migrateStaticSystemToLockWallpaperLocked(userId);
+                    if (!migrateStaticSystemToLockWallpaperLocked(userId)) {
+                        which |= FLAG_LOCK;
+                    }
                 }
             }
 
@@ -3324,7 +3331,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 wallpaper.mWhich = which;
                 wallpaper.fromForegroundApp = isFromForegroundApp(callingPackage);
                 boolean same = changingToSame(name, wallpaper);
-                if (bindWallpaperComponentLocked(name, false, true, wallpaper, null)) {
+
+                // force rebind when reapplying a system-only wallpaper to system+lock
+                boolean forceRebind = same && mLockWallpaperMap.get(userId) != null
+                        && which == (FLAG_SYSTEM | FLAG_LOCK);
+                if (bindWallpaperComponentLocked(name, forceRebind, true, wallpaper, null)) {
                     if (!same) {
                         wallpaper.primaryColors = null;
                     } else {

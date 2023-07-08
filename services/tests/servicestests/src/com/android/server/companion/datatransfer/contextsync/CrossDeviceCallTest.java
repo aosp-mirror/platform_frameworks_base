@@ -149,6 +149,27 @@ public class CrossDeviceCallTest {
     }
 
     @Test
+    public void updateCallDetails_transitionDialingToOngoing() {
+        final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
+                InstrumentationRegistry.getTargetContext(),
+                mUninitializedCallDetails, /* callAudioState= */ null);
+        crossDeviceCall.updateCallDetails(createCallDetails(Call.STATE_DIALING,
+                Call.Details.CAPABILITY_HOLD | Call.Details.CAPABILITY_MUTE));
+        assertWithMessage("Wrong status for dialing state").that(crossDeviceCall.getStatus())
+                .isEqualTo(android.companion.Telecom.Call.DIALING);
+        assertWithMessage("Wrong controls for dialing state").that(crossDeviceCall.getControls())
+                .isEqualTo(Set.of(android.companion.Telecom.END));
+        crossDeviceCall.updateCallDetails(createCallDetails(Call.STATE_ACTIVE,
+                Call.Details.CAPABILITY_HOLD | Call.Details.CAPABILITY_MUTE));
+        assertWithMessage("Wrong status for active state").that(crossDeviceCall.getStatus())
+                .isEqualTo(android.companion.Telecom.Call.ONGOING);
+        assertWithMessage("Wrong controls for active state").that(crossDeviceCall.getControls())
+                .isEqualTo(Set.of(android.companion.Telecom.END,
+                        android.companion.Telecom.MUTE,
+                        android.companion.Telecom.PUT_ON_HOLD));
+    }
+
+    @Test
     public void updateSilencedIfRinging_ringing_silenced() {
         final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
                 InstrumentationRegistry.getTargetContext(),
@@ -285,6 +306,18 @@ public class CrossDeviceCallTest {
 
         assertWithMessage("Wrong caller id").that(result)
                 .isEqualTo(CONTACT_DISPLAY_NAME);
+    }
+
+    @Test
+    public void getSerializedPhoneAccountHandle_serializesCorrectly() {
+        final CrossDeviceCall crossDeviceCall = new CrossDeviceCall(
+                InstrumentationRegistry.getTargetContext(),
+                mUninitializedCallDetails, /* callAudioState= */ null);
+
+        final String result = crossDeviceCall.getSerializedPhoneAccountHandle();
+
+        assertWithMessage("Wrong phone account handle serialization").that(result)
+                .isEqualTo("label::com.google.test/com.google.test.Activity");
     }
 
     private Call.Details createCallDetails(int state, int capabilities) {

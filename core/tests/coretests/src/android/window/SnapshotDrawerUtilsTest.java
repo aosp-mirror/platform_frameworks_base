@@ -158,32 +158,42 @@ public class SnapshotDrawerUtilsTest {
 
     @Test
     public void testCalculateSnapshotCrop() {
-        setupSurface(100, 100, new Rect(0, 10, 0, 10), 0, new Rect(0, 0, 100, 100));
-        assertEquals(new Rect(0, 0, 100, 90), mSnapshotSurface.calculateSnapshotCrop());
+        final Rect contentInsets = new Rect(0, 10, 0, 10);
+        setupSurface(100, 100, contentInsets, 0, new Rect(0, 0, 100, 100));
+        assertEquals(new Rect(0, 0, 100, 90),
+                mSnapshotSurface.calculateSnapshotCrop(contentInsets));
     }
 
     @Test
     public void testCalculateSnapshotCrop_taskNotOnTop() {
-        setupSurface(100, 100, new Rect(0, 10, 0, 10), 0, new Rect(0, 50, 100, 150));
-        assertEquals(new Rect(0, 10, 100, 90), mSnapshotSurface.calculateSnapshotCrop());
+        final Rect contentInsets = new Rect(0, 10, 0, 10);
+        setupSurface(100, 100, contentInsets, 0, new Rect(0, 50, 100, 150));
+        assertEquals(new Rect(0, 10, 100, 90),
+                mSnapshotSurface.calculateSnapshotCrop(contentInsets));
     }
 
     @Test
     public void testCalculateSnapshotCrop_navBarLeft() {
-        setupSurface(100, 100, new Rect(10, 10, 0, 0), 0, new Rect(0, 0, 100, 100));
-        assertEquals(new Rect(10, 0, 100, 100), mSnapshotSurface.calculateSnapshotCrop());
+        final Rect contentInsets = new Rect(0, 10, 0, 0);
+        setupSurface(100, 100, contentInsets, 0, new Rect(0, 0, 100, 100));
+        assertEquals(new Rect(10, 0, 100, 100),
+                mSnapshotSurface.calculateSnapshotCrop(contentInsets));
     }
 
     @Test
     public void testCalculateSnapshotCrop_navBarRight() {
-        setupSurface(100, 100, new Rect(0, 10, 10, 0), 0, new Rect(0, 0, 100, 100));
-        assertEquals(new Rect(0, 0, 90, 100), mSnapshotSurface.calculateSnapshotCrop());
+        final Rect contentInsets = new Rect(0, 10, 10, 0);
+        setupSurface(100, 100, contentInsets, 0, new Rect(0, 0, 100, 100));
+        assertEquals(new Rect(0, 0, 90, 100),
+                mSnapshotSurface.calculateSnapshotCrop(contentInsets));
     }
 
     @Test
     public void testCalculateSnapshotCrop_waterfall() {
-        setupSurface(100, 100, new Rect(5, 10, 5, 10), 0, new Rect(0, 0, 100, 100));
-        assertEquals(new Rect(5, 0, 95, 90), mSnapshotSurface.calculateSnapshotCrop());
+        final Rect contentInsets = new Rect(5, 10, 5, 10);
+        setupSurface(100, 100, contentInsets, 0, new Rect(0, 0, 100, 100));
+        assertEquals(new Rect(5, 0, 95, 90),
+                mSnapshotSurface.calculateSnapshotCrop(contentInsets));
     }
 
     @Test

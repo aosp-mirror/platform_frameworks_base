@@ -27,6 +27,7 @@ import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
+import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.util.DebugUtils.valueToString;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
@@ -742,24 +743,24 @@ public class ActivityManagerServiceTest {
 
         broadcastIntent(intent1, null, true);
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false, Process.myUid()));
+                StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
         assertNull(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER));
         assertNull(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER));
 
         broadcastIntent(intent2, options.toBundle(), true);
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false, Process.myUid()));
+                StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER),
-                StickyBroadcast.create(intent2, true, Process.myUid()));
+                StickyBroadcast.create(intent2, true, Process.myUid(), PROCESS_STATE_UNKNOWN));
         assertNull(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER));
 
         broadcastIntent(intent3, null, true);
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false, Process.myUid()));
+                StickyBroadcast.create(intent1, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER),
-                StickyBroadcast.create(intent2, true, Process.myUid()));
+                StickyBroadcast.create(intent2, true, Process.myUid(), PROCESS_STATE_UNKNOWN));
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER),
-                StickyBroadcast.create(intent3, false, Process.myUid()));
+                StickyBroadcast.create(intent3, false, Process.myUid(), PROCESS_STATE_UNKNOWN));
     }
 
     @SuppressWarnings("GuardedBy")

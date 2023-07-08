@@ -38,11 +38,13 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -116,7 +118,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
             @NonNull String servicePackageName,
             @NonNull CredentialOption requestOption) {
         super(context, requestOption, session,
-                new ComponentName(servicePackageName, servicePackageName),
+                new ComponentName(servicePackageName, UUID.randomUUID().toString()),
                 userId, null);
         mCredentialDescriptionRegistry = CredentialDescriptionRegistry.forUser(userId);
         mCallingAppInfo = callingAppInfo;
@@ -124,6 +126,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
         mElementKeys = new HashSet<>(requestOption
                 .getCredentialRetrievalData()
                 .getStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS));
+        mStatus = Status.PENDING;
     }
 
     protected ProviderRegistryGetSession(@NonNull Context context,
@@ -133,7 +136,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
             @NonNull String servicePackageName,
             @NonNull CredentialOption requestOption) {
         super(context, requestOption, session,
-                new ComponentName(servicePackageName, servicePackageName),
+                new ComponentName(servicePackageName, UUID.randomUUID().toString()),
                 userId, null);
         mCredentialDescriptionRegistry = CredentialDescriptionRegistry.forUser(userId);
         mCallingAppInfo = callingAppInfo;
@@ -141,6 +144,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
         mElementKeys = new HashSet<>(requestOption
                 .getCredentialRetrievalData()
                 .getStringArrayList(CredentialOption.SUPPORTED_ELEMENT_KEYS));
+        mStatus = Status.PENDING;
     }
 
     private List<Entry> prepareUiCredentialEntries(
@@ -179,7 +183,9 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
             return null;
         }
         return new GetCredentialProviderData.Builder(
-                mComponentName.flattenToString()).setActionChips(null)
+                mComponentName.flattenToString())
+                .setActionChips(Collections.EMPTY_LIST)
+                .setAuthenticationEntries(Collections.EMPTY_LIST)
                 .setCredentialEntries(prepareUiCredentialEntries(
                         mProviderResponse.stream().flatMap((Function<CredentialDescriptionRegistry
                                         .FilterResult,
@@ -261,12 +267,12 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
                 .getFilteredResultForProvider(mCredentialProviderPackageName,
                         mElementKeys);
         mCredentialEntries = mProviderResponse.stream().flatMap(
-                (Function<CredentialDescriptionRegistry.FilterResult,
-                        Stream<CredentialEntry>>) filterResult
-                        -> filterResult.mCredentialEntries.stream())
-                .collect(Collectors.toList());
+                            (Function<CredentialDescriptionRegistry.FilterResult,
+                                    Stream<CredentialEntry>>)
+                filterResult -> filterResult.mCredentialEntries.stream())
+                    .collect(Collectors.toList());
         updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED,
-                /*source=*/ CredentialsSource.REGISTRY);
+                    /*source=*/ CredentialsSource.REGISTRY);
         mProviderSessionMetric.collectCandidateEntryMetrics(mCredentialEntries);
     }
 

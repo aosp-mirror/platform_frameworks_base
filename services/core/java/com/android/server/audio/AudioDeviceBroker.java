@@ -1018,13 +1018,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    /*package*/ void clearA2dpSuspended() {
+    /*package*/ void clearA2dpSuspended(boolean internalOnly) {
         if (AudioService.DEBUG_COMM_RTE) {
-            Log.v(TAG, "clearA2dpSuspended");
+            Log.v(TAG, "clearA2dpSuspended, internalOnly: " + internalOnly);
         }
         synchronized (mBluetoothAudioStateLock) {
             mBluetoothA2dpSuspendedInt = false;
-            mBluetoothA2dpSuspendedExt = false;
+            if (!internalOnly) {
+                mBluetoothA2dpSuspendedExt = false;
+            }
             updateAudioHalBluetoothState();
         }
     }
@@ -1046,13 +1048,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    /*package*/ void clearLeAudioSuspended() {
+    /*package*/ void clearLeAudioSuspended(boolean internalOnly) {
         if (AudioService.DEBUG_COMM_RTE) {
-            Log.v(TAG, "clearLeAudioSuspended");
+            Log.v(TAG, "clearLeAudioSuspended, internalOnly: " + internalOnly);
         }
         synchronized (mBluetoothAudioStateLock) {
             mBluetoothLeSuspendedInt = false;
-            mBluetoothLeSuspendedExt = false;
+            if (!internalOnly) {
+                mBluetoothLeSuspendedExt = false;
+            }
             updateAudioHalBluetoothState();
         }
     }
@@ -2205,19 +2209,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
         if (preferredCommunicationDevice == null) {
             AudioDeviceAttributes defaultDevice = getDefaultCommunicationDevice();
             if (defaultDevice != null) {
-                mDeviceInventory.setPreferredDevicesForStrategy(
+                mDeviceInventory.setPreferredDevicesForStrategyInt(
                         mCommunicationStrategyId, Arrays.asList(defaultDevice));
-                mDeviceInventory.setPreferredDevicesForStrategy(
+                mDeviceInventory.setPreferredDevicesForStrategyInt(
                         mAccessibilityStrategyId, Arrays.asList(defaultDevice));
             } else {
-                mDeviceInventory.removePreferredDevicesForStrategy(mCommunicationStrategyId);
-                mDeviceInventory.removePreferredDevicesForStrategy(mAccessibilityStrategyId);
+                mDeviceInventory.removePreferredDevicesForStrategyInt(mCommunicationStrategyId);
+                mDeviceInventory.removePreferredDevicesForStrategyInt(mAccessibilityStrategyId);
             }
             mDeviceInventory.applyConnectedDevicesRoles();
+            mDeviceInventory.reapplyExternalDevicesRoles();
         } else {
-            mDeviceInventory.setPreferredDevicesForStrategy(
+            mDeviceInventory.setPreferredDevicesForStrategyInt(
                     mCommunicationStrategyId, Arrays.asList(preferredCommunicationDevice));
-            mDeviceInventory.setPreferredDevicesForStrategy(
+            mDeviceInventory.setPreferredDevicesForStrategyInt(
                     mAccessibilityStrategyId, Arrays.asList(preferredCommunicationDevice));
         }
         onUpdatePhoneStrategyDevice(preferredCommunicationDevice);

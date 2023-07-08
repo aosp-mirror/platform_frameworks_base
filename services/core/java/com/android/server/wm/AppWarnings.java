@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Handler;
@@ -178,6 +179,14 @@ class AppWarnings {
      * @param r activity record for which the warning may be displayed
      */
     public void showDeprecatedAbiDialogIfNeeded(ActivityRecord r) {
+        final boolean isUsingAbiOverride = (r.info.applicationInfo.privateFlagsExt
+                & ApplicationInfo.PRIVATE_FLAG_EXT_CPU_OVERRIDE) != 0;
+        if (isUsingAbiOverride) {
+            // The abiOverride flag was specified during installation, which means that if the app
+            // is currently running in 32-bit mode, it is intended. Do not show the warning dialog.
+            return;
+        }
+        // The warning dialog can also be disabled for debugging purpose
         final boolean disableDeprecatedAbiDialog = SystemProperties.getBoolean(
                 "debug.wm.disable_deprecated_abi_dialog", false);
         if (disableDeprecatedAbiDialog) {

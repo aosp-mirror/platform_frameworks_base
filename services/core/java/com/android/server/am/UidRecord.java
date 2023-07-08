@@ -345,19 +345,30 @@ public final class UidRecord {
     }
 
     /**
+     * Check whether all processes in the Uid are frozen.
+     *
+     * @param excluding Skip this process record during the check.
      * @return true if all processes in the Uid are frozen, false otherwise.
      */
     @GuardedBy(anyOf = {"mService", "mProcLock"})
-    public boolean areAllProcessesFrozen() {
+    public boolean areAllProcessesFrozen(ProcessRecord excluding) {
         for (int i = mProcRecords.size() - 1; i >= 0; i--) {
             final ProcessRecord app = mProcRecords.valueAt(i);
             final ProcessCachedOptimizerRecord opt = app.mOptRecord;
 
-            if (!opt.isFrozen()) {
+            if (excluding != app && !opt.isFrozen()) {
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * @return true if all processes in the Uid are frozen, false otherwise.
+     */
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    public boolean areAllProcessesFrozen() {
+        return areAllProcessesFrozen(null);
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})

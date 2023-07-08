@@ -185,6 +185,8 @@ class AsyncRotationController extends FadeAnimationController implements Consume
                 }
             } else if (navigationBarCanMove || mTransitionOp == OP_CHANGE_MAY_SEAMLESS) {
                 action = Operation.ACTION_SEAMLESS;
+            } else if (mDisplayContent.mTransitionController.mNavigationBarAttachedToApp) {
+                return;
             }
             mTargetWindowTokens.put(w.mToken, new Operation(action));
             return;

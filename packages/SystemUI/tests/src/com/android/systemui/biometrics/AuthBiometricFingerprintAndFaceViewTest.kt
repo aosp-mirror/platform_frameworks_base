@@ -99,7 +99,7 @@ class AuthBiometricFingerprintAndFaceViewTest : SysuiTestCase() {
         waitForIdleSync()
 
         assertThat(biometricView.isAuthenticated).isTrue()
-        verify(callback).onAction(AuthBiometricView.Callback.ACTION_AUTHENTICATED)
+        verify(callback).onAction(AuthBiometricView.Callback.ACTION_AUTHENTICATED_AND_CONFIRMED)
     }
 
     @Test

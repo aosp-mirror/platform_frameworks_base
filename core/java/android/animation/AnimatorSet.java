@@ -825,8 +825,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     private void animateBasedOnPlayTime(
             long currentPlayTime,
             long lastPlayTime,
-            boolean inReverse,
-            boolean notify
+            boolean inReverse
     ) {
         if (currentPlayTime < 0 || lastPlayTime < -1) {
             throw new UnsupportedOperationException("Error: Play time should never be negative.");
@@ -857,8 +856,8 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             while (index < endIndex) {
                 long playTime = startEndTimes[index];
                 if (lastPlayTime != playTime) {
-                    animateSkipToEnds(playTime, lastPlayTime, notify);
-                    animateValuesInRange(playTime, lastPlayTime, notify);
+                    animateSkipToEnds(playTime, lastPlayTime);
+                    animateValuesInRange(playTime, lastPlayTime);
                     lastPlayTime = playTime;
                 }
                 index++;
@@ -868,15 +867,15 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 index--;
                 long playTime = startEndTimes[index];
                 if (lastPlayTime != playTime) {
-                    animateSkipToEnds(playTime, lastPlayTime, notify);
-                    animateValuesInRange(playTime, lastPlayTime, notify);
+                    animateSkipToEnds(playTime, lastPlayTime);
+                    animateValuesInRange(playTime, lastPlayTime);
                     lastPlayTime = playTime;
                 }
             }
         }
         if (currentPlayTime != lastPlayTime) {
-            animateSkipToEnds(currentPlayTime, lastPlayTime, notify);
-            animateValuesInRange(currentPlayTime, lastPlayTime, notify);
+            animateSkipToEnds(currentPlayTime, lastPlayTime);
+            animateValuesInRange(currentPlayTime, lastPlayTime);
         }
     }
 
@@ -896,13 +895,11 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     }
 
     @Override
-    void animateSkipToEnds(long currentPlayTime, long lastPlayTime, boolean notify) {
+    void animateSkipToEnds(long currentPlayTime, long lastPlayTime) {
         initAnimation();
 
         if (lastPlayTime > currentPlayTime) {
-            if (notify) {
-                notifyStartListeners(true);
-            }
+            notifyStartListeners(true);
             for (int i = mEvents.size() - 1; i >= 0; i--) {
                 AnimationEvent event = mEvents.get(i);
                 Node node = event.mNode;
@@ -916,31 +913,25 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                     if (currentPlayTime <= start && start < lastPlayTime) {
                         animator.animateSkipToEnds(
                                 0,
-                                lastPlayTime - node.mStartTime,
-                                notify
+                                lastPlayTime - node.mStartTime
                         );
-                        if (notify) {
-                            mPlayingSet.remove(node);
-                        }
+                        mPlayingSet.remove(node);
                     } else if (start <= currentPlayTime && currentPlayTime <= end) {
                         animator.animateSkipToEnds(
                                 currentPlayTime - node.mStartTime,
-                                lastPlayTime - node.mStartTime,
-                                notify
+                                lastPlayTime - node.mStartTime
                         );
-                        if (notify && !mPlayingSet.contains(node)) {
+                        if (!mPlayingSet.contains(node)) {
                             mPlayingSet.add(node);
                         }
                     }
                 }
             }
-            if (currentPlayTime <= 0 && notify) {
+            if (currentPlayTime <= 0) {
                 notifyEndListeners(true);
             }
         } else {
-            if (notify) {
-                notifyStartListeners(false);
-            }
+            notifyStartListeners(false);
             int eventsSize = mEvents.size();
             for (int i = 0; i < eventsSize; i++) {
                 AnimationEvent event = mEvents.get(i);
@@ -955,45 +946,39 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                     if (lastPlayTime < end && end <= currentPlayTime) {
                         animator.animateSkipToEnds(
                                 end - node.mStartTime,
-                                lastPlayTime - node.mStartTime,
-                                notify
+                                lastPlayTime - node.mStartTime
                         );
-                        if (notify) {
-                            mPlayingSet.remove(node);
-                        }
+                        mPlayingSet.remove(node);
                     } else if (start <= currentPlayTime && currentPlayTime <= end) {
                         animator.animateSkipToEnds(
                                 currentPlayTime - node.mStartTime,
-                                lastPlayTime - node.mStartTime,
-                                notify
+                                lastPlayTime - node.mStartTime
                         );
-                        if (notify && !mPlayingSet.contains(node)) {
+                        if (!mPlayingSet.contains(node)) {
                             mPlayingSet.add(node);
                         }
                     }
                 }
             }
-            if (currentPlayTime >= getTotalDuration() && notify) {
+            if (currentPlayTime >= getTotalDuration()) {
                 notifyEndListeners(false);
             }
         }
     }
 
     @Override
-    void animateValuesInRange(long currentPlayTime, long lastPlayTime, boolean notify) {
+    void animateValuesInRange(long currentPlayTime, long lastPlayTime) {
         initAnimation();
 
-        if (notify) {
-            if (lastPlayTime < 0 || (lastPlayTime == 0 && currentPlayTime > 0)) {
-                notifyStartListeners(false);
-            } else {
-                long duration = getTotalDuration();
-                if (duration >= 0
-                        && (lastPlayTime > duration || (lastPlayTime == duration
-                        && currentPlayTime < duration))
-                ) {
-                    notifyStartListeners(true);
-                }
+        if (lastPlayTime < 0 || (lastPlayTime == 0 && currentPlayTime > 0)) {
+            notifyStartListeners(false);
+        } else {
+            long duration = getTotalDuration();
+            if (duration >= 0
+                    && (lastPlayTime > duration || (lastPlayTime == duration
+                    && currentPlayTime < duration))
+            ) {
+                notifyStartListeners(true);
             }
         }
 
@@ -1014,8 +999,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 ) {
                     animator.animateValuesInRange(
                             currentPlayTime - node.mStartTime,
-                            Math.max(-1, lastPlayTime - node.mStartTime),
-                            notify
+                            Math.max(-1, lastPlayTime - node.mStartTime)
                     );
                 }
             }
@@ -1111,7 +1095,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             }
         }
         mSeekState.setPlayTime(playTime, mReversing);
-        animateBasedOnPlayTime(playTime, lastPlayTime, mReversing, true);
+        animateBasedOnPlayTime(playTime, lastPlayTime, mReversing);
     }
 
     /**
@@ -1144,16 +1128,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     private void initChildren() {
         if (!isInitialized()) {
             mChildrenInitialized = true;
-
-            // We have to initialize all the start values so that they are based on the previous
-            // values.
-            long[] times = ensureChildStartAndEndTimes();
-
-            long previousTime = -1;
-            for (long time : times) {
-                animateBasedOnPlayTime(time, previousTime, false, false);
-                previousTime = time;
-            }
+            skipToEndValue(false);
         }
     }
 
@@ -1489,6 +1464,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         anim.mPauseTime = -1;
         anim.mSeekState = new SeekState();
         anim.mSelfPulse = true;
+        anim.mStartListenersCalled = false;
         anim.mPlayingSet = new ArrayList<Node>();
         anim.mNodeMap = new ArrayMap<Animator, Node>();
         anim.mNodes = new ArrayList<Node>(nodeCount);

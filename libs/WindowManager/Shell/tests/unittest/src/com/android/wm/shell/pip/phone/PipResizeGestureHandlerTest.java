@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
 
@@ -90,6 +91,8 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
 
     private PipDisplayLayoutState mPipDisplayLayoutState;
 
+    private PipTouchState mPipTouchState;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -104,8 +107,12 @@ public class PipResizeGestureHandlerTest extends ShellTestCase {
         final PipMotionHelper motionHelper = new PipMotionHelper(mContext, mPipBoundsState,
                 mPipTaskOrganizer, mPhonePipMenuController, pipSnapAlgorithm,
                 mMockPipTransitionController, mFloatingContentCoordinator);
+
+        mPipTouchState = new PipTouchState(ViewConfiguration.get(mContext),
+                () -> {}, () -> {}, mMainExecutor);
         mPipResizeGestureHandler = new PipResizeGestureHandler(mContext, pipBoundsAlgorithm,
-                mPipBoundsState, motionHelper, mPipTaskOrganizer, mPipDismissTargetHandler,
+                mPipBoundsState, motionHelper, mPipTouchState, mPipTaskOrganizer,
+                mPipDismissTargetHandler,
                 (Rect bounds) -> new Rect(), () -> {}, mPipUiEventLogger, mPhonePipMenuController,
                 mMainExecutor) {
             @Override

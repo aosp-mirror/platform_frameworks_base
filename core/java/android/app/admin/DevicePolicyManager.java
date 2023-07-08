@@ -581,6 +581,7 @@ public class DevicePolicyManager {
      *     <li>{@link #LOCK_TASK_FEATURE_HOME}</li>
      *     <li>{@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS}</li>
      *     <li>{@link #LOCK_TASK_FEATURE_NOTIFICATIONS}</li>
+     *     <li>{@link #LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK}</li>
      * </ul>
      * <li>{@link #getLockTaskFeatures(ComponentName)}</li>
      * <li>{@link #setLockTaskPackages(ComponentName, String[])}</li>
@@ -11368,7 +11369,8 @@ public class DevicePolicyManager {
      * @throws SecurityException     if the caller is not a profile owner on an organization-owned
      *                               managed profile.
      * @throws IllegalStateException if called after the device setup has been completed.
-     * @throws UnsupportedOperationException if the api is not enabled.
+     * @throws UnsupportedOperationException if managed subscriptions policy is not explicitly
+     *         enabled by the device policy management role holder during device setup.
      * @see ManagedSubscriptionsPolicy
      */
     public void setManagedSubscriptionsPolicy(@Nullable ManagedSubscriptionsPolicy policy) {

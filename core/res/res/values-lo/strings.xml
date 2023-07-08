@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"ຫາກຕ້ອງການອອກ, ໃຫ້ຮູດຈາກທາງເທິງລົງມາທາງລຸ່ມ."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ໄດ້​ແລ້ວ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ໝຸນເພື່ອມຸມມອງທີ່ດີຂຶ້ນ"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ອອກຈາກແບ່ງໜ້າຈໍເພື່ອມຸມມອງທີ່ດີຂຶ້ນ"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ເປີດ <xliff:g id="NAME">%s</xliff:g> ໃນໂໝດເຕັມຈໍເພື່ອມຸມມອງທີ່ດີຂຶ້ນ"</string>
     <string name="done_label" msgid="7283767013231718521">"ແລ້ວໆ"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ໂຕໝຸນປັບຊົ່ວໂມງ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ໂຕໝຸນປັບນາທີ"</string>
@@ -1975,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານ. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"ແອັບນີ້ສ້າງຂຶ້ນສຳລັບ Android ເວີຊັນເກົ່າ. ມັນອາດເຮັດວຽກບໍ່ຖືກຕ້ອງ ແລະ ຮວມທັງບໍ່ມີຄວາມປອດໄພ ແລະ ການປ້ອງກັນຄວາມເປັນສ່ວນຕົວຫຼ້າສຸດ. ກວດສອບເພື່ອອັບເດດ ຫຼື ຕິດຕໍ່ນັກພັດທະນາແອັບ."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ກວດເບິ່ງອັບເດດ"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"ແອັບນີ້ບໍ່ສາມາດໃຊ້ໄດ້ກັບ Android ເວີຊັນຫຼ້າສຸດ. ກວດສອບເພື່ອອັບເດດ ຫຼື ຕິດຕໍ່ນັກພັດທະນາແອັບ."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ທ່ານມີຂໍ້ຄວາມໃໝ່"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"ເປີດແອັບ SMS ເພື່ອເບິ່ງ"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"ຄຸນສົມບັດບາງຢ່າງອາດຖືກຈຳກັດໄວ້"</string>
@@ -2167,8 +2168,8 @@
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"ເປີດໃນ <xliff:g id="APP">%s</xliff:g> ສຳລັບວຽກບໍ?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"ໂທຈາກແອັບບ່ອນເຮັດວຽກບໍ?"</string>
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"ສະຫຼັບໄປເປັນແອັບບ່ອນເຮັດວຽກບໍ?"</string>
-    <string name="miniresolver_call_information" msgid="6739417525304184083">"ອົງການຈັດຕັ້ງຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານໂທຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
-    <string name="miniresolver_sms_information" msgid="4311292661329483088">"ອົງການຈັດຕັ້ງຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານສົ່ງຂໍ້ຄວາມໄດ້ຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
+    <string name="miniresolver_call_information" msgid="6739417525304184083">"ອົງການຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານໂທຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
+    <string name="miniresolver_sms_information" msgid="4311292661329483088">"ອົງການຂອງທ່ານອະນຸຍາດໃຫ້ທ່ານສົ່ງຂໍ້ຄວາມໄດ້ຈາກແອັບບ່ອນເຮັດວຽກເທົ່ານັ້ນ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບສ່ວນຕົວ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບບ່ອນເຮັດວຽກ"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"ໂທ"</string>

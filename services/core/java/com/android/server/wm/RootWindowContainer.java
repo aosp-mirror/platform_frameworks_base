@@ -438,8 +438,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTaskSupervisor = mService.mTaskSupervisor;
         mTaskSupervisor.mRootWindowContainer = this;
         mDisplayOffTokenAcquirer = mService.new SleepTokenAcquirerImpl(DISPLAY_OFF_SLEEP_TOKEN_TAG);
-        mDeviceStateController = new DeviceStateController(service.mContext, service.mH,
-                service.mGlobalLock);
+        mDeviceStateController = new DeviceStateController(service.mContext, service.mGlobalLock);
         mDisplayRotationCoordinator = new DisplayRotationCoordinator();
     }
 
@@ -1062,8 +1061,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 displayHasContent = true;
             } else if (displayContent != null &&
                     (!mObscureApplicationContentOnSecondaryDisplays
+                            || displayContent.isKeyguardAlwaysUnlocked()
                             || (obscured && type == TYPE_KEYGUARD_DIALOG))) {
-                // Allow full screen keyguard presentation dialogs to be seen.
+                // Allow full screen keyguard presentation dialogs to be seen, or simply ignore the
+                // keyguard if this display is always unlocked.
                 displayHasContent = true;
             }
             if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
@@ -1281,6 +1282,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         defaultTaskDisplayArea.getOrCreateRootHomeTask(ON_TOP);
         positionChildAt(POSITION_TOP, defaultTaskDisplayArea.mDisplayContent,
                 false /* includingParents */);
+    }
+
+    /**
+     * Called just before display manager has applied the device state to the displays
+     * @param deviceState device state as defined by
+     *        {@link android.hardware.devicestate.DeviceStateManager}
+     */
+    void onDisplayManagerReceivedDeviceState(int deviceState) {
+        mDeviceStateController.onDeviceStateReceivedByDisplayManager(deviceState);
     }
 
     // TODO(multi-display): Look at all callpoints to make sure they make sense in multi-display.
@@ -2005,7 +2015,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // from doing work and changing the activity visuals while animating
             // TODO(task-org): Figure-out more structured way to do this long term.
             r.setWindowingMode(r.getWindowingMode());
-            r.mWaitForEnteringPinnedMode = true;
 
             final TaskFragment organizedTf = r.getOrganizedTaskFragment();
             final boolean singleActivity = task.getNonFinishingActivityCount() == 1;
@@ -2132,6 +2141,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
             rootTask.setDeferTaskAppear(false);
 
+            // After setting this, it is not expected to change activity configuration until the
+            // transition animation is finished. So the activity can keep consistent appearance
+            // when animating.
+            r.mWaitForEnteringPinnedMode = true;
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the root pinned task
             r.supportsEnterPipOnTaskSwitch = false;
@@ -2349,10 +2362,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 final Transition transition = new Transition(TRANSIT_SLEEP, 0 /* flags */,
                         display.mTransitionController, mWmService.mSyncEngine);
                 final TransitionController.OnStartCollect sendSleepTransition = (deferred) -> {
-                    display.mTransitionController.requestStartTransition(transition,
-                            null /* trigger */, null /* remote */, null /* display */);
-                    // Force playing immediately so that unrelated ops can't be collected.
-                    transition.playNow();
+                    if (deferred && !display.shouldSleep()) {
+                        transition.abort();
+                    } else {
+                        display.mTransitionController.requestStartTransition(transition,
+                                null /* trigger */, null /* remote */, null /* display */);
+                        // Force playing immediately so that unrelated ops can't be collected.
+                        transition.playNow();
+                    }
                 };
                 if (!display.mTransitionController.isCollecting()) {
                     // Since this bypasses sync, submit directly ignoring whether sync-engine
@@ -3298,9 +3315,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (aOptions != null) {
                 // Resolve the root task the task should be placed in now based on options
                 // and reparent if needed.
+                // TODO(b/229927851) For split-screen, setLaunchRootTask is no longer the "root"
+                // task, consider to rename methods like "parentTask" instead of "rootTask".
                 final Task targetRootTask =
                         getOrCreateRootTask(null, aOptions, task, onTop);
-                if (targetRootTask != null && task.getRootTask() != targetRootTask) {
+                // When launch with ActivityOptions#getLaunchRootTask, the "root task" just mean the
+                // parent of current launch, not the "root task" in hierarchy.
+                if (targetRootTask != null && task.getRootTask() != targetRootTask
+                        && task.getParent() != targetRootTask) {
                     final int reparentMode = onTop
                             ? REPARENT_MOVE_ROOT_TASK_TO_FRONT : REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
                     task.reparent(targetRootTask, onTop, reparentMode, ANIMATE, DEFER_RESUME,

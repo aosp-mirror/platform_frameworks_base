@@ -4011,7 +4011,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mCentralSurfaces.resetUserExpandedStates();
             clearTemporaryViews();
             clearUserLockedViews();
-            cancelActiveSwipe();
+            resetAllSwipeState();
         }
     }
 
@@ -4077,8 +4077,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 mGroupExpansionManager.collapseGroups();
                 mExpandHelper.cancelImmediately();
                 if (!mIsExpansionChanging) {
-                    cancelActiveSwipe();
+                    resetAllSwipeState();
                 }
+                finalizeClearAllAnimation();
             }
             updateNotificationAnimationStates();
             updateChronometers();
@@ -4174,18 +4175,28 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         runAnimationFinishedRunnables();
         clearTransient();
         clearHeadsUpDisappearRunning();
+        finalizeClearAllAnimation();
+    }
 
+    private void finalizeClearAllAnimation() {
         if (mAmbientState.isClearAllInProgress()) {
             setClearAllInProgress(false);
             if (mShadeNeedsToClose) {
                 mShadeNeedsToClose = false;
-                postDelayed(
-                        () -> {
-                            mShadeController.animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE);
-                        },
-                        DELAY_BEFORE_SHADE_CLOSE /* delayMillis */);
+                if (mIsExpanded) {
+                    collapseShadeDelayed();
+                }
             }
         }
+    }
+
+    private void collapseShadeDelayed() {
+        postDelayed(
+                () -> {
+                    mShadeController.animateCollapseShade(
+                            CommandQueue.FLAG_EXCLUDE_NONE);
+                },
+                DELAY_BEFORE_SHADE_CLOSE /* delayMillis */);
     }
 
     private void clearHeadsUpDisappearRunning() {
@@ -4395,6 +4406,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         boolean nowHiddenAtAll = mAmbientState.isHiddenAtAll();
         if (nowFullyHidden != wasFullyHidden) {
             updateVisibility();
+            resetAllSwipeState();
         }
         if (!wasHiddenAtAll && nowHiddenAtAll) {
             resetExposedMenuView(true /* animate */, true /* animate */);
@@ -4535,6 +4547,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
     }
 
+    @VisibleForTesting
     public void setClearAllInProgress(boolean clearAllInProgress) {
         mClearAllInProgress = clearAllInProgress;
         mAmbientState.setClearAllInProgress(clearAllInProgress);
@@ -4688,6 +4701,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (v instanceof ExpandableNotificationRow && !mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
+            mController.updateImportantForAccessibility();
         }
 
         updateSpeedBumpIndex();
@@ -4699,6 +4713,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
+            mController.updateImportantForAccessibility();
         }
 
         updateSpeedBumpIndex();
@@ -4711,6 +4726,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (v instanceof ExpandableNotificationRow && mController.isShowingEmptyShadeView()) {
             mController.updateShowEmptyShadeView();
             updateFooter();
+            mController.updateImportantForAccessibility();
         }
 
         updateSpeedBumpIndex();
@@ -5151,7 +5167,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mHeadsUpAppearanceController = headsUpAppearanceController;
     }
 
-    private boolean isVisible(View child) {
+    @VisibleForTesting
+    public boolean isVisible(View child) {
         boolean hasClipBounds = child.getClipBounds(mTmpRect);
         return child.getVisibility() == View.VISIBLE
                 && (!hasClipBounds || mTmpRect.height() > 0);
@@ -5849,9 +5866,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    private void cancelActiveSwipe() {
-        mSwipeHelper.resetSwipeState();
+    private void resetAllSwipeState() {
+        Trace.beginSection("NSSL.resetAllSwipeState()");
+        mSwipeHelper.resetTouchState();
+        for (int i = 0; i < getChildCount(); i++) {
+            mSwipeHelper.forceResetSwipeState(getChildAt(i));
+        }
         updateContinuousShadowDrawing();
+        Trace.endSection();
     }
 
     void updateContinuousShadowDrawing() {

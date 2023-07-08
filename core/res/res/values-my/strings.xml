@@ -199,7 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"အာရုံခံကိရိယာ အကြောင်းကြားချက် ဝန်ဆောင်မှု"</string>
     <string name="twilight_service" msgid="8964898045693187224">"နေဝင်ဆည်းဆာ ဝန်ဆောင်မှု"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS အချိန်အပ်ဒိတ် ဝန်ဆောင်မှု"</string>
-    <string name="device_policy_manager_service" msgid="5085762851388850332">"ကိရိယာဆိုင်ရာ မူဝါဒ မန်နေဂျာဝန်ဆောင်မှု"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"ကိရိယာ မူဝါဒ မန်နေဂျာဝန်ဆောင်မှု"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"တေးဂီတကို သိရှိမှတ်မိခြင်း စီမံခန့်ခွဲမှုစနစ် ဝန်ဆောင်မှု"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"စက်စီမံအက်ပ်ကို သုံး၍မရပါ။ သင်၏ စက်ပစ္စည်းအတွင်းရှိ အရာများကို ဖျက်လိုက်ပါမည်\n\nမေးစရာများရှိပါက သင့်အဖွဲ့အစည်း၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
@@ -681,8 +681,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"အလင်းရောင် အားနည်းသည်"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ဖုန်းကို အဝေးသို့ခွာပါ"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ဖုန်းကို အနားသို့ပိုတိုးပါ"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"ဖုန်းကို ပိုမြှင့်လိုက်ပါ"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"ဖုန်းကို ပိုနှိမ့်လိုက်ပါ"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"ဖုန်းကို မြှင့်လိုက်ပါ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ဖုန်းကို နှိမ့်လိုက်ပါ"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ဖုန်းကို သင့်ဘယ်ဘက်သို့ ရွှေ့ပါ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"ဖုန်းကို သင့်ညာဘက်သို့ ရွှေ့ပါ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"သင့်စက်ပစ္စည်းကို တည့်တည့်ကြည့်ပါ။"</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"ထွက်ရန် အပေါ်မှ အောက်သို့ ဆွဲချပါ။"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ရပါပြီ"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ပိုကောင်းသောမြင်ကွင်းအတွက် လှည့်ပါ"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ပိုကောင်းသောမြင်ကွင်းအတွက် မျက်နှာပြင် ခွဲ၍ပြသခြင်းမှ ထွက်ပါ"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"ပိုကောင်းသောမြင်ကွင်းအတွက် ဖန်သားပြင်အပြည့်ဖြင့် <xliff:g id="NAME">%s</xliff:g> ကို ဖွင့်ပါ"</string>
     <string name="done_label" msgid="7283767013231718521">"ပြီးပါပြီ"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"နာရီရွေးချက်စရာ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"မိနစ်လှည့်သော ရွေ့လျားတန်"</string>
@@ -1975,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"၎င်းကို သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> တွင် သုံး၍မရပါ။ ဖုန်းတွင် စမ်းကြည့်ပါ။"</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"ဤအက်ပ်ကို ဗားရှင်းဟောင်းအတွက် ရေးထားသည်။ ၎င်းကမှန်ကန်စွာ လုပ်ဆောင်နိုင်မည်မဟုတ်ဘဲ နောက်ဆုံးထုတ် လုံခြုံရေးနှင့် ကိုယ်ရေးအချက်အလက်လုံခြုံမှု အကာအကွယ်များ မပါဝင်ပါ။ အပ်ဒိတ်ရှာကြည့်ပါ (သို့) အက်ပ်ရေးသူထံ ဆက်သွယ်ပါ။"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"အပ်ဒိတ်စစ်ရန်"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"ဤအက်ပ်သည် Android နောက်ဆုံးဗားရှင်းနှင့် တွဲမသုံးနိုင်ပါ။ အပ်ဒိတ်ရှာကြည့်ပါ (သို့) အက်ပ်ရေးသူထံ ဆက်သွယ်ပါ။"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"သင့်ထံတွင် စာအသစ်များရောက်နေသည်"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"ကြည့်ရှုရန် SMS အက်ပ်ကိုဖွင့်ပါ"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"လုပ်ဆောင်ချက် ကန့်သတ်မှုရှိနိုင်သည်"</string>

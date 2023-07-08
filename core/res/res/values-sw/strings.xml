@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Imeshindwa kuunda muundo wa uso wako. Jaribu tena."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Vioo vyeusi vimetambuliwa. Ni lazima uso wako wote uonekane."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Kifuniko cha uso kimetambuliwa. Ni lazima uso wako wote uonekane."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Uso umefunikwa. Lazima uso wako wote uonekane."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imeshindwa kuthibitisha uso. Maunzi hayapatikani."</string>
@@ -839,7 +839,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Ya nyumbani"</item>
     <item msgid="7740243458912727194">"Simu ya mkononi"</item>
-    <item msgid="8526146065496663766">"Ya kazini"</item>
+    <item msgid="8526146065496663766">"Kazini"</item>
     <item msgid="8150904584178569699">"Pepesi ya Kazini"</item>
     <item msgid="4537253139152229577">"Pepesi ya Nyumbani"</item>
     <item msgid="6751245029698664340">"Kurasa anwani"</item>
@@ -882,7 +882,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"Maalum"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"Ya nyumbani"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"Simu ya mkononi"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"Ya kazini"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"Kazini"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"Pepesi ya Kazini"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Pepesi ya Nyumbani"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"Peja"</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ili kuondoka, telezesha kidole kutoka juu hadi chini."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Nimeelewa"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zungusha ili upate mwonekano bora"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Funga skrini iliyogawanywa ili upate mwonekano bora"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Fungua <xliff:g id="NAME">%s</xliff:g> kwenye skrini nzima ili uone maudhui kwa urahisi"</string>
     <string name="done_label" msgid="7283767013231718521">"Imekamilika"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kitelezi cha mviringo wa saa"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kitelezi cha mviringo wa dakika"</string>
@@ -1975,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Huwezi kufikia mipangilio hii kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako. Badala yake jaribu kwenye simu yako."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Programu hii ilisanidiwa kwa ajili ya toleo la zamani la Android. Huenda isifanye kazi ipasavyo na haijumuishi ulinzi wa faragha na usalama wa hivi karibuni. Angalia kama ina sasisho au wasiliana na msanidi wa programu."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Angalia masasisho"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Programu hii haitumiki kwenye toleo jipya zaidi la Android. Angalia iwapo sasisho linapatikana au wasiliana na msanidi programu."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Una ujumbe mpya"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Fungua programu ya SMS ili uweze kuangalia"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Huenda baadhi ya vipengele vinadhibitiwa"</string>
@@ -2166,7 +2167,7 @@
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Ungependa kufungua <xliff:g id="APP">%s</xliff:g> ukitumia wasifu wa binafsi?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Ungependa kufungua <xliff:g id="APP">%s</xliff:g> ukitumia wasifu wa kazini?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"Ungependa kupiga simu ukitumia programu ya kazini?"</string>
-    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Ungependa kubadilisha ili utumie programu ya kazini?"</string>
+    <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"Ungependa kutumia programu ya kazini?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"Shirika lako linakuruhusu upige simu ukitumia programu za kazini pekee"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"Shirika lako linakuruhusu utume ujumbe ukitumia programu za kazini pekee"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Tumia kivinjari cha binafsi"</string>

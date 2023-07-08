@@ -29,6 +29,7 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
@@ -68,6 +69,7 @@ import androidx.annotation.BinderThread;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
@@ -264,7 +266,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor) {
         this(context, shellInit, shellController, organizer, pool, displayController, mainExecutor,
-                mainHandler, animExecutor, null);
+                mainHandler, animExecutor, null,
+                new RootTaskDisplayAreaOrganizer(mainExecutor, context));
     }
 
     public Transitions(@NonNull Context context,
@@ -276,7 +279,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull ShellExecutor mainExecutor,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor,
-            @Nullable ShellCommandHandler shellCommandHandler) {
+            @Nullable ShellCommandHandler shellCommandHandler,
+            @NonNull RootTaskDisplayAreaOrganizer rootTDAOrganizer) {
         mOrganizer = organizer;
         mContext = context;
         mMainExecutor = mainExecutor;
@@ -284,7 +288,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         mDisplayController = displayController;
         mPlayerImpl = new TransitionPlayerImpl();
         mDefaultTransitionHandler = new DefaultTransitionHandler(context, shellInit,
-                displayController, pool, mainExecutor, mainHandler, animExecutor);
+                displayController, pool, mainExecutor, mainHandler, animExecutor, rootTDAOrganizer);
         mRemoteTransitionHandler = new RemoteTransitionHandler(mMainExecutor);
         mShellController = shellController;
         // The very last handler (0 in the list) should be the default one.
@@ -554,7 +558,10 @@ public class Transitions implements RemoteCallable<Transitions>,
                     layer = -zSplitLine - i;
                 }
             } else if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
-                if (isOpening) {
+                if (isOpening
+                        // This is for when an activity launches while a different transition is
+                        // collecting.
+                        || change.hasFlags(FLAG_MOVED_TO_TOP)) {
                     // put on top
                     layer = zSplitLine + numChanges - i;
                 } else {
@@ -570,8 +577,8 @@ public class Transitions implements RemoteCallable<Transitions>,
                     layer = zSplitLine + numChanges - i;
                 }
             } else { // CHANGE or other
-                if (isClosing) {
-                    // Put below CLOSE mode.
+                if (isClosing || TransitionUtil.isOrderOnly(change)) {
+                    // Put below CLOSE mode (in the "static" section).
                     layer = zSplitLine - i;
                 } else {
                     // Put above CLOSE mode.
@@ -637,6 +644,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     @VisibleForTesting
     void onTransitionReady(@NonNull IBinder transitionToken, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
+        info.setUnreleasedWarningCallSiteForAllSurfaces("Transitions.onTransitionReady");
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady %s: %s",
                 transitionToken, info);
         final int activeIdx = findByToken(mPendingTransitions, transitionToken);
@@ -801,6 +809,9 @@ public class Transitions implements RemoteCallable<Transitions>,
             track.mReadyTransitions.remove(0);
             track.mActiveTransition = ready;
             if (ready.mAborted) {
+                if (ready.mStartT != null) {
+                    ready.mStartT.apply();
+                }
                 // finish now since there's nothing to animate. Calls back into processReadyQueue
                 onFinish(ready, null, null);
                 return;
@@ -928,10 +939,6 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Aborts a transition. This will still queue it up to maintain order. */
     private void onAbort(ActiveTransition transition) {
         final Track track = mTracks.get(transition.getTrack());
-        // apply immediately since they may be "parallel" operations: We currently we use abort for
-        // thing which are independent to other transitions (like starting-window transfer).
-        transition.mStartT.apply();
-        transition.mFinishT.apply();
         transition.mAborted = true;
 
         mTracer.logAborted(transition.mInfo.getDebugId());
@@ -1078,9 +1085,8 @@ public class Transitions implements RemoteCallable<Transitions>,
                     if (wct == null) {
                         wct = new WindowContainerTransaction();
                     }
-                    mDisplayController.getChangeController().dispatchOnDisplayChange(wct,
-                            change.getDisplayId(), change.getStartRotation(),
-                            change.getEndRotation(), null /* newDisplayAreaInfo */);
+                    mDisplayController.onDisplayRotateRequested(wct, change.getDisplayId(),
+                            change.getStartRotation(), change.getEndRotation());
                 }
             }
         }

@@ -51,7 +51,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
@@ -93,7 +92,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.server.testutils.StubTransaction;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.TransitionInfoBuilder;
@@ -105,6 +103,7 @@ import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellSharedConstants;
+import com.android.wm.shell.util.StubTransaction;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -703,8 +702,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 createTaskInfo(1, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
 
         final DisplayController displays = createTestDisplayController();
-        final @Surface.Rotation int upsideDown = displays
-                .getDisplayLayout(DEFAULT_DISPLAY).getUpsideDownRotation();
+        final DisplayLayout displayLayout = displays.getDisplayLayout(DEFAULT_DISPLAY);
+        final @Surface.Rotation int upsideDown = displayLayout.getUpsideDownRotation();
 
         TransitionInfo.Change displayChange = new ChangeBuilder(TRANSIT_CHANGE)
                 .setFlags(FLAG_IS_DISPLAY).setRotate().build();
@@ -744,7 +743,8 @@ public class ShellTransitionTests extends ShellTestCase {
         assertEquals(ROTATION_ANIMATION_ROTATE, DefaultTransitionHandler.getRotationAnimationHint(
                 displayChange, noTask, displays));
 
-        // Not seamless if one of rotations is upside-down
+        // Not seamless if the nav bar cares rotation and one of rotations is upside-down.
+        doReturn(false).when(displayLayout).allowSeamlessRotationDespiteNavBarMoving();
         displayChange = new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
                 .setRotate(upsideDown, ROTATION_ANIMATION_UNSPECIFIED).build();
         final TransitionInfo seamlessUpsideDown = new TransitionInfoBuilder(TRANSIT_CHANGE)

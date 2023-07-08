@@ -113,6 +113,11 @@ public class ForegroundServiceTypeLoggerModule {
         // We use this to get the duration an API was active after
         // the stop call.
         final SparseArray<Long> mLastFgsTimeStamp = new SparseArray<>();
+
+        // A map of API types to first FGS start call timestamps
+        // We use this to get the duration an API was active after
+        // the stop call.
+        final SparseArray<Long> mFirstFgsTimeStamp = new SparseArray<>();
     }
 
     // SparseArray that tracks all UIDs that have made various
@@ -146,6 +151,7 @@ public class ForegroundServiceTypeLoggerModule {
             if (fgsIndex < 0) {
                 uidState.mRunningFgs.put(apiType, new ArrayMap<>());
                 fgsIndex = uidState.mRunningFgs.indexOfKey(apiType);
+                uidState.mFirstFgsTimeStamp.put(apiType, System.currentTimeMillis());
             }
             final ArrayMap<ComponentName, ServiceRecord> fgsList =
                     uidState.mRunningFgs.valueAt(fgsIndex);
@@ -237,7 +243,7 @@ public class ForegroundServiceTypeLoggerModule {
                 // there's no more FGS running for this type, just get rid of it
                 uidState.mRunningFgs.remove(apiType);
                 // but we need to keep track of the timestamp in case an API stops
-                uidState.mLastFgsTimeStamp.put(apiType, record.mFgsExitTime);
+                uidState.mLastFgsTimeStamp.put(apiType, System.currentTimeMillis());
             }
         }
         if (!apisFound.isEmpty()) {
@@ -454,8 +460,17 @@ public class ForegroundServiceTypeLoggerModule {
     public void logFgsApiEvent(ServiceRecord r, int fgsState,
             @FgsApiState int apiState,
             @ForegroundServiceApiType int apiType, long timestamp) {
-        final long apiDurationBeforeFgsStart = r.mFgsEnterTime - timestamp;
-        final long apiDurationAfterFgsEnd = timestamp - r.mFgsExitTime;
+        long apiDurationBeforeFgsStart = r.createRealTime - timestamp;
+        long apiDurationAfterFgsEnd = timestamp - r.mFgsExitTime;
+        UidState uidState = mUids.get(r.appInfo.uid);
+        if (uidState != null) {
+            if (uidState.mFirstFgsTimeStamp.contains(apiType)) {
+                apiDurationBeforeFgsStart = uidState.mFirstFgsTimeStamp.get(apiType) - timestamp;
+            }
+            if (uidState.mLastFgsTimeStamp.contains(apiType)) {
+                apiDurationAfterFgsEnd = timestamp - uidState.mLastFgsTimeStamp.get(apiType);
+            }
+        }
         final int[] apiTypes = new int[1];
         apiTypes[0] = apiType;
         final long[] timeStamps = new long[1];

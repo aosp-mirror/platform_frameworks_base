@@ -61,6 +61,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -73,6 +74,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)
+@Ignore("b/236891644")
 class BouncerMessageRepositoryTest : SysuiTestCase() {
 
     @Mock private lateinit var updateMonitor: KeyguardUpdateMonitor

@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Gesicht authentifiziert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bestätigt"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Zum Abschließen auf \"Bestätigen\" tippen"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Mit Gesicht entsperrt"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Gerät mit dem Gesicht entsperrt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Gesicht erkannt. Tippe, um fortzufahren."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Gesicht erkannt. Tippe zum Fortfahren auf das Symbol „Entsperren“."</string>
@@ -244,7 +243,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Eingabe"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hörhilfen"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hörgeräte"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Wird aktiviert…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Autom. drehen"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Bildschirm automatisch drehen"</string>
@@ -453,9 +452,9 @@
     <string name="monitoring_subtitle_ca_certificate" msgid="8588092029755175800">"CA-Zertifikate"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Richtlinien ansehen"</string>
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"Jugendschutzeinstellungen"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Dieses Gerät gehört <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nDein IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten deines Geräts sehen und verwalten.\n\nWeitere Informationen erhältst du von deinem IT-Administrator."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Dieses Gerät gehört <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nIhr IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten Ihres Geräts sehen und verwalten.\n\nWeitere Informationen erhalten Sie von Ihrem IT-Administrator."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> kann möglicherweise auf die Daten zugreifen, die mit diesem Gerät verknüpft sind, Apps verwalten und die Geräteeinstellungen ändern.\n\nFalls du Fragen hast, wende dich an <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Dieses Gerät gehört deiner Organisation.\n\nDein IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten deines Geräts sehen und verwalten.\n\nWeitere Informationen erhältst du von deinem IT-Administrator."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Dieses Gerät gehört Ihrer Organisation.\n\nIhr IT-Administrator kann Einstellungen, Zugriffsrechte im Unternehmen, Apps, mit diesem Gerät verknüpfte Daten und die Standortdaten Ihres Geräts sehen und verwalten.\n\nWeitere Informationen erhalten Sie von Ihrem IT-Administrator."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Deine Organisation hat ein Zertifikat einer Zertifizierungsstelle auf deinem Gerät installiert. Eventuell wird dein sicherer Netzwerkverkehr überwacht oder bearbeitet."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Deine Organisation hat ein Zertifikat einer Zertifizierungsstelle in deinem Arbeitsprofil installiert. Eventuell wird dein sicherer Netzwerkverkehr überwacht oder bearbeitet."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Auf dem Gerät ist das Zertifikat einer Zertifizierungsstelle installiert. Eventuell wird dein sicherer Netzwerkverkehr überwacht oder bearbeitet."</string>
@@ -468,7 +467,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Deine privaten Apps sind über <xliff:g id="VPN_APP">%1$s</xliff:g> mit dem Internet verbunden. Deine Netzwerkaktivitäten, einschließlich E-Mails und Browserdaten, sind für deinen VPN-Anbieter sichtbar."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN-Einstellungen öffnen"</string>
-    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Dieses Gerät wird von deinen Eltern verwaltet. Sie können unter anderem Informationen über deine genutzten Apps, deinen Standort und deine Gerätenutzungsdauer einsehen und verwalten."</string>
+    <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Dieses Gerät wird von deinen Eltern verwaltet. Sie können unter anderem Informationen über deine genutzten Apps, deinen Standort und deine Bildschirmzeit einsehen und verwalten."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Durch TrustAgent entsperrt"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -897,8 +896,8 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# Steuerelement hinzugefügt.}other{# Steuerelemente hinzugefügt.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Entfernt"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> hinzufügen?"</string>
-    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> darf auswählen, welche Einstellungen und Inhalte hier angezeigt werden."</string>
-    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Einstellungen für <xliff:g id="APPNAME">%s</xliff:g> entfernen?"</string>
+    <string name="controls_panel_authorization" msgid="7045551688535104194">"<xliff:g id="APPNAME">%s</xliff:g> darf auswählen, welche Steuerelemente und Inhalte hier angezeigt werden."</string>
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Steuerelemente für <xliff:g id="APPNAME">%s</xliff:g> entfernen?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Zu Favoriten hinzugefügt"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Zu Favoriten hinzugefügt, Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Aus Favoriten entfernt"</string>
@@ -1004,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Speichern nicht möglich. Versuche es noch einmal."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Speichern nicht möglich."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Gib mindestens vier Zeichen ein"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Maximal 16 Zeichen möglich"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Maximal <xliff:g id="LENGTH">%1$d</xliff:g> Zeichen möglich"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build-Nummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Build-Nummer in Zwischenablage kopiert."</string>
     <string name="basic_status" msgid="2315371112182658176">"Offene Unterhaltung"</string>
@@ -1124,20 +1123,20 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Weitere Informationen"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Weitere Informationen unter <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> öffnen"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Die App ist eingerichtet"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet wurde mindestens eine Karte hinzugefügt"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera-App ist installiert"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Die App ist eingerichtet"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Mindestens ein Gerät ist verfügbar"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Wähle eine Standard-App für Notizen aus, die du für die Verknüpfung verwenden möchtest"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Damit du die Wallet App als Verknüpfung hinzufügen kannst, muss die App installiert sein"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Damit du die Wallet App als Verknüpfung hinzufügen kannst, muss mindestens eine Karte hinzugefügt sein"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Damit du den QR-Code-Scanner als Verknüpfung hinzufügen kannst, muss eine Kamera-App installiert sein"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Damit du die Home App als Verknüpfung hinzufügen kannst, muss die App installiert sein"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• Mindestens ein Gerät ist verfügbar"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Wähle eine Standard-App für Notizen aus, die du für die Verknüpfung verwenden möchtest"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"App wählen"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Verknüpfung berühren &amp; halten"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Abbrechen"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Bildschirm jetzt wechseln"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Jetzt umdrehen"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Smartphone auffalten"</string>
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Bildschirm wechseln?"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Mit der Rückkamera lassen sich Fotos mit höherer Auflösung aufnehmen"</string>
-    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Smartphone umdrehen, um Fotos mit höherer Auflösung aufzunehmen"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Für höhere Auflösung Smartphone umdrehen"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Faltbares Gerät wird geöffnet"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Faltbares Gerät wird umgeklappt"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Akku bei <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
@@ -1158,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prioritätsmodus an"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant-Aktivierung an"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Standard-Notizen-App in den Einstellungen einrichten"</string>
+    <string name="install_app" msgid="5066668100199613936">"App installieren"</string>
 </resources>

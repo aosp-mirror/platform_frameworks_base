@@ -88,6 +88,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
@@ -600,7 +601,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * The callbacks to make when the windows all have been drawn for a given
      * {@link WindowContainer}.
      */
-    final HashMap<WindowContainer, Runnable> mWaitingForDrawnCallbacks = new HashMap<>();
+    final ArrayMap<WindowContainer<?>, Message> mWaitingForDrawnCallbacks = new ArrayMap<>();
 
     /** List of window currently causing non-system overlay windows to be hidden. */
     private ArrayList<WindowState> mHidingNonSystemOverlayWindows = new ArrayList<>();
@@ -3591,6 +3592,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setCurrentUser(@UserIdInt int newUserId) {
         synchronized (mGlobalLock) {
+            mAtmService.getTransitionController().requestTransitionIfNeeded(TRANSIT_OPEN, null);
             mCurrentUserId = newUserId;
             mPolicy.setCurrentUserLw(newUserId);
             mKeyguardDisableHandler.setCurrentUser(newUserId);
@@ -5366,8 +5368,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int CLIENT_FREEZE_TIMEOUT = 30;
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
 
-        public static final int ALL_WINDOWS_DRAWN = 33;
-
         public static final int NEW_ANIMATOR_SCALE = 34;
 
         public static final int SHOW_EMULATOR_DISPLAY_OVERLAY = 36;
@@ -5489,7 +5489,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case WAITING_FOR_DRAWN_TIMEOUT: {
-                    Runnable callback = null;
+                    final Message callback;
                     final WindowContainer<?> container = (WindowContainer<?>) msg.obj;
                     synchronized (mGlobalLock) {
                         ProtoLog.w(WM_ERROR, "Timeout waiting for drawn: undrawn=%s",
@@ -5503,7 +5503,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         callback = mWaitingForDrawnCallbacks.remove(container);
                     }
                     if (callback != null) {
-                        callback.run();
+                        callback.sendToTarget();
                     }
                     break;
                 }
@@ -5524,17 +5524,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (activity.isAttached()) {
                             activity.getRootTask().notifyActivityDrawnLocked(activity);
                         }
-                    }
-                    break;
-                }
-                case ALL_WINDOWS_DRAWN: {
-                    Runnable callback;
-                    final WindowContainer container = (WindowContainer) msg.obj;
-                    synchronized (mGlobalLock) {
-                        callback = mWaitingForDrawnCallbacks.remove(container);
-                    }
-                    if (callback != null) {
-                        callback.run();
                     }
                     break;
                 }
@@ -6095,7 +6084,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mWaitingForDrawnCallbacks.isEmpty()) {
             return;
         }
-        mWaitingForDrawnCallbacks.forEach((container, callback) -> {
+        for (int i = mWaitingForDrawnCallbacks.size() - 1; i >= 0; i--) {
+            final WindowContainer<?> container = mWaitingForDrawnCallbacks.keyAt(i);
             for (int j = container.mWaitingForDrawn.size() - 1; j >= 0; j--) {
                 final WindowState win = (WindowState) container.mWaitingForDrawn.get(j);
                 ProtoLog.i(WM_DEBUG_SCREEN_ON,
@@ -6121,9 +6111,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (container.mWaitingForDrawn.isEmpty()) {
                 ProtoLog.d(WM_DEBUG_SCREEN_ON, "All windows drawn!");
                 mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, container);
-                mH.sendMessage(mH.obtainMessage(H.ALL_WINDOWS_DRAWN, container));
+                mWaitingForDrawnCallbacks.removeAt(i).sendToTarget();
             }
-        });
+        }
     }
 
     private void traceStartWaitingForWindowDrawn(WindowState window) {
@@ -7674,6 +7664,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void onDisplayManagerReceivedDeviceState(int deviceState) {
+            mH.post(() -> {
+                synchronized (mGlobalLock) {
+                    mRoot.onDisplayManagerReceivedDeviceState(deviceState);
+                }
+            });
+        }
+
+        @Override
         public void setMagnificationSpec(int displayId, MagnificationSpec spec) {
             synchronized (mGlobalLock) {
                 if (mAccessibilityController.hasCallbacks()) {
@@ -7800,13 +7799,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void waitForAllWindowsDrawn(Runnable callback, long timeout, int displayId) {
+        public void waitForAllWindowsDrawn(Message message, long timeout, int displayId) {
+            Objects.requireNonNull(message.getTarget());
             final WindowContainer<?> container = displayId == INVALID_DISPLAY
                     ? mRoot : mRoot.getDisplayContent(displayId);
             if (container == null) {
                 // The waiting container doesn't exist, no need to wait to run the callback. Run and
                 // return;
-                callback.run();
+                message.sendToTarget();
                 return;
             }
             boolean allWindowsDrawn = false;
@@ -7823,13 +7823,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
 
-                    mWaitingForDrawnCallbacks.put(container, callback);
+                    mWaitingForDrawnCallbacks.put(container, message);
                     mH.sendNewMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT, container, timeout);
                     checkDrawnWindowsLocked();
                 }
             }
             if (allWindowsDrawn) {
-                callback.run();
+                message.sendToTarget();
             }
         }
 

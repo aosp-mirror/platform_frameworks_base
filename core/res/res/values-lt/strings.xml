@@ -640,8 +640,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Kaskart šiek tiek pakeiskite piršto poziciją"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Kontrolinis kodas neatpažintas"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Kontrolinis kodas neatpažintas"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Piršto atspaudas neatpažintas"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Piršto atspaudas neatpažintas"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Piršto antspaudas autentifikuotas"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Veidas autentifikuotas"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Veidas autentifikuotas, paspauskite patvirtinimo mygtuką"</string>
@@ -675,7 +675,7 @@
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Jei norite naudoti atrakinimą pagal veidą, įjunkite parinktį "<b>"Prieiga prie fotoaparato"</b>" skiltyje „Nustatymai“ &gt; „Privatumas“"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Daugiau atrakinimo metodų nustatymas"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Palieskite, kad pridėtumėte kontrolinį kodą"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Atrakinimas kontroliniu kodu"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Atrakinimas piršto atspaudu"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Negalima naudoti kontrolinio kodo jutiklio"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Apsilankykite pas taisymo paslaugos teikėją."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nepavyko sukurti veido modelio. Band. dar kartą."</string>
@@ -1852,7 +1852,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Jei norite išeiti, perbraukite žemyn iš viršaus."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Supratau"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Pasukite, kad geriau matytumėte vaizdą"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Išeikite iš išskaidyto ekrano režimo, kad geriau matytumėte vaizdą"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Atidarykite „<xliff:g id="NAME">%s</xliff:g>“ viso ekrano režimu, kad geriau matytumėte vaizdą"</string>
     <string name="done_label" msgid="7283767013231718521">"Atlikta"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Apskritas valandų šliaužiklis"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Apskritas minučių šliaužiklis"</string>
@@ -1977,6 +1977,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Nepavyksta pasiekti nuotolinio įrenginio iš jūsų „<xliff:g id="DEVICE">%1$s</xliff:g>“. Pabandykite naudoti telefoną."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Ši programa sukurta senesnės versijos „Android“. Ji gali tinkamai neveikti ir joje nėra naujausių saugos ir privatumo apsaugos priemonių. Patikrinkite, ar yra naujinių, arba susisiekite su programos kūrėju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tikrinti, ar yra naujinių"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Ši programa nesuderinama su naujausios versijos „Android“. Patikrinkite, ar yra naujinių, arba susisiekite su programos kūrėju."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Turite naujų pranešimų"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Atidaryti SMS programą, norint peržiūrėti"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Kai kurios funkcijos ribojamos"</string>
@@ -2337,7 +2338,7 @@
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Klaviatūros išdėstymas nustatytas į <xliff:g id="LAYOUT_1">%s</xliff:g>. Palieskite, kad pakeistumėte."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Klaviatūros išdėstymas nustatytas į <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Palieskite, kad pakeistumėte."</string>
     <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Klaviatūros išdėstymas nustatytas į <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Palieskite, kad pakeistumėte."</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Klaviatūros išdėstymas nustatytas į <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Palieskite, kad pakeistumėte."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Išdėstymas nustatytas į <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Palieskite, kad pakeistumėte."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Sukonfigūruotos fizinės klaviatūros"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Palieskite, kad peržiūrėtumėte klaviatūras"</string>
 </resources>

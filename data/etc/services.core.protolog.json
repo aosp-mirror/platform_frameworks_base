@@ -1813,6 +1813,12 @@
       "group": "WM_DEBUG_KEEP_SCREEN_ON",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-479665533": {
+      "message": "DisplayRotationCompatPolicy: Multi-window toast not shown as package '%s' cannot be found.",
+      "level": "ERROR",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
+    },
     "-464564167": {
       "message": "Current transition prevents automatic focus change",
       "level": "VERBOSE",

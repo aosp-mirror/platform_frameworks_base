@@ -625,7 +625,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ett fel uppstod vid autentiseringen"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Använd skärmlåset"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Fortsätt med hjälp av ditt skärmlås"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tryck på sensorn med ett stadigt tryck"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tryck hårt på sensorn"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Fingeravtrycket kändes inte igen. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Rengör fingeravtryckssensorn och försök igen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Rengör sensorn och försök igen"</string>
@@ -645,7 +645,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Ansiktet har autentiserats. Tryck på Bekräfta"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Det finns ingen maskinvara för fingeravtryck."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Det gick inte att konfigurera fingeravtryck"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Fingeravtryckskonfigurering nådde tidsgränsen. Försök igen."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Tiden för fingeravtrycksinställning gick ut. Försök igen."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingeravtrycksåtgärden avbröts."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Fingeravtrycksåtgärden avbröts av användaren."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"För många försök. Använd låsskärmen i stället."</string>
@@ -1715,7 +1715,7 @@
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Färgkorrigering"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enhandsläge"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extradimmat"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hörapparater"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hörhjälpmedel"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har aktiverats."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Volymknapparna har tryckts ned. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> har inaktiverats."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Släpp volymknapparna. Du kan aktivera <xliff:g id="SERVICE_NAME">%1$s</xliff:g> genom att hålla båda volymknapparna nedtryckta i tre sekunder igen."</string>
@@ -1850,7 +1850,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Svep nedåt från skärmens överkant för att avsluta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotera för att få en bättre vy"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Stäng delad skärm för att få en bättre vy"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Öppna <xliff:g id="NAME">%s</xliff:g> i fullskärmsläget för att få en bättre vy"</string>
     <string name="done_label" msgid="7283767013231718521">"Klart"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Cirkelreglage för timmar"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Cirkelreglage för minuter"</string>
@@ -1975,6 +1975,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Det går inte att streama detta till <xliff:g id="DEVICE">%1$s</xliff:g>. Testa med telefonen i stället."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Den här appen byggdes för en äldre version av Android. Den kanske inte fungerar som den ska och har inte de senaste säkerhets- och integritetsskydden. Sök efter en uppdatering eller kontakta appens utvecklare."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Sök efter uppdateringar"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"Denna app är inte kompatibel med den senaste versionen av Android. Sök efter en uppdatering eller kontakta appens utvecklare."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du har nya meddelanden"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Öppna sms-appen och visa meddelandet"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Vissa funktioner är begränsade"</string>

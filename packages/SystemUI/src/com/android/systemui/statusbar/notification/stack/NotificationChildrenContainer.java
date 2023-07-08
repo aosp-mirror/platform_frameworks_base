@@ -379,6 +379,7 @@ public class NotificationChildrenContainer extends ViewGroup
     }
 
     public void recreateNotificationHeader(OnClickListener listener, boolean isConversation) {
+        Trace.beginSection("NotifChildCont#recreateHeader");
         mHeaderClickListener = listener;
         mIsConversation = isConversation;
         StatusBarNotification notification = mContainingNotification.getEntry().getSbn();
@@ -406,6 +407,7 @@ public class NotificationChildrenContainer extends ViewGroup
         recreateLowPriorityHeader(builder, isConversation);
         updateHeaderVisibility(false /* animate */);
         updateChildrenAppearance();
+        Trace.endSection();
     }
 
     /**

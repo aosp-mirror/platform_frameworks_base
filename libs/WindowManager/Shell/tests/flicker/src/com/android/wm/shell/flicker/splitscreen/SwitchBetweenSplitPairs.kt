@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -64,7 +63,6 @@ class SwitchBetweenSplitPairs(override val flicker: FlickerTest) :
         }
 
     @PlatinumTest(focusArea = "sysui")
-    @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
     override fun cujCompleted() {

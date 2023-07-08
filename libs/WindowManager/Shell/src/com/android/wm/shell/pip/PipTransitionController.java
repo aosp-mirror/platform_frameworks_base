@@ -38,6 +38,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
@@ -221,6 +222,13 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     public boolean isEnteringPip(@NonNull TransitionInfo.Change change,
             @WindowManager.TransitionType int transitType) {
         return false;
+    }
+
+    /** Whether a particular package is same as current pip package. */
+    public boolean isInPipPackage(String packageName) {
+        final TaskInfo inPipTask = mPipOrganizer.getTaskInfo();
+        return packageName != null && inPipTask != null
+                && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
     }
 
     /** Add PiP-related changes to `outWCT` for the given request. */

@@ -607,6 +607,7 @@ interface IActivityManager {
 
     void killPackageDependents(in String packageName, int userId);
     void makePackageIdle(String packageName, int userId);
+    void setDeterministicUidIdle(boolean deterministic);
     int getMemoryTrimLevel();
     boolean isVrModePackageEnabled(in ComponentName packageName);
     void notifyLockedProfile(int userId);

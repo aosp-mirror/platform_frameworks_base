@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
@@ -177,12 +178,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     @PowerExemptionManager.ReasonCode
     int mAllowWhileInUsePermissionInFgsReason = REASON_DENIED;
 
-    // Integer version of mAllowWhileInUsePermissionInFgs that we keep track to compare
-    // the old and new logics.
-    // TODO: Remove them once we're confident in the new logic.
-    int mDebugWhileInUseReasonInStartForeground = REASON_DENIED;
-    int mDebugWhileInUseReasonInBindService = REASON_DENIED;
-
     // A copy of mAllowWhileInUsePermissionInFgs's value when the service is entering FGS state.
     boolean mAllowWhileInUsePermissionInFgsAtEntering;
     /** Allow scheduling user-initiated jobs from the background. */
@@ -224,13 +219,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // is called.
     int mStartForegroundCount;
 
-    // Last time mAllowWhileInUsePermissionInFgs or mAllowStartForeground was set to "allowed"
-    // from "disallowed" when the service was _not_ already a foreground service.
-    // this means they're set in startService(). (not startForegroundService)
-    // In startForeground(), if this timestamp is too old, we can't trust these flags, so
-    // we need to reset them.
-    long mLastUntrustedSetFgsRestrictionAllowedTime;
-
     // This is a service record of a FGS delegate (not a service record of a real service)
     boolean mIsFgsDelegate;
     @Nullable ForegroundServiceDelegation mFgsDelegation;
@@ -257,6 +245,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      */
     long mRestartSchedulingTime;
 
+    /**
+     * The snapshot process state when the service is requested (either start or bind).
+     */
+    int mProcessStateOnRequest;
+
     static class StartItem {
         final ServiceRecord sr;
         final boolean taskRemoved;
@@ -266,6 +259,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         final Intent intent;
         final NeededUriGrants neededGrants;
         final @Nullable String mCallingPackageName;
+        final int mCallingProcessState;
         long deliveredTime;
         int deliveryCount;
         int doneExecutingCount;
@@ -275,7 +269,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id,
                 Intent _intent, NeededUriGrants _neededGrants, int _callingId,
-                String callingProcessName, @Nullable String callingPackageName) {
+                String callingProcessName, @Nullable String callingPackageName,
+                int callingProcessState) {
             sr = _sr;
             taskRemoved = _taskRemoved;
             id = _id;
@@ -284,6 +279,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             callingId = _callingId;
             mCallingProcessName = callingProcessName;
             mCallingPackageName = callingPackageName;
+            mCallingProcessState = callingProcessState;
         }
 
         UriPermissionOwner getUriPermissionsLocked() {
@@ -624,12 +620,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         pw.print(prefix); pw.print("mAllowWhileInUsePermissionInFgsReason=");
         pw.println(PowerExemptionManager.reasonCodeToString(mAllowWhileInUsePermissionInFgsReason));
 
-        pw.print(prefix); pw.print("debugWhileInUseReasonInStartForeground=");
-        pw.println(PowerExemptionManager.reasonCodeToString(
-                mDebugWhileInUseReasonInStartForeground));
-        pw.print(prefix); pw.print("debugWhileInUseReasonInBindService=");
-        pw.println(PowerExemptionManager.reasonCodeToString(mDebugWhileInUseReasonInBindService));
-
         pw.print(prefix); pw.print("allowUiJobScheduling="); pw.println(mAllowUiJobScheduling);
         pw.print(prefix); pw.print("recentCallingPackage=");
                 pw.println(mRecentCallingPackage);
@@ -641,10 +631,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         pw.println(mStartForegroundCount);
         pw.print(prefix); pw.print("infoAllowStartForeground=");
         pw.println(mInfoAllowStartForeground);
-
-        pw.print(prefix); pw.print("lastUntrustedSetFgsRestrictionAllowedTime=");
-        TimeUtils.formatDuration(mLastUntrustedSetFgsRestrictionAllowedTime, now, pw);
-        pw.println();
 
         if (delayed) {
             pw.print(prefix); pw.print("delayed="); pw.println(delayed);
@@ -896,6 +882,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             app.mServices.updateHostingComonentTypeForBindingsLocked();
         }
         app = proc;
+        updateProcessStateOnRequest();
         if (pendingConnectionGroup > 0 && proc != null) {
             final ProcessServiceRecord psr = proc.mServices;
             psr.setConnectionService(this);
@@ -920,6 +907,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             proc.mServices.updateBoundClientUids();
             proc.mServices.updateHostingComonentTypeForBindingsLocked();
         }
+    }
+
+    void updateProcessStateOnRequest() {
+        mProcessStateOnRequest = app != null && app.getThread() != null && !app.isKilled()
+                ? app.mState.getCurProcState() : PROCESS_STATE_NONEXISTENT;
     }
 
     @NonNull
@@ -1084,12 +1076,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (app == null) {
             return;
         }
-        if (mBackgroundStartPrivilegesByStartMerged.allowsAny()
-                || mIsAllowedBgActivityStartsByBinding) {
+        BackgroundStartPrivileges backgroundStartPrivileges =
+                getBackgroundStartPrivilegesWithExclusiveToken();
+        if (backgroundStartPrivileges.allowsAny()) {
             // if the token is already there it's safe to "re-add it" - we're dealing with
             // a set of Binder objects
             app.addOrUpdateBackgroundStartPrivileges(this,
-                    getBackgroundStartPrivilegesWithExclusiveToken());
+                    backgroundStartPrivileges);
         } else {
             app.removeBackgroundStartPrivileges(this);
         }

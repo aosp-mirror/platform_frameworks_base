@@ -56,15 +56,10 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class MovePipDownOnShelfHeightChange(flicker: FlickerTest) : MovePipShelfHeightTransition(flicker) {
-    /** Defines the transition used to run the test */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition {
-            teardown {
-                tapl.pressHome()
-                testApp.exit(wmHelper)
-            }
-            transitions { testApp.launchViaIntent(wmHelper) }
-        }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        teardown { testApp.exit(wmHelper) }
+        transitions { testApp.launchViaIntent(wmHelper) }
+    }
 
     /** Checks that the visible region of [pipApp] window always moves down during the animation. */
     @Presubmit @Test fun pipWindowMovesDown() = pipWindowMoves(Direction.DOWN)

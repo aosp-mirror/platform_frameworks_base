@@ -26,12 +26,11 @@ import org.junit.Test
 import org.junit.runners.Parameterized
 
 abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker) {
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setup { pipApp.launchViaIntent(wmHelper) }
-            teardown { pipApp.exit(wmHelper) }
+    override val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        setup {
+            pipApp.launchViaIntent(wmHelper)
         }
+    }
 
     /** Checks [pipApp] window remains visible throughout the animation */
     @Presubmit
@@ -63,7 +62,7 @@ abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker)
      */
     @Presubmit
     @Test
-    fun pipWindowRemainInsideVisibleBounds() {
+    open fun pipWindowRemainInsideVisibleBounds() {
         flicker.assertWmVisibleRegion(pipApp) { coversAtMost(displayBounds) }
     }
 

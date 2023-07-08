@@ -188,6 +188,7 @@ public abstract class MediaOutputBaseAdapter extends
             mContainerLayout.setContentDescription(null);
             mTitleText.setTextColor(mController.getColorItemContent());
             mSubTitleText.setTextColor(mController.getColorItemContent());
+            mSubTitleText.setSelected(true);
             mTwoLineTitleText.setTextColor(mController.getColorItemContent());
             mVolumeValueText.setTextColor(mController.getColorItemContent());
             mSeekBar.setProgressTintList(
@@ -417,7 +418,7 @@ public abstract class MediaOutputBaseAdapter extends
             mIconAreaLayout.setOnClickListener(listener);
         }
 
-        void initMutingExpectedDevice() {
+        void initFakeActiveDevice() {
             disableSeekBar();
             updateTitleIcon(R.drawable.media_output_icon_volume,
                     mController.getColorItemContent());

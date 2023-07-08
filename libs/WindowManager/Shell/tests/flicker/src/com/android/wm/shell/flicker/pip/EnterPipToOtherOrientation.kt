@@ -73,39 +73,39 @@ open class EnterPipToOtherOrientation(flicker: FlickerTest) : PipTransition(flic
     private val startingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
     private val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
 
-    /** Defines the transition used to run the test */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setup {
-                // Launch a portrait only app on the fullscreen stack
-                testApp.launchViaIntent(
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        teardown {
+            testApp.exit(wmHelper)
+        }
+        transitions {
+            // Enter PiP, and assert that the PiP is within bounds now that the device is back
+            // in portrait
+            broadcastActionTrigger.doAction(ACTION_ENTER_PIP)
+            // during rotation the status bar becomes invisible and reappears at the end
+            wmHelper
+                .StateSyncBuilder()
+                .withPipShown()
+                .withNavOrTaskBarVisible()
+                .withStatusBarVisible()
+                .waitForAndVerify()
+        }
+    }
+
+    override val defaultEnterPip: FlickerBuilder.() -> Unit = {
+        setup {
+            // Launch a portrait only app on the fullscreen stack
+            testApp.launchViaIntent(
                     wmHelper,
                     stringExtras = mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_PORTRAIT.toString())
-                )
-                // Launch the PiP activity fixed as landscape
-                pipApp.launchViaIntent(
+            )
+            // Launch the PiP activity fixed as landscape, but don't enter PiP
+            pipApp.launchViaIntent(
                     wmHelper,
                     stringExtras =
-                        mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString())
-                )
-            }
-            teardown {
-                pipApp.exit(wmHelper)
-                testApp.exit(wmHelper)
-            }
-            transitions {
-                // Enter PiP, and assert that the PiP is within bounds now that the device is back
-                // in portrait
-                broadcastActionTrigger.doAction(ACTION_ENTER_PIP)
-                // during rotation the status bar becomes invisible and reappears at the end
-                wmHelper
-                    .StateSyncBuilder()
-                    .withPipShown()
-                    .withNavOrTaskBarVisible()
-                    .withStatusBarVisible()
-                    .waitForAndVerify()
-            }
+                    mapOf(EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString())
+            )
         }
+    }
 
     /**
      * This test is not compatible with Tablets. When using [Activity.setRequestedOrientation] to

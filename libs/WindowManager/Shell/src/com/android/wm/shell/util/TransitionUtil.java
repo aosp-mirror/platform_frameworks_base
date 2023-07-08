@@ -121,15 +121,14 @@ public class TransitionUtil {
         @Override
         public boolean test(TransitionInfo.Change change) {
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            if (taskInfo == null) return false;
             // Children always come before parent since changes are in top-to-bottom z-order.
-            if ((taskInfo == null) || mChildTaskTargets.get(taskInfo.taskId)) {
-                // has children, so not a leaf. Skip.
-                return false;
-            }
+            boolean hasChildren = mChildTaskTargets.get(taskInfo.taskId);
             if (taskInfo.hasParentTask()) {
                 mChildTaskTargets.put(taskInfo.parentTaskId, true);
             }
-            return true;
+            // If it has children, it's not a leaf.
+            return !hasChildren;
         }
     }
 
@@ -171,6 +170,9 @@ public class TransitionUtil {
             if (isOpeningType(mode)) {
                 t.setAlpha(leash, 0.f);
             }
+            // Set the transition leash position to 0 in case the divider leash position being
+            // taking down.
+            t.setPosition(leash, 0, 0);
             t.setLayer(leash, Integer.MAX_VALUE);
             return;
         }
@@ -229,7 +231,11 @@ public class TransitionUtil {
         t.reparent(change.getLeash(), leashSurface);
         t.setAlpha(change.getLeash(), 1.0f);
         t.show(change.getLeash());
-        t.setPosition(change.getLeash(), 0, 0);
+        if (!isDividerBar(change)) {
+            // For divider, don't modify its inner leash position when creating the outer leash
+            // for the transition. In case the position being wrong after the transition finished.
+            t.setPosition(change.getLeash(), 0, 0);
+        }
         t.setLayer(change.getLeash(), 0);
         return leashSurface;
     }

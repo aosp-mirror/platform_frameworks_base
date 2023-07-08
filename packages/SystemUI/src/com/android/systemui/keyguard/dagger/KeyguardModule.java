@@ -37,10 +37,12 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -51,6 +53,7 @@ import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionMo
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceModule;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
+import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
@@ -71,6 +74,8 @@ import dagger.Module;
 import dagger.Provides;
 
 import java.util.concurrent.Executor;
+
+import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * Dagger Module providing keyguard.
@@ -128,7 +133,10 @@ public class KeyguardModule {
             Lazy<NotificationShadeWindowController> notificationShadeWindowController,
             Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
             Lazy<ScrimController> scrimControllerLazy,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            @Main CoroutineDispatcher mainDispatcher,
+            Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
+            SystemPropertiesHelper systemPropertiesHelper) {
         return new KeyguardViewMediator(
                 context,
                 uiEventLogger,
@@ -162,7 +170,10 @@ public class KeyguardModule {
                 notificationShadeWindowController,
                 activityLaunchAnimator,
                 scrimControllerLazy,
-                featureFlags);
+                featureFlags,
+                mainDispatcher,
+                dreamingToLockscreenTransitionViewModel,
+                systemPropertiesHelper);
     }
 
     /** */

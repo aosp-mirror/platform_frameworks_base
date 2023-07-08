@@ -132,7 +132,7 @@
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"అన్‌లాక్ చేయబడింది"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"పరికరం లాక్ చేయబడింది"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ముఖాన్ని స్కాన్ చేస్తోంది"</string>
-    <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"పంపు"</string>
+    <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"పంపండి"</string>
     <string name="cancel" msgid="1089011503403416730">"రద్దు చేయండి"</string>
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"నిర్ధారించండి"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"మళ్లీ ట్రై చేయండి"</string>
@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"ముఖం ప్రామాణీకరించబడింది"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"నిర్ధారించబడింది"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"పూర్తి చేయడానికి \"నిర్ధారించు\" నొక్కండి"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది. కొనసాగించడానికి నొక్కండి."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ముఖం గుర్తించబడింది. కొనసాగించడానికి నొక్కండి."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ముఖం గుర్తించబడింది. కొనసాగడానికి అన్‌లాక్ చిహ్నం నొక్కండి."</string>
@@ -151,7 +150,7 @@
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించండి"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ఆకృతిని ఉపయోగించండి"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"పాస్‌వర్డ్‌ను ఉపయోగించండి"</string>
-    <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"పిన్ తప్పు"</string>
+    <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN తప్పు"</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ఆకృతి తప్పు"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"పాస్‌వర్డ్ తప్పు"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"చాలా ఎక్కువ తప్పు ప్రయత్నాలు చేశారు.\n<xliff:g id="NUMBER">%d</xliff:g> సెకన్ల తర్వాత మళ్లీ ట్రై చేయండి."</string>
@@ -390,7 +389,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"మీరు గెస్ట్ మోడ్‌లో ఉన్నారు"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"కొత్త యూజర్‌ను జోడించడం వలన గెస్ట్ మోడ్ నుండి వైదొలుగుతుంది. అలాగే ప్రస్తుత గెస్ట్ సెషన్ నుండి అన్ని యాప్‌లతో పాటు మొత్తం డేటా తొలగించబడుతుంది."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"వినియోగదారు పరిమితిని చేరుకున్నారు"</string>
-    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{ఒక యూజర్‌ను మాత్రమే క్రియేట్ చేయవచ్చు.}other{మీరు గరిష్టంగా # మంది యూజర్‌లను జోడించవచ్చు.}}"</string>
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{ఒక యూజర్‌ను మాత్రమే క్రియేట్ చేయవచ్చు.}other{మీరు గరిష్ఠంగా # మంది యూజర్‌లను జోడించవచ్చు.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"యూజర్‌ను తీసివేయాలా?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"ఈ వినియోగదారుకు సంబంధించిన అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"తీసివేయండి"</string>
@@ -930,7 +929,7 @@
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"అవును"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"పిన్ అక్షరాలను లేదా చిహ్నాలను కలిగి ఉంది"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>ను వెరిఫై చేయండి"</string>
-    <string name="controls_pin_wrong" msgid="6162694056042164211">"పిన్ తప్పు"</string>
+    <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN తప్పు"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"పిన్‌ని ఎంటర్ చేయండి"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"మరొక పిన్‌ని ప్రయత్నించండి"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g>కి సంబంధించి మార్పును నిర్ధారించండి"</string>
@@ -1004,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"సేవ్ చేయడం సాధ్యపడదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"సేవ్ చేయడం సాధ్యపడదు."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"కనీసం 4 అక్షరాలను ఉపయోగించండి"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"16 కంటే తక్కువ అక్షరాలను ఉపయోగించండి"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g> కంటే తక్కువ అక్షరాలను ఉపయోగించండి"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"బిల్డ్ నంబర్"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"బిల్డ్ నంబర్, క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది."</string>
     <string name="basic_status" msgid="2315371112182658176">"సంభాషణను తెరవండి"</string>
@@ -1124,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"మరింత తెలుసుకోండి"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g>‌లో మరింత తెలుసుకోండి"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g>‌ను తెరవండి"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• యాప్ సెటప్ చేయబడి ఉందని"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Walletకు కనీసం ఒక కార్డ్ అయినా జోడించబడి ఉందని"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• కెమెరా యాప్ ఇన్‌స్టాల్ చేసి ఉందని"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• యాప్ సెటప్ చేయబడి ఉందని"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• కనీసం ఒక పరికరమైనా అందుబాటులో ఉందని"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"నోట్‌టేకింగ్ షార్ట్‌కట్‌ను ఉపయోగించడానికి ఆటోమేటిక్ సెట్టింగ్ నోట్స్ యాప్‌ను ఎంచుకోండి"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Wallet యాప్‌ను షార్ట్‌కట్‌గా జోడించడానికి, యాప్ ఇన్‌స్టాల్ చేయబడిందని నిర్ధారించుకోండి"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Wallet యాప్‌ను షార్ట్‌కట్‌గా జోడించడానికి, కనీసం ఒక కార్డ్ జోడించబడిందని నిర్ధారించుకోండి"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"QR కోడ్ స్కానర్‌ను షార్ట్‌కట్‌గా జోడించడానికి, కెమెరా యాప్ ఇన్‌స్టాల్ చేయబడిందని నిర్ధారించుకోండి"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Home యాప్‌ను షార్ట్‌కట్‌గా జోడించడానికి, యాప్ ఇన్‌స్టాల్ చేయబడిందని నిర్ధారించుకోండి"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• కనీసం ఒక పరికరమైనా అందుబాటులో ఉందని"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"నోట్‌టేకింగ్ షార్ట్‌కట్‌ను ఉపయోగించడానికి ఆటోమేటిక్ సెట్టింగ్ నోట్స్ యాప్‌ను ఎంచుకోండి"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"యాప్‌ను ఎంచుకోండి"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"షార్ట్‌కట్‌ను తాకి, నొక్కి ఉంచు"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"రద్దు చేయండి"</string>
@@ -1158,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ప్రయారిటీ మోడ్ ఆన్‌లో ఉంది"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant అటెన్షన్ ఆన్‌లో ఉంది"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"సెట్టింగ్‌లలో ఆటోమేటిక్‌గా ఉండేలా ఒక నోట్స్ యాప్‌ను సెట్ చేసుకోండి"</string>
+    <string name="install_app" msgid="5066668100199613936">"యాప్‌ను ఇన్‌స్టాల్ చేయండి"</string>
 </resources>

@@ -43,9 +43,11 @@ import androidx.recyclerview.widget.RecyclerView.State;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSEditEvent;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.TileLayout;
 import com.android.systemui.qs.customize.TileAdapter.Holder;
 import com.android.systemui.qs.customize.TileQueryHelper.TileInfo;
 import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
@@ -114,6 +116,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private RecyclerView mRecyclerView;
     private int mNumColumns;
 
+    private TextView mTempTextView;
+    private int mMinTileViewHeight;
+
     @Inject
     public TileAdapter(
             @QSThemedContext Context context,
@@ -129,6 +134,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mNumColumns = context.getResources().getInteger(NUM_COLUMNS_ID);
         mAccessibilityDelegate = new TileAdapterDelegate();
         mSizeLookup.setSpanIndexCacheEnabled(true);
+        mTempTextView = new TextView(context);
+        mMinTileViewHeight = context.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
     }
 
     @Override
@@ -318,6 +325,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     @Override
     public void onBindViewHolder(final Holder holder, int position) {
+        if (holder.mTileView != null) {
+            holder.mTileView.setMinimumHeight(mMinTileViewHeight);
+        }
+
         if (holder.getItemViewType() == TYPE_HEADER) {
             setSelectableForHeaders(holder.itemView);
             return;
@@ -859,5 +870,20 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 + res.getDimensionPixelSize(R.dimen.qs_brightness_margin_bottom)
                 - buttonMinWidth
                 - res.getDimensionPixelSize(R.dimen.qs_tile_margin_top_bottom);
+    }
+
+    /**
+     * Re-estimate the tile view height based under current font scaling. Like
+     * {@link TileLayout#estimateCellHeight()}, the tile view height would be estimated with 2
+     * labels as general case.
+     */
+    public void reloadTileHeight() {
+        final int minHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
+        FontSizeUtils.updateFontSize(mTempTextView, R.dimen.qs_tile_text_size);
+        int unspecifiedSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        mTempTextView.measure(unspecifiedSpec, unspecifiedSpec);
+        int padding = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_padding);
+        int estimatedTileViewHeight = mTempTextView.getMeasuredHeight() * 2 + padding * 2;
+        mMinTileViewHeight = Math.max(minHeight, estimatedTileViewHeight);
     }
 }

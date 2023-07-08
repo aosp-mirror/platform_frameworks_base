@@ -683,11 +683,11 @@
     <string name="face_acquired_too_close" msgid="4453646176196302462">"צריך להרחיק את הטלפון"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"צריך לקרב את הטלפון"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"צריך להגביה את הטלפון"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"צריך להוריד את הטלפון"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"צריך להנמיך את הטלפון."</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"צריך להזיז את הטלפון שמאלה"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"צריך להזיז את הטלפון ימינה"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"יש להביט ישירות אל המכשיר."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"אי אפשר לראות את הפנים שלך. יש להחזיק את הטלפון בגובה העיניים."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"לא רואים את הפנים שלך. יש להחזיק את הטלפון בגובה העיניים."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"יש לסרוק שוב את הפנים."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"לא ניתן לזהות את הפנים. יש לנסות שוב."</string>
@@ -703,7 +703,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"לא ניתן ליצור את התבנית לזיהוי הפנים. יש לנסות שוב."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"זוהו משקפיים כהים. הפנים שלך חייבות להיות גלויות לגמרי."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"זוהה כיסוי על הפנים. הפנים שלך חייבות להיות גלויות לגמרי."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"זוהה שהפנים מכוסות. הפנים שלך חייבות להיות גלויות לגמרי."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"לא ניתן לאמת את הפנים. החומרה לא זמינה."</string>
@@ -1258,7 +1258,7 @@
     <string name="android_upgrading_complete" msgid="409800058018374746">"תהליך האתחול בשלבי סיום."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"לחצת על לחצן ההפעלה – בדרך כלל הפעולה הזו מכבה את המסך.\n\nעליך לנסות להקיש בעדינות במהלך ההגדרה של טביעת האצבע שלך."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"לסיום ההגדרה, יש לכבות את המסך"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"השבתה"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"כיבוי"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"להמשיך לאמת את טביעת האצבע שלך?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"לחצת על לחצן ההפעלה – בדרך כלל הפעולה הזו מכבה את המסך.\n\nעליך לנסות להקיש בעדינות כדי לאמת את טביעת האצבע שלך."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"כיבוי המסך"</string>
@@ -1366,7 +1366,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"‏MIDI באמצעות USB מופעל"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"המכשיר מחובר כמצלמת אינטרנט"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"‏אביזר USB מחובר"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"יש להקיש להצגת אפשרויות נוספות."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"לאפשרויות נוספות, יש להקיש כאן."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"המכשיר המחובר בטעינה. יש להקיש לאפשרויות נוספות."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"המכשיר זיהה התקן אודיו אנלוגי"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ההתקן שחיברת לא תואם לטלפון הזה. יש להקיש לקבלת מידע נוסף."</string>
@@ -1696,8 +1696,8 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"לא להפעיל"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"מופעל"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"כבוי"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"להעניק לשירות <xliff:g id="SERVICE">%1$s</xliff:g> שליטה מלאה במכשיר?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"האפשרות לשליטה מלאה במכשיר לא מתאימה לכל האפליקציות, אלא רק לאפליקציות שעוזרות עם צורכי הנגישות שלך."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"להעניק לשירות \'<xliff:g id="SERVICE">%1$s</xliff:g>\' שליטה מלאה במכשיר?"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"האפשרות לשליטה מלאה במכשיר לא מתאימה לרוב האפליקציות, אלא רק לאפליקציות שעוזרות עם צורכי הנגישות שלך."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"הצגת המסך ושליטה בו"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"אפשרות לקריאת כל התוכן במסך ולהצגת התוכן מעל אפליקציות אחרות."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"הצגה וביצוע של פעולות"</string>
@@ -1851,7 +1851,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"כדי לצאת, פשוט מחליקים אצבע מלמעלה למטה."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"הבנתי"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"מסובבים כדי לראות טוב יותר"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"צריך לצאת מהמסך המפוצל כדי לראות טוב יותר"</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"צריך לפתוח את <xliff:g id="NAME">%s</xliff:g> במסך מלא כדי לראות טוב יותר"</string>
     <string name="done_label" msgid="7283767013231718521">"סיום"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"מחוון שעות מעגלי"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"מחוון דקות מעגלי"</string>
@@ -1976,6 +1976,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"אי אפשר לגשת להגדרה הזו במכשיר <xliff:g id="DEVICE">%1$s</xliff:g>. במקום זאת, אפשר לנסות בטלפון."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"‏האפליקציה הזו תוכננה לגרסה ישנה יותר של Android. האפליקציה לא כוללת את אמצעי ההגנה האחרונים לאבטחה ופרטיות, ועלולה לא לעבוד כראוי. כדאי לבדוק אם יש עדכון או ליצור קשר עם מפתח האפליקציה."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"יש עדכון חדש?"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"‏האפליקציה הזו לא תואמת לגרסה העדכנית של Android. כדאי לבדוק אם יש עדכון או ליצור קשר עם מפתחי האפליקציה."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"יש לך הודעות חדשות"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"‏יש לפתוח את אפליקציית ה-SMS כדי להציג"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"ייתכן שחלק מהפונקציונליות תהיה מוגבלת"</string>

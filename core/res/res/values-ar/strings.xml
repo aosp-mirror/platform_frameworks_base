@@ -1220,7 +1220,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"يستمر التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> في التوقف."</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"تستمر عملية <xliff:g id="PROCESS">%1$s</xliff:g> في التوقف."</string>
     <string name="aerr_restart" msgid="2789618625210505419">"فتح التطبيق مرة أخرى"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"إرسال تعليقات"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"إرسال ملاحظات"</string>
     <string name="aerr_close" msgid="3398336821267021852">"إغلاق"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"كتم الصوت حتى إعادة تشغيل الجهاز"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"انتظار"</string>
@@ -1854,7 +1854,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"للخروج، مرر بسرعة من أعلى إلى أسفل."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"حسنًا"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"يمكنك تدوير الجهاز لرؤية شاشة معاينة الكاميرا بشكل أوضح."</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"يمكنك الخروج من وضع \"تقسيم الشاشة\" لرؤية شاشة معاينة الكاميرا بشكل أوضح."</string>
+    <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"عليك فتح \"<xliff:g id="NAME">%s</xliff:g>\" في وضع ملء الشاشة لرؤية شاشة معاينة الكاميرا بشكل أوضح."</string>
     <string name="done_label" msgid="7283767013231718521">"تم"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"شريط التمرير الدائري للساعات"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"شريط التمرير الدائري للدقائق"</string>
@@ -1979,6 +1979,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"لا يمكن الوصول إلى هذه الإعدادات على <xliff:g id="DEVICE">%1$s</xliff:g>. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"‏تم إنشاء هذا التطبيق لإصدار قديم من Android. قد لا يعمل بشكل صحيح كما أنه لا يشتمِل على أحدث الإجراءات لحماية الأمان والخصوصية. ابحث عن تحديث أو تواصَل مع مطوّر التطبيق."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"البحث عن تحديث"</string>
+    <string name="deprecated_abi_message" msgid="6820548011196218091">"‏هذا التطبيق غير متوافق مع أحدث إصدار من Android. ابحث عن تحديث أو تواصَل مع مطوّر التطبيق."</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"لديك رسائل جديدة"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"‏فتح تطبيق الرسائل القصيرة SMS للعرض"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"قد تكون بعض الوظائف مُقيّدة."</string>

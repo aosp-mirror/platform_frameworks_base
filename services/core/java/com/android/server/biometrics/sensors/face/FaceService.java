@@ -415,6 +415,11 @@ public class FaceService extends SystemService {
                         }
                     }
                 }
+
+                @Override
+                public void onError(int error, int vendorCode) throws RemoteException {
+                    receiver.onError(error, vendorCode);
+                }
             };
 
             // This effectively iterates through all sensors, but has to do so by finding all

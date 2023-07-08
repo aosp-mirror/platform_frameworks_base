@@ -142,8 +142,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Tvár bola overená"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Potvrdené"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Overenie dokončíte klepnutím na Potvrdiť"</string>
-    <!-- no translation found for biometric_dialog_tap_confirm_with_face (3783056044917913453) -->
-    <skip />
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Odomknuté tvárou"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Odomknuté tvárou. Pokračujte stlačením."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Tvár bola rozpoznaná. Pokračujte stlačením."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Tvár bola rozpoznaná. Pokračujte stlačením ikony odomknutia"</string>
@@ -400,7 +399,7 @@
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Služba poskytujúca túto funkciu bude mať prístup k všetkým informáciám zobrazovaným na obrazovke alebo prehrávaným v zariadení počas nahrávania či prenosu. Patria medzi ne informácie, ako sú heslá, platobné údaje, fotky, správy a prehrávaný zvuk."</string>
     <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Celá obrazovka"</string>
     <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Jedna aplikácia"</string>
-    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Aplikácia na zdieľanie alebo nahrávanie"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Vyberte aplikáciu, ktorú chcete zdieľať alebo nahrávať"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Chcete spustiť nahrávanie alebo prenos s aktivovaným povolením <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Počas zdieľania, nahrávania alebo prenosu bude mať <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> prístup k všetkému, čo sa zobrazuje na obrazovke alebo prehráva v zariadení. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Počas zdieľania, nahrávania alebo prenosu v aplikácii bude mať <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> prístup k všetkému, čo sa v danej aplikácii zobrazuje alebo prehráva. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
@@ -721,7 +720,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ľavá ikona"</string>
     <string name="right_icon" msgid="1103955040645237425">"Pravá ikona"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Pridržaním a presunutím pridáte karty"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Dlaždice môžete usporiadať pridržaním a presunutím"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Karty môžete usporiadať pridržaním a presunutím"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Presunutím sem odstránite"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Minimálny počet vyžadovaných dlaždíc: <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Upraviť"</string>
@@ -1004,7 +1003,7 @@
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Nedá sa uložiť. Skúste to znova."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Nedá sa uložiť."</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Použite aspoň štyri znaky"</string>
-    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Použite menej než 16 znakov"</string>
+    <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Použite menej znakov než <xliff:g id="LENGTH">%1$d</xliff:g>"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Číslo zostavy"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Číslo zostavy bolo skopírované do schránky."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvorená konverzácia"</string>
@@ -1124,12 +1123,12 @@
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Ďalšie informácie"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Viac sa dozviete na <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Otvoriť <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Aplikácia je nastavená"</string>
-    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Do Peňaženky bola pridaná minimálne jedna karta"</string>
-    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Nainštalujte si aplikáciu kamery"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikácia je nastavená"</string>
-    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• K dispozícii je minimálne jedno zariadenie"</string>
-    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Vyberte predvolenú aplikáciu na písanie poznámok, ku ktorej priradíte skratku pre poznámky"</string>
+    <string name="wallet_quick_affordance_unavailable_install_the_app" msgid="7298552910007208368">"Ak chcete pridať aplikáciu Peňaženka ako odkaz, uistite sa, že je nainštalovaná"</string>
+    <string name="wallet_quick_affordance_unavailable_configure_the_app" msgid="4387433357429873258">"Ak chcete pridať aplikáciu Peňaženka ako odkaz, uistite sa, že bola pridaná aspoň jedna karta"</string>
+    <string name="qr_scanner_quick_affordance_unavailable_explanation" msgid="3049582306241150946">"Ak chcete pridať skener QR kódov ako odkaz, uistite, že je nainštalovaná aplikácia fotoaparátu"</string>
+    <string name="home_quick_affordance_unavailable_install_the_app" msgid="6187820778998446168">"Ak chcete pridať aplikáciu Home ako odkaz, uistite sa, že je nainštalovaná"</string>
+    <string name="home_quick_affordance_unavailable_configure_the_app" msgid="7953595390775156839">"• K dispozícii je minimálne jedno zariadenie"</string>
+    <string name="notes_app_quick_affordance_unavailable_explanation" msgid="4796955161600178530">"Ak chcete používať odkaz na písanie poznámok, vyberte predvolenú aplikáciu na písanie poznámok"</string>
     <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Výber aplikácie"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pridržte skratku"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Zrušiť"</string>
@@ -1158,4 +1157,5 @@
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Režim priority je zapnutý"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Pozornosť Asistenta je zapnutá"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Nastavte predvolenú aplikáciu na poznámky v Nastaveniach"</string>
+    <string name="install_app" msgid="5066668100199613936">"Inštalovať aplikáciu"</string>
 </resources>

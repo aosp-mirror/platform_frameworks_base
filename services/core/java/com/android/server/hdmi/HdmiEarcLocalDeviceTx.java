@@ -42,6 +42,12 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
     // How long to wait for the audio system to report its capabilities after eARC was connected
     static final long REPORT_CAPS_MAX_DELAY_MS = 2_000;
 
+    // Array containing the names of the eARC states. The integer value of the eARC state
+    // corresponds to the index in the array.
+    private static final String earcStatusNames[] = {"HDMI_EARC_STATUS_IDLE",
+            "HDMI_EARC_STATUS_EARC_PENDING", "HDMI_EARC_STATUS_ARC_PENDING",
+            "HDMI_EARC_STATUS_EARC_CONNECTED"};
+
     // eARC Capability Data Structure parameters
     private static final int EARC_CAPS_PAYLOAD_LENGTH = 0x02;
     private static final int EARC_CAPS_DATA_START = 0x03;
@@ -75,11 +81,17 @@ public class HdmiEarcLocalDeviceTx extends HdmiEarcLocalDevice {
         mReportCapsRunnable = new ReportCapsRunnable();
     }
 
+    private String earcStatusToString(int status) {
+        return earcStatusNames[status];
+    }
+
     protected void handleEarcStateChange(@Constants.EarcStatus int status) {
         int oldEarcStatus;
+
         synchronized (mLock) {
-            HdmiLogger.debug("eARC state change [old:%b new %b]", mEarcStatus,
-                    status);
+            HdmiLogger.debug("eARC state change [old: %s(%d) new: %s(%d)]",
+                    earcStatusToString(mEarcStatus), mEarcStatus,
+                    earcStatusToString(status), status);
             oldEarcStatus = mEarcStatus;
             mEarcStatus = status;
         }

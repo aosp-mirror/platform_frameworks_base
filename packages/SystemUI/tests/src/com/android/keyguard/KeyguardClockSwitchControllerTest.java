@@ -408,4 +408,18 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 any(ClockRegistry.ClockChangeListener.class));
         verify(mClockEventController, times).registerListeners(mView);
     }
+
+    @Test
+    public void testSplitShadeEnabledSetToSmartspaceController() {
+        mController.setSplitShadeEnabled(true);
+        verify(mSmartspaceController, times(1)).setSplitShadeEnabled(true);
+        verify(mSmartspaceController, times(0)).setSplitShadeEnabled(false);
+    }
+
+    @Test
+    public void testSplitShadeDisabledSetToSmartspaceController() {
+        mController.setSplitShadeEnabled(false);
+        verify(mSmartspaceController, times(1)).setSplitShadeEnabled(false);
+        verify(mSmartspaceController, times(0)).setSplitShadeEnabled(true);
+    }
 }

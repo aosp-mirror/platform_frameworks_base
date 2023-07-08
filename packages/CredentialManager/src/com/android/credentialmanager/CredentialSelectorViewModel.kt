@@ -118,8 +118,10 @@ class CredentialSelectorViewModel(
         if (entry != null && entry.pendingIntent != null) {
             Log.d(Constants.LOG_TAG, "Launching provider activity")
             uiState = uiState.copy(providerActivityState = ProviderActivityState.PENDING)
+            val entryIntent = entry.fillInIntent
+            entryIntent?.putExtra(Constants.IS_AUTO_SELECTED_KEY, uiState.isAutoSelectFlow)
             val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
-                .setFillInIntent(entry.fillInIntent).build()
+                .setFillInIntent(entryIntent).build()
             try {
                 launcher.launch(intentSenderRequest)
             } catch (e: Exception) {

@@ -52,19 +52,16 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class ExitPipToAppViaIntentTest(flicker: FlickerTest) : ExitPipToAppTransition(flicker) {
-
-    /** Defines the transition used to run the test */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition {
-            setup {
-                // launch an app behind the pip one
-                testApp.launchViaIntent(wmHelper)
-            }
-            transitions {
-                // This will bring PipApp to fullscreen
-                pipApp.exitPipToFullScreenViaIntent(wmHelper)
-                // Wait until the other app is no longer visible
-                wmHelper.StateSyncBuilder().withWindowSurfaceDisappeared(testApp).waitForAndVerify()
-            }
+    override val thisTransition: FlickerBuilder.() -> Unit = {
+        setup {
+            // launch an app behind the pip one
+            testApp.launchViaIntent(wmHelper)
         }
+        transitions {
+            // This will bring PipApp to fullscreen
+            pipApp.exitPipToFullScreenViaIntent(wmHelper)
+            // Wait until the other app is no longer visible
+            wmHelper.StateSyncBuilder().withWindowSurfaceDisappeared(testApp).waitForAndVerify()
+        }
+    }
 }

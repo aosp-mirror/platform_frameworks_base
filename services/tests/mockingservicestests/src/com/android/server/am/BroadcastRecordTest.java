@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_LOCKED_BOOT_COMPLETED;
@@ -958,7 +959,8 @@ public class BroadcastRecordTest {
                 userId,
                 BackgroundStartPrivileges.NONE,
                 false /* timeoutExempt */,
-                filterExtrasForReceiver);
+                filterExtrasForReceiver,
+                PROCESS_STATE_UNKNOWN);
     }
 
     private static int getAppId(int i) {

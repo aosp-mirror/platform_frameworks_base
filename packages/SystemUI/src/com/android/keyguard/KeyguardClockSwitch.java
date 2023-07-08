@@ -1,7 +1,13 @@
 package com.android.keyguard;
 
 import static android.view.View.ALPHA;
+import static android.view.View.SCALE_X;
+import static android.view.View.SCALE_Y;
 import static android.view.View.TRANSLATION_Y;
+
+import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_X_CLOCK_DESIGN;
+import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_Y_CLOCK_DESIGN;
+import static com.android.keyguard.KeyguardStatusAreaView.TRANSLATE_Y_CLOCK_SIZE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -17,6 +23,7 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.android.app.animation.Interpolators;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
@@ -44,6 +51,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private static final long STATUS_AREA_START_DELAY_MILLIS = 0;
     private static final long STATUS_AREA_MOVE_UP_MILLIS = 967;
     private static final long STATUS_AREA_MOVE_DOWN_MILLIS = 467;
+    private static final float SMARTSPACE_TRANSLATION_CENTER_MULTIPLIER = 1.4f;
 
     @IntDef({LARGE, SMALL})
     @Retention(RetentionPolicy.SOURCE)
@@ -88,14 +96,18 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private KeyguardClockFrame mLargeClockFrame;
     private ClockController mClock;
 
-    private View mStatusArea;
+    private KeyguardStatusAreaView mStatusArea;
     private int mSmartspaceTopOffset;
+    private float mWeatherClockSmartspaceScaling = 1f;
+    private int mWeatherClockSmartspaceTranslateX = 0;
+    private int mWeatherClockSmartspaceTranslateY = 0;
     private int mDrawAlpha = 255;
 
     /**
      * Maintain state so that a newly connected plugin can be initialized.
      */
     private float mDarkAmount;
+    private boolean mSplitShadeCentered = false;
 
     /**
      * Indicates which clock is currently displayed - should be one of {@link ClockSize}.
@@ -105,7 +117,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     @VisibleForTesting AnimatorSet mClockInAnim = null;
     @VisibleForTesting AnimatorSet mClockOutAnim = null;
-    private AnimatorSet mStatusAreaAnim = null;
+    @VisibleForTesting AnimatorSet mStatusAreaAnim = null;
 
     private int mClockSwitchYAmount;
     @VisibleForTesting boolean mChildrenAreLaidOut = false;
@@ -117,13 +129,30 @@ public class KeyguardClockSwitch extends RelativeLayout {
     }
 
     /**
-     * Apply dp changes on font/scale change
+     * Apply dp changes on configuration change
      */
-    public void onDensityOrFontScaleChanged() {
+    public void onConfigChanged() {
         mClockSwitchYAmount = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_clock_switch_y_shift);
         mSmartspaceTopOffset = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_smartspace_top_offset);
+        mWeatherClockSmartspaceScaling = ResourcesCompat.getFloat(
+                mContext.getResources(), R.dimen.weather_clock_smartspace_scale);
+        mWeatherClockSmartspaceTranslateX = mContext.getResources().getDimensionPixelSize(
+                R.dimen.weather_clock_smartspace_translateX);
+        mWeatherClockSmartspaceTranslateY = mContext.getResources().getDimensionPixelSize(
+                R.dimen.weather_clock_smartspace_translateY);
+        updateStatusArea(/* animate= */false);
+    }
+
+    /**
+     * Enable or disable split shade specific positioning
+     */
+    public void setSplitShadeCentered(boolean splitShadeCentered) {
+        if (mSplitShadeCentered != splitShadeCentered) {
+            mSplitShadeCentered = splitShadeCentered;
+            updateStatusArea(/* animate= */true);
+        }
     }
 
     @Override
@@ -134,7 +163,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mLargeClockFrame = findViewById(R.id.lockscreen_clock_view_large);
         mStatusArea = findViewById(R.id.keyguard_status_area);
 
-        onDensityOrFontScaleChanged();
+        onConfigChanged();
     }
 
     @Override
@@ -182,6 +211,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mSmallClockFrame.addView(clock.getSmallClock().getView());
         mLargeClockFrame.addView(clock.getLargeClock().getView());
         updateClockTargetRegions();
+        updateStatusArea(/* animate= */false);
+    }
+
+    private void updateStatusArea(boolean animate) {
+        if (mDisplayedClockSize != null && mChildrenAreLaidOut) {
+            updateClockViews(mDisplayedClockSize == LARGE, animate);
+        }
     }
 
     void updateClockTargetRegions() {
@@ -230,13 +266,25 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mStatusAreaAnim = null;
 
         View in, out;
-        float statusAreaYTranslation, clockInYTranslation, clockOutYTranslation;
+        float statusAreaYTranslation, statusAreaClockScale = 1f;
+        float statusAreaClockTranslateX = 0f, statusAreaClockTranslateY = 0f;
+        float clockInYTranslation, clockOutYTranslation;
         if (useLargeClock) {
             out = mSmallClockFrame;
             in = mLargeClockFrame;
             if (indexOfChild(in) == -1) addView(in, 0);
             statusAreaYTranslation = mSmallClockFrame.getTop() - mStatusArea.getTop()
                     + mSmartspaceTopOffset;
+            // TODO: Load from clock config when less risky
+            if (mClock != null
+                    && mClock.getLargeClock().getConfig().getHasCustomWeatherDataDisplay()) {
+                statusAreaClockScale = mWeatherClockSmartspaceScaling;
+                statusAreaClockTranslateX = mWeatherClockSmartspaceTranslateX;
+                statusAreaClockTranslateY = mWeatherClockSmartspaceTranslateY;
+                if (mSplitShadeCentered) {
+                    statusAreaClockTranslateX *= SMARTSPACE_TRANSLATION_CENTER_MULTIPLIER;
+                }
+            }
             clockInYTranslation = 0;
             clockOutYTranslation = 0; // Small clock translation is handled with statusArea
         } else {
@@ -258,7 +306,12 @@ public class KeyguardClockSwitch extends RelativeLayout {
             in.setAlpha(1f);
             in.setTranslationY(clockInYTranslation);
             in.setVisibility(View.VISIBLE);
-            mStatusArea.setTranslationY(statusAreaYTranslation);
+            mStatusArea.setScaleX(statusAreaClockScale);
+            mStatusArea.setScaleY(statusAreaClockScale);
+            mStatusArea.setTranslateXFromClockDesign(statusAreaClockTranslateX);
+            mStatusArea.setTranslateYFromClockDesign(statusAreaClockTranslateY);
+            mStatusArea.setTranslateYFromClockSize(statusAreaYTranslation);
+            mSmallClockFrame.setTranslationY(statusAreaYTranslation);
             return;
         }
 
@@ -295,8 +348,15 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 useLargeClock ? STATUS_AREA_MOVE_UP_MILLIS : STATUS_AREA_MOVE_DOWN_MILLIS);
         mStatusAreaAnim.setInterpolator(Interpolators.EMPHASIZED);
         mStatusAreaAnim.playTogether(
-                ObjectAnimator.ofFloat(mStatusArea, TRANSLATION_Y, statusAreaYTranslation),
-                ObjectAnimator.ofFloat(mSmallClockFrame, TRANSLATION_Y, statusAreaYTranslation));
+                ObjectAnimator.ofFloat(mStatusArea, TRANSLATE_Y_CLOCK_SIZE.getProperty(),
+                        statusAreaYTranslation),
+                ObjectAnimator.ofFloat(mSmallClockFrame, TRANSLATION_Y, statusAreaYTranslation),
+                ObjectAnimator.ofFloat(mStatusArea, SCALE_X, statusAreaClockScale),
+                ObjectAnimator.ofFloat(mStatusArea, SCALE_Y, statusAreaClockScale),
+                ObjectAnimator.ofFloat(mStatusArea, TRANSLATE_X_CLOCK_DESIGN.getProperty(),
+                        statusAreaClockTranslateX),
+                ObjectAnimator.ofFloat(mStatusArea, TRANSLATE_Y_CLOCK_DESIGN.getProperty(),
+                        statusAreaClockTranslateY));
         mStatusAreaAnim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
                 mStatusAreaAnim = null;

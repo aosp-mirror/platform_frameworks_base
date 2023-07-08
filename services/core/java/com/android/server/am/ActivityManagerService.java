@@ -1176,20 +1176,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         public Intent intent;
         public boolean deferUntilActive;
         public int originalCallingUid;
+        /** The snapshot process state of the app who sent this broadcast */
+        public int originalCallingAppProcessState;
 
         public static StickyBroadcast create(Intent intent, boolean deferUntilActive,
-                int originalCallingUid) {
+                int originalCallingUid, int originalCallingAppProcessState) {
             final StickyBroadcast b = new StickyBroadcast();
             b.intent = intent;
             b.deferUntilActive = deferUntilActive;
             b.originalCallingUid = originalCallingUid;
+            b.originalCallingAppProcessState = originalCallingAppProcessState;
             return b;
         }
 
         @Override
         public String toString() {
             return "{intent=" + intent + ", defer=" + deferUntilActive + ", originalCallingUid="
-                    + originalCallingUid + "}";
+                    + originalCallingUid + ", originalCallingAppProcessState="
+                    + originalCallingAppProcessState + "}";
         }
     }
 
@@ -1489,12 +1493,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
         static final int CHANGE_FOREGROUND_SERVICES = 1<<1;
-        static final int CHANGE_CAPABILITY = 1<<2;
         int changes;
         int uid;
         int pid;
         int processState;
-        int capability;
         boolean foregroundActivities;
         int foregroundServiceTypes;
     }
@@ -1523,6 +1525,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Current boot phase.
      */
     int mBootPhase;
+
+    volatile boolean mDeterministicUidIdle = false;
 
     @VisibleForTesting
     public WindowManagerService mWindowManager;
@@ -1618,6 +1622,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int SERVICE_SHORT_FGS_PROCSTATE_TIMEOUT_MSG = 77;
     static final int SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG = 78;
     static final int UPDATE_CACHED_APP_HIGH_WATERMARK = 79;
+    static final int ADD_UID_TO_OBSERVER_MSG = 80;
+    static final int REMOVE_UID_FROM_OBSERVER_MSG = 81;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1775,6 +1781,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } break;
                 case PUSH_TEMP_ALLOWLIST_UI_MSG: {
                     pushTempAllowlist();
+                } break;
+                case ADD_UID_TO_OBSERVER_MSG: {
+                    mUidObserverController.addUidToObserverImpl((IBinder) msg.obj, msg.arg1);
+                } break;
+                case REMOVE_UID_FROM_OBSERVER_MSG: {
+                    mUidObserverController.removeUidFromObserverImpl((IBinder) msg.obj, msg.arg1);
                 } break;
             }
         }
@@ -3393,7 +3405,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mProcessList.noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
                         ApplicationExitInfo.SUBREASON_UNKNOWN, reason);
             }
-            ProcessList.killProcessGroup(app.uid, pid);
+            app.killProcessGroupIfNecessaryLocked(true);
             synchronized (mProcLock) {
                 app.setKilled(true);
             }
@@ -4854,7 +4866,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     checkTime(startTime, "finishAttachApplicationInner: "
                             + "after dispatching broadcasts");
-                } catch (Exception e) {
+                } catch (BroadcastDeliveryFailedException e) {
                     // If the app died trying to launch the receiver we declare it 'bad'
                     Slog.wtf(TAG, "Exception thrown dispatching broadcasts in " + app, e);
                     badApp = true;
@@ -13787,7 +13799,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (action.startsWith("android.intent.action.USER_")
                                 || action.startsWith("android.intent.action.PACKAGE_")
                                 || action.startsWith("android.intent.action.UID_")
-                                || action.startsWith("android.intent.action.EXTERNAL_")) {
+                                || action.startsWith("android.intent.action.EXTERNAL_")
+                                || action.startsWith("android.bluetooth.")) {
                             if (DEBUG_BROADCAST) {
                                 Slog.wtf(TAG,
                                         "System internals registering for " + filter.toLongString()
@@ -14035,7 +14048,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             receivers, null, null, 0, null, null, false, true, true, -1,
                             originalStickyCallingUid, BackgroundStartPrivileges.NONE,
                             false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */,
-                            null /* filterExtrasForReceiver */);
+                            null /* filterExtrasForReceiver */,
+                            broadcast.originalCallingAppProcessState);
                     queue.enqueueBroadcastLocked(r);
                 }
             }
@@ -14435,6 +14449,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     && !Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
                 Slog.w(TAG, "Skipping broadcast of " + intent
                         + ": user " + userId + " and its parent (if any) are stopped");
+                scheduleCanceledResultTo(resultToApp, resultTo, intent, userId,
+                        brOptions, callingUid, callerPackage);
                 return ActivityManager.BROADCAST_FAILED_USER_STOPPED;
             }
         }
@@ -14506,6 +14522,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             isProtectedBroadcast = AppGlobals.getPackageManager().isProtectedBroadcast(action);
         } catch (RemoteException e) {
             Slog.w(TAG, "Remote exception", e);
+            scheduleCanceledResultTo(resultToApp, resultTo, intent,
+                    userId, brOptions, callingUid, callerPackage);
             return ActivityManager.BROADCAST_SUCCESS;
         }
 
@@ -14739,6 +14757,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (aInfo == null) {
                             Slog.w(TAG, "Dropping ACTION_PACKAGE_REPLACED for non-existent pkg:"
                                     + " ssp=" + ssp + " data=" + data);
+                            scheduleCanceledResultTo(resultToApp, resultTo, intent,
+                                    userId, brOptions, callingUid, callerPackage);
                             return ActivityManager.BROADCAST_SUCCESS;
                         }
                         updateAssociationForApp(aInfo);
@@ -14824,6 +14844,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Apps should now be using ShortcutManager.pinRequestShortcut().
                     Log.w(TAG, "Broadcast " + action
                             + " no longer supported. It will not be delivered.");
+                    scheduleCanceledResultTo(resultToApp, resultTo, intent,
+                            userId, brOptions, callingUid, callerPackage);
                     return ActivityManager.BROADCAST_SUCCESS;
                 case Intent.ACTION_PRE_BOOT_COMPLETED:
                     timeoutExempt = true;
@@ -14831,6 +14853,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case Intent.ACTION_CLOSE_SYSTEM_DIALOGS:
                     if (!mAtmInternal.checkCanCloseSystemDialogs(callingPid, callingUid,
                             callerPackage)) {
+                        scheduleCanceledResultTo(resultToApp, resultTo, intent,
+                                userId, brOptions, callingUid, callerPackage);
                         // Returning success seems to be the pattern here
                         return ActivityManager.BROADCAST_SUCCESS;
                     }
@@ -14850,6 +14874,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        final int callerAppProcessState = getRealProcessStateLocked(callerApp, realCallingPid);
         // Add to the sticky list if requested.
         if (sticky) {
             if (checkPermission(android.Manifest.permission.BROADCAST_STICKY,
@@ -14864,6 +14889,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (requiredPermissions != null && requiredPermissions.length > 0) {
                 Slog.w(TAG, "Can't broadcast sticky intent " + intent
                         + " and enforce permissions " + Arrays.toString(requiredPermissions));
+                scheduleCanceledResultTo(resultToApp, resultTo, intent,
+                        userId, brOptions, callingUid, callerPackage);
                 return ActivityManager.BROADCAST_STICKY_CANT_HAVE_PERMISSION;
             }
             if (intent.getComponent() != null) {
@@ -14912,12 +14939,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (intent.filterEquals(list.get(i).intent)) {
                     // This sticky already exists, replace it.
                     list.set(i, StickyBroadcast.create(new Intent(intent), deferUntilActive,
-                            callingUid));
+                            callingUid, callerAppProcessState));
                     break;
                 }
             }
             if (i >= stickiesCount) {
-                list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive, callingUid));
+                list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive, callingUid,
+                        callerAppProcessState));
             }
         }
 
@@ -15000,7 +15028,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
                     registeredReceivers, resultToApp, resultTo, resultCode, resultData,
                     resultExtras, ordered, sticky, false, userId,
-                    backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver);
+                    backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
+                    callerAppProcessState);
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing parallel broadcast " + r);
             queue.enqueueBroadcastLocked(r);
             registeredReceivers = null;
@@ -15094,7 +15123,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     requiredPermissions, excludedPermissions, excludedPackages, appOp, brOptions,
                     receivers, resultToApp, resultTo, resultCode, resultData, resultExtras,
                     ordered, sticky, false, userId,
-                    backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver);
+                    backgroundStartPrivileges, timeoutExempt, filterExtrasForReceiver,
+                    callerAppProcessState);
 
             if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Enqueueing ordered broadcast " + r);
             queue.enqueueBroadcastLocked(r);
@@ -15109,6 +15139,46 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return ActivityManager.BROADCAST_SUCCESS;
+    }
+
+    @GuardedBy("this")
+    private void scheduleCanceledResultTo(ProcessRecord resultToApp, IIntentReceiver resultTo,
+            Intent intent, int userId, BroadcastOptions options, int callingUid,
+            String callingPackage) {
+        if (resultTo == null) {
+            return;
+        }
+        final ProcessRecord app = resultToApp;
+        final IApplicationThread thread  = (app != null) ? app.getOnewayThread() : null;
+        if (thread != null) {
+            try {
+                final boolean shareIdentity = (options != null && options.isShareIdentityEnabled());
+                thread.scheduleRegisteredReceiver(
+                        resultTo, intent, Activity.RESULT_CANCELED, null, null,
+                        false, false, true, userId, app.mState.getReportedProcState(),
+                        shareIdentity ? callingUid : Process.INVALID_UID,
+                        shareIdentity ? callingPackage : null);
+            } catch (RemoteException e) {
+                final String msg = "Failed to schedule result of " + intent + " via "
+                        + app + ": " + e;
+                app.killLocked("Can't schedule resultTo", ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
+                Slog.d(TAG, msg);
+            }
+        }
+    }
+
+    @GuardedBy("this")
+    private int getRealProcessStateLocked(ProcessRecord app, int pid) {
+        if (app == null) {
+            synchronized (mPidsSelfLocked) {
+                app = mPidsSelfLocked.get(pid);
+            }
+        }
+        if (app != null && app.getThread() != null && !app.isKilled()) {
+            return app.mState.getCurProcState();
+        }
+        return PROCESS_STATE_NONEXISTENT;
     }
 
     @VisibleForTesting
@@ -16465,6 +16535,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
+    public void setDeterministicUidIdle(boolean deterministic) {
+        mDeterministicUidIdle = deterministic;
+    }
+
     /** Make the currently active UIDs idle after a certain grace period. */
     final void idleUids() {
         synchronized (this) {
@@ -17233,6 +17308,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } catch (IOException e) {
                 }
             }
+        }
+    }
+
+    void onProcessFreezableChangedLocked(ProcessRecord app) {
+        if (mEnableModernQueue) {
+            mBroadcastQueues[0].onProcessFreezableChangedLocked(app);
         }
     }
 
@@ -18947,25 +19028,27 @@ public class ActivityManagerService extends IActivityManager.Stub
         // too quickly in parallel below
         pingCount.incrementAndGet();
 
-        synchronized (mProcLock) {
-            final ArrayMap<String, SparseArray<ProcessRecord>> pmap =
-                    mProcessList.getProcessNamesLOSP().getMap();
-            final int numProc = pmap.size();
-            for (int iProc = 0; iProc < numProc; iProc++) {
-                final SparseArray<ProcessRecord> apps = pmap.valueAt(iProc);
-                for (int iApp = 0, numApps = apps.size(); iApp < numApps; iApp++) {
-                    final ProcessRecord app = apps.valueAt(iApp);
-                    final IApplicationThread thread = app.getOnewayThread();
-                    if (thread != null) {
-                        mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
-                                CachedAppOptimizer.UNFREEZE_REASON_PING);
-                        pingCount.incrementAndGet();
-                        try {
-                            thread.schedulePing(pongCallback);
-                        } catch (RemoteException ignored) {
-                            // When we failed to ping remote process, pretend as
-                            // if we received the expected pong
-                            pongCallback.sendResult(null);
+        synchronized (ActivityManagerService.this) {
+            synchronized (mProcLock) {
+                final ArrayMap<String, SparseArray<ProcessRecord>> pmap =
+                        mProcessList.getProcessNamesLOSP().getMap();
+                final int numProc = pmap.size();
+                for (int iProc = 0; iProc < numProc; iProc++) {
+                    final SparseArray<ProcessRecord> apps = pmap.valueAt(iProc);
+                    for (int iApp = 0, numApps = apps.size(); iApp < numApps; iApp++) {
+                        final ProcessRecord app = apps.valueAt(iApp);
+                        final IApplicationThread thread = app.getOnewayThread();
+                        if (thread != null) {
+                            mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
+                                    CachedAppOptimizer.UNFREEZE_REASON_PING);
+                            pingCount.incrementAndGet();
+                            try {
+                                thread.schedulePing(pongCallback);
+                            } catch (RemoteException ignored) {
+                                // When we failed to ping remote process, pretend as
+                                // if we received the expected pong
+                                pongCallback.sendResult(null);
+                            }
                         }
                     }
                 }

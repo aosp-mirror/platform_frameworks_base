@@ -2116,7 +2116,6 @@
   <java-symbol type="string" name="data_usage_rapid_body" />
   <java-symbol type="string" name="data_usage_rapid_app_body" />
   <java-symbol type="string" name="default_wallpaper_component" />
-  <java-symbol type="array" name="cmf_default_wallpaper_component" />
   <java-symbol type="string" name="device_storage_monitor_notification_channel" />
   <java-symbol type="string" name="dlg_ok" />
   <java-symbol type="string" name="dump_heap_notification" />
@@ -2533,7 +2532,7 @@
   <java-symbol type="string" name="zen_mode_default_events_name" />
   <java-symbol type="string" name="zen_mode_default_every_night_name" />
   <java-symbol type="string" name="display_rotation_camera_compat_toast_after_rotation" />
-  <java-symbol type="string" name="display_rotation_camera_compat_toast_in_split_screen" />
+  <java-symbol type="string" name="display_rotation_camera_compat_toast_in_multi_window" />
   <java-symbol type="array" name="config_system_condition_providers" />
   <java-symbol type="string" name="muted_by" />
   <java-symbol type="string" name="zen_mode_alarm" />

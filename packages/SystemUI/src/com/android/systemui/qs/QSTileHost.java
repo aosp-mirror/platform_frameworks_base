@@ -302,7 +302,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             if (tile != null && (!(tile instanceof CustomTile)
                     || ((CustomTile) tile).getUser() == currentUser)) {
                 if (tile.isAvailable()) {
-                    if (DEBUG) Log.d(TAG, "Adding " + tile);
+                    Log.d(TAG, "Adding " + tile);
                     tile.removeCallbacks();
                     if (!(tile instanceof CustomTile) && mCurrentUser != currentUser) {
                         tile.userSwitch(currentUser);
@@ -421,6 +421,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     // When calling this, you may want to modify mTilesListDirty accordingly.
     @MainThread
     private void saveTilesToSettings(List<String> tileSpecs) {
+        Log.d(TAG, "Saving tiles: " + tileSpecs + " for user: " + mCurrentUser);
         mSecureSettings.putStringForUser(TILES_SETTING, TextUtils.join(",", tileSpecs),
                 null /* tag */, false /* default */, mCurrentUser,
                 true /* overrideable by restore */);
@@ -494,7 +495,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
                 lifecycleManager.flushMessagesAndUnbind();
             }
         }
-        if (DEBUG) Log.d(TAG, "saveCurrentTiles " + newTiles);
+        Log.d(TAG, "saveCurrentTiles " + newTiles);
         mTilesListDirty = true;
         saveTilesToSettings(newTiles);
     }
@@ -565,9 +566,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
 
         if (TextUtils.isEmpty(tileList)) {
             tileList = res.getString(R.string.quick_settings_tiles);
-            if (DEBUG) Log.d(TAG, "Loaded tile specs from default config: " + tileList);
+            Log.d(TAG, "Loaded tile specs from default config: " + tileList);
         } else {
-            if (DEBUG) Log.d(TAG, "Loaded tile specs from setting: " + tileList);
+            Log.d(TAG, "Loaded tile specs from setting: " + tileList);
         }
         final ArrayList<String> tiles = new ArrayList<String>();
         boolean addedDefault = false;
@@ -613,6 +614,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("QSTileHost:");
+        pw.println("tile specs: " + mTileSpecs);
+        pw.println("current user: " + mCurrentUser);
+        pw.println("is dirty: " + mTilesListDirty);
+        pw.println("tiles:");
         mTiles.values().stream().filter(obj -> obj instanceof Dumpable)
                 .forEach(o -> ((Dumpable) o).dump(pw, args));
     }

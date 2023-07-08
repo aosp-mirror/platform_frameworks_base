@@ -950,7 +950,7 @@ public class DisplayRotation {
     }
 
     void freezeRotation(int rotation) {
-        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis()) {
+        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mDisplayContent)) {
             rotation = RotationUtils.reverseRotationDirectionAroundZAxis(rotation);
         }
 
@@ -1225,7 +1225,7 @@ public class DisplayRotation {
         if (mFoldController != null && mFoldController.shouldIgnoreSensorRotation()) {
             sensorRotation = -1;
         }
-        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis()) {
+        if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mDisplayContent)) {
             sensorRotation = RotationUtils.reverseRotationDirectionAroundZAxis(sensorRotation);
         }
         mLastSensorRotation = sensorRotation;
@@ -1730,7 +1730,9 @@ public class DisplayRotation {
     }
 
     /**
-     * Called by the DeviceStateManager callback when the device state changes.
+     * Called by the display manager just before it applied the device state, it is guaranteed
+     * that in case of physical display change the {@link DisplayRotation#physicalDisplayChanged}
+     * method will be invoked *after* this one.
      */
     void foldStateChanged(DeviceStateController.DeviceState deviceState) {
         if (mFoldController != null) {

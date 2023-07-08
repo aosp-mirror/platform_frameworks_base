@@ -669,6 +669,16 @@ class ProcessRecord implements WindowProcessListener {
         return mOnewayThread;
     }
 
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    int getCurProcState() {
+        return mState.getCurProcState();
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    int getSetProcState() {
+        return mState.getSetProcState();
+    }
+
     @GuardedBy({"mService", "mProcLock"})
     public void makeActive(IApplicationThread thread, ProcessStatsService tracker) {
         mProfile.onProcessActive(thread, tracker);
@@ -1192,31 +1202,15 @@ class ProcessRecord implements WindowProcessListener {
                         "Killing " + toShortString() + " (adj " + mState.getSetAdj()
                         + "): " + reason, info.uid);
             }
+            // Since the process is getting killed, reset the freezable related state.
+            mOptRecord.setPendingFreeze(false);
+            mOptRecord.setFrozen(false);
             if (mPid > 0) {
                 mService.mProcessList.noteAppKill(this, reasonCode, subReason, description);
                 EventLog.writeEvent(EventLogTags.AM_KILL,
                         userId, mPid, processName, mState.getSetAdj(), reason);
                 Process.killProcessQuiet(mPid);
-                final boolean killProcessGroup;
-                if (mHostingRecord != null
-                        && (mHostingRecord.usesWebviewZygote() || mHostingRecord.usesAppZygote())) {
-                    synchronized (ProcessRecord.this) {
-                        killProcessGroup = mProcessGroupCreated;
-                        if (!killProcessGroup) {
-                            // The process group hasn't been created, request to skip it.
-                            mSkipProcessGroupCreation = true;
-                        }
-                    }
-                } else {
-                    killProcessGroup = true;
-                }
-                if (killProcessGroup) {
-                    if (asyncKPG) {
-                        ProcessList.killProcessGroup(uid, mPid);
-                    } else {
-                        Process.sendSignalToProcessGroup(uid, mPid, OsConstants.SIGKILL);
-                    }
-                }
+                killProcessGroupIfNecessaryLocked(asyncKPG);
             } else {
                 mPendingStart = false;
             }
@@ -1228,6 +1222,30 @@ class ProcessRecord implements WindowProcessListener {
                 }
             }
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+
+    @GuardedBy("mService")
+    void killProcessGroupIfNecessaryLocked(boolean async) {
+        final boolean killProcessGroup;
+        if (mHostingRecord != null
+                && (mHostingRecord.usesWebviewZygote() || mHostingRecord.usesAppZygote())) {
+            synchronized (ProcessRecord.this) {
+                killProcessGroup = mProcessGroupCreated;
+                if (!killProcessGroup) {
+                    // The process group hasn't been created, request to skip it.
+                    mSkipProcessGroupCreation = true;
+                }
+            }
+        } else {
+            killProcessGroup = true;
+        }
+        if (killProcessGroup) {
+            if (async) {
+                ProcessList.killProcessGroup(uid, mPid);
+            } else {
+                Process.sendSignalToProcessGroup(uid, mPid, OsConstants.SIGKILL);
+            }
         }
     }
 

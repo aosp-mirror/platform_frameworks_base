@@ -356,6 +356,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         });
 
         verify(mockMediaOutputController).releaseSession();
+        verify(mDialogLaunchAnimator).disableAllCurrentDialogsExitAnimations();
     }
 
     @Test
@@ -371,7 +372,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     @NonNull
     private MediaOutputDialog makeTestDialog(MediaOutputController controller) {
         return new MediaOutputDialog(mContext, false, mBroadcastSender,
-                controller, mUiEventLogger);
+                controller, mDialogLaunchAnimator, mUiEventLogger);
     }
 
     private void withTestDialog(MediaOutputController controller, Consumer<MediaOutputDialog> c) {

@@ -79,6 +79,10 @@ class FakeUserRepository : UserRepository {
         return _userSwitcherSettings.value.isSimpleUserSwitcher
     }
 
+    override fun isUserSwitcherEnabled(): Boolean {
+        return _userSwitcherSettings.value.isUserSwitcherEnabled
+    }
+
     fun setUserInfos(infos: List<UserInfo>) {
         _userInfos.value = infos
     }
