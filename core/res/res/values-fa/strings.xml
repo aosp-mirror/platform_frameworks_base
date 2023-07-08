@@ -393,7 +393,7 @@
     <string name="permdesc_killBackgroundProcesses" msgid="2357013583055434685">"به برنامه امکان می‌دهد به فرآیندهای پس‌زمینه سایر برنامه‌ها پایان دهد. این ممکن است باعث شود سایر برنامه‌ها متوقف شوند."</string>
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"این برنامه می‌تواند روی برنامه‌های دیگر ظاهر شود"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"این برنامه می‌تواند روی برنامه‌های دیگر یا سایر قسمت‌های صفحه ظاهر شود. ممکن است در عملکرد معمول برنامه‌های دیگر اختلال ایجاد کند و شیوه نمایش آن‌ها را تغییر دهد."</string>
-    <string name="permlab_hideOverlayWindows" msgid="6382697828482271802">"پنهان کردن هم‌پوشانی برنامه‌های دیگر"</string>
+    <string name="permlab_hideOverlayWindows" msgid="6382697828482271802">"پنهان کردن رونهاد برنامه‌های دیگر"</string>
     <string name="permdesc_hideOverlayWindows" msgid="5660242821651958225">"این برنامه می‌تواند از سیستم بخواهد تا هم‌پوشانی‌های ایجادشده توسط برنامه‌های دیگر را روی برنامه نشان ندهد."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"اجرا شدن در پس‌زمینه"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"این برنامه می‌تواند در پس‌زمینه اجرا شود. ممکن است شارژ باتری زودتر مصرف شود."</string>
@@ -1639,7 +1639,7 @@
     <string name="media_route_status_in_use" msgid="6684112905244944724">"در حال استفاده"</string>
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"صفحه نمایش از خود"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"‏صفحه HDMI"</string>
-    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"هم‌پوشانی #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"رونهاد #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">"، امن"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"الگو را فراموش کرده‌اید"</string>
