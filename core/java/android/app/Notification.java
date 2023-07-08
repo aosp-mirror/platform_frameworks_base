@@ -2171,6 +2171,10 @@ public class Notification implements Parcelable
             }
         }
 
+        private void visitUris(@NonNull Consumer<Uri> visitor) {
+            visitIconUri(visitor, getIcon());
+        }
+
         @Override
         public Action clone() {
             return new Action(
@@ -2858,7 +2862,7 @@ public class Notification implements Parcelable
 
         if (actions != null) {
             for (Action action : actions) {
-                visitIconUri(visitor, action.getIcon());
+                action.visitUris(visitor);
             }
         }
 
@@ -2938,6 +2942,11 @@ public class Notification implements Parcelable
 
         if (mBubbleMetadata != null) {
             visitIconUri(visitor, mBubbleMetadata.getIcon());
+        }
+
+        if (extras != null && extras.containsKey(WearableExtender.EXTRA_WEARABLE_EXTENSIONS)) {
+            WearableExtender extender = new WearableExtender(this);
+            extender.visitUris(visitor);
         }
     }
 
@@ -3038,10 +3047,9 @@ public class Notification implements Parcelable
         // cannot look into the extras as there may be parcelables there that
         // the platform does not know how to handle. To go around that we have
         // an explicit list of the pending intents in the extras bundle.
-        final boolean collectPendingIntents = (allPendingIntents == null);
-        if (collectPendingIntents) {
-            PendingIntent.setOnMarshaledListener(
-                    (PendingIntent intent, Parcel out, int outFlags) -> {
+        PendingIntent.OnMarshaledListener addedListener = null;
+        if (allPendingIntents == null) {
+            addedListener = (PendingIntent intent, Parcel out, int outFlags) -> {
                 if (parcel == out) {
                     synchronized (this) {
                         if (allPendingIntents == null) {
@@ -3050,7 +3058,8 @@ public class Notification implements Parcelable
                         allPendingIntents.add(intent);
                     }
                 }
-            });
+            };
+            PendingIntent.addOnMarshaledListener(addedListener);
         }
         try {
             // IMPORTANT: Add marshaling code in writeToParcelImpl as we
@@ -3061,8 +3070,8 @@ public class Notification implements Parcelable
                 parcel.writeArraySet(allPendingIntents);
             }
         } finally {
-            if (collectPendingIntents) {
-                PendingIntent.setOnMarshaledListener(null);
+            if (addedListener != null) {
+                PendingIntent.removeOnMarshaledListener(addedListener);
             }
         }
     }
@@ -3468,8 +3477,11 @@ public class Notification implements Parcelable
      *
      * @hide
      */
-    public void setAllowlistToken(@Nullable IBinder token) {
-        mAllowlistToken = token;
+    public void clearAllowlistToken() {
+        mAllowlistToken = null;
+        if (publicVersion != null) {
+            publicVersion.clearAllowlistToken();
+        }
     }
 
     /**
@@ -11713,6 +11725,12 @@ public class Notification implements Parcelable
                 mFlags |= mask;
             } else {
                 mFlags &= ~mask;
+            }
+        }
+
+        private void visitUris(@NonNull Consumer<Uri> visitor) {
+            for (Action action : mActions) {
+                action.visitUris(visitor);
             }
         }
     }

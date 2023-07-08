@@ -62,6 +62,8 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
+import static android.os.PowerWhitelistManager.REASON_NOTIFICATION_SERVICE;
+import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
@@ -83,6 +85,9 @@ import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.No
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI;
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.WAKE_LOCK_FOR_POSTING_NOTIFICATION;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+import static com.android.server.am.PendingIntentRecord.FLAG_ACTIVITY_SENDER;
+import static com.android.server.am.PendingIntentRecord.FLAG_BROADCAST_SENDER;
+import static com.android.server.am.PendingIntentRecord.FLAG_SERVICE_SENDER;
 import static com.android.server.notification.NotificationManagerService.DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_ADJUSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
@@ -186,6 +191,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.Process;
@@ -716,6 +722,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @After
     public void assertAllWakeLocksReleased() {
+        waitForIdle(); // Finish async work.
         for (WakeLock wakeLock : mAcquiredWakeLocks) {
             assertThat(wakeLock.isHeld()).isFalse();
         }
@@ -5907,6 +5914,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(visitor, times(1)).accept(eq(personIcon.getUri()));
         verify(visitor, times(1)).accept(eq(verificationIcon.getUri()));
+    }
+
+    @Test
+    public void testVisitUris_wearableExtender() {
+        Icon actionIcon = Icon.createWithContentUri("content://media/action");
+        Icon wearActionIcon = Icon.createWithContentUri("content://media/wearAction");
+        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent(),
+                PendingIntent.FLAG_IMMUTABLE);
+        Notification n = new Notification.Builder(mContext, "a")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addAction(new Notification.Action.Builder(actionIcon, "Hey!", intent).build())
+                .extend(new Notification.WearableExtender().addAction(
+                        new Notification.Action.Builder(wearActionIcon, "Wear!", intent).build()))
+                .build();
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+
+        verify(visitor).accept(eq(actionIcon.getUri()));
+        verify(visitor).accept(eq(wearActionIcon.getUri()));
     }
 
     @Test
@@ -12095,6 +12122,70 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mUsageStats, never()).registerUpdatedByApp(any(), any());
         assertThat(mService.mNotificationList).hasSize(1);
         assertThat(mService.mNotificationList.get(0).getNotification().when).isEqualTo(111); // old
+    }
+
+    @Test
+    public void enqueueNotification_allowlistsPendingIntents() throws RemoteException {
+        PendingIntent contentIntent = createPendingIntent("content");
+        PendingIntent actionIntent1 = createPendingIntent("action1");
+        PendingIntent actionIntent2 = createPendingIntent("action2");
+        Notification n = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setContentIntent(contentIntent)
+                .addAction(new Notification.Action.Builder(null, "action1", actionIntent1).build())
+                .addAction(new Notification.Action.Builder(null, "action2", actionIntent2).build())
+                .build();
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 1,
+                parcelAndUnparcel(n, Notification.CREATOR), mUserId);
+
+        verify(mAmi, times(3)).setPendingIntentAllowlistDuration(
+                any(), any(), anyLong(),
+                eq(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED),
+                eq(REASON_NOTIFICATION_SERVICE), any());
+        verify(mAmi, times(3)).setPendingIntentAllowBgActivityStarts(any(),
+                any(), eq(FLAG_ACTIVITY_SENDER | FLAG_BROADCAST_SENDER | FLAG_SERVICE_SENDER));
+    }
+
+    @Test
+    public void enqueueNotification_allowlistsPendingIntents_includingFromPublicVersion()
+            throws RemoteException {
+        PendingIntent contentIntent = createPendingIntent("content");
+        PendingIntent actionIntent = createPendingIntent("action");
+        PendingIntent publicContentIntent = createPendingIntent("publicContent");
+        PendingIntent publicActionIntent = createPendingIntent("publicAction");
+        Notification source = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setContentIntent(contentIntent)
+                .addAction(new Notification.Action.Builder(null, "action", actionIntent).build())
+                .setPublicVersion(new Notification.Builder(mContext, "channel")
+                        .setContentIntent(publicContentIntent)
+                        .addAction(new Notification.Action.Builder(
+                                null, "publicAction", publicActionIntent).build())
+                        .build())
+                .build();
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 1,
+                parcelAndUnparcel(source, Notification.CREATOR), mUserId);
+
+        verify(mAmi, times(4)).setPendingIntentAllowlistDuration(
+                any(), any(), anyLong(),
+                eq(TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED),
+                eq(REASON_NOTIFICATION_SERVICE), any());
+        verify(mAmi, times(4)).setPendingIntentAllowBgActivityStarts(any(),
+                any(), eq(FLAG_ACTIVITY_SENDER | FLAG_BROADCAST_SENDER | FLAG_SERVICE_SENDER));
+    }
+
+    private static <T extends Parcelable> T parcelAndUnparcel(T source,
+            Parcelable.Creator<T> creator) {
+        Parcel parcel = Parcel.obtain();
+        source.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        return creator.createFromParcel(parcel);
+    }
+
+    private PendingIntent createPendingIntent(String action) {
+        return PendingIntent.getActivity(mContext, 0,
+                new Intent(action).setPackage(mContext.getPackageName()),
+                PendingIntent.FLAG_MUTABLE);
     }
 
     private void setDpmAppOppsExemptFromDismissal(boolean isOn) {

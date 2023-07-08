@@ -68,6 +68,9 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _isDreamingWithOverlay = MutableStateFlow(false)
     override val isDreamingWithOverlay: Flow<Boolean> = _isDreamingWithOverlay
 
+    private val _isActiveDreamLockscreenHosted = MutableStateFlow(false)
+    override val isActiveDreamLockscreenHosted: StateFlow<Boolean> = _isActiveDreamLockscreenHosted
+
     private val _dozeAmount = MutableStateFlow(0f)
     override val linearDozeAmount: Flow<Float> = _dozeAmount
 
@@ -153,6 +156,10 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setDreamingWithOverlay(isDreaming: Boolean) {
         _isDreamingWithOverlay.value = isDreaming
+    }
+
+    override fun setIsActiveDreamLockscreenHosted(isLockscreenHosted: Boolean) {
+        _isActiveDreamLockscreenHosted.value = isLockscreenHosted
     }
 
     fun setDozeAmount(dozeAmount: Float) {

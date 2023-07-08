@@ -801,9 +801,9 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
-    public void animateToCredentialUI() {
+    public void animateToCredentialUI(boolean isError) {
         if (mBiometricView != null) {
-            mBiometricView.startTransitionToCredentialUI();
+            mBiometricView.startTransitionToCredentialUI(isError);
         } else {
             Log.e(TAG, "animateToCredentialUI(): mBiometricView is null");
         }

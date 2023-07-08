@@ -146,6 +146,14 @@ object Flags {
     val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = releasedFlag(208,
         "lockscreen_without_secure_lock_when_dreaming")
 
+    // TODO(b/286092087): Tracking Bug
+    @JvmField
+    val ENABLE_SYSTEM_UI_DREAM_CONTROLLER = unreleasedFlag(301, "enable_system_ui_dream_controller")
+
+    // TODO(b/288287730): Tracking Bug
+    @JvmField
+    val ENABLE_SYSTEM_UI_DREAM_HOSTING = unreleasedFlag(302, "enable_system_ui_dream_hosting")
+
     /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
      * the digits when the clock moves.
@@ -428,9 +436,6 @@ object Flags {
 
     // TODO(b/263272731): Tracking Bug
     val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag(910, "media_ttt_receiver_success_ripple")
-
-    // TODO(b/263512203): Tracking Bug
-    val MEDIA_EXPLICIT_INDICATOR = releasedFlag(911, "media_explicit_indicator")
 
     // TODO(b/265813373): Tracking Bug
     val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE = releasedFlag(912, "media_ttt_dismiss_gesture")
