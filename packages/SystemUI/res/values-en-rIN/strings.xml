@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Power menu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Page <xliff:g id="ID_1">%1$d</xliff:g> of <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lock screen"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Phone turned off due to heat"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Your phone is now running normally.\nTap for more info"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Your phone was too hot, so it turned off to cool down. Your phone is now running normally.\n\nYour phone may get too hot if you:\n	• Use resource-intensive apps (such as gaming, video or navigation apps)\n	• Download or upload large files\n	• Use your phone in high temperatures"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"See care steps"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Phone is getting warm"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Some features are limited while phone cools down.\nTap for more info"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Your phone will automatically try to cool down. You can still use your phone, but it may run more slowly.\n\nOnce your phone has cooled down, it will run normally."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"See care steps"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Unplug your device"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Your device is getting warm near the charging port. If it’s connected to a charger or USB accessory, unplug it and take care as the cable may also be warm."</string>
