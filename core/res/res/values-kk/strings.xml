@@ -229,7 +229,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Қайта іске қосылуда…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Зауыттық деректерді қалпына келтіру"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Қайта іске қосылуда…"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"Өшірілуде…"</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"Өшіріліп жатыр…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Планшет өшіріледі."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Android TV құрылғысы өшеді."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Сағатыңыз өшіріледі."</string>
@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ҚАБЫЛДАМАУ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Енгізу әдісін таңдау"</string>
     <string name="show_ime" msgid="6406112007347443383">"Физикалық пернетақта қосулы кезде оны экранға шығару"</string>
-    <string name="hardware" msgid="1800597768237606953">"Виртуалдық пернетақтаны көрсету"</string>
+    <string name="hardware" msgid="3611039921284836033">"Экрандағы пернетақтаны пайдалану"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> конфигурациялау"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Физикалық пернетақталарды конфигурациялау"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Тіл мен пернетақта схемасын таңдау үшін түртіңіз."</string>

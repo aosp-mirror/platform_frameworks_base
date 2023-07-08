@@ -1395,7 +1395,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"REBUTJA"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Selecciona un mètode d\'introducció"</string>
     <string name="show_ime" msgid="6406112007347443383">"Mantén-lo en pantalla mentre el teclat físic està actiu"</string>
-    <string name="hardware" msgid="1800597768237606953">"Mostra el teclat virtual"</string>
+    <string name="hardware" msgid="3611039921284836033">"Utilitza el teclat en pantalla"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configura <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configura els teclats físics"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Toca per seleccionar l\'idioma i la disposició"</string>

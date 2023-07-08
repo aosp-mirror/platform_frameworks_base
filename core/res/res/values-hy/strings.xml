@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ՄԵՐԺԵԼ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Ընտրեք ներածման եղանակը"</string>
     <string name="show_ime" msgid="6406112007347443383">"Պահել էկրանին, երբ ֆիզիկական ստեղնաշարն ակտիվ է"</string>
-    <string name="hardware" msgid="1800597768237606953">"Ցույց տալ վիրտուալ ստեղնաշարը"</string>
+    <string name="hardware" msgid="3611039921284836033">"Օգտագործել էկրանային ստեղնաշար"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Կարգավորեք <xliff:g id="DEVICE_NAME">%s</xliff:g> սարքը"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Կարգավորեք ֆիզիկական ստեղնաշարերը"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Հպեք՝ լեզուն և դասավորությունն ընտրելու համար"</string>

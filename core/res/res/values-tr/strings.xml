@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"REDDET"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Giriş yöntemini seçin"</string>
     <string name="show_ime" msgid="6406112007347443383">"Fiziksel klavye etkin durumdayken ekranda tut"</string>
-    <string name="hardware" msgid="1800597768237606953">"Sanal klavyeyi göster"</string>
+    <string name="hardware" msgid="3611039921284836033">"Ekran klavyesi kullanın"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> ayarlarını yapılandır"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Fiziksel klavyeleri yapılandırın"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dili ve düzeni seçmek için dokunun"</string>
@@ -1951,7 +1951,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> uygulaması şu anda kullanılamıyor. Uygulamanın kullanım durumu <xliff:g id="APP_NAME_1">%2$s</xliff:g> tarafından yönetiliyor."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Daha fazla bilgi"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Uygulamanın duraklatmasını kaldır"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"İş uygulamaları açılsın mı?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"İş uygulamaları devam ettirilsin mi?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Devam ettir"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Acil durum"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Uygulama kullanılamıyor"</string>

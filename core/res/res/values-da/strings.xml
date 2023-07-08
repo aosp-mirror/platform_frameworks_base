@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"AFVIS"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Vælg inputmetode"</string>
     <string name="show_ime" msgid="6406112007347443383">"Behold den på skærmen, mens det fysiske tastatur er aktivt"</string>
-    <string name="hardware" msgid="1800597768237606953">"Vis virtuelt tastatur"</string>
+    <string name="hardware" msgid="3611039921284836033">"Brug skærmtastaturet"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Konfigurer <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Konfigurer fysiske tastaturer"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tryk for at vælge sprog og layout"</string>

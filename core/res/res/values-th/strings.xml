@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ปฏิเสธ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"เลือกวิธีการป้อนข้อมูล"</string>
     <string name="show_ime" msgid="6406112007347443383">"เปิดทิ้งไว้บนหน้าจอในระหว่างใช้งานแป้นพิมพ์จริง"</string>
-    <string name="hardware" msgid="1800597768237606953">"แสดงแป้นพิมพ์เสมือน"</string>
+    <string name="hardware" msgid="3611039921284836033">"ใช้แป้นพิมพ์บนหน้าจอ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"กำหนดค่า <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"กำหนดค่าแป้นพิมพ์จริง"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"แตะเพื่อเลือกภาษาและรูปแบบ"</string>

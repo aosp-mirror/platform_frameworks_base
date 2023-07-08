@@ -1396,7 +1396,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ODMÍTNOUT"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Vybrat metodu zadávání"</string>
     <string name="show_ime" msgid="6406112007347443383">"Ponechat na obrazovce, když je aktivní fyzická klávesnice"</string>
-    <string name="hardware" msgid="1800597768237606953">"Zobrazit virtuální klávesnici"</string>
+    <string name="hardware" msgid="3611039921284836033">"Použít softwarovou klávesnici"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Nakonfigurujte zařízení <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Nakonfigurujte fyzické klávesnice"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Klepnutím vyberte jazyk a rozvržení"</string>
@@ -1953,7 +1953,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikace <xliff:g id="APP_NAME_0">%1$s</xliff:g> momentálně není dostupná. Tato předvolba se spravuje v aplikaci <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Další informace"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Zrušit pozastavení aplikace"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušit pozast. prac. aplikací?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušit pozastavení pracovních aplikací?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Zrušit pozastavení"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Stav nouze"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikace není k dispozici"</string>

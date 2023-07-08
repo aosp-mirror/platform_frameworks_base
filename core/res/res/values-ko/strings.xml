@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"거부"</string>
     <string name="select_input_method" msgid="3971267998568587025">"입력 방법 선택"</string>
     <string name="show_ime" msgid="6406112007347443383">"물리적 키보드가 활성 상태인 경우 화면에 켜 둠"</string>
-    <string name="hardware" msgid="1800597768237606953">"가상 키보드 표시"</string>
+    <string name="hardware" msgid="3611039921284836033">"터치 키보드 사용"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> 설정"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"실제 키보드 설정"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"탭하여 언어와 레이아웃을 선택하세요."</string>

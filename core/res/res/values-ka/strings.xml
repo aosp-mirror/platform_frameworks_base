@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"უარყოფა"</string>
     <string name="select_input_method" msgid="3971267998568587025">"აირჩიეთ შეყვანის მეთოდი"</string>
     <string name="show_ime" msgid="6406112007347443383">"აქტიური ფიზიკური კლავიატურისას ეკრანზე შენარჩუნება"</string>
-    <string name="hardware" msgid="1800597768237606953">"ვირტუალური კლავიატურის ჩვენება"</string>
+    <string name="hardware" msgid="3611039921284836033">"ეკრანული კლავიატურის გამოყენება"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"მოახდინეთ <xliff:g id="DEVICE_NAME">%s</xliff:g>-ის კონფიგურირება"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"მოახდინეთ ფიზიკური კლავიატურების კონფიგურირება"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"შეეხეთ ენისა და განლაგების ასარჩევად"</string>

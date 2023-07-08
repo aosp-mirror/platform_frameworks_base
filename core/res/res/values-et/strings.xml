@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"KEELDU"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Valige sisestusmeetod"</string>
     <string name="show_ime" msgid="6406112007347443383">"Hoia seda ekraanil, kui füüsiline klaviatuur on aktiivne"</string>
-    <string name="hardware" msgid="1800597768237606953">"Virtuaalse klaviatuuri kuvam."</string>
+    <string name="hardware" msgid="3611039921284836033">"Kasuta ekraaniklaviatuuri"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Seadistage <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Seadistage füüsilised klaviatuurid"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Puudutage keele ja paigutuse valimiseks"</string>

@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ප්‍රතික්ෂේප කරන්න"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ආදාන ක්‍රමයක් තෝරන්න"</string>
     <string name="show_ime" msgid="6406112007347443383">"භෞතික යතුරු පුවරුව සක්‍රිය අතරතුර එය තිරය මත තබා ගන්න"</string>
-    <string name="hardware" msgid="1800597768237606953">"අතථ්‍ය යතුරු පුවරුව පෙන්වන්න"</string>
+    <string name="hardware" msgid="3611039921284836033">"තිරය මත යතුරු පුවරුව භාවිතය"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> වින්‍යාස කරන්න"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"භෞතික යතුරුපුවරුව වින්‍යාස කරන්න"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"භාෂාව හා පිරිසැලසුම තේරීමට තට්ටු කරන්න"</string>

@@ -1395,7 +1395,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Избор метода уноса"</string>
     <string name="show_ime" msgid="6406112007347443383">"Задржава се на екрану док је физичка тастатура активна"</string>
-    <string name="hardware" msgid="1800597768237606953">"Прикажи виртуелну тастатуру"</string>
+    <string name="hardware" msgid="3611039921284836033">"Користи тастатуру на екрану"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Конфигуришите уређај <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Конфигуришите физичке тастатуре"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Додирните да бисте изабрали језик и распоред"</string>
