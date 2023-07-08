@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Meni dugmeta za uključivanje"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_1">%1$d</xliff:g>. strana od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Zaključan ekran"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se isključio zbog toplote"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Telefon sada normalno radi.\nDodirnite za više informacija"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon je bio prevruć, pa se isključio da se ohladi. Sada radi normalno.\n\nTelefon može previše da se ugreje ako:\n	• Koristite aplikacije koje zahtevaju puno resursa (npr. video igre, video ili aplikacije za navigaciju)\n	• Preuzimate/otpremate velike datoteke\n	• Koristite telefon na visokoj temperaturi"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Pogledajte upozorenja"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Telefon se zagrejao"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Neke funkcije su ograničene dok se telefon ne ohladi.\nDodirnite za više informacija"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon će automatski pokušati da se ohladi. I dalje ćete moći da koristite telefon, ali će sporije reagovati.\n\nKada se telefon ohladi, normalno će raditi."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Pogledajte upozorenja"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Isključite uređaj"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Uređaj se zagreva u blizini porta za punjenje. Ako je povezan sa punjačem ili USB opremom, isključite je i budite pažljivi jer i kabl može da bude vruć."</string>
