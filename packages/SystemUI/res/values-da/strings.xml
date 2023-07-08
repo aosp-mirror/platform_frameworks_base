@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Aktivér USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Få flere oplysninger"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Hold oplåst er deaktiveret"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Hold ulåst er deaktiveret"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"sendte et billede"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Gemmer screenshot..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Gemmer screenshot på din arbejdsprofil…"</string>
@@ -661,12 +661,12 @@
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"Åbn systemindstillinger"</string>
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Åbn Google Assistent"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lås skærm"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"Hent appen Notes for at skrive et hurtigt notat"</string>
+    <string name="group_system_quick_memo" msgid="2914234890158583919">"Åbn appen Notes for at skrive et hurtigt notat"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Systemmultitasking"</string>
     <string name="system_multitasking_rhs" msgid="6593269428880305699">"Start opdelt skærm med aktuel app til højre"</string>
     <string name="system_multitasking_lhs" msgid="8839380725557952846">"Start opdelt skærm med aktuel app til venstre"</string>
     <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Skift fra opdelt skærm til fuld skærm"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Ved opdelt skærm: Erstat en app med én app ad gangen"</string>
+    <string name="system_multitasking_replace" msgid="844285282472557186">"Ved opdelt skærm: Erstat en app med en anden app"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
     <string name="input_switch_input_language_next" msgid="3394291576873633793">"Skift inputsprog (næste sprog)"</string>
     <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Skift inputsprog (forrige sprog)"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu for afbryderknappen"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Side <xliff:g id="ID_1">%1$d</xliff:g> af <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Låseskærm"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefonen slukkede pga. varme"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Din telefon kører nu normalt.\nTryk for at få flere oplysninger"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Din telefon var blevet for varm, så den slukkede for at køle ned. Din telefon kører nu igen normalt. \n\nDin telefon kan blive for varm, hvis du:\n	• Bruger ressourcekrævende apps (f.eks. spil, video eller navigation)\n	• Downloader eller uploader store filer\n	• Bruger din telefon i varme omgivelser"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Se håndteringsvejledning"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Telefonen er ved at blive varm"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Nogle funktioner er begrænsede, mens telefonen køler ned.\nTryk for at få flere oplysninger"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Din telefon forsøger automatisk at køle ned. Du kan stadig bruge telefonen, men den kører muligvis langsommere.\n\nNår din telefon er kølet ned, fungerer den normalt igen."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Se håndteringsvejledning"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Træk stikket ud af din enhed"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Din enhed er ved at blive varm i nærheden af opladningsporten. Hvis enheden er tilsluttet en oplader eller USB-enhed, skal du trække stikket ud. Vær opmærksom på, at stikket også kan være varmt."</string>
