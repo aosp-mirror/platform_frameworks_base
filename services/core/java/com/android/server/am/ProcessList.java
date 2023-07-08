@@ -357,6 +357,7 @@ public final class ProcessList {
     static final byte LMK_UPDATE_PROPS = 7;
     static final byte LMK_KILL_OCCURRED = 8; // Msg to subscribed clients on kill occurred event
     static final byte LMK_STATE_CHANGED = 9; // Msg to subscribed clients on state changed
+    static final byte LMK_START_MONITORING = 9; // Start monitoring if delayed earlier
 
     // Low Memory Killer Daemon command codes.
     // These must be kept in sync with async_event_type definitions in lmkd.h
@@ -1566,6 +1567,15 @@ public final class ProcessList {
             return false;
         }
         return true;
+    }
+
+    /**
+     * {@hide}
+     */
+    public static void startPsiMonitoringAfterBoot() {
+        ByteBuffer buf = ByteBuffer.allocate(4);
+        buf.putInt(LMK_START_MONITORING);
+        writeLmkd(buf, null);
     }
 
     private static boolean writeLmkd(ByteBuffer buf, ByteBuffer repl) {
