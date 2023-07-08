@@ -79,7 +79,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"버블"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"관리"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"대화창을 닫았습니다."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"보기를 개선하려면 탭하여 앱을 다시 시작합니다."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"더 편하게 보기를 원하면 탭하여 앱을 다시 시작하세요."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"카메라 문제가 있나요?\n해결하려면 탭하세요."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"해결되지 않았나요?\n되돌리려면 탭하세요."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"카메라에 문제가 없나요? 닫으려면 탭하세요."</string>
