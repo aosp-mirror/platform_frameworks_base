@@ -17,8 +17,8 @@
 package com.android.systemui.theme
 
 import android.util.Pair
-import com.android.systemui.monet.dynamiccolor.DynamicColor
-import com.android.systemui.monet.dynamiccolor.MaterialDynamicColors
+import com.google.ux.material.libmonet.dynamiccolor.DynamicColor
+import com.google.ux.material.libmonet.dynamiccolor.MaterialDynamicColors
 
 class DynamicColors {
     companion object {
