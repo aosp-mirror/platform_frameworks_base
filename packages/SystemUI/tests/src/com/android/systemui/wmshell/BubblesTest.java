@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -153,6 +154,7 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskViewTransitions;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
 import org.junit.Before;
@@ -282,7 +284,7 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock
-    private TaskViewTransitions mTaskViewTransitions;
+    Transitions mTransitions;
     @Mock
     private Optional<OneHandedController> mOneHandedOptional;
     @Mock
@@ -293,6 +295,8 @@ public class BubblesTest extends SysuiTestCase {
     private NotifPipelineFlags mNotifPipelineFlags;
     @Mock
     private Icon mAppBubbleIcon;
+
+    private TaskViewTransitions mTaskViewTransitions;
 
     private TestableBubblePositioner mPositioner;
 
@@ -309,6 +313,12 @@ public class BubblesTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            doReturn(true).when(mTransitions).isRegistered();
+        }
+        mTaskViewTransitions = new TaskViewTransitions(mTransitions);
+
         mTestableLooper = TestableLooper.get(this);
 
         // For the purposes of this test, just run everything synchronously

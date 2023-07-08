@@ -233,7 +233,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         FakeFeatureFlags().apply {
             this.set(Flags.UMO_SURFACE_RIPPLE, false)
             this.set(Flags.UMO_TURBULENCE_NOISE, false)
-            this.set(Flags.MEDIA_EXPLICIT_INDICATOR, true)
             this.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, false)
         }
     @Mock private lateinit var globalSettings: GlobalSettings
@@ -1793,7 +1792,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         // THEN it sends the PendingIntent without dismissing keyguard first,
         // and does not use the Intent directly (see b/271845008)
         captor.value.onClick(viewHolder.player)
-        verify(pendingIntent).send()
+        verify(pendingIntent).send(any(Bundle::class.java))
         verify(pendingIntent, never()).getIntent()
         verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
     }

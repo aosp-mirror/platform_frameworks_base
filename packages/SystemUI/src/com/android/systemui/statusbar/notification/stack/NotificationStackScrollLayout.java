@@ -5919,7 +5919,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         Trace.beginSection("NSSL.resetAllSwipeState()");
         mSwipeHelper.resetTouchState();
         for (int i = 0; i < getChildCount(); i++) {
-            mSwipeHelper.forceResetSwipeState(getChildAt(i));
+            View child = getChildAt(i);
+            mSwipeHelper.forceResetSwipeState(child);
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow childRow = (ExpandableNotificationRow) child;
+                List<ExpandableNotificationRow> grandchildren = childRow.getAttachedChildren();
+                if (grandchildren != null) {
+                    for (ExpandableNotificationRow grandchild : grandchildren) {
+                        mSwipeHelper.forceResetSwipeState(grandchild);
+                    }
+                }
+            }
         }
         updateContinuousShadowDrawing();
         Trace.endSection();

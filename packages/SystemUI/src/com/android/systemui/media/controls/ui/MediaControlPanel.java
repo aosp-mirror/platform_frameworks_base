@@ -23,6 +23,7 @@ import static com.android.systemui.media.controls.models.recommendation.Smartspa
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
+import android.app.ActivityOptions;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.app.WallpaperColors;
@@ -535,7 +536,10 @@ public class MediaControlPanel {
                         mLockscreenUserManager.getCurrentUserId());
                 if (showOverLockscreen) {
                     try {
-                        clickIntent.send();
+                        ActivityOptions opts = ActivityOptions.makeBasic();
+                        opts.setPendingIntentBackgroundActivityStartMode(
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                        clickIntent.send(opts.toBundle());
                     } catch (PendingIntent.CanceledException e) {
                         Log.e(TAG, "Pending intent for " + key + " was cancelled");
                     }
@@ -684,6 +688,8 @@ public class MediaControlPanel {
                                 try {
                                     BroadcastOptions options = BroadcastOptions.makeBasic();
                                     options.setInteractive(true);
+                                    options.setPendingIntentBackgroundActivityStartMode(
+                                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
                                     deviceIntent.send(options.toBundle());
                                 } catch (PendingIntent.CanceledException e) {
                                     Log.e(TAG, "Device pending intent was canceled");

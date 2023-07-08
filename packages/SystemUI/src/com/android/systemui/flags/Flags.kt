@@ -89,7 +89,7 @@ object Flags {
     // TODO(b/277338665): Tracking Bug
     @JvmField
     val NOTIFICATION_SHELF_REFACTOR =
-        unreleasedFlag(271161129, "notification_shelf_refactor")
+        unreleasedFlag(271161129, "notification_shelf_refactor", teamfood = true)
 
     // TODO(b/288326013): Tracking Bug
     @JvmField
@@ -145,6 +145,14 @@ object Flags {
     @JvmField
     val LOCKSCREEN_WITHOUT_SECURE_LOCK_WHEN_DREAMING = releasedFlag(208,
         "lockscreen_without_secure_lock_when_dreaming")
+
+    // TODO(b/286092087): Tracking Bug
+    @JvmField
+    val ENABLE_SYSTEM_UI_DREAM_CONTROLLER = unreleasedFlag(301, "enable_system_ui_dream_controller")
+
+    // TODO(b/288287730): Tracking Bug
+    @JvmField
+    val ENABLE_SYSTEM_UI_DREAM_HOSTING = unreleasedFlag(302, "enable_system_ui_dream_hosting")
 
     /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
@@ -429,9 +437,6 @@ object Flags {
     // TODO(b/263272731): Tracking Bug
     val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag(910, "media_ttt_receiver_success_ripple")
 
-    // TODO(b/263512203): Tracking Bug
-    val MEDIA_EXPLICIT_INDICATOR = releasedFlag(911, "media_explicit_indicator")
-
     // TODO(b/265813373): Tracking Bug
     val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE = releasedFlag(912, "media_ttt_dismiss_gesture")
 
@@ -558,6 +563,12 @@ object Flags {
     @JvmField
     val WALLPAPER_MULTI_CROP =
         sysPropBooleanFlag(1118, "persist.wm.debug.wallpaper_multi_crop", default = false)
+
+    // TODO(b/290220798): Tracking Bug
+    @Keep
+    @JvmField
+    val ENABLE_PIP2_IMPLEMENTATION =
+        sysPropBooleanFlag(1119, "persist.wm.debug.enable_pip2_implementation", default = false)
 
 
     // 1200 - predictive back

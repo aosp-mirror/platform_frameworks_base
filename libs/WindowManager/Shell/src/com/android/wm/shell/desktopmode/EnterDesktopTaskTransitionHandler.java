@@ -22,9 +22,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
-import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
@@ -35,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.MoveToDesktopAnimator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,18 +49,17 @@ import java.util.function.Supplier;
  */
 public class EnterDesktopTaskTransitionHandler implements Transitions.TransitionHandler {
 
+    private static final String TAG = "EnterDesktopTaskTransitionHandler";
     private final Transitions mTransitions;
     private final Supplier<SurfaceControl.Transaction> mTransactionSupplier;
 
-    // The size of the screen during drag relative to the fullscreen size
-    public static final float DRAG_FREEFORM_SCALE = 0.4f;
     // The size of the screen after drag relative to the fullscreen size
     public static final float FINAL_FREEFORM_SCALE = 0.6f;
     public static final int FREEFORM_ANIMATION_DURATION = 336;
 
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
-    private Point mPosition;
     private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
+    private MoveToDesktopAnimator mMoveToDesktopAnimator;
 
     public EnterDesktopTaskTransitionHandler(
             Transitions transitions) {
@@ -87,15 +88,30 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     }
 
     /**
+     * Starts Transition of type TRANSIT_ENTER_FREEFORM
+     * @param wct WindowContainerTransaction for transition
+     * @param moveToDesktopAnimator Animator that shrinks and positions task during two part move
+     *                              to desktop animation
+     * @param onAnimationEndCallback to be called after animation
+     */
+    public void startMoveToFreeformAnimation(@NonNull WindowContainerTransaction wct,
+            @NonNull MoveToDesktopAnimator moveToDesktopAnimator,
+            Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
+        mMoveToDesktopAnimator = moveToDesktopAnimator;
+        startTransition(Transitions.TRANSIT_ENTER_FREEFORM, wct, onAnimationEndCallback);
+    }
+
+    /**
      * Starts Transition of type TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
      * @param wct WindowContainerTransaction for transition
-     * @param position Position of task when transition is triggered
+     * @param moveToDesktopAnimator Animator that shrinks and positions task during two part move
+     *                              to desktop animation
      * @param onAnimationEndCallback to be called after animation
      */
     public void startCancelMoveToDesktopMode(@NonNull WindowContainerTransaction wct,
-            Point position,
+            MoveToDesktopAnimator moveToDesktopAnimator,
             Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
-        mPosition = position;
+        mMoveToDesktopAnimator = moveToDesktopAnimator;
         startTransition(Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE, wct,
                 onAnimationEndCallback);
     }
@@ -145,9 +161,23 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             // to null and we don't require an animation
             final SurfaceControl sc = change.getLeash();
             startT.setWindowCrop(sc, null);
+
+            if (mMoveToDesktopAnimator == null
+                    || mMoveToDesktopAnimator.getTaskId() != change.getTaskInfo().taskId) {
+                Slog.e(TAG, "No animator available for this transition");
+                return false;
+            }
+
+            // Calculate and set position of the task
+            final PointF position = mMoveToDesktopAnimator.getPosition();
+            startT.setPosition(sc, position.x, position.y);
+            finishT.setPosition(sc, position.x, position.y);
+
             startT.apply();
+
             mTransitions.getMainExecutor().execute(
                     () -> finishCallback.onTransitionFinished(null, null));
+
             return true;
         }
 
@@ -162,12 +192,18 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
                     endBounds.height());
             startT.apply();
 
+            // End the animation that shrinks the window when task is first dragged from fullscreen
+            if (mMoveToDesktopAnimator != null) {
+                mMoveToDesktopAnimator.endAnimator();
+            }
+
             // We want to find the scale of the current bounds relative to the end bounds. The
             // task is currently scaled to DRAG_FREEFORM_SCALE and the final bounds will be
             // scaled to FINAL_FREEFORM_SCALE. So, it is scaled to
             // DRAG_FREEFORM_SCALE / FINAL_FREEFORM_SCALE relative to the freeform bounds
             final ValueAnimator animator =
-                    ValueAnimator.ofFloat(DRAG_FREEFORM_SCALE / FINAL_FREEFORM_SCALE, 1f);
+                    ValueAnimator.ofFloat(
+                            MoveToDesktopAnimator.DRAG_FREEFORM_SCALE / FINAL_FREEFORM_SCALE, 1f);
             animator.setDuration(FREEFORM_ANIMATION_DURATION);
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
             animator.addUpdateListener(animation -> {
@@ -199,8 +235,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
         }
 
         if (type == Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
-                && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                && mPosition != null) {
+                && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             // This Transition animates a task to fullscreen after being dragged from the status
             // bar and then released back into the status bar area
             final SurfaceControl sc = change.getLeash();
@@ -210,13 +245,27 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
                     .setWindowCrop(sc, endBounds.width(), endBounds.height())
                     .apply();
 
+            if (mMoveToDesktopAnimator == null
+                    || mMoveToDesktopAnimator.getTaskId() != change.getTaskInfo().taskId) {
+                Slog.e(TAG, "No animator available for this transition");
+                return false;
+            }
+
+            // End the animation that shrinks the window when task is first dragged from fullscreen
+            mMoveToDesktopAnimator.endAnimator();
+
             final ValueAnimator animator = new ValueAnimator();
-            animator.setFloatValues(DRAG_FREEFORM_SCALE, 1f);
+            animator.setFloatValues(MoveToDesktopAnimator.DRAG_FREEFORM_SCALE, 1f);
             animator.setDuration(FREEFORM_ANIMATION_DURATION);
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
+
+            // Get position of the task
+            final float x = mMoveToDesktopAnimator.getPosition().x;
+            final float y = mMoveToDesktopAnimator.getPosition().y;
+
             animator.addUpdateListener(animation -> {
                 final float scale = (float) animation.getAnimatedValue();
-                t.setPosition(sc, mPosition.x * (1 - scale), mPosition.y * (1 - scale))
+                t.setPosition(sc, x * (1 - scale), y * (1 - scale))
                         .setScale(sc, scale, scale)
                         .show(sc)
                         .apply();

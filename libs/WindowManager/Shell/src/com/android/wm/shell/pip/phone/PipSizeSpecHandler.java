@@ -123,18 +123,19 @@ public class PipSizeSpecHandler {
             final int totalVerticalPadding = getInsetBounds().top
                     + (getDisplayBounds().height() - getInsetBounds().bottom);
 
-            final int shorterLength = (int) (1f * Math.min(
-                    getDisplayBounds().width() - totalHorizontalPadding,
-                    getDisplayBounds().height() - totalVerticalPadding));
+            final int shorterLength = Math.min(getDisplayBounds().width() - totalHorizontalPadding,
+                    getDisplayBounds().height() - totalVerticalPadding);
 
             int maxWidth, maxHeight;
 
             // use the optimized max sizing logic only within a certain aspect ratio range
             if (aspectRatio >= mOptimizedAspectRatio && aspectRatio <= 1 / mOptimizedAspectRatio) {
                 // this formula and its derivation is explained in b/198643358#comment16
-                maxWidth = (int) (mOptimizedAspectRatio * shorterLength
+                maxWidth = Math.round(mOptimizedAspectRatio * shorterLength
                         + shorterLength * (aspectRatio - mOptimizedAspectRatio) / (1
                         + aspectRatio));
+                // make sure the max width doesn't go beyond shorter screen length after rounding
+                maxWidth = Math.min(maxWidth, shorterLength);
                 maxHeight = Math.round(maxWidth / aspectRatio);
             } else {
                 if (aspectRatio > 1f) {
