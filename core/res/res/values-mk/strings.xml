@@ -1257,7 +1257,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Се стартуваат апликациите."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Подигањето завршува."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Го притиснавте копчето за вклучување — така обично се исклучува екранот.\n\nДопрете лесно додека го поставувате отпечатокот."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"За да завршите со поставувањето, исклучете го екранот"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"За излез, исклучете го екранот"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Исклучи"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Да продолжи потврдувањето на отпечаток?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Го притиснавте копчето за вклучување — така обично се исклучува екранот.\n\nДопрете лесно за да го потврдите отпечатокот."</string>
@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Одбери метод на внес"</string>
     <string name="show_ime" msgid="6406112007347443383">"Прикажувај ја на екранот додека е активна физичката тастатура"</string>
-    <string name="hardware" msgid="1800597768237606953">"Прикажи виртуелна тастатура"</string>
+    <string name="hardware" msgid="3611039921284836033">"Користете тастатура на екран"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Конфигурирање на <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Конфигурирање физички тастатури"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Допрете за избирање јазик и распоред"</string>

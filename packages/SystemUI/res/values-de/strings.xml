@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Ein-/Aus-Menü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Seite <xliff:g id="ID_1">%1$d</xliff:g> von <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Sperrbildschirm"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Ausgeschaltet, da zu heiß"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Dein Smartphone funktioniert jetzt wieder normal.\nFür mehr Informationen tippen."</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Dein Smartphone war zu heiß und wurde zum Abkühlen ausgeschaltet. Nun funktioniert es wieder normal.\n\nMögliche Ursachen:\n	• Verwendung ressourcenintensiver Apps (z. B. Spiele-, Video- oder Navigations-Apps)\n	• Download oder Upload großer Dateien \n	• Verwendung des Smartphones bei hohen Temperaturen"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Schritte zur Abkühlung des Geräts ansehen"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Smartphone wird warm"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Einige Funktionen sind während der Abkühlphase des Smartphones eingeschränkt.\nFür mehr Informationen tippen."</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Dein Smartphone kühlt sich automatisch ab. Du kannst dein Smartphone weiterhin nutzen, aber es reagiert möglicherweise langsamer.\n\nSobald dein Smartphone abgekühlt ist, funktioniert es wieder normal."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Schritte zur Abkühlung des Geräts ansehen"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Gerät vom Stromnetz trennen"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Dein Gerät erwärmt sich am Ladeanschluss. Trenne das Gerät vom Stromnetz, wenn es an ein Ladegerät oder USB-Zubehör angeschlossen ist. Sei vorsichtig, denn das Kabel könnte ebenfalls heiß sein."</string>

@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Aktivovat USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Další informace"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Snímek obrazovky"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Prodloužení odemknutí deaktivováno"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Rozšíření odemknutí deaktivováno"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"odesílá obrázek"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Ukládání snímku obrazovky..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Ukládání snímku obrazovky do pracovního profilu…"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Nabídka vypínače"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Stránka <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Obrazovka uzamčení"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon se vypnul z důvodu zahřátí"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Nyní telefon funguje jako obvykle.\nKlepnutím zobrazíte další informace"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon byl příliš zahřátý, proto se vypnul, aby vychladl. Nyní telefon funguje jako obvykle.\n\nTelefon se může příliš zahřát v těchto případech:\n	• používání náročných aplikací (např. her, videí nebo navigace),\n	• stahování nebo nahrávání velkých souborů,\n	• používání telefonu při vysokých teplotách."</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Zobrazit pokyny, co dělat"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Telefon se zahřívá"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Některé funkce jsou při chladnutí telefonu omezeny.\nKlepnutím zobrazíte další informace"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefon se automaticky pokusí vychladnout. Lze jej nadále používat, ale může být pomalejší.\n\nAž telefon vychladne, bude fungovat normálně."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Zobrazit pokyny, co dělat"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Odpojte zařízení"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Zařízení se zahřívá v oblasti nabíjecího portu. Pokud je připojeno k nabíječce nebo příslušenství USB, odpojte ho (dejte pozor, kabel také může být zahřátý)."</string>

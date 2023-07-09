@@ -1395,7 +1395,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"עדיף שלא"</string>
     <string name="select_input_method" msgid="3971267998568587025">"בחירה של שיטת הזנה"</string>
     <string name="show_ime" msgid="6406112007347443383">"להשאיר במסך בזמן שהמקלדת הפיזית פעילה"</string>
-    <string name="hardware" msgid="1800597768237606953">"הצגת מקלדת וירטואלית"</string>
+    <string name="hardware" msgid="3611039921284836033">"שימוש במקלדת שמופיעה במסך"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"הגדרה של <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"הגדרת מקלדות פיזיות"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"יש להקיש כדי לבחור שפה ופריסה"</string>

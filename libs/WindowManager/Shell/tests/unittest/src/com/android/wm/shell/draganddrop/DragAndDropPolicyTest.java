@@ -133,8 +133,7 @@ public class DragAndDropPolicyTest extends ShellTestCase {
         mPortraitDisplayLayout = new DisplayLayout(info2, res, false, false);
         mInsets = Insets.of(0, 0, 0, 0);
 
-        mPolicy = spy(new DragAndDropPolicy(
-                mContext, mActivityTaskManager, mSplitScreenStarter, mSplitScreenStarter));
+        mPolicy = spy(new DragAndDropPolicy(mContext, mSplitScreenStarter, mSplitScreenStarter));
         mActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);
         mNonResizeableActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);
         setClipDataResizeable(mNonResizeableActivityClipData, false);
@@ -206,7 +205,10 @@ public class DragAndDropPolicyTest extends ShellTestCase {
     @Test
     public void testDragAppOverFullscreenHome_expectOnlyFullscreenTarget() {
         setRunningTask(mHomeTask);
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
+        DragSession dragSession = new DragSession(mContext, mActivityTaskManager,
+                mLandscapeDisplayLayout, mActivityClipData);
+        dragSession.update();
+        mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN);
 
@@ -218,7 +220,10 @@ public class DragAndDropPolicyTest extends ShellTestCase {
     @Test
     public void testDragAppOverFullscreenApp_expectSplitScreenTargets() {
         setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
+        DragSession dragSession = new DragSession(mContext, mActivityTaskManager,
+                mLandscapeDisplayLayout, mActivityClipData);
+        dragSession.update();
+        mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
@@ -235,7 +240,10 @@ public class DragAndDropPolicyTest extends ShellTestCase {
     @Test
     public void testDragAppOverFullscreenAppPhone_expectVerticalSplitScreenTargets() {
         setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mPortraitDisplayLayout, mActivityClipData, mLoggerSessionId);
+        DragSession dragSession = new DragSession(mContext, mActivityTaskManager,
+                mPortraitDisplayLayout, mActivityClipData);
+        dragSession.update();
+        mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = assertExactTargetTypes(
                 mPolicy.getTargets(mInsets), TYPE_SPLIT_TOP, TYPE_SPLIT_BOTTOM);
 
@@ -252,7 +260,10 @@ public class DragAndDropPolicyTest extends ShellTestCase {
     @Test
     public void testTargetHitRects() {
         setRunningTask(mFullscreenAppTask);
-        mPolicy.start(mLandscapeDisplayLayout, mActivityClipData, mLoggerSessionId);
+        DragSession dragSession = new DragSession(mContext, mActivityTaskManager,
+                mLandscapeDisplayLayout, mActivityClipData);
+        dragSession.update();
+        mPolicy.start(dragSession, mLoggerSessionId);
         ArrayList<Target> targets = mPolicy.getTargets(mInsets);
         for (Target t : targets) {
             assertTrue(mPolicy.getTargetAtLocation(t.hitRegion.left, t.hitRegion.top) == t);

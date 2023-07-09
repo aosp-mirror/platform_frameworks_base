@@ -1007,7 +1007,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"Android TV түзмөгүңүздүн кулпусун <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес ачууга аракет жасадыңыз. Android TV түзмөгүңүз эми демейки параметрлерге кайтарылат."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"Сиз телефонду бөгөттөн чыгарууга <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Телефон баштапкы абалына келтирилет."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> секунддан кийин кайталаңыз."</string>
-    <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Сүрөт үлгүсүн унутуп калдыңызбы?"</string>
+    <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"Сүрөт үлгүсүн унутуп койдуңузбу?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"Аккаунт менен кулпусун ачуу"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"Өтө көп үлгү киргизүү аракети болду"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"Бөгөттөн чыгарыш үчүн, Google эсебиңиз менен кириңиз."</string>
@@ -1015,7 +1015,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"Сырсөз"</string>
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Кирүү"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"Колдонуучу атыңыз же сырсөзүңүз туура эмес."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"Колдонуучу атыңызды же сырсөзүңүздү унутуп калдыңызбы?\n"<b>"google.com/accounts/recovery"</b>" дарегине кайрылыңыз."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"Колдонуучу атыңызды же сырсөзүңүздү унутуп койдуңузбу?\n"<b>"google.com/accounts/recovery"</b>" дарегине кайрылыңыз."</string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"Текшерүүдө…"</string>
     <string name="lockscreen_unlock_label" msgid="4648257878373307582">"Кулпусун ачуу"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"Добушу күйүк"</string>
@@ -1394,7 +1394,7 @@
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"ЧЕТКЕ КАГУУ"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Дайын киргизүү ыкмасын тандаңыз"</string>
     <string name="show_ime" msgid="6406112007347443383">"Баскычтоп иштетилгенде экранда көрүнүп турат"</string>
-    <string name="hardware" msgid="1800597768237606953">"Виртуалдык баскычтоп"</string>
+    <string name="hardware" msgid="3611039921284836033">"Экрандагы баскычтопту колдонуу"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> түзмөгүн конфигурациялоо"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Физикалык баскычтопторду конфигурациялоо"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Тил жана калып тандоо үчүн таптап коюңуз"</string>
@@ -1666,7 +1666,7 @@
     <string name="kg_login_password_hint" msgid="3330530727273164402">"Сырсөз"</string>
     <string name="kg_login_submit_button" msgid="893611277617096870">"Кирүү"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"Колдонуучу атыңыз же сырсөзүңүз туура эмес."</string>
-    <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Колдонуучу атыңызды же сырсөзүңүздү унутуп калдыңызбы?\n"<b>"google.com/accounts/recovery"</b>" дарегине кайрылыңыз."</string>
+    <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"Колдонуучу атыңызды же сырсөзүңүздү унутуп койдуңузбу?\n"<b>"google.com/accounts/recovery"</b>" дарегине кайрылыңыз."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"Эсеп текшерилүүдө…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"Сиз PIN кодуңузду <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин кайталаңыз."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"Сиз сырсөзүңүздү <xliff:g id="NUMBER_0">%1$d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундадан кийин кайталаңыз."</string>
