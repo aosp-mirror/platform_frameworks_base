@@ -693,13 +693,13 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Menu del tasto di accensione"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> di <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Schermata di blocco"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Il telefono si è spento perché surriscaldato"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ora il telefono funziona normalmente.\nTocca per ulteriori informazioni"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Il telefono era surriscaldato e si è spento per raffreddarsi. Ora funziona normalmente.\n\nIl telefono può surriscaldarsi se:\n	• Utilizzi app che consumano molte risorse (ad esempio app di navigazione, giochi o video)\n	• Scarichi o carichi grandi file\n	• Lo utilizzi in presenza di alte temperature"</string>
+    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Lo smartphone si è spento per il calore"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ora lo smartphone funziona normalmente.\nTocca per maggiori informazioni"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Lo smartphone era surriscaldato e si è spento per raffreddarsi. Ora funziona normalmente.\n\nLo smartphone può surriscaldarsi se:\n	• Utilizzi app che consumano molte risorse (ad esempio app di navigazione, giochi o video)\n	• Scarichi o carichi grandi file\n	• Lo utilizzi in presenza di alte temperature"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Leggi le misure da adottare"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Il telefono si sta scaldando"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Alcune funzionalità limitate durante il raffreddamento del telefono.\nTocca per ulteriori informazioni"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Il telefono cercherà automaticamente di raffreddarsi. Puoi comunque usarlo, ma potrebbe essere più lento.\n\nUna volta raffreddato, il telefono funzionerà normalmente."</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Alcune funzionalità sono state limitate durante il raffreddamento dello smartphone.\nTocca per maggiori informazioni"</string>
+    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Lo smartphone cercherà automaticamente di raffreddarsi. Puoi comunque usarlo, ma potrebbe essere più lento.\n\nUna volta raffreddato, lo smartphone funzionerà normalmente."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Leggi le misure da adottare"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Scollega il dispositivo"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Il tuo dispositivo si sta scaldando vicino alla porta di ricarica. Se è collegato a un caricabatterie o a un accessorio USB, scollegalo e fai attenzione perché il cavo potrebbe essere caldo."</string>
