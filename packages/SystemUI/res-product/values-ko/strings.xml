@@ -40,6 +40,24 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4682221342671290678">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 직장 프로필과 모든 프로필 데이터가 삭제됩니다."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="1860049973474855672">"잠금 해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금 해제해야 합니다.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="44112553371516141">"잠금 해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%2$d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금 해제해야 합니다.\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="thermal_shutdown_title" product="default" msgid="8039593017174903505">"발열로 인해 휴대전화가 꺼짐"</string>
+    <string name="thermal_shutdown_title" product="device" msgid="2954206342842856379">"발열로 인해 기기가 꺼짐"</string>
+    <string name="thermal_shutdown_title" product="tablet" msgid="8941033526856177533">"발열로 인해 태블릿이 꺼짐"</string>
+    <string name="thermal_shutdown_message" product="default" msgid="6685194547904051408">"이제 휴대전화가 정상적으로 작동합니다.\n자세히 알아보려면 탭하세요."</string>
+    <string name="thermal_shutdown_message" product="device" msgid="3039675532521590478">"이제 기기가 정상적으로 작동합니다.\n자세히 알아보려면 탭하세요."</string>
+    <string name="thermal_shutdown_message" product="tablet" msgid="5285898074484811386">"이제 태블릿이 정상적으로 작동합니다.\n자세히 알아보려면 탭하세요."</string>
+    <string name="thermal_shutdown_dialog_message" product="default" msgid="6145923570358574186">"휴대전화가 과열되어 온도를 낮추기 위해 전원이 종료되었습니다. 지금은 휴대전화가 정상적으로 작동합니다.\n\n휴대전화가 과열되는 이유는 다음과 같습니다.\n	• 리소스를 많이 사용하는 앱 사용(예: 게임, 동영상 또는 내비게이션 앱)\n	• 대용량 파일을 다운로드 또는 업로드\n	• 온도가 높은 곳에서 휴대전화 사용"</string>
+    <string name="thermal_shutdown_dialog_message" product="device" msgid="3647879000909527365">"기기가 과열되어 온도를 낮추기 위해 전원이 종료되었습니다. 지금은 기기가 정상적으로 작동합니다.\n\n기기가 과열되는 이유는 다음과 같습니다.\n	• 리소스를 많이 사용하는 앱 사용(예: 게임, 동영상 또는 내비게이션 앱)\n	• 대용량 파일을 다운로드 또는 업로드\n	• 온도가 높은 곳에서 기기 사용"</string>
+    <string name="thermal_shutdown_dialog_message" product="tablet" msgid="8274487811928782165">"태블릿이 과열되어 온도를 낮추기 위해 전원이 종료되었습니다. 지금은 태블릿이 정상적으로 작동합니다.\n\n태블릿이 과열되는 이유는 다음과 같습니다.\n	• 리소스를 많이 사용하는 앱 사용(예: 게임, 동영상 또는 내비게이션 앱)\n	• 대용량 파일을 다운로드 또는 업로드\n	• 온도가 높은 곳에서 태블릿 사용"</string>
+    <string name="high_temp_title" product="default" msgid="5365000411304924115">"휴대전화 온도가 높음"</string>
+    <string name="high_temp_title" product="device" msgid="6622009907401563664">"기기 온도가 높음"</string>
+    <string name="high_temp_title" product="tablet" msgid="9039733706606446616">"태블릿 온도가 높음"</string>
+    <string name="high_temp_notif_message" product="default" msgid="3928947950087257452">"휴대전화 온도를 낮추는 동안 일부 기능이 제한됩니다.\n자세히 알아보려면 탭하세요."</string>
+    <string name="high_temp_notif_message" product="device" msgid="6105125771372547292">"기기 온도를 낮추는 동안 일부 기능이 제한됩니다.\n자세히 알아보려면 탭하세요."</string>
+    <string name="high_temp_notif_message" product="tablet" msgid="7799279192797476850">"태블릿 온도를 낮추는 동안 일부 기능이 제한됩니다.\n자세히 알아보려면 탭하세요."</string>
+    <string name="high_temp_dialog_message" product="default" msgid="4272882413847595625">"휴대전화가 자동으로 온도를 낮추려고 시도합니다. 휴대전화를 계속 사용할 수는 있지만 작동이 느려질 수도 있습니다.\n\n휴대전화 온도가 낮아지면 정상적으로 작동됩니다."</string>
+    <string name="high_temp_dialog_message" product="device" msgid="263861943935989046">"기기가 자동으로 온도를 낮추려고 시도합니다. 기기를 계속 사용할 수는 있지만 작동이 느려질 수도 있습니다.\n\n기기 온도가 낮아지면 정상적으로 작동됩니다."</string>
+    <string name="high_temp_dialog_message" product="tablet" msgid="5613713326841935537">"태블릿이 자동으로 온도를 낮추려고 시도합니다. 태블릿을 계속 사용할 수 있지만 작동이 느려질 수도 있습니다.\n\n태블릿 온도가 낮아지면 정상적으로 작동합니다."</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="tablet" msgid="3726972508570143945">"지문 센서는 전원 버튼에 있습니다. 태블릿 옆면에 있는 튀어나온 볼륨 버튼 옆의 평평한 버튼입니다."</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="device" msgid="2929467060295094725">"지문 센서는 전원 버튼에 있습니다. 기기 옆면에 있는 튀어나온 볼륨 버튼 옆의 평평한 버튼입니다."</string>
     <string name="security_settings_sfps_enroll_find_sensor_message" product="default" msgid="8582726566542997639">"지문 센서는 전원 버튼에 있습니다. 휴대전화 옆면에 있는 튀어나온 볼륨 버튼 옆의 평평한 버튼입니다."</string>
