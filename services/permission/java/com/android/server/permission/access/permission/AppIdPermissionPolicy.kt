@@ -390,7 +390,14 @@ class AppIdPermissionPolicy : SchemePolicy() {
         packageState: PackageState,
         changedPermissionNames: MutableIndexedSet<String>
     ) {
-        packageState.androidPackage!!.permissions.forEachIndexed { _, parsedPermission ->
+        val androidPackage = packageState.androidPackage!!
+        // This may not be the same package as the old permission because the old permission owner
+        // can be different, hence using this somewhat strange name to prevent misuse.
+        val oldNewPackage = oldState.externalState.packageStates[packageState.packageName]
+            ?.androidPackage
+        val isPackageSigningChanged = oldNewPackage != null &&
+                androidPackage.signingDetails != oldNewPackage.signingDetails
+        androidPackage.permissions.forEachIndexed { _, parsedPermission ->
             val newPermissionInfo = PackageInfoUtils.generatePermissionInfo(
                 parsedPermission, PackageManager.GET_META_DATA.toLong()
             )!!
@@ -520,7 +527,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     newPackageName != oldPermission.packageName ||
                     newPermission.protectionLevel != oldPermission.protectionLevel || (
                         oldPermission.isReconciled && (
-                            (
+                            (newPermission.isSignature && isPackageSigningChanged) || (
                                 newPermission.isKnownSigner &&
                                     newPermission.knownCerts != oldPermission.knownCerts
                             ) || (

@@ -867,10 +867,12 @@ public final class SigningDetails implements Parcelable {
             return false;
         }
         // The capabilities for the past signing certs must match as well.
-        for (int i = 0; i < mPastSigningCertificates.length; i++) {
-            if (mPastSigningCertificates[i].getFlags()
-                    != that.mPastSigningCertificates[i].getFlags()) {
-                return false;
+        if (mPastSigningCertificates != null) {
+            for (int i = 0; i < mPastSigningCertificates.length; i++) {
+                if (mPastSigningCertificates[i].getFlags()
+                        != that.mPastSigningCertificates[i].getFlags()) {
+                    return false;
+                }
             }
         }
         return true;
