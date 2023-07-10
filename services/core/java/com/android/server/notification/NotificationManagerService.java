@@ -10501,6 +10501,11 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        protected boolean allowRebindForParentUser() {
+            return false;
+        }
+
+        @Override
         protected String getRequiredPermission() {
             // only signature/privileged apps can be bound.
             return android.Manifest.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE;
@@ -11042,6 +11047,11 @@ public class NotificationManagerService extends SystemService {
                     }
                 }
             }
+        }
+
+        @Override
+        protected boolean allowRebindForParentUser() {
+            return true;
         }
 
         @Override
