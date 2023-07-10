@@ -226,8 +226,6 @@
     <dimen name="bubble_user_education_padding_end">58dp</dimen>
     <!-- Padding between the bubble and the user education text. -->
     <dimen name="bubble_user_education_stack_padding">16dp</dimen>
-    <!-- Size of the bubble bar (height), should match transient_taskbar_size in Launcher. -->
-    <dimen name="bubblebar_size">72dp</dimen>
     <!-- The size of the caption bar inset at the top of bubble bar expanded view. -->
     <dimen name="bubble_bar_expanded_view_caption_height">32dp</dimen>
     <!-- The height of the dots shown for the caption menu in the bubble bar expanded view.. -->

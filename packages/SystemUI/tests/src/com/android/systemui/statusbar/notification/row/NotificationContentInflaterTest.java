@@ -92,6 +92,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     @Mock private ConversationNotificationProcessor mConversationNotificationProcessor;
     @Mock private InflatedSmartReplyState mInflatedSmartReplyState;
     @Mock private InflatedSmartReplyViewHolder mInflatedSmartReplies;
+    @Mock private NotifLayoutInflaterFactory mNotifLayoutInflaterFactory;
 
     private final SmartReplyStateInflater mSmartReplyStateInflater =
             new SmartReplyStateInflater() {
@@ -130,7 +131,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mConversationNotificationProcessor,
                 mock(MediaFeatureFlag.class),
                 mock(Executor.class),
-                mSmartReplyStateInflater);
+                mSmartReplyStateInflater,
+                mNotifLayoutInflaterFactory);
     }
 
     @Test

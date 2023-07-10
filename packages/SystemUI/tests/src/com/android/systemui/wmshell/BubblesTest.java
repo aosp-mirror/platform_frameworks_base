@@ -1996,7 +1996,7 @@ public class BubblesTest extends SysuiTestCase {
 
         FakeBubbleStateListener bubbleStateListener = new FakeBubbleStateListener();
         mBubbleController.registerBubbleStateListener(bubbleStateListener);
-        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), true);
+        mBubbleController.expandStackAndSelectBubbleFromLauncher(mBubbleEntry.getKey(), 500, 1000);
 
         assertThat(mBubbleController.getLayerView().isExpanded()).isTrue();
 
