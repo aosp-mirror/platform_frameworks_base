@@ -613,16 +613,26 @@ public class CameraServiceProxy extends SystemService
 
         @Override
         public boolean isCameraDisabled(int userId) {
-            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-            if (dpm == null) {
-                Slog.e(TAG, "Failed to get the device policy manager service");
+            if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
+                Slog.e(TAG, "Calling UID: " + Binder.getCallingUid()
+                        + " doesn't match expected camera service UID!");
                 return false;
             }
+            final long ident = Binder.clearCallingIdentity();
             try {
-                return dpm.getCameraDisabled(null, userId);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
+                DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+                if (dpm == null) {
+                    Slog.e(TAG, "Failed to get the device policy manager service");
+                    return false;
+                }
+                try {
+                    return dpm.getCameraDisabled(null, userId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
     };
