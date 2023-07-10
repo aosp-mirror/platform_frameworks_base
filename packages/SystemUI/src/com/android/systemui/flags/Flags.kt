@@ -268,6 +268,16 @@ object Flags {
     @JvmField
     val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area", teamfood = true)
 
+    /**
+     * Migrate the bottom area to the new keyguard root view.
+     * Because there is no such thing as a "bottom area" after this, this also breaks it up into
+     * many smaller, modular pieces.
+     */
+    // TODO(b/290652751): Tracking bug.
+    @JvmField
+    val MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA =
+        unreleasedFlag(290652751, "migrate_split_keyguard_bottom_area")
+
     /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
     // TODO(b/283260512): Tracking bug.
     @JvmField
