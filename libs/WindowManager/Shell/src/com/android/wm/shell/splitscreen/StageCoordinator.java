@@ -2564,6 +2564,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 // so don't handle it.
                 Log.e(TAG, "Somehow removed the last task in a stage outside of a proper "
                         + "transition.");
+                // This new transition would be merged to current one so we need to clear
+                // tile manually here.
+                clearSplitPairedInRecents(EXIT_REASON_APP_FINISHED);
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 final int dismissTop = (dismissStages.size() == 1
                         && getStageType(dismissStages.valueAt(0)) == STAGE_TYPE_MAIN)
@@ -2744,6 +2747,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 Log.w(TAG, splitFailureMessage("startPendingEnterAnimation",
                         "launched 2 tasks in split, but didn't receive "
                         + "2 tasks in transition. Possibly one of them failed to launch"));
+                if (mRecentTasks.isPresent() && mainChild != null) {
+                    mRecentTasks.get().removeSplitPair(mainChild.getTaskInfo().taskId);
+                }
+                if (mRecentTasks.isPresent() && sideChild != null) {
+                    mRecentTasks.get().removeSplitPair(sideChild.getTaskInfo().taskId);
+                }
                 mSplitUnsupportedToast.show();
                 return true;
             }
