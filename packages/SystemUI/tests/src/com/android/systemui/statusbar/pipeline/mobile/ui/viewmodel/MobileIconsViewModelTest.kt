@@ -92,15 +92,31 @@ class MobileIconsViewModelTest : SysuiTestCase() {
 
             interactor.filteredSubscriptions.value =
                 listOf(
-                    SubscriptionModel(subscriptionId = 1, isOpportunistic = false),
+                    SubscriptionModel(
+                        subscriptionId = 1,
+                        isOpportunistic = false,
+                        carrierName = "Carrier 1",
+                    ),
                 )
             assertThat(latest).isEqualTo(listOf(1))
 
             interactor.filteredSubscriptions.value =
                 listOf(
-                    SubscriptionModel(subscriptionId = 2, isOpportunistic = false),
-                    SubscriptionModel(subscriptionId = 5, isOpportunistic = true),
-                    SubscriptionModel(subscriptionId = 7, isOpportunistic = true),
+                    SubscriptionModel(
+                        subscriptionId = 2,
+                        isOpportunistic = false,
+                        carrierName = "Carrier 2",
+                    ),
+                    SubscriptionModel(
+                        subscriptionId = 5,
+                        isOpportunistic = true,
+                        carrierName = "Carrier 5",
+                    ),
+                    SubscriptionModel(
+                        subscriptionId = 7,
+                        isOpportunistic = true,
+                        carrierName = "Carrier 7",
+                    ),
                 )
             assertThat(latest).isEqualTo(listOf(2, 5, 7))
 
@@ -308,8 +324,23 @@ class MobileIconsViewModelTest : SysuiTestCase() {
         }
 
     companion object {
-        private val SUB_1 = SubscriptionModel(subscriptionId = 1, isOpportunistic = false)
-        private val SUB_2 = SubscriptionModel(subscriptionId = 2, isOpportunistic = false)
-        private val SUB_3 = SubscriptionModel(subscriptionId = 3, isOpportunistic = false)
+        private val SUB_1 =
+            SubscriptionModel(
+                subscriptionId = 1,
+                isOpportunistic = false,
+                carrierName = "Carrier 1",
+            )
+        private val SUB_2 =
+            SubscriptionModel(
+                subscriptionId = 2,
+                isOpportunistic = false,
+                carrierName = "Carrier 2",
+            )
+        private val SUB_3 =
+            SubscriptionModel(
+                subscriptionId = 3,
+                isOpportunistic = false,
+                carrierName = "Carrier 3",
+            )
     }
 }

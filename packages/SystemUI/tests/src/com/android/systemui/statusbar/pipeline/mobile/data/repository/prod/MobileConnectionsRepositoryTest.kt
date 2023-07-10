@@ -1190,30 +1190,36 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     companion object {
         // Subscription 1
         private const val SUB_1_ID = 1
+        private const val SUB_1_NAME = "Carrier $SUB_1_ID"
         private val GROUP_1 = ParcelUuid(UUID.randomUUID())
         private val SUB_1 =
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_1_ID)
                 whenever(it.groupUuid).thenReturn(GROUP_1)
+                whenever(it.carrierName).thenReturn(SUB_1_NAME)
             }
         private val MODEL_1 =
             SubscriptionModel(
                 subscriptionId = SUB_1_ID,
                 groupUuid = GROUP_1,
+                carrierName = SUB_1_NAME,
             )
 
         // Subscription 2
         private const val SUB_2_ID = 2
+        private const val SUB_2_NAME = "Carrier $SUB_2_ID"
         private val GROUP_2 = ParcelUuid(UUID.randomUUID())
         private val SUB_2 =
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_2_ID)
                 whenever(it.groupUuid).thenReturn(GROUP_2)
+                whenever(it.carrierName).thenReturn(SUB_2_NAME)
             }
         private val MODEL_2 =
             SubscriptionModel(
                 subscriptionId = SUB_2_ID,
                 groupUuid = GROUP_2,
+                carrierName = SUB_2_NAME,
             )
 
         // Subs 3 and 4 are considered to be in the same group ------------------------------------
@@ -1242,9 +1248,14 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         // Carrier merged subscription
         private const val SUB_CM_ID = 5
+        private const val SUB_CM_NAME = "Carrier $SUB_CM_ID"
         private val SUB_CM =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_CM_ID) }
-        private val MODEL_CM = SubscriptionModel(subscriptionId = SUB_CM_ID)
+            mock<SubscriptionInfo>().also {
+                whenever(it.subscriptionId).thenReturn(SUB_CM_ID)
+                whenever(it.carrierName).thenReturn(SUB_CM_NAME)
+            }
+        private val MODEL_CM =
+            SubscriptionModel(subscriptionId = SUB_CM_ID, carrierName = SUB_CM_NAME)
 
         private val WIFI_INFO_CM =
             mock<WifiInfo>().apply {
