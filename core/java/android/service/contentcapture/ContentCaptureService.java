@@ -15,6 +15,8 @@
  */
 package android.service.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_PAUSED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_RESUMED;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureHelper.toList;
@@ -569,7 +571,16 @@ public abstract class ContentCaptureService extends Service {
         List<ContentCaptureEvent> events = parceledEvents.getList();
         int sessionIdInt = events.isEmpty() ? NO_SESSION_ID : events.get(0).getSessionId();
         ContentCaptureSessionId sessionId = new ContentCaptureSessionId(sessionIdInt);
+
+        ContentCaptureEvent startEvent =
+                new ContentCaptureEvent(sessionIdInt, TYPE_SESSION_RESUMED);
+        startEvent.setSelectionIndex(0, events.size());
+        onContentCaptureEvent(sessionId, startEvent);
+
         events.forEach(event -> onContentCaptureEvent(sessionId, event));
+
+        ContentCaptureEvent endEvent = new ContentCaptureEvent(sessionIdInt, TYPE_SESSION_PAUSED);
+        onContentCaptureEvent(sessionId, endEvent);
     }
 
     private void handleOnActivitySnapshot(int sessionId, @NonNull SnapshotData snapshotData) {
