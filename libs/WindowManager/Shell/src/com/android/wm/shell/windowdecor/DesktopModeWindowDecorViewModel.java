@@ -799,6 +799,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         return DesktopModeStatus.isProto2Enabled()
                 && taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
+                && !taskInfo.configuration.windowConfiguration.isAlwaysOnTop()
                 && mDisplayController.getDisplayContext(taskInfo.displayId)
                 .getResources().getConfiguration().smallestScreenWidthDp >= 600;
     }
