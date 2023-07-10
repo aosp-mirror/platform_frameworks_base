@@ -90,7 +90,8 @@ public class WindowInfosListenerForTest {
 
         @Override
         public String toString() {
-            return name + ", frame=" + bounds
+            return name + ", displayId=" + displayId
+                    + ", frame=" + bounds
                     + ", isVisible=" + isVisible
                     + ", isTrustedOverlay=" + isTrustedOverlay
                     + ", token=" + windowToken;
