@@ -1375,8 +1375,6 @@ struct ResTable_config
     // match the requested configuration at all.
     bool isLocaleBetterThan(const ResTable_config& o, const ResTable_config* requested) const;
 
-    bool isBetterThanBeforeLocale(const ResTable_config& o, const ResTable_config* requested) const;
-
     String8 toString() const;
 };
 
