@@ -2250,4 +2250,19 @@ public class ServiceState implements Parcelable {
             return false;
         }
     }
+
+    /**
+     * Get whether device is connected to a non-terrestrial network.
+     *
+     * @return {@code true} if device is connected to a non-terrestrial network else {@code false}.
+     * @hide
+     */
+    public boolean isUsingNonTerrestrialNetwork() {
+        synchronized (mNetworkRegistrationInfos) {
+            for (NetworkRegistrationInfo nri : mNetworkRegistrationInfos) {
+                if (nri.isNonTerrestrialNetwork()) return true;
+            }
+        }
+        return false;
+    }
 }
