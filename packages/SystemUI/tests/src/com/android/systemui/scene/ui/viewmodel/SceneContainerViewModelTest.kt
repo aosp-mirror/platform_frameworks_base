@@ -40,7 +40,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     private val underTest =
         SceneContainerViewModel(
             interactor = interactor,
-            containerName = "container1",
+            containerName = SceneTestUtils.CONTAINER_1,
         )
 
     @Test
@@ -48,10 +48,10 @@ class SceneContainerViewModelTest : SysuiTestCase() {
         val isVisible by collectLastValue(underTest.isVisible)
         assertThat(isVisible).isTrue()
 
-        interactor.setVisible("container1", false)
+        interactor.setVisible(SceneTestUtils.CONTAINER_1, false)
         assertThat(isVisible).isFalse()
 
-        interactor.setVisible("container1", true)
+        interactor.setVisible(SceneTestUtils.CONTAINER_1, true)
         assertThat(isVisible).isTrue()
     }
 

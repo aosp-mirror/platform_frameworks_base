@@ -18,8 +18,8 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
@@ -110,18 +110,16 @@ class BouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val message by collectLastValue(underTest.message)
             val throttling by collectLastValue(bouncerInteractor.throttling)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(message?.isUpdateAnimated).isTrue()
 
-            repeat(BouncerInteractor.THROTTLE_EVERY) {
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
                 // Wrong PIN.
                 bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
             }
             assertThat(message?.isUpdateAnimated).isFalse()
 
-            throttling?.totalDurationSec?.let { seconds -> advanceTimeBy(seconds * 1000L) }
+            throttling?.remainingMs?.let { remainingMs -> advanceTimeBy(remainingMs.toLong()) }
             assertThat(message?.isUpdateAnimated).isTrue()
         }
 
@@ -135,18 +133,16 @@ class BouncerViewModelTest : SysuiTestCase() {
                     }
                 )
             val throttling by collectLastValue(bouncerInteractor.throttling)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(isInputEnabled).isTrue()
 
-            repeat(BouncerInteractor.THROTTLE_EVERY) {
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
                 // Wrong PIN.
                 bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
             }
             assertThat(isInputEnabled).isFalse()
 
-            throttling?.totalDurationSec?.let { seconds -> advanceTimeBy(seconds * 1000L) }
+            throttling?.remainingMs?.let { milliseconds -> advanceTimeBy(milliseconds.toLong()) }
             assertThat(isInputEnabled).isTrue()
         }
 
@@ -154,11 +150,9 @@ class BouncerViewModelTest : SysuiTestCase() {
     fun throttlingDialogMessage() =
         testScope.runTest {
             val throttlingDialogMessage by collectLastValue(underTest.throttlingDialogMessage)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
 
-            repeat(BouncerInteractor.THROTTLE_EVERY) {
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
                 // Wrong PIN.
                 assertThat(throttlingDialogMessage).isNull()
                 bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
@@ -173,11 +167,9 @@ class BouncerViewModelTest : SysuiTestCase() {
         return listOf(
             AuthenticationMethodModel.None,
             AuthenticationMethodModel.Swipe,
-            AuthenticationMethodModel.Pin(1234),
-            AuthenticationMethodModel.Password("password"),
-            AuthenticationMethodModel.Pattern(
-                listOf(AuthenticationMethodModel.Pattern.PatternCoordinate(1, 1))
-            ),
+            AuthenticationMethodModel.Pin,
+            AuthenticationMethodModel.Password,
+            AuthenticationMethodModel.Pattern,
         )
     }
 }

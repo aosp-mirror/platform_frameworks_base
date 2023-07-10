@@ -70,9 +70,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_deviceLocked_lockScreen() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(false)
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
@@ -82,9 +80,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_deviceUnlocked_gone() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(true)
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
@@ -94,9 +90,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(true)
             runCurrent()
 
@@ -109,9 +103,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(false)
             runCurrent()
 
