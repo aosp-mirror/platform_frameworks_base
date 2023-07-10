@@ -311,8 +311,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             super.onBootPhase(phase);
             if (phase == PHASE_ACTIVITY_MANAGER_READY) {
                 mLockSettingsService.migrateOldDataAfterSystemReady();
-                mLockSettingsService.loadEscrowData();
                 mLockSettingsService.deleteRepairModePersistentDataIfNeeded();
+            } else if (phase == PHASE_BOOT_COMPLETED) {
+                mLockSettingsService.loadEscrowData();
             }
         }
 
@@ -843,7 +844,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         mHasSecureLockScreen = mContext.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN);
         migrateOldData();
-        getGateKeeperService();
         getAuthSecretHal();
         mDeviceProvisionedObserver.onSystemReady();
 
@@ -2599,7 +2599,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             return mGateKeeperService;
         }
 
-        final IBinder service = ServiceManager.getService(Context.GATEKEEPER_SERVICE);
+        final IBinder service = ServiceManager.waitForService(Context.GATEKEEPER_SERVICE);
         if (service != null) {
             try {
                 service.linkToDeath(new GateKeeperDiedRecipient(), 0);

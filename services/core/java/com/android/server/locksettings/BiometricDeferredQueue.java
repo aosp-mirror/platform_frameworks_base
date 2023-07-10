@@ -311,7 +311,7 @@ public class BiometricDeferredQueue {
 
     @Nullable
     private static synchronized IGateKeeperService getGatekeeperService() {
-        final IBinder service = ServiceManager.getService(Context.GATEKEEPER_SERVICE);
+        final IBinder service = ServiceManager.waitForService(Context.GATEKEEPER_SERVICE);
         if (service == null) {
             Slog.e(TAG, "Unable to acquire GateKeeperService");
             return null;
