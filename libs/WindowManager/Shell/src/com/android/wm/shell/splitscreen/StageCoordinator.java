@@ -732,12 +732,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mMainStage.activate(wct, false /* reparent */);
         }
 
+        setSideStagePosition(splitPosition, wct);
         mSplitLayout.setDivideRatio(splitRatio);
         updateWindowBounds(mSplitLayout, wct);
         wct.reorder(mRootTaskInfo.token, true);
         setRootForceTranslucent(false, wct);
 
-        setSideStagePosition(splitPosition, wct);
         options1 = options1 != null ? options1 : new Bundle();
         addActivityOptions(options1, mSideStage);
         if (shortcutInfo1 != null) {
