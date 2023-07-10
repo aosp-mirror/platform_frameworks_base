@@ -620,6 +620,28 @@ public final class BroadcastQueueModernImplTest {
         assertEquals(BroadcastProcessQueue.REASON_CORE_UID, queue.getRunnableAtReason());
     }
 
+    @Test
+    public void testRunnableAt_freezableCoreUid() {
+        final BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
+                "com.android.bluetooth", Process.BLUETOOTH_UID);
+
+        // Mark the process as freezable
+        queue.setProcessAndUidState(mProcess, false, true);
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastOptions options = BroadcastOptions.makeWithDeferUntilActive(true);
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick, options,
+                List.of(makeMockRegisteredReceiver()), false);
+        enqueueOrReplaceBroadcast(queue, timeTickRecord, 0);
+
+        assertEquals(Long.MAX_VALUE, queue.getRunnableAt());
+        assertEquals(BroadcastProcessQueue.REASON_CACHED_INFINITE_DEFER,
+                queue.getRunnableAtReason());
+
+        queue.setProcessAndUidState(mProcess, false, false);
+        assertThat(queue.getRunnableAt()).isEqualTo(timeTickRecord.enqueueTime);
+        assertEquals(BroadcastProcessQueue.REASON_CORE_UID, queue.getRunnableAtReason());
+    }
+
     /**
      * Verify that a cached process that would normally be delayed becomes
      * immediately runnable when the given broadcast is enqueued.
