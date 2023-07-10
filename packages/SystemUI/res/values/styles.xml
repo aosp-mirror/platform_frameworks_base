@@ -1116,7 +1116,7 @@
     <style name="Widget.Dialog.Button">
         <item name="android:buttonCornerRadius">28dp</item>
         <item name="android:background">@drawable/qs_dialog_btn_filled</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimary</item>
+        <item name="android:textColor">@color/qs_dialog_btn_filled_text_color</item>
         <item name="android:textSize">14sp</item>
         <item name="android:lineHeight">20sp</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
