@@ -18,6 +18,7 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.PackageManager;
 import android.hardware.security.keymint.KeyParameter;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
@@ -299,6 +300,12 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
             return false;
         }
 
+        private static boolean hasKeyMintV2() {
+            PackageManager pm = android.app.AppGlobals.getInitialApplication().getPackageManager();
+            return pm.hasSystemFeature(PackageManager.FEATURE_HARDWARE_KEYSTORE, 200)
+                    && !pm.hasSystemFeature(PackageManager.FEATURE_HARDWARE_KEYSTORE, 300);
+        }
+
         @Override
         protected final void addAlgorithmSpecificParametersToBegin(
                 @NonNull List<KeyParameter> parameters, Authorization[] keyCharacteristics) {
@@ -307,11 +314,12 @@ abstract class AndroidKeyStoreRSACipherSpi extends AndroidKeyStoreCipherSpiBase 
                     KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigest
             ));
             // Only add the KM_TAG_RSA_OAEP_MGF_DIGEST tag to begin() if the MGF Digest is
-            // present in the key properties. Keys generated prior to Android 14 did not have
-            // this tag (Keystore didn't add it) so specifying any MGF digest tag would cause
-            // a begin() operation (on an Android 14 device) to fail (with a key that was generated
-            // on Android 13 or below).
-            if (isMgfDigestTagPresentInKeyProperties(keyCharacteristics)) {
+            // present in the key properties or KeyMint version is 200. Keys generated prior to
+            // Android 14 did not have this tag (Keystore didn't add it) and hence not present in
+            // imported key as well, so specifying any MGF digest tag would cause a begin()
+            // operation (on an Android 14 device) to fail (with a key that was generated on
+            // Android 13 or below).
+            if (isMgfDigestTagPresentInKeyProperties(keyCharacteristics) || hasKeyMintV2()) {
                 parameters.add(KeyStore2ParameterUtils.makeEnum(
                         KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST, mKeymasterMgf1Digest
                 ));
