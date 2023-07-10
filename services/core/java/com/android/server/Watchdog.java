@@ -915,7 +915,7 @@ public class Watchdog implements Dumpable {
         // The system's been hanging for a whlie, another second or two won't hurt much.
         SystemClock.sleep(5000);
         processCpuTracker.update();
-        report.append(processCpuTracker.printCurrentState(anrTime));
+        report.append(processCpuTracker.printCurrentState(anrTime, 10));
         report.append(tracesFileException.getBuffer());
 
         if (!halfWatchdog) {
