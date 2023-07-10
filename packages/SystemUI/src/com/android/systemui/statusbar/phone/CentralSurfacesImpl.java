@@ -2098,11 +2098,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     @Override
-    public int getDisplayId() {
-        return mDisplayId;
-    }
-
-    @Override
     public void readyForKeyguardDone() {
         mStatusBarKeyguardViewManager.readyForKeyguardDone();
     }

@@ -355,8 +355,6 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void updateNotificationPanelTouchState();
 
-    int getDisplayId();
-
     int getRotation();
 
     @VisibleForTesting
