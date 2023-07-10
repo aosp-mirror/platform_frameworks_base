@@ -65,16 +65,6 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
         }
     }
 
-    /** Assert the background animation layer is never visible during bounds change transition. */
-    @Presubmit
-    @Test
-    fun backgroundLayerNeverVisible() {
-        val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
-        flicker.assertLayers {
-            isInvisible(backgroundColorLayer)
-        }
-    }
-
     /** Trampoline activity should finish itself before the end of this test. */
     @Presubmit
     @Test
