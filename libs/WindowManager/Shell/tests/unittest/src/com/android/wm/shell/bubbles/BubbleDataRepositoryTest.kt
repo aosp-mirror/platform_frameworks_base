@@ -19,21 +19,17 @@ package com.android.wm.shell.bubbles
 import android.app.ActivityTaskManager
 import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
-import android.os.Handler
-import android.os.Looper
 import android.util.SparseArray
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.bubbles.storage.BubbleEntity
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
-import com.android.wm.shell.common.HandlerExecutor
+import com.android.wm.shell.common.ShellExecutor
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 class BubbleDataRepositoryTest : ShellTestCase() {
 
@@ -122,8 +118,7 @@ class BubbleDataRepositoryTest : ShellTestCase() {
         )
     )
 
-    private val testHandler = Handler(Looper.getMainLooper())
-    private val mainExecutor = HandlerExecutor(testHandler)
+    private val mainExecutor = mock(ShellExecutor::class.java)
     private val launcherApps = mock(LauncherApps::class.java)
 
     private val persistedBubbles = SparseArray<List<BubbleEntity>>()
@@ -150,44 +145,32 @@ class BubbleDataRepositoryTest : ShellTestCase() {
 
     @Test
     fun testLoadBubbles_invalidParent() {
-        val latch = CountDownLatch(1)
         val activeUserIds = listOf(10, 1, 12) // Missing user 0 in persistedBubbles
-
         dataRepository.loadBubbles(1, activeUserIds) {
-            latch.countDown()
+            // Verify that user 0 has been removed from the persisted list
+            val entitiesByUser = persistentRepository.readFromDisk()
+            assertThat(entitiesByUser.get(0)).isNull()
         }
-        latch.await(500, TimeUnit.MILLISECONDS)
-        assertThat(latch.count).isEqualTo(0)
-
-        // Verify that user 0 has been removed from the persisted list
-        val entitiesByUser = persistentRepository.readFromDisk()
-        assertThat(entitiesByUser.get(0)).isNull()
     }
 
     @Test
     fun testLoadBubbles_invalidChild() {
-        val latch = CountDownLatch(1)
         val activeUserIds = listOf(0, 10, 1) // Missing user 1's child user 12
-
-        // Build a list to compare against (remove all user 12 bubbles)
-        val user1BubblesWithoutUser12 = mutableListOf<Bubble>()
-        val user1EntitiesWithoutUser12 = mutableListOf<BubbleEntity>()
-        for (entity in user1BubbleEntities) {
-            if (entity.userId != 12) {
-                user1BubblesWithoutUser12.add(entity.toBubble())
-                user1EntitiesWithoutUser12.add(entity)
-            }
-        }
-
         dataRepository.loadBubbles(1, activeUserIds) {
-            latch.countDown()
-        }
-        latch.await(500, TimeUnit.MILLISECONDS)
-        assertThat(latch.count).isEqualTo(0)
+            // Build a list to compare against
+            val user1BubblesWithoutUser12 = mutableListOf<Bubble>()
+            val user1EntitiesWithoutUser12 = mutableListOf<BubbleEntity>()
+            for (entity in user1BubbleEntities) {
+                if (entity.userId != 12) {
+                    user1BubblesWithoutUser12.add(entity.toBubble())
+                    user1EntitiesWithoutUser12.add(entity)
+                }
+            }
 
-        // Verify that user 12 has been removed from the persisted list
-        val entitiesByUser = persistentRepository.readFromDisk()
-        assertThat(entitiesByUser.get(1)).isEqualTo(user1EntitiesWithoutUser12)
+            // Verify that user 12 has been removed from the persisted list
+            val entitiesByUser = persistentRepository.readFromDisk()
+            assertThat(entitiesByUser.get(1)).isEqualTo(user1EntitiesWithoutUser12)
+        }
     }
 
     private fun BubbleEntity.toBubble(): Bubble {
