@@ -837,7 +837,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     void adjustVolume(MediaDevice device, int volume) {
         ThreadUtils.postOnBackgroundThread(() -> {
-            device.requestSetVolume(volume);
+            mLocalMediaManager.adjustDeviceVolume(device, volume);
         });
     }
 

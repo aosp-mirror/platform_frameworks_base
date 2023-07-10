@@ -188,11 +188,7 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         device.setState(MediaDeviceState.STATE_CONNECTING);
-        if (TextUtils.isEmpty(mPackageName)) {
-            mInfoMediaManager.connectDeviceWithoutPackageName(device);
-        } else {
-            device.connect();
-        }
+        mInfoMediaManager.connectToDevice(device);
         return true;
     }
 
@@ -373,6 +369,16 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public List<MediaDevice> getSelectedMediaDevice() {
         return mInfoMediaManager.getSelectedMediaDevices();
+    }
+
+    /**
+     * Requests a volume change for a specific media device.
+     *
+     * This operation is different from {@link #adjustSessionVolume(String, int)}, which changes the
+     * volume of the overall session.
+     */
+    public void adjustDeviceVolume(MediaDevice device, int volume) {
+        mInfoMediaManager.adjustDeviceVolume(device, volume);
     }
 
     /**
@@ -559,9 +565,7 @@ public class LocalMediaManager implements BluetoothCallback {
                 final CachedBluetoothDevice cachedDevice =
                         cachedDeviceManager.findDevice(device);
                 if (isBondedMediaDevice(cachedDevice) && isMutingExpectedDevice(cachedDevice)) {
-                    return new BluetoothMediaDevice(mContext,
-                            cachedDevice,
-                            null, null, mPackageName);
+                    return new BluetoothMediaDevice(mContext, cachedDevice, null, mPackageName);
                 }
             }
             return null;
@@ -607,9 +611,8 @@ public class LocalMediaManager implements BluetoothCallback {
             unRegisterDeviceAttributeChangeCallback();
             mDisconnectedMediaDevices.clear();
             for (CachedBluetoothDevice cachedDevice : cachedBluetoothDeviceList) {
-                final MediaDevice mediaDevice = new BluetoothMediaDevice(mContext,
-                        cachedDevice,
-                        null, null, mPackageName);
+                final MediaDevice mediaDevice =
+                        new BluetoothMediaDevice(mContext, cachedDevice, null, mPackageName);
                 if (!mMediaDevices.contains(mediaDevice)) {
                     cachedDevice.registerCallback(mDeviceAttributeChangeCallback);
                     mDisconnectedMediaDevices.add(mediaDevice);

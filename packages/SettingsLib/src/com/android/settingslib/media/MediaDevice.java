@@ -50,7 +50,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter2Manager;
 import android.media.NearbyDevice;
 import android.media.RouteListingPreference;
 import android.os.Build;
@@ -116,15 +115,16 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
 
     protected final Context mContext;
     protected final MediaRoute2Info mRouteInfo;
-    protected final MediaRouter2Manager mRouterManager;
     protected final RouteListingPreference.Item mItem;
     protected final String mPackageName;
 
-    MediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
-            String packageName, RouteListingPreference.Item item) {
+    MediaDevice(
+            Context context,
+            MediaRoute2Info info,
+            String packageName,
+            RouteListingPreference.Item item) {
         mContext = context;
         mRouteInfo = info;
-        mRouterManager = routerManager;
         mPackageName = packageName;
         mItem = item;
         setType(info);
@@ -306,20 +306,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public abstract boolean isConnected();
 
     /**
-     * Request to set volume.
-     *
-     * @param volume is the new value.
-     */
-
-    public void requestSetVolume(int volume) {
-        if (mRouteInfo == null) {
-            Log.w(TAG, "Unable to set volume. RouteInfo is empty");
-            return;
-        }
-        mRouterManager.setRouteVolume(mRouteInfo, volume);
-    }
-
-    /**
      * Get max volume from MediaDevice.
      *
      * @return max volume.
@@ -390,21 +376,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             return true;
         }
         return mRouteInfo.getVolumeHandling() == MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
-    }
-
-    /**
-     * Transfer MediaDevice for media
-     *
-     * @return result of transfer media
-     */
-    public boolean connect() {
-        if (mRouteInfo == null) {
-            Log.w(TAG, "Unable to connect. RouteInfo is empty");
-            return false;
-        }
-        setConnectedRecord();
-        mRouterManager.transfer(mPackageName, mRouteInfo);
-        return true;
     }
 
     /**

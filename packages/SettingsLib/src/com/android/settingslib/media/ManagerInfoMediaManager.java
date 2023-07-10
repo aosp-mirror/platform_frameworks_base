@@ -28,7 +28,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 
 import java.util.ArrayList;
@@ -81,6 +80,11 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
     }
 
     @Override
+    protected void transferToRoute(@NonNull MediaRoute2Info route) {
+        mRouterManager.transfer(mPackageName, route);
+    }
+
+    @Override
     protected boolean connectDeviceWithoutPackageName(@NonNull MediaDevice device) {
         final RoutingSessionInfo info = mRouterManager.getSystemRoutingSession(null);
         if (info != null) {
@@ -129,6 +133,11 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
     }
 
     @Override
+    protected void setRouteVolume(@NonNull MediaRoute2Info route, int volume) {
+        mRouterManager.setRouteVolume(route, volume);
+    }
+
+    @Override
     @Nullable
     protected RouteListingPreference getRouteListingPreference() {
         return mRouterManager.getRouteListingPreference(mPackageName);
@@ -165,40 +174,6 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
     @NonNull
     protected List<MediaRoute2Info> getTransferableRoutes(@NonNull String packageName) {
         return mRouterManager.getTransferableRoutes(packageName);
-    }
-
-    @Override
-    @NonNull
-    protected ComplexMediaDevice createComplexMediaDevice(
-            MediaRoute2Info route, RouteListingPreference.Item routeListingPreferenceItem) {
-        return new ComplexMediaDevice(
-                mContext, mRouterManager, route, mPackageName, routeListingPreferenceItem);
-    }
-
-    @Override
-    @NonNull
-    protected InfoMediaDevice createInfoMediaDevice(
-            MediaRoute2Info route, RouteListingPreference.Item routeListingPreferenceItem) {
-        return new InfoMediaDevice(
-                mContext, mRouterManager, route, mPackageName, routeListingPreferenceItem);
-    }
-
-    @Override
-    @NonNull
-    protected PhoneMediaDevice createPhoneMediaDevice(MediaRoute2Info route,
-            RouteListingPreference.Item routeListingPreferenceItem) {
-        return new PhoneMediaDevice(mContext, mRouterManager, route, mPackageName,
-                routeListingPreferenceItem);
-    }
-
-    @Override
-    @NonNull
-    protected BluetoothMediaDevice createBluetoothMediaDevice(
-            MediaRoute2Info route, CachedBluetoothDevice cachedDevice,
-            RouteListingPreference.Item routeListingPreferenceItem) {
-        return new BluetoothMediaDevice(
-                mContext, cachedDevice, mRouterManager, route, mPackageName,
-                routeListingPreferenceItem);
     }
 
     @VisibleForTesting
