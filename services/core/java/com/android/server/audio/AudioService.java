@@ -3449,8 +3449,14 @@ public class AudioService extends IAudioService.Stub
                         hdmiClient = mHdmiTvClient;
                     }
 
-                    if (((mHdmiPlaybackClient != null && isFullVolumeDevice(device))
-                            || (mHdmiTvClient != null && mHdmiSystemAudioSupported))
+                    boolean playbackDeviceConditions = mHdmiPlaybackClient != null
+                            && isFullVolumeDevice(device);
+                    boolean tvConditions = mHdmiTvClient != null
+                            && mHdmiSystemAudioSupported
+                            && !isAbsoluteVolumeDevice(device)
+                            && !isA2dpAbsoluteVolumeDevice(device);
+
+                    if ((playbackDeviceConditions || tvConditions)
                             && mHdmiCecVolumeControlEnabled
                             && streamTypeAlias == AudioSystem.STREAM_MUSIC) {
                         int keyCode = KeyEvent.KEYCODE_UNKNOWN;
