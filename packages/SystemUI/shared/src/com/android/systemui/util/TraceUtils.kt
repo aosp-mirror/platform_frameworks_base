@@ -67,7 +67,7 @@ class TraceUtils {
          * under a single track.
          */
         inline fun <T> traceAsync(method: String, block: () -> T): T =
-            traceAsync(method, "AsyncTraces", block)
+            traceAsync("AsyncTraces", method, block)
 
         /**
          * Creates an async slice in a track with [trackName] while [block] runs.
@@ -76,7 +76,7 @@ class TraceUtils {
          * [trackName] of the track. The track is one of the rows visible in a perfetto trace inside
          * SystemUI process.
          */
-        inline fun <T> traceAsync(method: String, trackName: String, block: () -> T): T {
+        inline fun <T> traceAsync(trackName: String, method: String, block: () -> T): T {
             val cookie = lastCookie.incrementAndGet()
             Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, trackName, method, cookie)
             try {
