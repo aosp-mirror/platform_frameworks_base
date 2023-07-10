@@ -43,11 +43,4 @@ abstract class SplitScreenBase(flicker: LegacyFlickerTest) : BaseBenchmarkTest(f
             secondaryApp.exit(wmHelper)
         }
     }
-
-    protected open val withoutTracing: FlickerBuilder.() -> Unit = {
-        withoutLayerTracing()
-        withoutWindowManagerTracing()
-        withoutTransitionTracing()
-        withoutTransactionsTracing()
-    }
 }
