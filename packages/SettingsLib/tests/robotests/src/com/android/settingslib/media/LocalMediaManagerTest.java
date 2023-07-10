@@ -433,9 +433,9 @@ public class LocalMediaManagerTest {
         final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
         when(info.getId()).thenReturn(TEST_SESSION_ID);
         routingSessionInfos.add(info);
-        when(mInfoMediaManager.getActiveRoutingSessions()).thenReturn(routingSessionInfos);
+        when(mInfoMediaManager.getRemoteSessions()).thenReturn(routingSessionInfos);
 
-        assertThat(mLocalMediaManager.getActiveMediaSession().get(0).getId())
+        assertThat(mLocalMediaManager.getRemoteRoutingSessions().get(0).getId())
                 .matches(TEST_SESSION_ID);
     }
 
@@ -544,7 +544,7 @@ public class LocalMediaManagerTest {
         final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
         when(info.getId()).thenReturn(TEST_SESSION_ID);
         routingSessionInfos.add(info);
-        when(mInfoMediaManager.getActiveRoutingSessions()).thenReturn(routingSessionInfos);
+        when(mInfoMediaManager.getRoutingSessionById(TEST_SESSION_ID)).thenReturn(info);
 
         mLocalMediaManager.adjustSessionVolume(TEST_SESSION_ID, 10);
 

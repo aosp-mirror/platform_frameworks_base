@@ -783,30 +783,17 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void getActiveRemoteMediaDevice_isSystemSession_returnSession() {
+    public void getActiveRemoteMediaDevices() {
         when(mRemoteSessionInfo.getId()).thenReturn(TEST_SESSION_ID);
         when(mRemoteSessionInfo.getName()).thenReturn(TEST_SESSION_NAME);
         when(mRemoteSessionInfo.getVolumeMax()).thenReturn(100);
         when(mRemoteSessionInfo.getVolume()).thenReturn(10);
         when(mRemoteSessionInfo.isSystemSession()).thenReturn(false);
         mRoutingSessionInfos.add(mRemoteSessionInfo);
-        when(mLocalMediaManager.getActiveMediaSession()).thenReturn(mRoutingSessionInfos);
+        when(mLocalMediaManager.getRemoteRoutingSessions()).thenReturn(mRoutingSessionInfos);
 
         assertThat(mMediaOutputController.getActiveRemoteMediaDevices()).containsExactly(
                 mRemoteSessionInfo);
-    }
-
-    @Test
-    public void getActiveRemoteMediaDevice_notSystemSession_returnEmpty() {
-        when(mRemoteSessionInfo.getId()).thenReturn(TEST_SESSION_ID);
-        when(mRemoteSessionInfo.getName()).thenReturn(TEST_SESSION_NAME);
-        when(mRemoteSessionInfo.getVolumeMax()).thenReturn(100);
-        when(mRemoteSessionInfo.getVolume()).thenReturn(10);
-        when(mRemoteSessionInfo.isSystemSession()).thenReturn(true);
-        mRoutingSessionInfos.add(mRemoteSessionInfo);
-        when(mLocalMediaManager.getActiveMediaSession()).thenReturn(mRoutingSessionInfos);
-
-        assertThat(mMediaOutputController.getActiveRemoteMediaDevices()).isEmpty();
     }
 
     @Test

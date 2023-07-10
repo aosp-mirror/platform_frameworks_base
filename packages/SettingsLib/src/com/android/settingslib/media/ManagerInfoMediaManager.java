@@ -30,7 +30,6 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -151,11 +150,22 @@ public class ManagerInfoMediaManager extends InfoMediaManager {
 
     @Override
     @NonNull
-    protected List<RoutingSessionInfo> getActiveRoutingSessions() {
-        List<RoutingSessionInfo> infos = new ArrayList<>();
-        infos.add(mRouterManager.getSystemRoutingSession(null));
-        infos.addAll(mRouterManager.getRemoteSessions());
-        return infos;
+    protected List<RoutingSessionInfo> getRemoteSessions() {
+        return mRouterManager.getRemoteSessions();
+    }
+
+    @Nullable
+    @Override
+    protected RoutingSessionInfo getRoutingSessionById(@NonNull String sessionId) {
+        for (RoutingSessionInfo sessionInfo : getRemoteSessions()) {
+            if (TextUtils.equals(sessionInfo.getId(), sessionId)) {
+                return sessionInfo;
+            }
+        }
+
+        RoutingSessionInfo systemSession = mRouterManager.getSystemRoutingSession(null);
+
+        return TextUtils.equals(systemSession.getId(), sessionId) ? systemSession : null;
     }
 
     @Override
