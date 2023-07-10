@@ -32,8 +32,12 @@ interface IBubbles {
     oneway void showBubble(in String key, in int bubbleBarXCoordinate,
                     in int bubbleBarYCoordinate) = 3;
 
-    oneway void removeBubble(in String key, in int reason) = 4;
+    oneway void removeBubble(in String key) = 4;
 
-    oneway void collapseBubbles() = 5;
+    oneway void removeAllBubbles() = 5;
+
+    oneway void collapseBubbles() = 6;
+
+    oneway void collapseWhileDragging(in String key, in boolean collapse) = 7;
 
 }
