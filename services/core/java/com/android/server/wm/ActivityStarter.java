@@ -698,6 +698,10 @@ class ActivityStarter {
                         mRequest.intent, caller, callingUid);
             }
 
+            if (mRequest.intent != null) {
+                mRequest.componentSpecified |= mRequest.intent.getComponent() != null;
+            }
+
             // If the caller hasn't already resolved the activity, we're willing
             // to do so here. If the caller is already holding the WM lock here,
             // and we need to check dynamic Uri permissions, then we're forced
