@@ -31,6 +31,9 @@
 
     <dimen name="large_screen_shade_header_height">56dp</dimen>
 
+    <!-- it's a bit smaller on 720dp to account for status_bar_icon_horizontal_margin -->
+    <dimen name="shade_header_system_icons_padding_start">10dp</dimen>
+
     <!-- Biometric Auth pattern view size, better to align keyguard_security_width -->
     <dimen name="biometric_auth_pattern_view_size">348dp</dimen>
 </resources>

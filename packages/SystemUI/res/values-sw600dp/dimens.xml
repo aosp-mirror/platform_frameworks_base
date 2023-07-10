@@ -67,6 +67,9 @@
     <dimen name="large_dialog_width">472dp</dimen>
 
     <dimen name="large_screen_shade_header_height">42dp</dimen>
+    <!-- start padding is smaller to account for status icon margins coming from drawable itself -->
+    <dimen name="shade_header_system_icons_padding_start">11dp</dimen>
+    <dimen name="shade_header_system_icons_padding_end">12dp</dimen>
 
     <!-- Lockscreen shade transition values -->
     <dimen name="lockscreen_shade_transition_by_tap_distance">200dp</dimen>
