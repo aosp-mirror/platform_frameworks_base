@@ -109,7 +109,7 @@ object Flags {
         sysPropBooleanFlag(
             128,
             "persist.sysui.notification.builder_extras_override",
-            default = false
+            default = true
         )
 
     // 200 - keyguard/lockscreen
