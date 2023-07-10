@@ -94,9 +94,7 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
             utils.authenticationRepository.setUnlocked(false)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
             underTest.dismissLockscreen()
@@ -109,9 +107,7 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
             utils.authenticationRepository.setUnlocked(true)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
             underTest.dismissLockscreen()
@@ -153,9 +149,7 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Lockscreen))
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(isUnlocked).isFalse()
 
             sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Gone))

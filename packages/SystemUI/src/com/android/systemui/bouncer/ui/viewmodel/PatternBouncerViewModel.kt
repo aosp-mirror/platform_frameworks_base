@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -70,19 +69,7 @@ class PatternBouncerViewModel(
     val dots: StateFlow<List<PatternDotViewModel>> = _dots.asStateFlow()
 
     /** Whether the pattern itself should be rendered visibly. */
-    val isPatternVisible: StateFlow<Boolean> =
-        flow {
-                emit(null)
-                emit(interactor.getAuthenticationMethod())
-            }
-            .map { authMethod ->
-                (authMethod as? AuthenticationMethodModel.Pattern)?.isPatternVisible ?: false
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = false,
-            )
+    val isPatternVisible: StateFlow<Boolean> = interactor.isPatternVisible
 
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
