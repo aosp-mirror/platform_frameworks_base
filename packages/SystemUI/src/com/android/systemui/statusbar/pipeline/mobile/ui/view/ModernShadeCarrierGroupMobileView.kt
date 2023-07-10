@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,51 +19,58 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.LinearLayout
 import com.android.systemui.R
-import com.android.systemui.statusbar.StatusBarIconView.getVisibleStateString
+import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconBinder
-import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
-import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarView
+import com.android.systemui.statusbar.pipeline.mobile.ui.binder.ShadeCarrierBinder
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.ShadeCarrierGroupMobileIconViewModel
+import com.android.systemui.util.AutoMarqueeTextView
 
-class ModernStatusBarMobileView(
+/**
+ * ViewGroup containing a mobile carrier name and icon in the Shade Header. Can be multiple
+ * instances as children under [ShadeCarrierGroup]
+ */
+class ModernShadeCarrierGroupMobileView(
     context: Context,
     attrs: AttributeSet?,
-) : ModernStatusBarView(context, attrs) {
+) : LinearLayout(context, attrs) {
 
     var subId: Int = -1
 
     override fun toString(): String {
-        return "ModernStatusBarMobileView(" +
-            "slot='$slot', " +
+        return "ModernShadeCarrierGroupMobileView(" +
             "subId=$subId, " +
-            "isCollecting=${binding.isCollecting()}, " +
-            "visibleState=${getVisibleStateString(visibleState)}); " +
             "viewString=${super.toString()}"
     }
 
     companion object {
 
         /**
-         * Inflates a new instance of [ModernStatusBarMobileView], binds it to [viewModel], and
-         * returns it.
+         * Inflates a new instance of [ModernShadeCarrierGroupMobileView], binds it to [viewModel],
+         * and returns it.
          */
         @JvmStatic
         fun constructAndBind(
             context: Context,
             logger: MobileViewLogger,
             slot: String,
-            viewModel: LocationBasedMobileViewModel,
-        ): ModernStatusBarMobileView {
-            return (LayoutInflater.from(context)
-                    .inflate(R.layout.status_bar_mobile_signal_group_new, null)
-                    as ModernStatusBarMobileView)
+            viewModel: ShadeCarrierGroupMobileIconViewModel,
+        ): ModernShadeCarrierGroupMobileView {
+            return (LayoutInflater.from(context).inflate(R.layout.shade_carrier_new, null)
+                    as ModernShadeCarrierGroupMobileView)
                 .also {
                     it.subId = viewModel.subscriptionId
-                    it.initView(slot) {
-                        MobileIconBinder.bind(view = it, viewModel = viewModel, logger = logger)
+
+                    val iconView = it.requireViewById<ModernStatusBarMobileView>(R.id.mobile_combo)
+                    iconView.initView(slot) {
+                        MobileIconBinder.bind(iconView, viewModel, STATE_ICON, logger)
                     }
                     logger.logNewViewBinding(it, viewModel)
+
+                    val textView = it.requireViewById<AutoMarqueeTextView>(R.id.mobile_carrier_text)
+                    ShadeCarrierBinder.bind(textView, viewModel)
                 }
         }
     }
