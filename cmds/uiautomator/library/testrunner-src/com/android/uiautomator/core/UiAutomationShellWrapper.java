@@ -8,6 +8,7 @@ import android.app.UiAutomation;
 import android.app.UiAutomationConnection;
 import android.content.Intent;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.RemoteException;
 
 /**
@@ -26,6 +27,10 @@ public class UiAutomationShellWrapper {
             throw new IllegalStateException("Already connected!");
         }
         mHandlerThread.start();
+        // The AccessibilityInteractionClient used by UiAutomation expects the main looper to
+        // be prepared. In most contexts this is normally done automatically, but must be called
+        // explicitly here because this is a shell tool.
+        Looper.prepareMainLooper();
         mUiAutomation = new UiAutomation(mHandlerThread.getLooper(),
                 new UiAutomationConnection());
         mUiAutomation.connect();
