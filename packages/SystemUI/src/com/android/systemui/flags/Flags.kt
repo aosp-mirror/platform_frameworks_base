@@ -169,16 +169,6 @@ object Flags {
     @JvmField val DOZING_MIGRATION_1 = unreleasedFlag(213, "dozing_migration_1")
 
     /**
-     * Whether to enable the code powering customizable lock screen quick affordances.
-     *
-     * This flag enables any new prebuilt quick affordances as well.
-     */
-    // TODO(b/255618149): Tracking Bug
-    @JvmField
-    val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES =
-        releasedFlag(216, "customizable_lock_screen_quick_affordances")
-
-    /**
      * Migrates control of the LightRevealScrim's reveal effect and amount from legacy code to the
      * new KeyguardTransitionRepository.
      */
