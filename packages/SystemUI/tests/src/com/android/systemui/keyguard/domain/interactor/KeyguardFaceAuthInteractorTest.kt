@@ -38,10 +38,9 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
-import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
-import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -121,8 +120,8 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                     mock(KeyguardStateController::class.java),
                     bouncerRepository,
                     mock(BiometricSettingsRepository::class.java),
-                    FakeDeviceEntryFingerprintAuthRepository(),
                     FakeSystemClock(),
+                    keyguardUpdateMonitor,
                 ),
                 keyguardTransitionInteractor,
                 featureFlags,
@@ -160,7 +159,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
 
             underTest.onDeviceLifted()
 
-            val outputValue = authenticationStatus()!! as ErrorAuthenticationStatus
+            val outputValue = authenticationStatus()!! as ErrorFaceAuthenticationStatus
             assertThat(outputValue.msgId)
                 .isEqualTo(BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT)
             assertThat(outputValue.msg).isEqualTo("Face Unlock unavailable")

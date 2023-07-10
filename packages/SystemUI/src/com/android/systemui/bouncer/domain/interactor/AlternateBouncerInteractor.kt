@@ -16,10 +16,10 @@
 
 package com.android.systemui.bouncer.domain.interactor
 
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
@@ -35,8 +35,8 @@ constructor(
     private val keyguardStateController: KeyguardStateController,
     private val bouncerRepository: KeyguardBouncerRepository,
     private val biometricSettingsRepository: BiometricSettingsRepository,
-    private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
     private val systemClock: SystemClock,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) {
     var receivedDownTouch = false
     val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
@@ -78,7 +78,7 @@ constructor(
             biometricSettingsRepository.isFingerprintEnrolled.value &&
             biometricSettingsRepository.isStrongBiometricAllowed.value &&
             biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&
-            !deviceEntryFingerprintAuthRepository.isLockedOut.value &&
+            !keyguardUpdateMonitor.isFingerprintLockedOut &&
             !keyguardStateController.isUnlocked &&
             !statusBarStateController.isDozing
     }
