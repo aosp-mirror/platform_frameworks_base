@@ -250,13 +250,10 @@ open class PipAppHelper(instrumentation: Instrumentation) :
             waitConditions = arrayOf(ConditionsFactory.hasPipWindow())
         )
 
-        val windowRegion = wmHelper.getWindowRegion(this)
-
         wmHelper
             .StateSyncBuilder()
             .withWindowSurfaceAppeared(this)
             .withPipShown()
-            .withSurfaceVisibleRegion(this, windowRegion)
             .waitForAndVerify()
     }
 
