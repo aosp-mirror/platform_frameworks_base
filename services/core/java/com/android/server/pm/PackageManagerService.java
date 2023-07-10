@@ -2121,8 +2121,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 // Save the names of pre-existing packages prior to scanning, so we can determine
                 // which system packages are completely new due to an upgrade.
                 mExistingPackages = new ArraySet<>(packageSettings.size());
-                for (PackageSetting ps : packageSettings.values()) {
-                    mExistingPackages.add(ps.getPackageName());
+                for (int i = 0; i < packageSettings.size(); i++) {
+                    mExistingPackages.add(packageSettings.valueAt(i).getPackageName());
                 }
 
                 // Triggering {@link com.android.server.pm.crossprofile.
@@ -2249,8 +2249,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             // If this is the first boot or an update from pre-M, then we need to initialize the
             // default preferred apps across all defined users.
             if (mPromoteSystemApps || mFirstBoot) {
-                for (UserInfo user : mInjector.getUserManagerInternal().getUsers(true)) {
-                    mSettings.applyDefaultPreferredAppsLPw(user.id);
+                final List<UserInfo> users = mInjector.getUserManagerInternal().getUsers(true);
+                for (int i = 0; i < users.size(); i++) {
+                    mSettings.applyDefaultPreferredAppsLPw(users.get(i).id);
+
                 }
             }
 
@@ -4278,8 +4280,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         final Computer snapshot = snapshotComputer();
         for (String packageName : apkList) {
             setSystemAppHiddenUntilInstalled(snapshot, packageName, true);
-            for (UserInfo user : mInjector.getUserManagerInternal().getUsers(false)) {
-                setSystemAppInstallState(snapshot, packageName, false, user.id);
+            final List<UserInfo> users = mInjector.getUserManagerInternal().getUsers(false);
+            for (int i = 0; i < users.size(); i++) {
+                setSystemAppInstallState(snapshot, packageName, false, users.get(i).id);
             }
         }
     }
@@ -4724,7 +4727,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
                 ArraySet<CrossProfileIntentFilter> set =
                         new ArraySet<>(resolver.filterSet());
-                for (CrossProfileIntentFilter filter : set) {
+                for (int i = 0; i < set.size(); i++) {
+                    final CrossProfileIntentFilter filter = set.valueAt(i);
                     if (IntentFilter.filterEquals(filter.mFilter, intentFilter)
                             && filter.getOwnerPackage().equals(ownerPackage)
                             && filter.getTargetUserId() == targetUserId
@@ -6066,8 +6070,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final Computer snapshot = snapshotComputer();
             enforceOwnerRights(snapshot, packageName, Binder.getCallingUid());
             mimeTypes = CollectionUtils.emptyIfNull(mimeTypes);
-            for (String mimeType : mimeTypes) {
-                if (mimeType.length() > 255) {
+            for (int i = 0; i < mimeTypes.size(); i++) {
+                if (mimeTypes.get(i).length() > 255) {
                     throw new IllegalArgumentException("MIME type length exceeds 255 characters");
                 }
             }
@@ -6941,7 +6945,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
                 if (targetPkg.getLibraryNames() != null) {
                     // Set the overlay paths for dependencies of the shared library.
-                    for (final String libName : targetPkg.getLibraryNames()) {
+                    List<String> libraryNames = targetPkg.getLibraryNames();
+                    for (int j = 0; j < libraryNames.size(); j++) {
+                        final String libName = libraryNames.get(j);
                         ArraySet<String> modifiedDependents = null;
 
                         final SharedLibraryInfo info = computer.getSharedLibraryInfo(libName,
@@ -6955,7 +6961,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         if (dependents == null) {
                             continue;
                         }
-                        for (final VersionedPackage dependent : dependents) {
+                        for (int k = 0; k < dependents.size(); k++) {
+                            final VersionedPackage dependent = dependents.get(k);
                             final PackageStateInternal dependentState =
                                     computer.getPackageStateInternal(dependent.getPackageName());
                             if (dependentState == null) {
