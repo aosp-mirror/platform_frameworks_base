@@ -24,7 +24,6 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import org.junit.FixMethodOrder
@@ -37,11 +36,10 @@ import org.junit.runners.Parameterized
  * Test IME window closing to home transitions. To run this test: `atest
  * FlickerTests:CloseImeWindowToHomeTest`
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class CloseImeOnGoHomeTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
+class CloseImeOnGoHomeTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     private val testApp = ImeAppHelper(instrumentation)
 
     /** {@inheritDoc} */

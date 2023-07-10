@@ -21,7 +21,6 @@ import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
-import androidx.test.filters.RequiresDevice
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,11 +48,10 @@ import org.junit.runners.Parameterized
  *        apps are running before setup
  * ```
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ClosePipBySwipingDownTest(flicker: LegacyFlickerTest) : ClosePipTransition(flicker) {
+class ClosePipBySwipingDownTest(flicker: LegacyFlickerTest) : ClosePipTransition(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = {
         transitions {
             val pipRegion = wmHelper.getWindowRegion(pipApp).bounds

@@ -26,7 +26,6 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import org.junit.FixMethodOrder
@@ -48,11 +47,10 @@ import org.junit.runners.Parameterized
  *     Swipe right from the bottom of the screen to quick switch back to the app
  * ```
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class QuickSwitchFromLauncherTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
+class QuickSwitchFromLauncherTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     private val testApp = SimpleAppHelper(instrumentation)
 
     /** {@inheritDoc} */

@@ -22,7 +22,6 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import androidx.test.filters.RequiresDevice
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,12 +70,11 @@ import org.junit.runners.Parameterized
  *        apps are running before setup
  * ```
  */
-@RequiresDevice
 @FlickerServiceCompatible
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class CloseAppHomeButtonTest(flicker: LegacyFlickerTest) : CloseAppTransition(flicker) {
+class CloseAppHomeButtonTest(flicker: LegacyFlickerTest) : CloseAppTransition(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {

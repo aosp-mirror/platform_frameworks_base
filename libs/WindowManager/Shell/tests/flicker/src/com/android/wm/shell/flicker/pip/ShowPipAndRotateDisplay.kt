@@ -23,7 +23,6 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.FixMethodOrder
@@ -55,11 +54,10 @@ import org.junit.runners.Parameterized
  *        apps are running before setup
  * ```
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ShowPipAndRotateDisplay(flicker: LegacyFlickerTest) : PipTransition(flicker) {
+class ShowPipAndRotateDisplay(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     private val testApp = SimpleAppHelper(instrumentation)
     private val screenBoundsStart = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
     private val screenBoundsEnd = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)

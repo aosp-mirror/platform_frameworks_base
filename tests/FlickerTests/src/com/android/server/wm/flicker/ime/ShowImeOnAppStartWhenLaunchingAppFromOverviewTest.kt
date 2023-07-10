@@ -24,7 +24,6 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.reopenAppFromOverview
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.setRotation
@@ -37,11 +36,10 @@ import org.junit.runners.Parameterized
 /**
  * Test IME window opening transitions. To run this test: `atest FlickerTests:ReOpenImeWindowTest`
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ShowImeOnAppStartWhenLaunchingAppFromOverviewTest(flicker: LegacyFlickerTest) :
+class ShowImeOnAppStartWhenLaunchingAppFromOverviewTest(flicker: LegacyFlickerTest) :
     BaseTest(flicker) {
     private val testApp = ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 

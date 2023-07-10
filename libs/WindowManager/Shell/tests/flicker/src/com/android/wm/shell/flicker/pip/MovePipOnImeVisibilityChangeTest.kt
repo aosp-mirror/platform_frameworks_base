@@ -25,7 +25,6 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.FixMethodOrder
@@ -35,11 +34,10 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /** Test Pip launch. To run this test: `atest WMShellFlickerTests:PipKeyboardTest` */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class MovePipOnImeVisibilityChangeTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
+class MovePipOnImeVisibilityChangeTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     private val imeApp = ImeAppHelper(instrumentation)
 
     override val thisTransition: FlickerBuilder.() -> Unit = {

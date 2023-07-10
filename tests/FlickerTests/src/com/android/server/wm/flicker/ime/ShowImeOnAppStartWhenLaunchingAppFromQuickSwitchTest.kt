@@ -24,7 +24,6 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
@@ -39,12 +38,11 @@ import org.junit.runners.Parameterized
  * Test IME windows switching with 2-Buttons or gestural navigation. To run this test: `atest
  * FlickerTests:SwitchImeWindowsFromGestureNavTest`
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Presubmit
-open class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: LegacyFlickerTest) :
+class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: LegacyFlickerTest) :
     BaseTest(flicker) {
     private val testApp = SimpleAppHelper(instrumentation)
     private val imeTestApp =

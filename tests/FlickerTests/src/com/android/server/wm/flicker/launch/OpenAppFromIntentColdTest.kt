@@ -24,7 +24,6 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -53,12 +52,11 @@ import org.junit.runners.Parameterized
  *        apps are running before setup
  * ```
  */
-@RequiresDevice
 @FlickerServiceCompatible
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class OpenAppFromIntentColdTest(flicker: LegacyFlickerTest) :
+class OpenAppFromIntentColdTest(flicker: LegacyFlickerTest) :
     OpenAppFromLauncherTransition(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
