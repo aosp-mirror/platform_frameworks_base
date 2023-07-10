@@ -417,7 +417,7 @@ public class AccountManagerService
                                 }
 
                         if (accounts == null) {
-                            accounts = getAccountsAsUser(null, userId, "android");
+                            accounts = getAccountsOrEmptyArray(null, userId, "android");
                             if (ArrayUtils.isEmpty(accounts)) {
                                 return;
                             }
@@ -446,7 +446,7 @@ public class AccountManagerService
 
     private void cancelAccountAccessRequestNotificationIfNeeded(int uid,
             boolean checkAccess, UserAccounts userAccounts) {
-        Account[] accounts = getAccountsAsUser(null, UserHandle.getUserId(uid), "android");
+        Account[] accounts = getAccountsOrEmptyArray(null, UserHandle.getUserId(uid), "android");
         for (Account account : accounts) {
             cancelAccountAccessRequestNotificationIfNeeded(account, uid, checkAccess, userAccounts);
         }
@@ -454,7 +454,7 @@ public class AccountManagerService
 
     private void cancelAccountAccessRequestNotificationIfNeeded(String packageName, int uid,
             boolean checkAccess, UserAccounts userAccounts) {
-        Account[] accounts = getAccountsAsUser(null, UserHandle.getUserId(uid), "android");
+        Account[] accounts = getAccountsOrEmptyArray(null, UserHandle.getUserId(uid), "android");
         for (Account account : accounts) {
             cancelAccountAccessRequestNotificationIfNeeded(account,
                     uid, packageName, checkAccess, userAccounts);
@@ -4481,6 +4481,16 @@ public class AccountManagerService
     }
 
     @NonNull
+    private Account[] getAccountsOrEmptyArray(String type, int userId, String opPackageName) {
+        try {
+            return getAccountsAsUser(type, userId, opPackageName);
+        } catch (SQLiteCantOpenDatabaseException e) {
+            Log.w(TAG, "Could not get accounts for user " + userId, e);
+            return new Account[]{};
+        }
+    }
+
+    @NonNull
     private Account[] getAccountsAsUserForPackage(
             String type,
             int userId,
@@ -4569,7 +4579,7 @@ public class AccountManagerService
     public void addSharedAccountsFromParentUser(int parentUserId, int userId,
             String opPackageName) {
         checkManageOrCreateUsersPermission("addSharedAccountsFromParentUser");
-        Account[] accounts = getAccountsAsUser(null, parentUserId, opPackageName);
+        Account[] accounts = getAccountsOrEmptyArray(null, parentUserId, opPackageName);
         for (Account account : accounts) {
             addSharedAccountAsUser(account, userId);
         }
