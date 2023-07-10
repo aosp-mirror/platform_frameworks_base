@@ -112,26 +112,6 @@ public final class ShadeControllerImpl implements ShadeController {
     }
 
     @Override
-    public void animateCollapseShade() {
-        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE);
-    }
-
-    @Override
-    public void animateCollapseShade(int flags) {
-        animateCollapseShade(flags, false, false, 1.0f);
-    }
-
-    @Override
-    public void animateCollapseShadeForced() {
-        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_NONE, true, false, 1.0f);
-    }
-
-    @Override
-    public void animateCollapseShadeForcedDelayed() {
-        animateCollapseShade(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true, true, 1.0f);
-    }
-
-    @Override
     public void animateCollapseShade(int flags, boolean force, boolean delayed,
             float speedUpFactor) {
         if (!force && mStatusBarStateController.getState() != StatusBarState.SHADE) {
