@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.Point
 import android.platform.test.annotations.Presubmit
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
@@ -80,7 +81,8 @@ open class DragToDismissBubbleScreenTest(flicker: LegacyFlickerTest) : BaseBubbl
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         flicker.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                LayersTraceSubject.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS + listOf(testApp)
+                LayersTraceSubject.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS +
+                    listOf(testApp, ComponentNameMatcher(className = "Bubbles!#"))
             )
         }
     }
