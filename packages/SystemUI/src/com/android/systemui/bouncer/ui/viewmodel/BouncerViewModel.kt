@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
-import com.android.systemui.bouncer.shared.model.AuthenticationThrottledModel
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.util.kotlin.pairwise
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlin.math.ceil
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,12 +54,12 @@ constructor(
     private val interactor: BouncerInteractor = interactorFactory.create(containerName)
 
     private val isInputEnabled: StateFlow<Boolean> =
-        interactor.throttling
-            .map { it == null }
+        interactor.isThrottled
+            .map { !it }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = interactor.throttling.value == null,
+                initialValue = !interactor.isThrottled.value,
             )
 
     private val pin: PinBouncerViewModel by lazy {
@@ -115,9 +118,9 @@ constructor(
     val message: StateFlow<MessageViewModel> =
         combine(
                 interactor.message,
-                interactor.throttling,
-            ) { message, throttling ->
-                toMessageViewModel(message, throttling)
+                interactor.isThrottled,
+            ) { message, isThrottled ->
+                toMessageViewModel(message, isThrottled)
             }
             .stateIn(
                 scope = applicationScope,
@@ -125,7 +128,7 @@ constructor(
                 initialValue =
                     toMessageViewModel(
                         message = interactor.message.value,
-                        throttling = interactor.throttling.value,
+                        isThrottled = interactor.isThrottled.value,
                     ),
             )
 
@@ -143,9 +146,9 @@ constructor(
 
     init {
         applicationScope.launch {
-            interactor.throttling
-                .map { model ->
-                    model?.let {
+            interactor.isThrottled
+                .map { isThrottled ->
+                    if (isThrottled) {
                         when (interactor.getAuthenticationMethod()) {
                             is AuthenticationMethodModel.Pin ->
                                 R.string.kg_too_many_failed_pin_attempts_dialog_message
@@ -157,10 +160,12 @@ constructor(
                         }?.let { stringResourceId ->
                             applicationContext.getString(
                                 stringResourceId,
-                                model.failedAttemptCount,
-                                model.totalDurationSec,
+                                interactor.throttling.value.failedAttemptCount,
+                                ceil(interactor.throttling.value.remainingMs / 1000f).toInt(),
                             )
                         }
+                    } else {
+                        null
                     }
                 }
                 .distinctUntilChanged()
@@ -184,11 +189,11 @@ constructor(
 
     private fun toMessageViewModel(
         message: String?,
-        throttling: AuthenticationThrottledModel?,
+        isThrottled: Boolean,
     ): MessageViewModel {
         return MessageViewModel(
             text = message ?: "",
-            isUpdateAnimated = throttling == null,
+            isUpdateAnimated = !isThrottled,
         )
     }
 

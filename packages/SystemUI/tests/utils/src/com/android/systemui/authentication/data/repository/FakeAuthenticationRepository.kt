@@ -16,40 +16,154 @@
 
 package com.android.systemui.authentication.data.repository
 
+import com.android.internal.widget.LockPatternUtils
+import com.android.internal.widget.LockPatternView
+import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationResultModel
+import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class FakeAuthenticationRepository(
-    private val delegate: AuthenticationRepository,
-    private val onSecurityModeChanged: (SecurityMode) -> Unit,
-) : AuthenticationRepository by delegate {
+    private val currentTime: () -> Long,
+) : AuthenticationRepository {
+
+    private val _isBypassEnabled = MutableStateFlow(false)
+    override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled
+
+    private val _isAutoConfirmEnabled = MutableStateFlow(false)
+    override val isAutoConfirmEnabled: StateFlow<Boolean> = _isAutoConfirmEnabled.asStateFlow()
 
     private val _isUnlocked = MutableStateFlow(false)
     override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
 
-    private var authenticationMethod: AuthenticationMethodModel = DEFAULT_AUTHENTICATION_METHOD
+    override val hintedPinLength: Int = 6
+
+    private val _isPatternVisible = MutableStateFlow(true)
+    override val isPatternVisible: StateFlow<Boolean> = _isPatternVisible.asStateFlow()
+
+    private val _throttling = MutableStateFlow(AuthenticationThrottlingModel())
+    override val throttling: StateFlow<AuthenticationThrottlingModel> = _throttling.asStateFlow()
+
+    private val _authenticationMethod =
+        MutableStateFlow<AuthenticationMethodModel>(DEFAULT_AUTHENTICATION_METHOD)
+    val authenticationMethod: StateFlow<AuthenticationMethodModel> =
+        _authenticationMethod.asStateFlow()
+
+    private var isLockscreenEnabled = true
+    private var failedAttemptCount = 0
+    private var throttlingEndTimestamp = 0L
+    private var credentialOverride: List<Any>? = null
+    private var securityMode: SecurityMode = DEFAULT_AUTHENTICATION_METHOD.toSecurityMode()
 
     override suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
-        return authenticationMethod
+        return authenticationMethod.value
     }
 
     fun setAuthenticationMethod(authenticationMethod: AuthenticationMethodModel) {
-        this.authenticationMethod = authenticationMethod
-        onSecurityModeChanged(authenticationMethod.toSecurityMode())
+        _authenticationMethod.value = authenticationMethod
+        securityMode = authenticationMethod.toSecurityMode()
+    }
+
+    fun overrideCredential(pin: List<Int>) {
+        credentialOverride = pin
+    }
+
+    override suspend fun isLockscreenEnabled(): Boolean {
+        return isLockscreenEnabled
+    }
+
+    override suspend fun reportAuthenticationAttempt(isSuccessful: Boolean) {
+        failedAttemptCount = if (isSuccessful) 0 else failedAttemptCount + 1
+        _isUnlocked.value = isSuccessful
+    }
+
+    override suspend fun getPinLength(): Int {
+        return (credentialOverride ?: listOf(1, 2, 3, 4)).size
+    }
+
+    override fun setBypassEnabled(isBypassEnabled: Boolean) {
+        _isBypassEnabled.value = isBypassEnabled
+    }
+
+    override suspend fun getFailedAuthenticationAttemptCount(): Int {
+        return failedAttemptCount
+    }
+
+    override suspend fun getThrottlingEndTimestamp(): Long {
+        return throttlingEndTimestamp
+    }
+
+    override fun setThrottling(throttlingModel: AuthenticationThrottlingModel) {
+        _throttling.value = throttlingModel
     }
 
     fun setUnlocked(isUnlocked: Boolean) {
         _isUnlocked.value = isUnlocked
     }
 
-    companion object {
-        val DEFAULT_AUTHENTICATION_METHOD =
-            AuthenticationMethodModel.Pin(listOf(1, 2, 3, 4), autoConfirm = false)
+    fun setAutoConfirmEnabled(isEnabled: Boolean) {
+        _isAutoConfirmEnabled.value = isEnabled
+    }
 
-        fun AuthenticationMethodModel.toSecurityMode(): SecurityMode {
+    fun setLockscreenEnabled(isLockscreenEnabled: Boolean) {
+        this.isLockscreenEnabled = isLockscreenEnabled
+    }
+
+    override suspend fun setThrottleDuration(durationMs: Int) {
+        throttlingEndTimestamp = if (durationMs > 0) currentTime() + durationMs else 0
+    }
+
+    override suspend fun checkCredential(
+        credential: LockscreenCredential
+    ): AuthenticationResultModel {
+        val expectedCredential = credentialOverride ?: getExpectedCredential(securityMode)
+        val isSuccessful =
+            when {
+                credential.type != getCurrentCredentialType(securityMode) -> false
+                credential.type == LockPatternUtils.CREDENTIAL_TYPE_PIN ->
+                    credential.isPin && credential.matches(expectedCredential)
+                credential.type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD ->
+                    credential.isPassword && credential.matches(expectedCredential)
+                credential.type == LockPatternUtils.CREDENTIAL_TYPE_PATTERN ->
+                    credential.isPattern && credential.matches(expectedCredential)
+                else -> error("Unexpected credential type ${credential.type}!")
+            }
+
+        return if (
+            isSuccessful || failedAttemptCount < MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING - 1
+        ) {
+            AuthenticationResultModel(
+                isSuccessful = isSuccessful,
+                throttleDurationMs = 0,
+            )
+        } else {
+            AuthenticationResultModel(
+                isSuccessful = false,
+                throttleDurationMs = THROTTLE_DURATION_MS,
+            )
+        }
+    }
+
+    companion object {
+        val DEFAULT_AUTHENTICATION_METHOD = AuthenticationMethodModel.Pin
+        val PATTERN =
+            listOf(
+                AuthenticationMethodModel.Pattern.PatternCoordinate(2, 0),
+                AuthenticationMethodModel.Pattern.PatternCoordinate(2, 1),
+                AuthenticationMethodModel.Pattern.PatternCoordinate(2, 2),
+                AuthenticationMethodModel.Pattern.PatternCoordinate(1, 1),
+                AuthenticationMethodModel.Pattern.PatternCoordinate(0, 0),
+                AuthenticationMethodModel.Pattern.PatternCoordinate(0, 1),
+                AuthenticationMethodModel.Pattern.PatternCoordinate(0, 2),
+            )
+        const val MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING = 5
+        const val THROTTLE_DURATION_MS = 30000
+
+        private fun AuthenticationMethodModel.toSecurityMode(): SecurityMode {
             return when (this) {
                 is AuthenticationMethodModel.Pin -> SecurityMode.PIN
                 is AuthenticationMethodModel.Password -> SecurityMode.Password
@@ -57,6 +171,51 @@ class FakeAuthenticationRepository(
                 is AuthenticationMethodModel.Swipe,
                 is AuthenticationMethodModel.None -> SecurityMode.None
             }
+        }
+
+        @LockPatternUtils.CredentialType
+        private fun getCurrentCredentialType(
+            securityMode: SecurityMode,
+        ): Int {
+            return when (securityMode) {
+                SecurityMode.PIN,
+                SecurityMode.SimPin,
+                SecurityMode.SimPuk -> LockPatternUtils.CREDENTIAL_TYPE_PIN
+                SecurityMode.Password -> LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
+                SecurityMode.Pattern -> LockPatternUtils.CREDENTIAL_TYPE_PATTERN
+                SecurityMode.None -> LockPatternUtils.CREDENTIAL_TYPE_NONE
+                else -> error("Unsupported SecurityMode $securityMode!")
+            }
+        }
+
+        private fun getExpectedCredential(securityMode: SecurityMode): List<Any> {
+            return when (val credentialType = getCurrentCredentialType(securityMode)) {
+                LockPatternUtils.CREDENTIAL_TYPE_PIN -> listOf(1, 2, 3, 4)
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD -> "password".toList()
+                LockPatternUtils.CREDENTIAL_TYPE_PATTERN -> PATTERN.toCells()
+                else -> error("Unsupported credential type $credentialType!")
+            }
+        }
+
+        private fun LockscreenCredential.matches(expectedCredential: List<Any>): Boolean {
+            @Suppress("UNCHECKED_CAST")
+            return when {
+                isPin ->
+                    credential.map { byte -> byte.toInt().toChar() - '0' } == expectedCredential
+                isPassword -> credential.map { byte -> byte.toInt().toChar() } == expectedCredential
+                isPattern ->
+                    credential.contentEquals(
+                        LockPatternUtils.patternToByteArray(
+                            expectedCredential as List<LockPatternView.Cell>
+                        )
+                    )
+                else -> error("Unsupported credential type $type!")
+            }
+        }
+
+        private fun List<AuthenticationMethodModel.Pattern.PatternCoordinate>.toCells():
+            List<LockPatternView.Cell> {
+            return map { coordinate -> LockPatternView.Cell.of(coordinate.y, coordinate.x) }
         }
     }
 }

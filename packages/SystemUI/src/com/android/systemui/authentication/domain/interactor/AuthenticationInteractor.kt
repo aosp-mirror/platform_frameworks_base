@@ -16,25 +16,43 @@
 
 package com.android.systemui.authentication.domain.interactor
 
-import android.app.admin.DevicePolicyManager
+import com.android.internal.widget.LockPatternView
+import com.android.internal.widget.LockscreenCredential
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Hosts application business logic related to authentication. */
 @SysUISingleton
 class AuthenticationInteractor
 @Inject
 constructor(
-    @Application applicationScope: CoroutineScope,
+    @Application private val applicationScope: CoroutineScope,
     private val repository: AuthenticationRepository,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val userRepository: UserRepository,
+    private val clock: SystemClock,
 ) {
     /**
      * Whether the device is unlocked.
@@ -67,18 +85,66 @@ constructor(
      */
     val isBypassEnabled: StateFlow<Boolean> = repository.isBypassEnabled
 
+    /** The current authentication throttling state, only meaningful if [isThrottled] is `true`. */
+    val throttling: StateFlow<AuthenticationThrottlingModel> = repository.throttling
+
     /**
-     * Number of consecutively failed authentication attempts. This resets to `0` when
-     * authentication succeeds.
+     * Whether currently throttled and the user has to wait before being able to try another
+     * authentication attempt.
      */
-    val failedAuthenticationAttempts: StateFlow<Int> = repository.failedAuthenticationAttempts
+    val isThrottled: StateFlow<Boolean> =
+        throttling
+            .map { it.remainingMs > 0 }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = throttling.value.remainingMs > 0,
+            )
+
+    /** The length of the hinted PIN, or `null` if pin length hint should not be shown. */
+    val hintedPinLength: StateFlow<Int?> =
+        flow { emit(repository.getPinLength()) }
+            .map { currentPinLength ->
+                // Hinting is enabled for 6-digit codes only
+                currentPinLength.takeIf { repository.hintedPinLength == it }
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = null,
+            )
+
+    /** Whether the auto confirm feature is enabled for the currently-selected user. */
+    val isAutoConfirmEnabled: StateFlow<Boolean> = repository.isAutoConfirmEnabled
+
+    /** Whether the pattern should be visible for the currently-selected user. */
+    val isPatternVisible: StateFlow<Boolean> = repository.isPatternVisible
+
+    private var throttlingCountdownJob: Job? = null
+
+    init {
+        applicationScope.launch {
+            userRepository.selectedUserInfo
+                .map { it.id }
+                .distinctUntilChanged()
+                .collect { onSelectedUserChanged() }
+        }
+    }
 
     /**
      * Returns the currently-configured authentication method. This determines how the
      * authentication challenge is completed in order to unlock an otherwise locked device.
      */
     suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
-        return repository.getAuthenticationMethod()
+        val authMethod = repository.getAuthenticationMethod()
+        return if (
+            authMethod is AuthenticationMethodModel.None && repository.isLockscreenEnabled()
+        ) {
+            // We treat "None" as "Swipe" when the lockscreen is enabled.
+            AuthenticationMethodModel.Swipe
+        } else {
+            authMethod
+        }
     }
 
     /**
@@ -104,39 +170,52 @@ constructor(
      *   authentication failed, `null` if the check was not performed.
      */
     suspend fun authenticate(input: List<Any>, tryAutoConfirm: Boolean = false): Boolean? {
-        val authMethod = getAuthenticationMethod()
-        if (tryAutoConfirm) {
-            if ((authMethod as? AuthenticationMethodModel.Pin)?.autoConfirm != true) {
-                // Do not attempt to authenticate unless the PIN lock is set to auto-confirm.
-                return null
-            }
-
-            if (input.size < authMethod.code.size) {
-                // Do not attempt to authenticate if the PIN has not yet the required amount of
-                // digits. This intentionally only skip for shorter PINs; if the PIN is longer, the
-                // layer above might have throttled this check, and the PIN should be rejected via
-                // the auth code below.
-                return null
-            }
+        if (input.isEmpty()) {
+            throw IllegalArgumentException("Input was empty!")
         }
 
-        val isSuccessful =
-            when (authMethod) {
-                is AuthenticationMethodModel.Pin -> input.asCode() == authMethod.code
-                is AuthenticationMethodModel.Password -> input.asPassword() == authMethod.password
-                is AuthenticationMethodModel.Pattern -> input.asPattern() == authMethod.coordinates
-                else -> true
+        val skipCheck =
+            when {
+                // We're being throttled, the UI layer should not have called this; skip the
+                // attempt.
+                isThrottled.value -> true
+                // Auto-confirm attempt when the feature is not enabled; skip the attempt.
+                tryAutoConfirm && !isAutoConfirmEnabled.value -> true
+                // Auto-confirm should skip the attempt if the pin entered is too short.
+                tryAutoConfirm && input.size < repository.getPinLength() -> true
+                else -> false
             }
+        if (skipCheck) {
+            return null
+        }
 
-        if (isSuccessful) {
-            repository.setFailedAuthenticationAttempts(0)
-        } else {
-            repository.setFailedAuthenticationAttempts(
-                repository.failedAuthenticationAttempts.value + 1
+        // Attempt to authenticate:
+        val authMethod = getAuthenticationMethod()
+        val credential = authMethod.createCredential(input) ?: return null
+        val authenticationResult = repository.checkCredential(credential)
+        credential.zeroize()
+
+        if (authenticationResult.isSuccessful || !tryAutoConfirm) {
+            repository.reportAuthenticationAttempt(
+                isSuccessful = authenticationResult.isSuccessful,
             )
         }
 
-        return isSuccessful
+        // Check if we need to throttle and, if so, kick off the throttle countdown:
+        if (!authenticationResult.isSuccessful && authenticationResult.throttleDurationMs > 0) {
+            repository.setThrottleDuration(
+                durationMs = authenticationResult.throttleDurationMs,
+            )
+            startThrottlingCountdown()
+        }
+
+        if (authenticationResult.isSuccessful) {
+            // Since authentication succeeded, we should refresh throttling to make sure that our
+            // state is completely reflecting the upstream source of truth.
+            refreshThrottling()
+        }
+
+        return authenticationResult.isSuccessful
     }
 
     /** See [isBypassEnabled]. */
@@ -144,44 +223,67 @@ constructor(
         repository.setBypassEnabled(!repository.isBypassEnabled.value)
     }
 
-    companion object {
-        /**
-         * Returns a PIN code from the given list. It's assumed the given list elements are all
-         * [Int] in the range [0-9].
-         */
-        private fun List<Any>.asCode(): List<Int>? {
-            if (isEmpty() || size > DevicePolicyManager.MAX_PASSWORD_LENGTH) {
-                return null
-            }
-
-            return map {
-                require(it is Int && it in 0..9) {
-                    "Pin is required to be Int in range [0..9], but got $it"
+    /** Starts refreshing the throttling state every second. */
+    private suspend fun startThrottlingCountdown() {
+        cancelCountdown()
+        throttlingCountdownJob =
+            applicationScope.launch {
+                while (refreshThrottling() > 0) {
+                    delay(1.seconds.inWholeMilliseconds)
                 }
-                it
             }
-        }
+    }
 
-        /**
-         * Returns a password from the given list. It's assumed the given list elements are all
-         * [Char].
-         */
-        private fun List<Any>.asPassword(): String {
-            val anyList = this
-            return buildString { anyList.forEach { append(it as Char) } }
-        }
+    /** Cancels any throttling state countdown started in [startThrottlingCountdown]. */
+    private fun cancelCountdown() {
+        throttlingCountdownJob?.cancel()
+        throttlingCountdownJob = null
+    }
 
-        /**
-         * Returns a list of [AuthenticationMethodModel.Pattern.PatternCoordinate] from the given
-         * list. It's assumed the given list elements are all
-         * [AuthenticationMethodModel.Pattern.PatternCoordinate].
-         */
-        private fun List<Any>.asPattern():
-            List<AuthenticationMethodModel.Pattern.PatternCoordinate> {
-            val anyList = this
-            return buildList {
-                anyList.forEach { add(it as AuthenticationMethodModel.Pattern.PatternCoordinate) }
-            }
+    /** Notifies that the currently-selected user has changed. */
+    private suspend fun onSelectedUserChanged() {
+        cancelCountdown()
+        if (refreshThrottling() > 0) {
+            startThrottlingCountdown()
+        }
+    }
+
+    /**
+     * Refreshes the throttling state, hydrating the repository with the latest state.
+     *
+     * @return The remaining time for the current throttling countdown, in milliseconds or `0` if
+     *   not being throttled.
+     */
+    private suspend fun refreshThrottling(): Long {
+        return withContext(backgroundDispatcher) {
+            val failedAttemptCount = async { repository.getFailedAuthenticationAttemptCount() }
+            val deadline = async { repository.getThrottlingEndTimestamp() }
+            val remainingMs = max(0, deadline.await() - clock.elapsedRealtime())
+            repository.setThrottling(
+                AuthenticationThrottlingModel(
+                    failedAttemptCount = failedAttemptCount.await(),
+                    remainingMs = remainingMs.toInt(),
+                ),
+            )
+            remainingMs
+        }
+    }
+
+    private fun AuthenticationMethodModel.createCredential(
+        input: List<Any>
+    ): LockscreenCredential? {
+        return when (this) {
+            is AuthenticationMethodModel.Pin ->
+                LockscreenCredential.createPin(input.joinToString(""))
+            is AuthenticationMethodModel.Password ->
+                LockscreenCredential.createPassword(input.joinToString(""))
+            is AuthenticationMethodModel.Pattern ->
+                LockscreenCredential.createPattern(
+                    input
+                        .map { it as AuthenticationMethodModel.Pattern.PatternCoordinate }
+                        .map { LockPatternView.Cell.of(it.y, it.x) }
+                )
+            else -> null
         }
     }
 }

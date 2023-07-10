@@ -532,6 +532,12 @@ constructor(
         }
     }
 
+    /** Returns the ID of the currently-selected user. */
+    @UserIdInt
+    fun getSelectedUserId(): Int {
+        return repository.getSelectedUserInfo().id
+    }
+
     private fun showDialog(request: ShowDialogRequestModel) {
         _dialogShowRequests.value = request
     }
@@ -774,17 +780,16 @@ constructor(
         }
 
         // TODO(b/246631653): cache the bitmaps to avoid the background work to fetch them.
-        val userIcon = withContext(backgroundDispatcher) {
-            manager.getUserIcon(userId)
-                ?.let { bitmap ->
+        val userIcon =
+            withContext(backgroundDispatcher) {
+                manager.getUserIcon(userId)?.let { bitmap ->
                     val iconSize =
-                        applicationContext
-                            .resources
-                            .getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size)
+                        applicationContext.resources.getDimensionPixelSize(
+                            R.dimen.bouncer_user_switcher_icon_size
+                        )
                     Icon.scaleDownIfNecessary(bitmap, iconSize, iconSize)
                 }
-        }
-
+            }
 
         if (userIcon != null) {
             return BitmapDrawable(userIcon)

@@ -19,6 +19,7 @@ package com.android.systemui.scene.data.repository
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.SceneTransitionModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,6 +46,9 @@ constructor(
         containerConfigByName
             .map { (containerName, _) -> containerName to MutableStateFlow(1f) }
             .toMap()
+    private val sceneTransitionByContainerName:
+        Map<String, MutableStateFlow<SceneTransitionModel?>> =
+        containerConfigByName.keys.associateWith { MutableStateFlow(null) }
 
     /**
      * Returns the keys to all scenes in the container with the given name.
@@ -70,9 +74,41 @@ constructor(
         currentSceneByContainerName.setValue(containerName, scene)
     }
 
+    /** Sets the scene transition in the container with the given name. */
+    fun setSceneTransition(containerName: String, from: SceneKey, to: SceneKey) {
+        check(allSceneKeys(containerName).contains(from)) {
+            """
+                Cannot set current scene key to "$from". The container "$containerName" does
+                not contain a scene with that key.
+            """
+                .trimIndent()
+        }
+        check(allSceneKeys(containerName).contains(to)) {
+            """
+                Cannot set current scene key to "$to". The container "$containerName" does
+                not contain a scene with that key.
+            """
+                .trimIndent()
+        }
+
+        sceneTransitionByContainerName.setValue(
+            containerName,
+            SceneTransitionModel(from = from, to = to)
+        )
+    }
+
     /** The current scene in the container with the given name. */
     fun currentScene(containerName: String): StateFlow<SceneModel> {
         return currentSceneByContainerName.mutableOrError(containerName).asStateFlow()
+    }
+
+    /**
+     * Scene transitions as pairs of keys. A new value is emitted exactly once, each time a scene
+     * transition occurs. The flow begins with a `null` value at first, because the initial scene is
+     * not something that we transition to from another scene.
+     */
+    fun sceneTransitions(containerName: String): StateFlow<SceneTransitionModel?> {
+        return sceneTransitionByContainerName.mutableOrError(containerName).asStateFlow()
     }
 
     /** Sets whether the container with the given name is visible. */
