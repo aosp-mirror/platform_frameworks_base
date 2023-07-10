@@ -42,6 +42,8 @@ android_test {
         "androidx.compose.runtime_runtime",
         "androidx.compose.ui_ui-test-junit4",
         "androidx.compose.ui_ui-test-manifest",
+
+        "truth-prebuilt",
     ],
 
     kotlincflags: ["-Xjvm-default=enable"],
