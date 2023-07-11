@@ -24,10 +24,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.BatteryConsumer;
+import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.os.Process;
+import android.os.UserHandle;
 import android.telephony.NetworkRegistrationInfo;
 import android.util.Log;
 
@@ -413,7 +417,7 @@ public class BatteryStatsHistoryTest {
         mClock.uptime = 1_000_000;
         // More than 32k strings
         final int tagCount = 0x7FFF + 20;
-        for (int tag = 0; tag < tagCount;) {
+        for (int tag = 0; tag < tagCount; ) {
             mClock.realtime += 10;
             mClock.uptime += 10;
             mHistory.recordEvent(mClock.realtime, mClock.uptime, HistoryItem.EVENT_ALARM_START,
@@ -438,7 +442,7 @@ public class BatteryStatsHistoryTest {
         int wakeReasonTagsPooled = 0;
         int wakeReasonTagsUnpooled = 0;
         for (BatteryStatsHistoryIterator iterator = mHistory.iterate(); iterator.hasNext(); ) {
-            HistoryItem item  = iterator.next();
+            HistoryItem item = iterator.next();
             if (item.cmd != HistoryItem.CMD_UPDATE) {
                 continue;
             }
@@ -482,6 +486,36 @@ public class BatteryStatsHistoryTest {
         assertThat(wakelockTagsUnpooled).isGreaterThan(0);
         assertThat(wakeReasonTagsPooled).isGreaterThan(0);
         assertThat(wakeReasonTagsUnpooled).isGreaterThan(0);
+    }
+
+    @Test
+    public void recordProcStateChange() {
+        mHistory.recordProcessStateChange(200, 200, 42, BatteryConsumer.PROCESS_STATE_BACKGROUND);
+        mHistory.recordProcessStateChange(300, 300, 42, BatteryConsumer.PROCESS_STATE_FOREGROUND);
+        // Large UID, > 0xFFFFFF
+        mHistory.recordProcessStateChange(400, 400,
+                UserHandle.getUid(777, Process.LAST_ISOLATED_UID),
+                BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
+
+        BatteryStatsHistoryIterator iterator = mHistory.iterate();
+        BatteryStats.HistoryItem item;
+        assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
+
+        assertThat(item = iterator.next()).isNotNull();
+
+        String dump = toString(item, /* checkin */ false);
+        assertThat(dump).contains("+200ms");
+        assertThat(dump).contains("procstate: 42: bg");
+
+        assertThat(item = iterator.next()).isNotNull();
+        dump = toString(item, /* checkin */ false);
+        assertThat(dump).contains("+300ms");
+        assertThat(dump).contains("procstate: 42: fg");
+
+        assertThat(item = iterator.next()).isNotNull();
+        dump = toString(item, /* checkin */ false);
+        assertThat(dump).contains("+400ms");
+        assertThat(dump).contains("procstate: u777i999: fgs");
     }
 
     private String toString(BatteryStats.HistoryItem item, boolean checkin) {

@@ -136,6 +136,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
+import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 
 import libcore.util.EmptyArray;
@@ -10552,6 +10553,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 final int batteryConsumerProcessState =
                         mapUidProcessStateToBatteryConsumerProcessState(uidRunningState);
+                if (mBsi.mSystemReady && Flags.streamlinedBatteryStats()) {
+                    mBsi.mHistory.recordProcessStateChange(elapsedRealtimeMs, uptimeMs, mUid,
+                            batteryConsumerProcessState);
+                }
                 getCpuActiveTimeCounter().setState(batteryConsumerProcessState, elapsedRealtimeMs);
 
                 getMobileRadioActiveTimeCounter()

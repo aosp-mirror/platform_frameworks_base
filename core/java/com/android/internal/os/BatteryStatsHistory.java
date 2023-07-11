@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.BitDescription;
@@ -124,6 +125,7 @@ public class BatteryStatsHistory {
 
     static final int EXTENSION_POWER_STATS_DESCRIPTOR_FLAG = 0x00000001;
     static final int EXTENSION_POWER_STATS_FLAG = 0x00000002;
+    static final int EXTENSION_PROCESS_STATE_CHANGE_FLAG = 0x00000004;
 
     // For state1, trace everything except the wakelock bit (which can race with
     // suspend) and the running bit (which isn't meaningful in traces).
@@ -1053,6 +1055,18 @@ public class BatteryStatsHistory {
     }
 
     /**
+     * Records the change of a UID's proc state.
+     */
+    public void recordProcessStateChange(long elapsedRealtimeMs, long uptimeMs,
+            int uid, @BatteryConsumer.ProcessState int processState) {
+        mHistoryCur.processStateChange = mHistoryCur.localProcessStateChange;
+        mHistoryCur.processStateChange.uid = uid;
+        mHistoryCur.processStateChange.processState = processState;
+        mHistoryCur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
+        writeHistoryItem(elapsedRealtimeMs, uptimeMs);
+    }
+
+    /**
      * Records a history item with the amount of charge consumed by WiFi.  Used on certain devices
      * equipped with on-device power metering.
      */
@@ -1337,7 +1351,9 @@ public class BatteryStatsHistory {
             mTraceLastState2 = cur.states2;
         }
 
-        if ((!mHaveBatteryLevel || !mRecordingHistory) && cur.powerStats == null) {
+        if ((!mHaveBatteryLevel || !mRecordingHistory)
+                && cur.powerStats == null
+                && cur.processStateChange == null) {
             return;
         }
 
@@ -1373,7 +1389,8 @@ public class BatteryStatsHistory {
                 && mHistoryLastWritten.batteryPlugType == cur.batteryPlugType
                 && mHistoryLastWritten.batteryTemperature == cur.batteryTemperature
                 && mHistoryLastWritten.batteryVoltage == cur.batteryVoltage
-                && mHistoryLastWritten.powerStats == null) {
+                && mHistoryLastWritten.powerStats == null
+                && mHistoryLastWritten.processStateChange == null) {
             // We can merge this new change in with the last one.  Merging is
             // allowed as long as only the states have changed, and within those states
             // as long as no bit has changed both between now and the last entry, as
@@ -1458,6 +1475,7 @@ public class BatteryStatsHistory {
             copy.eventTag = null;
             copy.tagsFirstOccurrence = false;
             copy.powerStats = null;
+            copy.processStateChange = null;
             writeHistoryItem(elapsedRealtimeMs, uptimeMs, copy, HistoryItem.CMD_RESET);
         }
         writeHistoryItem(elapsedRealtimeMs, uptimeMs, cur, HistoryItem.CMD_UPDATE);
@@ -1486,6 +1504,7 @@ public class BatteryStatsHistory {
         cur.eventTag = null;
         cur.tagsFirstOccurrence = false;
         cur.powerStats = null;
+        cur.processStateChange = null;
         if (DEBUG) {
             Slog.i(TAG, "Writing history buffer: was " + mHistoryBufferLastPos
                     + " now " + mHistoryBuffer.dataPosition()
@@ -1622,6 +1641,9 @@ public class BatteryStatsHistory {
                 extensionFlags |= BatteryStatsHistory.EXTENSION_POWER_STATS_DESCRIPTOR_FLAG;
             }
         }
+        if (cur.processStateChange != null) {
+            extensionFlags |= BatteryStatsHistory.EXTENSION_PROCESS_STATE_CHANGE_FLAG;
+        }
         if (extensionFlags != 0) {
             cur.states2 |= HistoryItem.STATE2_EXTENSIONS_FLAG;
         } else {
@@ -1752,6 +1774,9 @@ public class BatteryStatsHistory {
                     mWrittenPowerStatsDescriptors.add(cur.powerStats.descriptor);
                 }
                 cur.powerStats.writeToParcel(dest);
+            }
+            if (cur.processStateChange != null) {
+                cur.processStateChange.writeToParcel(dest);
             }
         }
     }

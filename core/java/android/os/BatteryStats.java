@@ -1794,6 +1794,59 @@ public abstract class BatteryStats {
     }
 
     /**
+     * An extension to the history item describing a proc state change for a UID.
+     */
+    public static final class ProcessStateChange {
+        public int uid;
+        public @BatteryConsumer.ProcessState int processState;
+
+        private static final int LARGE_UID_FLAG = 0x80000000;
+        private static final int SMALL_UID_MASK = 0x00FFFFFF;
+        private static final int PROC_STATE_MASK = 0x7F000000;
+        private static final int PROC_STATE_SHIFT = Integer.numberOfTrailingZeros(PROC_STATE_MASK);
+
+        /**
+         * Writes this object to the supplied parcel.
+         */
+        public void writeToParcel(Parcel out) {
+            int bits = processState << PROC_STATE_SHIFT;
+            if ((uid & ~SMALL_UID_MASK) == 0) {
+                bits |= uid;
+                out.writeInt(bits);
+            } else {
+                bits |= LARGE_UID_FLAG;
+                out.writeInt(bits);
+                out.writeInt(uid);
+            }
+        }
+
+        /**
+         * Reads this object from the supplied parcel.
+         */
+        public void readFromParcel(Parcel in) {
+            int bits = in.readInt();
+            processState = (bits & PROC_STATE_MASK) >>> PROC_STATE_SHIFT;
+            if (processState >= BatteryConsumer.PROCESS_STATE_COUNT) {
+                Slog.e(TAG, "Unrecognized proc state in battery history: " + processState);
+                processState = BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
+            }
+            if ((bits & LARGE_UID_FLAG) == 0) {
+                uid = bits & ~PROC_STATE_MASK;
+            } else {
+                uid = in.readInt();
+            }
+        }
+
+        /**
+         * String representation for inclusion in the battery history dump.
+         */
+        public String formatForBatteryHistory() {
+            return UserHandle.formatUid(uid) + ": "
+                    + BatteryConsumer.processStateToString(processState);
+        }
+    }
+
+    /**
      * Battery history record.
      */
     public static final class HistoryItem {
@@ -1939,6 +1992,9 @@ public abstract class BatteryStats {
         // Non-null when there are power stats to be written to history
         public PowerStats powerStats;
 
+        // Non-null when there is procstate change to be written to history
+        public ProcessStateChange processStateChange;
+
         public static final int EVENT_FLAG_START = 0x8000;
         public static final int EVENT_FLAG_FINISH = 0x4000;
 
@@ -2035,6 +2091,7 @@ public abstract class BatteryStats {
         public final HistoryTag localWakelockTag = new HistoryTag();
         public final HistoryTag localWakeReasonTag = new HistoryTag();
         public final HistoryTag localEventTag = new HistoryTag();
+        public final ProcessStateChange localProcessStateChange = new ProcessStateChange();
 
         // Includes a tag's first occurrence in the parcel, so the value of the tag is written
         // rather than just its index in the history tag pool.
@@ -2148,6 +2205,7 @@ public abstract class BatteryStats {
             eventTag = null;
             tagsFirstOccurrence = false;
             powerStats = null;
+            processStateChange = null;
         }
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -2198,6 +2256,7 @@ public abstract class BatteryStats {
             tagsFirstOccurrence = o.tagsFirstOccurrence;
             currentTime = o.currentTime;
             powerStats = o.powerStats;
+            processStateChange = o.processStateChange;
         }
 
         public boolean sameNonEvent(HistoryItem o) {
@@ -7075,6 +7134,12 @@ public abstract class BatteryStats {
                                 "\n                 Stats: ");
                         item.append(rec.powerStats.formatForBatteryHistory(
                                 "\n                    "));
+                    }
+                }
+                if (rec.processStateChange != null && verbose) {
+                    if (!checkin) {
+                        item.append(" procstate: ");
+                        item.append(rec.processStateChange.formatForBatteryHistory());
                     }
                 }
                 item.append("\n");

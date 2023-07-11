@@ -232,8 +232,15 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
             } else {
                 cur.powerStats = null;
             }
+            if ((extensionFlags & BatteryStatsHistory.EXTENSION_PROCESS_STATE_CHANGE_FLAG) != 0) {
+                cur.processStateChange = cur.localProcessStateChange;
+                cur.processStateChange.readFromParcel(src);
+            } else {
+                cur.processStateChange = null;
+            }
         } else {
             cur.powerStats = null;
+            cur.processStateChange = null;
         }
     }
 
