@@ -589,27 +589,14 @@ final class VerifyingSession {
             final PackageVerificationResponse response = new PackageVerificationResponse(
                     verificationCodeAtTimeout, requiredUid);
 
-            if (streaming) {
-                // For streaming installations, count verification timeout from the broadcast.
-                startVerificationTimeoutCountdown(verificationId, streaming, response,
-                        verificationTimeout);
-            }
+            startVerificationTimeoutCountdown(verificationId, streaming, response,
+                    verificationTimeout);
 
             // Send the intent to the required verification agent, but only start the
             // verification timeout after the target BroadcastReceivers have run.
             mPm.mContext.sendOrderedBroadcastAsUser(requiredIntent, verifierUser,
                     receiverPermission, AppOpsManager.OP_NONE, options.toBundle(),
-                    new BroadcastReceiver() {
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            if (!streaming) {
-                                // For NON-streaming installations, count verification timeout from
-                                // the broadcast was processed by all receivers.
-                                startVerificationTimeoutCountdown(verificationId, streaming,
-                                        response, verificationTimeout);
-                            }
-                        }
-                    }, null, 0, null, null);
+                    null, null, 0, null, null);
         }
 
         Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "verification", verificationId);
