@@ -179,17 +179,11 @@ public final class PasswordMetrics implements Parcelable {
     };
 
     /**
-     * Returns the {@code PasswordMetrics} for a given credential.
-     *
-     * If the credential is a pin or a password, equivalent to
-     * {@link #computeForPasswordOrPin(byte[], boolean)}. {@code credential} cannot be null
-     * when {@code type} is
-     * {@link com.android.internal.widget.LockPatternUtils#CREDENTIAL_TYPE_PASSWORD}.
+     * Returns the {@code PasswordMetrics} for the given credential.
      */
     public static PasswordMetrics computeForCredential(LockscreenCredential credential) {
         if (credential.isPassword() || credential.isPin()) {
-            return PasswordMetrics.computeForPasswordOrPin(credential.getCredential(),
-                    credential.isPin());
+            return computeForPasswordOrPin(credential.getCredential(), credential.isPin());
         } else if (credential.isPattern())  {
             PasswordMetrics metrics = new PasswordMetrics(CREDENTIAL_TYPE_PATTERN);
             metrics.length = credential.size();
@@ -202,10 +196,10 @@ public final class PasswordMetrics implements Parcelable {
     }
 
     /**
-     * Returns the {@code PasswordMetrics} for a given password or pin
+     * Returns the {@code PasswordMetrics} for the given password or pin.
      */
-    public static PasswordMetrics computeForPasswordOrPin(byte[] password, boolean isPin) {
-        // Analyse the characters used
+    private static PasswordMetrics computeForPasswordOrPin(byte[] credential, boolean isPin) {
+        // Analyze the characters used.
         int letters = 0;
         int upperCase = 0;
         int lowerCase = 0;
@@ -213,8 +207,8 @@ public final class PasswordMetrics implements Parcelable {
         int symbols = 0;
         int nonLetter = 0;
         int nonNumeric = 0;
-        final int length = password.length;
-        for (byte b : password) {
+        final int length = credential.length;
+        for (byte b : credential) {
             switch (categoryChar((char) b)) {
                 case CHAR_LOWER_CASE:
                     letters++;
@@ -239,7 +233,7 @@ public final class PasswordMetrics implements Parcelable {
         }
 
         final int credType = isPin ? CREDENTIAL_TYPE_PIN : CREDENTIAL_TYPE_PASSWORD;
-        final int seqLength = maxLengthSequence(password);
+        final int seqLength = maxLengthSequence(credential);
         return new PasswordMetrics(credType, length, letters, upperCase, lowerCase,
                 numeric, symbols, nonLetter, nonNumeric, seqLength);
     }
