@@ -112,16 +112,14 @@ public class GraphicsEnvironment {
     private static final int ANGLE_GL_DRIVER_ALL_ANGLE_OFF = 0;
 
     // Values for ANGLE_GL_DRIVER_SELECTION_VALUES
+    private static final String ANGLE_GL_DRIVER_CHOICE_DEFAULT = "default";
+    private static final String ANGLE_GL_DRIVER_CHOICE_ANGLE = "angle";
+    private static final String ANGLE_GL_DRIVER_CHOICE_NATIVE = "native";
+
     private enum AngleDriverChoice {
-        DEFAULT("default"),
-        ANGLE("angle"),
-        NATIVE("native");
-
-        public final String choice;
-
-        AngleDriverChoice(String choice) {
-            this.choice = choice;
-        }
+        DEFAULT,
+        ANGLE,
+        NATIVE,
     }
 
     private static final String PROPERTY_RO_ANGLE_SUPPORTED = "ro.gfx.angle.supported";
@@ -493,9 +491,9 @@ public class GraphicsEnvironment {
         Log.v(TAG,
                 "ANGLE Developer option for '" + packageName + "' "
                         + "set to: '" + optInValue + "'");
-        if (optInValue.equals(AngleDriverChoice.ANGLE.choice)) {
+        if (optInValue.equals(ANGLE_GL_DRIVER_CHOICE_ANGLE)) {
             return AngleDriverChoice.ANGLE;
-        } else if (optInValue.equals(AngleDriverChoice.NATIVE.choice)) {
+        } else if (optInValue.equals(ANGLE_GL_DRIVER_CHOICE_NATIVE)) {
             return AngleDriverChoice.NATIVE;
         } else {
             // The user either chose default or an invalid value; go with the default driver or what
