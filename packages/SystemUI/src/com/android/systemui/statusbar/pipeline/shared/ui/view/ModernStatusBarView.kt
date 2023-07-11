@@ -118,7 +118,7 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
                 it.visibleState = STATE_DOT
             }
 
-        val width = mContext.resources.getDimensionPixelSize(R.dimen.status_bar_icon_size)
+        val width = mContext.resources.getDimensionPixelSize(R.dimen.status_bar_icon_size_sp)
         val lp = LayoutParams(width, width)
         lp.gravity = Gravity.CENTER_VERTICAL or Gravity.START
         addView(dotView, lp)
