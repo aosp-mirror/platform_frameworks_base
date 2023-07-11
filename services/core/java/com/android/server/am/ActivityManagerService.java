@@ -8108,8 +8108,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         return killed;
     }
 
-    @Override
-    public void killUid(int appId, int userId, String reason) {
+    private void killUid(int appId, int userId, int reason, int subReason,
+            String reasonAsString) {
         enforceCallingPermission(Manifest.permission.KILL_UID, "killUid");
         synchronized (this) {
             final long identity = Binder.clearCallingIdentity();
@@ -8120,14 +8120,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                             true /* callerWillRestart */, true /* doit */,
                             true /* evenPersistent */, false /* setRemoved */,
                             false /* uninstalling */,
-                            ApplicationExitInfo.REASON_OTHER,
-                            ApplicationExitInfo.SUBREASON_KILL_UID,
-                            reason != null ? reason : "kill uid");
+                            reason,
+                            subReason,
+                            reasonAsString != null ? reasonAsString : "kill uid");
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
         }
+    }
+
+    @Override
+    public void killUid(int appId, int userId, String reason) {
+        killUid(appId, userId, ApplicationExitInfo.REASON_OTHER,
+                ApplicationExitInfo.SUBREASON_KILL_UID, reason);
     }
 
     @Override
@@ -8645,6 +8651,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             Slog.i(TAG, "Skipping kill (uid is SYSTEM)");
                         } else {
                             killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
+                                    ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE,
+                                    ApplicationExitInfo.SUBREASON_EXCESSIVE_BINDER_OBJECTS,
                                     "Too many Binders sent to SYSTEM");
                             // We need to run a GC here, because killing the processes involved
                             // actually isn't guaranteed to free up the proxies; in fact, if the
