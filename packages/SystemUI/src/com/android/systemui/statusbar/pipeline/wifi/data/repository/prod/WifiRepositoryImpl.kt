@@ -34,6 +34,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
@@ -48,6 +49,7 @@ import com.android.systemui.statusbar.pipeline.wifi.shared.WifiInputLogger
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -60,7 +62,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
 
 /** Real implementation of [WifiRepository]. */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
@@ -76,8 +80,9 @@ constructor(
     logger: WifiInputLogger,
     @WifiTableLog wifiTableLogBuffer: TableLogBuffer,
     @Main mainExecutor: Executor,
+    @Background private val bgDispatcher: CoroutineDispatcher,
     @Application scope: CoroutineScope,
-    wifiManager: WifiManager,
+    private val wifiManager: WifiManager,
 ) : RealWifiRepository {
 
     private val wifiStateChangeEvents: Flow<Unit> =
@@ -93,19 +98,24 @@ constructor(
     // have changed.
     override val isWifiEnabled: StateFlow<Boolean> =
         merge(wifiNetworkChangeEvents, wifiStateChangeEvents)
-            .mapLatest { wifiManager.isWifiEnabled }
+            .onStart { emit(Unit) }
+            .mapLatest { isWifiEnabled() }
             .distinctUntilChanged()
             .logDiffsForTable(
                 wifiTableLogBuffer,
                 columnPrefix = "",
                 columnName = "isEnabled",
-                initialValue = wifiManager.isWifiEnabled,
+                initialValue = false,
             )
             .stateIn(
                 scope = scope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = wifiManager.isWifiEnabled,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
             )
+
+    // [WifiManager.isWifiEnabled] is a blocking IPC call, so fetch it in the background.
+    private suspend fun isWifiEnabled(): Boolean =
+        withContext(bgDispatcher) { wifiManager.isWifiEnabled }
 
     override val isWifiDefault: StateFlow<Boolean> =
         connectivityRepository.defaultConnections
@@ -289,6 +299,7 @@ constructor(
         private val logger: WifiInputLogger,
         @WifiTableLog private val wifiTableLogBuffer: TableLogBuffer,
         @Main private val mainExecutor: Executor,
+        @Background private val bgDispatcher: CoroutineDispatcher,
         @Application private val scope: CoroutineScope,
     ) {
         fun create(wifiManager: WifiManager): WifiRepositoryImpl {
@@ -299,6 +310,7 @@ constructor(
                 logger,
                 wifiTableLogBuffer,
                 mainExecutor,
+                bgDispatcher,
                 scope,
                 wifiManager,
             )

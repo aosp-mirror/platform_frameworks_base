@@ -83,6 +83,7 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
                 logger,
                 tableLogger,
                 mainExecutor,
+                testDispatcher,
                 testScope.backgroundScope,
                 wifiManager,
             )
