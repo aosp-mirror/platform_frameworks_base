@@ -2725,11 +2725,12 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
-    private String[] getKeyboardLayoutOverlay(InputDeviceIdentifier identifier) {
+    private String[] getKeyboardLayoutOverlay(InputDeviceIdentifier identifier, String languageTag,
+            String layoutType) {
         if (!mSystemReady) {
             return null;
         }
-        return mKeyboardLayoutManager.getKeyboardLayoutOverlay(identifier);
+        return mKeyboardLayoutManager.getKeyboardLayoutOverlay(identifier, languageTag, layoutType);
     }
 
     @EnforcePermission(Manifest.permission.REMAP_MODIFIER_KEYS)

@@ -313,7 +313,8 @@ public:
     std::shared_ptr<PointerControllerInterface> obtainPointerController(int32_t deviceId) override;
     void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) override;
     std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
-            const InputDeviceIdentifier& identifier) override;
+            const InputDeviceIdentifier& identifier,
+            const std::optional<KeyboardLayoutInfo> keyboardLayoutInfo) override;
     std::string getDeviceAlias(const InputDeviceIdentifier& identifier) override;
     TouchAffineTransformation getTouchAffineTransformation(const std::string& inputDeviceDescriptor,
                                                            ui::Rotation surfaceRotation) override;
@@ -779,17 +780,32 @@ void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDevice
 }
 
 std::shared_ptr<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
-        const InputDeviceIdentifier& identifier) {
+        const InputDeviceIdentifier& identifier,
+        const std::optional<KeyboardLayoutInfo> keyboardLayoutInfo) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
     std::shared_ptr<KeyCharacterMap> result;
     ScopedLocalRef<jstring> descriptor(env, env->NewStringUTF(identifier.descriptor.c_str()));
+    ScopedLocalRef<jstring> languageTag(env,
+                                        keyboardLayoutInfo
+                                                ? env->NewStringUTF(
+                                                          keyboardLayoutInfo->languageTag.c_str())
+                                                : nullptr);
+    ScopedLocalRef<jstring> layoutType(env,
+                                       keyboardLayoutInfo
+                                               ? env->NewStringUTF(
+                                                         keyboardLayoutInfo->layoutType.c_str())
+                                               : nullptr);
     ScopedLocalRef<jobject> identifierObj(env, env->NewObject(gInputDeviceIdentifierInfo.clazz,
             gInputDeviceIdentifierInfo.constructor, descriptor.get(),
             identifier.vendor, identifier.product));
-    ScopedLocalRef<jobjectArray> arrayObj(env, jobjectArray(env->CallObjectMethod(mServiceObj,
-                gServiceClassInfo.getKeyboardLayoutOverlay, identifierObj.get())));
+    ScopedLocalRef<jobjectArray>
+            arrayObj(env,
+                     jobjectArray(env->CallObjectMethod(mServiceObj,
+                                                        gServiceClassInfo.getKeyboardLayoutOverlay,
+                                                        identifierObj.get(), languageTag.get(),
+                                                        layoutType.get())));
     if (arrayObj.get()) {
         ScopedLocalRef<jstring> filenameObj(env,
                 jstring(env->GetObjectArrayElement(arrayObj.get(), 0)));
@@ -2803,9 +2819,9 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.getPointerIcon, clazz,
             "getPointerIcon", "(I)Landroid/view/PointerIcon;");
 
-    GET_METHOD_ID(gServiceClassInfo.getKeyboardLayoutOverlay, clazz,
-            "getKeyboardLayoutOverlay",
-            "(Landroid/hardware/input/InputDeviceIdentifier;)[Ljava/lang/String;");
+    GET_METHOD_ID(gServiceClassInfo.getKeyboardLayoutOverlay, clazz, "getKeyboardLayoutOverlay",
+                  "(Landroid/hardware/input/InputDeviceIdentifier;Ljava/lang/String;Ljava/lang/"
+                  "String;)[Ljava/lang/String;");
 
     GET_METHOD_ID(gServiceClassInfo.getDeviceAlias, clazz,
             "getDeviceAlias", "(Ljava/lang/String;)Ljava/lang/String;");
