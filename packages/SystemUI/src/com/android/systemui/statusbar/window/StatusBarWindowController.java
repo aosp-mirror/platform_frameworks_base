@@ -240,8 +240,10 @@ public class StatusBarWindowController {
                     Insets.of(0, safeTouchRegionHeight, 0, 0));
         }
         lp.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(mInsetsSourceOwner, 0, statusBars()),
-                new InsetsFrameProvider(mInsetsSourceOwner, 0, tappableElement()),
+                new InsetsFrameProvider(mInsetsSourceOwner, 0, statusBars())
+                        .setInsetsSize(getInsets(height)),
+                new InsetsFrameProvider(mInsetsSourceOwner, 0, tappableElement())
+                        .setInsetsSize(getInsets(height)),
                 gestureInsetsProvider
         };
         return lp;
@@ -306,10 +308,35 @@ public class StatusBarWindowController {
         mLpChanged.height =
                 state.mIsLaunchAnimationRunning ? ViewGroup.LayoutParams.MATCH_PARENT : mBarHeight;
         for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+            int height = SystemBarUtils.getStatusBarHeightForRotation(mContext, rot);
             mLpChanged.paramsForRotation[rot].height =
-                    state.mIsLaunchAnimationRunning ? ViewGroup.LayoutParams.MATCH_PARENT :
-                    SystemBarUtils.getStatusBarHeightForRotation(mContext, rot);
+                    state.mIsLaunchAnimationRunning ? ViewGroup.LayoutParams.MATCH_PARENT : height;
+            // The status bar height could change at runtime if one display has a cutout while
+            // another doesn't (like some foldables). It could also change when using debug cutouts.
+            // So, we need to re-fetch the height and re-apply it to the insets each time to avoid
+            // bugs like b/290300359.
+            InsetsFrameProvider[] providers = mLpChanged.paramsForRotation[rot].providedInsets;
+            if (providers != null) {
+                for (InsetsFrameProvider provider : providers) {
+                    provider.setInsetsSize(getInsets(height));
+                }
+            }
         }
+    }
+
+    /**
+     * Get the insets that should be applied to the status bar window given the current status bar
+     * height.
+     *
+     * The status bar window height can sometimes be full-screen (see {@link #applyHeight(State)}.
+     * However, the status bar *insets* should *not* be full-screen, because this would prevent apps
+     * from drawing any content and can cause animations to be cancelled (see b/283958440). Instead,
+     * the status bar insets should always be equal to the space occupied by the actual status bar
+     * content -- setting the insets correctly will prevent window manager from unnecessarily
+     * re-drawing this window and other windows. This method provides the correct insets.
+     */
+    private Insets getInsets(int height) {
+        return Insets.of(0, height, 0, 0);
     }
 
     private void apply(State state) {
