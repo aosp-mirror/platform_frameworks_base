@@ -66,11 +66,14 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** InfoMediaManager provide interface to get InfoMediaDevice list. */
 @RequiresApi(Build.VERSION_CODES.R)
@@ -693,25 +696,62 @@ public abstract class InfoMediaManager extends MediaManager {
             return filteredInfos;
         }
 
+        /**
+         * Returns an ordered list of available devices based on the provided {@code
+         * routeListingPreferenceItems}.
+         *
+         * <p>The result has the following order:
+         *
+         * <ol>
+         *   <li>Selected routes.
+         *   <li>Not-selected system routes.
+         *   <li>Not-selected, non-system, available routes sorted by route listing preference.
+         * </ol>
+         *
+         * @param selectedRoutes List of currently selected routes.
+         * @param availableRoutes List of available routes that match the app's requested route
+         *     features.
+         * @param routeListingPreferenceItems Ordered list of {@link RouteListingPreference.Item} to
+         *     sort routes with.
+         */
         @DoNotInline
         static List<MediaRoute2Info> arrangeRouteListByPreference(
-                List<MediaRoute2Info> selectedRouteInfos, List<MediaRoute2Info> infolist,
-                List<RouteListingPreference.Item> preferenceRouteListing) {
-            final List<MediaRoute2Info> sortedInfoList = new ArrayList<>(selectedRouteInfos);
-            infolist.removeAll(selectedRouteInfos);
-            sortedInfoList.addAll(infolist.stream().filter(
-                    MediaRoute2Info::isSystemRoute).collect(Collectors.toList()));
-            for (RouteListingPreference.Item item : preferenceRouteListing) {
-                for (MediaRoute2Info info : infolist) {
-                    if (item.getRouteId().equals(info.getId())
-                            && !selectedRouteInfos.contains(info)
-                            && !info.isSystemRoute()) {
-                        sortedInfoList.add(info);
-                        break;
-                    }
+                List<MediaRoute2Info> selectedRoutes,
+                List<MediaRoute2Info> availableRoutes,
+                List<RouteListingPreference.Item> routeListingPreferenceItems) {
+            Set<String> sortedRouteIds = new LinkedHashSet<>();
+
+            // Add selected routes first.
+            for (MediaRoute2Info selectedRoute : selectedRoutes) {
+                sortedRouteIds.add(selectedRoute.getId());
+            }
+
+            // Add not-yet-added system routes.
+            for (MediaRoute2Info availableRoute : availableRoutes) {
+                if (availableRoute.isSystemRoute()) {
+                    sortedRouteIds.add(availableRoute.getId());
                 }
             }
-            return sortedInfoList;
+
+            // Create a mapping from id to route to avoid a quadratic search.
+            Map<String, MediaRoute2Info> idToRouteMap =
+                    Stream.concat(selectedRoutes.stream(), availableRoutes.stream())
+                            .collect(
+                                    Collectors.toMap(
+                                            MediaRoute2Info::getId,
+                                            Function.identity(),
+                                            (route1, route2) -> route1));
+
+            // Add not-selected routes that match RLP items. All system routes have already been
+            // added at this point.
+            for (RouteListingPreference.Item item : routeListingPreferenceItems) {
+                MediaRoute2Info route = idToRouteMap.get(item.getRouteId());
+                if (route != null) {
+                    sortedRouteIds.add(route.getId());
+                }
+            }
+
+            return sortedRouteIds.stream().map(idToRouteMap::get).collect(Collectors.toList());
         }
 
         @DoNotInline
