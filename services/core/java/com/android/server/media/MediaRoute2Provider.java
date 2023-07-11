@@ -116,6 +116,7 @@ abstract class MediaRoute2Provider {
     public void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + getDebugString());
         prefix += "  ";
+
         if (mProviderInfo == null) {
             pw.println(prefix + "<provider info not received, yet>");
         } else if (mProviderInfo.getRoutes().isEmpty()) {
@@ -123,6 +124,17 @@ abstract class MediaRoute2Provider {
         } else {
             for (MediaRoute2Info route : mProviderInfo.getRoutes()) {
                 pw.printf("%s%s | %s\n", prefix, route.getId(), route.getName());
+            }
+        }
+
+        pw.println(prefix + "Active routing sessions:");
+        synchronized (mLock) {
+            if (mSessionInfos.isEmpty()) {
+                pw.println(prefix + "  <no active routing sessions>");
+            } else {
+                for (RoutingSessionInfo routingSessionInfo : mSessionInfos) {
+                    routingSessionInfo.dump(pw, prefix + "  ");
+                }
             }
         }
     }
