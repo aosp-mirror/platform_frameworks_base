@@ -144,12 +144,7 @@ constructor(
     private val lockPatternUtils: LockPatternUtils,
 ) : AuthenticationRepository {
 
-    override val isUnlocked: StateFlow<Boolean> =
-        keyguardRepository.isKeyguardUnlocked.stateIn(
-            scope = applicationScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = false,
-        )
+    override val isUnlocked: StateFlow<Boolean> = keyguardRepository.isKeyguardUnlocked
 
     override suspend fun isLockscreenEnabled(): Boolean {
         return withContext(backgroundDispatcher) {

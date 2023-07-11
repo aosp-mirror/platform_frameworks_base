@@ -87,7 +87,7 @@ interface KeyguardRepository {
     val isKeyguardShowing: Flow<Boolean>
 
     /** Is the keyguard in a unlocked state? */
-    val isKeyguardUnlocked: Flow<Boolean>
+    val isKeyguardUnlocked: StateFlow<Boolean>
 
     /** Is an activity showing over the keyguard? */
     val isKeyguardOccluded: Flow<Boolean>
@@ -299,7 +299,7 @@ constructor(
             }
             .distinctUntilChanged()
 
-    override val isKeyguardUnlocked: Flow<Boolean> =
+    override val isKeyguardUnlocked: StateFlow<Boolean> =
         conflatedCallbackFlow {
                 val callback =
                     object : KeyguardStateController.Callback {
@@ -330,7 +330,11 @@ constructor(
 
                 awaitClose { keyguardStateController.removeCallback(callback) }
             }
-            .distinctUntilChanged()
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = keyguardStateController.isUnlocked,
+            )
 
     override val isKeyguardGoingAway: Flow<Boolean> = conflatedCallbackFlow {
         val callback =
