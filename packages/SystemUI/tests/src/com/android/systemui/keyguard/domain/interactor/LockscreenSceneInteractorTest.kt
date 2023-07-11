@@ -47,7 +47,6 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
     private val underTest =
         utils.lockScreenSceneInteractor(
             authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
             bouncerInteractor =
                 utils.bouncerInteractor(
                     authenticationInteractor = authenticationInteractor,
@@ -126,22 +125,6 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
             underTest.dismissLockscreen()
 
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
-        }
-
-    @Test
-    fun deviceLockedInNonLockScreenScene_switchesToLockScreenScene() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            runCurrent()
-            sceneInteractor.setCurrentScene(CONTAINER_1, SceneModel(SceneKey.Gone))
-            runCurrent()
-            utils.authenticationRepository.setUnlocked(true)
-            runCurrent()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
-
-            utils.authenticationRepository.setUnlocked(false)
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
         }
 
     @Test

@@ -52,7 +52,10 @@ class BouncerViewModelTest : SysuiTestCase() {
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = utils.sceneInteractor(),
         )
-    private val underTest = utils.bouncerViewModel(bouncerInteractor)
+    private val underTest =
+        utils.bouncerViewModel(
+            bouncerInteractor = bouncerInteractor,
+        )
 
     @Test
     fun authMethod_nonNullForSecureMethods_nullForNotSecureMethods() =

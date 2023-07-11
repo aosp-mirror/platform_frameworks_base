@@ -53,7 +53,6 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                     override fun create(containerName: String): LockscreenSceneInteractor {
                         return utils.lockScreenSceneInteractor(
                             authenticationInteractor = authenticationInteractor,
-                            sceneInteractor = sceneInteractor,
                             bouncerInteractor =
                                 utils.bouncerInteractor(
                                     authenticationInteractor = authenticationInteractor,

@@ -20,20 +20,14 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 /** Hosts business and application state accessing logic for the lockscreen scene. */
 class LockscreenSceneInteractor
@@ -42,7 +36,6 @@ constructor(
     @Application applicationScope: CoroutineScope,
     private val authenticationInteractor: AuthenticationInteractor,
     bouncerInteractorFactory: BouncerInteractor.Factory,
-    private val sceneInteractor: SceneInteractor,
     @Assisted private val containerName: String,
 ) {
     private val bouncerInteractor: BouncerInteractor =
@@ -71,46 +64,6 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = false,
             )
-
-    init {
-        // LOCKING SHOWS Lockscreen.
-        //
-        // Move to the lockscreen scene if the device becomes locked while in any scene.
-        applicationScope.launch {
-            authenticationInteractor.isUnlocked
-                .map { !it }
-                .distinctUntilChanged()
-                .collect { isLocked ->
-                    if (isLocked) {
-                        sceneInteractor.setCurrentScene(
-                            containerName = containerName,
-                            scene = SceneModel(SceneKey.Lockscreen),
-                        )
-                    }
-                }
-        }
-
-        // BYPASS UNLOCK.
-        //
-        // Moves to the gone scene if bypass is enabled and the device becomes unlocked while in the
-        // lockscreen scene.
-        applicationScope.launch {
-            combine(
-                    authenticationInteractor.isBypassEnabled,
-                    authenticationInteractor.isUnlocked,
-                    sceneInteractor.currentScene(containerName),
-                    ::Triple,
-                )
-                .collect { (isBypassEnabled, isUnlocked, currentScene) ->
-                    if (isBypassEnabled && isUnlocked && currentScene.key == SceneKey.Lockscreen) {
-                        sceneInteractor.setCurrentScene(
-                            containerName = containerName,
-                            scene = SceneModel(SceneKey.Gone),
-                        )
-                    }
-                }
-        }
-    }
 
     /** Attempts to dismiss the lockscreen. This will cause the bouncer to show, if needed. */
     fun dismissLockscreen() {
