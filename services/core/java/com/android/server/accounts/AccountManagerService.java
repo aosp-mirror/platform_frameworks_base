@@ -357,15 +357,25 @@ public class AccountManagerService
             @Override
             public void onPackageAdded(String packageName, int uid) {
                 // Called on a handler, and running as the system
-                UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
-                cancelAccountAccessRequestNotificationIfNeeded(uid, true, accounts);
+                try {
+                    UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
+                    cancelAccountAccessRequestNotificationIfNeeded(uid, true, accounts);
+                } catch (SQLiteCantOpenDatabaseException e) {
+                    Log.w(TAG, "Can't read accounts database", e);
+                    return;
+                }
             }
 
             @Override
             public void onPackageUpdateFinished(String packageName, int uid) {
                 // Called on a handler, and running as the system
-                UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
-                cancelAccountAccessRequestNotificationIfNeeded(uid, true, accounts);
+                try {
+                    UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
+                    cancelAccountAccessRequestNotificationIfNeeded(uid, true, accounts);
+                } catch (SQLiteCantOpenDatabaseException e) {
+                    Log.w(TAG, "Can't read accounts database", e);
+                    return;
+                }
             }
         }.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
 
@@ -391,6 +401,9 @@ public class AccountManagerService
                     }
                 } catch (NameNotFoundException e) {
                     /* ignore */
+                } catch (SQLiteCantOpenDatabaseException e) {
+                    Log.w(TAG, "Can't read accounts database", e);
+                    return;
                 }
             }
         });
