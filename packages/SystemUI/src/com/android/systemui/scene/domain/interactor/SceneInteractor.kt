@@ -24,7 +24,17 @@ import com.android.systemui.scene.shared.model.SceneTransitionModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
-/** Business logic and app state accessors for the scene framework. */
+/**
+ * Generic business logic and app state accessors for the scene framework.
+ *
+ * Note that scene container specific business logic does not belong in this class. Instead, it
+ * should be hoisted to a class that is specific to that scene container, for an example, please see
+ * [SystemUiDefaultSceneContainerStartable].
+ *
+ * Also note that this class should not depend on state or logic of other modules or features.
+ * Instead, other feature modules should depend on and call into this class when their parts of the
+ * application state change.
+ */
 @SysUISingleton
 class SceneInteractor
 @Inject
