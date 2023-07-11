@@ -282,6 +282,15 @@ object Flags {
     // TODO(b/291767565): Tracking bug.
     @JvmField val MIGRATE_KEYGUARD_STATUS_VIEW = unreleasedFlag(243, "migrate_keyguard_status_view")
 
+    /** Enables preview loading animation in the wallpaper picker. */
+    // TODO(b/274443705): Tracking Bug
+    @JvmField
+    val WALLPAPER_PICKER_PREVIEW_ANIMATION =
+            unreleasedFlag(
+                    244,
+                    "wallpaper_picker_preview_animation"
+            )
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
