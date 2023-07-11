@@ -339,6 +339,7 @@ public class NotificationIconContainer extends ViewGroup {
             }
         }
         if (child instanceof StatusBarIconView) {
+            ((StatusBarIconView) child).updateIconDimens();
             ((StatusBarIconView) child).setDozing(mDozing, false, 0);
         }
     }
@@ -537,9 +538,10 @@ public class NotificationIconContainer extends ViewGroup {
             IconState iconState = mIconStates.get(mIsolatedIcon);
             if (iconState != null) {
                 // Most of the time the icon isn't yet added when this is called but only happening
-                // later
-                iconState.setXTranslation(mIsolatedIconLocation.left - mAbsolutePosition[0]
-                        - (1 - mIsolatedIcon.getIconScale()) * mIsolatedIcon.getWidth() / 2.0f);
+                // later. The isolated icon position left should equal to the mIsolatedIconLocation
+                // to ensure the icon be put at the center of the HUN icon placeholder,
+                // {@See HeadsUpAppearanceController#updateIsolatedIconLocation}.
+                iconState.setXTranslation(mIsolatedIconLocation.left - mAbsolutePosition[0]);
                 iconState.visibleState = StatusBarIconView.STATE_ICON;
             }
         }
