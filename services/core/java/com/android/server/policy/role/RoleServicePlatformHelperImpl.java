@@ -19,7 +19,6 @@ package com.android.server.policy.role;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.admin.DevicePolicyManagerInternal;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -304,8 +303,6 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
     public String computePackageStateHash(@UserIdInt int userId) {
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
-        DevicePolicyManagerInternal devicePolicyManagerInternal = LocalServices.getService(
-                DevicePolicyManagerInternal.class);
         final MessageDigestOutputStream mdos = new MessageDigestOutputStream();
 
         DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(mdos));
@@ -345,30 +342,6 @@ public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper 
                 throw new AssertionError(e);
             }
         }, userId);
-        try {
-            String deviceOwner= "";
-            if (devicePolicyManagerInternal.getDeviceOwnerUserId() == userId) {
-                ComponentName deviceOwnerComponent =
-                    devicePolicyManagerInternal.getDeviceOwnerComponent(false);
-                if (deviceOwnerComponent != null) {
-                    deviceOwner = deviceOwnerComponent.getPackageName();
-                }
-            }
-            dataOutputStream.writeUTF(deviceOwner);
-            String profileOwner = "";
-            ComponentName profileOwnerComponent =
-                devicePolicyManagerInternal.getProfileOwnerAsUser(userId);
-            if (profileOwnerComponent != null) {
-                profileOwner = profileOwnerComponent.getPackageName();
-            }
-            dataOutputStream.writeUTF(profileOwner);
-            dataOutputStream.writeInt(Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.DEVICE_DEMO_MODE, 0));
-            dataOutputStream.flush();
-        } catch (IOException e) {
-            // Never happens for MessageDigestOutputStream and DataOutputStream.
-            throw new AssertionError(e);
-        }
         return mdos.getDigestAsString();
     }
 
