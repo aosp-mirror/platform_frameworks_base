@@ -191,6 +191,10 @@ public class AuthControllerTest extends SysuiTestCase {
     private ArgumentCaptor<IFaceAuthenticatorsRegisteredCallback> mFaceAuthenticatorsRegisteredCaptor;
     @Captor
     private ArgumentCaptor<BiometricStateListener> mBiometricStateCaptor;
+    @Captor
+    private ArgumentCaptor<Integer> mModalityCaptor;
+    @Captor
+    private ArgumentCaptor<String> mMessageCaptor;
     @Mock
     private Resources mResources;
 
@@ -201,9 +205,6 @@ public class AuthControllerTest extends SysuiTestCase {
     private DelayableExecutor mBackgroundExecutor;
     private TestableAuthController mAuthController;
     private FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
-
-    @Mock
-    private VibratorHelper mVibratorHelper;
 
     @Before
     public void setup() throws RemoteException {
@@ -267,7 +268,6 @@ public class AuthControllerTest extends SysuiTestCase {
                         true /* supportsSelfIllumination */,
                         true /* resetLockoutRequireHardwareAuthToken */));
         when(mFaceManager.getSensorPropertiesInternal()).thenReturn(faceProps);
-        when(mVibratorHelper.hasVibrator()).thenReturn(true);
 
         mAuthController = new TestableAuthController(mContextSpy);
 
@@ -482,13 +482,60 @@ public class AuthControllerTest extends SysuiTestCase {
                 BiometricConstants.BIOMETRIC_PAUSED_REJECTED,
                 0 /* vendorCode */);
 
-        ArgumentCaptor<Integer> modalityCaptor = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mDialog1).onAuthenticationFailed(modalityCaptor.capture(), messageCaptor.capture());
+        verify(mDialog1).onAuthenticationFailed(mModalityCaptor.capture(), mMessageCaptor.capture());
 
-        assertEquals(modalityCaptor.getValue().intValue(), modality);
-        assertEquals(messageCaptor.getValue(),
+        assertEquals(mModalityCaptor.getValue().intValue(), modality);
+        assertEquals(mMessageCaptor.getValue(),
                 mContext.getString(R.string.biometric_not_recognized));
+    }
+
+    @Test
+    public void testOnAuthenticationFailedInvoked_coex_whenFaceAuthRejected_withPaused() {
+        testOnAuthenticationFailedInvoked_coex_whenFaceAuthRejected(
+                BiometricConstants.BIOMETRIC_PAUSED_REJECTED);
+    }
+
+    @Test
+    public void testOnAuthenticationFailedInvoked_coex_whenFaceAuthRejected_withTimeout() {
+        testOnAuthenticationFailedInvoked_coex_whenFaceAuthRejected(
+                BiometricConstants.BIOMETRIC_ERROR_TIMEOUT);
+    }
+
+    private void testOnAuthenticationFailedInvoked_coex_whenFaceAuthRejected(int error) {
+        final int modality = BiometricAuthenticator.TYPE_FACE;
+        final int userId = 0;
+
+        enrollFingerprintAndFace(userId);
+
+        showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
+
+        mAuthController.onBiometricError(modality, error, 0 /* vendorCode */);
+
+        verify(mDialog1).onAuthenticationFailed(mModalityCaptor.capture(), mMessageCaptor.capture());
+
+        assertThat(mModalityCaptor.getValue().intValue()).isEqualTo(modality);
+        assertThat(mMessageCaptor.getValue()).isEqualTo(
+                mContext.getString(R.string.biometric_face_not_recognized));
+    }
+
+    @Test
+    public void testOnAuthenticationFailedInvoked_whenFingerprintAuthRejected() {
+        final int modality = BiometricAuthenticator.TYPE_FINGERPRINT;
+        final int userId = 0;
+
+        enrollFingerprintAndFace(userId);
+
+        showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
+
+        mAuthController.onBiometricError(modality,
+                BiometricConstants.BIOMETRIC_PAUSED_REJECTED,
+                0 /* vendorCode */);
+
+        verify(mDialog1).onAuthenticationFailed(mModalityCaptor.capture(), mMessageCaptor.capture());
+
+        assertThat(mModalityCaptor.getValue().intValue()).isEqualTo(modality);
+        assertThat(mMessageCaptor.getValue()).isEqualTo(
+                mContext.getString(R.string.fingerprint_error_not_match));
     }
 
     @Test
@@ -499,13 +546,11 @@ public class AuthControllerTest extends SysuiTestCase {
         final int vendorCode = 0;
         mAuthController.onBiometricError(modality, error, vendorCode);
 
-        ArgumentCaptor<Integer> modalityCaptor = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mDialog1).onAuthenticationFailed(modalityCaptor.capture(), messageCaptor.capture());
+        verify(mDialog1).onAuthenticationFailed(mModalityCaptor.capture(), mMessageCaptor.capture());
 
-        assertEquals(modalityCaptor.getValue().intValue(), modality);
-        assertEquals(messageCaptor.getValue(),
-                FaceManager.getErrorString(mContext, error, vendorCode));
+        assertThat(mModalityCaptor.getValue().intValue()).isEqualTo(modality);
+        assertThat(mMessageCaptor.getValue()).isEqualTo(
+                mContext.getString(R.string.biometric_not_recognized));
     }
 
     @Test
@@ -515,12 +560,10 @@ public class AuthControllerTest extends SysuiTestCase {
         final String helpMessage = "help";
         mAuthController.onBiometricHelp(modality, helpMessage);
 
-        ArgumentCaptor<Integer> modalityCaptor = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mDialog1).onHelp(modalityCaptor.capture(), messageCaptor.capture());
+        verify(mDialog1).onHelp(mModalityCaptor.capture(), mMessageCaptor.capture());
 
-        assertEquals(modalityCaptor.getValue().intValue(), modality);
-        assertEquals(messageCaptor.getValue(), helpMessage);
+        assertThat(mModalityCaptor.getValue().intValue()).isEqualTo(modality);
+        assertThat(mMessageCaptor.getValue()).isEqualTo(helpMessage);
     }
 
     @Test
@@ -531,12 +574,10 @@ public class AuthControllerTest extends SysuiTestCase {
         final int vendorCode = 0;
         mAuthController.onBiometricError(modality, error, vendorCode);
 
-        ArgumentCaptor<Integer> modalityCaptor = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mDialog1).onError(modalityCaptor.capture(), messageCaptor.capture());
+        verify(mDialog1).onError(mModalityCaptor.capture(), mMessageCaptor.capture());
 
-        assertEquals(modalityCaptor.getValue().intValue(), modality);
-        assertEquals(messageCaptor.getValue(),
+        assertThat(mModalityCaptor.getValue().intValue()).isEqualTo(modality);
+        assertThat(mMessageCaptor.getValue()).isEqualTo(
                 FaceManager.getErrorString(mContext, error, vendorCode));
     }
 
@@ -550,7 +591,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         mAuthController.onBiometricError(BiometricAuthenticator.TYPE_FACE, error, vendorCode);
         verify(mDialog1, never()).onError(anyInt(), anyString());
-        verify(mDialog1).animateToCredentialUI();
+        verify(mDialog1).animateToCredentialUI(eq(true));
     }
 
     @Test
@@ -563,7 +604,7 @@ public class AuthControllerTest extends SysuiTestCase {
 
         mAuthController.onBiometricError(BiometricAuthenticator.TYPE_FACE, error, vendorCode);
         verify(mDialog1, never()).onError(anyInt(), anyString());
-        verify(mDialog1).animateToCredentialUI();
+        verify(mDialog1).animateToCredentialUI(eq(true));
     }
 
     @Test
@@ -578,7 +619,7 @@ public class AuthControllerTest extends SysuiTestCase {
         mAuthController.onBiometricError(modality, error, vendorCode);
         verify(mDialog1).onError(
                 eq(modality), eq(FaceManager.getErrorString(mContext, error, vendorCode)));
-        verify(mDialog1, never()).animateToCredentialUI();
+        verify(mDialog1, never()).animateToCredentialUI(eq(true));
     }
 
     @Test
@@ -593,7 +634,7 @@ public class AuthControllerTest extends SysuiTestCase {
         mAuthController.onBiometricError(modality, error, vendorCode);
         verify(mDialog1).onError(
                 eq(modality), eq(FaceManager.getErrorString(mContext, error, vendorCode)));
-        verify(mDialog1, never()).animateToCredentialUI();
+        verify(mDialog1, never()).animateToCredentialUI(eq(true));
     }
 
     @Test
@@ -998,6 +1039,31 @@ public class AuthControllerTest extends SysuiTestCase {
         return HAT;
     }
 
+    private void enrollFingerprintAndFace(final int userId) {
+
+        // Enroll fingerprint
+        verify(mFingerprintManager).registerBiometricStateListener(
+                mBiometricStateCaptor.capture());
+        assertFalse(mAuthController.isFingerprintEnrolled(userId));
+
+        mBiometricStateCaptor.getValue().onEnrollmentsChanged(userId,
+                1 /* sensorId */, true /* hasEnrollments */);
+        waitForIdleSync();
+
+        assertTrue(mAuthController.isFingerprintEnrolled(userId));
+
+        // Enroll face
+        verify(mFaceManager).registerBiometricStateListener(
+                mBiometricStateCaptor.capture());
+        assertFalse(mAuthController.isFaceAuthEnrolled(userId));
+
+        mBiometricStateCaptor.getValue().onEnrollmentsChanged(userId,
+                2 /* sensorId */, true /* hasEnrollments */);
+        waitForIdleSync();
+
+        assertTrue(mAuthController.isFaceAuthEnrolled(userId));
+    }
+
     private final class TestableAuthController extends AuthController {
         private int mBuildCount = 0;
         private PromptInfo mLastBiometricPromptInfo;
@@ -1012,7 +1078,7 @@ public class AuthControllerTest extends SysuiTestCase {
                     () -> mBiometricPromptCredentialInteractor, () -> mPromptSelectionInteractor,
                     () -> mCredentialViewModel, () -> mPromptViewModel,
                     mInteractionJankMonitor, mHandler,
-                    mBackgroundExecutor, mVibratorHelper, mUdfpsUtils);
+                    mBackgroundExecutor, mUdfpsUtils);
         }
 
         @Override
