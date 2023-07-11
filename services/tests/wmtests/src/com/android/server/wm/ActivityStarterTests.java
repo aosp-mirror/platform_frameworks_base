@@ -1332,6 +1332,10 @@ public class ActivityStarterTests extends WindowTestsBase {
         starter.setReason("testNoActivityInfo").setIntent(intent)
                 .setActivityInfo(null).execute();
         verify(starter.mRequest).resolveActivity(any());
+
+        // Also verifies the value of Request#componentSpecified should be true even the
+        // ActivityStarter#setComponentSpecified is not explicitly set.
+        assertTrue(starter.mRequest.componentSpecified);
     }
 
     @Test
