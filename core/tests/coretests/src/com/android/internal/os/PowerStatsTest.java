@@ -19,8 +19,8 @@ package com.android.internal.os;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.BatteryConsumer;
-import android.os.Bundle;
 import android.os.Parcel;
+import android.os.PersistableBundle;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -39,7 +39,7 @@ public class PowerStatsTest {
     @Before
     public void setup() {
         mRegistry = new PowerStats.DescriptorRegistry();
-        Bundle extras = new Bundle();
+        PersistableBundle extras = new PersistableBundle();
         extras.putBoolean("hasPowerMonitor", true);
         mDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU, 3, 2, extras);
         mRegistry.register(mDescriptor);
@@ -52,8 +52,8 @@ public class PowerStatsTest {
         stats.stats[0] = 10;
         stats.stats[1] = 20;
         stats.stats[2] = 30;
-        stats.uidStats.put(42, new long[] {40, 50});
-        stats.uidStats.put(99, new long[] {60, 70});
+        stats.uidStats.put(42, new long[]{40, 50});
+        stats.uidStats.put(99, new long[]{60, 70});
 
         Parcel parcel = Parcel.obtain();
         mDescriptor.writeSummaryToParcel(parcel);
@@ -74,10 +74,10 @@ public class PowerStatsTest {
 
         PowerStats newStats = PowerStats.readFromParcel(newParcel, mRegistry);
         assertThat(newStats.durationMs).isEqualTo(1234);
-        assertThat(newStats.stats).isEqualTo(new long[] {10, 20, 30});
+        assertThat(newStats.stats).isEqualTo(new long[]{10, 20, 30});
         assertThat(newStats.uidStats.size()).isEqualTo(2);
-        assertThat(newStats.uidStats.get(42)).isEqualTo(new long[] {40, 50});
-        assertThat(newStats.uidStats.get(99)).isEqualTo(new long[] {60, 70});
+        assertThat(newStats.uidStats.get(42)).isEqualTo(new long[]{40, 50});
+        assertThat(newStats.uidStats.get(99)).isEqualTo(new long[]{60, 70});
 
         String end = newParcel.readString();
         assertThat(end).isEqualTo("END");
@@ -86,7 +86,7 @@ public class PowerStatsTest {
     @Test
     public void parceling_unrecognizedPowerComponent() {
         PowerStats stats = new PowerStats(
-                new PowerStats.Descriptor(777, "luck", 3, 2, new Bundle()));
+                new PowerStats.Descriptor(777, "luck", 3, 2, new PersistableBundle()));
         stats.durationMs = 1234;
 
         Parcel parcel = Parcel.obtain();

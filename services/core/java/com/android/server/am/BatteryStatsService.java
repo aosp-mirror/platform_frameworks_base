@@ -2631,6 +2631,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mStats.dumpStatsSample(pw);
     }
 
+    private void dumpAggregatedStats(PrintWriter pw) {
+        mStats.dumpAggregatedStats(pw, /* startTime */ 0, /* endTime */0);
+    }
+
     private void dumpMeasuredEnergyStats(PrintWriter pw) {
         // Wait for the completion of pending works if there is any
         awaitCompletion();
@@ -2874,6 +2878,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     return;
                 } else if ("--sample".equals(arg)) {
                     dumpStatsSample(pw);
+                    return;
+                } else if ("--aggregated".equals(arg)) {
+                    dumpAggregatedStats(pw);
                     return;
                 } else if ("-a".equals(arg)) {
                     flags |= BatteryStats.DUMP_VERBOSE;

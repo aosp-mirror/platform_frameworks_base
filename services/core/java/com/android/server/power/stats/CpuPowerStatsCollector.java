@@ -17,8 +17,8 @@
 package com.android.server.power.stats;
 
 import android.os.BatteryConsumer;
-import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.Keep;
@@ -74,7 +74,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
 
         mCpuPowerStats = new PowerStats(
                 new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_CPU, 0, mUidStatsSize,
-                        new Bundle()));
+                        new PersistableBundle()));
     }
 
     /**

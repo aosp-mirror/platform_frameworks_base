@@ -21,12 +21,14 @@ import android.annotation.Nullable;
 import android.os.BatteryConsumer;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Container for power stats, acquired by various PowerStatsCollector classes. See subclasses for
@@ -74,16 +76,16 @@ public final class PowerStats {
          * Extra parameters specific to the power component, e.g. the availability of power
          * monitors.
          */
-        public final Bundle extras;
+        public final PersistableBundle extras;
 
         public Descriptor(@BatteryConsumer.PowerComponent int powerComponentId,
-                int statsArrayLength, int uidStatsArrayLength, @NonNull Bundle extras) {
+                int statsArrayLength, int uidStatsArrayLength, @NonNull PersistableBundle extras) {
             this(powerComponentId, BatteryConsumer.powerComponentIdToString(powerComponentId),
                     statsArrayLength, uidStatsArrayLength, extras);
         }
 
         public Descriptor(int customPowerComponentId, String name, int statsArrayLength,
-                int uidStatsArrayLength, Bundle extras) {
+                int uidStatsArrayLength, PersistableBundle extras) {
             if (statsArrayLength > MAX_STATS_ARRAY_LENGTH) {
                 throw new IllegalArgumentException(
                         "statsArrayLength is too high. Max = " + MAX_STATS_ARRAY_LENGTH);
@@ -104,11 +106,11 @@ public final class PowerStats {
          */
         public void writeSummaryToParcel(Parcel parcel) {
             int firstWord = ((PARCEL_FORMAT_VERSION << PARCEL_FORMAT_VERSION_SHIFT)
-                    & PARCEL_FORMAT_VERSION_MASK)
-                    | ((statsArrayLength << STATS_ARRAY_LENGTH_SHIFT)
-                    & STATS_ARRAY_LENGTH_MASK)
-                    | ((uidStatsArrayLength << UID_STATS_ARRAY_LENGTH_SHIFT)
-                    & UID_STATS_ARRAY_LENGTH_MASK);
+                             & PARCEL_FORMAT_VERSION_MASK)
+                            | ((statsArrayLength << STATS_ARRAY_LENGTH_SHIFT)
+                               & STATS_ARRAY_LENGTH_MASK)
+                            | ((uidStatsArrayLength << UID_STATS_ARRAY_LENGTH_SHIFT)
+                               & UID_STATS_ARRAY_LENGTH_MASK);
             parcel.writeInt(firstWord);
             parcel.writeInt(powerComponentId);
             parcel.writeString(name);
@@ -125,7 +127,7 @@ public final class PowerStats {
             int version = (firstWord & PARCEL_FORMAT_VERSION_MASK) >>> PARCEL_FORMAT_VERSION_SHIFT;
             if (version != PARCEL_FORMAT_VERSION) {
                 Log.w(TAG, "Cannot read PowerStats from Parcel - the parcel format version has "
-                        + "changed from " + version + " to " + PARCEL_FORMAT_VERSION);
+                           + "changed from " + version + " to " + PARCEL_FORMAT_VERSION);
                 return null;
             }
             int statsArrayLength =
@@ -134,9 +136,28 @@ public final class PowerStats {
                     (firstWord & UID_STATS_ARRAY_LENGTH_MASK) >>> UID_STATS_ARRAY_LENGTH_SHIFT;
             int powerComponentId = parcel.readInt();
             String name = parcel.readString();
-            Bundle extras = parcel.readBundle(PowerStats.class.getClassLoader());
+            PersistableBundle extras = parcel.readPersistableBundle();
             return new Descriptor(powerComponentId, name, statsArrayLength, uidStatsArrayLength,
                     extras);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Descriptor)) return false;
+            Descriptor that = (Descriptor) o;
+            return powerComponentId == that.powerComponentId
+                   && statsArrayLength == that.statsArrayLength
+                   && uidStatsArrayLength == that.uidStatsArrayLength
+                   && Objects.equals(name, that.name)
+                   && extras.size() == that.extras.size()        // Unparcel the Parcel if not yet
+                   && Bundle.kindofEquals(extras,
+                    that.extras);  // Since the Parcel is now unparceled, do a deep comparison
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(powerComponentId);
         }
 
         @Override
@@ -145,12 +166,12 @@ public final class PowerStats {
                 extras.size();  // Unparcel
             }
             return "PowerStats.Descriptor{"
-                    + "powerComponentId=" + powerComponentId
-                    + ", name='" + name + '\''
-                    + ", statsArrayLength=" + statsArrayLength
-                    + ", uidStatsArrayLength=" + uidStatsArrayLength
-                    + ", extras=" + extras
-                    + '}';
+                   + "powerComponentId=" + powerComponentId
+                   + ", name='" + name + '\''
+                   + ", statsArrayLength=" + statsArrayLength
+                   + ", uidStatsArrayLength=" + uidStatsArrayLength
+                   + ", extras=" + extras
+                   + '}';
         }
     }
 
@@ -254,7 +275,7 @@ public final class PowerStats {
             }
             if (parcel.dataPosition() != endPos) {
                 Log.e(TAG, "Corrupted PowerStats parcel. Expected length: " + length
-                        + ", actual length: " + (parcel.dataPosition() - startPos));
+                           + ", actual length: " + (parcel.dataPosition() - startPos));
                 return null;
             }
             return stats;

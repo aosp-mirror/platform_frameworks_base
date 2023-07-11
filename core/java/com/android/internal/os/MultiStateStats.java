@@ -41,6 +41,10 @@ public class MultiStateStats {
             this.mTracked = tracked;
             this.mLabels = labels;
         }
+
+        public boolean isTracked() {
+            return mTracked;
+        }
     }
 
     /**

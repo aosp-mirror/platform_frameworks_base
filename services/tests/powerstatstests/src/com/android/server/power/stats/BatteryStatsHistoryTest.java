@@ -28,8 +28,8 @@ import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
-import android.os.Bundle;
 import android.os.Parcel;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.telephony.NetworkRegistrationInfo;
@@ -387,7 +387,8 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void recordPowerStats() {
-        PowerStats.Descriptor descriptor = new PowerStats.Descriptor(42, "foo", 1, 2, new Bundle());
+        PowerStats.Descriptor descriptor = new PowerStats.Descriptor(42, "foo", 1, 2,
+                new PersistableBundle());
         PowerStats powerStats = new PowerStats(descriptor);
         powerStats.durationMs = 100;
         powerStats.stats[0] = 200;
