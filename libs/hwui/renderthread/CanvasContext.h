@@ -43,6 +43,7 @@
 #include "Lighting.h"
 #include "ReliableSurface.h"
 #include "RenderNode.h"
+#include "renderstate/RenderState.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
 #include "utils/RingBuffer.h"
@@ -64,7 +65,7 @@ class Frame;
 // This per-renderer class manages the bridge between the global EGL context
 // and the render surface.
 // TODO: Rename to Renderer or some other per-window, top-level manager
-class CanvasContext : public IFrameCallback {
+class CanvasContext : public IFrameCallback, public IGpuContextCallback {
 public:
     static CanvasContext* create(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                                  IContextFactory* contextFactory, pid_t uiThreadId,
@@ -154,6 +155,7 @@ public:
     void markLayerInUse(RenderNode* node);
 
     void destroyHardwareResources();
+    void onContextDestroyed() override;
 
     DeferredLayerUpdater* createTextureLayer();
 

@@ -307,13 +307,21 @@ public:
         int destroyed = 0;
         int removeOverlays = 0;
         int glesDraw = 0;
+        int vkInitialize = 0;
+        int vkDraw = 0;
+        int vkPostDraw = 0;
     };
 
     static void expectOnRenderThread(const std::string_view& function = "unknown") {
         EXPECT_EQ(gettid(), TestUtils::getRenderThreadTid()) << "Called on wrong thread: " << function;
     }
 
-    static WebViewFunctorCallbacks createMockFunctor(RenderMode mode) {
+    static int createMockFunctor() {
+        const auto renderMode = WebViewFunctor_queryPlatformRenderMode();
+        return WebViewFunctor_create(nullptr, createMockFunctorCallbacks(renderMode), renderMode);
+    }
+
+    static WebViewFunctorCallbacks createMockFunctorCallbacks(RenderMode mode) {
         auto callbacks = WebViewFunctorCallbacks{
                 .onSync =
                         [](int functor, void* client_data, const WebViewSyncData& data) {
@@ -345,9 +353,22 @@ public:
                     sMockFunctorCounts[functor].glesDraw++;
                 };
                 break;
-            default:
-                ADD_FAILURE();
-                return WebViewFunctorCallbacks{};
+            case RenderMode::Vulkan:
+                callbacks.vk.initialize = [](int functor, void* data,
+                                             const VkFunctorInitParams& params) {
+                    expectOnRenderThread("initialize");
+                    sMockFunctorCounts[functor].vkInitialize++;
+                };
+                callbacks.vk.draw = [](int functor, void* data, const VkFunctorDrawParams& params,
+                                       const WebViewOverlayData& overlayParams) {
+                    expectOnRenderThread("draw");
+                    sMockFunctorCounts[functor].vkDraw++;
+                };
+                callbacks.vk.postDraw = [](int functor, void* data) {
+                    expectOnRenderThread("postDraw");
+                    sMockFunctorCounts[functor].vkPostDraw++;
+                };
+                break;
         }
         return callbacks;
     }
