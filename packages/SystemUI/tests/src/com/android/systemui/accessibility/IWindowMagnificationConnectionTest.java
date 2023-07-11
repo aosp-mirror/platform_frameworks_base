@@ -198,6 +198,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         assertTrue(mWindowMagnification.mUsersScales.contains(testUserId));
         assertEquals(mWindowMagnification.mUsersScales.get(testUserId).get(TEST_DISPLAY),
                 (Float) testScale);
+        verify(mMagnificationSettingsController).setMagnificationScale(eq(testScale));
     }
 
     private class FakeControllerSupplier extends

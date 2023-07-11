@@ -645,10 +645,12 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         assertTrue(
                 mirrorView.performAccessibilityAction(R.id.accessibility_action_zoom_out, null));
         // Minimum scale is 1.0.
-        verify(mWindowMagnifierCallback).onPerformScaleAction(eq(displayId), eq(1.0f));
+        verify(mWindowMagnifierCallback).onPerformScaleAction(
+                eq(displayId), /* scale= */ eq(1.0f), /* updatePersistence= */ eq(true));
 
         assertTrue(mirrorView.performAccessibilityAction(R.id.accessibility_action_zoom_in, null));
-        verify(mWindowMagnifierCallback).onPerformScaleAction(eq(displayId), eq(2.5f));
+        verify(mWindowMagnifierCallback).onPerformScaleAction(
+                eq(displayId), /* scale= */ eq(2.5f), /* updatePersistence= */ eq(true));
 
         // TODO: Verify the final state when the mirror surface is visible.
         assertTrue(mirrorView.performAccessibilityAction(R.id.accessibility_action_move_up, null));
