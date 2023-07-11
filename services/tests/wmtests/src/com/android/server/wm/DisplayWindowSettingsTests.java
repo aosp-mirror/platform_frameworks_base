@@ -484,6 +484,18 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         assertTrue(dcIgnoreOrientation.getIgnoreOrientationRequest());
     }
 
+    @Test
+    public void testDisplayRemoval() {
+        spyOn(mWm.mDisplayWindowSettings);
+        spyOn(mWm.mDisplayWindowSettingsProvider);
+
+        mPrivateDisplay.removeImmediately();
+
+        verify(mWm.mDisplayWindowSettings).onDisplayRemoved(mPrivateDisplay);
+        verify(mWm.mDisplayWindowSettingsProvider).onDisplayRemoved(
+                mPrivateDisplay.getDisplayInfo());
+    }
+
     public final class TestSettingsProvider implements DisplayWindowSettings.SettingsProvider {
         Map<DisplayInfo, SettingsEntry> mOverrideSettingsCache = new HashMap<>();
 
@@ -512,6 +524,11 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
             }
 
             overrideSettings.setTo(settings);
+        }
+
+        @Override
+        public void onDisplayRemoved(@NonNull DisplayInfo info) {
+            mOverrideSettingsCache.remove(info);
         }
     }
 }

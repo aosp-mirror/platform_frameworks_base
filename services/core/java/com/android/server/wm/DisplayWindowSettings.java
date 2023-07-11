@@ -33,6 +33,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.Surface;
+import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 
 import com.android.server.policy.WindowManagerPolicy;
@@ -45,15 +46,20 @@ import java.util.Objects;
  * delegates the persistence and lookup of settings values to the supplied {@link SettingsProvider}.
  */
 class DisplayWindowSettings {
+    @NonNull
     private final WindowManagerService mService;
+    @NonNull
     private final SettingsProvider mSettingsProvider;
 
-    DisplayWindowSettings(WindowManagerService service, SettingsProvider settingsProvider) {
+    DisplayWindowSettings(@NonNull WindowManagerService service,
+            @NonNull SettingsProvider settingsProvider) {
         mService = service;
         mSettingsProvider = settingsProvider;
     }
 
-    void setUserRotation(DisplayContent displayContent, int rotationMode, int rotation) {
+    void setUserRotation(@NonNull DisplayContent displayContent,
+            @WindowManagerPolicy.UserRotationMode int rotationMode,
+            @Surface.Rotation int rotation) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
@@ -62,7 +68,7 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    void setForcedSize(DisplayContent displayContent, int width, int height) {
+    void setForcedSize(@NonNull DisplayContent displayContent, int width, int height) {
         if (displayContent.isDefaultDisplay) {
             final String sizeString = (width == 0 || height == 0) ? "" : (width + "," + height);
             Settings.Global.putString(mService.mContext.getContentResolver(),
@@ -77,21 +83,20 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    void setForcedDensity(DisplayInfo info, int density, int userId) {
+    void setForcedDensity(@NonNull DisplayInfo info, int density, int userId) {
         if (info.displayId == Display.DEFAULT_DISPLAY) {
             final String densityString = density == 0 ? "" : Integer.toString(density);
             Settings.Secure.putStringForUser(mService.mContext.getContentResolver(),
                     Settings.Secure.DISPLAY_DENSITY_FORCED, densityString, userId);
         }
 
-        final DisplayInfo displayInfo = info;
         final SettingsProvider.SettingsEntry overrideSettings =
-                mSettingsProvider.getOverrideSettings(displayInfo);
+                mSettingsProvider.getOverrideSettings(info);
         overrideSettings.mForcedDensity = density;
-        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
+        mSettingsProvider.updateOverrideSettings(info, overrideSettings);
     }
 
-    void setForcedScalingMode(DisplayContent displayContent, @ForceScalingMode int mode) {
+    void setForcedScalingMode(@NonNull DisplayContent displayContent, @ForceScalingMode int mode) {
         if (displayContent.isDefaultDisplay) {
             Settings.Global.putInt(mService.mContext.getContentResolver(),
                     Settings.Global.DISPLAY_SCALING_FORCE, mode);
@@ -104,7 +109,7 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    void setFixedToUserRotation(DisplayContent displayContent, int fixedToUserRotation) {
+    void setFixedToUserRotation(@NonNull DisplayContent displayContent, int fixedToUserRotation) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
@@ -112,8 +117,8 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    void setIgnoreOrientationRequest(
-            DisplayContent displayContent, boolean ignoreOrientationRequest) {
+    void setIgnoreOrientationRequest(@NonNull DisplayContent displayContent,
+            boolean ignoreOrientationRequest) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
@@ -121,7 +126,9 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    private int getWindowingModeLocked(SettingsProvider.SettingsEntry settings, DisplayContent dc) {
+    @WindowConfiguration.WindowingMode
+    private int getWindowingModeLocked(@NonNull SettingsProvider.SettingsEntry settings,
+            @NonNull DisplayContent dc) {
         int windowingMode = settings.mWindowingMode;
         // This display used to be in freeform, but we don't support freeform anymore, so fall
         // back to fullscreen.
@@ -139,13 +146,15 @@ class DisplayWindowSettings {
         return windowingMode;
     }
 
-    int getWindowingModeLocked(DisplayContent dc) {
+    @WindowConfiguration.WindowingMode
+    int getWindowingModeLocked(@NonNull DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
         return getWindowingModeLocked(settings, dc);
     }
 
-    void setWindowingModeLocked(DisplayContent dc, int mode) {
+    void setWindowingModeLocked(@NonNull DisplayContent dc,
+            @WindowConfiguration.WindowingMode int mode) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
@@ -157,7 +166,8 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    int getRemoveContentModeLocked(DisplayContent dc) {
+    @WindowManager.RemoveContentMode
+    int getRemoveContentModeLocked(@NonNull DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
         if (settings.mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED) {
@@ -171,7 +181,8 @@ class DisplayWindowSettings {
         return settings.mRemoveContentMode;
     }
 
-    void setRemoveContentModeLocked(DisplayContent dc, int mode) {
+    void setRemoveContentModeLocked(@NonNull DisplayContent dc,
+            @WindowManager.RemoveContentMode int mode) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
@@ -179,14 +190,14 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    boolean shouldShowWithInsecureKeyguardLocked(DisplayContent dc) {
+    boolean shouldShowWithInsecureKeyguardLocked(@NonNull DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
         return settings.mShouldShowWithInsecureKeyguard != null
                 ? settings.mShouldShowWithInsecureKeyguard : false;
     }
 
-    void setShouldShowWithInsecureKeyguardLocked(DisplayContent dc, boolean shouldShow) {
+    void setShouldShowWithInsecureKeyguardLocked(@NonNull DisplayContent dc, boolean shouldShow) {
         if (!dc.isPrivate() && shouldShow) {
             throw new IllegalArgumentException("Public display can't be allowed to show content"
                     + " when locked");
@@ -199,7 +210,7 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    void setDontMoveToTop(DisplayContent dc, boolean dontMoveToTop) {
+    void setDontMoveToTop(@NonNull DisplayContent dc, boolean dontMoveToTop) {
         DisplayInfo displayInfo = dc.getDisplayInfo();
         SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getSettings(displayInfo);
@@ -207,7 +218,7 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    boolean shouldShowSystemDecorsLocked(DisplayContent dc) {
+    boolean shouldShowSystemDecorsLocked(@NonNull DisplayContent dc) {
         if (dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
             // Default display should show system decors.
             return true;
@@ -218,7 +229,7 @@ class DisplayWindowSettings {
         return settings.mShouldShowSystemDecors != null ? settings.mShouldShowSystemDecors : false;
     }
 
-    void setShouldShowSystemDecorsLocked(DisplayContent dc, boolean shouldShow) {
+    void setShouldShowSystemDecorsLocked(@NonNull DisplayContent dc, boolean shouldShow) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
@@ -226,7 +237,8 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    @DisplayImePolicy int getImePolicyLocked(DisplayContent dc) {
+    @DisplayImePolicy
+    int getImePolicyLocked(@NonNull DisplayContent dc) {
         if (dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
             // Default display should show IME.
             return DISPLAY_IME_POLICY_LOCAL;
@@ -238,7 +250,7 @@ class DisplayWindowSettings {
                 : DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
     }
 
-    void setDisplayImePolicy(DisplayContent dc, @DisplayImePolicy int imePolicy) {
+    void setDisplayImePolicy(@NonNull DisplayContent dc, @DisplayImePolicy int imePolicy) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
@@ -246,11 +258,11 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    void applySettingsToDisplayLocked(DisplayContent dc) {
+    void applySettingsToDisplayLocked(@NonNull DisplayContent dc) {
         applySettingsToDisplayLocked(dc, /* includeRotationSettings */ true);
     }
 
-    void applySettingsToDisplayLocked(DisplayContent dc, boolean includeRotationSettings) {
+    void applySettingsToDisplayLocked(@NonNull DisplayContent dc, boolean includeRotationSettings) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
 
@@ -274,9 +286,8 @@ class DisplayWindowSettings {
         dc.mIsDensityForced = hasDensityOverride;
         dc.mIsSizeForced = hasSizeOverride;
 
-        final boolean ignoreDisplayCutout = settings.mIgnoreDisplayCutout != null
+        dc.mIgnoreDisplayCutout = settings.mIgnoreDisplayCutout != null
                 ? settings.mIgnoreDisplayCutout : false;
-        dc.mIgnoreDisplayCutout = ignoreDisplayCutout;
 
         final int width = hasSizeOverride ? settings.mForcedWidth : dc.mInitialDisplayWidth;
         final int height = hasSizeOverride ? settings.mForcedHeight : dc.mInitialDisplayHeight;
@@ -296,7 +307,7 @@ class DisplayWindowSettings {
         if (includeRotationSettings) applyRotationSettingsToDisplayLocked(dc);
     }
 
-    void applyRotationSettingsToDisplayLocked(DisplayContent dc) {
+    void applyRotationSettingsToDisplayLocked(@NonNull DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
 
@@ -315,7 +326,7 @@ class DisplayWindowSettings {
      * @return {@code true} if any settings for this display has changed; {@code false} if nothing
      * changed.
      */
-    boolean updateSettingsForDisplay(DisplayContent dc) {
+    boolean updateSettingsForDisplay(@NonNull DisplayContent dc) {
         final TaskDisplayArea defaultTda = dc.getDefaultTaskDisplayArea();
         if (defaultTda != null && defaultTda.getWindowingMode() != getWindowingModeLocked(dc)) {
             // For the time being the only thing that may change is windowing mode, so just update
@@ -324,6 +335,13 @@ class DisplayWindowSettings {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Called when the given {@link DisplayContent} is removed to cleanup.
+     */
+    void onDisplayRemoved(@NonNull DisplayContent dc) {
+        mSettingsProvider.onDisplayRemoved(dc.getDisplayInfo());
     }
 
     /**
@@ -364,19 +382,29 @@ class DisplayWindowSettings {
         void updateOverrideSettings(@NonNull DisplayInfo info, @NonNull SettingsEntry overrides);
 
         /**
+         * Called when a display is removed to cleanup.
+         */
+        void onDisplayRemoved(@NonNull DisplayInfo info);
+
+        /**
          * Settings for a display.
          */
         class SettingsEntry {
+            @WindowConfiguration.WindowingMode
             int mWindowingMode = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
             @Nullable
+            @WindowManagerPolicy.UserRotationMode
             Integer mUserRotationMode;
             @Nullable
+            @Surface.Rotation
             Integer mUserRotation;
             int mForcedWidth;
             int mForcedHeight;
             int mForcedDensity;
             @Nullable
+            @ForceScalingMode
             Integer mForcedScalingMode;
+            @WindowManager.RemoveContentMode
             int mRemoveContentMode = REMOVE_CONTENT_MODE_UNDEFINED;
             @Nullable
             Boolean mShouldShowWithInsecureKeyguard;
@@ -395,7 +423,7 @@ class DisplayWindowSettings {
 
             SettingsEntry() {}
 
-            SettingsEntry(SettingsEntry copyFrom) {
+            SettingsEntry(@NonNull SettingsEntry copyFrom) {
                 setTo(copyFrom);
             }
 

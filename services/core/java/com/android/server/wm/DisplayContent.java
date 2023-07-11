@@ -522,7 +522,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean mWaitingForConfig;
 
     // TODO(multi-display): remove some of the usages.
-    @VisibleForTesting
     boolean isDefaultDisplay;
 
     /** Detect user tapping outside of current focused task bounds .*/
@@ -3358,6 +3357,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mRootWindowContainer.mTaskSupervisor
                     .getKeyguardController().onDisplayRemoved(mDisplayId);
             mWallpaperController.resetLargestDisplay(mDisplay);
+            mWmService.mDisplayWindowSettings.onDisplayRemoved(this);
         } finally {
             mDisplayReady = false;
         }
