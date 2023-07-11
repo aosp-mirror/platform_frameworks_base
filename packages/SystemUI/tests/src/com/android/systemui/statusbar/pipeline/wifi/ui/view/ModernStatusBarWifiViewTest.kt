@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
 import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import com.android.systemui.statusbar.StatusBarIconView.STATE_ICON
 import com.android.systemui.statusbar.phone.StatusBarLocation
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
@@ -64,7 +63,6 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     private lateinit var testableLooper: TestableLooper
 
-    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
@@ -110,7 +108,6 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         viewModel =
             viewModelForLocation(
                 viewModelCommon,
-                statusBarPipelineFlags,
                 StatusBarLocation.HOME,
             )
     }
@@ -199,7 +196,6 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     @Test
     fun onDarkChanged_iconHasNewColor() {
-        whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
         val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
@@ -215,7 +211,6 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     @Test
     fun setStaticDrawableColor_iconHasNewColor() {
-        whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
         val view = ModernStatusBarWifiView.constructAndBind(context, SLOT_NAME, viewModel)
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()

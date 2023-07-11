@@ -46,13 +46,6 @@ constructor(
         featureFlags.isEnabled(Flags.NEW_STATUS_BAR_MOBILE_ICONS_BACKEND) || useNewMobileIcons()
 
     /**
-     * Returns true if we should apply some coloring to the icons that were rendered with the new
-     * pipeline to help with debugging.
-     */
-    fun useDebugColoring(): Boolean =
-        featureFlags.isEnabled(Flags.NEW_STATUS_BAR_ICONS_DEBUG_COLORING)
-
-    /**
      * For convenience in the StatusBarIconController, we want to gate some actions based on slot
      * name and the flag together.
      *

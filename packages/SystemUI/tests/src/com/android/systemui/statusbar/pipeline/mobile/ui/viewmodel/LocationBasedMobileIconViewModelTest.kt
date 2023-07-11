@@ -86,9 +86,9 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
             )
 
-        homeIcon = HomeMobileIconViewModel(commonImpl, statusBarPipelineFlags, mock())
-        qsIcon = QsMobileIconViewModel(commonImpl, statusBarPipelineFlags)
-        keyguardIcon = KeyguardMobileIconViewModel(commonImpl, statusBarPipelineFlags)
+        homeIcon = HomeMobileIconViewModel(commonImpl, mock())
+        qsIcon = QsMobileIconViewModel(commonImpl)
+        keyguardIcon = KeyguardMobileIconViewModel(commonImpl)
     }
 
     @Test

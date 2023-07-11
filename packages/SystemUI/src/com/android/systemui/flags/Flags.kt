@@ -369,9 +369,6 @@ object Flags {
     val NEW_STATUS_BAR_MOBILE_ICONS_BACKEND =
         unreleasedFlag(608, "new_status_bar_mobile_icons_backend", teamfood = true)
 
-    // TODO(b/260881289): Tracking Bug
-    val NEW_STATUS_BAR_ICONS_DEBUG_COLORING =
-        unreleasedFlag(611, "new_status_bar_icons_debug_coloring")
 
     // TODO(b/265892345): Tracking Bug
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag(265892345, "plug_in_status_bar_chip")
