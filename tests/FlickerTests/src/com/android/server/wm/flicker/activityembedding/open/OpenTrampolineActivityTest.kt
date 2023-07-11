@@ -18,7 +18,6 @@ package com.android.server.wm.flicker.activityembedding
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.Rect
-import android.tools.common.datatypes.Region
 import android.tools.common.flicker.subject.region.RegionSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -38,8 +37,8 @@ import org.junit.runners.Parameterized
  *
  * Setup: Launch Activity A in fullscreen.
  *
- * Transitions: From A launch a trampoline Activity T, T launches secondary Activity B and
- * finishes itself, end up in split A|B.
+ * Transitions: From A launch a trampoline Activity T, T launches secondary Activity B and finishes
+ * itself, end up in split A|B.
  *
  * To run this test: `atest FlickerTests:OpenTrampolineActivityTest`
  */
@@ -53,12 +52,10 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
             tapl.setExpectedRotationCheckEnabled(false)
             testApp.launchViaIntent(wmHelper)
             startDisplayBounds =
-                    wmHelper.currentState.layerState.physicalDisplayBounds
-                            ?: error("Can't get display bounds")
+                wmHelper.currentState.layerState.physicalDisplayBounds
+                    ?: error("Can't get display bounds")
         }
-        transitions {
-            testApp.launchTrampolineActivity(wmHelper)
-        }
+        transitions { testApp.launchTrampolineActivity(wmHelper) }
         teardown {
             tapl.goHome()
             testApp.exit(wmHelper)
@@ -70,9 +67,7 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
     @Test
     fun backgroundLayerNeverVisible() {
         val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
-        flicker.assertLayers {
-            isInvisible(backgroundColorLayer)
-        }
+        flicker.assertLayers { isInvisible(backgroundColorLayer) }
     }
 
     /** Trampoline activity should finish itself before the end of this test. */
@@ -96,9 +91,7 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
     @Presubmit
     @Test
     fun mainActivityWindowAlwaysVisible() {
-        flicker.assertWm {
-            isAppWindowVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-        }
+        flicker.assertWm { isAppWindowVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT) }
     }
 
     // TODO(b/289140963): After this is fixed, assert the main Activity window is visible
@@ -107,12 +100,8 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
     @Presubmit
     @Test
     fun mainActivityLayerAlwaysVisible() {
-        flicker.assertLayersStart {
-            isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-        }
-        flicker.assertLayersEnd {
-            isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-        }
+        flicker.assertLayersStart { isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT) }
+        flicker.assertLayersEnd { isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT) }
     }
 
     /** Secondary activity is launched from the trampoline activity. */
@@ -121,10 +110,10 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
     fun secondaryActivityWindowLaunchedFromTrampoline() {
         flicker.assertWm {
             notContains(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    .then()
-                    .isAppWindowInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    .then()
-                    .isAppWindowVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .then()
+                .isAppWindowInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .then()
+                .isAppWindowVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
         }
     }
 
@@ -134,8 +123,8 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
     fun secondaryActivityLayerLaunchedFromTrampoline() {
         flicker.assertLayers {
             isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    .then()
-                    .isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .then()
+                .isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
         }
     }
 
@@ -145,36 +134,38 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
     fun mainActivityWindowGoesFromFullscreenToSplit() {
         flicker.assertWm {
             this.invoke("mainActivityStartsInFullscreen") {
-                it.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                    it.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
                         .coversExactly(startDisplayBounds)
-            }
-                    // Begin of transition.
-                    .then()
-                    .isAppWindowInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    .then()
-                    .invoke("mainAndSecondaryInSplit") {
-                        val mainActivityRegion =
-                                RegionSubject(
-                                        it.visibleRegion(
-                                                ActivityEmbeddingAppHelper
-                                                        .MAIN_ACTIVITY_COMPONENT).region,
-                                        it.timestamp)
-                        val secondaryActivityRegion =
-                                RegionSubject(
-                                        it.visibleRegion(
-                                                ActivityEmbeddingAppHelper
-                                                        .SECONDARY_ACTIVITY_COMPONENT).region,
-                                        it.timestamp)
-                        check { "height" }
-                                .that(mainActivityRegion.region.height)
-                                .isEqual(secondaryActivityRegion.region.height)
-                        check { "width" }
-                                .that(mainActivityRegion.region.width)
-                                .isEqual(secondaryActivityRegion.region.width)
-                        mainActivityRegion
-                                .plus(secondaryActivityRegion.region)
-                                .coversExactly(startDisplayBounds)
-                    }
+                }
+                // Begin of transition.
+                .then()
+                .isAppWindowInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .then()
+                .invoke("mainAndSecondaryInSplit") {
+                    val mainActivityRegion =
+                        RegionSubject(
+                            it.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                                .region,
+                            it.timestamp
+                        )
+                    val secondaryActivityRegion =
+                        RegionSubject(
+                            it.visibleRegion(
+                                    ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT
+                                )
+                                .region,
+                            it.timestamp
+                        )
+                    check { "height" }
+                        .that(mainActivityRegion.region.height)
+                        .isEqual(secondaryActivityRegion.region.height)
+                    check { "width" }
+                        .that(mainActivityRegion.region.width)
+                        .isEqual(secondaryActivityRegion.region.width)
+                    mainActivityRegion
+                        .plus(secondaryActivityRegion.region)
+                        .coversExactly(startDisplayBounds)
+                }
         }
     }
 
@@ -184,27 +175,26 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
     fun mainActivityLayerGoesFromFullscreenToSplit() {
         flicker.assertLayers {
             this.invoke("mainActivityStartsInFullscreen") {
-                it.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                    it.visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
                         .coversExactly(startDisplayBounds)
-            }
-                    .then()
-                    .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-                    .then()
-                    .isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                }
+                .then()
+                .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .then()
+                .isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
         }
         flicker.assertLayersEnd {
-            val leftLayerRegion = visibleRegion(
-                    ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+            val leftLayerRegion = visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
             val rightLayerRegion =
-                    visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
             // Compare dimensions of two splits, given we're using default split attributes,
             // both activities take up the same visible size on the display.
             check { "height" }
-                    .that(leftLayerRegion.region.height)
-                    .isEqual(rightLayerRegion.region.height)
+                .that(leftLayerRegion.region.height)
+                .isEqual(rightLayerRegion.region.height)
             check { "width" }
-                    .that(leftLayerRegion.region.width)
-                    .isEqual(rightLayerRegion.region.width)
+                .that(leftLayerRegion.region.width)
+                .isEqual(rightLayerRegion.region.width)
             leftLayerRegion.notOverlaps(rightLayerRegion.region)
             // Layers of two activities sum to be fullscreen size on display.
             leftLayerRegion.plus(rightLayerRegion.region).coversExactly(startDisplayBounds)
