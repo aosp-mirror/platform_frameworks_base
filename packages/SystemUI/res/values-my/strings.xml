@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"USB ကို ဖွင့်ရန်"</string>
     <string name="learn_more" msgid="4690632085667273811">"ပိုမိုလေ့လာရန်"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"‘တိုးချဲ့ဖွင့်ခြင်း’ ပိတ်ထားသည်"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"‘လော့ခ်ဖွင့်ချိန်တိုးခြင်း’ ပိတ်ထားသည်"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ပုံပို့ထားသည်"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ဖန်သားပြင်ဓါတ်ပုံရိုက်ခြင်းအား သိမ်းဆည်းပါမည်"</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"အလုပ်ပရိုဖိုင်တွင် ဖန်သားပြင်ဓာတ်ပုံ သိမ်းနေသည်…"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ပါဝါမီနူး"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"စာမျက်နှာ <xliff:g id="ID_2">%2$d</xliff:g> အနက်မှ စာမျက်နှာ <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"လော့ခ်ချထားချိန် မျက်နှာပြင်"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"အပူရှိန်ကြောင့်ဖုန်းပိတ်ထားသည်"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"သင့်ဖုန်းသည် ယခု ပုံမှန်အလုပ်လုပ်နေပါပြီ။\nနောက်ထပ်အချက်အလက်များအတွက် တို့ပါ"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"သင့်ဖုန်းအလွန်ပူနေသည့်အတွက် အေးသွားစေရန် ပိတ်ထားပါသည်။ ယခုပုံမှန် အလုပ်လုပ်ပါပြီ။\n\nအောက်ပါတို့ကိုသုံးလျှင် ပူလာပါမည်-\n	• အရင်းအမြစ်များသောအက်ပ်ကို သုံးခြင်း (ဥပမာ ဂိမ်းကစားခြင်း၊ ဗီဒီယိုကြည့်ခြင်း (သို့) လမ်းညွှန်အက်ပ်)\n	• ကြီးမားသောဖိုင်များ ဒေါင်းလုဒ် (သို့) အပ်လုဒ်လုပ်ခြင်း\n	• အပူရှိန်မြင့်သောနေရာတွင် သုံးခြင်း"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"ဖုန်း ပူနွေးလာပါပြီ"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"ဖုန်းကို အေးအောင်ပြုလုပ်နေစဉ်တွင် အချို့ဝန်ဆောင်မှုများကို ကန့်သတ်ထားပါသည်။\nနောက်ထပ်အချက်အလက်များအတွက် တို့ပါ"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"သင့်ဖုန်းသည် အလိုအလျောက် ပြန်အေးသွားပါလိမ့်မည်။ ဖုန်းကို အသုံးပြုနိုင်ပါသေးသည် သို့သော် ပိုနှေးနိုင်ပါသည်။\n\nသင့်ဖုန်း အေးသွားသည်နှင့် ပုံမှန်အတိုင်း ပြန်အလုပ်လုပ်ပါလိမ့်မည်။"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ဂရုပြုစရာ အဆင့်များ ကြည့်ရန်"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"သင့်စက်ကို ပလတ်ဖြုတ်ပါ"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"သင့်စက်သည် အားသွင်းပို့တ်အနီးတွင် ပူနွေးလာသည်။ ၎င်းကို အားသွင်းကိရိယာ (သို့) USB ဆက်စပ်ပစ္စည်းနှင့် ချိတ်ဆက်ထားပါက ပလတ်ဖြုတ်ပါ။ ကြိုးကလည်း ပူနွေးနေနိုင်သဖြင့် ဂရုပြုပါ။"</string>
