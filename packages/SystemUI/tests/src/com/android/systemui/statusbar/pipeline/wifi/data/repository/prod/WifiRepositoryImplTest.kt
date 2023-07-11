@@ -76,7 +76,8 @@ class WifiRepositoryImplTest : SysuiTestCase() {
     private lateinit var executor: Executor
     private lateinit var connectivityRepository: ConnectivityRepository
 
-    private val testScope = TestScope(UnconfinedTestDispatcher())
+    private val dispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(dispatcher)
 
     @Before
     fun setUp() {
@@ -1301,6 +1302,7 @@ class WifiRepositoryImplTest : SysuiTestCase() {
             logger,
             tableLogger,
             executor,
+            dispatcher,
             testScope.backgroundScope,
             wifiManager,
         )

@@ -339,6 +339,7 @@ public class NotificationIconContainer extends ViewGroup {
             }
         }
         if (child instanceof StatusBarIconView) {
+            ((StatusBarIconView) child).updateIconDimens();
             ((StatusBarIconView) child).setDozing(mDozing, false, 0);
         }
     }
@@ -447,9 +448,14 @@ public class NotificationIconContainer extends ViewGroup {
     @VisibleForTesting
     boolean isOverflowing(boolean isLastChild, float translationX, float layoutEnd,
             float iconSize) {
-        // Layout end, as used here, does not include padding end.
-        final float overflowX = isLastChild ? layoutEnd : layoutEnd - iconSize;
-        return translationX >= overflowX;
+        if (isLastChild) {
+            return translationX + iconSize > layoutEnd;
+        } else {
+            // If the child is not the last child, we need to ensure that we have room for the next
+            // icon and the dot. The dot could be as large as an icon, so verify that we have room
+            // for 2 icons.
+            return translationX + iconSize * 2f > layoutEnd;
+        }
     }
 
     /**
@@ -489,10 +495,7 @@ public class NotificationIconContainer extends ViewGroup {
             // First icon to overflow.
             if (firstOverflowIndex == -1 && isOverflowing) {
                 firstOverflowIndex = i;
-                mVisualOverflowStart = layoutEnd - mIconSize;
-                if (forceOverflow || mIsStaticLayout) {
-                    mVisualOverflowStart = Math.min(translationX, mVisualOverflowStart);
-                }
+                mVisualOverflowStart = translationX;
             }
             final float drawingScale = mOnLockScreen && view instanceof StatusBarIconView
                     ? ((StatusBarIconView) view).getIconScaleIncreased()
@@ -537,9 +540,10 @@ public class NotificationIconContainer extends ViewGroup {
             IconState iconState = mIconStates.get(mIsolatedIcon);
             if (iconState != null) {
                 // Most of the time the icon isn't yet added when this is called but only happening
-                // later
-                iconState.setXTranslation(mIsolatedIconLocation.left - mAbsolutePosition[0]
-                        - (1 - mIsolatedIcon.getIconScale()) * mIsolatedIcon.getWidth() / 2.0f);
+                // later. The isolated icon position left should equal to the mIsolatedIconLocation
+                // to ensure the icon be put at the center of the HUN icon placeholder,
+                // {@See HeadsUpAppearanceController#updateIsolatedIconLocation}.
+                iconState.setXTranslation(mIsolatedIconLocation.left - mAbsolutePosition[0]);
                 iconState.visibleState = StatusBarIconView.STATE_ICON;
             }
         }

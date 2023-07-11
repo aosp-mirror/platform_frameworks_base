@@ -121,10 +121,12 @@ frame when animating QS <-> QQS transition
     <LinearLayout
         android:id="@+id/shade_header_system_icons"
         android:layout_width="wrap_content"
-        app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
-        android:layout_height="@dimen/large_screen_shade_header_min_height"
+        android:layout_height="@dimen/shade_header_system_icons_height"
         android:clickable="true"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/shade_header_system_icons_padding_start"
+        android:paddingEnd="@dimen/shade_header_system_icons_padding_end"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/privacy_container"
         app:layout_constraintTop_toTopOf="@id/clock">
@@ -132,13 +134,13 @@ frame when animating QS <-> QQS transition
         <com.android.systemui.statusbar.phone.StatusIconContainer
             android:id="@+id/statusIcons"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:paddingEnd="@dimen/signal_cluster_battery_padding" />
 
         <com.android.systemui.battery.BatteryMeterView
             android:id="@+id/batteryRemainingIcon"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             app:textAppearance="@style/TextAppearance.QS.Status" />
     </LinearLayout>
 

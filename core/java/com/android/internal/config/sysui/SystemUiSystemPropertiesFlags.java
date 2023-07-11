@@ -84,7 +84,7 @@ public class SystemUiSystemPropertiesFlags {
 
         /** Gating the holding of WakeLocks until NLSes are told about a new notification. */
         public static final Flag WAKE_LOCK_FOR_POSTING_NOTIFICATION =
-                devFlag("persist.sysui.notification.wake_lock_for_posting_notification");
+                releasedFlag("persist.sysui.notification.wake_lock_for_posting_notification");
 
         /** Gating storing NotificationRankingUpdate ranking map in shared memory. */
         public static final Flag RANKING_UPDATE_ASHMEM = devFlag(

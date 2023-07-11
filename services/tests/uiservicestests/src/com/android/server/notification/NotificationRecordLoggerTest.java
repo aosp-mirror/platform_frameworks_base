@@ -18,6 +18,14 @@ package com.android.server.notification;
 
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.service.notification.NotificationListenerService.REASON_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
+import static android.service.notification.NotificationStats.DISMISSAL_OTHER;
+
+import static com.android.server.notification.NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_CLICK;
+import static com.android.server.notification.NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_GROUP_SUMMARY_CANCELED;
+import static com.android.server.notification.NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_USER_OTHER;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_POSTED;
 import static com.android.server.notification.NotificationRecordLogger.NotificationReportedEvent.NOTIFICATION_UPDATED;
 
@@ -207,5 +215,19 @@ public class NotificationRecordLoggerTest extends UiServiceTestCase {
                 /* hasFsiRequestedButDeniedFlag= */ false,
                 /* eventType= */ NOTIFICATION_POSTED);
         assertEquals(FrameworkStatsLog.NOTIFICATION_REPORTED__FSI_STATE__NO_FSI, fsiState);
+    }
+
+    @Test
+    public void testBubbleGroupSummaryDismissal() {
+        assertEquals(NOTIFICATION_CANCEL_GROUP_SUMMARY_CANCELED,
+                NotificationRecordLogger.NotificationCancelledEvent.fromCancelReason(
+                REASON_GROUP_SUMMARY_CANCELED, DISMISSAL_BUBBLE));
+    }
+
+    @Test
+    public void testOtherNotificationCancel() {
+        assertEquals(NOTIFICATION_CANCEL_USER_OTHER,
+                NotificationRecordLogger.NotificationCancelledEvent.fromCancelReason(
+                        REASON_CANCEL, DISMISSAL_OTHER));
     }
 }

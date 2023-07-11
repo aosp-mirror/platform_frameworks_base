@@ -16,8 +16,6 @@
 
 package com.android.systemui.authentication.shared.model
 
-import androidx.annotation.VisibleForTesting
-
 /** Enumerates all known authentication methods. */
 sealed class AuthenticationMethodModel(
     /**
@@ -34,30 +32,11 @@ sealed class AuthenticationMethodModel(
     /** The most basic authentication method. The lock screen can be swiped away when displayed. */
     object Swipe : AuthenticationMethodModel(isSecure = false)
 
-    /**
-     * Authentication method using a PIN.
-     *
-     * In practice, a pin is restricted to 16 decimal digits , see
-     * [android.app.admin.DevicePolicyManager.MAX_PASSWORD_LENGTH]
-     */
-    data class Pin(val code: List<Int>, val autoConfirm: Boolean) :
-        AuthenticationMethodModel(isSecure = true) {
+    object Pin : AuthenticationMethodModel(isSecure = true)
 
-        /** Convenience constructor for tests only. */
-        @VisibleForTesting
-        constructor(
-            code: Long,
-            autoConfirm: Boolean = false
-        ) : this(code.toString(10).map { it - '0' }, autoConfirm) {}
-    }
+    object Password : AuthenticationMethodModel(isSecure = true)
 
-    data class Password(val password: String) : AuthenticationMethodModel(isSecure = true)
-
-    data class Pattern(
-        val coordinates: List<PatternCoordinate>,
-        val isPatternVisible: Boolean = true,
-    ) : AuthenticationMethodModel(isSecure = true) {
-
+    object Pattern : AuthenticationMethodModel(isSecure = true) {
         data class PatternCoordinate(
             val x: Int,
             val y: Int,

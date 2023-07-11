@@ -123,6 +123,7 @@ android_library {
     ],
     static_libs: [
         "SystemUISharedLib",
+        "SystemUICustomizationLib",
         "SettingsLib",
         "androidx.leanback_leanback",
         "androidx.slice_slice-core",
@@ -272,7 +273,6 @@ filegroup {
         "tests/src/com/android/systemui/dock/DockManagerFake.java",
         "tests/src/com/android/systemui/dump/LogBufferHelper.kt",
         "tests/src/com/android/systemui/statusbar/phone/FakeKeyguardStateController.java",
-        "tests/src/com/android/systemui/keyguard/domain/quickaffordance/FakeKeyguardQuickAffordanceRegistry.kt",
 
         /* Biometric converted tests */
         "tests/src/com/android/systemui/biometrics/BiometricTestExtensions.kt",

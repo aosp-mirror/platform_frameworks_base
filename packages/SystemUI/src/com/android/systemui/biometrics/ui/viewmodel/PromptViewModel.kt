@@ -20,7 +20,7 @@ import android.util.Log
 import com.android.systemui.biometrics.AuthBiometricView
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.model.BiometricModalities
-import com.android.systemui.biometrics.domain.model.BiometricModality
+import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.android.systemui.biometrics.shared.model.PromptKind
 import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
@@ -210,35 +210,33 @@ constructor(
      * Show a temporary error [message] associated with an optional [failedModality] and play
      * [hapticFeedback].
      *
-     * An optional [messageAfterError] will be shown via [showAuthenticating] when
-     * [authenticateAfterError] is set (or via [showHelp] when not set) after the error is
-     * dismissed.
+     * The [messageAfterError] will be shown via [showAuthenticating] when [authenticateAfterError]
+     * is set (or via [showHelp] when not set) after the error is dismissed.
      *
-     * The error is ignored if the user has already authenticated or if [suppressIfErrorShowing] is
-     * set and an error message is already showing.
+     * The error is ignored if the user has already authenticated or if [suppressIf] is true given
+     * the currently showing [PromptMessage].
      */
     suspend fun showTemporaryError(
         message: String,
+        messageAfterError: String,
+        authenticateAfterError: Boolean,
+        suppressIf: (PromptMessage) -> Boolean = { false },
         hapticFeedback: Boolean = true,
-        messageAfterError: String = "",
-        authenticateAfterError: Boolean = false,
-        suppressIfErrorShowing: Boolean = false,
         failedModality: BiometricModality = BiometricModality.None,
     ) = coroutineScope {
         if (_isAuthenticated.value.isAuthenticated) {
             return@coroutineScope
         }
-        if (_message.value.isErrorOrHelp && suppressIfErrorShowing) {
-            if (_isAuthenticated.value.isNotAuthenticated) {
-                _canTryAgainNow.value = supportsRetry(failedModality)
-            }
+
+        _canTryAgainNow.value = supportsRetry(failedModality)
+
+        if (suppressIf(_message.value)) {
             return@coroutineScope
         }
 
         _isAuthenticating.value = false
         _isAuthenticated.value = PromptAuthState(false)
         _forceMediumSize.value = true
-        _canTryAgainNow.value = supportsRetry(failedModality)
         _message.value = PromptMessage.Error(message)
         _legacyState.value = AuthBiometricView.STATE_ERROR
 
@@ -374,7 +372,9 @@ constructor(
                 AuthBiometricView.STATE_AUTHENTICATED
             }
 
-        vibrator.success(modality)
+        if (!needsUserConfirmation) {
+            vibrator.success(modality)
+        }
 
         messageJob?.cancel()
         messageJob = null
@@ -419,6 +419,8 @@ constructor(
         _isAuthenticated.value = authState.asExplicitlyConfirmed()
         _message.value = PromptMessage.Empty
         _legacyState.value = AuthBiometricView.STATE_AUTHENTICATED
+
+        vibrator.success(authState.authenticatedModality)
 
         messageJob?.cancel()
         messageJob = null

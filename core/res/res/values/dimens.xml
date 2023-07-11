@@ -95,8 +95,10 @@
     <dimen name="navigation_bar_height_landscape_car_mode">96dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen in car mode -->
     <dimen name="navigation_bar_width_car_mode">96dp</dimen>
-    <!-- Height of notification icons in the status bar -->
+    <!-- Original dp height of notification icons in the status bar  -->
     <dimen name="status_bar_icon_size">22dip</dimen>
+    <!-- New sp height of notification icons in the status bar  -->
+    <dimen name="status_bar_icon_size_sp">22sp</dimen>
     <!-- Desired size of system icons in status bar. -->
     <dimen name="status_bar_system_icon_size">15dp</dimen>
     <!-- Intrinsic size of most system icons in status bar. This is the default value that

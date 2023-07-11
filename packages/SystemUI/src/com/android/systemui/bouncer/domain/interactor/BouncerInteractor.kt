@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.bouncer.domain.interactor
 
 import android.content.Context
-import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
-import com.android.systemui.bouncer.shared.model.AuthenticationThrottledModel
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.util.kotlin.pairwise
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -50,6 +52,7 @@ constructor(
     private val repository: BouncerRepository,
     private val authenticationInteractor: AuthenticationInteractor,
     private val sceneInteractor: SceneInteractor,
+    featureFlags: FeatureFlags,
     @Assisted private val containerName: String,
 ) {
 
@@ -57,9 +60,10 @@ constructor(
     val message: StateFlow<String?> =
         combine(
                 repository.message,
-                repository.throttling,
-            ) { message, throttling ->
-                messageOrThrottlingMessage(message, throttling)
+                authenticationInteractor.isThrottled,
+                authenticationInteractor.throttling,
+            ) { message, isThrottled, throttling ->
+                messageOrThrottlingMessage(message, isThrottled, throttling)
             }
             .stateIn(
                 scope = applicationScope,
@@ -67,36 +71,39 @@ constructor(
                 initialValue =
                     messageOrThrottlingMessage(
                         repository.message.value,
-                        repository.throttling.value,
+                        authenticationInteractor.isThrottled.value,
+                        authenticationInteractor.throttling.value,
                     )
             )
 
-    /** The current authentication throttling state. If `null`, there's no throttling. */
-    val throttling: StateFlow<AuthenticationThrottledModel?> = repository.throttling
+    /** The current authentication throttling state, only meaningful if [isThrottled] is `true`. */
+    val throttling: StateFlow<AuthenticationThrottlingModel> = authenticationInteractor.throttling
+
+    /**
+     * Whether currently throttled and the user has to wait before being able to try another
+     * authentication attempt.
+     */
+    val isThrottled: StateFlow<Boolean> = authenticationInteractor.isThrottled
+
+    /** Whether the auto confirm feature is enabled for the currently-selected user. */
+    val isAutoConfirmEnabled: StateFlow<Boolean> = authenticationInteractor.isAutoConfirmEnabled
+
+    /** The length of the PIN for which we should show a hint. */
+    val hintedPinLength: StateFlow<Int?> = authenticationInteractor.hintedPinLength
+
+    /** Whether the pattern should be visible for the currently-selected user. */
+    val isPatternVisible: StateFlow<Boolean> = authenticationInteractor.isPatternVisible
 
     init {
-        // UNLOCKING SHOWS Gone.
-        //
-        // Move to the gone scene if the device becomes unlocked while on the bouncer scene.
-        applicationScope.launch {
-            sceneInteractor
-                .currentScene(containerName)
-                .flatMapLatest { currentScene ->
-                    if (currentScene.key == SceneKey.Bouncer) {
-                        authenticationInteractor.isUnlocked
-                    } else {
-                        flowOf(false)
+        if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+            // Clear the message if moved from throttling to no-longer throttling.
+            applicationScope.launch {
+                isThrottled.pairwise().collect { (wasThrottled, currentlyThrottled) ->
+                    if (wasThrottled && !currentlyThrottled) {
+                        clearMessage()
                     }
                 }
-                .distinctUntilChanged()
-                .collect { isUnlocked ->
-                    if (isUnlocked) {
-                        sceneInteractor.setCurrentScene(
-                            containerName = containerName,
-                            scene = SceneModel(SceneKey.Gone),
-                        )
-                    }
-                }
+            }
         }
     }
 
@@ -168,41 +175,16 @@ constructor(
         input: List<Any>,
         tryAutoConfirm: Boolean = false,
     ): Boolean? {
-        if (repository.throttling.value != null) {
-            return false
-        }
-
         val isAuthenticated =
             authenticationInteractor.authenticate(input, tryAutoConfirm) ?: return null
 
-        val failedAttempts = authenticationInteractor.failedAuthenticationAttempts.value
-        when {
-            isAuthenticated -> {
-                repository.setThrottling(null)
-                sceneInteractor.setCurrentScene(
-                    containerName = containerName,
-                    scene = SceneModel(SceneKey.Gone),
-                )
-            }
-            failedAttempts >= THROTTLE_AGGRESSIVELY_AFTER || failedAttempts % THROTTLE_EVERY == 0 ->
-                applicationScope.launch {
-                    var remainingDurationSec = THROTTLE_DURATION_SEC
-                    while (remainingDurationSec > 0) {
-                        repository.setThrottling(
-                            AuthenticationThrottledModel(
-                                failedAttemptCount = failedAttempts,
-                                totalDurationSec = THROTTLE_DURATION_SEC,
-                                remainingDurationSec = remainingDurationSec,
-                            )
-                        )
-                        remainingDurationSec--
-                        delay(1000)
-                    }
-
-                    repository.setThrottling(null)
-                    clearMessage()
-                }
-            else -> repository.setMessage(errorMessage(getAuthenticationMethod()))
+        if (isAuthenticated) {
+            sceneInteractor.setCurrentScene(
+                containerName = containerName,
+                scene = SceneModel(SceneKey.Gone),
+            )
+        } else {
+            repository.setMessage(errorMessage(getAuthenticationMethod()))
         }
 
         return isAuthenticated
@@ -233,13 +215,14 @@ constructor(
 
     private fun messageOrThrottlingMessage(
         message: String?,
-        throttling: AuthenticationThrottledModel?,
+        isThrottled: Boolean,
+        throttlingModel: AuthenticationThrottlingModel,
     ): String {
         return when {
-            throttling != null ->
+            isThrottled ->
                 applicationContext.getString(
                     com.android.internal.R.string.lockscreen_too_many_failed_attempts_countdown,
-                    throttling.remainingDurationSec,
+                    throttlingModel.remainingMs.milliseconds.inWholeSeconds,
                 )
             message != null -> message
             else -> ""
@@ -251,11 +234,5 @@ constructor(
         fun create(
             containerName: String,
         ): BouncerInteractor
-    }
-
-    companion object {
-        @VisibleForTesting const val THROTTLE_DURATION_SEC = 30
-        @VisibleForTesting const val THROTTLE_AGGRESSIVELY_AFTER = 15
-        @VisibleForTesting const val THROTTLE_EVERY = 5
     }
 }
