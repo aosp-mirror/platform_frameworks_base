@@ -425,11 +425,13 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Action to scroll the node content forward.
+     * @see AccessibilityAction#ACTION_SCROLL_FORWARD
      */
     public static final int ACTION_SCROLL_FORWARD = 1 << 12;
 
     /**
      * Action to scroll the node content backward.
+     * @see AccessibilityAction#ACTION_SCROLL_BACKWARD
      */
     public static final int ACTION_SCROLL_BACKWARD = 1 << 13;
 
@@ -5404,6 +5406,42 @@ public class AccessibilityNodeInfo implements Parcelable {
          *     <strong>Arguments:</strong>
          *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
          * </p>
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event. Depending on the orientation,
+         * this element should also add the relevant directional scroll actions of
+         * {@link #ACTION_SCROLL_LEFT}, {@link #ACTION_SCROLL_RIGHT},
+         * {@link #ACTION_SCROLL_UP}, and {@link #ACTION_SCROLL_DOWN}. If the scrolling brings
+         * the next or previous element into view as the center element, such as in a ViewPager2,
+         * use {@link #ACTION_PAGE_DOWN} and the other page actions instead of the directional
+         * actions.
+         * <p>Example: a scrolling UI of vertical orientation with a forward
+         * scroll action should also add the scroll down action:
+         * <pre class="prettyprint"><code>
+         *     onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+         *          super.onInitializeAccessibilityNodeInfo(info);
+         *          if (canScrollForward) {
+         *              info.addAction(ACTION_SCROLL_FORWARD);
+         *              info.addAction(ACTION_SCROLL_DOWN);
+         *          }
+         *     }
+         *     performAccessibilityAction(int action, Bundle bundle) {
+         *          if (action == ACTION_SCROLL_FORWARD || action == ACTION_SCROLL_DOWN) {
+         *              scrollForward();
+         *          }
+         *     }
+         *     scrollForward() {
+         *         ...
+         *         if (mAccessibilityManager.isEnabled()) {
+         *             event = new AccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
+         *             event.setScrollDeltaX(dx);
+         *             event.setScrollDeltaY(dy);
+         *             event.setMaxScrollX(maxDx);
+         *             event.setMaxScrollY(maxDY);
+         *             sendAccessibilityEventUnchecked(event);
+         *        }
+         *     }
+         *      </code>
+         * </pre></p>
          */
         public static final AccessibilityAction ACTION_SCROLL_FORWARD =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
@@ -5414,6 +5452,54 @@ public class AccessibilityNodeInfo implements Parcelable {
          *     <strong>Arguments:</strong>
          *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
          * </p>
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event. Depending on the orientation,
+         * this element should also add the relevant directional scroll actions of
+         * {@link #ACTION_SCROLL_LEFT}, {@link #ACTION_SCROLL_RIGHT},
+         * {@link #ACTION_SCROLL_UP}, and {@link #ACTION_SCROLL_DOWN}. If the scrolling brings
+         * the next or previous element into view as the center element, such as in a ViewPager2,
+         * use {@link #ACTION_PAGE_DOWN} and the other page actions instead of the directional
+         * actions.
+         * <p> Example: a scrolling UI of horizontal orientation with a backward
+         * scroll action should also add the scroll left/right action (LTR/RTL):
+         * <pre class="prettyprint"><code>
+         *     onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+         *          super.onInitializeAccessibilityNodeInfo(info);
+         *          if (canScrollBackward) {
+         *              info.addAction(ACTION_SCROLL_FORWARD);
+         *              if (leftToRight) {
+         *                  info.addAction(ACTION_SCROLL_LEFT);
+         *              } else {
+         *                  info.addAction(ACTION_SCROLL_RIGHT);
+         *              }
+         *          }
+         *     }
+         *     performAccessibilityAction(int action, Bundle bundle) {
+         *          if (action == ACTION_SCROLL_BACKWARD) {
+         *              scrollBackward();
+         *          } else if (action == ACTION_SCROLL_LEFT) {
+         *              if (!isRTL()){
+         *                  scrollBackward();
+         *              }
+         *          } else if (action == ACTION_SCROLL_RIGHT) {
+         *              if (isRTL()){
+         *                  scrollBackward();
+         *              }
+         *          }
+         *     }
+         *     scrollBackward() {
+         *         ...
+         *         if (mAccessibilityManager.isEnabled()) {
+         *             event = new AccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
+         *             event.setScrollDeltaX(dx);
+         *             event.setScrollDeltaY(dy);
+         *             event.setMaxScrollX(maxDx);
+         *             event.setMaxScrollY(maxDY);
+         *             sendAccessibilityEventUnchecked(event);
+         *        }
+         *     }
+         *      </code>
+         * </pre></p>
          */
         public static final AccessibilityAction ACTION_SCROLL_BACKWARD =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
@@ -5509,6 +5595,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Action that requests the node make its bounding rectangle visible
          * on the screen, scrolling if necessary just enough.
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          *
          * @see View#requestRectangleOnScreen(Rect)
          */
@@ -5524,6 +5612,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          *     <li>{@link AccessibilityNodeInfo#ACTION_ARGUMENT_ROW_INT}</li>
          *     <li>{@link AccessibilityNodeInfo#ACTION_ARGUMENT_COLUMN_INT}</li>
          * <ul>
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          *
          * @see AccessibilityNodeInfo#getCollectionInfo()
          */
@@ -5562,6 +5652,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          *     <strong>Arguments:</strong>
          *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
          * </p>
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_SCROLL_UP =
                 new AccessibilityAction(R.id.accessibilityActionScrollUp);
@@ -5572,6 +5664,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          *     <strong>Arguments:</strong>
          *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
          * </p>
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_SCROLL_LEFT =
                 new AccessibilityAction(R.id.accessibilityActionScrollLeft);
@@ -5582,6 +5676,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          *     <strong>Arguments:</strong>
          *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
          * </p>
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_SCROLL_DOWN =
                 new AccessibilityAction(R.id.accessibilityActionScrollDown);
@@ -5592,30 +5688,40 @@ public class AccessibilityNodeInfo implements Parcelable {
          *     <strong>Arguments:</strong>
          *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
          * </p>
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_SCROLL_RIGHT =
                 new AccessibilityAction(R.id.accessibilityActionScrollRight);
 
         /**
          * Action to move to the page above.
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_PAGE_UP =
                 new AccessibilityAction(R.id.accessibilityActionPageUp);
 
         /**
          * Action to move to the page below.
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_PAGE_DOWN =
                 new AccessibilityAction(R.id.accessibilityActionPageDown);
 
         /**
          * Action to move to the page left.
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_PAGE_LEFT =
                 new AccessibilityAction(R.id.accessibilityActionPageLeft);
 
         /**
          * Action to move to the page right.
+         * <p>The UI element that implements this should send a
+         * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
          */
         public static final AccessibilityAction ACTION_PAGE_RIGHT =
                 new AccessibilityAction(R.id.accessibilityActionPageRight);
@@ -5720,8 +5826,9 @@ public class AccessibilityNodeInfo implements Parcelable {
          * This action initiates a drag & drop within the system. The source's dragged content is
          * prepared before the drag begins. In View, this action should prepare the arguments to
          * {@link View#startDragAndDrop(ClipData, View.DragShadowBuilder, Object, int)} and then
-         * call {@link View#startDragAndDrop(ClipData, View.DragShadowBuilder, Object, int)}. The
-         * equivalent should be performed for other UI toolkits.
+         * call {@link View#startDragAndDrop(ClipData, View.DragShadowBuilder, Object, int)} with
+         * {@link View#DRAG_FLAG_ACCESSIBILITY_ACTION}. The equivalent should be performed for other
+         * UI toolkits.
          * </p>
          *
          * @see AccessibilityEvent#CONTENT_CHANGE_TYPE_DRAG_STARTED
@@ -5735,7 +5842,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          * This action is added to potential drop targets if the source started a drag with
          * {@link #ACTION_DRAG_START}. In View, these targets are Views that accepted
          * {@link android.view.DragEvent#ACTION_DRAG_STARTED} and have an
-         * {@link View.OnDragListener}.
+         * {@link View.OnDragListener}, and the drop occurs at the center location of the View's
+         * window bounds.
          * </p>
          *
          * @see AccessibilityEvent#CONTENT_CHANGE_TYPE_DRAG_DROPPED

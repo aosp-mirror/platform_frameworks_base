@@ -192,6 +192,8 @@ import java.util.List;
  *   <li>{@link #getEventTime()}  - The event time.</li>
  *   <li>{@link #getScrollDeltaX()} - The difference in the horizontal position.</li>
  *   <li>{@link #getScrollDeltaY()} - The difference in the vertical position.</li>
+ *   <li>{@link #getMaxScrollX()} ()} -  The max scroll offset of the source left edge</li>
+ *   <li>{@link #getMaxScrollY()} ()} - The max scroll offset of the source top edge.</li>
  * </ul>
  * </p>
  * <p>
@@ -538,8 +540,18 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_WINDOW_CONTENT_CHANGED = 1 << 11;
 
     /**
-     * Represents the event of scrolling a view. This event type is generally not sent directly.
-     * @see android.view.View#onScrollChanged(int, int, int, int)
+     * Represents the event of scrolling a view. This event type is generally not sent directly. In
+     * the View system, this is sent in
+     * {@link android.view.View#onScrollChanged(int, int, int, int)}
+     * <p>In addition to the source and package name, the event should populate scroll-specific
+     * properties like {@link #setScrollDeltaX(int)}, {@link #setScrollDeltaY(int)},
+     * {@link #setMaxScrollX(int)}, and {@link #setMaxScrollY(int)}.
+     * <p>Services are encouraged to rely on the source to query UI state over AccessibilityEvents
+     * properties. For example, to check after a scroll if the bottom of the scrolling UI element
+     * has been reached, check if the source node is scrollable and has the
+     * {@link AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_BACKWARD} action but not the
+     * {@link AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_FORWARD} action.
+     * For scrolling to a target, use {@link #TYPE_VIEW_TARGETED_BY_SCROLL}.
      */
     public static final int TYPE_VIEW_SCROLLED = 1 << 12;
 
