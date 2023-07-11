@@ -345,23 +345,6 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
         }
 
-    @Test
-    fun switchesToGone_whenUnlocked() =
-        testScope.runTest {
-            utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(
-                SceneTestUtils.CONTAINER_1,
-                SceneModel(SceneKey.Bouncer)
-            )
-            val currentScene by
-                collectLastValue(sceneInteractor.currentScene(SceneTestUtils.CONTAINER_1))
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-
-            utils.authenticationRepository.setUnlocked(true)
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
-        }
-
     private fun assertTryAgainMessage(
         message: String?,
         time: Int,

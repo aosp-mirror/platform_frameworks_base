@@ -24,6 +24,8 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -51,6 +53,7 @@ class SceneTestUtils(
 ) {
     val testDispatcher = StandardTestDispatcher()
     val testScope = TestScope(testDispatcher)
+    val featureFlags = FakeFeatureFlags().apply { set(Flags.SCENE_CONTAINER, true) }
     private val userRepository: UserRepository by lazy {
         FakeUserRepository().apply {
             val users = listOf(UserInfo(/* id=  */ 0, "name", /* flags= */ 0))
@@ -129,6 +132,7 @@ class SceneTestUtils(
             repository = BouncerRepository(),
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
+            featureFlags = featureFlags,
             containerName = CONTAINER_1,
         )
     }
@@ -145,13 +149,13 @@ class SceneTestUtils(
                         return bouncerInteractor
                     }
                 },
+            featureFlags = featureFlags,
             containerName = CONTAINER_1,
         )
     }
 
     fun lockScreenSceneInteractor(
         authenticationInteractor: AuthenticationInteractor,
-        sceneInteractor: SceneInteractor,
         bouncerInteractor: BouncerInteractor,
     ): LockscreenSceneInteractor {
         return LockscreenSceneInteractor(
@@ -163,7 +167,6 @@ class SceneTestUtils(
                         return bouncerInteractor
                     }
                 },
-            sceneInteractor = sceneInteractor,
             containerName = CONTAINER_1,
         )
     }
