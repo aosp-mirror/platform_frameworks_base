@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"পাওয়ার মেনু"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>টির মধ্যে <xliff:g id="ID_1">%1$d</xliff:g> নং পৃষ্ঠা"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"লক স্ক্রিন"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"আপনার ফোন গরম হওয়ার জন্য বন্ধ হয়ে গেছে"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"আপনার ফোন এখন ভালভাবে কাজ করছে।\nআরও তথ্যের জন্য ট্যাপ করুন"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"আপনার ফোন খুব বেশি গরম হয়েছিল বলে ঠাণ্ডা হওয়ার জন্য বন্ধ হয়ে গেছে। আপনার ফোন ঠিক-ঠাক ভাবে চলছে না।\n\nআপনার ফোন খুব বেশি গরম হয়ে যাবে যদি আপনি:\n	•এমন অ্যাপ ব্যবহার করলে যেটি আপনার ডিভাইসের রিসোর্স বেশি ব্যবহার করে (যেমন গেমিং, ভিডিও বা নেভিগেশন অ্যাপ)\n	• বড় ফাইল ডাউনলোড বা আপলোড করলে\n	• বেশি তাপমাত্রায় আপনার ফোন ব্যবহার করলে"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"ডিভাইস রক্ষণাবেক্ষণের ধাপগুলি দেখুন"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"ফোনটি গরম হচ্ছে"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"ফোন ঠাণ্ডা না হওয়া পর্যন্ত কিছু ফিচার কাজ করে না।\nআরও তথ্যের জন্য ট্যাপ করুন"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"আপনার ফোনটি নিজে থেকেই ঠাণ্ডা হওয়ার চেষ্টা করবে৷ আপনি তবুও আপনার ফোন ব্যবহার করতে পারেন, কিন্তু এটি একটু ধীরে চলতে পারে৷\n\nআপনার ফোনটি পুরোপুরি ঠাণ্ডা হয়ে গেলে এটি স্বাভাবিকভাবে চলবে৷"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"ডিভাইস রক্ষণাবেক্ষণের ধাপগুলি দেখুন"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"আপনার ডিভাইস আনপ্লাগ করা"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"চার্জিং পোর্টের কাছে আপনার ডিভাইসটি গরম হচ্ছে। এটি চার্জার বা ইউএসবি অ্যাক্সেসরির সাথে কানেক্ট করা থাকলে, আনপ্লাগ করুন এবং সতর্ক থাকুন কারণ কেবেলটিও গরম হতে পারে।"</string>
@@ -987,7 +981,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"অডিও আউটপুটের জন্য উপলভ্য ডিভাইস।"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ভলিউম"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"স্পিকার &amp; ডিসপ্লে"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"স্পিকার ও ডিসপ্লে"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"সাজেস্ট করা ডিভাইস"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"অন্য ডিভাইসে মিডিয়া সরাতে আপনার শেয়ার করা সেশন বন্ধ করুন"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"বন্ধ করুন"</string>
