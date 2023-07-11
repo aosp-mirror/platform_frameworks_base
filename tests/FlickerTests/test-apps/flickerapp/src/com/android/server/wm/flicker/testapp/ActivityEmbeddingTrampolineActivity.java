@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.bubbles;
+package com.android.server.wm.flicker.testapp;
 
+import android.app.Activity;
 import android.content.Intent;
-import com.android.wm.shell.bubbles.IBubblesListener;
+import android.os.Bundle;
 
 /**
- * Interface that is exposed to remote callers (launcher) to manipulate the bubbles feature when
- * showing in the bubble bar.
+ * A Trampoline Activity that launches {@link ActivityEmbeddingSecondaryActivity} and then
+ * finishes itself.
  */
-interface IBubbles {
-
-    oneway void registerBubbleListener(in IBubblesListener listener) = 1;
-
-    oneway void unregisterBubbleListener(in IBubblesListener listener) = 2;
-
-    oneway void showBubble(in String key, in int bubbleBarXCoordinate,
-                    in int bubbleBarYCoordinate) = 3;
-
-    oneway void removeBubble(in String key, in int reason) = 4;
-
-    oneway void collapseBubbles() = 5;
-
+public class ActivityEmbeddingTrampolineActivity extends Activity {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Trampoline activity doesn't have a view.
+        startActivity(new Intent().setComponent(
+                ActivityOptions.ActivityEmbedding.SecondaryActivity.COMPONENT));
+        finish();
+    }
 }
