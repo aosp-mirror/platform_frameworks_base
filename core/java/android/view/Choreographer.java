@@ -749,6 +749,25 @@ public final class Choreographer {
         return getExpectedPresentationTimeNanos() / TimeUtils.NANOS_PER_MS;
     }
 
+    /**
+     * Same as {@link #getExpectedPresentationTimeNanos()},
+     * Should always use {@link #getExpectedPresentationTimeNanos()} if it's possilbe.
+     * This method involves a binder call to SF,
+     * calling this method can potentially influence the performance.
+     *
+     * @return The frame start time, in the {@link System#nanoTime()} time base.
+     *
+     * @hide
+     */
+    public long getLatestExpectedPresentTimeNanos() {
+        if (mDisplayEventReceiver == null) {
+            return System.nanoTime();
+        }
+
+        return mDisplayEventReceiver.getLatestVsyncEventData()
+                .preferredFrameTimeline().expectedPresentationTime;
+    }
+
     private void scheduleFrameLocked(long now) {
         if (!mFrameScheduled) {
             mFrameScheduled = true;
