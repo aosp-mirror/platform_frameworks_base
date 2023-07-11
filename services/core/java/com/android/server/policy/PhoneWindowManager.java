@@ -3304,8 +3304,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             minLinearBrightness, maxLinearBrightness);
                     mDisplayManager.setBrightness(screenDisplayId, adjustedLinearBrightness);
 
-                    startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
-                            UserHandle.CURRENT_OR_SELF);
+                    Intent intent = new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+                    intent.putExtra(EXTRA_FROM_BRIGHTNESS_KEY, true);
+                    startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
                 }
                 return true;
             case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN:
