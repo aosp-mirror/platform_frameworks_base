@@ -8672,13 +8672,18 @@ public class AudioService extends IAudioService.Stub
                 // fire changed intents for all streams, but only when the device it changed on
                 //  is the current device
                 if ((index != oldIndex) && isCurrentDevice) {
-                    mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
-                    mVolumeChanged.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
-                    mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
-                            mStreamVolumeAlias[mStreamType]);
-                    AudioService.sVolumeLogger.enqueue(new VolChangedBroadcastEvent(
-                            mStreamType, mStreamVolumeAlias[mStreamType], index));
-                    sendBroadcastToAll(mVolumeChanged, mVolumeChangedOptions);
+                    // for single volume devices, only send the volume change broadcast
+                    // on the alias stream
+                    if (!mIsSingleVolume || (mStreamVolumeAlias[mStreamType] == mStreamType)) {
+                        mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
+                        mVolumeChanged.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE,
+                                oldIndex);
+                        mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
+                                mStreamVolumeAlias[mStreamType]);
+                        AudioService.sVolumeLogger.enqueue(new VolChangedBroadcastEvent(
+                                mStreamType, mStreamVolumeAlias[mStreamType], index));
+                        sendBroadcastToAll(mVolumeChanged, mVolumeChangedOptions);
+                    }
                 }
             }
             return changed;
