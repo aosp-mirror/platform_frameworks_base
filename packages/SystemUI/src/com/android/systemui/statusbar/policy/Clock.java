@@ -374,6 +374,13 @@ public class Clock extends TextView implements
 
     @Override
     public void onDensityOrFontScaleChanged() {
+        reloadDimens();
+    }
+
+    private void reloadDimens() {
+        // reset mCachedWidth so the new width would be updated properly when next onMeasure
+        mCachedWidth = -1;
+
         FontSizeUtils.updateFontSize(this, R.dimen.status_bar_clock_size);
         setPaddingRelative(
                 mContext.getResources().getDimensionPixelSize(
