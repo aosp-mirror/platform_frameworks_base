@@ -804,4 +804,11 @@ object Flags {
     // TODO(b/285174336): Tracking Bug
     @JvmField
     val USE_REPOS_FOR_BOUNCER_SHOWING = unreleasedFlag(2900, "use_repos_for_bouncer_showing")
+
+    // 3100 - Haptic interactions
+
+    // TODO(b/290213663): Tracking Bug
+    @JvmField
+    val ONE_WAY_HAPTICS_API_MIGRATION =
+        unreleasedFlag(3100, "oneway_haptics_api_migration")
 }
