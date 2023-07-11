@@ -82,17 +82,17 @@ constructor(
      */
     fun launchTrampolineActivity(wmHelper: WindowManagerStateHelper) {
         val launchButton =
-                uiDevice.wait(
-                        Until.findObject(By.res(getPackage(), "launch_trampoline_button")),
-                        FIND_TIMEOUT
-                )
+            uiDevice.wait(
+                Until.findObject(By.res(getPackage(), "launch_trampoline_button")),
+                FIND_TIMEOUT
+            )
         require(launchButton != null) { "Can't find launch trampoline activity button on screen." }
         launchButton.click()
         wmHelper
-                .StateSyncBuilder()
-                .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-                .withActivityRemoved(TRAMPOLINE_ACTIVITY_COMPONENT)
-                .waitForAndVerify()
+            .StateSyncBuilder()
+            .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+            .withActivityRemoved(TRAMPOLINE_ACTIVITY_COMPONENT)
+            .waitForAndVerify()
     }
 
     /**
@@ -217,7 +217,7 @@ constructor(
                 .toFlickerComponent()
 
         val TRAMPOLINE_ACTIVITY_COMPONENT =
-                ActivityOptions.ActivityEmbedding.TrampolineActivity.COMPONENT.toFlickerComponent()
+            ActivityOptions.ActivityEmbedding.TrampolineActivity.COMPONENT.toFlickerComponent()
 
         @JvmStatic
         fun getWindowExtensions(): WindowExtensions? {

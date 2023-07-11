@@ -26,7 +26,6 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.view.WindowManager
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import org.junit.FixMethodOrder
@@ -88,11 +87,10 @@ import org.junit.runners.Parameterized
  *        apps are running before setup
  * ```
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class SeamlessAppRotationTest(flicker: LegacyFlickerTest) : RotationTransition(flicker) {
+class SeamlessAppRotationTest(flicker: LegacyFlickerTest) : RotationTransition(flicker) {
     override val testApp = SeamlessRotationAppHelper(instrumentation)
 
     /** {@inheritDoc} */

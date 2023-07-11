@@ -23,7 +23,6 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -81,11 +80,10 @@ import org.junit.runners.Parameterized
  *        apps are running before setup
  * ```
  */
-@RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ChangeAppRotationTest(flicker: LegacyFlickerTest) : RotationTransition(flicker) {
+class ChangeAppRotationTest(flicker: LegacyFlickerTest) : RotationTransition(flicker) {
     override val testApp = SimpleAppHelper(instrumentation)
     override val transition: FlickerBuilder.() -> Unit
         get() = {
