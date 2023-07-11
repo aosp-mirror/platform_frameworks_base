@@ -103,7 +103,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private void initDimens() {
         // This is the same value that StatusBarIconView uses
         mIconDotFrameWidth = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_icon_size);
+                com.android.internal.R.dimen.status_bar_icon_size_sp);
         mDotPadding = getResources().getDimensionPixelSize(R.dimen.overflow_icon_dot_padding);
         mIconSpacing = getResources().getDimensionPixelSize(R.dimen.status_bar_system_icon_spacing);
         int radius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);

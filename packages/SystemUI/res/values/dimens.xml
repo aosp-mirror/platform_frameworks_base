@@ -121,24 +121,26 @@
     <dimen name="navigation_edge_cancelled_arrow_height">0dp</dimen>
     <dimen name="navigation_edge_cancelled_edge_corners">6dp</dimen>
 
-    <!-- Height of notification icons in the status bar -->
+    <!-- New sp height of notification icons in the status bar -->
+    <dimen name="status_bar_icon_size_sp">@*android:dimen/status_bar_icon_size_sp</dimen>
+    <!-- Original dp height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
     <!-- Default horizontal drawable padding for status bar icons. -->
-    <dimen name="status_bar_horizontal_padding">2.5dp</dimen>
+    <dimen name="status_bar_horizontal_padding">2.5sp</dimen>
 
     <!-- Height of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_height">13.0dp</dimen>
+    <dimen name="status_bar_battery_icon_height">13.0sp</dimen>
 
     <!-- Width of the battery icon in the status bar. The battery drawable assumes a 12x20 canvas,
-    so the width of the icon should be 13.0dp * (12.0 / 20.0) -->
-    <dimen name="status_bar_battery_icon_width">7.8dp</dimen>
+    so the width of the icon should be 13.0sp * (12.0 / 20.0) -->
+    <dimen name="status_bar_battery_icon_width">7.8sp</dimen>
 
-    <!-- The battery icon is 13dp tall, but the other system icons are 15dp tall (see
+    <!-- The battery icon is 13sp tall, but the other system icons are 15sp tall (see
          @*android:dimen/status_bar_system_icon_size) with some top and bottom padding embedded in
          the drawables themselves. So, the battery icon may need an extra 1dp of spacing so that its
          bottom still aligns with the bottom of all the other system icons. See b/258672854. -->
-    <dimen name="status_bar_battery_extra_vertical_spacing">1dp</dimen>
+    <dimen name="status_bar_battery_extra_vertical_spacing">1sp</dimen>
 
     <!-- The font size for the clock in the status bar. -->
     <dimen name="status_bar_clock_size">14sp</dimen>
@@ -153,19 +155,26 @@
     <dimen name="status_bar_left_clock_starting_padding">0dp</dimen>
 
     <!-- End padding for left-aligned status bar clock -->
-    <dimen name="status_bar_left_clock_end_padding">2dp</dimen>
+    <dimen name="status_bar_left_clock_end_padding">2sp</dimen>
 
     <!-- Spacing after the wifi signals that is present if there are any icons following it. -->
-    <dimen name="status_bar_wifi_signal_spacer_width">2.5dp</dimen>
+    <dimen name="status_bar_wifi_signal_spacer_width">2.5sp</dimen>
 
+    <!-- Size of the view displaying the wifi inout icon in the status bar. -->
+    <dimen name="status_bar_wifi_inout_container_size">17sp</dimen>
     <!-- Size of the view displaying the wifi signal icon in the status bar. -->
-    <dimen name="status_bar_wifi_signal_size">@*android:dimen/status_bar_system_icon_size</dimen>
+    <dimen name="status_bar_wifi_signal_size">13sp</dimen>
+
+    <!-- Size of the view displaying the mobile inout icon in the status bar. -->
+    <dimen name="status_bar_mobile_inout_container_size">17sp</dimen>
+    <!-- Size of the view displaying the mobile signal icon in the status bar. -->
+    <dimen name="status_bar_mobile_signal_size">13sp</dimen>
 
     <!-- Spacing before the airplane mode icon if there are any icons preceding it. -->
-    <dimen name="status_bar_airplane_spacer_width">4dp</dimen>
+    <dimen name="status_bar_airplane_spacer_width">4sp</dimen>
 
     <!-- Spacing between system icons. -->
-    <dimen name="status_bar_system_icon_spacing">0dp</dimen>
+    <dimen name="status_bar_system_icon_spacing">0sp</dimen>
 
     <!-- The amount to scale each of the status bar icons by. A value of 1 means no scaling. -->
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.0</item>
@@ -338,7 +347,7 @@
     <dimen name="status_bar_icons_padding_top">8dp</dimen>
 
     <!-- gap on either side of status bar notification icons -->
-    <dimen name="status_bar_icon_horizontal_margin">0dp</dimen>
+    <dimen name="status_bar_icon_horizontal_margin">0sp</dimen>
 
     <!-- the padding on the start of the statusbar -->
     <dimen name="status_bar_padding_start">8dp</dimen>
@@ -350,10 +359,10 @@
     <dimen name="status_bar_padding_top">0dp</dimen>
 
     <!-- the radius of the overflow dot in the status bar -->
-    <dimen name="overflow_dot_radius">2dp</dimen>
+    <dimen name="overflow_dot_radius">2sp</dimen>
 
     <!-- the padding between dots in the icon overflow -->
-    <dimen name="overflow_icon_dot_padding">3dp</dimen>
+    <dimen name="overflow_icon_dot_padding">3sp</dimen>
 
     <!-- Dimensions related to screenshots -->
 
@@ -841,7 +850,7 @@
 
     <!-- Padding between the mobile signal indicator and the start icon when the roaming icon
          is displayed in the upper left corner. -->
-    <dimen name="roaming_icon_start_padding">2dp</dimen>
+    <dimen name="roaming_icon_start_padding">2sp</dimen>
 
     <!-- Extra padding between the mobile data type icon and the strength indicator when the data
          type icon is wide for the tile in quick settings. -->
@@ -1067,7 +1076,7 @@
     <!-- Margin between icons of Ongoing App Ops chip -->
     <dimen name="ongoing_appops_chip_icon_margin">4dp</dimen>
     <!-- Icon size of Ongoing App Ops chip -->
-    <dimen name="ongoing_appops_chip_icon_size">16dp</dimen>
+    <dimen name="ongoing_appops_chip_icon_size">16sp</dimen>
     <!-- Radius of Ongoing App Ops chip corners -->
     <dimen name="ongoing_appops_chip_bg_corner_radius">28dp</dimen>
     <!--  One or two privacy items  -->
