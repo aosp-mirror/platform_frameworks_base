@@ -2316,7 +2316,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ફોનના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"તમારા <xliff:g id="DEVICE">%1$s</xliff:g> પરથી ટૅબ્લેટના કૅમેરાનો ઍક્સેસ કરી શકતાં નથી"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"સ્ટ્રીમ કરતી વખતે આ ઍક્સેસ કરી શકાતું નથી. તેના બદલે તમારા ફોન પર પ્રયાસ કરો."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"સ્ટ્રીમ કરતી વખતે ચિત્ર-માં-ચિત્ર જોઈ શકતા નથી"</string>
     <string name="system_locale_title" msgid="711882686834677268">"સિસ્ટમ ડિફૉલ્ટ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"કાર્ડ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"વૉચ મેનેજ કરવા માટે સાથી વૉચ પ્રોફાઇલની પરવાનગી"</string>

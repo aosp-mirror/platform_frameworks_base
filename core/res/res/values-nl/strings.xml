@@ -2316,7 +2316,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Kan geen toegang tot de camera van de telefoon krijgen vanaf je <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Kan geen toegang tot de camera van de tablet krijgen vanaf je <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Je hebt hier geen toegang toe tijdens streaming. Probeer het in plaats daarvan op je telefoon."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Kan scherm-in-scherm niet bekijken tijdens het streamen"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systeemstandaard"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KAART <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Smartwatchprofiel voor bijbehorende app om smartwatches te beheren"</string>

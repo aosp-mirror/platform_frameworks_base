@@ -2316,7 +2316,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取手機的相機"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取平板電腦的相機"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"串流播放時無法存取這項內容，請改用手機。"</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"串流播放時無法查看子母畫面"</string>
     <string name="system_locale_title" msgid="711882686834677268">"系統預設"</string>
     <string name="default_card_name" msgid="9198284935962911468">"SIM 卡 <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"用於管理智慧手錶的配對智慧手錶設定檔權限"</string>
