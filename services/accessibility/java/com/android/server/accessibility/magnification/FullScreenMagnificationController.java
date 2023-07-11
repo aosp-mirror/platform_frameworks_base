@@ -110,7 +110,6 @@ public class FullScreenMagnificationController implements
     private boolean mAlwaysOnMagnificationEnabled = false;
     private final DisplayManagerInternal mDisplayManagerInternal;
 
-    private final MagnificationThumbnailFeatureFlag mMagnificationThumbnailFeatureFlag;
     @NonNull private final Supplier<MagnificationThumbnail> mThumbnailSupplier;
 
     /**
@@ -643,13 +642,6 @@ public class FullScreenMagnificationController implements
             }
         }
 
-        void onThumbnailFeatureFlagChanged() {
-            synchronized (mLock) {
-                destroyThumbnail();
-                createThumbnailIfSupported();
-            }
-        }
-
         /**
          * Updates the current magnification spec.
          *
@@ -810,40 +802,16 @@ public class FullScreenMagnificationController implements
         addInfoChangedCallback(magnificationInfoChangedCallback);
         mScaleProvider = scaleProvider;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mMagnificationThumbnailFeatureFlag = new MagnificationThumbnailFeatureFlag();
-        mMagnificationThumbnailFeatureFlag.addOnChangedListener(
-                backgroundExecutor, this::onMagnificationThumbnailFeatureFlagChanged);
         if (thumbnailSupplier != null) {
             mThumbnailSupplier = thumbnailSupplier;
         } else {
             mThumbnailSupplier = () -> {
-                if (mMagnificationThumbnailFeatureFlag.isFeatureFlagEnabled()) {
-                    return new MagnificationThumbnail(
-                            ctx.getContext(),
-                            ctx.getContext().getSystemService(WindowManager.class),
-                            new Handler(ctx.getContext().getMainLooper())
-                    );
-                }
-                return null;
+                return new MagnificationThumbnail(
+                        ctx.getContext(),
+                        ctx.getContext().getSystemService(WindowManager.class),
+                        new Handler(ctx.getContext().getMainLooper())
+                );
             };
-        }
-    }
-
-    private void onMagnificationThumbnailFeatureFlagChanged() {
-        synchronized (mLock) {
-            for (int i = 0; i < mDisplays.size(); i++) {
-                onMagnificationThumbnailFeatureFlagChanged(mDisplays.keyAt(i));
-            }
-        }
-    }
-
-    private void onMagnificationThumbnailFeatureFlagChanged(int displayId) {
-        synchronized (mLock) {
-            final DisplayMagnification display = mDisplays.get(displayId);
-            if (display == null) {
-                return;
-            }
-            display.onThumbnailFeatureFlagChanged();
         }
     }
 
