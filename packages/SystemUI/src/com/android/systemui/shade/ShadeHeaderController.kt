@@ -275,6 +275,7 @@ constructor(
                 lastInsets?.let { updateConstraintsForInsets(header, it) }
                 updateResources()
                 updateCarrierGroupPadding()
+                clock.onDensityOrFontScaleChanged()
             }
         }
 
