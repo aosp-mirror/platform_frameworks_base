@@ -182,6 +182,10 @@ public class DreamOverlayStateController implements
      * Returns collection of present {@link Complication}.
      */
     public Collection<Complication> getComplications(boolean filterByAvailability) {
+        if (isLowLightActive()) {
+            // Don't show complications on low light.
+            return Collections.emptyList();
+        }
         return Collections.unmodifiableCollection(filterByAvailability
                 ? mComplications
                 .stream()
@@ -193,7 +197,8 @@ public class DreamOverlayStateController implements
                     if (mShouldShowComplications) {
                         return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
                     }
-                    return (requiredTypes & mSupportedTypes) == requiredTypes;
+                    final int typesToAlwaysShow = mSupportedTypes & getAvailableComplicationTypes();
+                    return (requiredTypes & typesToAlwaysShow) == requiredTypes;
                 })
                 .collect(Collectors.toCollection(HashSet::new))
                 : mComplications);

@@ -228,6 +228,15 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 });
     }
 
+    public void testShortcutIdTruncated() {
+        ShortcutInfo si = new ShortcutInfo.Builder(getTestContext(),
+                "s".repeat(Short.MAX_VALUE)).build();
+
+        assertTrue(
+                "id must be truncated to MAX_ID_LENGTH",
+                si.getId().length() <= ShortcutInfo.MAX_ID_LENGTH);
+    }
+
     public void testShortcutInfoParcel() {
         setCaller(CALLING_PACKAGE_1, USER_10);
         ShortcutInfo si = parceled(new ShortcutInfo.Builder(mClientContext)
