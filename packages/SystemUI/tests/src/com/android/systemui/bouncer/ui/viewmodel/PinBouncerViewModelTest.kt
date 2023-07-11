@@ -20,7 +20,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
@@ -54,16 +53,8 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             sceneInteractor = sceneInteractor,
         )
     private val bouncerViewModel =
-        BouncerViewModel(
-            applicationContext = context,
-            applicationScope = testScope.backgroundScope,
-            interactorFactory =
-                object : BouncerInteractor.Factory {
-                    override fun create(containerName: String): BouncerInteractor {
-                        return bouncerInteractor
-                    }
-                },
-            containerName = SceneTestUtils.CONTAINER_1,
+        utils.bouncerViewModel(
+            bouncerInteractor = bouncerInteractor,
         )
     private val underTest =
         PinBouncerViewModel(

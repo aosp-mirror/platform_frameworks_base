@@ -23,6 +23,8 @@ import com.android.systemui.R
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.util.kotlin.pairwise
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -49,6 +51,7 @@ constructor(
     @Application private val applicationContext: Context,
     @Application private val applicationScope: CoroutineScope,
     interactorFactory: BouncerInteractor.Factory,
+    featureFlags: FeatureFlags,
     @Assisted containerName: String,
 ) {
     private val interactor: BouncerInteractor = interactorFactory.create(containerName)
@@ -102,15 +105,48 @@ constructor(
         )
 
     init {
-        applicationScope.launch {
-            _authMethod.subscriptionCount
-                .pairwise()
-                .map { (previousCount, currentCount) -> currentCount > previousCount }
-                .collect { subscriberAdded ->
-                    if (subscriberAdded) {
-                        reloadAuthMethod()
+        if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+            applicationScope.launch {
+                interactor.isThrottled
+                    .map { isThrottled ->
+                        if (isThrottled) {
+                            when (interactor.getAuthenticationMethod()) {
+                                is AuthenticationMethodModel.Pin ->
+                                    R.string.kg_too_many_failed_pin_attempts_dialog_message
+                                is AuthenticationMethodModel.Password ->
+                                    R.string.kg_too_many_failed_password_attempts_dialog_message
+                                is AuthenticationMethodModel.Pattern ->
+                                    R.string.kg_too_many_failed_pattern_attempts_dialog_message
+                                else -> null
+                            }?.let { stringResourceId ->
+                                applicationContext.getString(
+                                    stringResourceId,
+                                    interactor.throttling.value.failedAttemptCount,
+                                    ceil(interactor.throttling.value.remainingMs / 1000f).toInt(),
+                                )
+                            }
+                        } else {
+                            null
+                        }
                     }
-                }
+                    .distinctUntilChanged()
+                    .collect { dialogMessageOrNull ->
+                        if (dialogMessageOrNull != null) {
+                            _throttlingDialogMessage.value = dialogMessageOrNull
+                        }
+                    }
+            }
+
+            applicationScope.launch {
+                _authMethod.subscriptionCount
+                    .pairwise()
+                    .map { (previousCount, currentCount) -> currentCount > previousCount }
+                    .collect { subscriberAdded ->
+                        if (subscriberAdded) {
+                            reloadAuthMethod()
+                        }
+                    }
+            }
         }
     }
 
@@ -143,39 +179,6 @@ constructor(
      * dismisses this dialog.
      */
     val throttlingDialogMessage: StateFlow<String?> = _throttlingDialogMessage.asStateFlow()
-
-    init {
-        applicationScope.launch {
-            interactor.isThrottled
-                .map { isThrottled ->
-                    if (isThrottled) {
-                        when (interactor.getAuthenticationMethod()) {
-                            is AuthenticationMethodModel.Pin ->
-                                R.string.kg_too_many_failed_pin_attempts_dialog_message
-                            is AuthenticationMethodModel.Password ->
-                                R.string.kg_too_many_failed_password_attempts_dialog_message
-                            is AuthenticationMethodModel.Pattern ->
-                                R.string.kg_too_many_failed_pattern_attempts_dialog_message
-                            else -> null
-                        }?.let { stringResourceId ->
-                            applicationContext.getString(
-                                stringResourceId,
-                                interactor.throttling.value.failedAttemptCount,
-                                ceil(interactor.throttling.value.remainingMs / 1000f).toInt(),
-                            )
-                        }
-                    } else {
-                        null
-                    }
-                }
-                .distinctUntilChanged()
-                .collect { dialogMessageOrNull ->
-                    if (dialogMessageOrNull != null) {
-                        _throttlingDialogMessage.value = dialogMessageOrNull
-                    }
-                }
-        }
-    }
 
     /** Notifies that the emergency services button was clicked. */
     fun onEmergencyServicesButtonClicked() {

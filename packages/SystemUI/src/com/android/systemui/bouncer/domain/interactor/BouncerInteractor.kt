@@ -25,6 +25,8 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -38,9 +40,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -53,6 +52,7 @@ constructor(
     private val repository: BouncerRepository,
     private val authenticationInteractor: AuthenticationInteractor,
     private val sceneInteractor: SceneInteractor,
+    featureFlags: FeatureFlags,
     @Assisted private val containerName: String,
 ) {
 
@@ -95,35 +95,13 @@ constructor(
     val isPatternVisible: StateFlow<Boolean> = authenticationInteractor.isPatternVisible
 
     init {
-        // UNLOCKING SHOWS Gone.
-        //
-        // Move to the gone scene if the device becomes unlocked while on the bouncer scene.
-        applicationScope.launch {
-            sceneInteractor
-                .currentScene(containerName)
-                .flatMapLatest { currentScene ->
-                    if (currentScene.key == SceneKey.Bouncer) {
-                        authenticationInteractor.isUnlocked
-                    } else {
-                        flowOf(false)
+        if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+            // Clear the message if moved from throttling to no-longer throttling.
+            applicationScope.launch {
+                isThrottled.pairwise().collect { (wasThrottled, currentlyThrottled) ->
+                    if (wasThrottled && !currentlyThrottled) {
+                        clearMessage()
                     }
-                }
-                .distinctUntilChanged()
-                .collect { isUnlocked ->
-                    if (isUnlocked) {
-                        sceneInteractor.setCurrentScene(
-                            containerName = containerName,
-                            scene = SceneModel(SceneKey.Gone),
-                        )
-                    }
-                }
-        }
-
-        // Clear the message if moved from throttling to no-longer throttling.
-        applicationScope.launch {
-            isThrottled.pairwise().collect { (wasThrottled, currentlyThrottled) ->
-                if (wasThrottled && !currentlyThrottled) {
-                    clearMessage()
                 }
             }
         }
