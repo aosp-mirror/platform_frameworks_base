@@ -33,14 +33,11 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
-import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.wm.shell.bubbles.Bubbles;
 
@@ -91,8 +88,6 @@ public class NotificationIconAreaController implements
     private final ArrayList<Rect> mTintAreas = new ArrayList<>();
     private final Context mContext;
 
-    private final DemoModeController mDemoModeController;
-
     private final FeatureFlags mFeatureFlags;
 
     private int mAodIconAppearTranslation;
@@ -139,8 +134,7 @@ public class NotificationIconAreaController implements
         wakeUpCoordinator.addListener(this);
         mBypassController = keyguardBypassController;
         mBubblesOptional = bubblesOptional;
-        mDemoModeController = demoModeController;
-        mDemoModeController.addCallback(this);
+        demoModeController.addCallback(this);
         mStatusBarWindowController = statusBarWindowController;
         mScreenOffAnimationController = screenOffAnimationController;
         notificationListener.addNotificationSettingsListener(mSettingsListener);
@@ -163,7 +157,6 @@ public class NotificationIconAreaController implements
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         mNotificationIconArea = inflateIconArea(layoutInflater);
         mNotificationIcons = mNotificationIconArea.findViewById(R.id.notificationIcons);
-
     }
 
     /**
@@ -183,16 +176,6 @@ public class NotificationIconAreaController implements
             updateAodNotificationIcons();
         }
         updateIconLayoutParams(mContext);
-    }
-
-    /**
-     * Update position of the view, with optional animation
-     */
-    public void updatePosition(int x, AnimationProperties props, boolean animate) {
-        if (mAodIcons != null) {
-            PropertyAnimator.setProperty(mAodIcons, AnimatableProperty.TRANSLATION_X, x, props,
-                    animate);
-        }
     }
 
     public void setupShelf(NotificationShelfController notificationShelfController) {
@@ -303,6 +286,7 @@ public class NotificationIconAreaController implements
         }
         return true;
     }
+
     /**
      * Updates the notifications with the given list of notifications to display.
      */
