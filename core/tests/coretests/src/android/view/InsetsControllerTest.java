@@ -237,17 +237,22 @@ public class InsetsControllerTest {
 
     @Test
     public void testSystemDrivenInsetsAnimationLoggingListener_onReady() {
+        var loggingListener = mock(WindowInsetsAnimationControlListener.class);
+
         prepareControls();
         // only the original thread that created view hierarchy can touch its views
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            WindowInsetsAnimationControlListener loggingListener =
-                    mock(WindowInsetsAnimationControlListener.class);
             mController.setSystemDrivenInsetsAnimationLoggingListener(loggingListener);
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained(true);
             // since there is no focused view, forcefully make IME visible.
-            mController.show(Type.ime(), true /* fromIme */);
-            verify(loggingListener).onReady(notNull(), anyInt());
+            mController.show(WindowInsets.Type.ime(), true /* fromIme */);
+            // When using the animation thread, this must not invoke onReady()
+            mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
         });
+        // Wait for onReady() being dispatched on the animation thread.
+        InsetsAnimationThread.get().getThreadHandler().runWithScissors(() -> {}, 500);
+
+        verify(loggingListener).onReady(notNull(), anyInt());
     }
 
     @Test
