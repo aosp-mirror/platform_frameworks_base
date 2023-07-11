@@ -281,7 +281,6 @@ abstract class ShadeModule {
             tunerService: TunerService,
             @Main mainHandler: Handler,
             contentResolver: ContentResolver,
-            featureFlags: FeatureFlags,
             batteryController: BatteryController,
         ): BatteryMeterViewController {
             return BatteryMeterViewController(
@@ -291,7 +290,6 @@ abstract class ShadeModule {
                 tunerService,
                 mainHandler,
                 contentResolver,
-                featureFlags,
                 batteryController,
             )
         }
