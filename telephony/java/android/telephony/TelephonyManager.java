@@ -5268,7 +5268,11 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getMergedImsisFromGroup(getSubId(), getOpPackageName());
+                String[] mergedImsisFromGroup =
+                        telephony.getMergedImsisFromGroup(getSubId(), getOpPackageName());
+                if (mergedImsisFromGroup != null) {
+                    return mergedImsisFromGroup;
+                }
             }
         } catch (RemoteException ex) {
         }
