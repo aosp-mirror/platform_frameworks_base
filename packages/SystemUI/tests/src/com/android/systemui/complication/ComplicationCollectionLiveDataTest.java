@@ -28,10 +28,10 @@ import androidx.lifecycle.Observer;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.DreamLogger;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.log.core.FakeLogBuffer;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -57,8 +57,6 @@ public class ComplicationCollectionLiveDataTest extends SysuiTestCase {
     private FakeFeatureFlags mFeatureFlags;
     @Mock
     private Observer mObserver;
-    @Mock
-    private DreamLogger mLogger;
 
     @Before
     public void setUp() {
@@ -70,7 +68,7 @@ public class ComplicationCollectionLiveDataTest extends SysuiTestCase {
                 mExecutor,
                 /* overlayEnabled= */ true,
                 mFeatureFlags,
-                mLogger);
+                FakeLogBuffer.Factory.Companion.create());
         mLiveData = new ComplicationCollectionLiveData(mStateController);
     }
 
