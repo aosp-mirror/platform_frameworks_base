@@ -33,6 +33,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Looper;
+import android.os.Process;
+import android.util.SparseArray;
 
 import org.junit.After;
 import org.junit.Before;
@@ -242,6 +244,54 @@ public class PackageMonitorCallbackHelperTest {
                 null /* instantUserIds */, null /* broadcastAllowList */);
 
         verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).never()).sendResult(any());
+    }
+
+    @Test
+    public void testRegisterPackageMonitorCallbackInAllowList_callbackShouldCalled()
+            throws Exception {
+        IRemoteCallback callback = createMockPackageMonitorCallback();
+        SparseArray<int[]> broadcastAllowList = new SparseArray<>();
+        broadcastAllowList.put(0, new int[] {Binder.getCallingUid()});
+
+        mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, 0 /* userId */,
+                Binder.getCallingUid());
+        mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
+                FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0} /* userIds */,
+                null /* instantUserIds */, broadcastAllowList);
+
+        verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).times(1)).sendResult(any());
+    }
+
+    @Test
+    public void testRegisterPackageMonitorCallbackNotInAllowList_callbackShouldNotCalled()
+            throws Exception {
+        IRemoteCallback callback = createMockPackageMonitorCallback();
+        SparseArray<int[]> broadcastAllowList = new SparseArray<>();
+        broadcastAllowList.put(0, new int[] {12345});
+
+        mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, 0 /* userId */,
+                Binder.getCallingUid());
+        mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
+                FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0} /* userIds */,
+                null /* instantUserIds */, broadcastAllowList);
+
+        verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).never()).sendResult(any());
+    }
+
+    @Test
+    public void testRegisterPackageMonitorCallbackNotInAllowListSystemUid_callbackShouldCalled()
+            throws Exception {
+        IRemoteCallback callback = createMockPackageMonitorCallback();
+        SparseArray<int[]> broadcastAllowList = new SparseArray<>();
+        broadcastAllowList.put(0, new int[] {12345});
+
+        mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, 0 /* userId */,
+                Process.SYSTEM_UID);
+        mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_ADDED,
+                FAKE_PACKAGE_NAME, createFakeBundle(), new int[]{0} /* userIds */,
+                null /* instantUserIds */, broadcastAllowList);
+
+        verify(callback, after(WAIT_CALLBACK_CALLED_IN_MS).times(1)).sendResult(any());
     }
 
     private IRemoteCallback createMockPackageMonitorCallback() {
