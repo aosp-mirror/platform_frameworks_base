@@ -45,7 +45,7 @@ import kotlin.test.fail
  * Tests for [InputManager.KeyboardBacklightListener].
  *
  * Build/Install/Run:
- * atest FrameworksCoreTests:KeyboardBacklightListenerTest
+ * atest InputTests:KeyboardBacklightListenerTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)
@@ -58,6 +58,7 @@ class KeyboardBacklightListenerTest {
     private lateinit var executor: Executor
     private lateinit var context: Context
     private lateinit var inputManager: InputManager
+    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
 
     @Mock
     private lateinit var iInputManagerMock: IInputManager
@@ -65,7 +66,7 @@ class KeyboardBacklightListenerTest {
     @Before
     fun setUp() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
-        InputManagerGlobal.resetInstance(iInputManagerMock)
+        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManagerMock)
         testLooper = TestLooper()
         executor = HandlerExecutor(Handler(testLooper.looper))
         registeredListener = null
@@ -99,7 +100,9 @@ class KeyboardBacklightListenerTest {
 
     @After
     fun tearDown() {
-        InputManagerGlobal.clearInstance()
+        if (this::inputManagerGlobalSession.isInitialized) {
+            inputManagerGlobalSession.close()
+        }
     }
 
     private fun notifyKeyboardBacklightChanged(

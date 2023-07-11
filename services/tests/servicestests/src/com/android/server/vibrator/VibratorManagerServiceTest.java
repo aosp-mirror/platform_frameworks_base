@@ -186,14 +186,14 @@ public class VibratorManagerServiceTest {
     private VirtualDeviceManagerInternal.VirtualDisplayListener mRegisteredVirtualDisplayListener;
     private VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener
             mRegisteredAppsOnVirtualDeviceListener;
-
+    private InputManagerGlobal.TestSession mInputManagerGlobalSession;
     private InputManager mInputManager;
 
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
-        InputManagerGlobal.resetInstance(mIInputManagerMock);
+        mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mIInputManagerMock);
         mVibrationConfig = new VibrationConfig(mContextSpy.getResources());
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
@@ -268,7 +268,9 @@ public class VibratorManagerServiceTest {
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
         // Ignore potential exceptions about the looper having never dispatched any messages.
         mTestLooper.stopAutoDispatchAndIgnoreExceptions();
-        InputManagerGlobal.clearInstance();
+        if (mInputManagerGlobalSession != null) {
+            mInputManagerGlobalSession.close();
+        }
     }
 
     private VibratorManagerService createSystemReadyService() {

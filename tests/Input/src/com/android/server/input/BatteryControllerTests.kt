@@ -167,7 +167,7 @@ private fun createMockListener(): IInputDeviceBatteryListener {
  * Tests for {@link InputDeviceBatteryController}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:InputDeviceBatteryControllerTests
+ * atest InputTests:InputDeviceBatteryControllerTests
  */
 @Presubmit
 class BatteryControllerTests {
@@ -198,13 +198,14 @@ class BatteryControllerTests {
     private lateinit var context: TestableContext
     private lateinit var testLooper: TestLooper
     private lateinit var devicesChangedListener: IInputDevicesChangedListener
+    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
     private val deviceGenerationMap = mutableMapOf<Int /*deviceId*/, Int /*generation*/>()
 
     @Before
     fun setup() {
         context = TestableContext(ApplicationProvider.getApplicationContext())
         testLooper = TestLooper()
-        InputManagerGlobal.resetInstance(iInputManager)
+        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         val inputManager = InputManager(context)
         context.addMockSystemService(InputManager::class.java, inputManager)
         `when`(iInputManager.inputDeviceIds).then {
@@ -220,6 +221,13 @@ class BatteryControllerTests {
         verify(iInputManager).registerInputDevicesChangedListener(listenerCaptor.capture())
         devicesChangedListener = listenerCaptor.value
         testLooper.dispatchAll()
+    }
+
+    @After
+    fun tearDown() {
+        if (this::inputManagerGlobalSession.isInitialized) {
+            inputManagerGlobalSession.close()
+        }
     }
 
     private fun notifyDeviceChanged(
@@ -251,11 +259,6 @@ class BatteryControllerTests {
     private fun createBluetoothDevice(address: String): BluetoothDevice {
         return context.getSystemService(BluetoothManager::class.java)!!
             .adapter.getRemoteDevice(address)
-    }
-
-    @After
-    fun tearDown() {
-        InputManagerGlobal.clearInstance()
     }
 
     @Test

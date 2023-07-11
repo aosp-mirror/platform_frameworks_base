@@ -46,7 +46,7 @@ import org.mockito.junit.MockitoJUnitRunner
  * Tests for [InputManager.InputDeviceBatteryListener].
  *
  * Build/Install/Run:
- * atest FrameworksCoreTests:InputDeviceBatteryListenerTest
+ * atest InputTests:InputDeviceBatteryListenerTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)
@@ -63,6 +63,7 @@ class InputDeviceBatteryListenerTest {
 
     @Mock
     private lateinit var iInputManagerMock: IInputManager
+    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
 
     @Before
     fun setUp() {
@@ -71,7 +72,7 @@ class InputDeviceBatteryListenerTest {
         executor = HandlerExecutor(Handler(testLooper.looper))
         registeredListener = null
         monitoredDevices.clear()
-        InputManagerGlobal.resetInstance(iInputManagerMock)
+        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManagerMock)
         inputManager = InputManager(context)
         `when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
                 .thenReturn(inputManager)
@@ -112,7 +113,9 @@ class InputDeviceBatteryListenerTest {
 
     @After
     fun tearDown() {
-        InputManagerGlobal.clearInstance()
+        if (this::inputManagerGlobalSession.isInitialized) {
+            inputManagerGlobalSession.close()
+        }
     }
 
     private fun notifyBatteryStateChanged(

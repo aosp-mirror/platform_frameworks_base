@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 
 import android.content.Context;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
@@ -43,12 +43,12 @@ public class ConfigurationProcessorTest {
 
     @Before
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getContext();
+        mContext = InstrumentationRegistry.getInstrumentation().getContext();
     }
 
     @Test
     public void testGetInputPortAssociations() {
-        final int res = com.android.frameworks.servicestests.R.raw.input_port_associations;
+        final int res = com.android.test.input.R.raw.input_port_associations;
         InputStream xml = mContext.getResources().openRawResource(res);
         Map<String, Integer> associations = null;
         try {
@@ -65,7 +65,7 @@ public class ConfigurationProcessorTest {
     @Test
     public void testGetInputPortAssociationsBadDisplayport() {
         final int res =
-                com.android.frameworks.servicestests.R.raw.input_port_associations_bad_displayport;
+                com.android.test.input.R.raw.input_port_associations_bad_displayport;
         InputStream xml = mContext.getResources().openRawResource(res);
         Map<String, Integer> associations = null;
         try {
@@ -79,7 +79,7 @@ public class ConfigurationProcessorTest {
 
     @Test
     public void testGetInputPortAssociationsEmptyConfig() {
-        final int res = com.android.frameworks.servicestests.R.raw.input_port_associations_bad_xml;
+        final int res = com.android.test.input.R.raw.input_port_associations_bad_xml;
         InputStream xml = mContext.getResources().openRawResource(res);
         try {
             ConfigurationProcessor.processInputPortAssociations(xml);

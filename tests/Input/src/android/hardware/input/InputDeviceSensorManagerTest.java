@@ -38,7 +38,7 @@ import android.hardware.SensorManager;
 import android.platform.test.annotations.Presubmit;
 import android.view.InputDevice;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -61,7 +61,7 @@ import java.util.concurrent.TimeUnit;
  * Tests for {@link InputDeviceSensorManager}.
  *
  * Build/Install/Run:
- * atest FrameworksCoreTests:InputDeviceSensorManagerTest
+ * atest InputTests:InputDeviceSensorManagerTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner.class)
@@ -77,11 +77,13 @@ public class InputDeviceSensorManagerTest {
     private final Object mLock = new Object();
 
     @Mock private IInputManager mIInputManagerMock;
+    private InputManagerGlobal.TestSession mInputManagerGlobalSession;
 
     @Before
     public void setUp() throws Exception {
-        final Context context = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
-        InputManagerGlobal.resetInstance(mIInputManagerMock);
+        final Context context = spy(
+                new ContextWrapper(InstrumentationRegistry.getInstrumentation().getContext()));
+        mInputManagerGlobalSession = InputManagerGlobal.createTestSession(mIInputManagerMock);
         mInputManager = new InputManager(context);
         when(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(mInputManager);
 
@@ -102,7 +104,9 @@ public class InputDeviceSensorManagerTest {
 
     @After
     public void tearDown() {
-        InputManagerGlobal.clearInstance();
+        if (mInputManagerGlobalSession != null) {
+            mInputManagerGlobalSession.close();
+        }
     }
 
     private class InputTestSensorEventListener implements SensorEventListener {

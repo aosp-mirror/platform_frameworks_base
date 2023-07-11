@@ -41,7 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner
  * Tests for [InputManager].
  *
  * Build/Install/Run:
- * atest FrameworksCoreTests:InputManagerTest
+ * atest InputTests:InputManagerTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner::class)
@@ -63,11 +63,12 @@ class InputManagerTest {
 
     @Mock
     private lateinit var iInputManager: IInputManager
+    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
 
     @Before
     fun setUp() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
-        InputManagerGlobal.resetInstance(iInputManager)
+        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         inputManager = InputManager(context)
         `when`(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager)
         `when`(iInputManager.inputDeviceIds).then {
@@ -77,7 +78,9 @@ class InputManagerTest {
 
     @After
     fun tearDown() {
-        InputManagerGlobal.clearInstance()
+        if (this::inputManagerGlobalSession.isInitialized) {
+            inputManagerGlobalSession.close()
+        }
     }
 
     private fun notifyDeviceChanged(

@@ -54,6 +54,7 @@ import android.view.InputMonitor;
 import android.view.PointerIcon;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
@@ -140,23 +141,27 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * Gets an instance of the input manager.
-     *
-     * @return The input manager instance.
+     * A test session tracker for InputManagerGlobal.
+     * @see #createTestSession(IInputManager)
      */
-    public static InputManagerGlobal resetInstance(IInputManager inputManagerService) {
-        synchronized (InputManager.class) {
-            sInstance = new InputManagerGlobal(inputManagerService);
-            return sInstance;
-        }
+    @VisibleForTesting
+    public interface TestSession extends AutoCloseable {
+        @Override
+        void close();
     }
 
     /**
-     * Clear the instance of the input manager.
+     * Create and set a test instance of InputManagerGlobal.
+     *
+     * @return The test session. The session must be {@link TestSession#close()}-ed at the end
+     * of the test.
      */
-    public static void clearInstance() {
+    @VisibleForTesting
+    public static TestSession createTestSession(IInputManager inputManagerService) {
         synchronized (InputManagerGlobal.class) {
-            sInstance = null;
+            final var oldInstance = sInstance;
+            sInstance = new InputManagerGlobal(inputManagerService);
+            return () -> sInstance = oldInstance;
         }
     }
 

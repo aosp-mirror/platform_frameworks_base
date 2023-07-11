@@ -376,6 +376,7 @@ public class VirtualDeviceManagerServiceTest {
     @After
     public void tearDown() {
         mDeviceImpl.close();
+        mInputManagerMockHelper.tearDown();
     }
 
     @Test

@@ -54,7 +54,7 @@ private fun createKeyboard(deviceId: Int): InputDevice =
  * Tests for {@link KeyRemapper}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:KeyRemapperTests
+ * atest InputTests:KeyRemapperTests
  */
 @Presubmit
 class KeyRemapperTests {
@@ -81,6 +81,7 @@ class KeyRemapperTests {
     private lateinit var context: Context
     private lateinit var dataStore: PersistentDataStore
     private lateinit var testLooper: TestLooper
+    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
 
     @Before
     fun setup() {
@@ -103,7 +104,7 @@ class KeyRemapperTests {
             dataStore,
             testLooper.looper
         )
-        InputManagerGlobal.resetInstance(iInputManager)
+        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         val inputManager = InputManager(context)
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
             .thenReturn(inputManager)
@@ -112,7 +113,9 @@ class KeyRemapperTests {
 
     @After
     fun tearDown() {
-        InputManagerGlobal.clearInstance()
+        if (this::inputManagerGlobalSession.isInitialized) {
+            inputManagerGlobalSession.close()
+        }
     }
 
     @Test

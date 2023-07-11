@@ -37,6 +37,7 @@ import android.view.inputmethod.InputMethodInfo
 import android.view.inputmethod.InputMethodSubtype
 import androidx.test.core.R
 import androidx.test.core.app.ApplicationProvider
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
@@ -77,7 +78,7 @@ private fun createKeyboard(
  * Tests for {@link Default UI} and {@link New UI}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:KeyboardLayoutManagerTests
+ * atest InputTests:KeyboardLayoutManagerTests
  */
 @Presubmit
 class KeyboardLayoutManagerTests {
@@ -120,6 +121,7 @@ class KeyboardLayoutManagerTests {
     private lateinit var context: Context
     private lateinit var dataStore: PersistentDataStore
     private lateinit var testLooper: TestLooper
+    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
 
     // Devices
     private lateinit var keyboardDevice: InputDevice
@@ -130,6 +132,7 @@ class KeyboardLayoutManagerTests {
     @Before
     fun setup() {
         context = Mockito.spy(ContextWrapper(ApplicationProvider.getApplicationContext()))
+        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         dataStore = PersistentDataStore(object : PersistentDataStore.Injector() {
             override fun openRead(): InputStream? {
                 throw FileNotFoundException()
@@ -148,8 +151,14 @@ class KeyboardLayoutManagerTests {
         setupIme()
     }
 
+    @After
+    fun tearDown() {
+        if (this::inputManagerGlobalSession.isInitialized) {
+            inputManagerGlobalSession.close()
+        }
+    }
+
     private fun setupInputDevices() {
-        InputManagerGlobal.resetInstance(iInputManager)
         val inputManager = InputManager(context)
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
             .thenReturn(inputManager)

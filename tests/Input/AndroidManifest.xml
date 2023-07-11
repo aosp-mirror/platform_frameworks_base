@@ -16,11 +16,14 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
      package="com.android.test.input">
-    <uses-permission android:name="android.permission.MONITOR_INPUT"/>
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
-    <uses-permission android:name="android.permission.INJECT_EVENTS"/>
 
-    <application android:label="InputTest">
+    <uses-permission android:name="android.permission.INJECT_EVENTS"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
+    <uses-permission android:name="android.permission.MONITOR_INPUT"/>
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG"/>
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
+
+    <application android:label="InputTest" android:debuggable="true">
 
         <activity android:name=".UnresponsiveGestureMonitorActivity"
              android:label="Unresponsive gesture monitor"

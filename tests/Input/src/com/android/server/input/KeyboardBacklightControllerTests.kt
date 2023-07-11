@@ -87,7 +87,7 @@ private fun createLight(lightId: Int, lightType: Int, suggestedBrightnessLevels:
  * Tests for {@link KeyboardBacklightController}.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:KeyboardBacklightControllerTests
+ * atest InputTests:KeyboardBacklightControllerTests
  */
 @Presubmit
 class KeyboardBacklightControllerTests {
@@ -111,6 +111,7 @@ class KeyboardBacklightControllerTests {
     private lateinit var context: Context
     private lateinit var dataStore: PersistentDataStore
     private lateinit var testLooper: TestLooper
+    private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
     private var lightColorMap: HashMap<Int, Int> = HashMap()
     private var lastBacklightState: KeyboardBacklightState? = null
     private var sysfsNodeChanges = 0
@@ -133,7 +134,7 @@ class KeyboardBacklightControllerTests {
         testLooper = TestLooper()
         keyboardBacklightController = KeyboardBacklightController(context, native, dataStore,
                 testLooper.looper, FakeAnimatorFactory(), uEventManager)
-        InputManagerGlobal.resetInstance(iInputManager)
+        inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         val inputManager = InputManager(context)
         `when`(context.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager)
         `when`(iInputManager.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
@@ -153,7 +154,9 @@ class KeyboardBacklightControllerTests {
 
     @After
     fun tearDown() {
-        InputManagerGlobal.clearInstance()
+        if (this::inputManagerGlobalSession.isInitialized) {
+            inputManagerGlobalSession.close()
+        }
     }
 
     @Test

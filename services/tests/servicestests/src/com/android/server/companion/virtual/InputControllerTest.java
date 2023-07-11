@@ -44,6 +44,7 @@ import androidx.test.InstrumentationRegistry;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,6 +92,11 @@ public class InputControllerTest {
                 new Handler(TestableLooper.get(this).getLooper()),
                 InstrumentationRegistry.getTargetContext().getSystemService(WindowManager.class),
                 threadVerifier);
+    }
+
+    @After
+    public void tearDown() {
+        mInputManagerMockHelper.tearDown();
     }
 
     @Test
