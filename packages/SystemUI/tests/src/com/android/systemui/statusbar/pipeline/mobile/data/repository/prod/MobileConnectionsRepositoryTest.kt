@@ -159,6 +159,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 mock(),
                 mock(),
                 FakeExecutor(FakeSystemClock()),
+                dispatcher,
                 testScope.backgroundScope,
                 mock(),
             )
