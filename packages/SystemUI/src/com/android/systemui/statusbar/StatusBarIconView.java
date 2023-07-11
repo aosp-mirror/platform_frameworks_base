@@ -160,7 +160,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private ObjectAnimator mIconAppearAnimator;
     private ObjectAnimator mDotAnimator;
     private float mDotAppearAmount;
-    private OnVisibilityChangedListener mOnVisibilityChangedListener;
     private int mDrawableColor;
     private int mIconColor;
     private int mDecorColor;
@@ -179,7 +178,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private int mCachedContrastBackgroundColor = NO_COLOR;
     private float[] mMatrix;
     private ColorMatrixColorFilter mMatrixColorFilter;
-    private boolean mIsInShelf;
     private Runnable mLayoutRunnable;
     private boolean mDismissed;
     private Runnable mOnDismissListener;
@@ -355,19 +353,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
 
     private boolean isNotification() {
         return mNotification != null;
-    }
-
-    private static boolean streq(String a, String b) {
-        if (a == b) {
-            return true;
-        }
-        if (a == null && b != null) {
-            return false;
-        }
-        if (a != null && b == null) {
-            return false;
-        }
-        return a.equals(b);
     }
 
     public boolean equalIcons(Icon a, Icon b) {
@@ -908,7 +893,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 if (targetAmount != currentAmount) {
                     mDotAnimator = ObjectAnimator.ofFloat(this, DOT_APPEAR_AMOUNT,
                             currentAmount, targetAmount);
-                    mDotAnimator.setInterpolator(interpolator);;
+                    mDotAnimator.setInterpolator(interpolator);
                     mDotAnimator.setDuration(duration == 0 ? ANIMATION_DURATION_FAST
                             : duration);
                     final boolean runRunnable = !runnableAdded;
@@ -965,20 +950,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         }
     }
 
-    @Override
-    public void setVisibility(int visibility) {
-        super.setVisibility(visibility);
-        if (mOnVisibilityChangedListener != null) {
-            mOnVisibilityChangedListener.onVisibilityChanged(visibility);
-        }
-    }
-
     public float getDotAppearAmount() {
         return mDotAppearAmount;
-    }
-
-    public void setOnVisibilityChangedListener(OnVisibilityChangedListener listener) {
-        mOnVisibilityChangedListener = listener;
     }
 
     public void setDozing(boolean dozing, boolean fade, long delay) {
@@ -1012,14 +985,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         outRect.right += translationX;
         outRect.top += translationY;
         outRect.bottom += translationY;
-    }
-
-    public void setIsInShelf(boolean isInShelf) {
-        mIsInShelf = isInShelf;
-    }
-
-    public boolean isInShelf() {
-        return mIsInShelf;
     }
 
     @Override
@@ -1102,9 +1067,5 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      */
     public boolean showsConversation() {
         return mShowsConversation;
-    }
-
-    public interface OnVisibilityChangedListener {
-        void onVisibilityChanged(int newVisibility);
     }
 }
