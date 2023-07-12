@@ -142,12 +142,17 @@ open class AuthBiometricFingerprintIconController(
             STATE_IDLE,
             STATE_AUTHENTICATING_ANIMATING_IN,
             STATE_AUTHENTICATING,
-            STATE_PENDING_CONFIRMATION,
             STATE_AUTHENTICATED ->
                 if (isSideFps) {
                     R.string.security_settings_sfps_enroll_find_sensor_message
                 } else {
                     R.string.fingerprint_dialog_touch_sensor
+                }
+            STATE_PENDING_CONFIRMATION ->
+                if (isSideFps) {
+                    R.string.security_settings_sfps_enroll_find_sensor_message
+                } else {
+                    R.string.fingerprint_dialog_authenticated_confirmation
                 }
             STATE_ERROR,
             STATE_HELP -> R.string.biometric_dialog_try_again

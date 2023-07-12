@@ -430,6 +430,8 @@
     <string name="face_reenroll_failure_dialog_content">Couldn\u2019t set up face unlock. Go to Settings to try again.</string>
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
+    <!-- Content description after successful auth when confirmation required -->
+    <string name="fingerprint_dialog_authenticated_confirmation">Press the unlock icon to continue</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
     <string name="fingerprint_dialog_use_fingerprint_instead">Can\u2019t recognize face. Use fingerprint instead.</string>
     <!-- Message shown to inform the user a face cannot be recognized and fingerprint should instead be used.[CHAR LIMIT=50] -->
