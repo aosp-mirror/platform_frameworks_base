@@ -24,9 +24,6 @@ import android.flags.SyncableFlag;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 
-import com.android.internal.flags.CoreFlags;
-import com.android.server.flags.FeatureFlagsService.PermissionsChecker;
-
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,16 +33,11 @@ class FeatureFlagsBinder extends IFeatureFlags.Stub {
     private final FlagsShellCommand mShellCommand;
     private final FlagCache<String> mFlagCache = new FlagCache<>();
     private final DynamicFlagBinderDelegate mDynamicFlagDelegate;
-    private final PermissionsChecker mPermissionsChecker;
 
-    FeatureFlagsBinder(
-            FlagOverrideStore flagStore,
-            FlagsShellCommand shellCommand,
-            PermissionsChecker permissionsChecker) {
+    FeatureFlagsBinder(FlagOverrideStore flagStore, FlagsShellCommand shellCommand) {
         mFlagStore = flagStore;
         mShellCommand = shellCommand;
         mDynamicFlagDelegate = new DynamicFlagBinderDelegate(flagStore);
-        mPermissionsChecker = permissionsChecker;
     }
 
     @Override
@@ -58,29 +50,11 @@ class FeatureFlagsBinder extends IFeatureFlags.Stub {
         mDynamicFlagDelegate.unregisterCallback(getCallingPid(), callback);
     }
 
-    // Note: The internals of this method should be kept in sync with queryFlags
-    // as they both should return identical results. The difference is that this method
-    // caches any values it receives and/or reads, whereas queryFlags does not.
-
     @Override
     public List<SyncableFlag> syncFlags(List<SyncableFlag> incomingFlags) {
         int pid = getCallingPid();
         List<SyncableFlag> outputFlags = new ArrayList<>();
-
-        boolean hasFullSyncPrivileges = false;
-        SecurityException permissionFailureException = null;
-        try {
-            assertSyncPermission();
-            hasFullSyncPrivileges = true;
-        } catch (SecurityException e) {
-            permissionFailureException = e;
-        }
-
         for (SyncableFlag sf : incomingFlags) {
-            if (!hasFullSyncPrivileges && !CoreFlags.isCoreFlag(sf)) {
-                throw permissionFailureException;
-            }
-
             String ns = sf.getNamespace();
             String name = sf.getName();
             SyncableFlag outFlag;
@@ -101,58 +75,6 @@ class FeatureFlagsBinder extends IFeatureFlags.Stub {
         }
         return outputFlags;
     }
-
-    @Override
-    public void overrideFlag(SyncableFlag flag) {
-        assertWritePermission();
-        mFlagStore.set(flag.getNamespace(), flag.getName(), flag.getValue());
-    }
-
-    @Override
-    public void resetFlag(SyncableFlag flag) {
-        assertWritePermission();
-        mFlagStore.erase(flag.getNamespace(), flag.getName());
-    }
-
-    @Override
-    public List<SyncableFlag> queryFlags(List<SyncableFlag> incomingFlags) {
-        assertSyncPermission();
-        List<SyncableFlag> outputFlags = new ArrayList<>();
-        for (SyncableFlag sf : incomingFlags) {
-            String ns = sf.getNamespace();
-            String name = sf.getName();
-            String value;
-            String storeValue = mFlagStore.get(ns, name);
-            boolean overridden  = storeValue != null;
-
-            if (sf.isDynamic()) {
-                value = mDynamicFlagDelegate.getFlagValue(ns, name, sf.getValue());
-            } else {
-                value = mFlagCache.getOrNull(ns, name);
-                if (value == null) {
-                    value = Build.IS_USER ? null : storeValue;
-                    if (value == null) {
-                        value = sf.getValue();
-                    }
-                }
-            }
-            outputFlags.add(new SyncableFlag(
-                    sf.getNamespace(), sf.getName(), value, sf.isDynamic(), overridden));
-        }
-
-        return outputFlags;
-    }
-
-    private void assertSyncPermission() {
-        mPermissionsChecker.assertSyncPermission();
-        clearCallingIdentity();
-    }
-
-    private void assertWritePermission() {
-        mPermissionsChecker.assertWritePermission();
-        clearCallingIdentity();
-    }
-
 
     @SystemApi
     public int handleShellCommand(

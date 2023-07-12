@@ -28,28 +28,16 @@ public final class SyncableFlag implements Parcelable {
     private final String mName;
     private final String mValue;
     private final boolean mDynamic;
-    private final boolean mOverridden;
 
     public SyncableFlag(
             @NonNull String namespace,
             @NonNull String name,
             @NonNull String value,
             boolean dynamic) {
-        this(namespace, name, value, dynamic, false);
-    }
-
-    public SyncableFlag(
-            @NonNull String namespace,
-            @NonNull String name,
-            @NonNull String value,
-            boolean dynamic,
-            boolean overridden
-    ) {
         mNamespace = namespace;
         mName = name;
         mValue = value;
         mDynamic = dynamic;
-        mOverridden = overridden;
     }
 
     @NonNull
@@ -67,23 +55,16 @@ public final class SyncableFlag implements Parcelable {
         return mValue;
     }
 
+    @NonNull
     public boolean isDynamic() {
         return mDynamic;
-    }
-
-    public boolean isOverridden() {
-        return mOverridden;
     }
 
     @NonNull
     public static final Parcelable.Creator<SyncableFlag> CREATOR = new Parcelable.Creator<>() {
         public SyncableFlag createFromParcel(Parcel in) {
             return new SyncableFlag(
-                    in.readString(),
-                    in.readString(),
-                    in.readString(),
-                    in.readBoolean(),
-                    in.readBoolean());
+                    in.readString(), in.readString(), in.readString(), in.readBoolean());
         }
 
         public SyncableFlag[] newArray(int size) {
@@ -102,7 +83,6 @@ public final class SyncableFlag implements Parcelable {
         dest.writeString(mName);
         dest.writeString(mValue);
         dest.writeBoolean(mDynamic);
-        dest.writeBoolean(mOverridden);
     }
 
     @Override

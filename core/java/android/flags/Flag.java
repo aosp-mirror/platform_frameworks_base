@@ -37,9 +37,4 @@ public interface Flag<T> {
     /** The value of this flag if no override has been set. Null values are not supported. */
     @NonNull
     T getDefault();
-
-    /** Returns true if the value of this flag can change at runtime. */
-    default boolean isDynamic() {
-        return false;
-    }
 }

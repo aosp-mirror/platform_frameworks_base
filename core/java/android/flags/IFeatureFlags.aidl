@@ -62,28 +62,4 @@ interface IFeatureFlags {
      * {@link #registerCallback}.
      */
     void unregisterCallback(IFeatureFlagsCallback callback);
-
-    /**
-     * Query the {@link com.android.server.flags.FeatureFlagsService} for flags, but don't
-     * cache them. See {@link #syncFlags}.
-     *
-     * You almost certainly don't want this method. This is intended for the Flag Flipper
-     * application that needs to query the state of system but doesn't want to affect it by
-     * doing so. All other clients should use {@link syncFlags}.
-     */
-    List<SyncableFlag> queryFlags(in List<SyncableFlag> flagList);
-
-    /**
-     * Change a flags value in the system.
-     *
-     * This is intended for use by the Flag Flipper application.
-     */
-    void overrideFlag(in SyncableFlag flag);
-
-    /**
-     * Restore a flag to its default value.
-     *
-     * This is intended for use by the Flag Flipper application.
-     */
-    void resetFlag(in SyncableFlag flag);
 }

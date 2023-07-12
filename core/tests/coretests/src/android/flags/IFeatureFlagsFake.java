@@ -39,56 +39,6 @@ class IFeatureFlagsFake implements IFeatureFlags {
     }
 
     @Override
-    public List<SyncableFlag> queryFlags(List<SyncableFlag> flagList) {
-        return mOverrides == null ? flagList : mOverrides;    }
-
-    @Override
-    public void overrideFlag(SyncableFlag syncableFlag) {
-        SyncableFlag match = findFlag(syncableFlag);
-        if (match != null) {
-            mOverrides.remove(match);
-        }
-
-        mOverrides.add(syncableFlag);
-
-        for (IFeatureFlagsCallback cb : mCallbacks) {
-            try {
-                cb.onFlagChange(syncableFlag);
-            } catch (RemoteException e) {
-                // does not happen in fakes.
-            }
-        }
-    }
-
-    @Override
-    public void resetFlag(SyncableFlag syncableFlag) {
-        SyncableFlag match = findFlag(syncableFlag);
-        if (match != null) {
-            mOverrides.remove(match);
-        }
-
-        for (IFeatureFlagsCallback cb : mCallbacks) {
-            try {
-                cb.onFlagChange(syncableFlag);
-            } catch (RemoteException e) {
-                // does not happen in fakes.
-            }
-        }
-    }
-
-    private SyncableFlag findFlag(SyncableFlag syncableFlag) {
-        SyncableFlag match = null;
-        for (SyncableFlag sf : mOverrides) {
-            if (sf.getName().equals(syncableFlag.getName())
-                    && sf.getNamespace().equals(syncableFlag.getNamespace())) {
-                match = sf;
-                break;
-            }
-        }
-
-        return match;
-    }
-    @Override
     public void registerCallback(IFeatureFlagsCallback callback) {
         mCallbacks.add(callback);
     }
