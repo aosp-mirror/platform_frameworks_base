@@ -566,12 +566,20 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     @Override
     public float getTopCornerRadius() {
+        if (isNewHeadsUpAnimFlagEnabled()) {
+            return super.getTopCornerRadius();
+        }
+
         float fraction = getInterpolatedAppearAnimationFraction();
         return MathUtils.lerp(0, super.getTopCornerRadius(), fraction);
     }
 
     @Override
     public float getBottomCornerRadius() {
+        if (isNewHeadsUpAnimFlagEnabled()) {
+            return super.getBottomCornerRadius();
+        }
+
         float fraction = getInterpolatedAppearAnimationFraction();
         return MathUtils.lerp(0, super.getBottomCornerRadius(), fraction);
     }

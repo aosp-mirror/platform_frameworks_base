@@ -93,6 +93,12 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
         return mRoundableState;
     }
 
+    @Override
+    public int getClipHeight() {
+        int clipHeight = Math.max(mActualHeight - mClipTopAmount - mClipBottomAmount, 0);
+        return Math.max(clipHeight, mMinimumHeightForClipping);
+    }
+
     private void initDimens() {
         mContentShift = getResources().getDimensionPixelSize(
                 R.dimen.shelf_transform_content_shift);
