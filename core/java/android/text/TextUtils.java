@@ -27,6 +27,7 @@ import android.annotation.PluralsRes;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.icu.lang.UCharacter;
 import android.icu.text.CaseMap;
 import android.icu.text.Edits;
@@ -2482,12 +2483,28 @@ public class TextUtils {
         if (ellipsizeDip == 0) {
             return gettingCleaned.toString();
         } else {
-            // Truncate
-            final TextPaint paint = new TextPaint();
-            paint.setTextSize(42);
+            final float assumedFontSizePx = 42;
+            if (Typeface.getSystemFontMap().isEmpty()) {
+                // In the system server, the font files may not be loaded, so unable to perform
+                // ellipsize, so use the estimated char count for the ellipsize.
 
-            return TextUtils.ellipsize(gettingCleaned.toString(), paint, ellipsizeDip,
-                    TextUtils.TruncateAt.END);
+                // The median of glyph widths of the Roboto is 0.57em, so use it as a reference
+                // of the glyph width.
+                final float assumedCharWidthInEm = 0.57f;
+                final float assumedCharWidthInPx = assumedFontSizePx * assumedCharWidthInEm;
+
+                // Even if the argument name is `ellipsizeDip`, the unit of this argument is pixels.
+                final int charCount = (int) ((ellipsizeDip + 0.5f) / assumedCharWidthInPx);
+                return TextUtils.trimToSize(gettingCleaned.toString(), charCount)
+                        + getEllipsisString(TruncateAt.END);
+            } else {
+                // Truncate
+                final TextPaint paint = new TextPaint();
+                paint.setTextSize(assumedFontSizePx);
+
+                return TextUtils.ellipsize(gettingCleaned.toString(), paint, ellipsizeDip,
+                        TextUtils.TruncateAt.END);
+            }
         }
     }
 
