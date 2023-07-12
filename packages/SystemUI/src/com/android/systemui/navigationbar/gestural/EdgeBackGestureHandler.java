@@ -88,11 +88,7 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
-import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.statusbar.phone.LightBarController;
-import com.android.systemui.tracing.ProtoTracer;
-import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
-import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.systemui.util.Assert;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.desktopmode.DesktopMode;
@@ -115,8 +111,7 @@ import javax.inject.Provider;
 /**
  * Utility class to handle edge swipes for back gesture
  */
-public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBackPlugin>,
-        ProtoTraceable<SystemUiTraceProto> {
+public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBackPlugin> {
 
     private static final String TAG = "EdgeBackGestureHandler";
     private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
@@ -192,7 +187,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private Consumer<Boolean> mButtonForcedVisibleCallback;
 
     private final PluginManager mPluginManager;
-    private final ProtoTracer mProtoTracer;
     private final NavigationModeController mNavigationModeController;
     private final BackPanelController.Factory mBackPanelControllerFactory;
     private final ViewConfiguration mViewConfiguration;
@@ -402,7 +396,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             @Main Handler handler,
             @Background Executor backgroundExecutor,
             UserTracker userTracker,
-            ProtoTracer protoTracer,
             NavigationModeController navigationModeController,
             BackPanelController.Factory backPanelControllerFactory,
             ViewConfiguration viewConfiguration,
@@ -425,7 +418,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mOverviewProxyService = overviewProxyService;
         mSysUiState = sysUiState;
         mPluginManager = pluginManager;
-        mProtoTracer = protoTracer;
         mNavigationModeController = navigationModeController;
         mBackPanelControllerFactory = backPanelControllerFactory;
         mViewConfiguration = viewConfiguration;
@@ -557,7 +549,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
      */
     public void onNavBarAttached() {
         mIsAttached = true;
-        mProtoTracer.add(this);
         mOverviewProxyService.addCallback(mQuickSwitchListener);
         mSysUiState.addCallback(mSysUiStateCallback);
         if (mIsTrackpadGestureFeaturesEnabled) {
@@ -576,7 +567,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
      */
     public void onNavBarDetached() {
         mIsAttached = false;
-        mProtoTracer.remove(this);
         mOverviewProxyService.removeCallback(mQuickSwitchListener);
         mSysUiState.removeCallback(mSysUiStateCallback);
         mInputManager.unregisterInputDeviceListener(mInputDeviceListener);
@@ -1135,8 +1125,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 dispatchToBackAnimation(ev);
             }
         }
-
-        mProtoTracer.scheduleFrameUpdate();
     }
 
     private boolean isButtonPressFromTrackpad(MotionEvent ev) {
@@ -1285,14 +1273,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         return topActivity != null && mGestureBlockingActivities.contains(topActivity);
     }
 
-    @Override
-    public void writeToProto(SystemUiTraceProto proto) {
-        if (proto.edgeBackGestureHandler == null) {
-            proto.edgeBackGestureHandler = new EdgeBackGestureHandlerProto();
-        }
-        proto.edgeBackGestureHandler.allowGesture = mAllowGesture;
-    }
-
     public void setBackAnimation(BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
         updateBackAnimationThresholds();
@@ -1319,7 +1299,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         private final Handler mHandler;
         private final Executor mBackgroundExecutor;
         private final UserTracker mUserTracker;
-        private final ProtoTracer mProtoTracer;
         private final NavigationModeController mNavigationModeController;
         private final BackPanelController.Factory mBackPanelControllerFactory;
         private final ViewConfiguration mViewConfiguration;
@@ -1343,7 +1322,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                        @Main Handler handler,
                        @Background Executor backgroundExecutor,
                        UserTracker userTracker,
-                       ProtoTracer protoTracer,
                        NavigationModeController navigationModeController,
                        BackPanelController.Factory backPanelControllerFactory,
                        ViewConfiguration viewConfiguration,
@@ -1365,7 +1343,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mHandler = handler;
             mBackgroundExecutor = backgroundExecutor;
             mUserTracker = userTracker;
-            mProtoTracer = protoTracer;
             mNavigationModeController = navigationModeController;
             mBackPanelControllerFactory = backPanelControllerFactory;
             mViewConfiguration = viewConfiguration;
@@ -1392,7 +1369,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                     mHandler,
                     mBackgroundExecutor,
                     mUserTracker,
-                    mProtoTracer,
                     mNavigationModeController,
                     mBackPanelControllerFactory,
                     mViewConfiguration,

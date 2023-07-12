@@ -78,7 +78,6 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
-import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
@@ -195,11 +194,10 @@ public interface CentralSurfacesDependenciesModule {
     static CommandQueue provideCommandQueue(
             Context context,
             DisplayTracker displayTracker,
-            ProtoTracer protoTracer,
             CommandRegistry registry,
             DumpHandler dumpHandler
     ) {
-        return new CommandQueue(context, displayTracker, protoTracer, registry, dumpHandler);
+        return new CommandQueue(context, displayTracker, registry, dumpHandler);
     }
 
     /**

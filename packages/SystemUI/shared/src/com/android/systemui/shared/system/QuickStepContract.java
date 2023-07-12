@@ -42,8 +42,6 @@ public class QuickStepContract {
             "com.google.android.apps.nexuslauncher.NexusLauncherActivity";
 
     public static final String KEY_EXTRA_SYSUI_PROXY = "extra_sysui_proxy";
-    public static final String KEY_EXTRA_WINDOW_CORNER_RADIUS = "extra_window_corner_radius";
-    public static final String KEY_EXTRA_SUPPORTS_WINDOW_CORNERS = "extra_supports_window_corners";
     public static final String KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER = "extra_unfold_animation";
     // See ISysuiUnlockAnimationController.aidl
     public static final String KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER = "unlock_animation";
