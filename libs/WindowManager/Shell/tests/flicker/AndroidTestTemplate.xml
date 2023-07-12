@@ -90,9 +90,9 @@
         <option name="directory-keys"
                 value="/data/user/0/com.android.wm.shell.flicker.bubbles/files"/>
         <option name="directory-keys"
-                value="/data/user/0/com.android.server.wm.flicker.pip/files"/>
+                value="/data/user/0/com.android.wm.shell.flicker.pip/files"/>
         <option name="directory-keys"
-                value="/data/user/0/com.android.server.wm.flicker.splitscreen/files"/>
+                value="/data/user/0/com.android.wm.shell.flicker.splitscreen/files"/>
         <option name="directory-keys"
             value="/data/user/0/com.android.server.wm.flicker.service/files"/>
         <option name="collect-on-run-ended-only" value="true"/>
