@@ -85,7 +85,7 @@ import java.util.concurrent.atomic.AtomicLong;
 //TODO Introduce a single lock object to lock the whole state and avoid the requirement above.
 
 // All users should be able to connect to USB and Bluetooth MIDI devices.
-// All users can create can install an app that provides, a Virtual MIDI Device Service.
+// All users can create can install an app that provides a Virtual MIDI Device Service.
 // Users can not open virtual MIDI devices created by other users.
 // getDevices() surfaces devices that can be opened by that user.
 // openDevice() rejects devices that are cannot be opened by that user.
