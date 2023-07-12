@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.icon.IconManager;
+import com.android.systemui.statusbar.notification.row.BigPictureIconManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline;
@@ -151,6 +153,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
                                 component.getExpandableNotificationRowController();
                         rowController.init(entry);
                         entry.setRowController(rowController);
+                        maybeSetBigPictureIconManager(row, component);
                         bindRow(entry, row);
                         updateRow(entry, row);
                         inflateContentViews(entry, params, row, callback);
@@ -165,11 +168,29 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             return;
         }
         mLogger.logReleasingViews(entry);
+        cancelRunningJobs(entry.getRow());
         final RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_CONTRACTED);
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_EXPANDED);
         params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
         mRowContentBindStage.requestRebind(entry, null);
+    }
+
+    private void maybeSetBigPictureIconManager(ExpandableNotificationRow row,
+            ExpandableNotificationRowComponent component) {
+        if (mFeatureFlags.isEnabled(Flags.BIGPICTURE_NOTIFICATION_LAZY_LOADING)) {
+            row.setBigPictureIconManager(component.getBigPictureIconManager());
+        }
+    }
+
+    private void cancelRunningJobs(ExpandableNotificationRow row) {
+        if (row == null) {
+            return;
+        }
+        BigPictureIconManager iconManager = row.getBigPictureIconManager();
+        if (iconManager != null) {
+            iconManager.cancelJobs();
+        }
     }
 
     /**
