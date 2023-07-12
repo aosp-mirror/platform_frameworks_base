@@ -16,7 +16,6 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_ICON;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_MOBILE;
-import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_WIFI;
 
 import static junit.framework.Assert.assertTrue;
 
@@ -41,13 +40,11 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
-import com.android.systemui.statusbar.StatusBarWifiView;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController.IconManager;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
 import com.android.systemui.statusbar.pipeline.wifi.ui.WifiUiAdapter;
@@ -156,22 +153,15 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
         assertTrue("Expected StatusBarIconView",
                 (manager.getViewAt(0) instanceof StatusBarIconView));
 
-        holder = holderForType(TYPE_WIFI);
-        manager.onIconAdded(1, "test_wifi", false, holder);
-        assertTrue(manager.getViewAt(1) instanceof StatusBarWifiView);
-
         holder = holderForType(TYPE_MOBILE);
-        manager.onIconAdded(2, "test_mobile", false, holder);
-        assertTrue(manager.getViewAt(2) instanceof StatusBarMobileView);
+        manager.onIconAdded(1, "test_mobile", false, holder);
+        assertTrue(manager.getViewAt(1) instanceof StatusBarMobileView);
     }
 
     private StatusBarIconHolder holderForType(int type) {
         switch (type) {
             case TYPE_MOBILE:
                 return StatusBarIconHolder.fromMobileIconState(mock(MobileIconState.class));
-
-            case TYPE_WIFI:
-                return StatusBarIconHolder.fromWifiIconState(mock(WifiIconState.class));
 
             case TYPE_ICON:
             default:
@@ -214,13 +204,6 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
         }
 
         @Override
-        protected StatusBarWifiView addWifiIcon(int index, String slot, WifiIconState state) {
-            StatusBarWifiView mock = mock(StatusBarWifiView.class);
-            mGroup.addView(mock, index);
-            return mock;
-        }
-
-        @Override
         protected StatusBarMobileView addMobileIcon(int index, String slot, MobileIconState state) {
             StatusBarMobileView mock = mock(StatusBarMobileView.class);
             mGroup.addView(mock, index);
@@ -250,13 +233,6 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
             StatusBarIconView mock = mock(StatusBarIconView.class);
             mGroup.addView(mock, index);
 
-            return mock;
-        }
-
-        @Override
-        protected StatusBarWifiView addWifiIcon(int index, String slot, WifiIconState state) {
-            StatusBarWifiView mock = mock(StatusBarWifiView.class);
-            mGroup.addView(mock, index);
             return mock;
         }
 
