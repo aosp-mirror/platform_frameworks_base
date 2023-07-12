@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Power menu"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Page <xliff:g id="ID_1">%1$d</xliff:g> ng <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lock screen"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Na-off ang telepono dahil sa init"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Maayos na ngayong gumagana ang iyong telepono.\nMag-tap para sa higit pang impormasyon"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Napakainit ng telepono, kaya nag-off ito para lumamig. Maayos na itong gumagana.\n\nMaaaring lubos na uminit ang telepono kapag:\n	• Gumamit ka ng resource-intensive na app (gaya ng app para sa gaming, video, o navigation)\n	• Nag-download o nag-upload ka ng malaking file\n • Ginamit mo ito sa mainit na lugar"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Tingnan ang mga hakbang sa pangangalaga"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Umiinit ang telepono"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Limitado ang ilang feature habang nagku-cool down ang telepono.\nMag-tap para sa higit pang impormasyon"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Awtomatikong susubukan ng iyong telepono na mag-cool down. Magagamit mo pa rin ang iyong telepono, ngunit maaaring mas mabagal ang paggana nito.\n\nKapag nakapag-cool down na ang iyong telepono, gagana na ito nang normal."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Tingnan ang mga hakbang sa pangangalaga"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Bunutin sa saksakan ang device"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Umiinit ang iyong device malapit sa charging port. Kung nakakonekta ito sa charger o USB accessory, bunutin ito sa saksakan, at mag-ingat dahil posibleng mainit din ang cable."</string>
