@@ -475,6 +475,8 @@
     <!-- Margin start of the system icons super container -->
     <dimen name="system_icons_super_container_margin_start">16dp</dimen>
 
+    <dimen name="status_icons_hover_state_background_radius">16dp</dimen>
+
     <!-- Width for the notification panel and related windows -->
     <dimen name="match_parent">-1px</dimen>
 
