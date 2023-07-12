@@ -460,6 +460,14 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     public static final int SUBREASON_SDK_SANDBOX_NOT_NEEDED = 28;
 
+    /**
+     * The process was killed because the binder proxy limit for system server was exceeded.
+     *
+     * For internal use only.
+     * @hide
+     */
+    public static final int SUBREASON_EXCESSIVE_BINDER_OBJECTS = 29;
+
     // If there is any OEM code which involves additional app kill reasons, it should
     // be categorized in {@link #REASON_OTHER}, with subreason code starting from 1000.
 
@@ -635,6 +643,7 @@ public final class ApplicationExitInfo implements Parcelable {
         SUBREASON_KILL_BACKGROUND,
         SUBREASON_PACKAGE_UPDATE,
         SUBREASON_UNDELIVERED_BROADCAST,
+        SUBREASON_EXCESSIVE_BINDER_OBJECTS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SubReason {}
@@ -1360,6 +1369,8 @@ public final class ApplicationExitInfo implements Parcelable {
                 return "PACKAGE UPDATE";
             case SUBREASON_UNDELIVERED_BROADCAST:
                 return "UNDELIVERED BROADCAST";
+            case SUBREASON_EXCESSIVE_BINDER_OBJECTS:
+                return "EXCESSIVE BINDER OBJECTS";
             default:
                 return "UNKNOWN";
         }
