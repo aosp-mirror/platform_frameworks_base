@@ -118,9 +118,9 @@ class DynamicFlagBinderDelegate {
         mFlagStore.setChangeCallback(mFlagChangeCallback);
     }
 
-    SyncableFlag syncDynamicFlag(int pid, SyncableFlag sf) {
+    void syncDynamicFlag(int pid, SyncableFlag sf) {
         if (!sf.isDynamic()) {
-            return sf;
+            return;
         }
 
         String ns = sf.getNamespace();
@@ -162,7 +162,7 @@ class DynamicFlagBinderDelegate {
         // to something.
         data.setDefaultValue(sf.getValue());
 
-        return new SyncableFlag(sf.getNamespace(), sf.getName(), value, true);
+        sf.setValue(value);
     }
 
 

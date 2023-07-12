@@ -17,7 +17,6 @@
 package android.flags;
 
 import android.annotation.NonNull;
-import android.provider.DeviceConfig;
 
 /**
  * A flag representing a false value.
@@ -26,18 +25,36 @@ import android.provider.DeviceConfig;
  *
  * @hide
  */
-public final class FusedOffFlag extends BooleanFlagBase {
-    /**
-     * @param namespace A namespace for this flag. See {@link DeviceConfig}.
-     * @param name      A name for this flag.
-     */
+public final class FusedOffFlag implements Flag<Boolean> {
+    private final String mNamespace;
+    private final String mName;
+
     FusedOffFlag(String namespace, String name) {
-        super(namespace, name);
+        mNamespace = namespace;
+        mName = name;
     }
 
     @Override
     @NonNull
     public Boolean getDefault() {
         return false;
+    }
+
+    @Override
+    @NonNull
+    public String getNamespace() {
+        return mNamespace;
+    }
+
+    @Override
+    @NonNull
+    public String getName() {
+        return mName;
+    }
+
+    @Override
+    @NonNull
+    public String toString() {
+        return getNamespace() + "." + getName() + "[false]";
     }
 }

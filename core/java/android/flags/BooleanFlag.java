@@ -25,7 +25,9 @@ import android.annotation.NonNull;
  *
  * @hide
  */
-public class BooleanFlag extends BooleanFlagBase {
+public class BooleanFlag implements Flag<Boolean> {
+    private final String mNamespace;
+    private final String mName;
     private final boolean mDefault;
 
     /**
@@ -34,7 +36,8 @@ public class BooleanFlag extends BooleanFlagBase {
      * @param defaultValue The value of this flag if no other override is present.
      */
     BooleanFlag(String namespace, String name, boolean defaultValue) {
-        super(namespace, name);
+        mNamespace = namespace;
+        mName = name;
         mDefault = defaultValue;
     }
 
@@ -42,5 +45,23 @@ public class BooleanFlag extends BooleanFlagBase {
     @NonNull
     public Boolean getDefault() {
         return mDefault;
+    }
+
+    @Override
+    @NonNull
+    public String getNamespace() {
+        return mNamespace;
+    }
+
+    @Override
+    @NonNull
+    public String getName() {
+        return mName;
+    }
+
+    @Override
+    @NonNull
+    public String toString() {
+        return getNamespace() + "." + getName() + "[" + getDefault() + "]";
     }
 }

@@ -23,8 +23,10 @@ package android.flags;
  *
  * @hide
  */
-public class DynamicBooleanFlag extends BooleanFlagBase implements DynamicFlag<Boolean> {
+public class DynamicBooleanFlag implements DynamicFlag<Boolean> {
 
+    private final String mNamespace;
+    private final String mName;
     private final boolean mDefault;
 
     /**
@@ -33,12 +35,28 @@ public class DynamicBooleanFlag extends BooleanFlagBase implements DynamicFlag<B
      * @param defaultValue The value of this flag if no other override is present.
      */
     DynamicBooleanFlag(String namespace, String name, boolean defaultValue) {
-        super(namespace, name);
+        mNamespace = namespace;
+        mName = name;
         mDefault = defaultValue;
+    }
+
+    @Override
+    public String getNamespace() {
+        return mNamespace;
+    }
+
+    @Override
+    public String getName() {
+        return mName;
     }
 
     @Override
     public Boolean getDefault() {
         return mDefault;
+    }
+
+    @Override
+    public String toString() {
+        return getNamespace() + "." + getName() + "[" + getDefault() + "]";
     }
 }
