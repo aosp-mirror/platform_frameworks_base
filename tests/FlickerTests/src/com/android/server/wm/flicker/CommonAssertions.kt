@@ -19,6 +19,8 @@
 package com.android.server.wm.flicker
 
 import android.tools.common.PlatformConsts
+import android.tools.common.Position
+import android.tools.common.flicker.subject.layers.LayerTraceEntrySubject
 import android.tools.common.flicker.subject.region.RegionSubject
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.IComponentNameMatcher
@@ -169,12 +171,7 @@ fun LegacyFlickerTest.statusBarLayerIsVisibleAtStartAndEnd() {
  */
 fun LegacyFlickerTest.navBarLayerPositionAtStart() {
     assertLayersStart {
-        val display =
-            this.entry.displays.firstOrNull { !it.isVirtual } ?: error("There is no display!")
-        this.visibleRegion(ComponentNameMatcher.NAV_BAR)
-            .coversExactly(
-                WindowUtils.getNavigationBarPosition(display, scenario.isGesturalNavigation)
-            )
+        assertNavBarPosition(this, scenario.isGesturalNavigation)
     }
 }
 
@@ -184,13 +181,36 @@ fun LegacyFlickerTest.navBarLayerPositionAtStart() {
  */
 fun LegacyFlickerTest.navBarLayerPositionAtEnd() {
     assertLayersEnd {
-        val display =
-            this.entry.displays.minByOrNull { it.id }
-                ?: throw RuntimeException("There is no display!")
-        this.visibleRegion(ComponentNameMatcher.NAV_BAR)
-            .coversExactly(
-                WindowUtils.getNavigationBarPosition(display, scenario.isGesturalNavigation)
-            )
+        assertNavBarPosition(this, scenario.isGesturalNavigation)
+    }
+}
+
+private fun assertNavBarPosition(sfState: LayerTraceEntrySubject, isGesturalNavigation: Boolean) {
+    val display =
+        sfState.entry.displays.filterNot { it.isOff }.minByOrNull { it.id }
+            ?: error("There is no display!")
+    val displayArea = display.layerStackSpace
+    val navBarPosition = display.navBarPosition(isGesturalNavigation)
+    val navBarRegion = sfState.visibleRegion(ComponentNameMatcher.NAV_BAR)
+
+    when (navBarPosition) {
+        Position.TOP ->
+            navBarRegion.hasSameTopPosition(displayArea)
+                .hasSameLeftPosition(displayArea)
+                .hasSameRightPosition(displayArea)
+        Position.BOTTOM ->
+            navBarRegion.hasSameBottomPosition(displayArea)
+                .hasSameLeftPosition(displayArea)
+                .hasSameRightPosition(displayArea)
+        Position.LEFT ->
+            navBarRegion.hasSameLeftPosition(displayArea)
+                .hasSameTopPosition(displayArea)
+                .hasSameBottomPosition(displayArea)
+        Position.RIGHT ->
+            navBarRegion.hasSameRightPosition(displayArea)
+                .hasSameTopPosition(displayArea)
+                .hasSameBottomPosition(displayArea)
+        else -> error("Unknown position $navBarPosition")
     }
 }
 
