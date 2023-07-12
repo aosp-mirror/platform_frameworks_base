@@ -2124,11 +2124,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         try {
             pvr = verifyAndGetBypass(uid, packageName, null);
         } catch (SecurityException e) {
-            if (Process.isIsolated(uid)) {
-                Slog.e(TAG, "Cannot setMode: isolated process");
-            } else {
-                Slog.e(TAG, "Cannot setMode", e);
-            }
+            logVerifyAndGetBypassFailure(uid, e, "setMode");
             return;
         }
 
@@ -2580,11 +2576,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         try {
             pvr = verifyAndGetBypass(uid, packageName, null);
         } catch (SecurityException e) {
-            if (Process.isIsolated(uid)) {
-                Slog.e(TAG, "Cannot checkOperation: isolated process");
-            } else {
-                Slog.e(TAG, "Cannot checkOperation", e);
-            }
+            logVerifyAndGetBypassFailure(uid, e, "checkOperation");
             return AppOpsManager.opToDefaultMode(code);
         }
 
@@ -2796,11 +2788,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 attributionTag = null;
             }
         } catch (SecurityException e) {
-            if (Process.isIsolated(uid)) {
-                Slog.e(TAG, "Cannot noteOperation: isolated process");
-            } else {
-                Slog.e(TAG, "Cannot noteOperation", e);
-            }
+            logVerifyAndGetBypassFailure(uid, e, "noteOperation");
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                     packageName);
         }
@@ -3333,11 +3321,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 attributionTag = null;
             }
         } catch (SecurityException e) {
-            if (Process.isIsolated(uid)) {
-                Slog.e(TAG, "Cannot startOperation: isolated process");
-            } else {
-                Slog.e(TAG, "Cannot startOperation", e);
-            }
+            logVerifyAndGetBypassFailure(uid, e, "startOperation");
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                     packageName);
         }
@@ -3513,11 +3497,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 attributionTag = null;
             }
         } catch (SecurityException e) {
-            if (Process.isIsolated(uid)) {
-                Slog.e(TAG, "Cannot finishOperation: isolated process");
-            } else {
-                Slog.e(TAG, "Cannot finishOperation", e);
-            }
+            logVerifyAndGetBypassFailure(uid, e, "finishOperation");
             return;
         }
 
@@ -4071,6 +4051,17 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         return false;
+    }
+
+    private void logVerifyAndGetBypassFailure(int uid, @NonNull SecurityException e,
+            @NonNull String methodName) {
+        if (Process.isIsolated(uid)) {
+            Slog.e(TAG, "Cannot " + methodName + ": isolated UID");
+        } else if (UserHandle.getAppId(uid) < Process.FIRST_APPLICATION_UID) {
+            Slog.e(TAG, "Cannot " + methodName + ": non-application UID " + uid);
+        } else {
+            Slog.e(TAG, "Cannot " + methodName, e);
+        }
     }
 
     /**
