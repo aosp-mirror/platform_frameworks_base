@@ -1369,7 +1369,7 @@ public class LowPowerStandbyController {
          * Otherwise, returns false, and the default policy will be used.
          */
         public boolean enableCustomPolicy() {
-            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_POLICY, false);
+            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_POLICY, true);
         }
 
         /**
@@ -1377,7 +1377,7 @@ public class LowPowerStandbyController {
          * Otherwise, returns false, and {@link #getActiveStandbyPorts()} will always be empty.
          */
         public boolean enableStandbyPorts() {
-            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_STANDBY_PORTS, false);
+            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_STANDBY_PORTS, true);
         }
 
         /**
