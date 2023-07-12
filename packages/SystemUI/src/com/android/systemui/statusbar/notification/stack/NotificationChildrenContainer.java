@@ -192,6 +192,11 @@ public class NotificationChildrenContainer extends ViewGroup
     }
 
     @Override
+    public int getClipHeight() {
+        return Math.max(mActualHeight - mClipBottomAmount, 0);
+    }
+
+    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int childCount =
                 Math.min(mAttachedChildren.size(), NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
