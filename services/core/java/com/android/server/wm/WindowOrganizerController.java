@@ -1608,6 +1608,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         final int count = tasksToReparent.size();
         for (int i = 0; i < count; ++i) {
             final Task task = tasksToReparent.get(i);
+            final int prevWindowingMode = task.getWindowingMode();
             if (syncId >= 0) {
                 addToSyncSet(syncId, task);
             }
@@ -1620,6 +1621,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 task.reparent((Task) newParent,
                         hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
                         false /*moveParents*/, "processChildrenTaskReparentHierarchyOp");
+            }
+            // Trim the compatible Recent task (if any) after the Task is reparented and now has
+            // a different windowing mode, in order to prevent redundant Recent tasks after
+            // reparenting.
+            if (prevWindowingMode != task.getWindowingMode()) {
+                mService.mTaskSupervisor.mRecentTasks.removeCompatibleRecentTask(task);
             }
         }
 
