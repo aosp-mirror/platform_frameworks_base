@@ -79,17 +79,25 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteracto
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.model.SceneContainerNames;
+import com.android.systemui.scene.shared.model.SceneKey;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.user.domain.interactor.UserInteractor;
 import com.android.systemui.util.ViewController;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import java.io.File;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
+
+import kotlinx.coroutines.Job;
 
 /** Controller for {@link KeyguardSecurityContainer} */
 @KeyguardBouncerScope
@@ -378,6 +386,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     showPrimarySecurityScreen(false);
                 }
             };
+    private final UserInteractor mUserInteractor;
+    private final Provider<SceneInteractor> mSceneInteractor;
+    private final Provider<JavaAdapter> mJavaAdapter;
+    @Nullable private Job mSceneTransitionCollectionJob;
 
     @Inject
     public KeyguardSecurityContainerController(KeyguardSecurityContainer view,
@@ -402,7 +414,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             ViewMediatorCallback viewMediatorCallback,
             AudioManager audioManager,
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
-            BouncerMessageInteractor bouncerMessageInteractor
+            BouncerMessageInteractor bouncerMessageInteractor,
+            Provider<JavaAdapter> javaAdapter,
+            UserInteractor userInteractor,
+            Provider<SceneInteractor> sceneInteractor
     ) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
@@ -429,6 +444,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mAudioManager = audioManager;
         mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
         mBouncerMessageInteractor = bouncerMessageInteractor;
+        mUserInteractor = userInteractor;
+        mSceneInteractor = sceneInteractor;
+        mJavaAdapter = javaAdapter;
     }
 
     @Override
@@ -451,6 +469,24 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mView.setOnKeyListener(mOnKeyListener);
 
         showPrimarySecurityScreen(false);
+
+        if (mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+            // When the scene framework transitions from bouncer to gone, we dismiss the keyguard.
+            mSceneTransitionCollectionJob = mJavaAdapter.get().alwaysCollectFlow(
+                mSceneInteractor.get().sceneTransitions(SceneContainerNames.SYSTEM_UI_DEFAULT),
+                sceneTransitionModel -> {
+                    if (sceneTransitionModel != null
+                            && sceneTransitionModel.getFrom() == SceneKey.Bouncer.INSTANCE
+                            && sceneTransitionModel.getTo() == SceneKey.Gone.INSTANCE) {
+                        final int selectedUserId = mUserInteractor.getSelectedUserId();
+                        showNextSecurityScreenOrFinish(
+                                /* authenticated= */ true,
+                                selectedUserId,
+                                /* bypassSecondaryLockScreen= */ true,
+                                mSecurityModel.getSecurityMode(selectedUserId));
+                    }
+                });
+        }
     }
 
     @Override
@@ -459,6 +495,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mConfigurationController.removeCallback(mConfigurationListener);
         mView.removeMotionEventListener(mGlobalTouchListener);
         mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
+
+        if (mSceneTransitionCollectionJob != null) {
+            mSceneTransitionCollectionJob.cancel(null);
+            mSceneTransitionCollectionJob = null;
+        }
     }
 
     /** */

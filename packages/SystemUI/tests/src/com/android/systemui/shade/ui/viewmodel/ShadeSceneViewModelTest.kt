@@ -22,7 +22,6 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.SceneTestUtils.Companion.CONTAINER_1
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
@@ -54,7 +53,6 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                     override fun create(containerName: String): LockscreenSceneInteractor {
                         return utils.lockScreenSceneInteractor(
                             authenticationInteractor = authenticationInteractor,
-                            sceneInteractor = sceneInteractor,
                             bouncerInteractor =
                                 utils.bouncerInteractor(
                                     authenticationInteractor = authenticationInteractor,
@@ -70,9 +68,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_deviceLocked_lockScreen() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(false)
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
@@ -82,9 +78,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     fun upTransitionSceneKey_deviceUnlocked_gone() =
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(true)
 
             assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Gone)
@@ -93,10 +87,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            val currentScene by
+                collectLastValue(sceneInteractor.currentScene(SceneTestUtils.CONTAINER_1))
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(true)
             runCurrent()
 
@@ -108,10 +101,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Pin(1234)
-            )
+            val currentScene by
+                collectLastValue(sceneInteractor.currentScene(SceneTestUtils.CONTAINER_1))
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(false)
             runCurrent()
 

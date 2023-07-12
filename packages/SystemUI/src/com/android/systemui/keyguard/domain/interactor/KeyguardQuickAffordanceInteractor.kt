@@ -414,7 +414,7 @@ constructor(
     }
 
     private suspend fun isFeatureDisabledByDevicePolicy(): Boolean =
-        traceAsync("isFeatureDisabledByDevicePolicy", TAG) {
+        traceAsync(TAG, "isFeatureDisabledByDevicePolicy") {
             withContext(backgroundDispatcher) {
                 devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
             }

@@ -18,7 +18,7 @@ package com.android.systemui.biometrics.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.domain.model.BiometricModality
+import com.android.systemui.biometrics.shared.model.BiometricModality
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

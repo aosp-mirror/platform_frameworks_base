@@ -32,7 +32,7 @@
 
     <ImageView
         android:id="@+id/notification_lights_out"
-        android:layout_width="@dimen/status_bar_icon_size"
+        android:layout_width="@dimen/status_bar_icon_size_sp"
         android:layout_height="match_parent"
         android:paddingStart="@dimen/status_bar_padding_start"
         android:paddingBottom="2dip"

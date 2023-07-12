@@ -52,6 +52,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
+import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
@@ -59,7 +60,6 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.keyguard.shared.model.ScrimAlpha;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -1492,6 +1492,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             mColors.setSupportsDarkText(
                     ColorUtils.calculateContrast(mColors.getMainColor(), Color.WHITE) > 4.5);
         }
+
+        int surface = Utils.getColorAttr(mScrimBehind.getContext(),
+                com.android.internal.R.attr.materialColorSurface).getDefaultColor();
+        for (ScrimState state : ScrimState.values()) {
+            state.setSurfaceColor(surface);
+        }
+
         mNeedsDrawableColorUpdate = true;
     }
 

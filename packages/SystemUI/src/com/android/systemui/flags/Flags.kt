@@ -91,6 +91,11 @@ object Flags {
     val NOTIFICATION_SHELF_REFACTOR =
         unreleasedFlag(271161129, "notification_shelf_refactor", teamfood = true)
 
+    // TODO(b/290787599): Tracking Bug
+    @JvmField
+    val NOTIFICATION_ICON_CONTAINER_REFACTOR =
+        unreleasedFlag(278765923, "notification_icon_container_refactor")
+
     // TODO(b/288326013): Tracking Bug
     @JvmField
     val NOTIFICATION_ASYNC_HYBRID_VIEW_INFLATION =
@@ -258,6 +263,16 @@ object Flags {
     @JvmField
     val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area", teamfood = true)
 
+    /**
+     * Migrate the bottom area to the new keyguard root view.
+     * Because there is no such thing as a "bottom area" after this, this also breaks it up into
+     * many smaller, modular pieces.
+     */
+    // TODO(b/290652751): Tracking bug.
+    @JvmField
+    val MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA =
+        unreleasedFlag(290652751, "migrate_split_keyguard_bottom_area")
+
     /** Whether to listen for fingerprint authentication over keyguard occluding activities. */
     // TODO(b/283260512): Tracking bug.
     @JvmField
@@ -276,6 +291,10 @@ object Flags {
     // TODO(b/286552209): Tracking bug.
     @JvmField
     val MIGRATE_LOCK_ICON = unreleasedFlag(240, "migrate_lock_icon")
+
+    // TODO(b/288276738): Tracking bug.
+    @JvmField
+    val WIDGET_ON_KEYGUARD = unreleasedFlag(241, "widget_on_keyguard")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -694,11 +713,11 @@ object Flags {
     // TODO(b/283071711): Tracking bug
     @JvmField
     val TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK =
-            releasedFlag(2401, "trim_resources_with_background_trim_on_lock")
+            unreleasedFlag(2401, "trim_resources_with_background_trim_on_lock")
 
     // TODO:(b/283203305): Tracking bug
     @JvmField
-    val TRIM_FONT_CACHES_AT_UNLOCK = releasedFlag(2402, "trim_font_caches_on_unlock")
+    val TRIM_FONT_CACHES_AT_UNLOCK = unreleasedFlag(2402, "trim_font_caches_on_unlock")
 
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug
@@ -769,6 +788,11 @@ object Flags {
     @JvmField
     val ENABLE_NEW_PRIVACY_DIALOG =
             unreleasedFlag(283740863, "enable_new_privacy_dialog", teamfood = false)
+
+    // TODO(b/289573946): Tracking Bug
+    @JvmField
+    val PRECOMPUTED_TEXT =
+        unreleasedFlag(289573946, "precomputed_text")
 
     // 2900 - CentralSurfaces-related flags
 

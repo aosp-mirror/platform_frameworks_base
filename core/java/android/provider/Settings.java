@@ -2186,6 +2186,16 @@ public final class Settings {
             = "android.settings.APP_NOTIFICATION_BUBBLE_SETTINGS";
 
     /**
+     * Intent Extra: The value of {@link android.app.settings.SettingsEnums#EntryPointType} for
+     * settings metrics that logs the entry point about physical keyboard settings.
+     * <p>
+     * This must be passed as an extra field to the {@link #ACTION_HARD_KEYBOARD_SETTINGS}.
+     * @hide
+     */
+    public static final String EXTRA_ENTRYPOINT =
+            "com.android.settings.inputmethod.EXTRA_ENTRYPOINT";
+
+    /**
      * Activity Extra: The package owner of the notification channel settings to display.
      * <p>
      * This must be passed as an extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}.
