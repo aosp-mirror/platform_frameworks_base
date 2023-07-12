@@ -31,6 +31,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_PERS
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_PROFILE_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_TAB;
 import static android.app.admin.DevicePolicyResources.Strings.Core.RESOLVER_WORK_TAB_ACCESSIBILITY;
+import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.PermissionChecker.PID_UNKNOWN;
 import static android.stats.devicepolicy.nano.DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL;
@@ -356,6 +357,12 @@ public class ResolverActivity extends Activity implements
         // flag set, we are now losing it.  That should be a very rare case
         // and we can live with this.
         intent.setFlags(intent.getFlags()&~Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+
+        // If FLAG_ACTIVITY_LAUNCH_ADJACENT was set, ResolverActivity was opened in the alternate
+        // side, which means we want to open the target app on the same side as ResolverActivity.
+        if ((intent.getFlags() & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
+            intent.setFlags(intent.getFlags() & ~FLAG_ACTIVITY_LAUNCH_ADJACENT);
+        }
         return intent;
     }
 
