@@ -105,6 +105,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(keyguardPinView.findViewById<View>(R.id.key_enter)).thenReturn(enterButton)
         // For posture tests:
         `when`(keyguardPinView.buttons).thenReturn(arrayOf())
+        `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
 
         pinViewController =
             KeyguardPinViewController(
@@ -167,7 +168,6 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     @Test
     fun startAppearAnimation_withAutoPinConfirmationFailedPasswordAttemptsLessThan5() {
         `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
-        `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
         `when`(lockPatternUtils.isAutoPinConfirmEnabled(anyInt())).thenReturn(true)
         `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(3)
         `when`(passwordTextView.text).thenReturn("")
@@ -182,7 +182,6 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     @Test
     fun startAppearAnimation_withAutoPinConfirmationFailedPasswordAttemptsMoreThan5() {
         `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
-        `when`(lockPatternUtils.getPinLength(anyInt())).thenReturn(6)
         `when`(lockPatternUtils.isAutoPinConfirmEnabled(anyInt())).thenReturn(true)
         `when`(lockPatternUtils.getCurrentFailedPasswordAttempts(anyInt())).thenReturn(6)
         `when`(passwordTextView.text).thenReturn("")
