@@ -79,7 +79,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     }
 
     // flush will create a GrRenderTarget if not already present.
-    canvas->flush();
+    directContext->flushAndSubmit();
 
     GLuint fboID = 0;
     SkISize fboSize;
@@ -167,7 +167,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
 
         // GL ops get inserted here if previous flush is missing, which could dirty the stencil
         bool stencilWritten = SkAndroidFrameworkUtils::clipWithStencil(tmpCanvas);
-        tmpCanvas->flush();  // need this flush for the single op that draws into the stencil
+        directContext->flushAndSubmit();  // need this flush for the single op that draws into the stencil
 
         // ensure that the framebuffer that the webview will render into is bound before after we
         // draw into the stencil
