@@ -1,0 +1,8 @@
+package: "com.android.server.power.optimization"
+
+flag {
+    name: "streamlined_battery_stats"
+    namespace: "power_optimization"
+    description: "Feature flag for streamlined battery stats"
+    bug: "285646152"
+}
