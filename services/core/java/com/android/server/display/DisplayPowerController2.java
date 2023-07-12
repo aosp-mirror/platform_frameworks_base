@@ -610,7 +610,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         setUpAutoBrightness(resources, handler);
 
-        mColorFadeEnabled = mInjector.isColorFadeEnabled();
+        mColorFadeEnabled = mInjector.isColorFadeEnabled()
+                && !resources.getBoolean(
+                  com.android.internal.R.bool.config_displayColorFadeDisabled);
         mColorFadeFadesConfig = resources.getBoolean(
                 R.bool.config_animateScreenLights);
 
