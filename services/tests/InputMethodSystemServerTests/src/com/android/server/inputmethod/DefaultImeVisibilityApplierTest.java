@@ -40,6 +40,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.Display;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -76,9 +77,9 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     public void testPerformShowIme() throws Exception {
         synchronized (ImfLock.class) {
             mVisibilityApplier.performShowIme(new Binder() /* showInputToken */,
-                    null /* statsToken */, 0 /* showFlags */, null, SHOW_SOFT_INPUT);
+                    null /* statsToken */, InputMethodManager.SHOW_IMPLICIT, null, SHOW_SOFT_INPUT);
         }
-        verifyShowSoftInput(false, true, 0 /* showFlags */);
+        verifyShowSoftInput(false, true, InputMethodManager.SHOW_IMPLICIT);
     }
 
     @Test
@@ -125,7 +126,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
     @Test
     public void testApplyImeVisibility_showImeImplicit() throws Exception {
         mVisibilityApplier.applyImeVisibility(mWindowToken, null, STATE_SHOW_IME_IMPLICIT);
-        verifyShowSoftInput(true, true, 0 /* showFlags */);
+        verifyShowSoftInput(true, true, InputMethodManager.SHOW_IMPLICIT);
     }
 
     @Test

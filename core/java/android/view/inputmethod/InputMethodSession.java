@@ -169,6 +169,12 @@ public interface InputMethodSession {
     /**
      * Toggle the soft input window.
      * Applications can toggle the state of the soft input window.
+     * @param showFlags Provides additional operating flags.  May be
+     * 0 or have the {@link InputMethodManager#SHOW_IMPLICIT},
+     * {@link InputMethodManager#SHOW_FORCED} bit set.
+     * @param hideFlags Provides additional operating flags.  May be
+     * 0 or have the {@link  InputMethodManager#HIDE_IMPLICIT_ONLY},
+     * {@link  InputMethodManager#HIDE_NOT_ALWAYS} bit set.
      *
      * @deprecated Starting in {@link android.os.Build.VERSION_CODES#S} the system no longer invokes
      * this method, instead it explicitly shows or hides the IME. An {@code InputMethodService}
@@ -176,8 +182,7 @@ public interface InputMethodSession {
      * InputMethodService#requestShowSelf} or {@link InputMethodService#requestHideSelf}
      */
     @Deprecated
-    public void toggleSoftInput(@InputMethodManager.ShowFlags int showFlags,
-            @InputMethodManager.HideFlags int hideFlags);
+    public void toggleSoftInput(int showFlags, int hideFlags);
 
     /**
      * This method is called when the cursor and/or the character position relevant to text input
