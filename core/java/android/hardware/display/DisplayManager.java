@@ -1762,6 +1762,15 @@ public final class DisplayManager {
          * 123,1,critical,0.8,default;123,1,moderate,0.6,id_2;456,2,moderate,0.9,critical,0.7
          */
         String KEY_BRIGHTNESS_THROTTLING_DATA = "brightness_throttling_data";
+
+        /**
+         * Key for disabling screen wake locks while apps are in cached state.
+         * Read value via {@link android.provider.DeviceConfig#getBoolean(String, String, boolean)}
+         * with {@link android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER} as the namespace.
+         * @hide
+         */
+        String KEY_DISABLE_SCREEN_WAKE_LOCKS_WHILE_CACHED =
+                "disable_screen_wake_locks_while_cached";
     }
 
     /**
