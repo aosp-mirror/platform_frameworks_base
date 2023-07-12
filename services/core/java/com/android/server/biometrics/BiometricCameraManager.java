@@ -17,9 +17,16 @@
 package com.android.server.biometrics;
 
 /**
- * Interface for biometric operations to get camera privacy state.
+ * Interface for biometrics to get camera status.
  */
-public interface BiometricSensorPrivacy {
-    /* Returns true if privacy is enabled and camera access is disabled. */
+public interface BiometricCameraManager {
+    /**
+     * Returns true if any camera is in use.
+     */
+    boolean isAnyCameraUnavailable();
+
+    /**
+     * Returns true if privacy is enabled and camera access is disabled.
+     */
     boolean isCameraPrivacyEnabled();
 }
