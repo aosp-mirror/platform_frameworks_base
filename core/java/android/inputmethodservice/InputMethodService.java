@@ -103,11 +103,10 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
-import android.view.BatchedInputEventReceiver.SimpleBatchedInputEventReceiver;
-import android.view.Choreographer;
 import android.view.Gravity;
 import android.view.InputChannel;
 import android.view.InputDevice;
+import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -1052,17 +1051,22 @@ public class InputMethodService extends AbstractInputMethodService {
             stylusEvents.forEach(InputMethodService.this::onStylusHandwritingMotionEvent);
 
             // create receiver for channel
-            mHandwritingEventReceiver = new SimpleBatchedInputEventReceiver(
-                    channel,
-                    Looper.getMainLooper(), Choreographer.getInstance(),
-                    event -> {
+            mHandwritingEventReceiver = new InputEventReceiver(channel, Looper.getMainLooper()) {
+                @Override
+                public void onInputEvent(InputEvent event) {
+                    boolean handled = false;
+                    try {
                         if (!(event instanceof MotionEvent)) {
-                            return false;
+                            return;
                         }
                         onStylusHandwritingMotionEvent((MotionEvent) event);
                         scheduleHandwritingSessionTimeout();
-                        return true;
-                    });
+                        handled = true;
+                    } finally {
+                        finishInputEvent(event, handled);
+                    }
+                }
+            };
             scheduleHandwritingSessionTimeout();
         }
 
