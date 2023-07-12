@@ -1713,6 +1713,11 @@ public class OomAdjuster {
         }
     }
 
+    private boolean isScreenOnOrAnimatingLocked(ProcessStateRecord state) {
+        return mService.mWakefulness.get() == PowerManagerInternal.WAKEFULNESS_AWAKE
+                || state.isRunningRemoteAnimation();
+    }
+
     @GuardedBy({"mService", "mProcLock"})
     private boolean computeOomAdjLSP(ProcessRecord app, int cachedAdj,
             ProcessRecord topApp, boolean doingAll, long now, boolean cycleReEval,
@@ -1794,8 +1799,7 @@ public class OomAdjuster {
                 state.setSystemNoUi(false);
             }
             if (!state.isSystemNoUi()) {
-                if (mService.mWakefulness.get() == PowerManagerInternal.WAKEFULNESS_AWAKE
-                        || state.isRunningRemoteAnimation()) {
+                if (isScreenOnOrAnimatingLocked(state)) {
                     // screen on or animating, promote UI
                     state.setCurProcState(ActivityManager.PROCESS_STATE_PERSISTENT_UI);
                     state.setCurrentSchedulingGroup(SCHED_GROUP_TOP_APP);
@@ -3281,8 +3285,10 @@ public class OomAdjuster {
                 } else {
                     setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
                 }
-                initialSchedGroup = SCHED_GROUP_TOP_APP;
-                initialProcState = PROCESS_STATE_TOP;
+                if (isScreenOnOrAnimatingLocked(state)) {
+                    initialSchedGroup = SCHED_GROUP_TOP_APP;
+                    initialProcState = PROCESS_STATE_TOP;
+                }
                 initialCapability = PROCESS_CAPABILITY_ALL;
                 initialCached = false;
             } catch (Exception e) {
