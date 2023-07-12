@@ -19,6 +19,8 @@ package com.android.server.vibrator;
 import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
 import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -302,6 +304,80 @@ public class VibrationThreadTest {
         assertFalse(mControllers.get(VIBRATOR_ID).isVibrating());
         assertEquals(Arrays.asList(expectedOneShot(5000)),
                 fakeVibrator.getEffectSegments(vibrationId));
+    }
+
+    @Test
+    public void vibrate_singleVibratorPatternWithZeroDurationSteps_skipsZeroDurationSteps() {
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 100, 50, 100, 0, 0, 0, 50}, /* repeat= */ -1);
+        VibrationStepConductor conductor = startThreadAndDispatcher(effect);
+        long vibrationId = conductor.getVibration().id;
+        waitForCompletion();
+
+        verify(mManagerHooks).noteVibratorOn(eq(UID), eq(300L));
+        verify(mManagerHooks).noteVibratorOff(eq(UID));
+
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
+        assertThat(mControllers.get(VIBRATOR_ID).isVibrating()).isFalse();
+
+        assertThat(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId))
+                .isEqualTo(expectedOneShots(100L, 150L));
+    }
+
+    @Test
+    public void vibrate_singleVibratorPatternWithZeroDurationAndAmplitude_skipsZeroDurationSteps() {
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        int[] amplitudes = new int[]{1, 2, 0, 3, 4, 5, 0, 6};
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 100, 0, 50, 50, 0, 100, 50}, amplitudes,
+                /* repeat= */ -1);
+        VibrationStepConductor conductor = startThreadAndDispatcher(effect);
+        long vibrationId = conductor.getVibration().id;
+        waitForCompletion();
+
+        verify(mManagerHooks).noteVibratorOn(eq(UID), eq(350L));
+        verify(mManagerHooks).noteVibratorOff(eq(UID));
+
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.FINISHED);
+        assertThat(mControllers.get(VIBRATOR_ID).isVibrating()).isFalse();
+
+        assertThat(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId))
+                .isEqualTo(expectedOneShots(200L, 50L));
+    }
+
+    @LargeTest
+    @Test
+    public void vibrate_singleVibratorRepeatingPatternWithZeroDurationSteps_repeatsEffectCorrectly()
+            throws Exception {
+        FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
+        fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+
+        VibrationEffect effect = VibrationEffect.createWaveform(
+                /* timings= */ new long[]{0, 200, 50, 100, 0, 50, 50, 100}, /* repeat= */ 0);
+        VibrationStepConductor conductor = startThreadAndDispatcher(effect);
+        long vibrationId = conductor.getVibration().id;
+        // We are expect this test to repeat the vibration effect twice, which would result in 5
+        // segments being played:
+        // 200ms ON
+        // 150ms ON (100ms + 50ms, skips 0ms)
+        // 300ms ON (100ms + 200ms looping to the start and skipping first 0ms)
+        // 150ms ON (100ms + 50ms, skips 0ms)
+        // 300ms ON (100ms + 200ms looping to the start and skipping first 0ms)
+        assertTrue(waitUntil(() -> fakeVibrator.getEffectSegments(vibrationId).size() >= 5,
+                5000L + TEST_TIMEOUT_MILLIS));
+        conductor.notifyCancelled(
+                new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_USER),
+                /* immediate= */ false);
+        waitForCompletion();
+
+        verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED_BY_USER);
+        assertThat(mControllers.get(VIBRATOR_ID).isVibrating()).isFalse();
+
+        assertThat(mVibratorProviders.get(VIBRATOR_ID).getEffectSegments(vibrationId).subList(0, 5))
+                .isEqualTo(expectedOneShots(200L, 150L, 300L, 150L, 300L));
     }
 
     @Test
@@ -1638,6 +1714,12 @@ public class VibrationThreadTest {
     private VibrationEffectSegment expectedOneShot(long millis) {
         return new StepSegment(VibrationEffect.DEFAULT_AMPLITUDE,
                 /* frequencyHz= */ 0, (int) millis);
+    }
+
+    private List<VibrationEffectSegment> expectedOneShots(long... millis) {
+        return Arrays.stream(millis)
+                .mapToObj(this::expectedOneShot)
+                .collect(Collectors.toList());
     }
 
     private VibrationEffectSegment expectedPrebaked(int effectId) {
