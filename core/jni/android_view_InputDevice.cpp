@@ -53,6 +53,7 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
     if (map != nullptr) {
         Parcel parcel;
         map->writeToParcel(&parcel);
+        parcel.setDataPosition(0);
         map = map->readFromParcel(&parcel);
     }
 
