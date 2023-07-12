@@ -1613,7 +1613,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         //  (Right now, there's a circular dependency.)
         mNotificationShadeWindowController.setWindowRootView(windowRootView);
         mNotificationShadeWindowViewController.setupExpandedStatusBar();
-        mShadeController.setShadeViewController(mShadeSurface);
         mShadeController.setNotificationShadeWindowViewController(
                 mNotificationShadeWindowViewController);
         mBackActionInteractor.setup(mQsController, mShadeSurface);

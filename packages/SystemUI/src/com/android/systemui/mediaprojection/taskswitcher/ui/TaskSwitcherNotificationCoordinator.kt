@@ -16,15 +16,19 @@
 
 package com.android.systemui.mediaprojection.taskswitcher.ui
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
+import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.mediaprojection.taskswitcher.ui.model.TaskSwitcherNotificationUiState.NotShowing
 import com.android.systemui.mediaprojection.taskswitcher.ui.model.TaskSwitcherNotificationUiState.Showing
 import com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel.TaskSwitcherNotificationViewModel
+import com.android.systemui.util.NotificationChannels
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -37,38 +41,69 @@ class TaskSwitcherNotificationCoordinator
 @Inject
 constructor(
     private val context: Context,
+    private val notificationManager: NotificationManager,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val viewModel: TaskSwitcherNotificationViewModel,
 ) {
-
     fun start() {
         applicationScope.launch {
             viewModel.uiState.flowOn(mainDispatcher).collect { uiState ->
                 Log.d(TAG, "uiState -> $uiState")
                 when (uiState) {
-                    is Showing -> showNotification(uiState)
+                    is Showing -> showNotification()
                     is NotShowing -> hideNotification()
                 }
             }
         }
     }
 
-    private fun showNotification(uiState: Showing) {
-        val text =
-            """
-            Sharing pauses when you switch apps.
-            Share this app instead.
-            Switch back.
-            """
-                .trimIndent()
-        // TODO(b/286201515): Create actual notification.
-        Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+    private fun showNotification() {
+        notificationManager.notify(TAG, NOTIFICATION_ID, createNotification())
     }
 
-    private fun hideNotification() {}
+    private fun createNotification(): Notification {
+        // TODO(b/286201261): implement actions
+        val actionSwitch =
+            Notification.Action.Builder(
+                    /* icon = */ null,
+                    context.getString(R.string.media_projection_task_switcher_action_switch),
+                    /* intent = */ null
+                )
+                .build()
+
+        val actionBack =
+            Notification.Action.Builder(
+                    /* icon = */ null,
+                    context.getString(R.string.media_projection_task_switcher_action_back),
+                    /* intent = */ null
+                )
+                .build()
+
+        val channel =
+            NotificationChannel(
+                NotificationChannels.HINTS,
+                context.getString(R.string.media_projection_task_switcher_notification_channel),
+                NotificationManager.IMPORTANCE_HIGH
+            )
+        notificationManager.createNotificationChannel(channel)
+        return Notification.Builder(context, channel.id)
+            .setSmallIcon(R.drawable.qs_screen_record_icon_on)
+            .setAutoCancel(true)
+            .setContentText(context.getString(R.string.media_projection_task_switcher_text))
+            .addAction(actionSwitch)
+            .addAction(actionBack)
+            .setPriority(Notification.PRIORITY_HIGH)
+            .setDefaults(Notification.DEFAULT_VIBRATE)
+            .build()
+    }
+
+    private fun hideNotification() {
+        notificationManager.cancel(NOTIFICATION_ID)
+    }
 
     companion object {
         private const val TAG = "TaskSwitchNotifCoord"
+        private const val NOTIFICATION_ID = 5566
     }
 }

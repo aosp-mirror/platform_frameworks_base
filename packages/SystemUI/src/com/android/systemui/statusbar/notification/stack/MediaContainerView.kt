@@ -30,8 +30,8 @@ import com.android.systemui.statusbar.notification.row.ExpandableView
  */
 class MediaContainerView(context: Context, attrs: AttributeSet?) : ExpandableView(context, attrs) {
 
+    override var clipHeight = 0
     var cornerRadius = 0f
-    var clipHeight = 0
     var clipRect = RectF()
     var clipPath = Path()
 

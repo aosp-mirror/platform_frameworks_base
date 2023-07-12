@@ -117,6 +117,8 @@ constructor(
     private var overlayView: View? = null
         set(value) {
             field?.let { oldView ->
+                val lottie = oldView.findViewById(R.id.sidefps_animation) as LottieAnimationView
+                lottie.pauseAnimation()
                 windowManager.removeView(oldView)
                 orientationListener.disable()
             }
@@ -193,7 +195,9 @@ constructor(
             requests.add(request)
             mainExecutor.execute {
                 if (overlayView == null) {
-                    traceSection("SideFpsController#show(request=${request.name}, reason=$reason") {
+                    traceSection(
+                        "SideFpsController#show(request=${request.name}, reason=$reason)"
+                    ) {
                         createOverlayForDisplay(reason)
                     }
                 } else {
@@ -208,7 +212,7 @@ constructor(
         requests.remove(request)
         mainExecutor.execute {
             if (requests.isEmpty()) {
-                traceSection("SideFpsController#hide(${request.name}") { overlayView = null }
+                traceSection("SideFpsController#hide(${request.name})") { overlayView = null }
             }
         }
     }

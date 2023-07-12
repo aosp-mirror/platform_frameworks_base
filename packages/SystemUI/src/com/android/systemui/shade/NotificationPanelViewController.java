@@ -1076,6 +1076,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         mTapAgainViewController.init();
         mShadeHeaderController.init();
+        mShadeHeaderController.setShadeCollapseAction(
+                () -> collapse(/* delayed= */ false , /* speedUpFactor= */ 1.0f));
         mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
         mNotificationPanelUnfoldAnimationController.ifPresent(controller ->
                 controller.setup(mNotificationContainerParent));

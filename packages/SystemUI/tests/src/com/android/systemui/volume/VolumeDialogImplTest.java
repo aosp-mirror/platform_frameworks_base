@@ -142,6 +142,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
+                false,
                 mCsdWarningDialogFactory,
                 mPostureController,
                 mTestableLooper.getLooper(),
@@ -378,6 +379,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
+                false,
                 mCsdWarningDialogFactory,
                 devicePostureController,
                 mTestableLooper.getLooper(),
@@ -397,6 +399,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         int gravity = dialog.getWindowGravity();
         assertEquals(Gravity.TOP, gravity & Gravity.VERTICAL_GRAVITY_MASK);
+
+        cleanUp(dialog);
     }
 
     @Test
@@ -415,6 +419,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
+                false,
                 mCsdWarningDialogFactory,
                 devicePostureController,
                 mTestableLooper.getLooper(),
@@ -433,6 +438,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         int gravity = dialog.getWindowGravity();
         assertEquals(Gravity.CENTER_VERTICAL, gravity & Gravity.VERTICAL_GRAVITY_MASK);
+
+        cleanUp(dialog);
     }
 
     @Test
@@ -451,6 +458,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
+                false,
                 mCsdWarningDialogFactory,
                 devicePostureController,
                 mTestableLooper.getLooper(),
@@ -469,6 +477,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         int gravity = dialog.getWindowGravity();
         assertEquals(Gravity.CENTER_VERTICAL, gravity & Gravity.VERTICAL_GRAVITY_MASK);
+
+        cleanUp(dialog);
     }
 
     @Test
@@ -489,18 +499,19 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mVolumePanelFactory,
                 mActivityStarter,
                 mInteractionJankMonitor,
+                false,
                 mCsdWarningDialogFactory,
                 mPostureController,
                 mTestableLooper.getLooper(),
-                mDumpManager
-        );
+                mDumpManager);
         dialog.init(0, null);
 
         verify(mPostureController, never()).removeCallback(any());
-
         dialog.destroy();
 
         verify(mPostureController).removeCallback(any());
+
+        cleanUp(dialog);
     }
 
     private void setOrientation(int orientation) {
@@ -513,12 +524,16 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @After
     public void teardown() {
-        if (mDialog != null) {
-            mDialog.clearInternalHandlerAfterTest();
-        }
+        cleanUp(mDialog);
         setOrientation(mOriginalOrientation);
         mTestableLooper.processAllMessages();
         reset(mPostureController);
+    }
+
+    private void cleanUp(VolumeDialogImpl dialog) {
+        if (dialog != null) {
+            dialog.clearInternalHandlerAfterTest();
+        }
     }
 
 /*

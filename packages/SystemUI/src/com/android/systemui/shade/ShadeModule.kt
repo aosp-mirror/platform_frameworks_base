@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfC
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
+import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.TapAgainView
 import com.android.systemui.statusbar.policy.BatteryController
@@ -64,7 +65,7 @@ import javax.inject.Named
 import javax.inject.Provider
 
 /** Module for classes related to the notification shade. */
-@Module
+@Module(includes = [StartShadeModule::class])
 abstract class ShadeModule {
 
     @Binds
@@ -281,17 +282,16 @@ abstract class ShadeModule {
             tunerService: TunerService,
             @Main mainHandler: Handler,
             contentResolver: ContentResolver,
-            featureFlags: FeatureFlags,
             batteryController: BatteryController,
         ): BatteryMeterViewController {
             return BatteryMeterViewController(
                 batteryMeterView,
+                StatusBarLocation.QS,
                 userTracker,
                 configurationController,
                 tunerService,
                 mainHandler,
                 contentResolver,
-                featureFlags,
                 batteryController,
             )
         }

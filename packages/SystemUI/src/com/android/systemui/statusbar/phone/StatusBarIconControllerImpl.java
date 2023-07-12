@@ -40,7 +40,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -202,35 +201,7 @@ public class StatusBarIconControllerImpl implements Tunable,
     }
 
     @Override
-    public void setWifiIcon(String slot, WifiIconState state) {
-        if (mStatusBarPipelineFlags.useNewWifiIcon()) {
-            Log.d(TAG, "ignoring old pipeline callback because the new wifi icon is enabled");
-            return;
-        }
-
-        if (state == null) {
-            removeIcon(slot, 0);
-            return;
-        }
-
-        StatusBarIconHolder holder = mStatusBarIconList.getIconHolder(slot, 0);
-        if (holder == null) {
-            holder = StatusBarIconHolder.fromWifiIconState(state);
-            setIcon(slot, holder);
-        } else {
-            holder.setWifiState(state);
-            handleSet(slot, holder);
-        }
-    }
-
-
-    @Override
     public void setNewWifiIcon() {
-        if (!mStatusBarPipelineFlags.useNewWifiIcon()) {
-            Log.d(TAG, "ignoring new pipeline callback because the new wifi icon is disabled");
-            return;
-        }
-
         String slot = mContext.getString(com.android.internal.R.string.status_bar_wifi);
         StatusBarIconHolder holder = mStatusBarIconList.getIconHolder(slot, /* tag= */ 0);
         if (holder == null) {

@@ -20,6 +20,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.model.WakeSleepReason
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.scene.shared.model.SceneKey
@@ -47,12 +50,18 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
         utils.authenticationInteractor(
             repository = authenticationRepository,
         )
+    private val keyguardRepository = utils.keyguardRepository()
+    private val keyguardInteractor =
+        utils.keyguardInteractor(
+            repository = keyguardRepository,
+        )
 
     private val underTest =
         SystemUiDefaultSceneContainerStartable(
             applicationScope = testScope.backgroundScope,
             sceneInteractor = sceneInteractor,
             authenticationInteractor = authenticationInteractor,
+            keyguardInteractor = keyguardInteractor,
             featureFlags = featureFlags,
         )
 
@@ -280,6 +289,94 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
         }
 
+    @Test
+    fun switchToGoneWhenDeviceSleepsUnlocked_featureEnabled() =
+        testScope.runTest {
+            val currentSceneKey by
+                collectLastValue(
+                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
+                        it.key
+                    }
+                )
+            prepareState(
+                isFeatureEnabled = true,
+                isDeviceUnlocked = true,
+                initialSceneKey = SceneKey.Shade,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
+            underTest.start()
+
+            keyguardRepository.setWakefulnessModel(ASLEEP)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Gone)
+        }
+
+    @Test
+    fun switchToGoneWhenDeviceSleepsUnlocked_featureDisabled() =
+        testScope.runTest {
+            val currentSceneKey by
+                collectLastValue(
+                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
+                        it.key
+                    }
+                )
+            prepareState(
+                isFeatureEnabled = false,
+                isDeviceUnlocked = true,
+                initialSceneKey = SceneKey.Shade,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
+            underTest.start()
+
+            keyguardRepository.setWakefulnessModel(ASLEEP)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
+        }
+
+    @Test
+    fun switchToLockscreenWhenDeviceSleepsLocked_featureEnabled() =
+        testScope.runTest {
+            val currentSceneKey by
+                collectLastValue(
+                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
+                        it.key
+                    }
+                )
+            prepareState(
+                isFeatureEnabled = true,
+                isDeviceUnlocked = false,
+                initialSceneKey = SceneKey.Shade,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
+            underTest.start()
+
+            keyguardRepository.setWakefulnessModel(ASLEEP)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+        }
+
+    @Test
+    fun switchToLockscreenWhenDeviceSleepsLocked_featureDisabled() =
+        testScope.runTest {
+            val currentSceneKey by
+                collectLastValue(
+                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
+                        it.key
+                    }
+                )
+            prepareState(
+                isFeatureEnabled = false,
+                isDeviceUnlocked = false,
+                initialSceneKey = SceneKey.Shade,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
+            underTest.start()
+
+            keyguardRepository.setWakefulnessModel(ASLEEP)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
+        }
+
     private fun prepareState(
         isFeatureEnabled: Boolean = true,
         isDeviceUnlocked: Boolean = false,
@@ -292,5 +389,14 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
         initialSceneKey?.let {
             sceneInteractor.setCurrentScene(SceneContainerNames.SYSTEM_UI_DEFAULT, SceneModel(it))
         }
+    }
+
+    companion object {
+        private val ASLEEP =
+            WakefulnessModel(
+                state = WakefulnessState.ASLEEP,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.POWER_BUTTON
+            )
     }
 }

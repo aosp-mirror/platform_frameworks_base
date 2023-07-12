@@ -72,6 +72,7 @@ public interface VolumeModule {
                 volumePanelFactory,
                 activityStarter,
                 interactionJankMonitor,
+                true, /* should listen for jank */
                 csdFactory,
                 devicePostureController,
                 Looper.getMainLooper(),

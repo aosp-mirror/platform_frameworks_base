@@ -126,6 +126,16 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     }
 
     @Test
+    fun updateBatteryState_capacitySame_inputDeviceChanges_updatesInputDeviceId() {
+        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
+        stylusUsiPowerUi.updateBatteryState(1, FixedCapacityBatteryState(0.1f))
+
+        assertThat(stylusUsiPowerUi.inputDeviceId).isEqualTo(1)
+        verify(notificationManager, times(1))
+            .notify(eq(R.string.stylus_battery_low_percentage), any())
+    }
+
+    @Test
     fun updateBatteryState_existingNotification_capacityAboveThreshold_cancelsNotification() {
         stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
         stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.8f))

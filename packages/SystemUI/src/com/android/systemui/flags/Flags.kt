@@ -91,6 +91,11 @@ object Flags {
     val NOTIFICATION_SHELF_REFACTOR =
         unreleasedFlag(271161129, "notification_shelf_refactor", teamfood = true)
 
+    // TODO(b/290787599): Tracking Bug
+    @JvmField
+    val NOTIFICATION_ICON_CONTAINER_REFACTOR =
+        unreleasedFlag(278765923, "notification_icon_container_refactor")
+
     // TODO(b/288326013): Tracking Bug
     @JvmField
     val NOTIFICATION_ASYNC_HYBRID_VIEW_INFLATION =
@@ -285,11 +290,16 @@ object Flags {
     /** Migrate the lock icon view to the new keyguard root view. */
     // TODO(b/286552209): Tracking bug.
     @JvmField
-    val MIGRATE_LOCK_ICON = unreleasedFlag(240, "migrate_lock_icon")
+    val MIGRATE_LOCK_ICON = unreleasedFlag(240, "migrate_lock_icon", teamfood = true)
 
     // TODO(b/288276738): Tracking bug.
     @JvmField
     val WIDGET_ON_KEYGUARD = unreleasedFlag(241, "widget_on_keyguard")
+
+    /** Migrate the NSSL to the a sibling to both the panel and keyguard root view. */
+    // TODO(b/288074305): Tracking bug.
+    @JvmField
+    val MIGRATE_NSSL = unreleasedFlag(242, "migrate_nssl")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -362,21 +372,9 @@ object Flags {
     // TODO(b/256614753): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS = releasedFlag(606, "new_status_bar_mobile_icons")
 
-    // TODO(b/256614210): Tracking Bug
-    val NEW_STATUS_BAR_WIFI_ICON = releasedFlag(607, "new_status_bar_wifi_icon")
-
     // TODO(b/256614751): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS_BACKEND =
         unreleasedFlag(608, "new_status_bar_mobile_icons_backend", teamfood = true)
-
-    // TODO(b/256613548): Tracking Bug
-    val NEW_STATUS_BAR_WIFI_ICON_BACKEND =
-        unreleasedFlag(609, "new_status_bar_wifi_icon_backend", teamfood = true)
-
-    // TODO(b/256623670): Tracking Bug
-    @JvmField
-    val BATTERY_SHIELD_ICON =
-        resourceBooleanFlag(610, R.bool.flag_battery_shield_icon, "battery_shield_icon")
 
     // TODO(b/260881289): Tracking Bug
     val NEW_STATUS_BAR_ICONS_DEBUG_COLORING =
