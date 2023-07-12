@@ -39,6 +39,15 @@ filegroup {
 }
 
 filegroup {
+    name: "feature_flags_aidl",
+    srcs: [
+        "android/flags/IFeatureFlags.aidl",
+        "android/flags/IFeatureFlagsCallback.aidl",
+        "android/flags/SyncableFlag.aidl",
+    ],
+}
+
+filegroup {
     name: "ITracingServiceProxy.aidl",
     srcs: ["android/tracing/ITracingServiceProxy.aidl"],
 }

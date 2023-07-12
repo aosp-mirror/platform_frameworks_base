@@ -164,6 +164,7 @@ java_library {
         "services.coverage",
         "services.credentials",
         "services.devicepolicy",
+        "services.flags",
         "services.midi",
         "services.musicsearch",
         "services.net",

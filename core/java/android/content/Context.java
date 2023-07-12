@@ -5298,6 +5298,13 @@ public abstract class Context {
     public static final String APP_PREDICTION_SERVICE = "app_prediction";
 
     /**
+     * Used for reading system-wide, overridable flags.
+     *
+     * @hide
+     */
+    public static final String FEATURE_FLAGS_SERVICE = "feature_flags";
+
+    /**
      * Official published name of the search ui service.
      *
      * <p><b>NOTE: </b> this service is optional; callers of
