@@ -1114,6 +1114,16 @@
     <!-- System sharing media projection permission button to continue. [CHAR LIMIT=60] -->
     <string name="media_projection_entry_generic_permission_dialog_continue">Start</string>
 
+    <!-- Task switcher notification -->
+    <!-- Task switcher notification text. [CHAR LIMIT=100] -->
+    <string name="media_projection_task_switcher_text">Sharing pauses when you switch apps</string>
+    <!-- The action for switching to the foreground task. [CHAR LIMIT=40] -->
+    <string name="media_projection_task_switcher_action_switch">Share this app instead</string>
+    <!-- The action for switching back to the projected task. [CHAR LIMIT=40] -->
+    <string name="media_projection_task_switcher_action_back">Switch back</string>
+    <!-- Task switcher notification channel name. [CHAR LIMIT=40] -->
+    <string name="media_projection_task_switcher_notification_channel">App switch</string>
+
     <!-- Title for the dialog that is shown when screen capturing is disabled by enterprise policy. [CHAR LIMIT=100] -->
     <string name="screen_capturing_disabled_by_policy_dialog_title">Blocked by your IT admin</string>
 
