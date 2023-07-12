@@ -33,9 +33,8 @@ import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -62,7 +61,6 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
     private Handler mHandler;
     @Mock
     private ContentResolver mContentResolver;
-    private FakeFeatureFlags mFeatureFlags;
     @Mock
     private BatteryController mBatteryController;
 
@@ -75,8 +73,8 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
         when(mBatteryMeterView.getContext()).thenReturn(mContext);
         when(mBatteryMeterView.getResources()).thenReturn(mContext.getResources());
 
-        mFeatureFlags = new FakeFeatureFlags();
-        mFeatureFlags.set(Flags.BATTERY_SHIELD_ICON, false);
+        mContext.getOrCreateTestableResources().addOverride(
+                R.bool.flag_battery_shield_icon, false);
     }
 
     @Test
@@ -135,7 +133,8 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
 
     @Test
     public void shieldFlagDisabled_viewNotified() {
-        mFeatureFlags.set(Flags.BATTERY_SHIELD_ICON, false);
+        mContext.getOrCreateTestableResources().addOverride(
+                R.bool.flag_battery_shield_icon, false);
 
         initController();
 
@@ -144,7 +143,8 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
 
     @Test
     public void shieldFlagEnabled_viewNotified() {
-        mFeatureFlags.set(Flags.BATTERY_SHIELD_ICON, true);
+        mContext.getOrCreateTestableResources().addOverride(
+                R.bool.flag_battery_shield_icon, true);
 
         initController();
 
@@ -160,7 +160,6 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
                 mTunerService,
                 mHandler,
                 mContentResolver,
-                mFeatureFlags,
                 mBatteryController
         );
     }

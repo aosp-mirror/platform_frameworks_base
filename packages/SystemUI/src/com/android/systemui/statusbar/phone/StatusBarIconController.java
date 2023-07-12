@@ -17,7 +17,6 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_ICON;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_MOBILE;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_MOBILE_NEW;
-import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_WIFI;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_WIFI_NEW;
 
 import android.annotation.Nullable;
@@ -43,12 +42,10 @@ import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
-import com.android.systemui.statusbar.StatusBarWifiView;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
 import com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconsBinder;
@@ -97,16 +94,9 @@ public interface StatusBarIconController {
      */
     void setIcon(String slot, int resourceId, CharSequence contentDescription);
 
-    /** */
-    void setWifiIcon(String slot, WifiIconState state);
-
     /**
      * Sets up a wifi icon using the new data pipeline. No effect if the wifi icon has already been
      * set up (inflated and added to the view hierarchy).
-     *
-     * This method completely replaces {@link #setWifiIcon} with the information from the new wifi
-     * data pipeline. Icons will automatically keep their state up to date, so we don't have to
-     * worry about funneling state objects through anymore.
      */
     void setNewWifiIcon();
 
@@ -408,13 +398,7 @@ public interface StatusBarIconController {
                 mMobileIconsViewModel = null;
             }
 
-            if (statusBarPipelineFlags.runNewWifiIconBackend()) {
-                // This starts the flow for the new pipeline, and will notify us of changes if
-                // {@link StatusBarPipelineFlags#useNewWifiIcon} is also true.
-                mWifiViewModel = wifiUiAdapter.bindGroup(mGroup, mLocation);
-            } else {
-                mWifiViewModel = null;
-            }
+            mWifiViewModel = wifiUiAdapter.bindGroup(mGroup, mLocation);
         }
 
         public boolean isDemoable() {
@@ -462,9 +446,6 @@ public interface StatusBarIconController {
                 case TYPE_ICON:
                     return addIcon(index, slot, blocked, holder.getIcon());
 
-                case TYPE_WIFI:
-                    return addWifiIcon(index, slot, holder.getWifiState());
-
                 case TYPE_WIFI_NEW:
                     return addNewWifiIcon(index, slot);
 
@@ -487,29 +468,7 @@ public interface StatusBarIconController {
             return view;
         }
 
-        @VisibleForTesting
-        protected StatusIconDisplayable addWifiIcon(int index, String slot, WifiIconState state) {
-            if (mStatusBarPipelineFlags.useNewWifiIcon()) {
-                throw new IllegalStateException("Attempting to add a wifi icon while the new "
-                        + "icons are enabled is not supported");
-            }
-
-            final StatusBarWifiView view = onCreateStatusBarWifiView(slot);
-            view.applyWifiState(state);
-            mGroup.addView(view, index, onCreateLayoutParams());
-
-            if (mIsInDemoMode) {
-                mDemoStatusIcons.addDemoWifiView(state);
-            }
-            return view;
-        }
-
         protected StatusIconDisplayable addNewWifiIcon(int index, String slot) {
-            if (!mStatusBarPipelineFlags.useNewWifiIcon()) {
-                throw new IllegalStateException("Attempting to add a wifi icon using the new"
-                        + "pipeline, but the enabled flag is false.");
-            }
-
             ModernStatusBarWifiView view = onCreateModernStatusBarWifiView(slot);
             mGroup.addView(view, index, onCreateLayoutParams());
 
@@ -571,11 +530,6 @@ public interface StatusBarIconController {
 
         private StatusBarIconView onCreateStatusBarIconView(String slot, boolean blocked) {
             return new StatusBarIconView(mContext, slot, null, blocked);
-        }
-
-        private StatusBarWifiView onCreateStatusBarWifiView(String slot) {
-            StatusBarWifiView view = StatusBarWifiView.fromContext(mContext, slot);
-            return view;
         }
 
         private ModernStatusBarWifiView onCreateModernStatusBarWifiView(String slot) {
@@ -640,9 +594,6 @@ public interface StatusBarIconController {
                 case TYPE_ICON:
                     onSetIcon(viewIndex, holder.getIcon());
                     return;
-                case TYPE_WIFI:
-                    onSetWifiIcon(viewIndex, holder.getWifiState());
-                    return;
                 case TYPE_MOBILE:
                     onSetMobileIcon(viewIndex, holder.getMobileState());
                     return;
@@ -652,23 +603,6 @@ public interface StatusBarIconController {
                     return;
                 default:
                     break;
-            }
-        }
-
-        public void onSetWifiIcon(int viewIndex, WifiIconState state) {
-            View view = mGroup.getChildAt(viewIndex);
-            if (view instanceof StatusBarWifiView) {
-                ((StatusBarWifiView) view).applyWifiState(state);
-            } else if (view instanceof ModernStatusBarWifiView) {
-                // ModernStatusBarWifiView will automatically apply state based on its callbacks, so
-                // we don't need to call applyWifiState.
-            } else {
-                throw new IllegalStateException("View at " + viewIndex + " must be of type "
-                        + "StatusBarWifiView or ModernStatusBarWifiView");
-            }
-
-            if (mIsInDemoMode) {
-                mDemoStatusIcons.updateWifiState(state);
             }
         }
 
@@ -703,9 +637,7 @@ public interface StatusBarIconController {
             mIsInDemoMode = true;
             if (mDemoStatusIcons == null) {
                 mDemoStatusIcons = createDemoStatusIcons();
-                if (mStatusBarPipelineFlags.useNewWifiIcon()) {
-                    mDemoStatusIcons.addModernWifiView(mWifiViewModel);
-                }
+                mDemoStatusIcons.addModernWifiView(mWifiViewModel);
             }
             mDemoStatusIcons.onDemoModeStarted();
         }
