@@ -122,6 +122,8 @@ constructor(
             }
     }
 
+    var shadeCollapseAction: Runnable? = null
+
     private lateinit var iconManager: StatusBarIconController.TintedIconManager
     private lateinit var carrierIconSlots: List<String>
     private lateinit var mShadeCarrierGroupController: ShadeCarrierGroupController
@@ -469,9 +471,11 @@ constructor(
         if (largeScreenActive) {
             logInstantEvent("Large screen constraints set")
             header.setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
+            systemIcons.setOnClickListener { shadeCollapseAction?.run() }
         } else {
             logInstantEvent("Small screen constraints set")
             header.setTransition(HEADER_TRANSITION_ID)
+            systemIcons.setOnClickListener(null)
         }
         header.jumpToState(header.startState)
         updatePosition()
