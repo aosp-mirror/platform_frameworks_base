@@ -274,7 +274,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mCentralSurfaces.isOccluded()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(entry, mNotificationRow);
@@ -340,7 +340,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Given
         sbn.getNotification().contentIntent = null;
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mCentralSurfaces.isOccluded()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(entry, mBubbleNotificationRow);
@@ -368,7 +368,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Given
         sbn.getNotification().contentIntent = mContentIntent;
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mCentralSurfaces.isOccluded()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
 
         // When
         mNotificationActivityStarter.onNotificationClicked(entry, mBubbleNotificationRow);
