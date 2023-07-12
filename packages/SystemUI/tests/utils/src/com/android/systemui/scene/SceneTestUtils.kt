@@ -22,11 +22,20 @@ import com.android.systemui.authentication.data.repository.AuthenticationReposit
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.bouncer.data.repository.BouncerRepository
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeCommandQueue
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
+import com.android.systemui.keyguard.shared.model.WakeSleepReason
+import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneContainerConfig
@@ -53,7 +62,11 @@ class SceneTestUtils(
 ) {
     val testDispatcher = StandardTestDispatcher()
     val testScope = TestScope(testDispatcher)
-    val featureFlags = FakeFeatureFlags().apply { set(Flags.SCENE_CONTAINER, true) }
+    val featureFlags =
+        FakeFeatureFlags().apply {
+            set(Flags.SCENE_CONTAINER, true)
+            set(Flags.FACE_AUTH_REFACTOR, false)
+        }
     private val userRepository: UserRepository by lazy {
         FakeUserRepository().apply {
             val users = listOf(UserInfo(/* id=  */ 0, "name", /* flags= */ 0))
@@ -66,6 +79,17 @@ class SceneTestUtils(
         FakeAuthenticationRepository(
             currentTime = { testScope.currentTime },
         )
+    }
+    val keyguardRepository: FakeKeyguardRepository by lazy {
+        FakeKeyguardRepository().apply {
+            setWakefulnessModel(
+                WakefulnessModel(
+                    WakefulnessState.AWAKE,
+                    WakeSleepReason.OTHER,
+                    WakeSleepReason.OTHER,
+                )
+            )
+        }
     }
     private val context = test.context
 
@@ -119,6 +143,20 @@ class SceneTestUtils(
             backgroundDispatcher = testDispatcher,
             userRepository = userRepository,
             clock = mock { whenever(elapsedRealtime()).thenAnswer { testScope.currentTime } }
+        )
+    }
+
+    fun keyguardRepository(): FakeKeyguardRepository {
+        return keyguardRepository
+    }
+
+    fun keyguardInteractor(repository: KeyguardRepository): KeyguardInteractor {
+        return KeyguardInteractor(
+            repository = repository,
+            commandQueue = FakeCommandQueue(),
+            featureFlags = featureFlags,
+            bouncerRepository = FakeKeyguardBouncerRepository(),
+            configurationRepository = FakeConfigurationRepository()
         )
     }
 
