@@ -127,8 +127,6 @@ public:
 private:
     friend class RecordingCanvas;
 
-    void flush();
-
     void save();
     void saveLayer(const SkRect*, const SkPaint*, const SkImageFilter*, SkCanvas::SaveLayerFlags);
     void saveBehind(const SkRect*);
@@ -207,8 +205,6 @@ public:
     SaveLayerStrategy getSaveLayerStrategy(const SaveLayerRec&) override;
     void willRestore() override;
     bool onDoSaveBehind(const SkRect*) override;
-
-    void onFlush() override;
 
     void didConcat44(const SkM44&) override;
     void didSetM44(const SkM44&) override;

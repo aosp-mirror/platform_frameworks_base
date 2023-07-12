@@ -107,11 +107,6 @@ struct Op {
 };
 static_assert(sizeof(Op) == 4, "");
 
-struct Flush final : Op {
-    static const auto kType = Type::Flush;
-    void draw(SkCanvas* c, const SkMatrix&) const { c->flush(); }
-};
-
 struct Save final : Op {
     static const auto kType = Type::Save;
     void draw(SkCanvas* c, const SkMatrix&) const { c->save(); }
@@ -751,10 +746,6 @@ inline void DisplayListData::map(const Fn fns[], Args... args) const {
     }
 }
 
-void DisplayListData::flush() {
-    this->push<Flush>(0);
-}
-
 void DisplayListData::save() {
     this->push<Save>(0);
 }
@@ -1044,10 +1035,6 @@ void RecordingCanvas::reset(DisplayListData* dl, const SkIRect& bounds) {
 
 sk_sp<SkSurface> RecordingCanvas::onNewSurface(const SkImageInfo&, const SkSurfaceProps&) {
     return nullptr;
-}
-
-void RecordingCanvas::onFlush() {
-    fDL->flush();
 }
 
 void RecordingCanvas::willSave() {
