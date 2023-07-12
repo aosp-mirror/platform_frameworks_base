@@ -132,6 +132,7 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
+import com.android.server.flags.FeatureFlagsService;
 import com.android.server.gpu.GpuService;
 import com.android.server.grammaticalinflection.GrammaticalInflectionService;
 import com.android.server.graphics.fonts.FontManagerService;
@@ -1109,6 +1110,12 @@ public final class SystemServer implements Dumpable {
         // therefore register the device identifier policy before the activity manager.
         t.traceBegin("DeviceIdentifiersPolicyService");
         mSystemServiceManager.startService(DeviceIdentifiersPolicyService.class);
+        t.traceEnd();
+
+        // Starts a service for reading runtime flag overrides, and keeping processes
+        // in sync with one another.
+        t.traceBegin("StartFeatureFlagsService");
+        mSystemServiceManager.startService(FeatureFlagsService.class);
         t.traceEnd();
 
         // Uri Grants Manager.
