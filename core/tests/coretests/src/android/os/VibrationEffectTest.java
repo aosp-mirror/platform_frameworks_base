@@ -38,6 +38,8 @@ import android.content.res.Resources;
 import android.hardware.vibrator.IVibrator;
 import android.net.Uri;
 import android.os.VibrationEffect.Composition.UnreachableAfterRepeatingIndefinitelyException;
+import android.os.vibrator.PrimitiveSegment;
+import android.os.vibrator.StepSegment;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -632,6 +634,88 @@ public class VibrationEffectTest {
                         .addEffect(TEST_ONE_SHOT)
                         .compose()
                         .validate());
+    }
+
+    @Test
+    public void testResolveOneShot() {
+        VibrationEffect.Composed resolved = DEFAULT_ONE_SHOT.resolve(51);
+        assertEquals(0.2f, ((StepSegment) resolved.getSegments().get(0)).getAmplitude());
+
+        assertThrows(IllegalArgumentException.class, () -> DEFAULT_ONE_SHOT.resolve(1000));
+    }
+
+    @Test
+    public void testResolveWaveform() {
+        VibrationEffect.Composed resolved = TEST_WAVEFORM.resolve(102);
+        assertEquals(0.4f, ((StepSegment) resolved.getSegments().get(2)).getAmplitude());
+
+        assertThrows(IllegalArgumentException.class, () -> TEST_WAVEFORM.resolve(1000));
+    }
+
+    @Test
+    public void testResolvePrebaked() {
+        VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+        assertEquals(effect, effect.resolve(51));
+    }
+
+    @Test
+    public void testResolveComposed() {
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 1)
+                .compose();
+        assertEquals(effect, effect.resolve(51));
+
+        VibrationEffect.Composed resolved = VibrationEffect.startComposition()
+                .addEffect(DEFAULT_ONE_SHOT)
+                .compose()
+                .resolve(51);
+        assertEquals(0.2f, ((StepSegment) resolved.getSegments().get(0)).getAmplitude());
+    }
+
+    @Test
+    public void testScaleOneShot() {
+        VibrationEffect.Composed scaledUp = TEST_ONE_SHOT.scale(1.5f);
+        assertTrue(100 / 255f < ((StepSegment) scaledUp.getSegments().get(0)).getAmplitude());
+
+        VibrationEffect.Composed scaledDown = TEST_ONE_SHOT.scale(0.5f);
+        assertTrue(100 / 255f > ((StepSegment) scaledDown.getSegments().get(0)).getAmplitude());
+    }
+
+    @Test
+    public void testScaleWaveform() {
+        VibrationEffect.Composed scaledUp = TEST_WAVEFORM.scale(1.5f);
+        assertEquals(1f, ((StepSegment) scaledUp.getSegments().get(0)).getAmplitude(), 1e-5f);
+
+        VibrationEffect.Composed scaledDown = TEST_WAVEFORM.scale(0.5f);
+        assertTrue(1f > ((StepSegment) scaledDown.getSegments().get(0)).getAmplitude());
+    }
+
+    @Test
+    public void testScalePrebaked() {
+        VibrationEffect effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+
+        VibrationEffect.Composed scaledUp = effect.scale(1.5f);
+        assertEquals(effect, scaledUp);
+
+        VibrationEffect.Composed scaledDown = effect.scale(0.5f);
+        assertEquals(effect, scaledDown);
+    }
+
+    @Test
+    public void testScaleComposed() {
+        VibrationEffect.Composed effect =
+                (VibrationEffect.Composed) VibrationEffect.startComposition()
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 1)
+                    .addEffect(TEST_ONE_SHOT)
+                    .compose();
+
+        VibrationEffect.Composed scaledUp = effect.scale(1.5f);
+        assertTrue(0.5f < ((PrimitiveSegment) scaledUp.getSegments().get(0)).getScale());
+        assertTrue(100 / 255f < ((StepSegment) scaledUp.getSegments().get(1)).getAmplitude());
+
+        VibrationEffect.Composed scaledDown = effect.scale(0.5f);
+        assertTrue(0.5f > ((PrimitiveSegment) scaledDown.getSegments().get(0)).getScale());
+        assertTrue(100 / 255f > ((StepSegment) scaledDown.getSegments().get(1)).getAmplitude());
     }
 
     private void doTestApplyRepeatingWithNonRepeatingOriginal(@NotNull VibrationEffect original) {
