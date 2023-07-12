@@ -78,24 +78,6 @@ abstract class RelativeTouchListener : View.OnTouchListener {
         velY: Float
     )
 
-    /**
-     * Called when an ACTION_CANCEL event is received for the given view. This signals that the
-     * current gesture has been aborted.
-     *
-     * @param viewInitialX The view's translationX value when this touch gesture started.
-     * @param viewInitialY The view's translationY value when this touch gesture started.
-     * @param dx Horizontal distance covered since the initial ACTION_DOWN event, in pixels.
-     * @param dy Vertical distance covered since the initial ACTION_DOWN event, in pixels.
-     */
-    open fun onCancel(
-        v: View,
-        ev: MotionEvent,
-        viewInitialX: Float,
-        viewInitialY: Float,
-        dx: Float,
-        dy: Float
-    ) {}
-
     /** The raw coordinates of the last ACTION_DOWN event. */
     private val touchDown = PointF()
 
@@ -164,7 +146,6 @@ abstract class RelativeTouchListener : View.OnTouchListener {
             }
 
             MotionEvent.ACTION_CANCEL -> {
-                onCancel(v, ev, viewPositionOnTouchDown.x, viewPositionOnTouchDown.y, dx, dy)
                 v.handler.removeCallbacksAndMessages(null)
                 velocityTracker.clear()
                 movedEnough = false
