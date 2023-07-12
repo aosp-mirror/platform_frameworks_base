@@ -20,18 +20,15 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 /**
  * @hide
  */
 public final class SyncableFlag implements Parcelable {
     private final String mNamespace;
     private final String mName;
-    private String mValue;
+    private final String mValue;
     private final boolean mDynamic;
 
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public SyncableFlag(
             @NonNull String namespace,
             @NonNull String name,
@@ -41,10 +38,6 @@ public final class SyncableFlag implements Parcelable {
         mName = name;
         mValue = value;
         mDynamic = dynamic;
-    }
-
-    public void setValue(@NonNull String value) {
-        mValue = value;
     }
 
     @NonNull

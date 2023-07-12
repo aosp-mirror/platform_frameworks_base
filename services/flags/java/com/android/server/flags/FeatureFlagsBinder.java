@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 class FeatureFlagsBinder extends IFeatureFlags.Stub {
@@ -52,11 +53,13 @@ class FeatureFlagsBinder extends IFeatureFlags.Stub {
     @Override
     public List<SyncableFlag> syncFlags(List<SyncableFlag> incomingFlags) {
         int pid = getCallingPid();
+        List<SyncableFlag> outputFlags = new ArrayList<>();
         for (SyncableFlag sf : incomingFlags) {
             String ns = sf.getNamespace();
             String name = sf.getName();
+            SyncableFlag outFlag;
             if (sf.isDynamic()) {
-                mDynamicFlagDelegate.syncDynamicFlag(pid, sf);
+                outFlag = mDynamicFlagDelegate.syncDynamicFlag(pid, sf);
             } else {
                 synchronized (mFlagCache) {
                     String value = mFlagCache.getOrNull(ns, name);
@@ -65,11 +68,12 @@ class FeatureFlagsBinder extends IFeatureFlags.Stub {
                         value = overrideValue != null ? overrideValue : sf.getValue();
                         mFlagCache.setIfChanged(ns, name, value);
                     }
-                    sf.setValue(value);
+                    outFlag = new SyncableFlag(sf.getNamespace(), sf.getName(), value, false);
                 }
             }
+            outputFlags.add(outFlag);
         }
-        return incomingFlags;
+        return outputFlags;
     }
 
     @SystemApi
