@@ -22,6 +22,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.scene.shared.model.SceneKey
@@ -45,6 +47,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val sceneInteractor: SceneInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
+    private val keyguardInteractor: KeyguardInteractor,
     private val featureFlags: FeatureFlags,
 ) : CoreStartable {
 
@@ -78,7 +81,7 @@ constructor(
                     when {
                         isUnlocked ->
                             when (currentSceneKey) {
-                                // When the device becomes unlocked in Bouncer, go to the Gone.
+                                // When the device becomes unlocked in Bouncer, go to Gone.
                                 is SceneKey.Bouncer -> SceneKey.Gone
                                 // When the device becomes unlocked in Lockscreen, go to Gone if
                                 // bypass is enabled.
@@ -101,13 +104,28 @@ constructor(
                     }
                 }
                 .filterNotNull()
-                .collect { targetSceneKey ->
-                    sceneInteractor.setCurrentScene(
-                        containerName = CONTAINER_NAME,
-                        scene = SceneModel(targetSceneKey),
-                    )
+                .collect { targetSceneKey -> switchToScene(targetSceneKey) }
+        }
+
+        applicationScope.launch {
+            keyguardInteractor.wakefulnessModel
+                .map { it.state == WakefulnessState.ASLEEP }
+                .distinctUntilChanged()
+                .collect { isAsleep ->
+                    if (isAsleep) {
+                        // When the device goes to sleep, reset the current scene.
+                        val isUnlocked = authenticationInteractor.isUnlocked.value
+                        switchToScene(if (isUnlocked) SceneKey.Gone else SceneKey.Lockscreen)
+                    }
                 }
         }
+    }
+
+    private fun switchToScene(targetSceneKey: SceneKey) {
+        sceneInteractor.setCurrentScene(
+            containerName = CONTAINER_NAME,
+            scene = SceneModel(targetSceneKey),
+        )
     }
 
     companion object {
