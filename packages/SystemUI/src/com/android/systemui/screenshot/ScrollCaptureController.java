@@ -130,8 +130,14 @@ public class ScrollCaptureController {
 
         @Override
         public String toString() {
-            return "LongScreenshot{w=" + mImageTileSet.getWidth()
-                    + ", h=" + mImageTileSet.getHeight() + "}";
+            return "LongScreenshot{"
+                    + "l=" + mImageTileSet.getLeft() + ", "
+                    + "t=" + mImageTileSet.getTop() + ", "
+                    + "r=" + mImageTileSet.getRight() + ", "
+                    + "b=" + mImageTileSet.getBottom() + ", "
+                    + "w=" + mImageTileSet.getWidth() + ", "
+                    + "h=" + mImageTileSet.getHeight()
+                    + "}";
         }
 
         public Drawable getDrawable() {
