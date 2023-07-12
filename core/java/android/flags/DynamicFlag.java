@@ -24,4 +24,8 @@ package android.flags;
  * @hide
  */
 public interface DynamicFlag<T> extends Flag<T> {
+    @Override
+    default boolean isDynamic() {
+        return true;
+    }
 }
