@@ -26,6 +26,7 @@ import androidx.core.animation.doOnEnd
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
+import com.android.dream.lowlight.util.TruncatedInterpolator
 import com.android.systemui.R
 import com.android.systemui.complication.ComplicationHostViewController
 import com.android.systemui.complication.ComplicationLayoutParams
@@ -204,31 +205,28 @@ constructor(
                     translationYAnimator(
                         from = 0f,
                         to = -mDreamInTranslationYDistance.toFloat(),
-                        durationMs = mDreamInTranslationYDurationMs,
+                        durationMs = mDreamInComplicationsAnimDurationMs,
                         delayMs = 0,
-                        interpolator = Interpolators.EMPHASIZED
+                        // Truncate the animation from the full duration to match the alpha
+                        // animation so that the whole animation ends at the same time.
+                        interpolator =
+                            TruncatedInterpolator(
+                                Interpolators.EMPHASIZED,
+                                /*originalDuration=*/ mDreamInTranslationYDurationMs.toFloat(),
+                                /*newDuration=*/ mDreamInComplicationsAnimDurationMs.toFloat()
+                            )
                     ),
                     alphaAnimator(
-                            from =
-                                mCurrentAlphaAtPosition.getOrDefault(
-                                    key = POSITION_BOTTOM,
-                                    defaultValue = 1f
-                                ),
-                            to = 0f,
-                            durationMs = mDreamInComplicationsAnimDurationMs,
-                            delayMs = 0,
-                            positions = POSITION_BOTTOM
-                        )
-                        .apply {
-                            doOnEnd {
-                                // The logical end of the animation is once the alpha and blur
-                                // animations finish, end the animation so that any listeners are
-                                // notified. The Y translation animation is much longer than all of
-                                // the other animations due to how the spec is defined, but is not
-                                // expected to run to completion.
-                                mAnimator?.end()
-                            }
-                        },
+                        from =
+                            mCurrentAlphaAtPosition.getOrDefault(
+                                key = POSITION_BOTTOM,
+                                defaultValue = 1f
+                            ),
+                        to = 0f,
+                        durationMs = mDreamInComplicationsAnimDurationMs,
+                        delayMs = 0,
+                        positions = POSITION_BOTTOM
+                    ),
                     alphaAnimator(
                         from =
                             mCurrentAlphaAtPosition.getOrDefault(
