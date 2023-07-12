@@ -3629,10 +3629,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                     com.android.internal.R.string.wallpaper_binding_label);
             intent.putExtra(Intent.EXTRA_CLIENT_INTENT, clientIntent);
-            boolean bindSuccess = mContext.bindServiceAsUser(intent, newConn,
-                    Context.BIND_AUTO_CREATE | Context.BIND_SHOWING_UI
+            int bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_SHOWING_UI
                             | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
-                            | Context.BIND_INCLUDE_CAPABILITIES,
+                            | Context.BIND_INCLUDE_CAPABILITIES;
+
+            if (mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_wallpaperTopApp)) {
+                bindFlags |= Context.BIND_SCHEDULE_LIKE_TOP_APP;
+            }
+            boolean bindSuccess = mContext.bindServiceAsUser(intent, newConn, bindFlags,
                     new UserHandle(serviceUserId));
             if (!bindSuccess) {
                 String msg = "Unable to bind service: " + componentName;
