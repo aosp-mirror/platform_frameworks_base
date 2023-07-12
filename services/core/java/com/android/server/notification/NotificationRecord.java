@@ -25,8 +25,6 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.app.IActivityManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -48,6 +46,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.provider.Settings;
@@ -98,8 +97,7 @@ public final class NotificationRecord {
     // the period after which a notification is updated where it can make sound
     private static final int MAX_SOUND_DELAY_MS = 2000;
     private final StatusBarNotification sbn;
-    IActivityManager mAm;
-    UriGrantsManagerInternal mUgmInternal;
+    private final UriGrantsManagerInternal mUgmInternal;
     final int mTargetSdkVersion;
     final int mOriginalFlags;
     private final Context mContext;
@@ -223,7 +221,6 @@ public final class NotificationRecord {
         this.sbn = sbn;
         mTargetSdkVersion = LocalServices.getService(PackageManagerInternal.class)
                 .getPackageTargetSdkVersion(sbn.getPackageName());
-        mAm = ActivityManager.getService();
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
@@ -1387,18 +1384,27 @@ public final class NotificationRecord {
      * Collect all {@link Uri} that should have permission granted to whoever
      * will be rendering it.
      */
-    protected void calculateGrantableUris() {
-        final Notification notification = getNotification();
-        notification.visitUris((uri) -> {
-            visitGrantableUri(uri, false, false);
-        });
+    private void calculateGrantableUris() {
+        Trace.beginSection("NotificationRecord.calculateGrantableUris");
+        try {
+            // We can't grant URI permissions from system.
+            final int sourceUid = getSbn().getUid();
+            if (sourceUid == android.os.Process.SYSTEM_UID) return;
 
-        if (notification.getChannelId() != null) {
-            NotificationChannel channel = getChannel();
-            if (channel != null) {
-                visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
-                        & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+            final Notification notification = getNotification();
+            notification.visitUris((uri) -> {
+                visitGrantableUri(uri, false, false);
+            });
+
+            if (notification.getChannelId() != null) {
+                NotificationChannel channel = getChannel();
+                if (channel != null) {
+                    visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
+                            & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+                }
             }
+        } finally {
+            Trace.endSection();
         }
     }
 
@@ -1413,13 +1419,14 @@ public final class NotificationRecord {
     private void visitGrantableUri(Uri uri, boolean userOverriddenUri, boolean isSound) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
-        // We can't grant Uri permissions from system
-        final int sourceUid = getSbn().getUid();
-        if (sourceUid == android.os.Process.SYSTEM_UID) return;
+        if (mGrantableUris != null && mGrantableUris.contains(uri)) {
+            return; // already verified this URI
+        }
 
+        final int sourceUid = getSbn().getUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            // This will throw SecurityException if caller can't grant
+            // This will throw a SecurityException if the caller can't grant.
             mUgmInternal.checkGrantUriPermission(sourceUid, null,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
