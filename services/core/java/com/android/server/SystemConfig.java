@@ -1827,6 +1827,9 @@ public class SystemConfig {
                         soname, soname, new String[0], true);
                 mSharedLibraries.put(entry.name, entry);
             }
+        } catch (FileNotFoundException e) {
+            // Expected for /vendor/etc/public.libraries.txt on some devices
+            Slog.d(TAG, listFile + " does not exist");
         } catch (IOException e) {
             Slog.w(TAG, "Failed to read public libraries file " + listFile, e);
         }
