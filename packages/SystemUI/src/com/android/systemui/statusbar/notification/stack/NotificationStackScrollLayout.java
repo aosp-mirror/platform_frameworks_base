@@ -3758,20 +3758,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             case MotionEvent.ACTION_UP:
                 if (mStatusBarState != StatusBarState.KEYGUARD && mTouchIsClick &&
                         isBelowLastNotification(mInitialTouchX, mInitialTouchY)) {
-                    debugLog("handleEmptySpaceClick: touch event propagated further");
+                    debugShadeLog("handleEmptySpaceClick: touch event propagated further");
                     mOnEmptySpaceClickListener.onEmptySpaceClicked(mInitialTouchX, mInitialTouchY);
                 }
                 break;
             default:
-                debugLog("handleEmptySpaceClick: MotionEvent ignored");
+                debugShadeLog("handleEmptySpaceClick: MotionEvent ignored");
         }
     }
 
-    private void debugLog(@CompileTimeConstant final String s) {
+    private void debugShadeLog(@CompileTimeConstant final String s) {
         if (mLogger == null) {
             return;
         }
-        mLogger.d(s);
+        mLogger.logShadeDebugEvent(s);
     }
 
     private void logEmptySpaceClick(MotionEvent ev, boolean isTouchBelowLastNotification,
