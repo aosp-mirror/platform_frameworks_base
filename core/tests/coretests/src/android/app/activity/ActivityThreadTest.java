@@ -884,12 +884,13 @@ public class ActivityThreadTest {
             mConfig.setTo(config);
             ++mNumOfConfigChanges;
 
-            if (mConfigLatch != null) {
+            final CountDownLatch configLatch = mConfigLatch;
+            if (configLatch != null) {
                 if (mTestLatch != null) {
                     mTestLatch.countDown();
                 }
                 try {
-                    mConfigLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
+                    configLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
                     throw new IllegalStateException(e);
                 }
