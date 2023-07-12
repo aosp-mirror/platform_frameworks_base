@@ -1016,8 +1016,9 @@ public class InputMethodService extends AbstractInputMethodService {
             if (!mOnPreparedStylusHwCalled) {
                 // prepare hasn't been called by Stylus HOVER.
                 onPrepareStylusHandwriting();
-                mOnPreparedStylusHwCalled = true;
             }
+            // reset flag as it's not relevant after onStartStylusHandwriting().
+            mOnPreparedStylusHwCalled = false;
             if (onStartStylusHandwriting()) {
                 mPrivOps.onStylusHandwritingReady(requestId, Process.myPid());
             } else {
@@ -3089,7 +3090,8 @@ public class InputMethodService extends AbstractInputMethodService {
         mInputStarted = false;
         mStartedInputConnection = null;
         mCurCompletions = null;
-        if (mInkWindow != null) {
+        if (!mOnPreparedStylusHwCalled) {
+            // If IME didn't prepare to show InkWindow for current handwriting session.
             finishStylusHandwriting();
         }
         // Back callback is typically unregistered in {@link #hideWindow()}, but it's possible
