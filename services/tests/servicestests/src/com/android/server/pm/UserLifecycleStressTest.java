@@ -16,10 +16,11 @@
 package com.android.server.pm;
 
 import static android.os.UserHandle.USER_NULL;
-import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+
+import static org.junit.Assume.assumeFalse;
 
 import android.app.ActivityManager;
 import android.app.IStopUserCallback;
@@ -27,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Postsubmit;
 import android.provider.Settings;
@@ -62,7 +64,7 @@ public class UserLifecycleStressTest {
     private static final String TAG = "UserLifecycleStressTest";
     // TODO: Make this smaller once we have improved it.
     private static final int TIMEOUT_IN_SECOND = 40;
-    private static final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
+    private static final int CHECK_USER_REMOVED_INTERVAL_MS = 500;
 
     private static final int NUM_ITERATIONS = 8;
     private static final int WAIT_BEFORE_STOP_USER_IN_SECOND = 3;
@@ -75,6 +77,7 @@ public class UserLifecycleStressTest {
     private ActivityManager mActivityManager;
     private UserSwitchWaiter mUserSwitchWaiter;
     private String mRemoveGuestOnExitOriginalValue;
+    private int mOriginalCurrentUserId;
 
     @Before
     public void setup() throws RemoteException {
@@ -85,10 +88,12 @@ public class UserLifecycleStressTest {
         mRemoveGuestOnExitOriginalValue = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.REMOVE_GUEST_ON_EXIT);
         waitForBroadcastBarrier(); // isolate tests from each other
+        mOriginalCurrentUserId = ActivityManager.getCurrentUser();
     }
 
     @After
     public void tearDown() throws IOException {
+        switchUser(mOriginalCurrentUserId);
         mUserSwitchWaiter.close();
         Settings.Global.putString(mContext.getContentResolver(),
                 Settings.Global.REMOVE_GUEST_ON_EXIT, mRemoveGuestOnExitOriginalValue);
@@ -101,6 +106,10 @@ public class UserLifecycleStressTest {
      */
     @Test
     public void stopManagedProfileStressTest() throws RemoteException, InterruptedException {
+        UserHandle mainUser = mUserManager.getMainUser();
+        assumeFalse("There is no main user", mainUser == null);
+        switchUser(mainUser.getIdentifier());
+
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             logIteration(i, "stopManagedProfileStressTest");
 
@@ -164,10 +173,6 @@ public class UserLifecycleStressTest {
         Settings.Global.putString(mContext.getContentResolver(),
                 Settings.Global.REMOVE_GUEST_ON_EXIT, "0");
 
-        if (ActivityManager.getCurrentUser() != USER_SYSTEM) {
-            switchUser(USER_SYSTEM);
-        }
-
         final List<UserInfo> guestUsers = mUserManager.getGuestUsers();
         int nextGuestId = guestUsers.isEmpty() ? USER_NULL : guestUsers.get(0).id;
 
@@ -202,8 +207,8 @@ public class UserLifecycleStressTest {
                         .isTrue();
             }
 
-            Log.d(TAG, "Switching back to the system user");
-            switchUser(USER_SYSTEM);
+            Log.d(TAG, "Switching back to the initial user");
+            switchUser(mOriginalCurrentUserId);
 
             nextGuestId = newGuest.id;
         }
@@ -253,6 +258,10 @@ public class UserLifecycleStressTest {
 
     /** Starts the given user in the foreground and waits for the switch to finish. */
     private void switchUser(int userId) {
+        if (ActivityManager.getCurrentUser() == userId) {
+            Log.d(TAG, "No need to switch, current user is already user " + userId);
+            return;
+        }
         Log.d(TAG, "Switching to user " + userId);
 
         mUserSwitchWaiter.runThenWaitUntilSwitchCompleted(userId, () -> {
