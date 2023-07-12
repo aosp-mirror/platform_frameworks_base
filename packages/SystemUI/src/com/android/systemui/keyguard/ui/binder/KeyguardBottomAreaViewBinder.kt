@@ -377,9 +377,9 @@ object KeyguardBottomAreaViewBinder {
             Utils.getColorAttrDefaultColor(
                 view.context,
                 if (viewModel.isActivated) {
-                    com.android.internal.R.attr.materialColorOnPrimaryFixed
+                    com.android.internal.R.attr.textColorPrimaryInverse
                 } else {
-                    com.android.internal.R.attr.materialColorOnSurface
+                    com.android.internal.R.attr.textColorPrimary
                 },
             )
         )
@@ -389,9 +389,9 @@ object KeyguardBottomAreaViewBinder {
                 Utils.getColorAttr(
                     view.context,
                     if (viewModel.isActivated) {
-                        com.android.internal.R.attr.materialColorPrimaryFixed
+                        com.android.internal.R.attr.colorAccentPrimary
                     } else {
-                        com.android.internal.R.attr.materialColorSurfaceContainerHigh
+                        com.android.internal.R.attr.colorSurface
                     }
                 )
             } else {

@@ -1550,7 +1550,6 @@ public class ScrollView extends FrameLayout {
             float deltaDistance = -unconsumed * FLING_DESTRETCH_FACTOR / size;
             int consumed = Math.round(-size / FLING_DESTRETCH_FACTOR
                     * mEdgeGlowTop.onPullDistance(deltaDistance, 0.5f));
-            mEdgeGlowTop.onRelease();
             if (consumed != unconsumed) {
                 mEdgeGlowTop.finish();
             }
@@ -1561,7 +1560,6 @@ public class ScrollView extends FrameLayout {
             float deltaDistance = unconsumed * FLING_DESTRETCH_FACTOR / size;
             int consumed = Math.round(size / FLING_DESTRETCH_FACTOR
                     * mEdgeGlowBottom.onPullDistance(deltaDistance, 0.5f));
-            mEdgeGlowBottom.onRelease();
             if (consumed != unconsumed) {
                 mEdgeGlowBottom.finish();
             }
