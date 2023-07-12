@@ -421,4 +421,9 @@
     <!-- The height of the area at the top of the screen where a freeform task will transition to
     fullscreen if dragged until the top bound of the task is within the area. -->
     <dimen name="desktop_mode_transition_area_height">16dp</dimen>
+
+    <!-- The acceptable area ratio of fg icon area/bg icon area, i.e. (72 x 72) / (108 x 108) -->
+    <item type="dimen" format="float" name="splash_icon_enlarge_foreground_threshold">0.44</item>
+    <!-- Scaling factor applied to splash icons without provided background i.e. (192 / 160) -->
+    <item type="dimen" format="float" name="splash_icon_no_background_scale_factor">1.2</item>
 </resources>

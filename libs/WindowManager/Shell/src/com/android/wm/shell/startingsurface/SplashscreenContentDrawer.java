@@ -112,28 +112,15 @@ public class SplashscreenContentDrawer {
      */
     static final long MAX_ANIMATION_DURATION = MINIMAL_ANIMATION_DURATION + TIME_WINDOW_DURATION;
 
-    // The acceptable area ratio of foreground_icon_area/background_icon_area, if there is an
-    // icon which it's non-transparent foreground area is similar to it's background area, then
-    // do not enlarge the foreground drawable.
-    // For example, an icon with the foreground 108*108 opaque pixels and it's background
-    // also 108*108 pixels, then do not enlarge this icon if only need to show foreground icon.
-    private static final float ENLARGE_FOREGROUND_ICON_THRESHOLD = (72f * 72f) / (108f * 108f);
-
-    /**
-     * If the developer doesn't specify a background for the icon, we slightly scale it up.
-     *
-     * The background is either manually specified in the theme or the Adaptive Icon
-     * background is used if it's different from the window background.
-     */
-    private static final float NO_BACKGROUND_SCALE = 192f / 160;
     private final Context mContext;
     private final HighResIconProvider mHighResIconProvider;
-
     private int mIconSize;
     private int mDefaultIconSize;
     private int mBrandingImageWidth;
     private int mBrandingImageHeight;
     private int mMainWindowShiftLength;
+    private float mEnlargeForegroundIconThreshold;
+    private float mNoBackgroundScale;
     private int mLastPackageContextConfigHash;
     private final TransactionPool mTransactionPool;
     private final SplashScreenWindowAttrs mTmpAttrs = new SplashScreenWindowAttrs();
@@ -336,6 +323,10 @@ public class SplashscreenContentDrawer {
                 com.android.wm.shell.R.dimen.starting_surface_brand_image_height);
         mMainWindowShiftLength = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.starting_surface_exit_animation_window_shift_length);
+        mEnlargeForegroundIconThreshold = mContext.getResources().getFloat(
+                com.android.wm.shell.R.dimen.splash_icon_enlarge_foreground_threshold);
+        mNoBackgroundScale = mContext.getResources().getFloat(
+                com.android.wm.shell.R.dimen.splash_icon_no_background_scale_factor);
     }
 
     /**
@@ -604,14 +595,14 @@ public class SplashscreenContentDrawer {
                 // There is no background below the icon, so scale the icon up
                 if (mTmpAttrs.mIconBgColor == Color.TRANSPARENT
                         || mTmpAttrs.mIconBgColor == mThemeColor) {
-                    mFinalIconSize *= NO_BACKGROUND_SCALE;
+                    mFinalIconSize *= mNoBackgroundScale;
                 }
                 createIconDrawable(iconDrawable, false /* legacy */, false /* loadInDetail */);
             } else {
                 final float iconScale = (float) mIconSize / (float) mDefaultIconSize;
                 final int densityDpi = mContext.getResources().getConfiguration().densityDpi;
                 final int scaledIconDpi =
-                        (int) (0.5f + iconScale * densityDpi * NO_BACKGROUND_SCALE);
+                        (int) (0.5f + iconScale * densityDpi * mNoBackgroundScale);
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "getIcon");
                 iconDrawable = mHighResIconProvider.getIcon(
                         mActivityInfo, densityDpi, scaledIconDpi);
@@ -693,8 +684,8 @@ public class SplashscreenContentDrawer {
                 // Reference AdaptiveIcon description, outer is 108 and inner is 72, so we
                 // scale by 192/160 if we only draw adaptiveIcon's foreground.
                 final float noBgScale =
-                        iconColor.mFgNonTranslucentRatio < ENLARGE_FOREGROUND_ICON_THRESHOLD
-                                ? NO_BACKGROUND_SCALE : 1f;
+                        iconColor.mFgNonTranslucentRatio < mEnlargeForegroundIconThreshold
+                                ? mNoBackgroundScale : 1f;
                 // Using AdaptiveIconDrawable here can help keep the shape consistent with the
                 // current settings.
                 mFinalIconSize = (int) (0.5f + mIconSize * noBgScale);
