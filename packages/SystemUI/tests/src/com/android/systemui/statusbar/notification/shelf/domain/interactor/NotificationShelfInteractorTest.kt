@@ -58,6 +58,7 @@ class NotificationShelfInteractorTest : SysuiTestCase() {
     private val powerInteractor =
         PowerInteractor(
             powerRepository,
+            keyguardRepository,
             FalsingCollectorFake(),
             screenOffAnimationController,
             statusBarStateController,
