@@ -72,6 +72,9 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.KeyguardChangeListener;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.TaskCornersListener;
 
@@ -89,6 +92,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final DesktopModeWindowDecoration.Factory mDesktopModeWindowDecorFactory;
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellTaskOrganizer mTaskOrganizer;
+    private final ShellController mShellController;
     private final Context mContext;
     private final Handler mMainHandler;
     private final Choreographer mMainChoreographer;
@@ -114,30 +118,37 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private MoveToDesktopAnimator mMoveToDesktopAnimator;
     private final Rect mDragToDesktopAnimationStartBounds = new Rect();
+    private final DesktopModeKeyguardChangeListener mDesktopModeKeyguardChangeListener;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
             Handler mainHandler,
             Choreographer mainChoreographer,
+            ShellInit shellInit,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
+            ShellController shellController,
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
-            Optional<DesktopTasksController> desktopTasksController) {
+            Optional<DesktopTasksController> desktopTasksController
+    ) {
         this(
                 context,
                 mainHandler,
                 mainChoreographer,
+                shellInit,
                 taskOrganizer,
                 displayController,
+                shellController,
                 syncQueue,
                 transitions,
                 desktopModeController,
                 desktopTasksController,
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
-                SurfaceControl.Transaction::new);
+                SurfaceControl.Transaction::new,
+                new DesktopModeKeyguardChangeListener());
     }
 
     @VisibleForTesting
@@ -145,20 +156,24 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Context context,
             Handler mainHandler,
             Choreographer mainChoreographer,
+            ShellInit shellInit,
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
+            ShellController shellController,
             SyncTransactionQueue syncQueue,
             Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
-            Supplier<SurfaceControl.Transaction> transactionFactory) {
+            Supplier<SurfaceControl.Transaction> transactionFactory,
+            DesktopModeKeyguardChangeListener desktopModeKeyguardChangeListener) {
         mContext = context;
         mMainHandler = mainHandler;
         mMainChoreographer = mainChoreographer;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mTaskOrganizer = taskOrganizer;
+        mShellController = shellController;
         mDisplayController = displayController;
         mSyncQueue = syncQueue;
         mTransitions = transitions;
@@ -168,6 +183,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mDesktopModeWindowDecorFactory = desktopModeWindowDecorFactory;
         mInputMonitorFactory = inputMonitorFactory;
         mTransactionFactory = transactionFactory;
+        mDesktopModeKeyguardChangeListener = desktopModeKeyguardChangeListener;
+
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
+        mShellController.addKeyguardChangeListener(mDesktopModeKeyguardChangeListener);
     }
 
     @Override
@@ -796,6 +818,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && mSplitScreenController.isTaskRootOrStageRoot(taskInfo.taskId)) {
             return false;
         }
+        if (mDesktopModeKeyguardChangeListener.isKeyguardVisibleAndOccluded()
+                && taskInfo.isFocused) {
+            return false;
+        }
         return DesktopModeStatus.isProto2Enabled()
                 && taskInfo.getWindowingMode() != WINDOWING_MODE_PINNED
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
@@ -882,6 +908,22 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         public void onTaskCornersRemoved(int taskId) {
             mDesktopModeController.ifPresent(d -> d.removeCornersForTask(taskId));
             mDesktopTasksController.ifPresent(d -> d.removeCornersForTask(taskId));
+        }
+    }
+
+    static class DesktopModeKeyguardChangeListener implements KeyguardChangeListener {
+        private boolean mIsKeyguardVisible;
+        private boolean mIsKeyguardOccluded;
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean visible, boolean occluded,
+                boolean animatingDismiss) {
+            mIsKeyguardVisible = visible;
+            mIsKeyguardOccluded = occluded;
+        }
+
+        public boolean isKeyguardVisibleAndOccluded() {
+            return mIsKeyguardVisible && mIsKeyguardOccluded;
         }
     }
 }
