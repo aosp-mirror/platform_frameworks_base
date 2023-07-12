@@ -324,7 +324,6 @@ import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.MergedConfiguration;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -725,9 +724,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private final boolean mIsUserAlwaysVisible;
 
     /** Allow activity launches which would otherwise be blocked by
-     * {@link ActivityTransitionSecurityController#checkActivityAllowedToStart}
+     * {@link BackgroundActivityStartController#checkActivityAllowedToStart}
      */
-    private boolean mAllowCrossUidActivitySwitchFromBelow;
+    boolean mAllowCrossUidActivitySwitchFromBelow;
 
     /** Have we been asked to have this token keep the screen frozen? */
     private boolean mFreezingScreen;
@@ -10189,50 +10188,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
         mAllowCrossUidActivitySwitchFromBelow = allowed;
-    }
-
-    /**
-     * Determines if a source is allowed to add or remove activities from the task,
-     * if the current ActivityRecord is above it in the stack
-     *
-     * A transition is blocked ({@code false} returned) if all of the following are met:
-     * <pre>
-     * 1. The source activity and the current activity record belong to different apps
-     * (i.e, have different UIDs).
-     * 2. Both the source activity and the current activity target U+
-     * 3. The current activity has not set
-     * {@link ActivityRecord#setAllowCrossUidActivitySwitchFromBelow(boolean)} to {@code true}
-     * </pre>
-     *
-     * Returns a pair where the elements mean:
-     * <pre>
-     * First: {@code false} if we should actually block the transition (takes into consideration
-     * feature flag and targetSdk).
-     * Second: {@code false} if we should warn about the transition via toasts. This happens if
-     * the transition would be blocked in case both the app was targeting U+ and the feature was
-     * enabled.
-     * </pre>
-     *
-     * @param sourceUid The source (s) activity performing the state change
-     */
-    Pair<Boolean, Boolean> allowCrossUidActivitySwitchFromBelow(int sourceUid) {
-        int myUid = info.applicationInfo.uid;
-        if (sourceUid == myUid) {
-            return new Pair<>(true, true);
-        }
-
-        // If mAllowCrossUidActivitySwitchFromBelow is set, honor it.
-        if (mAllowCrossUidActivitySwitchFromBelow) {
-            return new Pair<>(true, true);
-        }
-
-        // If it is not set, default to true if both records target ≥ U, false otherwise
-        // TODO(b/258792202) Replace with CompatChanges and replace Pair with boolean once feature
-        // flag is removed
-        boolean restrictActivitySwitch =
-                ActivitySecurityModelFeatureFlags.shouldRestrictActivitySwitch(myUid)
-                    && ActivitySecurityModelFeatureFlags.shouldRestrictActivitySwitch(sourceUid);
-        return new Pair<>(!restrictActivitySwitch, false);
     }
 
     boolean getTurnScreenOnFlag() {

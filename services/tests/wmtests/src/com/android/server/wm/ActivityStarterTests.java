@@ -174,7 +174,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         mController = mock(ActivityStartController.class);
         BackgroundActivityStartController balController =
                 new BackgroundActivityStartController(mAtm, mSupervisor);
-        doReturn(balController).when(mController).getBackgroundActivityLaunchController();
+        doReturn(balController).when(mAtm.mTaskSupervisor).getBackgroundActivityLaunchController();
         mActivityMetricsLogger = mock(ActivityMetricsLogger.class);
         clearInvocations(mActivityMetricsLogger);
         mAppOpsManager = mAtm.getAppOpsManager();
