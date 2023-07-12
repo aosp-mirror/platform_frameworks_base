@@ -87,6 +87,10 @@ class AccessorizedBatteryDrawable(
     }
 
     var displayShield: Boolean = false
+        set(value) {
+            field = value
+            postInvalidate()
+        }
 
     private fun updateSizes() {
         val b = bounds
@@ -203,5 +207,12 @@ class AccessorizedBatteryDrawable(
     private fun loadPaths() {
         val shieldPathString = context.resources.getString(R.string.config_batterymeterShieldPath)
         shieldPath.set(PathParser.createPathFromPathData(shieldPathString))
+    }
+
+    private val invalidateRunnable: () -> Unit = { invalidateSelf() }
+
+    private fun postInvalidate() {
+        unscheduleSelf(invalidateRunnable)
+        scheduleSelf(invalidateRunnable, 0)
     }
 }

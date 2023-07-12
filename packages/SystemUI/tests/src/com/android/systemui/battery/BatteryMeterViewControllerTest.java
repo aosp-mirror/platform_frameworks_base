@@ -37,6 +37,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
@@ -153,6 +154,7 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
     private void initController() {
         mController = new BatteryMeterViewController(
                 mBatteryMeterView,
+                StatusBarLocation.HOME,
                 mUserTracker,
                 mConfigurationController,
                 mTunerService,
