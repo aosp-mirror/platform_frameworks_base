@@ -718,9 +718,16 @@ public class BubblePositioner {
         mShowingInBubbleBar = showingInBubbleBar;
     }
 
-    /** Sets the position of the bubble bar in screen coordinates. */
-    public void setBubbleBarPosition(int x, int y) {
-        mBubbleBarPosition.set(x, y);
+    /**
+     * Sets the position of the bubble bar in screen coordinates.
+     *
+     * @param offsetX the offset of the bubble bar from the edge of the screen on the X axis
+     * @param offsetY the offset of the bubble bar from the edge of the screen on the Y axis
+     */
+    public void setBubbleBarPosition(int offsetX, int offsetY) {
+        mBubbleBarPosition.set(
+                getAvailableRect().width() - offsetX,
+                getAvailableRect().height() + mInsets.top + mInsets.bottom - offsetY);
     }
 
     /**
