@@ -43,8 +43,10 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityMod
 import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.getMainOrUnderlyingWifiInfo
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_DEFAULT
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository.Companion.COL_NAME_IS_ENABLED
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryDagger
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiInputLogger
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import java.util.concurrent.Executor
@@ -64,6 +66,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Real implementation of [WifiRepository]. */
@@ -81,9 +84,21 @@ constructor(
     @WifiTableLog wifiTableLogBuffer: TableLogBuffer,
     @Main mainExecutor: Executor,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    @Application scope: CoroutineScope,
+    @Application private val scope: CoroutineScope,
     private val wifiManager: WifiManager,
-) : RealWifiRepository {
+) : WifiRepositoryDagger {
+
+    override fun start() {
+        // There are two possible [WifiRepository] implementations: This class (old) and
+        // [WifiRepositoryFromTrackerLib] (new). While we migrate to the new class, we want this old
+        // class to still be running in the background so that we can collect logs and compare
+        // discrepancies. This #start method collects on the flows to ensure that the logs are
+        // collected.
+        scope.launch { isWifiEnabled.collect {} }
+        scope.launch { isWifiDefault.collect {} }
+        scope.launch { wifiNetwork.collect {} }
+        scope.launch { wifiActivity.collect {} }
+    }
 
     private val wifiStateChangeEvents: Flow<Unit> =
         broadcastDispatcher
@@ -104,7 +119,7 @@ constructor(
             .logDiffsForTable(
                 wifiTableLogBuffer,
                 columnPrefix = "",
-                columnName = "isEnabled",
+                columnName = COL_NAME_IS_ENABLED,
                 initialValue = false,
             )
             .stateIn(
@@ -125,7 +140,7 @@ constructor(
             .logDiffsForTable(
                 wifiTableLogBuffer,
                 columnPrefix = "",
-                columnName = "isDefault",
+                columnName = COL_NAME_IS_DEFAULT,
                 initialValue = false,
             )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
@@ -233,6 +248,8 @@ constructor(
         // [ConnectivityManager.NetworkCallback] results instead. So, for now we'll just rely on the
         // NetworkCallback inside [wifiNetwork] for our wifi network information.
         val WIFI_NETWORK_DEFAULT = WifiNetworkModel.Inactive
+
+        const val WIFI_STATE_DEFAULT = WifiManager.WIFI_STATE_DISABLED
 
         private fun createWifiNetworkModel(
             wifiInfo: WifiInfo,

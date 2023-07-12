@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository
 
+import com.android.systemui.CoreStartable
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import kotlinx.coroutines.flow.StateFlow
@@ -42,6 +43,13 @@ interface WifiRepository {
         val currentNetwork = wifiNetwork.value
         return currentNetwork is WifiNetworkModel.Active && currentNetwork.hasValidSsid()
     }
+
+    companion object {
+        /** Column name to use for [isWifiEnabled] for table logging. */
+        const val COL_NAME_IS_ENABLED = "isEnabled"
+        /** Column name to use for [isWifiDefault] for table logging. */
+        const val COL_NAME_IS_DEFAULT = "isDefault"
+    }
 }
 
 /**
@@ -53,3 +61,8 @@ interface WifiRepository {
  * repository.
  */
 interface RealWifiRepository : WifiRepository
+
+/** Used only by Dagger to bind [WifiRepositoryImpl]. */
+interface WifiRepositoryDagger : RealWifiRepository, CoreStartable
+/** Used only by Dagger to bind [WifiRepositoryViaTrackerLib]. */
+interface WifiRepositoryViaTrackerLibDagger : RealWifiRepository

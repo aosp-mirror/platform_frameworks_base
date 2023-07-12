@@ -375,6 +375,10 @@ object Flags {
     @JvmField
     val NEW_BLUETOOTH_REPOSITORY = releasedFlag(612, "new_bluetooth_repository")
 
+    // TODO(b/292533677): Tracking Bug
+    val WIFI_TRACKER_LIB_FOR_WIFI_ICON =
+        unreleasedFlag(613, "wifi_tracker_lib_for_wifi_icon")
+
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
     val ONGOING_CALL_STATUS_BAR_CHIP = releasedFlag(700, "ongoing_call_status_bar_chip")

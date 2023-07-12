@@ -62,6 +62,9 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+/**
+ * Note: Any new tests added here may also need to be added to [WifiRepositoryViaTrackerLibTest].
+ */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
