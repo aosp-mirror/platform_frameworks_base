@@ -3425,6 +3425,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         // within these users.
         mPermissionManager.restoreDelayedRuntimePermissions(packageName, userId);
 
+        // Restore default browser setting if it is now installed.
+        String defaultBrowser;
+        synchronized (mLock) {
+            defaultBrowser = mSettings.getPendingDefaultBrowserLPr(userId);
+        }
+        if (Objects.equals(packageName, defaultBrowser)) {
+            mDefaultAppProvider.setDefaultBrowser(packageName, userId);
+            synchronized (mLock) {
+                mSettings.removePendingDefaultBrowserLPw(userId);
+            }
+        }
+
         // Persistent preferred activity might have came into effect due to this
         // install.
         mPreferredActivityHelper.updateDefaultHomeNotLocked(snapshotComputer(), userId);
@@ -6647,7 +6659,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Override
         public String removeLegacyDefaultBrowserPackageName(int userId) {
             synchronized (mLock) {
-                return mSettings.removeDefaultBrowserPackageNameLPw(userId);
+                return mSettings.removePendingDefaultBrowserLPw(userId);
             }
         }
 
@@ -7523,8 +7535,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return mDefaultAppProvider.getDefaultBrowser(userId);
     }
 
-    void setDefaultBrowser(@Nullable String packageName, boolean async, @UserIdInt int userId) {
-        mDefaultAppProvider.setDefaultBrowser(packageName, async, userId);
+    void setDefaultBrowser(@Nullable String packageName, @UserIdInt int userId) {
+        mDefaultAppProvider.setDefaultBrowser(packageName, userId);
     }
 
     PackageUsage getPackageUsage() {
