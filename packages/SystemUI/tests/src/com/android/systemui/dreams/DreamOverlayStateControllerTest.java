@@ -235,6 +235,23 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testComplicationsNotShownForLowLight() {
+        final Complication complication = Mockito.mock(Complication.class);
+        final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
+
+        // Add a complication and verify it's returned in getComplications.
+        stateController.addComplication(complication);
+        mExecutor.runAllReady();
+        assertThat(stateController.getComplications().contains(complication))
+                .isTrue();
+
+        stateController.setLowLightActive(true);
+        mExecutor.runAllReady();
+
+        assertThat(stateController.getComplications()).isEmpty();
+    }
+
+    @Test
     public void testNotifyLowLightChanged() {
         final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
 
@@ -334,6 +351,34 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
             assertThat(complications.contains(noneComplication)).isTrue();
             assertThat(complications.contains(homeControlsComplication)).isTrue();
         }
+    }
+
+    @Test
+    public void testHomeControlsDoNotShowIfNotAvailable_featureEnabled() {
+        when(mFeatureFlags.isEnabled(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS)).thenReturn(true);
+
+        final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
+        stateController.setShouldShowComplications(true);
+
+        final Complication homeControlsComplication = Mockito.mock(Complication.class);
+        when(homeControlsComplication.getRequiredTypeAvailability())
+                .thenReturn(Complication.COMPLICATION_TYPE_HOME_CONTROLS);
+
+        stateController.addComplication(homeControlsComplication);
+
+        final DreamOverlayStateController.Callback callback =
+                Mockito.mock(DreamOverlayStateController.Callback.class);
+
+        stateController.addCallback(callback);
+        mExecutor.runAllReady();
+
+        // No home controls since it is not available.
+        assertThat(stateController.getComplications()).doesNotContain(homeControlsComplication);
+
+        stateController.setAvailableComplicationTypes(Complication.COMPLICATION_TYPE_HOME_CONTROLS
+                | Complication.COMPLICATION_TYPE_WEATHER);
+        mExecutor.runAllReady();
+        assertThat(stateController.getComplications()).contains(homeControlsComplication);
     }
 
     private DreamOverlayStateController getDreamOverlayStateController(boolean overlayEnabled) {

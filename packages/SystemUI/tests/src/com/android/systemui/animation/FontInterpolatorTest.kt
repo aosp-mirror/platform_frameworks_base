@@ -106,4 +106,29 @@ class FontInterpolatorTest : SysuiTestCase() {
         val reversedFont = interp.lerp(endFont, startFont, 0.5f)
         assertThat(resultFont).isSameInstanceAs(reversedFont)
     }
+
+    @Test
+    fun testCacheMaxSize() {
+        val interp = FontInterpolator()
+
+        val startFont = Font.Builder(sFont)
+                .setFontVariationSettings("'wght' 100")
+                .build()
+        val endFont = Font.Builder(sFont)
+                .setFontVariationSettings("'wght' 1")
+                .build()
+        val resultFont = interp.lerp(startFont, endFont, 0.5f)
+        for (i in 0..FONT_CACHE_MAX_ENTRIES + 1) {
+            val f1 = Font.Builder(sFont)
+                    .setFontVariationSettings("'wght' ${i * 100}")
+                    .build()
+            val f2 = Font.Builder(sFont)
+                    .setFontVariationSettings("'wght' $i")
+                    .build()
+            interp.lerp(f1, f2, 0.5f)
+        }
+
+        val cachedFont = interp.lerp(startFont, endFont, 0.5f)
+        assertThat(resultFont).isNotSameInstanceAs(cachedFont)
+    }
 }
