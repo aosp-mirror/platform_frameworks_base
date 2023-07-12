@@ -405,6 +405,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     UriGrantsManagerInternal mUgmInternal;
     @Mock
     AppOpsManager mAppOpsManager;
+    private AppOpsManager.OnOpChangedListener mOnPermissionChangeListener;
     @Mock
     private TestableNotificationManagerService.NotificationAssistantAccessGrantedCallback
             mNotificationAssistantAccessGrantedCallback;
@@ -603,6 +604,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         TestableResources tr = mContext.getOrCreateTestableResources();
         tr.addOverride(com.android.internal.R.string.config_defaultSearchSelectorPackageName,
                 SEARCH_SELECTOR_PKG);
+
+        doAnswer(invocation -> {
+            mOnPermissionChangeListener = invocation.getArgument(2);
+            return null;
+        }).when(mAppOpsManager).startWatchingMode(eq(AppOpsManager.OP_POST_NOTIFICATION), any(),
+                any());
 
         mWorkerHandler = spy(mService.new WorkerHandler(mTestableLooper.getLooper()));
         mService.init(mWorkerHandler, mRankingHandler, mPackageManager, mPackageManagerClient,
@@ -2295,8 +2302,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel, 1, "group", true);
         notif.getNotification().flags |= Notification.FLAG_NO_CLEAR;
         mService.addNotification(notif);
-        mService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0, 0, true,
-                notif.getUserId(), 0, null);
+        mService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0, 0,
+                notif.getUserId(), 0);
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(notif.getSbn().getPackageName());
@@ -3034,7 +3041,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         notif.getNotification().flags |= Notification.FLAG_NO_CLEAR;
         mService.addNotification(notif);
         mService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0,
-                Notification.FLAG_ONGOING_EVENT, true, notif.getUserId(), 0, null);
+                Notification.FLAG_ONGOING_EVENT, notif.getUserId(), 0);
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(notif.getSbn().getPackageName());
@@ -3061,8 +3068,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mTestNotificationChannel, 1, "group", true);
         notif.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
         mService.addNotification(notif);
-        mService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0, 0, true,
-                notif.getUserId(), 0, null);
+        mService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0, 0,
+                notif.getUserId(), 0);
         waitForIdle();
         StatusBarNotification[] notifs =
                 mBinderService.getActiveNotifications(notif.getSbn().getPackageName());
@@ -3213,48 +3220,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mPreferencesHelper, times(1)).getConversationNotificationChannel(
                 anyString(), anyInt(), eq(mTestNotificationChannel.getId()), eq(null),
                 anyBoolean(), anyBoolean());
-    }
-
-    @Test
-    public void testUpdateAppNotifyCreatorBlock() throws Exception {
-        when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
-
-        mBinderService.setNotificationsEnabledForPackage(PKG, mUid, false);
-        Thread.sleep(500);
-        waitForIdle();
-
-        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
-
-        assertEquals(NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED,
-                captor.getValue().getAction());
-        assertEquals(PKG, captor.getValue().getPackage());
-        assertTrue(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true));
-    }
-
-    @Test
-    public void testUpdateAppNotifyCreatorBlock_notIfMatchesExistingSetting() throws Exception {
-        when(mPermissionHelper.hasPermission(mUid)).thenReturn(false);
-
-        mBinderService.setNotificationsEnabledForPackage(PKG, 0, false);
-        verify(mContext, never()).sendBroadcastAsUser(any(), any(), eq(null));
-    }
-
-    @Test
-    public void testUpdateAppNotifyCreatorUnblock() throws Exception {
-        when(mPermissionHelper.hasPermission(mUid)).thenReturn(false);
-
-        mBinderService.setNotificationsEnabledForPackage(PKG, mUid, true);
-        Thread.sleep(500);
-        waitForIdle();
-
-        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
-
-        assertEquals(NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED,
-                captor.getValue().getAction());
-        assertEquals(PKG, captor.getValue().getPackage());
-        assertFalse(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true));
     }
 
     @Test
@@ -12172,6 +12137,134 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 eq(REASON_NOTIFICATION_SERVICE), any());
         verify(mAmi, times(4)).setPendingIntentAllowBgActivityStarts(any(),
                 any(), eq(FLAG_ACTIVITY_SENDER | FLAG_BROADCAST_SENDER | FLAG_SERVICE_SENDER));
+    }
+
+    @Test
+    public void onOpChanged_permissionRevoked_cancelsAllNotificationsFromPackage()
+            throws RemoteException {
+        // Have preexisting posted notifications from revoked package and other packages.
+        mService.addNotification(new NotificationRecord(mContext,
+                generateSbn("revoked", 1001, 1, 0), mTestNotificationChannel));
+        mService.addNotification(new NotificationRecord(mContext,
+                generateSbn("other", 1002, 2, 0), mTestNotificationChannel));
+        // Have preexisting enqueued notifications from revoked package and other packages.
+        mService.addEnqueuedNotification(new NotificationRecord(mContext,
+                generateSbn("revoked", 1001, 3, 0), mTestNotificationChannel));
+        mService.addEnqueuedNotification(new NotificationRecord(mContext,
+                generateSbn("other", 1002, 4, 0), mTestNotificationChannel));
+        assertThat(mService.mNotificationList).hasSize(2);
+        assertThat(mService.mEnqueuedNotifications).hasSize(2);
+
+        when(mPackageManagerInternal.getPackageUid("revoked", 0, 0)).thenReturn(1001);
+        when(mPermissionHelper.hasPermission(eq(1001))).thenReturn(false);
+
+        mOnPermissionChangeListener.onOpChanged(
+                AppOpsManager.OPSTR_POST_NOTIFICATION, "revoked", 0);
+        waitForIdle();
+
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getSbn().getPackageName()).isEqualTo("other");
+        assertThat(mService.mEnqueuedNotifications).hasSize(1);
+        assertThat(mService.mEnqueuedNotifications.get(0).getSbn().getPackageName()).isEqualTo(
+                "other");
+    }
+
+    @Test
+    public void onOpChanged_permissionStillGranted_notificationsAreNotAffected()
+            throws RemoteException {
+        // NOTE: This combination (receiving the onOpChanged broadcast for a package, the permission
+        // being now granted, AND having previously posted notifications from said package) should
+        // never happen (if we trust the broadcasts are correct). So this test is for a what-if
+        // scenario, to verify we still handle it reasonably.
+
+        // Have preexisting posted notifications from specific package and other packages.
+        mService.addNotification(new NotificationRecord(mContext,
+                generateSbn("granted", 1001, 1, 0), mTestNotificationChannel));
+        mService.addNotification(new NotificationRecord(mContext,
+                generateSbn("other", 1002, 2, 0), mTestNotificationChannel));
+        // Have preexisting enqueued notifications from specific package and other packages.
+        mService.addEnqueuedNotification(new NotificationRecord(mContext,
+                generateSbn("granted", 1001, 3, 0), mTestNotificationChannel));
+        mService.addEnqueuedNotification(new NotificationRecord(mContext,
+                generateSbn("other", 1002, 4, 0), mTestNotificationChannel));
+        assertThat(mService.mNotificationList).hasSize(2);
+        assertThat(mService.mEnqueuedNotifications).hasSize(2);
+
+        when(mPackageManagerInternal.getPackageUid("granted", 0, 0)).thenReturn(1001);
+        when(mPermissionHelper.hasPermission(eq(1001))).thenReturn(true);
+
+        mOnPermissionChangeListener.onOpChanged(
+                AppOpsManager.OPSTR_POST_NOTIFICATION, "granted", 0);
+        waitForIdle();
+
+        assertThat(mService.mNotificationList).hasSize(2);
+        assertThat(mService.mEnqueuedNotifications).hasSize(2);
+    }
+
+    @Test
+    public void onOpChanged_permissionGranted_notifiesAppUnblocked() throws Exception {
+        when(mPackageManagerInternal.getPackageUid(PKG, 0, 0)).thenReturn(1001);
+        when(mPermissionHelper.hasPermission(eq(1001))).thenReturn(true);
+
+        mOnPermissionChangeListener.onOpChanged(
+                AppOpsManager.OPSTR_POST_NOTIFICATION, PKG, 0);
+        waitForIdle();
+        Thread.sleep(600);
+        waitForIdle();
+
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext).sendBroadcastAsUser(captor.capture(), any(), eq(null));
+        assertThat(captor.getValue().getAction()).isEqualTo(
+                NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED);
+        assertThat(captor.getValue().getPackage()).isEqualTo(PKG);
+        assertThat(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true)).isFalse();
+    }
+
+    @Test
+    public void onOpChanged_permissionRevoked_notifiesAppBlocked() throws Exception {
+        when(mPackageManagerInternal.getPackageUid(PKG, 0, 0)).thenReturn(1001);
+        when(mPermissionHelper.hasPermission(eq(1001))).thenReturn(false);
+
+        mOnPermissionChangeListener.onOpChanged(
+                AppOpsManager.OPSTR_POST_NOTIFICATION, PKG, 0);
+        waitForIdle();
+        Thread.sleep(600);
+        waitForIdle();
+
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext).sendBroadcastAsUser(captor.capture(), any(), eq(null));
+        assertThat(captor.getValue().getAction()).isEqualTo(
+                NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED);
+        assertThat(captor.getValue().getPackage()).isEqualTo(PKG);
+        assertThat(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false)).isTrue();
+    }
+
+    @Test
+    public void setNotificationsEnabledForPackage_disabling_clearsNotifications() throws Exception {
+        mService.addNotification(new NotificationRecord(mContext,
+                generateSbn("package", 1001, 1, 0), mTestNotificationChannel));
+        assertThat(mService.mNotificationList).hasSize(1);
+        when(mPackageManagerInternal.getPackageUid("package", 0, 0)).thenReturn(1001);
+        when(mPermissionHelper.hasRequestedPermission(any(), eq("package"), anyInt())).thenReturn(
+                true);
+
+        // Start with granted permission and simulate effect of revoking it.
+        when(mPermissionHelper.hasPermission(1001)).thenReturn(true);
+        doAnswer(invocation -> {
+            when(mPermissionHelper.hasPermission(1001)).thenReturn(false);
+            mOnPermissionChangeListener.onOpChanged(
+                    AppOpsManager.OPSTR_POST_NOTIFICATION, "package", 0);
+            return null;
+        }).when(mPermissionHelper).setNotificationPermission("package", 0, false, true);
+
+        mBinderService.setNotificationsEnabledForPackage("package", 1001, false);
+        waitForIdle();
+
+        assertThat(mService.mNotificationList).hasSize(0);
+
+        Thread.sleep(600);
+        waitForIdle();
+        verify(mContext).sendBroadcastAsUser(any(), eq(UserHandle.of(0)), eq(null));
     }
 
     private static <T extends Parcelable> T parcelAndUnparcel(T source,
