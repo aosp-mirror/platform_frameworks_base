@@ -25,7 +25,6 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
-import android.platform.test.annotations.Presubmit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,13 +33,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Tests for {@link RampDownAdapter}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:RampDownAdapterTest
- */
-@Presubmit
 public class RampDownAdapterTest {
     private static final int TEST_RAMP_DOWN_DURATION = 20;
     private static final int TEST_STEP_DURATION = 5;

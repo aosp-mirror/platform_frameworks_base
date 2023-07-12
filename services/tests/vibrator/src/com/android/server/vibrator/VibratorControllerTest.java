@@ -45,7 +45,6 @@ import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -61,13 +60,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-/**
- * Tests for {@link VibratorController}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:VibratorControllerTest
- */
-@Presubmit
 public class VibratorControllerTest {
     private static final int VIBRATOR_ID = 0;
 

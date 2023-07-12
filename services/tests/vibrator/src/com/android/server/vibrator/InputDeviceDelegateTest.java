@@ -41,7 +41,6 @@ import android.os.Process;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.test.TestLooper;
-import android.platform.test.annotations.Presubmit;
 import android.view.InputDevice;
 
 import androidx.test.InstrumentationRegistry;
@@ -54,13 +53,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-/**
- * Tests for {@link InputDeviceDelegate}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:InputDeviceDelegateTest
- */
-@Presubmit
 public class InputDeviceDelegateTest {
 
     private static final int UID = Process.ROOT_UID;

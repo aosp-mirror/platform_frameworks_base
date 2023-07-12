@@ -32,7 +32,6 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
-import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -48,13 +47,6 @@ import org.mockito.junit.MockitoRule;
 
 import java.util.Arrays;
 
-/**
- * Tests for {@link DeviceAdapter}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:DeviceAdapterTest
- */
-@Presubmit
 public class DeviceAdapterTest {
     private static final int EMPTY_VIBRATOR_ID = 1;
     private static final int PWLE_VIBRATOR_ID = 2;
