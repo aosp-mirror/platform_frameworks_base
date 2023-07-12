@@ -616,7 +616,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         setUpAutoBrightness(resources, handler);
 
-        mColorFadeEnabled = mInjector.isColorFadeEnabled();
+        mColorFadeEnabled = mInjector.isColorFadeEnabled(resources);
         mColorFadeFadesConfig = resources.getBoolean(
                 R.bool.config_animateScreenLights);
 
@@ -2994,8 +2994,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     sensorManager, resources);
         }
 
-        boolean isColorFadeEnabled() {
-            return !ActivityManager.isLowRamDeviceStatic();
+        boolean isColorFadeEnabled(Resources resources) {
+            return !ActivityManager.isLowRamDeviceStatic()
+                && !resources.getBoolean(
+                  com.android.internal.R.bool.config_displayColorFadeDisabled);
         }
     }
 
