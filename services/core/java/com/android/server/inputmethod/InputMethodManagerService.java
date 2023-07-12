@@ -2462,7 +2462,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final ImeTracker.Token statsToken = mCurStatsToken;
             mCurStatsToken = null;
             showCurrentInputLocked(mCurFocusedWindow, statsToken,
-                    mVisibilityStateComputer.getShowFlags(),
+                    mVisibilityStateComputer.getImeShowFlags(),
                     null /* resultReceiver */, SoftInputShowHideReason.ATTACH_NEW_INPUT);
         }
 
@@ -3398,9 +3398,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public boolean showSoftInput(IInputMethodClient client, IBinder windowToken,
-            @Nullable ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
-            int lastClickTooType, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
+            @Nullable ImeTracker.Token statsToken, int flags, int lastClickTooType,
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showSoftInput");
         int uid = Binder.getCallingUid();
         ImeTracing.getInstance().triggerManagerServiceDump(
@@ -3573,17 +3572,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     boolean showCurrentInputLocked(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
-            @InputMethodManager.ShowFlags int flags, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
+            int flags, ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         return showCurrentInputLocked(windowToken, statsToken, flags,
                 MotionEvent.TOOL_TYPE_UNKNOWN, resultReceiver, reason);
     }
 
     @GuardedBy("ImfLock.class")
     private boolean showCurrentInputLocked(IBinder windowToken,
-            @Nullable ImeTracker.Token statsToken, @InputMethodManager.ShowFlags int flags,
-            int lastClickToolType, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
+            @Nullable ImeTracker.Token statsToken, int flags, int lastClickToolType,
+            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         // Create statsToken is none exists.
         if (statsToken == null) {
             statsToken = createStatsTokenForFocusedClient(true /* show */,
@@ -3614,8 +3611,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 curMethod.updateEditorToolType(lastClickToolType);
             }
             mVisibilityApplier.performShowIme(windowToken, statsToken,
-                    mVisibilityStateComputer.getShowFlagsForInputMethodServiceOnly(),
-                    resultReceiver, reason);
+                    mVisibilityStateComputer.getImeShowFlags(), resultReceiver, reason);
             mVisibilityStateComputer.setInputShown(true);
             return true;
         } else {
@@ -3627,8 +3623,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public boolean hideSoftInput(IInputMethodClient client, IBinder windowToken,
-            @Nullable ImeTracker.Token statsToken, @InputMethodManager.HideFlags int flags,
-            ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
+            @Nullable ImeTracker.Token statsToken, int flags, ResultReceiver resultReceiver,
+            @SoftInputShowHideReason int reason) {
         int uid = Binder.getCallingUid();
         ImeTracing.getInstance().triggerManagerServiceDump(
                 "InputMethodManagerService#hideSoftInput");
@@ -3658,8 +3654,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     boolean hideCurrentInputLocked(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
-            @InputMethodManager.HideFlags int flags, ResultReceiver resultReceiver,
-            @SoftInputShowHideReason int reason) {
+            int flags, ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         // Create statsToken is none exists.
         if (statsToken == null) {
             statsToken = createStatsTokenForFocusedClient(false /* show */,
@@ -4846,7 +4841,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void hideMySoftInput(@NonNull IBinder token, @InputMethodManager.HideFlags int flags,
+    private void hideMySoftInput(@NonNull IBinder token, int flags,
             @SoftInputShowHideReason int reason) {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInput");
@@ -4868,7 +4863,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    private void showMySoftInput(@NonNull IBinder token, @InputMethodManager.ShowFlags int flags) {
+    private void showMySoftInput(@NonNull IBinder token, int flags) {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInput");
             synchronized (ImfLock.class) {
@@ -6827,8 +6822,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void hideMySoftInput(@InputMethodManager.HideFlags int flags,
-                @SoftInputShowHideReason int reason, AndroidFuture future /* T=Void */) {
+        public void hideMySoftInput(int flags, @SoftInputShowHideReason int reason,
+                AndroidFuture future /* T=Void */) {
             @SuppressWarnings("unchecked")
             final AndroidFuture<Void> typedFuture = future;
             try {
@@ -6841,8 +6836,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @BinderThread
         @Override
-        public void showMySoftInput(@InputMethodManager.ShowFlags int flags,
-                AndroidFuture future /* T=Void */) {
+        public void showMySoftInput(int flags, AndroidFuture future /* T=Void */) {
             @SuppressWarnings("unchecked")
             final AndroidFuture<Void> typedFuture = future;
             try {
