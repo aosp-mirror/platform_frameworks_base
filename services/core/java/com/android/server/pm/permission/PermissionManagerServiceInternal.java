@@ -46,12 +46,13 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      *
      * @param packageName the name of the package you are checking against
      * @param permissionName the name of the permission you are checking for
+     * @param deviceId the device ID
      * @param userId the user ID
      * @return {@code PERMISSION_GRANTED} if the permission is granted, or {@code PERMISSION_DENIED}
      *         otherwise
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    int checkPermission(@NonNull String packageName, @NonNull String permissionName,
+    int checkPermission(@NonNull String packageName, @NonNull String permissionName, int deviceId,
             @UserIdInt int userId);
 
     /**
@@ -59,11 +60,12 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      *
      * @param uid the UID
      * @param permissionName the name of the permission you are checking for
+     * @param deviceId the device for which you are checking the permission
      * @return {@code PERMISSION_GRANTED} if the permission is granted, or {@code PERMISSION_DENIED}
      *         otherwise
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    int checkUidPermission(int uid, @NonNull String permissionName);
+    int checkUidPermission(int uid, @NonNull String permissionName, int deviceId);
 
     /**
      * Get whether permission review is required for a package.
@@ -73,8 +75,7 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      * @return whether permission review is required
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    boolean isPermissionsReviewRequired(@NonNull String packageName,
-            @UserIdInt int userId);
+    boolean isPermissionsReviewRequired(@NonNull String packageName, @UserIdInt int userId);
 
     /**
      * Reset the runtime permission state changes for a package.
@@ -85,8 +86,7 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      * @param userId the user ID
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    void resetRuntimePermissions(@NonNull AndroidPackage pkg,
-            @UserIdInt int userId);
+    void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId);
 
     /**
      * Reset the runtime permission state changes for all packages in a user.

@@ -23,6 +23,7 @@ import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -160,7 +161,8 @@ final class DumpHelper {
                 pkg = snapshot.resolveInternalPackageName(pkg,
                         PackageManager.VERSION_CODE_HIGHEST);
 
-                pw.println(mPermissionManager.checkPermission(perm, pkg, user));
+                pw.println(mPermissionManager.checkPermission(
+                        pkg, perm, Context.DEVICE_ID_DEFAULT, user));
                 return;
             } else if ("l".equals(cmd) || "libraries".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_LIBS);

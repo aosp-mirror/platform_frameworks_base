@@ -924,4 +924,6 @@ interface IActivityManager {
     void unregisterUidFrozenStateChangedCallback(in IUidFrozenStateChangedCallback callback);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)")
     int[] getUidFrozenState(in int[] uids);
+
+    int checkPermissionForDevice(in String permission, int pid, int uid, int deviceId);
 }
