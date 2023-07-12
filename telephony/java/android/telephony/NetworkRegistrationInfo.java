@@ -772,6 +772,18 @@ public final class NetworkRegistrationInfo implements Parcelable {
         }
     }
 
+    /**
+     * Convert isNonTerrestrialNetwork to string
+     *
+     * @param isNonTerrestrialNetwork boolean indicating whether network is a non-terrestrial
+     *                                network
+     * @return string format of isNonTerrestrialNetwork.
+     * @hide
+     */
+    public static String isNonTerrestrialNetworkToString(boolean isNonTerrestrialNetwork) {
+        return isNonTerrestrialNetwork ? "NON-TERRESTRIAL" : "TERRESTRIAL";
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -797,7 +809,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
                         ? nrStateToString(mNrState) : "****")
                 .append(" rRplmn=").append(mRplmn)
                 .append(" isUsingCarrierAggregation=").append(mIsUsingCarrierAggregation)
-                .append(" isNonTerrestrialNetwork=").append(mIsNonTerrestrialNetwork)
+                .append(" isNonTerrestrialNetwork=").append(
+                        isNonTerrestrialNetworkToString(mIsNonTerrestrialNetwork))
                 .append("}").toString();
     }
 
