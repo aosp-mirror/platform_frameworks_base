@@ -38,6 +38,7 @@ object UdfpsBackgroundViewBinder {
         view: ImageView,
         viewModel: BackgroundViewModel,
     ) {
+        view.alpha = 0f
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
