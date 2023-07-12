@@ -250,7 +250,13 @@ public class FeatureFlags {
         return flag;
     }
 
-    protected void sync() {
+    /**
+     * Sync any known flags that have not yet been synced.
+     *
+     * This is called implicitly when any flag is read, and is not generally needed except in
+     * exceptional circumstances.
+     */
+    public void sync() {
         synchronized (FeatureFlags.class) {
             if (mDirtyFlags.isEmpty()) {
                 return;
