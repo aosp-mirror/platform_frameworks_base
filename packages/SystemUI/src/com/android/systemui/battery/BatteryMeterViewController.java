@@ -35,10 +35,13 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
+
+import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
@@ -53,6 +56,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
     private final String mSlotBattery;
     private final SettingObserver mSettingObserver;
     private final UserTracker mUserTracker;
+    private final StatusBarLocation mLocation;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -94,6 +98,13 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
                 public void onIsBatteryDefenderChanged(boolean isBatteryDefender) {
                     mView.onIsBatteryDefenderChanged(isBatteryDefender);
                 }
+
+                @Override
+                public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+                    pw.print(super.toString());
+                    pw.println(" location=" + mLocation);
+                    mView.dump(pw, args);
+                }
             };
 
     private final UserTracker.Callback mUserChangedCallback =
@@ -113,6 +124,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
     @Inject
     public BatteryMeterViewController(
             BatteryMeterView view,
+            StatusBarLocation location,
             UserTracker userTracker,
             ConfigurationController configurationController,
             TunerService tunerService,
@@ -121,6 +133,7 @@ public class BatteryMeterViewController extends ViewController<BatteryMeterView>
             FeatureFlags featureFlags,
             BatteryController batteryController) {
         super(view);
+        mLocation = location;
         mUserTracker = userTracker;
         mConfigurationController = configurationController;
         mTunerService = tunerService;

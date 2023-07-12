@@ -22,6 +22,7 @@ import static android.os.BatteryManager.EXTRA_CHARGING_STATUS;
 import static android.os.BatteryManager.EXTRA_PRESENT;
 
 import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_QS;
+import static com.android.systemui.util.DumpUtilsKt.asIndenting;
 
 import android.annotation.WorkerThread;
 import android.content.BroadcastReceiver;
@@ -33,6 +34,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.view.View;
 
@@ -157,15 +159,29 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
-    public void dump(PrintWriter pw, String[] args) {
-        pw.println("BatteryController state:");
-        pw.print("  mLevel="); pw.println(mLevel);
-        pw.print("  mPluggedIn="); pw.println(mPluggedIn);
-        pw.print("  mCharging="); pw.println(mCharging);
-        pw.print("  mCharged="); pw.println(mCharged);
-        pw.print("  mIsBatteryDefender="); pw.println(mIsBatteryDefender);
-        pw.print("  mPowerSave="); pw.println(mPowerSave);
-        pw.print("  mStateUnknown="); pw.println(mStateUnknown);
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        IndentingPrintWriter ipw = asIndenting(pw);
+        ipw.println("BatteryController state:");
+        ipw.increaseIndent();
+        ipw.print("mHasReceivedBattery="); ipw.println(mHasReceivedBattery);
+        ipw.print("mLevel="); ipw.println(mLevel);
+        ipw.print("mPluggedIn="); ipw.println(mPluggedIn);
+        ipw.print("mCharging="); ipw.println(mCharging);
+        ipw.print("mCharged="); ipw.println(mCharged);
+        ipw.print("mIsBatteryDefender="); ipw.println(mIsBatteryDefender);
+        ipw.print("mPowerSave="); ipw.println(mPowerSave);
+        ipw.print("mStateUnknown="); ipw.println(mStateUnknown);
+        ipw.println("Callbacks:------------------");
+        // Since the above lines are already indented, we need to indent twice for the callbacks.
+        ipw.increaseIndent();
+        synchronized (mChangeCallbacks) {
+            final int n = mChangeCallbacks.size();
+            for (int i = 0; i < n; i++) {
+                mChangeCallbacks.get(i).dump(ipw, args);
+            }
+        }
+        ipw.decreaseIndent();
+        ipw.println("------------------");
     }
 
     @Override
