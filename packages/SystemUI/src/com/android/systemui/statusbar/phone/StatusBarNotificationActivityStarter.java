@@ -280,7 +280,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             mShadeController.addPostCollapseAction(runnable);
             mShadeController.collapseShade(true /* animate */);
         } else if (mKeyguardStateController.isShowing()
-                && mCentralSurfaces.isOccluded()) {
+                && mKeyguardStateController.isOccluded()) {
             mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
             mShadeController.collapseShade();
         } else {
