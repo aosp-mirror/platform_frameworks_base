@@ -98,14 +98,6 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
         mTaskFragmentOrganizer = taskFragmentOrganizer;
     }
 
-    /** Registers to listen to {@link CommonFoldingFeature} changes */
-    public void addFoldingStateChangedCallback(
-            java.util.function.Consumer<List<CommonFoldingFeature>> consumer) {
-        synchronized (mLock) {
-            mFoldingFeatureProducer.addDataChangedCallback(consumer);
-        }
-    }
-
     /**
      * Adds a listener interested in receiving updates to {@link WindowLayoutInfo}
      *
