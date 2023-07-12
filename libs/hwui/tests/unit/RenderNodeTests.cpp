@@ -231,8 +231,7 @@ TEST(RenderNode, multiTreeValidity) {
 }
 
 TEST(RenderNode, releasedCallback) {
-    int functor = WebViewFunctor_create(
-            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+    int functor = TestUtils::createMockFunctor();
 
     auto node = TestUtils::createNode(0, 0, 200, 400, [&](RenderProperties& props, Canvas& canvas) {
         canvas.drawWebViewFunctor(functor);

@@ -19,6 +19,7 @@
 #include "AnimationContext.h"
 #include "IContextFactory.h"
 #include "renderthread/CanvasContext.h"
+#include "renderthread/VulkanManager.h"
 #include "tests/common/TestUtils.h"
 
 using namespace android;
@@ -41,4 +42,39 @@ RENDERTHREAD_TEST(CanvasContext, create) {
     ASSERT_FALSE(canvasContext->hasOutputTarget());
 
     canvasContext->destroy();
+}
+
+RENDERTHREAD_TEST(CanvasContext, buildLayerDoesntLeak) {
+    auto node = TestUtils::createNode(0, 0, 200, 400, [](RenderProperties& props, Canvas& canvas) {
+        canvas.drawColor(0xFFFF0000, SkBlendMode::kSrc);
+    });
+    ASSERT_TRUE(node->isValid());
+    EXPECT_EQ(LayerType::None, node->stagingProperties().effectiveLayerType());
+    node->mutateStagingProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
+
+    auto& cacheManager = renderThread.cacheManager();
+    EXPECT_TRUE(cacheManager.areAllContextsStopped());
+    ContextFactory contextFactory;
+    std::unique_ptr<CanvasContext> canvasContext(
+            CanvasContext::create(renderThread, false, node.get(), &contextFactory, 0, 0));
+    canvasContext->buildLayer(node.get());
+    EXPECT_TRUE(node->hasLayer());
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        auto instance = VulkanManager::peekInstance();
+        if (instance) {
+            EXPECT_TRUE(instance->hasVkContext());
+        } else {
+            ADD_FAILURE() << "VulkanManager wasn't initialized to buildLayer?";
+        }
+    }
+    renderThread.destroyRenderingContext();
+    EXPECT_FALSE(node->hasLayer()) << "Node still has a layer after rendering context destroyed";
+
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        auto instance = VulkanManager::peekInstance();
+        if (instance) {
+            ADD_FAILURE() << "VulkanManager still exists";
+            EXPECT_FALSE(instance->hasVkContext());
+        }
+    }
 }

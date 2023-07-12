@@ -125,6 +125,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
         , mRenderPipeline(std::move(renderPipeline))
         , mHintSessionWrapper(uiThreadId, renderThreadId) {
     mRenderThread.cacheManager().registerCanvasContext(this);
+    mRenderThread.renderState().registerContextCallback(this);
     rootRenderNode->makeRoot();
     mRenderNodes.emplace_back(rootRenderNode);
     mProfiler.setDensity(DeviceInfo::getDensity());
@@ -137,6 +138,7 @@ CanvasContext::~CanvasContext() {
     }
     mRenderNodes.clear();
     mRenderThread.cacheManager().unregisterCanvasContext(this);
+    mRenderThread.renderState().removeContextCallback(this);
 }
 
 void CanvasContext::addRenderNode(RenderNode* node, bool placeFront) {
@@ -961,6 +963,10 @@ void CanvasContext::destroyHardwareResources() {
         }
         mRenderPipeline->onDestroyHardwareResources();
     }
+}
+
+void CanvasContext::onContextDestroyed() {
+    destroyHardwareResources();
 }
 
 DeferredLayerUpdater* CanvasContext::createTextureLayer() {

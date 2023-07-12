@@ -48,8 +48,7 @@ TEST(SkiaDisplayList, reset) {
     SkCanvas dummyCanvas;
     RenderNodeDrawable drawable(nullptr, &dummyCanvas);
     skiaDL->mChildNodes.emplace_back(nullptr, &dummyCanvas);
-    int functor1 = WebViewFunctor_create(
-            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+    int functor1 = TestUtils::createMockFunctor();
     GLFunctorDrawable functorDrawable{functor1, &dummyCanvas};
     WebViewFunctor_release(functor1);
     skiaDL->mChildFunctors.push_back(&functorDrawable);
@@ -101,8 +100,7 @@ TEST(SkiaDisplayList, syncContexts) {
 
     SkCanvas dummyCanvas;
 
-    int functor1 = WebViewFunctor_create(
-            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+    int functor1 = TestUtils::createMockFunctor();
     auto& counts = TestUtils::countsForFunctor(functor1);
     skiaDL.mChildFunctors.push_back(
             skiaDL.allocateDrawable<GLFunctorDrawable>(functor1, &dummyCanvas));
