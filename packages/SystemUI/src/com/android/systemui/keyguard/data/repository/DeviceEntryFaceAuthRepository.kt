@@ -30,6 +30,7 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
@@ -126,6 +127,7 @@ constructor(
     private val keyguardBypassController: KeyguardBypassController? = null,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val sessionTracker: SessionTracker,
     private val uiEventsLogger: UiEventLogger,
     private val faceAuthLogger: FaceAuthenticationLogger,
@@ -228,8 +230,12 @@ constructor(
         keyguardTransitionInteractor.anyStateToGoneTransition
             .filter { it.transitionState == TransitionState.FINISHED }
             .onEach {
-                faceAuthLogger.watchdogScheduled()
-                faceManager?.scheduleWatchdog()
+                // We deliberately want to run this in background because scheduleWatchdog does
+                // a Binder IPC.
+                withContext(backgroundDispatcher) {
+                    faceAuthLogger.watchdogScheduled()
+                    faceManager?.scheduleWatchdog()
+                }
             }
             .launchIn(applicationScope)
     }
