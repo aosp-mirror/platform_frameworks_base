@@ -60,6 +60,11 @@ public class DeviceConfigParameterProvider {
                 DisplayManager.DeviceConfig.KEY_USE_NORMAL_BRIGHTNESS_MODE_CONTROLLER, false);
     }
 
+    public boolean isDisableScreenWakeLocksWhileCachedFeatureEnabled() {
+        return mDeviceConfig.getBoolean(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                DisplayManager.DeviceConfig.KEY_DISABLE_SCREEN_WAKE_LOCKS_WHILE_CACHED, true);
+    }
+
     // feature: smooth_display_feature
     // parameter: peak_refresh_rate_default
     public float getPeakRefreshRateDefault() {
