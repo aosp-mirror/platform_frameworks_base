@@ -95,6 +95,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
                 Lazy { notifShadeWindowController },
                 activityLaunchAnimator,
                 context,
+                DISPLAY_ID,
                 lockScreenUserManager,
                 statusBarWindowController,
                 wakefulnessLifecycle,
@@ -273,5 +274,9 @@ class ActivityStarterImplTest : SysuiTestCase() {
         assertThat(mainExecutor.numPending()).isEqualTo(1)
         mainExecutor.runAllReady()
         verify(statusBarStateController).setLeaveOpenOnKeyguardHide(true)
+    }
+
+    private companion object {
+        private const val DISPLAY_ID = 0
     }
 }
