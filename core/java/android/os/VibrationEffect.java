@@ -547,6 +547,30 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
+     * Resolve default values into integer amplitude numbers.
+     *
+     * @param defaultAmplitude the default amplitude to apply, must be between 0 and
+     *                         MAX_AMPLITUDE
+     * @return this if amplitude value is already set, or a copy of this effect with given default
+     *         amplitude otherwise
+     *
+     * @hide
+     */
+    public abstract <T extends VibrationEffect> T resolve(int defaultAmplitude);
+
+    /**
+     * Scale the vibration effect intensity with the given constraints.
+     *
+     * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
+     *                    scale down the intensity, values larger than 1 will scale up
+     * @return this if there is no scaling to be done, or a copy of this effect with scaled
+     *         vibration intensity otherwise
+     *
+     * @hide
+     */
+    public abstract <T extends VibrationEffect> T scale(float scaleFactor);
+
+    /**
      * Ensures that the effect is repeating indefinitely or not. This is a lossy operation and
      * should only be applied once to an original effect - it shouldn't be applied to the
      * result of this method.
@@ -817,6 +841,40 @@ public abstract class VibrationEffect implements Parcelable {
             }
             // Vibration might still have some ramp or step segments, check the known duration.
             return totalDuration <= MAX_HAPTIC_FEEDBACK_DURATION;
+        }
+
+        /** @hide */
+        @NonNull
+        @Override
+        public Composed resolve(int defaultAmplitude) {
+            int segmentCount = mSegments.size();
+            ArrayList<VibrationEffectSegment> resolvedSegments = new ArrayList<>(segmentCount);
+            for (int i = 0; i < segmentCount; i++) {
+                resolvedSegments.add(mSegments.get(i).resolve(defaultAmplitude));
+            }
+            if (resolvedSegments.equals(mSegments)) {
+                return this;
+            }
+            Composed resolved = new Composed(resolvedSegments, mRepeatIndex);
+            resolved.validate();
+            return resolved;
+        }
+
+        /** @hide */
+        @NonNull
+        @Override
+        public Composed scale(float scaleFactor) {
+            int segmentCount = mSegments.size();
+            ArrayList<VibrationEffectSegment> scaledSegments = new ArrayList<>(segmentCount);
+            for (int i = 0; i < segmentCount; i++) {
+                scaledSegments.add(mSegments.get(i).scale(scaleFactor));
+            }
+            if (scaledSegments.equals(mSegments)) {
+                return this;
+            }
+            Composed scaled = new Composed(scaledSegments, mRepeatIndex);
+            scaled.validate();
+            return scaled;
         }
 
         /** @hide */
