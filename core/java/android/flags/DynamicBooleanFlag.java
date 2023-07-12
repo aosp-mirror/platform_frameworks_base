@@ -41,4 +41,10 @@ public class DynamicBooleanFlag extends BooleanFlagBase implements DynamicFlag<B
     public Boolean getDefault() {
         return mDefault;
     }
+
+    @Override
+    public DynamicBooleanFlag defineMetaData(String label, String description, String categoryName) {
+        super.defineMetaData(label, description, categoryName);
+        return this;
+    }
 }

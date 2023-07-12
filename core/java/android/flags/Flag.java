@@ -42,4 +42,41 @@ public interface Flag<T> {
     default boolean isDynamic() {
         return false;
     }
+
+    /**
+     * Add human-readable details to the flag. Flag client's are not required to set this.
+     *
+     * See {@link #getLabel()}, {@link #getDescription()}, and {@link #getCategoryName()}.
+     *
+     * @return Returns `this`, to make a fluent api.
+     */
+    Flag<T> defineMetaData(String label, String description, String categoryName);
+
+    /**
+     * A human-readable name for the flag. Defaults to {@link #getName()}
+     *
+     * See {@link #defineMetaData(String, String, String)}
+     */
+    @NonNull
+    default String getLabel() {
+        return getName();
+    }
+
+    /**
+     * A human-readable description for the flag. Defaults to null if unset.
+     *
+     * See {@link #defineMetaData(String, String, String)}
+     */
+    default String getDescription() {
+        return null;
+    }
+
+    /**
+     * A human-readable category name for the flag. Defaults to null if unset.
+     *
+     * See {@link #defineMetaData(String, String, String)}
+     */
+    default String getCategoryName() {
+        return null;
+    }
 }

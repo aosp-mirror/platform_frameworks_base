@@ -22,6 +22,9 @@ abstract class BooleanFlagBase implements Flag<Boolean> {
 
     private final String mNamespace;
     private final String mName;
+    private String mLabel;
+    private String mDescription;
+    private String mCategoryName;
 
     /**
      * @param namespace A namespace for this flag. See {@link android.provider.DeviceConfig}.
@@ -30,6 +33,7 @@ abstract class BooleanFlagBase implements Flag<Boolean> {
     BooleanFlagBase(String namespace, String name) {
         mNamespace = namespace;
         mName = name;
+        mLabel = name;
     }
 
     public abstract Boolean getDefault();
@@ -44,6 +48,30 @@ abstract class BooleanFlagBase implements Flag<Boolean> {
     @NonNull
     public String getName() {
         return mName;
+    }
+
+    @Override
+    public BooleanFlagBase defineMetaData(String label, String description, String categoryName) {
+        mLabel = label;
+        mDescription = description;
+        mCategoryName = categoryName;
+        return this;
+    }
+
+    @Override
+    @NonNull
+    public String getLabel() {
+        return mLabel;
+    }
+
+    @Override
+    public String getDescription() {
+        return mDescription;
+    }
+
+    @Override
+    public String getCategoryName() {
+        return mCategoryName;
     }
 
     @Override
