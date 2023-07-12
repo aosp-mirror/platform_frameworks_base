@@ -16,7 +16,6 @@
 package com.android.server.flags;
 
 import android.content.Context;
-import android.flags.FeatureFlags;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -53,10 +52,8 @@ public class FeatureFlagsService extends SystemService {
     @Override
     public void onStart() {
         Slog.d(TAG, "Started Feature Flag Service");
-        FeatureFlagsBinder service = new FeatureFlagsBinder(mFlagStore, mShellCommand);
         publishBinderService(
-                Context.FEATURE_FLAGS_SERVICE, service);
-        publishLocalService(FeatureFlags.class, new FeatureFlags(service));
+                Context.FEATURE_FLAGS_SERVICE, new FeatureFlagsBinder(mFlagStore, mShellCommand));
     }
 
 }

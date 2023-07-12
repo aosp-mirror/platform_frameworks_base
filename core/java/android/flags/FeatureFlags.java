@@ -110,8 +110,7 @@ public class FeatureFlags {
             try {
                 mIFeatureFlags.registerCallback(mIFeatureFlagsCallback);
             } catch (RemoteException e) {
-                // Shouldn't happen with things passed into tests.
-                Log.e(TAG, "Could not register callbacks!", e);
+                // Won't happen in tests.
             }
         }
     }
