@@ -89,6 +89,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         FromAlternateBouncerTransitionInteractor
     private lateinit var fromPrimaryBouncerTransitionInteractor:
         FromPrimaryBouncerTransitionInteractor
+    private lateinit var fromDreamingLockscreenHostedTransitionInteractor:
+        FromDreamingLockscreenHostedTransitionInteractor
 
     @Before
     fun setUp() {
@@ -133,6 +135,15 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
         fromDreamingTransitionInteractor =
             FromDreamingTransitionInteractor(
+                    scope = testScope,
+                    keyguardInteractor = createKeyguardInteractor(),
+                    transitionRepository = transitionRepository,
+                    transitionInteractor = transitionInteractor,
+                )
+                .apply { start() }
+
+        fromDreamingLockscreenHostedTransitionInteractor =
+            FromDreamingLockscreenHostedTransitionInteractor(
                     scope = testScope,
                     keyguardInteractor = createKeyguardInteractor(),
                     transitionRepository = transitionRepository,
@@ -299,6 +310,38 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    fun lockscreenToDreamingLockscreenHosted() =
+        testScope.runTest {
+            // GIVEN a device that is not dreaming or dozing
+            keyguardRepository.setDreamingWithOverlay(false)
+            keyguardRepository.setWakefulnessModel(startingToWake())
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            runCurrent()
+
+            // GIVEN a prior transition has run to LOCKSCREEN
+            runTransition(KeyguardState.GONE, KeyguardState.LOCKSCREEN)
+
+            // WHEN the device begins to dream and the dream is lockscreen hosted
+            keyguardRepository.setDreamingWithOverlay(true)
+            keyguardRepository.setIsActiveDreamLockscreenHosted(true)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to DREAMING_LOCKSCREEN_HOSTED should occur
+            assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.to).isEqualTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
     fun lockscreenToDozing() =
         testScope.runTest {
             // GIVEN a device with AOD not available
@@ -347,6 +390,149 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
             assertThat(info.to).isEqualTo(KeyguardState.AOD)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun dreamingLockscreenHostedToLockscreen() =
+        testScope.runTest {
+            // GIVEN a device dreaming with the lockscreen hosted dream and not dozing
+            keyguardRepository.setIsActiveDreamLockscreenHosted(true)
+            keyguardRepository.setWakefulnessModel(startingToWake())
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            runCurrent()
+
+            // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
+            runTransition(KeyguardState.GONE, KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+
+            // WHEN the lockscreen hosted dream stops
+            keyguardRepository.setIsActiveDreamLockscreenHosted(false)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to Lockscreen should occur
+            assertThat(info.ownerName).isEqualTo("FromDreamingLockscreenHostedTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+            assertThat(info.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun dreamingLockscreenHostedToGone() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
+            runTransition(KeyguardState.GONE, KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+
+            // WHEN biometrics succeeds with wake and unlock from dream mode
+            keyguardRepository.setBiometricUnlockState(
+                BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM
+            )
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to Gone should occur
+            assertThat(info.ownerName).isEqualTo("FromDreamingLockscreenHostedTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+            assertThat(info.to).isEqualTo(KeyguardState.GONE)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun dreamingLockscreenHostedToPrimaryBouncer() =
+        testScope.runTest {
+            // GIVEN a device dreaming with lockscreen hosted dream and not dozing
+            keyguardRepository.setIsActiveDreamLockscreenHosted(true)
+            keyguardRepository.setWakefulnessModel(startingToWake())
+            runCurrent()
+
+            // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
+            runTransition(KeyguardState.GONE, KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+
+            // WHEN the primary bouncer is set to show
+            bouncerRepository.setPrimaryShow(true)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to PRIMARY_BOUNCER should occur
+            assertThat(info.ownerName).isEqualTo("FromDreamingLockscreenHostedTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+            assertThat(info.to).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun dreamingLockscreenHostedToDozing() =
+        testScope.runTest {
+            // GIVEN a device is dreaming with lockscreen hosted dream
+            keyguardRepository.setIsActiveDreamLockscreenHosted(true)
+            runCurrent()
+
+            // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
+            runTransition(KeyguardState.GONE, KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+
+            // WHEN the device begins to sleep
+            keyguardRepository.setIsActiveDreamLockscreenHosted(false)
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.INITIALIZED, to = DozeStateModel.DOZE)
+            )
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to DOZING should occur
+            assertThat(info.ownerName).isEqualTo("FromDreamingLockscreenHostedTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+            assertThat(info.to).isEqualTo(KeyguardState.DOZING)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun dreamingLockscreenHostedToOccluded() =
+        testScope.runTest {
+            // GIVEN device is dreaming with lockscreen hosted dream and not occluded
+            keyguardRepository.setIsActiveDreamLockscreenHosted(true)
+            keyguardRepository.setKeyguardOccluded(false)
+            runCurrent()
+
+            // GIVEN a prior transition has run to DREAMING_LOCKSCREEN_HOSTED
+            runTransition(KeyguardState.GONE, KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+
+            // WHEN the keyguard is occluded and the lockscreen hosted dream stops
+            keyguardRepository.setIsActiveDreamLockscreenHosted(false)
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to OCCLUDED should occur
+            assertThat(info.ownerName).isEqualTo("FromDreamingLockscreenHostedTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+            assertThat(info.to).isEqualTo(KeyguardState.OCCLUDED)
             assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()
@@ -527,6 +713,38 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info.ownerName).isEqualTo("FromGoneTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.GONE)
             assertThat(info.to).isEqualTo(KeyguardState.DREAMING)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun goneToDreamingLockscreenHosted() =
+        testScope.runTest {
+            // GIVEN a device that is not dreaming or dozing
+            keyguardRepository.setDreamingWithOverlay(false)
+            keyguardRepository.setWakefulnessModel(startingToWake())
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            runCurrent()
+
+            // GIVEN a prior transition has run to GONE
+            runTransition(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+
+            // WHEN the device begins to dream with the lockscreen hosted dream
+            keyguardRepository.setDreamingWithOverlay(true)
+            keyguardRepository.setIsActiveDreamLockscreenHosted(true)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to DREAMING_LOCKSCREEN_HOSTED should occur
+            assertThat(info.ownerName).isEqualTo("FromGoneTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.GONE)
+            assertThat(info.to).isEqualTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
             assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()
@@ -720,6 +938,34 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
             assertThat(info.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun primaryBouncerToDreamingLockscreenHosted() =
+        testScope.runTest {
+            // GIVEN device dreaming with the lockscreen hosted dream and not dozing
+            keyguardRepository.setIsActiveDreamLockscreenHosted(true)
+            keyguardRepository.setWakefulnessModel(startingToWake())
+
+            // GIVEN a prior transition has run to PRIMARY_BOUNCER
+            bouncerRepository.setPrimaryShow(true)
+            runTransition(KeyguardState.DREAMING_LOCKSCREEN_HOSTED, KeyguardState.PRIMARY_BOUNCER)
+
+            // WHEN the primary bouncer stops showing and lockscreen hosted dream still active
+            bouncerRepository.setPrimaryShow(false)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition back to DREAMING_LOCKSCREEN_HOSTED should occur
+            assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
             assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()

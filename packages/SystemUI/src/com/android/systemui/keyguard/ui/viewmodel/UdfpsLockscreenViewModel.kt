@@ -112,6 +112,7 @@ open class UdfpsLockscreenViewModel(
             KeyguardState.OFF,
             KeyguardState.DOZING,
             KeyguardState.DREAMING,
+            KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
             KeyguardState.AOD,
             KeyguardState.PRIMARY_BOUNCER,
             KeyguardState.GONE,

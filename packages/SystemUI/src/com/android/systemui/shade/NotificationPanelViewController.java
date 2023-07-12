@@ -140,6 +140,7 @@ import com.android.systemui.keyguard.shared.model.WakefulnessModel;
 import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
 import com.android.systemui.keyguard.ui.view.KeyguardRootView;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel;
@@ -597,6 +598,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final OccludedToLockscreenTransitionViewModel mOccludedToLockscreenTransitionViewModel;
     private final LockscreenToDreamingTransitionViewModel mLockscreenToDreamingTransitionViewModel;
     private final GoneToDreamingTransitionViewModel mGoneToDreamingTransitionViewModel;
+    private final GoneToDreamingLockscreenHostedTransitionViewModel
+            mGoneToDreamingLockscreenHostedTransitionViewModel;
+
     private final LockscreenToOccludedTransitionViewModel mLockscreenToOccludedTransitionViewModel;
 
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -605,6 +609,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final CoroutineDispatcher mMainDispatcher;
     private boolean mIsAnyMultiShadeExpanded;
     private boolean mIsOcclusionTransitionRunning = false;
+    private boolean mIsGoneToDreamingLockscreenHostedTransitionRunning;
     private int mDreamingToLockscreenTransitionTranslationY;
     private int mOccludedToLockscreenTransitionTranslationY;
     private int mLockscreenToDreamingTransitionTranslationY;
@@ -650,6 +655,25 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             (TransitionStep step) -> {
                 mIsOcclusionTransitionRunning =
                     step.getTransitionState() == TransitionState.RUNNING;
+            };
+
+    private final Consumer<TransitionStep> mGoneToDreamingLockscreenHostedTransition =
+            (TransitionStep step) -> {
+                mIsOcclusionTransitionRunning =
+                        step.getTransitionState() == TransitionState.RUNNING;
+                mIsGoneToDreamingLockscreenHostedTransitionRunning = mIsOcclusionTransitionRunning;
+            };
+
+    private final Consumer<TransitionStep> mLockscreenToDreamingLockscreenHostedTransition =
+            (TransitionStep step) -> {
+                mIsOcclusionTransitionRunning =
+                        step.getTransitionState() == TransitionState.RUNNING;
+            };
+
+    private final Consumer<TransitionStep> mDreamingLockscreenHostedToLockscreenTransition =
+            (TransitionStep step) -> {
+                mIsOcclusionTransitionRunning =
+                        step.getTransitionState() == TransitionState.RUNNING;
             };
 
     private final Consumer<TransitionStep> mLockscreenToOccludedTransition =
@@ -734,6 +758,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             OccludedToLockscreenTransitionViewModel occludedToLockscreenTransitionViewModel,
             LockscreenToDreamingTransitionViewModel lockscreenToDreamingTransitionViewModel,
             GoneToDreamingTransitionViewModel goneToDreamingTransitionViewModel,
+            GoneToDreamingLockscreenHostedTransitionViewModel
+                    goneToDreamingLockscreenHostedTransitionViewModel,
             LockscreenToOccludedTransitionViewModel lockscreenToOccludedTransitionViewModel,
             @Main CoroutineDispatcher mainDispatcher,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
@@ -761,6 +787,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mOccludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel;
         mLockscreenToDreamingTransitionViewModel = lockscreenToDreamingTransitionViewModel;
         mGoneToDreamingTransitionViewModel = goneToDreamingTransitionViewModel;
+        mGoneToDreamingLockscreenHostedTransitionViewModel =
+                goneToDreamingLockscreenHostedTransitionViewModel;
         mLockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mKeyguardInteractor = keyguardInteractor;
@@ -1090,6 +1118,24 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         collectFlow(mView, mDreamingToLockscreenTransitionViewModel.lockscreenTranslationY(
                 mDreamingToLockscreenTransitionTranslationY),
                 setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
+
+        // Gone -> Dreaming hosted in lockscreen
+        collectFlow(mView, mKeyguardTransitionInteractor
+                        .getGoneToDreamingLockscreenHostedTransition(),
+                mGoneToDreamingLockscreenHostedTransition, mMainDispatcher);
+        collectFlow(mView, mGoneToDreamingLockscreenHostedTransitionViewModel.getLockscreenAlpha(),
+                setTransitionAlpha(mNotificationStackScrollLayoutController),
+                mMainDispatcher);
+
+        // Lockscreen -> Dreaming hosted in lockscreen
+        collectFlow(mView, mKeyguardTransitionInteractor
+                        .getLockscreenToDreamingLockscreenHostedTransition(),
+                mLockscreenToDreamingLockscreenHostedTransition, mMainDispatcher);
+
+        // Dreaming hosted in lockscreen -> Lockscreen
+        collectFlow(mView, mKeyguardTransitionInteractor
+                        .getDreamingLockscreenHostedToLockscreenTransition(),
+                mDreamingLockscreenHostedToLockscreenTransition, mMainDispatcher);
 
         // Occluded->Lockscreen
         collectFlow(mView, mKeyguardTransitionInteractor.getOccludedToLockscreenTransition(),
@@ -1496,13 +1542,18 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mAnimateNextPositionUpdate = false;
     }
 
+    private boolean shouldAnimateKeyguardStatusViewAlignment() {
+        // Do not animate when transitioning from Gone->DreamingLockscreenHosted
+        return !mIsGoneToDreamingLockscreenHostedTransitionRunning;
+    }
+
     private void updateClockAppearance() {
         int userSwitcherPreferredY = mStatusBarHeaderHeightKeyguard;
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
         boolean shouldAnimateClockChange = mScreenOffAnimationController.shouldAnimateClockChange();
         mKeyguardStatusViewController.displayClock(computeDesiredClockSize(),
                 shouldAnimateClockChange);
-        updateKeyguardStatusViewAlignment(/* animate= */true);
+        updateKeyguardStatusViewAlignment(/* animate= */shouldAnimateKeyguardStatusViewAlignment());
         int userSwitcherHeight = mKeyguardQsUserSwitchController != null
                 ? mKeyguardQsUserSwitchController.getUserIconHeight() : 0;
         if (mKeyguardUserSwitcherController != null) {
@@ -1625,6 +1676,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             // overlap.
             return true;
         }
+        if (isActiveDreamLockscreenHosted()) {
+            // Dreaming hosted in lockscreen, no "visible" notifications. Safe to center the clock.
+            return true;
+        }
         if (mNotificationListContainer.hasPulsingNotifications()) {
             // Pulsing notification appears on the right. Move clock left to avoid overlap.
             return false;
@@ -1651,6 +1706,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private boolean isOnAod() {
         return mDozing && mDozeParameters.getAlwaysOn();
+    }
+
+
+    private boolean isActiveDreamLockscreenHosted() {
+        return mKeyguardInteractor.isActiveDreamLockscreenHosted().getValue();
     }
 
     private boolean hasVisibleNotifications() {
