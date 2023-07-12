@@ -78,11 +78,11 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 deviceProvisionedController,
                 notificationShadeWindowController,
                 windowManager,
+                Lazy { shadeViewController },
                 Lazy { assistManager },
                 Lazy { gutsManager },
             )
         shadeController.setNotificationShadeWindowViewController(nswvc)
-        shadeController.setShadeViewController(shadeViewController)
     }
 
     @Test

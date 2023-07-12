@@ -18,6 +18,7 @@ package com.android.systemui.shade;
 
 import android.view.MotionEvent;
 
+import com.android.systemui.CoreStartable;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
@@ -31,7 +32,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
  * these are coordinated with {@link StatusBarKeyguardViewManager} via
  * {@link com.android.systemui.keyguard.KeyguardViewMediator} and others.
  */
-public interface ShadeController {
+public interface ShadeController extends CoreStartable {
 
     /** Make our window larger and the shade expanded */
     void instantExpandShade();
@@ -164,17 +165,14 @@ public interface ShadeController {
     void onLaunchAnimationEnd(boolean launchIsFullScreen);
 
     /** Sets the listener for when the visibility of the shade changes. */
-    default void setVisibilityListener(ShadeVisibilityListener listener) {};
+    default void setVisibilityListener(ShadeVisibilityListener listener) {}
 
     /** */
-    default void setNotificationPresenter(NotificationPresenter presenter) {};
+    default void setNotificationPresenter(NotificationPresenter presenter) {}
 
     /** */
     default void setNotificationShadeWindowViewController(
-            NotificationShadeWindowViewController notificationShadeWindowViewController) {};
-
-    /** */
-    default void setShadeViewController(ShadeViewController shadeViewController) {};
+            NotificationShadeWindowViewController notificationShadeWindowViewController) {}
 
     /** Listens for shade visibility changes. */
     interface ShadeVisibilityListener {

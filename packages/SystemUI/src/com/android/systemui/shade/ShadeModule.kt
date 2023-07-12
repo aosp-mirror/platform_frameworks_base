@@ -65,7 +65,7 @@ import javax.inject.Named
 import javax.inject.Provider
 
 /** Module for classes related to the notification shade. */
-@Module
+@Module(includes = [StartShadeModule::class])
 abstract class ShadeModule {
 
     @Binds
