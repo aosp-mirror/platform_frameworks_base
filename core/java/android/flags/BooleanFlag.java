@@ -43,10 +43,4 @@ public class BooleanFlag extends BooleanFlagBase {
     public Boolean getDefault() {
         return mDefault;
     }
-
-    @Override
-    public BooleanFlag defineMetaData(String label, String description, String categoryName) {
-        super.defineMetaData(label, description, categoryName);
-        return this;
-    }
 }

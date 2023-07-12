@@ -40,10 +40,4 @@ public final class FusedOnFlag extends BooleanFlagBase {
     public Boolean getDefault() {
         return true;
     }
-
-    @Override
-    public FusedOnFlag defineMetaData(String label, String description, String categoryName) {
-        super.defineMetaData(label, description, categoryName);
-        return this;
-    }
 }
