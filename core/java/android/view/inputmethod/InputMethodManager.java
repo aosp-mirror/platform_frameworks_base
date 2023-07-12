@@ -50,6 +50,7 @@ import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.annotation.UserIdInt;
 import android.app.ActivityThread;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -536,6 +537,13 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     Rect mCursorRect = new Rect();
 
+    /** Cached value for {@link #isStylusHandwritingAvailable} for userId. */
+    @GuardedBy("mH")
+    private PropertyInvalidatedCache<Integer, Boolean> mStylusHandwritingAvailableCache;
+
+    private static final String CACHE_KEY_STYLUS_HANDWRITING_PROPERTY =
+            "cache_key.system_server.stylus_handwriting";
+
     @GuardedBy("mH")
     private int mCursorSelStart;
     @GuardedBy("mH")
@@ -661,6 +669,15 @@ public final class InputMethodManager {
     private static final int MSG_SET_INTERACTIVE = 13;
     private static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
     private static final int MSG_ON_SHOW_REQUESTED = 31;
+
+    /**
+     * Calling this will invalidate Local stylus handwriting availability Cache which
+     * forces the next query in any process to recompute the cache.
+     * @hide
+     */
+    public static void invalidateLocalStylusHandwritingAvailabilityCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_STYLUS_HANDWRITING_PROPERTY);
+    }
 
     private static boolean isAutofillUIShowing(View servedView) {
         AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
@@ -1577,8 +1594,21 @@ public final class InputMethodManager {
         if (fallbackContext == null) {
             return false;
         }
-
-        return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(userId);
+        boolean isAvailable;
+        synchronized (mH) {
+            if (mStylusHandwritingAvailableCache == null) {
+                mStylusHandwritingAvailableCache = new PropertyInvalidatedCache<>(
+                        4 /* maxEntries */, CACHE_KEY_STYLUS_HANDWRITING_PROPERTY) {
+                    @Override
+                    public Boolean recompute(Integer userId) {
+                        return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(
+                                userId);
+                    }
+                };
+            }
+            isAvailable = mStylusHandwritingAvailableCache.query(userId);
+        }
+        return isAvailable;
     }
 
     /**
