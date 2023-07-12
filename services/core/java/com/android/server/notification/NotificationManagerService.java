@@ -832,12 +832,32 @@ public class NotificationManagerService extends SystemService {
             allowNotificationListener(userId, cn);
         }
 
+        allowDndPackages(userId);
+
+        setDefaultAssistantForUser(userId);
+    }
+
+    @VisibleForTesting
+    void allowDndPackages(int userId) {
         ArraySet<String> defaultDnds = mConditionProviders.getDefaultPackages();
         for (int i = 0; i < defaultDnds.size(); i++) {
             allowDndPackage(userId, defaultDnds.valueAt(i));
         }
+        if (!isDNDMigrationDone(userId)) {
+            setDNDMigrationDone(userId);
+        }
+    }
 
-        setDefaultAssistantForUser(userId);
+    @VisibleForTesting
+    boolean isDNDMigrationDone(int userId) {
+        return Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                Settings.Secure.DND_CONFIGS_MIGRATED, 0, userId) == 1;
+    }
+
+    @VisibleForTesting
+    void setDNDMigrationDone(int userId) {
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.DND_CONFIGS_MIGRATED, 1, userId);
     }
 
     protected void migrateDefaultNAS() {
@@ -1024,6 +1044,24 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    void resetDefaultDndIfNecessary() {
+        boolean removed = false;
+        final List<UserInfo> activeUsers = mUm.getAliveUsers();
+        for (UserInfo userInfo : activeUsers) {
+            int userId = userInfo.getUserHandle().getIdentifier();
+            if (isDNDMigrationDone(userId)) {
+                continue;
+            }
+            removed |= mConditionProviders.removeDefaultFromConfig(userId);
+            mConditionProviders.resetDefaultFromConfig();
+            allowDndPackages(userId);
+        }
+        if (removed) {
+            handleSavePolicyFile();
+        }
+    }
+
+    @VisibleForTesting
     protected void loadPolicyFile() {
         if (DBG) Slog.d(TAG, "loadPolicyFile");
         synchronized (mPolicyFile) {
@@ -1031,6 +1069,13 @@ public class NotificationManagerService extends SystemService {
             try {
                 infile = mPolicyFile.openRead();
                 readPolicyXml(infile, false /*forRestore*/, UserHandle.USER_ALL);
+
+                // We re-load the default dnd packages to allow the newly added and denined.
+                final boolean isWatch = mPackageManagerClient.hasSystemFeature(
+                        PackageManager.FEATURE_WATCH);
+                if (isWatch) {
+                    resetDefaultDndIfNecessary();
+                }
             } catch (FileNotFoundException e) {
                 // No data yet
                 // Load default managed services approvals

@@ -11836,6 +11836,13 @@ public final class Settings {
                 "accessibility_display_magnification_edge_haptic_enabled";
 
         /**
+         * If 1, DND default allowed packages have been updated
+         *
+         *  @hide
+         */
+        public static final String DND_CONFIGS_MIGRATED = "dnd_settings_migrated";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */

@@ -4288,6 +4288,9 @@
     <!-- Colon separated list of package names that should be granted DND access -->
     <string name="config_defaultDndAccessPackages" translatable="false">com.android.camera2</string>
 
+    <!-- Colon separated list of package names that should be removed from DND access packages -->
+    <string name="config_defaultDndDeniedPackages" translatable="false"></string>
+
     <!-- User restrictions set on the SYSTEM user when it is first created.
          Note: Also update appropriate overlay files. -->
     <string-array translatable="false" name="config_defaultFirstUserRestrictions">
