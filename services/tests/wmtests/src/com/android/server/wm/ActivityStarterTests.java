@@ -1749,8 +1749,7 @@ public class ActivityStarterTests extends WindowTestsBase {
     public void testLaunchActivityWithoutDisplayCategory() {
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
-        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
-                0 /* launchMode */, null /* componentName */);
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID);
         info.requiredDisplayCategory = "automotive";
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
                 .build();
@@ -1775,8 +1774,7 @@ public class ActivityStarterTests extends WindowTestsBase {
     public void testLaunchActivityWithDifferentDisplayCategory() {
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
-        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
-                0 /* launchMode */, null /* componentName */);
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID);
         info.requiredDisplayCategory = "automotive";
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
                 .build();
@@ -1801,8 +1799,7 @@ public class ActivityStarterTests extends WindowTestsBase {
     public void testLaunchActivityWithSameDisplayCategory() {
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
-        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID,
-                0 /* launchMode */, null /* componentName */);
+        info.taskAffinity = ActivityRecord.computeTaskAffinity("test", DEFAULT_FAKE_UID);
         info.requiredDisplayCategory = "automotive";
         final Task task = new TaskBuilder(mSupervisor).setCreateActivity(true).setActivityInfo(info)
                 .build();
