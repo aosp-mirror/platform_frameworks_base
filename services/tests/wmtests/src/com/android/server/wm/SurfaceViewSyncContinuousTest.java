@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.server.wm.UiDeviceUtils.pressUnlockButton;
 import static android.server.wm.UiDeviceUtils.pressWakeupButton;
-import static android.server.wm.WindowManagerState.getLogicalDisplaySize;
 
 import android.app.KeyguardManager;
 import android.os.PowerManager;
@@ -46,7 +45,6 @@ public class SurfaceViewSyncContinuousTest {
     @Before
     public void setup() {
         mCapturedActivity = mActivityRule.getActivity();
-        mCapturedActivity.setLogicalDisplaySize(getLogicalDisplaySize());
 
         final KeyguardManager km = mCapturedActivity.getSystemService(KeyguardManager.class);
         if (km != null && km.isKeyguardLocked() || !Objects.requireNonNull(

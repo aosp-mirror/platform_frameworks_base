@@ -109,10 +109,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name="android.view.cts.surfacevalidator.LocalMediaProjectionService"
-            android:foregroundServiceType="mediaProjection"
-            android:enabled="true">
-        </service>
     </application>
 
     <instrumentation

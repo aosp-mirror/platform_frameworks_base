@@ -5701,4 +5701,35 @@ public interface WindowManager extends ViewManager {
     default @NonNull List<ComponentName> notifyScreenshotListeners(int displayId) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @param displayId The displayId to that should have its content replaced.
+     * @param window The window that should get mirrored and the mirrored content rendered on
+     *               displayId passed in.
+     *
+     * @return Whether it successfully created a mirror SurfaceControl and replaced the display
+     * content with the mirror of the Window.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
+    default boolean replaceContentOnDisplayWithMirror(int displayId, @NonNull Window window) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param displayId The displayId to that should have its content replaced.
+     * @param sc The SurfaceControl that should get rendered onto the displayId passed in.
+     *
+     * @return Whether it successfully created a mirror SurfaceControl and replaced the display
+     * content with the mirror of the Window.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
+    default boolean replaceContentOnDisplayWithSc(int displayId, @NonNull SurfaceControl sc) {
+        throw new UnsupportedOperationException();
+    }
 }

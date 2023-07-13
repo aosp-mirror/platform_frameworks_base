@@ -7032,4 +7032,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Display is the root, so it's not rotated relative to anything.
         return Surface.ROTATION_0;
     }
+
+    public void replaceContent(SurfaceControl sc) {
+        new Transaction().reparent(sc, getSurfaceControl())
+                .reparent(mWindowingLayer, null)
+                .reparent(mOverlayLayer, null)
+                .reparent(mA11yOverlayLayer, null)
+                .apply();
+    }
 }

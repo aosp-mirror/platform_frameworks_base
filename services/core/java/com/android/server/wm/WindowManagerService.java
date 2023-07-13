@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.ACCESS_SURFACE_FLINGER;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INPUT_CONSUMER;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
@@ -24,7 +25,6 @@ import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.MODIFY_TOUCH_MODE_STATE;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
-import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
@@ -9550,6 +9550,25 @@ public class WindowManagerService extends IWindowManager.Stub
                     },
                     true /* traverseTopToBottom */);
             return List.copyOf(notifiedApps);
+        }
+    }
+
+    @RequiresPermission(ACCESS_SURFACE_FLINGER)
+    @Override
+    public boolean replaceContentOnDisplay(int displayId, SurfaceControl sc) {
+        if (!checkCallingPermission(ACCESS_SURFACE_FLINGER,
+                "replaceDisplayContent()")) {
+            throw new SecurityException("Requires ACCESS_SURFACE_FLINGER permission");
+        }
+
+        DisplayContent dc;
+        synchronized (mGlobalLock) {
+            dc = mRoot.getDisplayContentOrCreate(displayId);
+            if (dc == null) {
+                return false;
+            }
+            dc.replaceContent(sc);
+            return true;
         }
     }
 }
