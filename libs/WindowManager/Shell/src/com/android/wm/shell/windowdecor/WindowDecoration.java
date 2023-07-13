@@ -115,6 +115,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     SurfaceControl mCaptionContainerSurface;
     private WindowlessWindowManager mCaptionWindowManager;
     private SurfaceControlViewHost mViewHost;
+    private Configuration mWindowDecorConfig;
 
     private final Binder mOwner = new Binder();
     private final Rect mCaptionInsetsRect = new Rect();
@@ -125,8 +126,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             DisplayController displayController,
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
-            SurfaceControl taskSurface) {
-        this(context, displayController, taskOrganizer, taskInfo, taskSurface,
+            SurfaceControl taskSurface,
+            Configuration windowDecorConfig) {
+        this(context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, new SurfaceControlViewHostFactory() {});
     }
@@ -137,6 +139,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             ShellTaskOrganizer taskOrganizer,
             RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
+            Configuration windowDecorConfig,
             Supplier<SurfaceControl.Builder> surfaceControlBuilderSupplier,
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             Supplier<WindowContainerTransaction> windowContainerTransactionSupplier,
@@ -152,17 +155,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
 
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
-        mDecorWindowContext = mContext.createConfigurationContext(
-                getConfigurationWithOverrides(mTaskInfo));
-    }
-
-    /**
-     * Get {@link Configuration} from supplied {@link RunningTaskInfo}.
-     *
-     * Allows values to be overridden before returning the configuration.
-     */
-    protected Configuration getConfigurationWithOverrides(RunningTaskInfo taskInfo) {
-        return taskInfo.getConfiguration();
+        mWindowDecorConfig = windowDecorConfig;
+        mDecorWindowContext = mContext.createConfigurationContext(mWindowDecorConfig);
     }
 
     /**
@@ -179,7 +173,6 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             RelayoutResult<T> outResult) {
         outResult.reset();
 
-        final Configuration oldTaskConfig = mTaskInfo.getConfiguration();
         if (params.mRunningTaskInfo != null) {
             mTaskInfo = params.mRunningTaskInfo;
         }
@@ -198,8 +191,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         outResult.mRootView = rootView;
         rootView = null; // Clear it just in case we use it accidentally
-        final Configuration taskConfig = getConfigurationWithOverrides(mTaskInfo);
-        if (oldTaskConfig.densityDpi != taskConfig.densityDpi
+
+        final int oldDensityDpi = mWindowDecorConfig.densityDpi;
+        mWindowDecorConfig = params.mWindowDecorConfig != null ? params.mWindowDecorConfig
+                : mTaskInfo.getConfiguration();
+        if (oldDensityDpi != mWindowDecorConfig.densityDpi
                 || mDisplay == null
                 || mDisplay.getDisplayId() != mTaskInfo.displayId
                 || oldLayoutResId != mLayoutResId) {
@@ -209,7 +205,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 outResult.mRootView = null;
                 return;
             }
-            mDecorWindowContext = mContext.createConfigurationContext(taskConfig);
+            mDecorWindowContext = mContext.createConfigurationContext(mWindowDecorConfig);
             if (params.mLayoutResId != 0) {
                 outResult.mRootView = (T) LayoutInflater.from(mDecorWindowContext)
                         .inflate(params.mLayoutResId, null);
@@ -222,6 +218,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final Resources resources = mDecorWindowContext.getResources();
+        final Configuration taskConfig = mTaskInfo.getConfiguration();
         final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
         outResult.mWidth = taskBounds.width();
         outResult.mHeight = taskBounds.height();
@@ -470,6 +467,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionX;
         int mCaptionY;
 
+        Configuration mWindowDecorConfig;
+
         boolean mApplyStartTransactionOnDraw;
 
         void reset() {
@@ -484,6 +483,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionY = 0;
 
             mApplyStartTransactionOnDraw = false;
+            mWindowDecorConfig = null;
         }
     }
 

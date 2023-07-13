@@ -104,11 +104,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
+            Configuration windowDecorConfig,
             Handler handler,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
-        super(context, displayController, taskOrganizer, taskInfo, taskSurface);
+        super(context, displayController, taskOrganizer, taskInfo, taskSurface, windowDecorConfig);
 
         mHandler = handler;
         mChoreographer = choreographer;
@@ -116,17 +117,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
 
         loadAppInfo();
-    }
-
-    @Override
-    protected Configuration getConfigurationWithOverrides(
-            ActivityManager.RunningTaskInfo taskInfo) {
-        Configuration configuration = taskInfo.getConfiguration();
-        if (DesktopTasksController.isDesktopDensityOverrideSet()) {
-            // Density is overridden for desktop tasks. Keep system density for window decoration.
-            configuration.densityDpi = mContext.getResources().getConfiguration().densityDpi;
-        }
-        return configuration;
     }
 
     void setCaptionListeners(
@@ -193,6 +183,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mRelayoutParams.mCaptionHeightId = getCaptionHeightId();
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         mRelayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
+
+        mRelayoutParams.mWindowDecorConfig = DesktopTasksController.isDesktopDensityOverrideSet()
+                ? mContext.getResources().getConfiguration() // Use system context
+                : mTaskInfo.configuration; // Use task configuration
 
         mRelayoutParams.mCornerRadius =
                 (int) ScreenDecorationsUtils.getWindowCornerRadius(mContext);
@@ -617,12 +611,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 Choreographer choreographer,
                 SyncTransactionQueue syncQueue,
                 RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
+            final Configuration windowDecorConfig =
+                    DesktopTasksController.isDesktopDensityOverrideSet()
+                    ? context.getResources().getConfiguration() // Use system context
+                    : taskInfo.configuration; // Use task configuration
             return new DesktopModeWindowDecoration(
                     context,
                     displayController,
                     taskOrganizer,
                     taskInfo,
                     taskSurface,
+                    windowDecorConfig,
                     handler,
                     choreographer,
                     syncQueue,
