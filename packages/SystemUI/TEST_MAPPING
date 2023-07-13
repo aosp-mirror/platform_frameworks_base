@@ -53,6 +53,20 @@
       ]
     },
     {
+      "name": "SystemUIGoogleScreenshotTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        }
+      ]
+    },
+    {
       // TODO(b/251476085): Consider merging with SystemUIGoogleScreenshotTests (in U+)
       "name": "SystemUIGoogleBiometricsScreenshotTests",
       "options": [
@@ -128,6 +142,22 @@
         },
         {
             "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+   {
+      "name": "SystemUIGoogleScreenshotTests",
+      "options": [
+        {
+            "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+        },
+        {
+            "include-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
     }
