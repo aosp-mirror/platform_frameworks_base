@@ -714,6 +714,8 @@ public final class DisplayPowerController2Test {
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_OFF);
+
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_OFF;
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
@@ -751,6 +753,7 @@ public final class DisplayPowerController2Test {
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
 
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_DOZE;
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);

@@ -18,17 +18,23 @@ package com.android.server.display.brightness;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManagerInternal;
 import android.view.Display;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
+import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.display.brightness.strategy.BoostBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
 import com.android.server.display.brightness.strategy.FollowerBrightnessStrategy;
@@ -38,6 +44,7 @@ import com.android.server.display.brightness.strategy.ScreenOffBrightnessStrateg
 import com.android.server.display.brightness.strategy.TemporaryBrightnessStrategy;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -64,15 +71,20 @@ public final class DisplayBrightnessStrategySelectorTest {
     @Mock
     private FollowerBrightnessStrategy mFollowerBrightnessStrategy;
     @Mock
-    private Context mContext;
-    @Mock
     private Resources mResources;
 
     private DisplayBrightnessStrategySelector mDisplayBrightnessStrategySelector;
+    private Context mContext;
+
+    @Rule
+    public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
+        mContext = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
+        ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContext);
+        when(mContext.getContentResolver()).thenReturn(contentResolver);
         when(mContext.getResources()).thenReturn(mResources);
         when(mInvalidBrightnessStrategy.getName()).thenReturn("InvalidBrightnessStrategy");
         DisplayBrightnessStrategySelector.Injector injector =
