@@ -246,6 +246,7 @@ public class SettingsProvider extends ContentProvider {
     public static final String RESULT_ROWS_DELETED = "result_rows_deleted";
     public static final String RESULT_SETTINGS_LIST = "result_settings_list";
 
+    public static final String SETTINGS_PROVIDER_JOBS_NS = "SettingsProviderJobsNamespace";
     // Used for scheduling jobs to make a copy for the settings files
     public static final int WRITE_FALLBACK_SETTINGS_FILES_JOB_ID = 1;
     public static final long ONE_DAY_INTERVAL_MILLIS = 24 * 60 * 60 * 1000L;
@@ -2785,12 +2786,13 @@ public class SettingsProvider extends ContentProvider {
      */
     public void scheduleWriteFallbackFilesJob() {
         final Context context = getContext();
-        final JobScheduler jobScheduler =
+        JobScheduler jobScheduler =
                 (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         if (jobScheduler == null) {
             // Might happen: SettingsProvider is created before JobSchedulerService in system server
             return;
         }
+        jobScheduler = jobScheduler.forNamespace(SETTINGS_PROVIDER_JOBS_NS);
         // Check if the job is already scheduled. If so, skip scheduling another one
         if (jobScheduler.getPendingJob(WRITE_FALLBACK_SETTINGS_FILES_JOB_ID) != null) {
             return;
