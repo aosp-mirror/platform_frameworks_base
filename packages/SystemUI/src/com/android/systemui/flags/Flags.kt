@@ -290,11 +290,16 @@ object Flags {
     /** Migrate the lock icon view to the new keyguard root view. */
     // TODO(b/286552209): Tracking bug.
     @JvmField
-    val MIGRATE_LOCK_ICON = unreleasedFlag(240, "migrate_lock_icon")
+    val MIGRATE_LOCK_ICON = unreleasedFlag(240, "migrate_lock_icon", teamfood = true)
 
     // TODO(b/288276738): Tracking bug.
     @JvmField
     val WIDGET_ON_KEYGUARD = unreleasedFlag(241, "widget_on_keyguard")
+
+    /** Migrate the NSSL to the a sibling to both the panel and keyguard root view. */
+    // TODO(b/288074305): Tracking bug.
+    @JvmField
+    val MIGRATE_NSSL = unreleasedFlag(242, "migrate_nssl")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -367,21 +372,9 @@ object Flags {
     // TODO(b/256614753): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS = releasedFlag(606, "new_status_bar_mobile_icons")
 
-    // TODO(b/256614210): Tracking Bug
-    val NEW_STATUS_BAR_WIFI_ICON = releasedFlag(607, "new_status_bar_wifi_icon")
-
     // TODO(b/256614751): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS_BACKEND =
         unreleasedFlag(608, "new_status_bar_mobile_icons_backend", teamfood = true)
-
-    // TODO(b/256613548): Tracking Bug
-    val NEW_STATUS_BAR_WIFI_ICON_BACKEND =
-        unreleasedFlag(609, "new_status_bar_wifi_icon_backend", teamfood = true)
-
-    // TODO(b/256623670): Tracking Bug
-    @JvmField
-    val BATTERY_SHIELD_ICON =
-        resourceBooleanFlag(610, R.bool.flag_battery_shield_icon, "battery_shield_icon")
 
     // TODO(b/260881289): Tracking Bug
     val NEW_STATUS_BAR_ICONS_DEBUG_COLORING =
@@ -799,4 +792,11 @@ object Flags {
     // TODO(b/285174336): Tracking Bug
     @JvmField
     val USE_REPOS_FOR_BOUNCER_SHOWING = unreleasedFlag(2900, "use_repos_for_bouncer_showing")
+
+    // 3100 - Haptic interactions
+
+    // TODO(b/290213663): Tracking Bug
+    @JvmField
+    val ONE_WAY_HAPTICS_API_MIGRATION =
+        unreleasedFlag(3100, "oneway_haptics_api_migration")
 }

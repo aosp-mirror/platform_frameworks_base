@@ -464,9 +464,11 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
 
     public void dump(PrintWriter pw, String[] args) {
         String powerSave = mDrawable == null ? null : mDrawable.getPowerSaveEnabled() + "";
+        String displayShield = mDrawable == null ? null : mDrawable.getDisplayShield() + "";
         CharSequence percent = mBatteryPercentView == null ? null : mBatteryPercentView.getText();
         pw.println("  BatteryMeterView:");
         pw.println("    mDrawable.getPowerSave: " + powerSave);
+        pw.println("    mDrawable.getDisplayShield: " + displayShield);
         pw.println("    mBatteryPercentView.getText(): " + percent);
         pw.println("    mTextColor: #" + Integer.toHexString(mTextColor));
         pw.println("    mBatteryStateUnknown: " + mBatteryStateUnknown);

@@ -871,19 +871,22 @@ public class FingerprintService extends SystemService {
             super.registerAuthenticators_enforcePermission();
 
             mRegistry.registerAll(() -> {
-                final List<ServiceProvider> providers = new ArrayList<>();
-                providers.addAll(getHidlProviders(hidlSensors));
                 List<String> aidlSensors = new ArrayList<>();
                 final String[] instances = mAidlInstanceNameSupplier.get();
                 if (instances != null) {
                     aidlSensors.addAll(Lists.newArrayList(instances));
                 }
-                providers.addAll(getAidlProviders(
-                        Utils.filterAvailableHalInstances(getContext(), aidlSensors)));
+
+                final Pair<List<FingerprintSensorPropertiesInternal>, List<String>>
+                        filteredInstances = filterAvailableHalInstances(hidlSensors, aidlSensors);
+
+                final List<ServiceProvider> providers = new ArrayList<>();
+                providers.addAll(getHidlProviders(filteredInstances.first));
+                providers.addAll(getAidlProviders(filteredInstances.second));
+
                 return providers;
             });
         }
-
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
         public void addAuthenticatorsRegisteredCallback(
@@ -1036,6 +1039,33 @@ public class FingerprintService extends SystemService {
                 mBiometricStateCallback.start(mRegistry.getProviders());
             }
         });
+    }
+
+    private Pair<List<FingerprintSensorPropertiesInternal>, List<String>>
+                filterAvailableHalInstances(
+            @NonNull List<FingerprintSensorPropertiesInternal> hidlInstances,
+            @NonNull List<String> aidlInstances) {
+        if ((hidlInstances.size() + aidlInstances.size()) <= 1) {
+            return new Pair(hidlInstances, aidlInstances);
+        }
+
+        final int virtualAt = aidlInstances.indexOf("virtual");
+        if (Utils.isVirtualEnabled(getContext())) {
+            if (virtualAt != -1) {
+                //only virtual instance should be returned
+                return new Pair(new ArrayList<>(), List.of(aidlInstances.get(virtualAt)));
+            } else {
+                Slog.e(TAG, "Could not find virtual interface while it is enabled");
+                return new Pair(hidlInstances, aidlInstances);
+            }
+        } else {
+            //remove virtual instance
+            aidlInstances = new ArrayList<>(aidlInstances);
+            if (virtualAt != -1) {
+                aidlInstances.remove(virtualAt);
+            }
+            return new Pair(hidlInstances, aidlInstances);
+        }
     }
 
     @NonNull
