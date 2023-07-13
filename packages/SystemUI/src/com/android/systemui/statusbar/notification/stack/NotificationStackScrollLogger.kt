@@ -7,6 +7,7 @@ import com.android.systemui.log.core.LogLevel.INFO
 import com.android.systemui.log.core.LogLevel.ERROR
 import com.android.systemui.log.dagger.NotificationHeadsUpLog
 import com.android.systemui.log.dagger.NotificationRenderLog
+import com.android.systemui.log.dagger.ShadeLog
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_ADD
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 class NotificationStackScrollLogger @Inject constructor(
     @NotificationHeadsUpLog private val buffer: LogBuffer,
-    @NotificationRenderLog private val notificationRenderBuffer: LogBuffer
+    @NotificationRenderLog private val notificationRenderBuffer: LogBuffer,
+    @ShadeLog private val shadeLogBuffer: LogBuffer,
 ) {
     fun hunAnimationSkipped(entry: NotificationEntry, reason: String) {
         buffer.log(TAG, INFO, {
@@ -63,7 +65,7 @@ class NotificationStackScrollLogger @Inject constructor(
         })
     }
 
-    fun d(@CompileTimeConstant msg: String) = buffer.log(TAG, DEBUG, msg)
+    fun logShadeDebugEvent(@CompileTimeConstant msg: String) = shadeLogBuffer.log(TAG, DEBUG, msg)
 
     fun logEmptySpaceClick(
         isBelowLastNotification: Boolean,
@@ -71,7 +73,7 @@ class NotificationStackScrollLogger @Inject constructor(
         touchIsClick: Boolean,
         motionEventDesc: String
     ) {
-        buffer.log(TAG, DEBUG, {
+        shadeLogBuffer.log(TAG, DEBUG, {
             int1 = statusBarState
             bool1 = touchIsClick
             bool2 = isBelowLastNotification
