@@ -58,6 +58,16 @@ class ToastLogger @Inject constructor(
         })
     }
 
+    fun logOnSkipToastForInvalidDisplay(packageName: String, token: String, displayId: Int) {
+        log(DEBUG, {
+            str1 = packageName
+            str2 = token
+            int1 = displayId
+        }, {
+            "[$str2] Skip toast for [$str1] scheduled on unavailable display #$int1"
+        })
+    }
+
     private inline fun log(
         logLevel: LogLevel,
         initializer: LogMessage.() -> Unit,
