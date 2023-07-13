@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UiContext;
+import android.app.servertransaction.WindowTokenClientController;
 import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
@@ -3276,7 +3277,8 @@ class ContextImpl extends Context {
         // if this Context is not a WindowContext. WindowContext finalization is handled in
         // WindowContext class.
         if (mToken instanceof WindowTokenClient && mOwnsToken) {
-            ((WindowTokenClient) mToken).detachFromWindowContainerIfNeeded();
+            WindowTokenClientController.getInstance().detachIfNeeded(
+                    (WindowTokenClient) mToken);
         }
         super.finalize();
     }
@@ -3304,7 +3306,7 @@ class ContextImpl extends Context {
         final WindowTokenClient token = new WindowTokenClient();
         final ContextImpl context = systemContext.createWindowContextBase(token, displayId);
         token.attachContext(context);
-        token.attachToDisplayContent(displayId);
+        WindowTokenClientController.getInstance().attachToDisplayContent(token, displayId);
         context.mContextType = CONTEXT_TYPE_SYSTEM_OR_SYSTEM_UI;
         context.mOwnsToken = true;
 
