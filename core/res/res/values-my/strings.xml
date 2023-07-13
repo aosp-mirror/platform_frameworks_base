@@ -2305,7 +2305,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ ဖုန်းကင်မရာကို သုံး၍မရပါ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ တက်ဘလက်ကင်မရာကို သုံး၍မရပါ"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"တိုက်ရိုက်လွှင့်နေစဉ် ၎င်းကို မသုံးနိုင်ပါ။ ၎င်းအစား ဖုန်းတွင် စမ်းကြည့်ပါ။"</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"တိုက်ရိုက်လွှင့်စဉ် နှစ်ခုထပ်၍ မကြည့်နိုင်ပါ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"စနစ်မူရင်း"</string>
     <string name="default_card_name" msgid="9198284935962911468">"ကတ် <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"လက်ပတ်နာရီများစီမံရန် ‘တွဲဖက်နာရီ’ ပရိုဖိုင်ခွင့်ပြုချက်"</string>
