@@ -2317,6 +2317,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossible d\'accéder à l\'appareil photo du téléphone depuis votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossible d\'accéder à l\'appareil photo de la tablette depuis votre <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Impossible d\'accéder à cela pendant le streaming. Essayez plutôt sur votre téléphone."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Impossible d\'afficher Picture-in-picture pendant le streaming"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Paramètre système par défaut"</string>
     <string name="default_card_name" msgid="9198284935962911468">"CARTE <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Autorisation du profil de la montre associée pour gérer des montres"</string>

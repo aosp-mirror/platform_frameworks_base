@@ -2316,6 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Kan nie toegang tot die foon se kamera op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Kan nie toegang tot die tablet se kamera op jou <xliff:g id="DEVICE">%1$s</xliff:g> kry nie"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Jy kan nie toegang hiertoe kry terwyl daar gestroom word nie. Probeer eerder op jou foon."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Kan nie prent-in-prent sien terwyl jy stroom nie"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Stelselverstek"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KAART <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Metgeselhorlosieprofiel se toestemming om horlosies te bestuur"</string>

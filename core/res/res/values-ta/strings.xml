@@ -2316,6 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து மொபைலின் கேமராவை அணுக முடியாது"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து டேப்லெட்டின் கேமராவை அணுக முடியாது"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"ஸ்ட்ரீமின்போது இதை அணுக முடியாது. அதற்குப் பதிலாக உங்கள் மொபைலில் பயன்படுத்திப் பார்க்கவும்."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"ஸ்ட்ரீம் செய்யும்போது பிக்ச்சர்-இன்-பிக்ச்சர் அம்சத்தைப் பயன்படுத்த முடியாது"</string>
     <string name="system_locale_title" msgid="711882686834677268">"சிஸ்டத்தின் இயல்பு"</string>
     <string name="default_card_name" msgid="9198284935962911468">"கார்டு <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"வாட்ச்சுகளை நிர்வகிக்க, துணைத் தயாரிப்பு ஆப்ஸில் வாட்ச் சுயவிவரத்தை அனுமதித்தல்"</string>

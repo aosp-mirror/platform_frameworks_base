@@ -256,7 +256,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Usa esta opción na maioría das circunstancias. Permíteche realizar un seguimento do progreso do informe, introducir máis detalles sobre o problema e facer capturas de pantalla. É posible que omita algunhas seccións menos usadas para as que se tarda máis en facer o informe."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Informe completo"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Usa esta opción para que a interferencia sexa mínima cando o teu dispositivo non responda ou funcione demasiado lento, ou ben cando precises todas as seccións do informe. Non poderás introducir máis detalles nin facer máis capturas de pantalla."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Vaise facer unha captura de pantalla para o informe de erro dentro de # segundo.}other{Vaise facer unha captura de pantalla para o informe de erro dentro de # segundos.}}"</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Vaise facer unha captura de pantalla para o informe de erros dentro de # segundo.}other{Vaise facer unha captura de pantalla para o informe de erros dentro de # segundos.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Realizouse a captura de pantalla co informe de erros"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Produciuse un erro ao realizar a captura de pantalla co informe de erros"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo silencioso"</string>
@@ -2316,6 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Non se puido acceder á cámara do teléfono desde o teu dispositivo (<xliff:g id="DEVICE">%1$s</xliff:g>)"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Non se puido acceder á cámara da tableta desde o teu dispositivo (<xliff:g id="DEVICE">%1$s</xliff:g>)"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Non se puido acceder a este contido durante a reprodución en tempo real. Téntao desde o teléfono."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Non se pode ver un vídeo en pantalla superposta mentres se reproduce en tempo real"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Opción predeterminada do sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARXETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Permiso de perfil de Companion Watch para xestionar reloxos"</string>

@@ -1943,7 +1943,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言名稱"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建議語言"</string>
-    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"建議的語言"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"建議地區"</string>
     <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"建議語言"</string>
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"建議地區"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"所有語言"</string>
@@ -2316,6 +2316,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取手機的相機"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取平板電腦的相機"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"串流播放時無法存取這項內容，請改用手機。"</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"串流播放時無法查看子母畫面"</string>
     <string name="system_locale_title" msgid="711882686834677268">"系統預設"</string>
     <string name="default_card_name" msgid="9198284935962911468">"SIM 卡 <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"用於管理智慧手錶的配對智慧手錶設定檔權限"</string>
