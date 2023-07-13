@@ -37,6 +37,7 @@ import com.android.systemui.animation.DelegateLaunchAnimatorController
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.camera.CameraIntents.Companion.isInsecureCameraIntent
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -72,6 +73,7 @@ constructor(
     private val notifShadeWindowControllerLazy: Lazy<NotificationShadeWindowController>,
     private val activityLaunchAnimator: ActivityLaunchAnimator,
     private val context: Context,
+    @DisplayId private val displayId: Int,
     private val lockScreenUserManager: NotificationLockscreenUserManager,
     private val statusBarWindowController: StatusBarWindowController,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
@@ -471,9 +473,7 @@ constructor(
                     intent.getPackage()
                 ) { adapter: RemoteAnimationAdapter? ->
                     val options =
-                        ActivityOptions(
-                            CentralSurfaces.getActivityOptions(centralSurfaces!!.displayId, adapter)
-                        )
+                        ActivityOptions(CentralSurfaces.getActivityOptions(displayId, adapter))
 
                     // We know that the intent of the caller is to dismiss the keyguard and
                     // this runnable is called right after the keyguard is solved, so we tell
@@ -596,7 +596,7 @@ constructor(
                                     val options =
                                         ActivityOptions(
                                             CentralSurfaces.getActivityOptions(
-                                                centralSurfaces!!.displayId,
+                                                displayId,
                                                 animationAdapter
                                             )
                                         )
@@ -762,7 +762,7 @@ constructor(
                 TaskStackBuilder.create(context)
                     .addNextIntent(intent)
                     .startActivities(
-                        CentralSurfaces.getActivityOptions(centralSurfaces!!.displayId, adapter),
+                        CentralSurfaces.getActivityOptions(displayId, adapter),
                         userHandle
                     )
             }
