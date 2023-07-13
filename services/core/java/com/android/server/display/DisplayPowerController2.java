@@ -48,6 +48,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.FloatProperty;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.MutableFloat;
@@ -64,7 +65,6 @@ import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.RingBuffer;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
@@ -73,6 +73,7 @@ import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
 import com.android.server.display.brightness.DisplayBrightnessController;
+import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
@@ -380,6 +381,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     private final BrightnessThrottler mBrightnessThrottler;
 
+    private final BrightnessClamperController mBrightnessClamperController;
+
     private final Runnable mOnBrightnessChangeRunnable;
 
     private final BrightnessEvent mLastBrightnessEvent;
@@ -554,6 +557,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                         mDisplayId, mLogicalDisplay.getDisplayInfoLocked().brightnessDefault,
                         brightnessSetting, () -> postBrightnessChangeRunnable(),
                         new HandlerExecutor(mHandler));
+
+        mBrightnessClamperController = new BrightnessClamperController(mHandler,
+                modeChangeCallback::run, new BrightnessClamperController.DisplayDeviceData(
+                mUniqueDisplayId,
+                mThermalBrightnessThrottlingDataId,
+                mDisplayDeviceConfig
+        ));
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
 
@@ -781,6 +791,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 .getDisplayDeviceInfoLocked().type == Display.TYPE_INTERNAL;
         final String thermalBrightnessThrottlingDataId =
                 mLogicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId;
+
+        mBrightnessClamperController.onDisplayChanged(
+                new BrightnessClamperController.DisplayDeviceData(mUniqueDisplayId,
+                        mThermalBrightnessThrottlingDataId, config));
 
         mHandler.postAtTime(() -> {
             boolean changed = false;
@@ -1187,6 +1201,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mDisplayPowerProximityStateController.cleanup();
         mBrightnessRangeController.stop();
         mBrightnessThrottler.stop();
+        mBrightnessClamperController.stop();
         mHandler.removeCallbacksAndMessages(null);
 
         // Release any outstanding wakelocks we're still holding because of pending messages.
@@ -1518,6 +1533,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             // transformations to the brightness have pushed it outside of the currently
             // allowed range.
             float animateValue = clampScreenBrightness(brightnessState);
+
+            animateValue = mBrightnessClamperController.clamp(animateValue);
 
             // If there are any HDR layers on the screen, we have a special brightness value that we
             // use instead. We still preserve the calculated brightness for Standard Dynamic Range
@@ -2410,6 +2427,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println();
         if (mDisplayStateController != null) {
             mDisplayStateController.dumpsys(pw);
+        }
+
+        pw.println();
+        if (mBrightnessClamperController != null) {
+            mBrightnessClamperController.dump(ipw);
         }
     }
 
