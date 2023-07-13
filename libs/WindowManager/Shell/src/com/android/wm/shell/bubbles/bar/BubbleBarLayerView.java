@@ -150,12 +150,6 @@ public class BubbleBarLayerView extends FrameLayout
             mExpandedView = null;
         }
         if (mExpandedView == null) {
-            if (expandedView.getParent() != null) {
-                // Expanded view might be animating collapse and is still attached
-                // Cancel current animations and remove from parent
-                mAnimationHelper.cancelAnimations();
-                removeView(expandedView);
-            }
             mExpandedBubble = b;
             mExpandedView = expandedView;
             boolean isOverflowExpanded = b.getKey().equals(BubbleOverflow.KEY);
