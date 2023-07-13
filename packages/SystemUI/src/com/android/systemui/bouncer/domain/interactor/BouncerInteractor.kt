@@ -88,7 +88,7 @@ constructor(
     /** Whether the auto confirm feature is enabled for the currently-selected user. */
     val isAutoConfirmEnabled: StateFlow<Boolean> = authenticationInteractor.isAutoConfirmEnabled
 
-    /** The length of the PIN for which we should show a hint. */
+    /** The length of the hinted PIN, or `null`, if pin length hint should not be shown. */
     val hintedPinLength: StateFlow<Int?> = authenticationInteractor.hintedPinLength
 
     /** Whether the pattern should be visible for the currently-selected user. */
