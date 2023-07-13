@@ -2313,7 +2313,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere telefónu"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere tabletu"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"K tomuto obsahu nie je počas streamovania prístup. Skúste použiť telefón."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Počas streamingu sa obraz v obraze nedá zobraziť"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predvolené systémom"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KARTA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Povolenie profilu hodiniek pre sprievodnú aplikáciu umožňujúce spravovať hodinky"</string>

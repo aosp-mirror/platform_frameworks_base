@@ -2311,7 +2311,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"មិនអាច​ចូលប្រើ​កាមេរ៉ាទូរសព្ទ​ពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"មិនអាច​ចូលប្រើ​កាមេរ៉ា​ថេប្លេតពី <xliff:g id="DEVICE">%1$s</xliff:g> របស់អ្នក​បានទេ"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"មិន​អាច​ចូល​ប្រើប្រាស់​ខ្លឹមសារ​នេះ​បាន​ទេ ពេល​ផ្សាយ។ សូមសាកល្បងប្រើ​នៅលើ​ទូរសព្ទរបស់អ្នក​ជំនួសវិញ។"</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"មិនអាចមើលរូបក្នុងរូបខណៈពេលកំពុងផ្សាយបានទេ"</string>
     <string name="system_locale_title" msgid="711882686834677268">"លំនាំ​ដើម​ប្រព័ន្ធ"</string>
     <string name="default_card_name" msgid="9198284935962911468">"កាត <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"ការអនុញ្ញាតពីកម្រងព័ត៌មាននាឡិកាដៃគូ ដើម្បីគ្រប់គ្រងនាឡិកា"</string>
