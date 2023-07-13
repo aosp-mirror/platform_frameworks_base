@@ -3219,7 +3219,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         return startOperationUnchecked(clientId, code, uid, packageName, attributionTag,
                 Process.INVALID_UID, null, null, OP_FLAG_SELF, startIfModeDefault,
                 shouldCollectAsyncNotedOp, message, shouldCollectMessage, attributionFlags,
-                attributionChainId, /*dryRun*/ false);
+                attributionChainId);
     }
 
     @Override
@@ -3287,11 +3287,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         if (!skipProxyOperation) {
             // Test if the proxied operation will succeed before starting the proxy operation
-            final SyncNotedAppOp testProxiedOp = startOperationUnchecked(clientId, code,
-                    proxiedUid, resolvedProxiedPackageName, proxiedAttributionTag, proxyUid,
-                    resolvedProxyPackageName, proxyAttributionTag, proxiedFlags, startIfModeDefault,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    proxiedAttributionFlags, attributionChainId, /*dryRun*/ true);
+            final SyncNotedAppOp testProxiedOp = startOperationDryRun(code,
+                    proxiedUid, resolvedProxiedPackageName, proxiedAttributionTag,
+                    resolvedProxyPackageName, proxiedFlags, startIfModeDefault);
+
             if (!shouldStartForMode(testProxiedOp.getOpMode(), startIfModeDefault)) {
                 return testProxiedOp;
             }
@@ -3302,8 +3301,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             final SyncNotedAppOp proxyAppOp = startOperationUnchecked(clientId, code, proxyUid,
                     resolvedProxyPackageName, proxyAttributionTag, Process.INVALID_UID, null, null,
                     proxyFlags, startIfModeDefault, !isProxyTrusted, "proxy " + message,
-                    shouldCollectMessage, proxyAttributionFlags, attributionChainId,
-                    /*dryRun*/ false);
+                    shouldCollectMessage, proxyAttributionFlags, attributionChainId);
             if (!shouldStartForMode(proxyAppOp.getOpMode(), startIfModeDefault)) {
                 return proxyAppOp;
             }
@@ -3312,8 +3310,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         return startOperationUnchecked(clientId, code, proxiedUid, resolvedProxiedPackageName,
                 proxiedAttributionTag, proxyUid, resolvedProxyPackageName, proxyAttributionTag,
                 proxiedFlags, startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                shouldCollectMessage, proxiedAttributionFlags, attributionChainId,
-                /*dryRun*/ false);
+                shouldCollectMessage, proxiedAttributionFlags, attributionChainId);
     }
 
     private boolean shouldStartForMode(int mode, boolean startIfModeDefault) {
@@ -3325,7 +3322,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             String proxyPackageName, @Nullable String proxyAttributionTag, @OpFlags int flags,
             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, @Nullable String message,
             boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
-            int attributionChainId, boolean dryRun) {
+            int attributionChainId) {
         PackageVerificationResult pvr;
         try {
             pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
@@ -3348,11 +3345,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             final Ops ops = getOpsLocked(uid, packageName, attributionTag,
                     pvr.isAttributionTagValid, pvr.bypass, /* edit */ true);
             if (ops == null) {
-                if (!dryRun) {
-                    scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
-                            flags, AppOpsManager.MODE_IGNORED, startType, attributionFlags,
-                            attributionChainId);
-                }
+                scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
+                        flags, AppOpsManager.MODE_IGNORED, startType, attributionFlags,
+                        attributionChainId);
                 if (DEBUG) Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName + " flags: "
                         + AppOpsManager.flagsToString(flags));
@@ -3375,11 +3370,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 + switchCode + " (" + code + ") uid " + uid + " package "
                                 + packageName + " flags: " + AppOpsManager.flagsToString(flags));
                     }
-                    if (!dryRun) {
-                        attributedOp.rejected(uidState.getState(), flags);
-                        scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
-                                flags, uidMode, startType, attributionFlags, attributionChainId);
-                    }
+                    attributedOp.rejected(uidState.getState(), flags);
+                    scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
+                            flags, uidMode, startType, attributionFlags, attributionChainId);
                     return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
                 }
             } else {
@@ -3391,41 +3384,119 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (DEBUG) Slog.d(TAG, "startOperation: reject #" + mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
                             + packageName + " flags: " + AppOpsManager.flagsToString(flags));
-                    if (!dryRun) {
-                        attributedOp.rejected(uidState.getState(), flags);
-                        scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
-                                flags, mode, startType, attributionFlags, attributionChainId);
-                    }
+                    attributedOp.rejected(uidState.getState(), flags);
+                    scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag,
+                            flags, mode, startType, attributionFlags, attributionChainId);
                     return new SyncNotedAppOp(mode, code, attributionTag, packageName);
                 }
             }
             if (DEBUG) Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
                     + " package " + packageName + " restricted: " + isRestricted
                     + " flags: " + AppOpsManager.flagsToString(flags));
-            if (!dryRun) {
-                try {
-                    if (isRestricted) {
-                        attributedOp.createPaused(clientId, proxyUid, proxyPackageName,
-                                proxyAttributionTag, uidState.getState(), flags,
-                                attributionFlags, attributionChainId);
-                    } else {
-                        attributedOp.started(clientId, proxyUid, proxyPackageName,
-                                proxyAttributionTag, uidState.getState(), flags,
-                                attributionFlags, attributionChainId);
-                        startType = START_TYPE_STARTED;
-                    }
-                } catch (RemoteException e) {
-                    throw new RuntimeException(e);
+            try {
+                if (isRestricted) {
+                    attributedOp.createPaused(clientId, proxyUid, proxyPackageName,
+                            proxyAttributionTag, uidState.getState(), flags,
+                            attributionFlags, attributionChainId);
+                } else {
+                    attributedOp.started(clientId, proxyUid, proxyPackageName,
+                            proxyAttributionTag, uidState.getState(), flags,
+                            attributionFlags, attributionChainId);
+                    startType = START_TYPE_STARTED;
                 }
-                scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag, flags,
-                        isRestricted ? MODE_IGNORED : MODE_ALLOWED, startType, attributionFlags,
-                        attributionChainId);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
             }
+            scheduleOpStartedIfNeededLocked(code, uid, packageName, attributionTag, flags,
+                    isRestricted ? MODE_IGNORED : MODE_ALLOWED, startType, attributionFlags,
+                    attributionChainId);
         }
 
-        if (shouldCollectAsyncNotedOp && !dryRun && !isRestricted) {
+        if (shouldCollectAsyncNotedOp && !isRestricted) {
             collectAsyncNotedOp(uid, packageName, code, attributionTag, AppOpsManager.OP_FLAG_SELF,
                     message, shouldCollectMessage);
+        }
+
+        return new SyncNotedAppOp(isRestricted ? MODE_IGNORED : MODE_ALLOWED, code, attributionTag,
+                packageName);
+    }
+
+    /**
+     * Performs a dry run of the start operation i.e. determines the result of the start operation
+     * without actually updating the op state to be started.
+     *
+     * <p>This is used for proxy operations; before starting the op as the proxy, we must check that
+     * the proxied app can successfully start the operation.
+     */
+    private SyncNotedAppOp startOperationDryRun(int code, int uid,
+            @NonNull String packageName, @Nullable String attributionTag,
+            String proxyPackageName, @OpFlags int flags,
+            boolean startIfModeDefault) {
+        PackageVerificationResult pvr;
+        try {
+            pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
+            if (!pvr.isAttributionTagValid) {
+                attributionTag = null;
+            }
+        } catch (SecurityException e) {
+            if (Process.isIsolated(uid)) {
+                Slog.e(TAG, "Cannot startOperation: isolated process");
+            } else {
+                Slog.e(TAG, "Cannot startOperation", e);
+            }
+            return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
+                    packageName);
+        }
+
+        boolean isRestricted = false;
+        synchronized (this) {
+            final Ops ops = getOpsLocked(uid, packageName, attributionTag,
+                    pvr.isAttributionTagValid, pvr.bypass, /* edit */ true);
+            if (ops == null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "startOperation: no op for code " + code + " uid " + uid
+                            + " package " + packageName + " flags: "
+                            + AppOpsManager.flagsToString(flags));
+                }
+                return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
+                        packageName);
+            }
+            final Op op = getOpLocked(ops, code, uid, true);
+            final UidState uidState = ops.uidState;
+            isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass,
+                    false);
+            final int switchCode = AppOpsManager.opToSwitch(code);
+            // If there is a non-default mode per UID policy (we set UID op mode only if
+            // non-default) it takes over, otherwise use the per package policy.
+            if (uidState.getUidMode(switchCode) != AppOpsManager.opToDefaultMode(switchCode)) {
+                final int uidMode = uidState.evalMode(code, uidState.getUidMode(switchCode));
+                if (!shouldStartForMode(uidMode, startIfModeDefault)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "startOperation: uid reject #" + uidMode + " for code "
+                                + switchCode + " (" + code + ") uid " + uid + " package "
+                                + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                    }
+                    return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
+                }
+            } else {
+                final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, uid, true)
+                        : op;
+                final int mode = switchOp.uidState.evalMode(switchOp.op, switchOp.getMode());
+                if (mode != AppOpsManager.MODE_ALLOWED
+                        && (!startIfModeDefault || mode != MODE_DEFAULT)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "startOperation: reject #" + mode + " for code "
+                                + switchCode + " (" + code + ") uid " + uid + " package "
+                                + packageName + " flags: " + AppOpsManager.flagsToString(flags));
+                    }
+                    return new SyncNotedAppOp(mode, code, attributionTag, packageName);
+                }
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "startOperation: allowing code " + code + " uid " + uid
+                        + " package " + packageName + " restricted: " + isRestricted
+                        + " flags: " + AppOpsManager.flagsToString(flags));
+            }
         }
 
         return new SyncNotedAppOp(isRestricted ? MODE_IGNORED : MODE_ALLOWED, code, attributionTag,
