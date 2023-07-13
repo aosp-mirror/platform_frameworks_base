@@ -360,30 +360,22 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mTransientLaunches.put(activity, restoreBelow);
         setTransientLaunchToChanges(activity);
 
-        final Task transientRootTask = activity.getRootTask();
-        final WindowContainer<?> parent = restoreBelow != null ? restoreBelow.getParent()
-                : (transientRootTask != null ? transientRootTask.getParent() : null);
-        if (parent != null) {
+        if (restoreBelow != null) {
+            final Task transientRootTask = activity.getRootTask();
             // Collect all visible tasks which can be occluded by the transient activity to
             // make sure they are in the participants so their visibilities can be updated when
             // finishing transition.
-            parent.forAllTasks(t -> {
-                // Skip transient-launch task
-                if (t == transientRootTask) return false;
+            ((WindowContainer<?>) restoreBelow.getParent()).forAllTasks(t -> {
                 if (t.isVisibleRequested() && !t.isAlwaysOnTop()
                         && !t.getWindowConfiguration().tasksAreFloating()) {
-                    if (t.isRootTask()) {
+                    if (t.isRootTask() && t != transientRootTask) {
                         mTransientHideTasks.add(t);
                     }
                     if (t.isLeafTask()) {
                         collect(t);
                     }
                 }
-                return restoreBelow != null
-                        // Stop at the restoreBelow task
-                        ? t == restoreBelow
-                        // Or stop at the last visible task if no restore-below (new task)
-                        : (t.isRootTask() && t.fillsParent());
+                return t == restoreBelow;
             });
             // Add FLAG_ABOVE_TRANSIENT_LAUNCH to the tree of transient-hide tasks,
             // so ChangeInfo#hasChanged() can return true to report the transition info.
