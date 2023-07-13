@@ -16,27 +16,22 @@
 
 package com.android.systemui.mediaprojection.taskswitcher.data.repository
 
-import android.media.projection.MediaProjectionInfo
-import android.media.projection.MediaProjectionManager
 import android.os.Binder
 import android.os.Handler
-import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import android.view.ContentRecordingSession
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.mediaprojection.taskswitcher.data.model.MediaProjectionState
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createToken
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -45,29 +40,26 @@ import org.junit.runner.RunWith
 @SmallTest
 class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
 
-    private val mediaProjectionManager = mock<MediaProjectionManager>()
-
     private val dispatcher = StandardTestDispatcher()
     private val testScope = TestScope(dispatcher)
-    private val tasksRepo = FakeTasksRepository()
 
-    private lateinit var callback: MediaProjectionManager.Callback
-    private lateinit var repo: MediaProjectionManagerRepository
+    private val fakeMediaProjectionManager = FakeMediaProjectionManager()
+    private val fakeActivityTaskManager = FakeActivityTaskManager()
 
-    @Before
-    fun setUp() {
-        whenever(mediaProjectionManager.addCallback(any(), any())).thenAnswer {
-            callback = it.arguments[0] as MediaProjectionManager.Callback
-            return@thenAnswer Unit
-        }
-        repo =
-            MediaProjectionManagerRepository(
-                mediaProjectionManager = mediaProjectionManager,
-                handler = Handler.getMain(),
-                applicationScope = testScope.backgroundScope,
-                tasksRepository = tasksRepo
-            )
-    }
+    private val tasksRepo =
+        ActivityTaskManagerTasksRepository(
+            activityTaskManager = fakeActivityTaskManager.activityTaskManager,
+            applicationScope = testScope.backgroundScope,
+            backgroundDispatcher = dispatcher
+        )
+
+    private val repo =
+        MediaProjectionManagerRepository(
+            mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
+            handler = Handler.getMain(),
+            applicationScope = testScope.backgroundScope,
+            tasksRepository = tasksRepo
+        )
 
     @Test
     fun mediaProjectionState_onStart_emitsNotProjecting() =
@@ -75,7 +67,7 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             val state by collectLastValue(repo.mediaProjectionState)
             runCurrent()
 
-            callback.onStart(TEST_MEDIA_INFO)
+            fakeMediaProjectionManager.dispatchOnStart()
 
             assertThat(state).isEqualTo(MediaProjectionState.NotProjecting)
         }
@@ -86,7 +78,7 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             val state by collectLastValue(repo.mediaProjectionState)
             runCurrent()
 
-            callback.onStop(TEST_MEDIA_INFO)
+            fakeMediaProjectionManager.dispatchOnStop()
 
             assertThat(state).isEqualTo(MediaProjectionState.NotProjecting)
         }
@@ -97,7 +89,7 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             val state by collectLastValue(repo.mediaProjectionState)
             runCurrent()
 
-            callback.onRecordingSessionSet(TEST_MEDIA_INFO, /* session= */ null)
+            fakeMediaProjectionManager.dispatchOnSessionSet(session = null)
 
             assertThat(state).isEqualTo(MediaProjectionState.NotProjecting)
         }
@@ -108,8 +100,9 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             val state by collectLastValue(repo.mediaProjectionState)
             runCurrent()
 
-            val session = ContentRecordingSession.createDisplaySession(/* displayToMirror= */ 123)
-            callback.onRecordingSessionSet(TEST_MEDIA_INFO, session)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = ContentRecordingSession.createDisplaySession(/* displayToMirror= */ 123)
+            )
 
             assertThat(state).isEqualTo(MediaProjectionState.EntireScreen)
         }
@@ -120,9 +113,10 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             val state by collectLastValue(repo.mediaProjectionState)
             runCurrent()
 
-            val session =
-                ContentRecordingSession.createTaskSession(/* taskWindowContainerToken= */ null)
-            callback.onRecordingSessionSet(TEST_MEDIA_INFO, session)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session =
+                    ContentRecordingSession.createTaskSession(/* taskWindowContainerToken= */ null)
+            )
 
             assertThat(state).isEqualTo(MediaProjectionState.EntireScreen)
         }
@@ -134,8 +128,9 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
             runCurrent()
 
             val taskWindowContainerToken = Binder()
-            val session = ContentRecordingSession.createTaskSession(taskWindowContainerToken)
-            callback.onRecordingSessionSet(TEST_MEDIA_INFO, session)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = ContentRecordingSession.createTaskSession(taskWindowContainerToken)
+            )
 
             assertThat(state).isEqualTo(MediaProjectionState.EntireScreen)
         }
@@ -143,20 +138,16 @@ class MediaProjectionManagerRepositoryTest : SysuiTestCase() {
     @Test
     fun mediaProjectionState_sessionSet_taskWithToken_matchingRunningTask_emitsSingleTask() =
         testScope.runTest {
-            val token = FakeTasksRepository.createToken()
-            val task = FakeTasksRepository.createTask(taskId = 1, token = token)
-            tasksRepo.addRunningTask(task)
+            val token = createToken()
+            val task = createTask(taskId = 1, token = token)
+            fakeActivityTaskManager.addRunningTasks(task)
             val state by collectLastValue(repo.mediaProjectionState)
             runCurrent()
 
-            val session = ContentRecordingSession.createTaskSession(token.asBinder())
-            callback.onRecordingSessionSet(TEST_MEDIA_INFO, session)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = ContentRecordingSession.createTaskSession(token.asBinder())
+            )
 
             assertThat(state).isEqualTo(MediaProjectionState.SingleTask(task))
         }
-
-    companion object {
-        val TEST_MEDIA_INFO =
-            MediaProjectionInfo(/* packageName= */ "com.test.package", UserHandle.CURRENT)
-    }
 }
