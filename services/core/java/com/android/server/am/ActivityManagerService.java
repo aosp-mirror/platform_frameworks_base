@@ -9013,7 +9013,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean isSystemApp = process == null ||
                 (process.info.flags & (ApplicationInfo.FLAG_SYSTEM |
                                        ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0;
-        final String processName = process == null ? "unknown" : process.processName;
+        final String processName = process != null && process.getPid() == MY_PID
+                ? "system_server"
+                : (process == null ? "unknown" : process.processName);
         final DropBoxManager dbox = (DropBoxManager)
                 mContext.getSystemService(Context.DROPBOX_SERVICE);
 
