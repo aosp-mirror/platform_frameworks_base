@@ -24,6 +24,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
@@ -1333,6 +1334,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 taskFragment.setAnimationParams(animationParams);
+                break;
+            }
+            case OP_TYPE_REORDER_TO_FRONT: {
+                final Task task = taskFragment.getTask();
+                if (task != null) {
+                    final TaskFragment topTaskFragment = task.getTaskFragment(
+                            tf -> tf.asTask() == null);
+                    if (topTaskFragment != null && topTaskFragment != taskFragment) {
+                        final int index = task.mChildren.indexOf(topTaskFragment);
+                        task.mChildren.remove(taskFragment);
+                        task.mChildren.add(index, taskFragment);
+                    }
+                }
                 break;
             }
         }
