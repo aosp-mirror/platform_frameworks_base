@@ -552,7 +552,9 @@ public class WindowManagerService extends IWindowManager.Stub
     final PackageManagerInternal mPmInternal;
     private final TestUtilityService mTestUtilityService;
 
+    @NonNull
     final DisplayWindowSettingsProvider mDisplayWindowSettingsProvider;
+    @NonNull
     final DisplayWindowSettings mDisplayWindowSettings;
 
     /** If the system should display notifications for apps displaying an alert window. */
