@@ -40,7 +40,7 @@ class FakeAuthenticationRepository(
     private val _isUnlocked = MutableStateFlow(false)
     override val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
 
-    override val hintedPinLength: Int = 6
+    override val hintedPinLength: Int = HINTING_PIN_LENGTH
 
     private val _isPatternVisible = MutableStateFlow(true)
     override val isPatternVisible: StateFlow<Boolean> = _isPatternVisible.asStateFlow()
@@ -82,7 +82,7 @@ class FakeAuthenticationRepository(
     }
 
     override suspend fun getPinLength(): Int {
-        return (credentialOverride ?: listOf(1, 2, 3, 4)).size
+        return (credentialOverride ?: DEFAULT_PIN).size
     }
 
     override fun setBypassEnabled(isBypassEnabled: Boolean) {
@@ -148,6 +148,15 @@ class FakeAuthenticationRepository(
         }
     }
 
+    private fun getExpectedCredential(securityMode: SecurityMode): List<Any> {
+        return when (val credentialType = getCurrentCredentialType(securityMode)) {
+            LockPatternUtils.CREDENTIAL_TYPE_PIN -> credentialOverride ?: DEFAULT_PIN
+            LockPatternUtils.CREDENTIAL_TYPE_PASSWORD -> "password".toList()
+            LockPatternUtils.CREDENTIAL_TYPE_PATTERN -> PATTERN.toCells()
+            else -> error("Unsupported credential type $credentialType!")
+        }
+    }
+
     companion object {
         val DEFAULT_AUTHENTICATION_METHOD = AuthenticationMethodModel.Pin
         val PATTERN =
@@ -162,6 +171,8 @@ class FakeAuthenticationRepository(
             )
         const val MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING = 5
         const val THROTTLE_DURATION_MS = 30000
+        const val HINTING_PIN_LENGTH = 6
+        val DEFAULT_PIN = buildList { repeat(HINTING_PIN_LENGTH) { add(it + 1) } }
 
         private fun AuthenticationMethodModel.toSecurityMode(): SecurityMode {
             return when (this) {
@@ -185,15 +196,6 @@ class FakeAuthenticationRepository(
                 SecurityMode.Pattern -> LockPatternUtils.CREDENTIAL_TYPE_PATTERN
                 SecurityMode.None -> LockPatternUtils.CREDENTIAL_TYPE_NONE
                 else -> error("Unsupported SecurityMode $securityMode!")
-            }
-        }
-
-        private fun getExpectedCredential(securityMode: SecurityMode): List<Any> {
-            return when (val credentialType = getCurrentCredentialType(securityMode)) {
-                LockPatternUtils.CREDENTIAL_TYPE_PIN -> listOf(1, 2, 3, 4)
-                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD -> "password".toList()
-                LockPatternUtils.CREDENTIAL_TYPE_PATTERN -> PATTERN.toCells()
-                else -> error("Unsupported credential type $credentialType!")
             }
         }
 
