@@ -52,7 +52,6 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.provider.DeviceConfig;
-import android.sysprop.ApexProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.FastImmutableArraySet;
@@ -921,10 +920,6 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         return rebootWithLskfImpl(packageName, reason, slotSwitch);
     }
 
-    public static boolean isUpdatableApexSupported() {
-        return ApexProperties.updatable().orElse(false);
-    }
-
     // Metadata should be no more than few MB, if it's larger than 100MB something is wrong.
     private static final long APEX_INFO_SIZE_LIMIT = 24 * 1024 * 100;
 
@@ -975,11 +970,6 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     @Override
     public boolean allocateSpaceForUpdate(String packageFile) {
         allocateSpaceForUpdate_enforcePermission();
-        if (!isUpdatableApexSupported()) {
-            Log.i(TAG, "Updatable Apex not supported, "
-                    + "allocateSpaceForUpdate does nothing.");
-            return true;
-        }
         final long token = Binder.clearCallingIdentity();
         try {
             CompressedApexInfoList apexInfoList = getCompressedApexInfoList(packageFile);

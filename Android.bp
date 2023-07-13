@@ -246,7 +246,6 @@ java_library {
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
 
-        "com.android.sysprop.apex",
         "com.android.sysprop.init",
         "com.android.sysprop.localization",
         "PlatformProperties",
