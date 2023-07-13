@@ -458,7 +458,7 @@ public class DisplayDeviceConfig {
 
     public static final String QUIRK_CAN_SET_BRIGHTNESS_VIA_HWC = "canSetBrightnessViaHwc";
 
-    static final String DEFAULT_ID = "default";
+    public static final String DEFAULT_ID = "default";
 
     private static final float BRIGHTNESS_DEFAULT = 0.5f;
     private static final String ETC_DIR = "etc";
@@ -3127,11 +3127,15 @@ public class DisplayDeviceConfig {
     public static class ThermalBrightnessThrottlingData {
         public List<ThrottlingLevel> throttlingLevels;
 
-        static class ThrottlingLevel {
+        /**
+         * thermal status to brightness cap holder
+         */
+        public static class ThrottlingLevel {
             public @PowerManager.ThermalStatus int thermalStatus;
             public float brightness;
 
-            ThrottlingLevel(@PowerManager.ThermalStatus int thermalStatus, float brightness) {
+            public ThrottlingLevel(
+                    @PowerManager.ThermalStatus int thermalStatus, float brightness) {
                 this.thermalStatus = thermalStatus;
                 this.brightness = brightness;
             }
