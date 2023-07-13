@@ -25,6 +25,7 @@ import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
 import com.android.server.display.brightness.strategy.BoostBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
@@ -60,6 +61,8 @@ public class DisplayBrightnessStrategySelector {
     private final FollowerBrightnessStrategy mFollowerBrightnessStrategy;
     // The brightness strategy used to manage the brightness state when the request is invalid.
     private final InvalidBrightnessStrategy mInvalidBrightnessStrategy;
+    // Controls brightness when automatic (adaptive) brightness is running.
+    private final AutomaticBrightnessStrategy mAutomaticBrightnessStrategy;
 
     // We take note of the old brightness strategy so that we can know when the strategy changes.
     private String mOldBrightnessStrategyName;
@@ -81,6 +84,7 @@ public class DisplayBrightnessStrategySelector {
         mBoostBrightnessStrategy = injector.getBoostBrightnessStrategy();
         mFollowerBrightnessStrategy = injector.getFollowerBrightnessStrategy(displayId);
         mInvalidBrightnessStrategy = injector.getInvalidBrightnessStrategy();
+        mAutomaticBrightnessStrategy = injector.getAutomaticBrightnessStrategy(context, displayId);
         mAllowAutoBrightnessWhileDozingConfig = context.getResources().getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
         mOldBrightnessStrategyName = mInvalidBrightnessStrategy.getName();
@@ -128,6 +132,10 @@ public class DisplayBrightnessStrategySelector {
 
     public FollowerBrightnessStrategy getFollowerDisplayBrightnessStrategy() {
         return mFollowerBrightnessStrategy;
+    }
+
+    public AutomaticBrightnessStrategy getAutomaticBrightnessStrategy() {
+        return mAutomaticBrightnessStrategy;
     }
 
     /**
@@ -197,6 +205,10 @@ public class DisplayBrightnessStrategySelector {
 
         InvalidBrightnessStrategy getInvalidBrightnessStrategy() {
             return new InvalidBrightnessStrategy();
+        }
+
+        AutomaticBrightnessStrategy getAutomaticBrightnessStrategy(Context context, int displayId) {
+            return new AutomaticBrightnessStrategy(context, displayId);
         }
     }
 }
