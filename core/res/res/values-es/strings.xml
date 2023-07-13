@@ -2312,6 +2312,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No se puede acceder a la cámara del teléfono desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No se puede acceder a la cámara del tablet desde tu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"No se puede acceder a este contenido durante una emisión. Prueba en tu teléfono."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No se puede usar imagen en imagen mientras se emite contenido"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predeterminado del sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARJETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Permiso del perfil del reloj complementario para gestionar relojes"</string>

@@ -2311,6 +2311,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nem lehet hozzáférni a telefon kamerájához a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nem lehet hozzáférni a táblagép kamerájához a következő eszközön: <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Ehhez a tartalomhoz nem lehet hozzáférni streamelés közben. Próbálja újra a telefonján."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Streamelés közben nem lehetséges a kép a képben módban való lejátszás"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Rendszerbeállítás"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KÁRTYA: <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Társóra-profilra vonatkozó engedély az órák kezeléséhez"</string>
