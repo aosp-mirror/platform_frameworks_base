@@ -512,10 +512,11 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
         assertNotNull(mirrorView);
         mirrorView.getBoundsOnScreen(mirrorViewBound);
 
-        assertEquals(mirrorViewBound.exactCenterX() - windowBounds.exactCenterX(),
-                Math.round(offsetRatio * mirrorViewBound.width() / 2), 0.1f);
-        assertEquals(mirrorViewBound.exactCenterY() - windowBounds.exactCenterY(),
-                Math.round(offsetRatio * mirrorViewBound.height() / 2), 0.1f);
+        assertEquals((int) (offsetRatio * mirrorViewBound.width() / 2),
+                (int) (mirrorViewBound.exactCenterX() - windowBounds.exactCenterX()));
+        assertEquals((int) (offsetRatio * mirrorViewBound.height() / 2),
+                (int) (mirrorViewBound.exactCenterY() - windowBounds.exactCenterY()));
+
     }
 
     @Test
