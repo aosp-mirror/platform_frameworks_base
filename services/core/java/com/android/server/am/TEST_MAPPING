@@ -145,12 +145,7 @@
       ]
     },
     {
-      "name": "CtsAppSecurityHostTestCases",
-      "options": [
-        {
-          "include-filter": "android.appsecurity.cts.AppDataIsolationTests"
-        }
-      ]
+      "name": "CtsAppDataIsolationHostTestCases"
     },
     {
       "name": "CtsAppTestCases",
