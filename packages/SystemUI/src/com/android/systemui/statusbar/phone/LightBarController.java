@@ -38,8 +38,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.settings.DisplayTracker;
@@ -65,7 +63,6 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private final SysuiDarkIconDispatcher mStatusBarIconController;
     private final BatteryController mBatteryController;
-    private final boolean mUseNewLightBarLogic;
     private BiometricUnlockController mBiometricUnlockController;
 
     private LightBarTransitionsController mNavigationBarController;
@@ -123,10 +120,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             DarkIconDispatcher darkIconDispatcher,
             BatteryController batteryController,
             NavigationModeController navModeController,
-            FeatureFlags featureFlags,
             DumpManager dumpManager,
             DisplayTracker displayTracker) {
-        mUseNewLightBarLogic = featureFlags.isEnabled(Flags.NEW_LIGHT_BAR_LOGIC);
         mDarkIconColor = ctx.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightIconColor = ctx.getColor(R.color.light_mode_icon_color_single_tone);
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
@@ -188,51 +183,31 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             final boolean last = mNavigationLight;
             mHasLightNavigationBar = isLight(appearance, navigationBarMode,
                     APPEARANCE_LIGHT_NAVIGATION_BARS);
-            if (mUseNewLightBarLogic) {
-                final boolean ignoreScrimForce = mDirectReplying && mNavbarColorManagedByIme;
-                final boolean darkForScrim = mForceDarkForScrim && !ignoreScrimForce;
-                final boolean lightForScrim = mForceLightForScrim && !ignoreScrimForce;
-                final boolean darkForQs = (mQsCustomizing || mQsExpanded) && !mBouncerVisible;
-                final boolean darkForTop = darkForQs || mGlobalActionsVisible;
-                mNavigationLight =
-                        ((mHasLightNavigationBar && !darkForScrim) || lightForScrim) && !darkForTop;
-                if (DEBUG_NAVBAR) {
-                    mLastNavigationBarAppearanceChangedLog = getLogStringBuilder()
-                            .append("onNavigationBarAppearanceChanged()")
-                            .append(" appearance=").append(appearance)
-                            .append(" nbModeChanged=").append(nbModeChanged)
-                            .append(" navigationBarMode=").append(navigationBarMode)
-                            .append(" navbarColorManagedByIme=").append(navbarColorManagedByIme)
-                            .append(" mHasLightNavigationBar=").append(mHasLightNavigationBar)
-                            .append(" ignoreScrimForce=").append(ignoreScrimForce)
-                            .append(" darkForScrim=").append(darkForScrim)
-                            .append(" lightForScrim=").append(lightForScrim)
-                            .append(" darkForQs=").append(darkForQs)
-                            .append(" darkForTop=").append(darkForTop)
-                            .append(" mNavigationLight=").append(mNavigationLight)
-                            .append(" last=").append(last)
-                            .append(" timestamp=").append(System.currentTimeMillis())
-                            .toString();
-                    if (DEBUG_LOGS) Log.d(TAG, mLastNavigationBarAppearanceChangedLog);
-                }
-            } else {
-                mNavigationLight = mHasLightNavigationBar
-                        && (mDirectReplying && mNavbarColorManagedByIme || !mForceDarkForScrim)
-                        && !mQsCustomizing;
-                if (DEBUG_NAVBAR) {
-                    mLastNavigationBarAppearanceChangedLog = getLogStringBuilder()
-                            .append("onNavigationBarAppearanceChanged()")
-                            .append(" appearance=").append(appearance)
-                            .append(" nbModeChanged=").append(nbModeChanged)
-                            .append(" navigationBarMode=").append(navigationBarMode)
-                            .append(" navbarColorManagedByIme=").append(navbarColorManagedByIme)
-                            .append(" mHasLightNavigationBar=").append(mHasLightNavigationBar)
-                            .append(" mNavigationLight=").append(mNavigationLight)
-                            .append(" last=").append(last)
-                            .append(" timestamp=").append(System.currentTimeMillis())
-                            .toString();
-                    if (DEBUG_LOGS) Log.d(TAG, mLastNavigationBarAppearanceChangedLog);
-                }
+            final boolean ignoreScrimForce = mDirectReplying && mNavbarColorManagedByIme;
+            final boolean darkForScrim = mForceDarkForScrim && !ignoreScrimForce;
+            final boolean lightForScrim = mForceLightForScrim && !ignoreScrimForce;
+            final boolean darkForQs = (mQsCustomizing || mQsExpanded) && !mBouncerVisible;
+            final boolean darkForTop = darkForQs || mGlobalActionsVisible;
+            mNavigationLight =
+                    ((mHasLightNavigationBar && !darkForScrim) || lightForScrim) && !darkForTop;
+            if (DEBUG_NAVBAR) {
+                mLastNavigationBarAppearanceChangedLog = getLogStringBuilder()
+                        .append("onNavigationBarAppearanceChanged()")
+                        .append(" appearance=").append(appearance)
+                        .append(" nbModeChanged=").append(nbModeChanged)
+                        .append(" navigationBarMode=").append(navigationBarMode)
+                        .append(" navbarColorManagedByIme=").append(navbarColorManagedByIme)
+                        .append(" mHasLightNavigationBar=").append(mHasLightNavigationBar)
+                        .append(" ignoreScrimForce=").append(ignoreScrimForce)
+                        .append(" darkForScrim=").append(darkForScrim)
+                        .append(" lightForScrim=").append(lightForScrim)
+                        .append(" darkForQs=").append(darkForQs)
+                        .append(" darkForTop=").append(darkForTop)
+                        .append(" mNavigationLight=").append(mNavigationLight)
+                        .append(" last=").append(last)
+                        .append(" timestamp=").append(System.currentTimeMillis())
+                        .toString();
+                if (DEBUG_LOGS) Log.d(TAG, mLastNavigationBarAppearanceChangedLog);
             }
             if (mNavigationLight != last) {
                 updateNavigation();
@@ -311,66 +286,39 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     public void setScrimState(ScrimState scrimState, float scrimBehindAlpha,
             GradientColors scrimInFrontColor) {
-        if (mUseNewLightBarLogic) {
-            boolean bouncerVisibleLast = mBouncerVisible;
-            boolean forceDarkForScrimLast = mForceDarkForScrim;
-            boolean forceLightForScrimLast = mForceLightForScrim;
-            mBouncerVisible =
-                    scrimState == ScrimState.BOUNCER || scrimState == ScrimState.BOUNCER_SCRIMMED;
-            final boolean forceForScrim = mBouncerVisible
-                    || scrimBehindAlpha >= NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD;
-            final boolean scrimColorIsLight = scrimInFrontColor.supportsDarkText();
+        boolean bouncerVisibleLast = mBouncerVisible;
+        boolean forceDarkForScrimLast = mForceDarkForScrim;
+        boolean forceLightForScrimLast = mForceLightForScrim;
+        mBouncerVisible =
+                scrimState == ScrimState.BOUNCER || scrimState == ScrimState.BOUNCER_SCRIMMED;
+        final boolean forceForScrim = mBouncerVisible
+                || scrimBehindAlpha >= NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD;
+        final boolean scrimColorIsLight = scrimInFrontColor.supportsDarkText();
 
-            mForceDarkForScrim = forceForScrim && !scrimColorIsLight;
-            mForceLightForScrim = forceForScrim && scrimColorIsLight;
-            if (mBouncerVisible != bouncerVisibleLast) {
-                reevaluate();
-            } else if (mHasLightNavigationBar) {
-                if (mForceDarkForScrim != forceDarkForScrimLast) reevaluate();
-            } else {
-                if (mForceLightForScrim != forceLightForScrimLast) reevaluate();
-            }
-            if (DEBUG_NAVBAR) {
-                mLastSetScrimStateLog = getLogStringBuilder()
-                        .append("setScrimState()")
-                        .append(" scrimState=").append(scrimState)
-                        .append(" scrimBehindAlpha=").append(scrimBehindAlpha)
-                        .append(" scrimInFrontColor=").append(scrimInFrontColor)
-                        .append(" forceForScrim=").append(forceForScrim)
-                        .append(" scrimColorIsLight=").append(scrimColorIsLight)
-                        .append(" mHasLightNavigationBar=").append(mHasLightNavigationBar)
-                        .append(" mBouncerVisible=").append(mBouncerVisible)
-                        .append(" mForceDarkForScrim=").append(mForceDarkForScrim)
-                        .append(" mForceLightForScrim=").append(mForceLightForScrim)
-                        .append(" timestamp=").append(System.currentTimeMillis())
-                        .toString();
-                if (DEBUG_LOGS) Log.d(TAG, mLastSetScrimStateLog);
-            }
+        mForceDarkForScrim = forceForScrim && !scrimColorIsLight;
+        mForceLightForScrim = forceForScrim && scrimColorIsLight;
+        if (mBouncerVisible != bouncerVisibleLast) {
+            reevaluate();
+        } else if (mHasLightNavigationBar) {
+            if (mForceDarkForScrim != forceDarkForScrimLast) reevaluate();
         } else {
-            boolean forceDarkForScrimLast = mForceDarkForScrim;
-            // For BOUNCER/BOUNCER_SCRIMMED cases, we assume that alpha is always below threshold.
-            // This enables IMEs to control the navigation bar color.
-            // For other cases, scrim should be able to veto the light navigation bar.
-            // NOTE: this was also wrong for S and has been removed in the new logic.
-            mForceDarkForScrim = scrimState != ScrimState.BOUNCER
-                    && scrimState != ScrimState.BOUNCER_SCRIMMED
-                    && scrimBehindAlpha >= NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD
-                    && !scrimInFrontColor.supportsDarkText();
-            if (mHasLightNavigationBar && (mForceDarkForScrim != forceDarkForScrimLast)) {
-                reevaluate();
-            }
-            if (DEBUG_NAVBAR) {
-                mLastSetScrimStateLog = getLogStringBuilder()
-                        .append("setScrimState()")
-                        .append(" scrimState=").append(scrimState)
-                        .append(" scrimBehindAlpha=").append(scrimBehindAlpha)
-                        .append(" scrimInFrontColor=").append(scrimInFrontColor)
-                        .append(" mHasLightNavigationBar=").append(mHasLightNavigationBar)
-                        .append(" mForceDarkForScrim=").append(mForceDarkForScrim)
-                        .append(" timestamp=").append(System.currentTimeMillis())
-                        .toString();
-                if (DEBUG_LOGS) Log.d(TAG, mLastSetScrimStateLog);
-            }
+            if (mForceLightForScrim != forceLightForScrimLast) reevaluate();
+        }
+        if (DEBUG_NAVBAR) {
+            mLastSetScrimStateLog = getLogStringBuilder()
+                    .append("setScrimState()")
+                    .append(" scrimState=").append(scrimState)
+                    .append(" scrimBehindAlpha=").append(scrimBehindAlpha)
+                    .append(" scrimInFrontColor=").append(scrimInFrontColor)
+                    .append(" forceForScrim=").append(forceForScrim)
+                    .append(" scrimColorIsLight=").append(scrimColorIsLight)
+                    .append(" mHasLightNavigationBar=").append(mHasLightNavigationBar)
+                    .append(" mBouncerVisible=").append(mBouncerVisible)
+                    .append(" mForceDarkForScrim=").append(mForceDarkForScrim)
+                    .append(" mForceLightForScrim=").append(mForceLightForScrim)
+                    .append(" timestamp=").append(System.currentTimeMillis())
+                    .toString();
+            if (DEBUG_LOGS) Log.d(TAG, mLastSetScrimStateLog);
         }
     }
 
@@ -498,7 +446,6 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         private final DarkIconDispatcher mDarkIconDispatcher;
         private final BatteryController mBatteryController;
         private final NavigationModeController mNavModeController;
-        private final FeatureFlags mFeatureFlags;
         private final DumpManager mDumpManager;
         private final DisplayTracker mDisplayTracker;
 
@@ -507,14 +454,12 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
                 DarkIconDispatcher darkIconDispatcher,
                 BatteryController batteryController,
                 NavigationModeController navModeController,
-                FeatureFlags featureFlags,
                 DumpManager dumpManager,
                 DisplayTracker displayTracker) {
 
             mDarkIconDispatcher = darkIconDispatcher;
             mBatteryController = batteryController;
             mNavModeController = navModeController;
-            mFeatureFlags = featureFlags;
             mDumpManager = dumpManager;
             mDisplayTracker = displayTracker;
         }
@@ -522,7 +467,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         /** Create an {@link LightBarController} */
         public LightBarController create(Context context) {
             return new LightBarController(context, mDarkIconDispatcher, mBatteryController,
-                    mNavModeController, mFeatureFlags, mDumpManager, mDisplayTracker);
+                    mNavModeController, mDumpManager, mDisplayTracker);
         }
     }
 }

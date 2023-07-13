@@ -18,6 +18,7 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
@@ -60,10 +61,9 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
             assertThat(animateFailure).isFalse()
 
             // Wrong PIN:
-            underTest.onPinButtonClicked(3)
-            underTest.onPinButtonClicked(4)
-            underTest.onPinButtonClicked(5)
-            underTest.onPinButtonClicked(6)
+            FakeAuthenticationRepository.DEFAULT_PIN.drop(2).forEach { digit ->
+                underTest.onPinButtonClicked(digit)
+            }
             underTest.onAuthenticateButtonClicked()
             assertThat(animateFailure).isTrue()
 
@@ -71,10 +71,9 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
             assertThat(animateFailure).isFalse()
 
             // Correct PIN:
-            underTest.onPinButtonClicked(1)
-            underTest.onPinButtonClicked(2)
-            underTest.onPinButtonClicked(3)
-            underTest.onPinButtonClicked(4)
+            FakeAuthenticationRepository.DEFAULT_PIN.forEach { digit ->
+                underTest.onPinButtonClicked(digit)
+            }
             underTest.onAuthenticateButtonClicked()
             assertThat(animateFailure).isFalse()
         }

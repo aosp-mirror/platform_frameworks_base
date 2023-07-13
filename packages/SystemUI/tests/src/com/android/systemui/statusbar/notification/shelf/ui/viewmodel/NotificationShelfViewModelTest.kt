@@ -69,6 +69,7 @@ class NotificationShelfViewModelTest : SysuiTestCase() {
     private val powerInteractor by lazy {
         PowerInteractor(
             powerRepository,
+            keyguardRepository,
             FalsingCollectorFake(),
             screenOffAnimationController,
             statusBarStateController,

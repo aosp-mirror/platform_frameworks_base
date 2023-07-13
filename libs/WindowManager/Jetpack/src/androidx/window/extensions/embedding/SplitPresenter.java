@@ -17,6 +17,7 @@
 package androidx.window.extensions.embedding;
 
 import static android.content.pm.PackageManager.MATCH_ALL;
+import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -39,6 +40,7 @@ import android.view.WindowInsets;
 import android.view.WindowMetrics;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
+import android.window.TaskFragmentOperation;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.IntDef;
@@ -336,10 +338,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // value.
         final SplitRule rule = splitContainer.getSplitRule();
         final TaskFragmentContainer primaryContainer = splitContainer.getPrimaryContainer();
-        final Activity activity = primaryContainer.getTopNonFinishingActivity();
-        if (activity == null) {
-            return;
-        }
         final TaskContainer taskContainer = splitContainer.getTaskContainer();
         final TaskProperties taskProperties = taskContainer.getTaskProperties();
         final SplitAttributes splitAttributes = splitContainer.getCurrentSplitAttributes();
@@ -424,6 +422,16 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         container.setLastRequestedBounds(fragmentOptions.getInitialRelativeBounds());
         container.setLastRequestedWindowingMode(fragmentOptions.getWindowingMode());
         super.createTaskFragment(wct, fragmentOptions);
+
+        // Reorders the pinned TaskFragment to front to ensure it is the front-most TaskFragment.
+        final SplitPinContainer pinnedContainer =
+                container.getTaskContainer().getSplitPinContainer();
+        if (pinnedContainer != null) {
+            final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
+                    OP_TYPE_REORDER_TO_FRONT).build();
+            wct.addTaskFragmentOperation(
+                    pinnedContainer.getSecondaryContainer().getTaskFragmentToken(), operation);
+        }
     }
 
     @Override

@@ -61,19 +61,12 @@ object Flags {
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply")
 
-    // TODO(b/279735475): Tracking Bug
-    @JvmField
-    val NEW_LIGHT_BAR_LOGIC = releasedFlag(279735475, "new_light_bar_logic")
-
     /**
      * This flag is server-controlled and should stay as [unreleasedFlag] since we never want to
      * enable it on release builds.
      */
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
         unreleasedFlag(119, "notification_memory_logging_enabled")
-
-    // TODO(b/257315550): Tracking Bug
-    val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
 
     // TODO(b/260335638): Tracking Bug
     @JvmField
@@ -792,4 +785,11 @@ object Flags {
     // TODO(b/285174336): Tracking Bug
     @JvmField
     val USE_REPOS_FOR_BOUNCER_SHOWING = unreleasedFlag(2900, "use_repos_for_bouncer_showing")
+
+    // 3100 - Haptic interactions
+
+    // TODO(b/290213663): Tracking Bug
+    @JvmField
+    val ONE_WAY_HAPTICS_API_MIGRATION =
+        unreleasedFlag(3100, "oneway_haptics_api_migration")
 }

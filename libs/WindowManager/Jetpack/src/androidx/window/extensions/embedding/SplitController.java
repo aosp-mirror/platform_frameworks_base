@@ -213,6 +213,56 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @Override
+    public boolean pinTopActivityStack(int taskId, @NonNull SplitPinRule splitPinRule) {
+        synchronized (mLock) {
+            final TaskContainer task = getTaskContainer(taskId);
+            if (task == null) {
+                Log.e(TAG, "Cannot find the task for id: " + taskId);
+                return false;
+            }
+
+            final TaskFragmentContainer topContainer =
+                    task.getTopNonFinishingTaskFragmentContainer();
+            // Cannot pin the TaskFragment if no other TaskFragment behind it.
+            if (topContainer == null || task.indexOf(topContainer) <= 0) {
+                Log.w(TAG, "Cannot find an ActivityStack to pin or split");
+                return false;
+            }
+            // Abort if the top container is already pinned.
+            if (task.getSplitPinContainer() != null) {
+                Log.w(TAG, "There is already a pinned ActivityStack.");
+                return false;
+            }
+
+            // Find a valid adjacent TaskFragmentContainer
+            final TaskFragmentContainer primaryContainer =
+                    task.getNonFinishingTaskFragmentContainerBelow(topContainer);
+            if (primaryContainer == null) {
+                Log.w(TAG, "Cannot find another ActivityStack to split");
+                return false;
+            }
+
+            // Registers a Split
+            final SplitPinContainer splitPinContainer = new SplitPinContainer(primaryContainer,
+                    topContainer, splitPinRule, splitPinRule.getDefaultSplitAttributes());
+            task.addSplitContainer(splitPinContainer);
+
+            // Updates the Split
+            final TransactionRecord transactionRecord = mTransactionManager.startNewTransaction();
+            final WindowContainerTransaction wct = transactionRecord.getTransaction();
+            mPresenter.updateSplitContainer(splitPinContainer, wct);
+            transactionRecord.apply(false /* shouldApplyIndependently */);
+            updateCallbackIfNecessary();
+            return true;
+        }
+    }
+
+    @Override
+    public void unpinTopActivityStack(int taskId){
+        // TODO
+    }
+
+    @Override
     public void setSplitAttributesCalculator(
             @NonNull Function<SplitAttributesCalculatorParams, SplitAttributes> calculator) {
         synchronized (mLock) {
@@ -672,7 +722,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (targetContainer == null) {
             // When there is no embedding rule matched, try to place it in the top container
             // like a normal launch.
-            targetContainer = taskContainer.getTopTaskFragmentContainer();
+            targetContainer = taskContainer.getTopNonFinishingTaskFragmentContainer();
         }
         if (targetContainer == null) {
             return;
@@ -791,7 +841,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         final TaskFragmentContainer container = getContainerWithActivity(activity);
         if (!isOnReparent && container != null
-                && container.getTaskContainer().getTopTaskFragmentContainer() != container) {
+                && container.getTaskContainer().getTopNonFinishingTaskFragmentContainer()
+                        != container) {
             // Do not resolve if the launched activity is not the top-most container in the Task.
             return true;
         }
@@ -888,7 +939,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (taskContainer == null) {
             return;
         }
-        final TaskFragmentContainer targetContainer = taskContainer.getTopTaskFragmentContainer();
+        final TaskFragmentContainer targetContainer =
+                taskContainer.getTopNonFinishingTaskFragmentContainer();
         if (targetContainer == null) {
             return;
         }
@@ -1213,11 +1265,13 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         // 3. Whether the top activity (if any) should be split with the new activity intent.
         final TaskContainer taskContainer = getTaskContainer(taskId);
-        if (taskContainer == null || taskContainer.getTopTaskFragmentContainer() == null) {
+        if (taskContainer == null
+                || taskContainer.getTopNonFinishingTaskFragmentContainer() == null) {
             // There is no other activity in the Task to check split with.
             return null;
         }
-        final TaskFragmentContainer topContainer = taskContainer.getTopTaskFragmentContainer();
+        final TaskFragmentContainer topContainer =
+                taskContainer.getTopNonFinishingTaskFragmentContainer();
         final Activity topActivity = topContainer.getTopNonFinishingActivity();
         if (topActivity != null && topActivity != launchingActivity) {
             final TaskFragmentContainer container = getSecondaryContainerForSplitIfAny(wct,
@@ -1567,6 +1621,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // background.
             return;
         }
+        final SplitContainer splitContainer = getActiveSplitForContainer(container);
+        if (splitContainer instanceof SplitPinContainer
+                && updateSplitContainerIfNeeded(splitContainer, wct, null /* splitAttributes */)) {
+            // A SplitPinContainer exists and is updated.
+            return;
+        }
         if (launchPlaceholderIfNecessary(wct, container)) {
             // Placeholder was launched, the positions will be updated when the activity is added
             // to the secondary container.
@@ -1579,7 +1639,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // If the info is not available yet the task fragment will be expanded when it's ready
             return;
         }
-        SplitContainer splitContainer = getActiveSplitForContainer(container);
         if (splitContainer == null) {
             return;
         }

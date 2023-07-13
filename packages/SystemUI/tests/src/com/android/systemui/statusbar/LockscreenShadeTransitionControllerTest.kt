@@ -101,16 +101,18 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock lateinit var transitionControllerCallback: LockscreenShadeTransitionController.Callback
     private val disableFlagsRepository = FakeDisableFlagsRepository()
+    private val keyguardRepository = FakeKeyguardRepository()
     private val shadeInteractor = ShadeInteractor(
         testScope.backgroundScope,
         disableFlagsRepository,
-        keyguardRepository = FakeKeyguardRepository(),
+        keyguardRepository,
         userSetupRepository = FakeUserSetupRepository(),
         deviceProvisionedController = mock(),
         userInteractor = mock(),
     )
     private val powerInteractor = PowerInteractor(
         FakePowerRepository(),
+        keyguardRepository,
         FalsingCollectorFake(),
         screenOffAnimationController = mock(),
         statusBarStateController = mock(),

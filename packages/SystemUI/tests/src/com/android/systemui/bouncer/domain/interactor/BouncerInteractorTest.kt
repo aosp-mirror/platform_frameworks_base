@@ -94,7 +94,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
 
             // Correct input.
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isTrue()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
@@ -118,13 +118,20 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(message).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
-            // Wrong 4-digit pin
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 5), tryAutoConfirm = true)).isFalse()
+            // Wrong 6-digit pin
+            assertThat(underTest.authenticate(listOf(1, 2, 3, 5, 5, 6), tryAutoConfirm = true))
+                .isFalse()
             assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             // Correct input.
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4), tryAutoConfirm = true)).isTrue()
+            assertThat(
+                    underTest.authenticate(
+                        FakeAuthenticationRepository.DEFAULT_PIN,
+                        tryAutoConfirm = true
+                    )
+                )
+                .isTrue()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
@@ -147,7 +154,13 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             // Correct input.
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4), tryAutoConfirm = true)).isNull()
+            assertThat(
+                    underTest.authenticate(
+                        FakeAuthenticationRepository.DEFAULT_PIN,
+                        tryAutoConfirm = true
+                    )
+                )
+                .isNull()
             assertThat(message).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
@@ -309,7 +322,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             )
 
             // Correct PIN, but throttled, so doesn't change away from the bouncer scene:
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isNull()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isNull()
             assertThat(currentScene?.key).isEqualTo(SceneKey.Bouncer)
             assertTryAgainMessage(
                 message,
@@ -339,7 +352,7 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(currentScene?.key).isEqualTo(SceneKey.Bouncer)
 
             // Correct PIN and no longer throttled so changes to the Gone scene:
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isTrue()
             assertThat(currentScene?.key).isEqualTo(SceneKey.Gone)
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())

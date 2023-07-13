@@ -1175,6 +1175,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD), false, this, userId);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE), false, this, userId);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    STYLUS_HANDWRITING_ENABLED), false, this);
             mRegistered = true;
         }
 
@@ -1183,6 +1185,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
             final Uri accessibilityRequestingNoImeUri = Settings.Secure.getUriFor(
                     Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE);
+            final Uri stylusHandwritingEnabledUri = Settings.Secure.getUriFor(
+                    STYLUS_HANDWRITING_ENABLED);
             synchronized (ImfLock.class) {
                 if (showImeUri.equals(uri)) {
                     mMenuController.updateKeyboardFromSettingsLocked();
@@ -1200,6 +1204,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         showCurrentInputImplicitLocked(mCurFocusedWindow,
                                 SoftInputShowHideReason.SHOW_SETTINGS_ON_CHANGE);
                     }
+                } else if (stylusHandwritingEnabledUri.equals(uri)) {
+                    InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
                 } else {
                     boolean enabledChanged = false;
                     String newEnabled = mSettings.getEnabledInputMethodsStr();
@@ -2363,7 +2369,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mCurVirtualDisplayToScreenMatrix = null;
             ImeTracker.forLogging().onFailed(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
             mCurStatsToken = null;
-
+            InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
             mMenuController.hideInputMethodMenuLocked();
         }
     }
