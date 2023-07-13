@@ -16,47 +16,25 @@
 
 package android.content.res;
 
-import android.annotation.NonNull;
-import android.util.Pools.SimplePool;
-
 /**
  * Counter used to track the number of tags seen during manifest validation.
  *
  * {@hide}
  */
 public class TagCounter {
-    private static final int MAX_POOL_SIZE = 512;
     private static final int DEFAULT_MAX_COUNT = 512;
-
-    private static final ThreadLocal<SimplePool<TagCounter>> sPool =
-            ThreadLocal.withInitial(() -> new SimplePool<>(MAX_POOL_SIZE));
 
     private int mMaxValue;
     private int mCount;
-
-    @NonNull
-    static TagCounter obtain(int max) {
-        TagCounter counter = sPool.get().acquire();
-        if (counter == null) {
-            counter = new TagCounter();
-        }
-        counter.setMaxValue(max);
-        return counter;
-    }
-
-    void recycle() {
-        mCount = 0;
-        mMaxValue = DEFAULT_MAX_COUNT;
-        sPool.get().release(this);
-    }
 
     public TagCounter() {
         mMaxValue = DEFAULT_MAX_COUNT;
         mCount = 0;
     }
 
-    private void setMaxValue(int maxValue) {
+    void reset(int maxValue) {
         this.mMaxValue = maxValue;
+        this.mCount = 0;
     }
 
     void increment() {
@@ -65,9 +43,5 @@ public class TagCounter {
 
     public boolean isValid() {
         return mCount <= mMaxValue;
-    }
-
-    int value() {
-        return mCount;
     }
 }

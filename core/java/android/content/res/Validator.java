@@ -24,9 +24,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Validates manifest files by ensuring that tag counts and the length of string attributes are
@@ -36,29 +33,11 @@ import java.util.Map;
  */
 public class Validator {
 
-    private static final int MAX_TAG_COUNT = 100000;
-
     private final ArrayDeque<Element> mElements = new ArrayDeque<>();
-    private final Map<String, TagCounter> mTagCounters = new HashMap<>();
 
     private void cleanUp() {
         while (!mElements.isEmpty()) {
             mElements.pop().recycle();
-        }
-        Iterator<Map.Entry<String, TagCounter>> it = mTagCounters.entrySet().iterator();
-        while (it.hasNext()) {
-            it.next().getValue().recycle();
-            it.remove();
-        }
-    }
-
-    private void seen(String tag) throws XmlPullParserException {
-        mTagCounters.putIfAbsent(tag, TagCounter.obtain(MAX_TAG_COUNT));
-        TagCounter counter = mTagCounters.get(tag);
-        counter.increment();
-        if (!counter.isValid()) {
-            throw new XmlPullParserException("The number of " + tag
-                    + " tags exceeded " + MAX_TAG_COUNT);
         }
     }
 
@@ -84,7 +63,6 @@ public class Validator {
                 }
                 Element parent = mElements.peek();
                 if (parent == null || parent.hasChild(tag)) {
-                    seen(tag);
                     Element element = Element.obtain(tag);
                     element.validateStringAttrs(parser);
                     if (parent != null) {

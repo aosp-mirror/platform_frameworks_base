@@ -17,7 +17,6 @@
 package android.content.res;
 
 import android.annotation.NonNull;
-import android.util.ArrayMap;
 import android.util.Pools.SimplePool;
 
 import androidx.annotation.StyleableRes;
@@ -26,9 +25,6 @@ import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Defines the string attribute length and child tag count restrictions for a xml element.
@@ -161,9 +157,11 @@ public class Element {
     private static final String[] NAME_VALUE_ATTRS = {TAG_ATTR_NAME, TAG_ATTR_VALUE};
 
     private String[] mStringAttrNames = new String[0];
-    private final Map<String, TagCounter> mTagCounters = new ArrayMap<>();
+    // The length of mTagCounters corresponds to the number of tags defined in getCounterIdx. If new
+    // tags are added then the size here should be increased to match.
+    private final TagCounter[] mTagCounters = new TagCounter[35];
 
-    private String mTag;
+    String mTag;
 
     private static final ThreadLocal<SimplePool<Element>> sPool =
             ThreadLocal.withInitial(() -> new SimplePool<>(MAX_POOL_SIZE));
@@ -180,17 +178,91 @@ public class Element {
 
     void recycle() {
         mStringAttrNames = new String[0];
-        Iterator<Map.Entry<String, TagCounter>> it = mTagCounters.entrySet().iterator();
-        while (it.hasNext()) {
-            it.next().getValue().recycle();
-            it.remove();
-        }
         mTag = null;
         sPool.get().release(this);
     }
 
+    private long mChildTagMask = 0;
+
+    private static int getCounterIdx(String tag) {
+        switch(tag) {
+            case TAG_LAYOUT:
+                return 0;
+            case TAG_META_DATA:
+                return 1;
+            case TAG_INTENT_FILTER:
+                return 2;
+            case TAG_PROFILEABLE:
+                return 3;
+            case TAG_USES_NATIVE_LIBRARY:
+                return 4;
+            case TAG_RECEIVER:
+                return 5;
+            case TAG_SERVICE:
+                return 6;
+            case TAG_ACTIVITY_ALIAS:
+                return 7;
+            case TAG_USES_LIBRARY:
+                return 8;
+            case TAG_PROVIDER:
+                return 9;
+            case TAG_ACTIVITY:
+                return 10;
+            case TAG_ACTION:
+                return 11;
+            case TAG_CATEGORY:
+                return 12;
+            case TAG_DATA:
+                return 13;
+            case TAG_APPLICATION:
+                return 14;
+            case TAG_OVERLAY:
+                return 15;
+            case TAG_INSTRUMENTATION:
+                return 16;
+            case TAG_PERMISSION_GROUP:
+                return 17;
+            case TAG_PERMISSION_TREE:
+                return 18;
+            case TAG_SUPPORTS_GL_TEXTURE:
+                return 19;
+            case TAG_SUPPORTS_SCREENS:
+                return 20;
+            case TAG_USES_CONFIGURATION:
+                return 21;
+            case TAG_USES_PERMISSION_SDK_23:
+                return 22;
+            case TAG_USES_SDK:
+                return 23;
+            case TAG_COMPATIBLE_SCREENS:
+                return 24;
+            case TAG_QUERIES:
+                return 25;
+            case TAG_ATTRIBUTION:
+                return 26;
+            case TAG_USES_FEATURE:
+                return 27;
+            case TAG_PERMISSION:
+                return 28;
+            case TAG_USES_PERMISSION:
+                return 29;
+            case TAG_GRANT_URI_PERMISSION:
+                return 30;
+            case TAG_PATH_PERMISSION:
+                return 31;
+            case TAG_PACKAGE:
+                return 32;
+            case TAG_INTENT:
+                return 33;
+            default:
+                // The size of the mTagCounters array should be equal to this value+1
+                return 34;
+        }
+    }
+
     private void init(String tag) {
         this.mTag = tag;
+        mChildTagMask = 0;
         switch (tag) {
             case TAG_ACTION:
             case TAG_CATEGORY:
@@ -208,29 +280,29 @@ public class Element {
                 break;
             case TAG_ACTIVITY:
                 setStringAttrNames(ACTIVITY_STR_ATTR_NAMES);
-                addTagCounter(1000, TAG_LAYOUT);
-                addTagCounter(8000, TAG_META_DATA);
-                addTagCounter(20000, TAG_INTENT_FILTER);
+                initializeCounter(TAG_LAYOUT, 1000);
+                initializeCounter(TAG_META_DATA, 8000);
+                initializeCounter(TAG_INTENT_FILTER, 20000);
                 break;
             case TAG_ACTIVITY_ALIAS:
                 setStringAttrNames(ACTIVITY_ALIAS_STR_ATTR_NAMES);
-                addTagCounter(8000, TAG_META_DATA);
-                addTagCounter(20000, TAG_INTENT_FILTER);
+                initializeCounter(TAG_META_DATA, 8000);
+                initializeCounter(TAG_INTENT_FILTER, 20000);
                 break;
             case TAG_APPLICATION:
                 setStringAttrNames(APPLICATION_STR_ATTR_NAMES);
-                addTagCounter(100, TAG_PROFILEABLE);
-                addTagCounter(100, TAG_USES_NATIVE_LIBRARY);
-                addTagCounter(1000, TAG_RECEIVER);
-                addTagCounter(1000, TAG_SERVICE);
-                addTagCounter(4000, TAG_ACTIVITY_ALIAS);
-                addTagCounter(4000, TAG_USES_LIBRARY);
-                addTagCounter(8000, TAG_PROVIDER);
-                addTagCounter(8000, TAG_META_DATA);
-                addTagCounter(40000, TAG_ACTIVITY);
+                initializeCounter(TAG_PROFILEABLE, 100);
+                initializeCounter(TAG_USES_NATIVE_LIBRARY, 100);
+                initializeCounter(TAG_RECEIVER, 1000);
+                initializeCounter(TAG_SERVICE, 1000);
+                initializeCounter(TAG_ACTIVITY_ALIAS, 4000);
+                initializeCounter(TAG_USES_LIBRARY, 4000);
+                initializeCounter(TAG_PROVIDER, 8000);
+                initializeCounter(TAG_META_DATA, 8000);
+                initializeCounter(TAG_ACTIVITY, 40000);
                 break;
             case TAG_COMPATIBLE_SCREENS:
-                addTagCounter(4000, TAG_SCREEN);
+                initializeCounter(TAG_SCREEN, 4000);
                 break;
             case TAG_DATA:
                 setStringAttrNames(DATA_STR_ATTR_NAMES);
@@ -243,28 +315,28 @@ public class Element {
                 break;
             case TAG_INTENT:
             case TAG_INTENT_FILTER:
-                addTagCounter(20000, TAG_ACTION);
-                addTagCounter(40000, TAG_CATEGORY);
-                addTagCounter(40000, TAG_DATA);
+                initializeCounter(TAG_ACTION, 20000);
+                initializeCounter(TAG_CATEGORY, 40000);
+                initializeCounter(TAG_DATA, 40000);
                 break;
             case TAG_MANIFEST:
                 setStringAttrNames(MANIFEST_STR_ATTR_NAMES);
-                addTagCounter(100, TAG_APPLICATION);
-                addTagCounter(100, TAG_OVERLAY);
-                addTagCounter(100, TAG_INSTRUMENTATION);
-                addTagCounter(100, TAG_PERMISSION_GROUP);
-                addTagCounter(100, TAG_PERMISSION_TREE);
-                addTagCounter(100, TAG_SUPPORTS_GL_TEXTURE);
-                addTagCounter(100, TAG_SUPPORTS_SCREENS);
-                addTagCounter(100, TAG_USES_CONFIGURATION);
-                addTagCounter(100, TAG_USES_PERMISSION_SDK_23);
-                addTagCounter(100, TAG_USES_SDK);
-                addTagCounter(200, TAG_COMPATIBLE_SCREENS);
-                addTagCounter(200, TAG_QUERIES);
-                addTagCounter(400, TAG_ATTRIBUTION);
-                addTagCounter(400, TAG_USES_FEATURE);
-                addTagCounter(2000, TAG_PERMISSION);
-                addTagCounter(20000, TAG_USES_PERMISSION);
+                initializeCounter(TAG_APPLICATION, 100);
+                initializeCounter(TAG_OVERLAY, 100);
+                initializeCounter(TAG_INSTRUMENTATION, 100);
+                initializeCounter(TAG_PERMISSION_GROUP, 100);
+                initializeCounter(TAG_PERMISSION_TREE, 100);
+                initializeCounter(TAG_SUPPORTS_GL_TEXTURE, 100);
+                initializeCounter(TAG_SUPPORTS_SCREENS, 100);
+                initializeCounter(TAG_USES_CONFIGURATION, 100);
+                initializeCounter(TAG_USES_PERMISSION_SDK_23, 100);
+                initializeCounter(TAG_USES_SDK, 100);
+                initializeCounter(TAG_COMPATIBLE_SCREENS, 200);
+                initializeCounter(TAG_QUERIES, 200);
+                initializeCounter(TAG_ATTRIBUTION, 400);
+                initializeCounter(TAG_USES_FEATURE, 400);
+                initializeCounter(TAG_PERMISSION, 2000);
+                initializeCounter(TAG_USES_PERMISSION, 20000);
                 break;
             case TAG_META_DATA:
             case TAG_PROPERTY:
@@ -281,21 +353,21 @@ public class Element {
                 break;
             case TAG_PROVIDER:
                 setStringAttrNames(PROVIDER_STR_ATTR_NAMES);
-                addTagCounter(100, TAG_GRANT_URI_PERMISSION);
-                addTagCounter(100, TAG_PATH_PERMISSION);
-                addTagCounter(8000, TAG_META_DATA);
-                addTagCounter(20000, TAG_INTENT_FILTER);
+                initializeCounter(TAG_GRANT_URI_PERMISSION, 100);
+                initializeCounter(TAG_PATH_PERMISSION, 100);
+                initializeCounter(TAG_META_DATA, 8000);
+                initializeCounter(TAG_INTENT_FILTER, 20000);
                 break;
             case TAG_QUERIES:
-                addTagCounter(1000, TAG_PACKAGE);
-                addTagCounter(2000, TAG_INTENT);
-                addTagCounter(8000, TAG_PROVIDER);
+                initializeCounter(TAG_PACKAGE, 1000);
+                initializeCounter(TAG_INTENT, 2000);
+                initializeCounter(TAG_PROVIDER, 8000);
                 break;
             case TAG_RECEIVER:
             case TAG_SERVICE:
                 setStringAttrNames(RECEIVER_SERVICE_STR_ATTR_NAMES);
-                addTagCounter(8000, TAG_META_DATA);
-                addTagCounter(20000, TAG_INTENT_FILTER);
+                initializeCounter(TAG_META_DATA, 8000);
+                initializeCounter(TAG_INTENT_FILTER, 20000);
                 break;
         }
     }
@@ -365,12 +437,17 @@ public class Element {
         }
     }
 
-    private void addTagCounter(int max, String tag) {
-        mTagCounters.put(tag, TagCounter.obtain(max));
+    private void initializeCounter(String tag, int max) {
+        int idx = getCounterIdx(tag);
+        if (mTagCounters[idx] == null) {
+            mTagCounters[idx] = new TagCounter();
+        }
+        mTagCounters[idx].reset(max);
+        mChildTagMask |= 1 << idx;
     }
 
     boolean hasChild(String tag) {
-        return mTagCounters.containsKey(tag);
+        return (mChildTagMask & (1 << getCounterIdx(tag))) != 0;
     }
 
     void validateStringAttrs(@NonNull XmlPullParser attrs) throws XmlPullParserException {
@@ -393,8 +470,8 @@ public class Element {
     }
 
     void seen(@NonNull Element element) throws XmlPullParserException {
-        if (mTagCounters.containsKey(element.mTag)) {
-            TagCounter counter = mTagCounters.get(element.mTag);
+        TagCounter counter = mTagCounters[getCounterIdx(element.mTag)];
+        if (counter != null) {
             counter.increment();
             if (!counter.isValid()) {
                 throw new XmlPullParserException("The number of child " + element.mTag
