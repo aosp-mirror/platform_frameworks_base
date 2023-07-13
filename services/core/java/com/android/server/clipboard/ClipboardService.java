@@ -193,8 +193,11 @@ public class ClipboardService extends SystemService {
         if (IS_EMULATOR) {
             mEmulatorClipboardMonitor = new EmulatorClipboardMonitor((clip) -> {
                 synchronized (mLock) {
-                    setPrimaryClipInternalLocked(getClipboardLocked(0, DEVICE_ID_DEFAULT), clip,
-                            android.os.Process.SYSTEM_UID, null);
+                    Clipboard clipboard = getClipboardLocked(0, DEVICE_ID_DEFAULT);
+                    if (clipboard != null) {
+                        setPrimaryClipInternalLocked(clipboard, clip, android.os.Process.SYSTEM_UID,
+                                null);
+                    }
                 }
             });
         } else {
@@ -637,6 +640,9 @@ public class ClipboardService extends SystemService {
                 }
 
                 Clipboard clipboard = getClipboardLocked(intendingUserId, intendingDeviceId);
+                if (clipboard == null) {
+                    return null;
+                }
                 showAccessNotificationLocked(pkg, intendingUid, intendingUserId, clipboard);
                 notifyTextClassifierLocked(clipboard, pkg, intendingUid);
                 if (clipboard.primaryClip != null) {
@@ -665,7 +671,7 @@ public class ClipboardService extends SystemService {
             }
             synchronized (mLock) {
                 Clipboard clipboard = getClipboardLocked(intendingUserId, intendingDeviceId);
-                return clipboard.primaryClip != null
+                return (clipboard != null && clipboard.primaryClip != null)
                         ? clipboard.primaryClip.getDescription() : null;
             }
         }
@@ -688,7 +694,8 @@ public class ClipboardService extends SystemService {
                 return false;
             }
             synchronized (mLock) {
-                return getClipboardLocked(intendingUserId, intendingDeviceId).primaryClip != null;
+                Clipboard clipboard = getClipboardLocked(intendingUserId, intendingDeviceId);
+                return clipboard != null && clipboard.primaryClip != null;
             }
         }
 
@@ -709,8 +716,11 @@ public class ClipboardService extends SystemService {
                 return;
             }
             synchronized (mLock) {
-                getClipboardLocked(intendingUserId, intendingDeviceId)
-                        .primaryClipListeners
+                Clipboard clipboard = getClipboardLocked(intendingUserId, intendingDeviceId);
+                if (clipboard == null) {
+                    return;
+                }
+                clipboard.primaryClipListeners
                         .register(
                                 listener,
                                 new ListenerInfo(intendingUid, callingPackage, attributionTag));
@@ -733,8 +743,11 @@ public class ClipboardService extends SystemService {
                 return;
             }
             synchronized (mLock) {
-                getClipboardLocked(intendingUserId,
-                        intendingDeviceId).primaryClipListeners.unregister(listener);
+                Clipboard clipboard = getClipboardLocked(intendingUserId,
+                                intendingDeviceId);
+                if (clipboard != null) {
+                    clipboard.primaryClipListeners.unregister(listener);
+                }
             }
         }
 
@@ -757,7 +770,7 @@ public class ClipboardService extends SystemService {
             }
             synchronized (mLock) {
                 Clipboard clipboard = getClipboardLocked(intendingUserId, intendingDeviceId);
-                if (clipboard.primaryClip != null) {
+                if (clipboard != null && clipboard.primaryClip != null) {
                     CharSequence text = clipboard.primaryClip.getItemAt(0).getText();
                     return text != null && text.length() > 0;
                 }
@@ -786,7 +799,7 @@ public class ClipboardService extends SystemService {
             }
             synchronized (mLock) {
                 Clipboard clipboard = getClipboardLocked(intendingUserId, intendingDeviceId);
-                if (clipboard.primaryClip != null) {
+                if (clipboard != null && clipboard.primaryClip != null) {
                     return clipboard.mPrimaryClipPackage;
                 }
                 return null;
@@ -808,7 +821,8 @@ public class ClipboardService extends SystemService {
                         final int intendingUid = msg.arg2;
                         final int intendingDeviceId = ((Pair<Integer, Integer>) msg.obj).second;
                         synchronized (mLock) {
-                            if (getClipboardLocked(userId, intendingDeviceId).primaryClip != null) {
+                            Clipboard clipboard = getClipboardLocked(userId, intendingDeviceId);
+                            if (clipboard != null && clipboard.primaryClip != null) {
                                 FrameworkStatsLog.write(FrameworkStatsLog.CLIPBOARD_CLEARED,
                                         FrameworkStatsLog.CLIPBOARD_CLEARED__SOURCE__AUTO_CLEAR);
                                 setPrimaryClipInternalLocked(
@@ -824,9 +838,23 @@ public class ClipboardService extends SystemService {
     };
 
     @GuardedBy("mLock")
-    private Clipboard getClipboardLocked(@UserIdInt int userId, int deviceId) {
+    private @Nullable Clipboard getClipboardLocked(@UserIdInt int userId, int deviceId) {
         Clipboard clipboard = mClipboards.get(userId, deviceId);
         if (clipboard == null) {
+            try {
+                if (!mUm.isUserRunning(userId)) {
+                    Slog.w(TAG, "getClipboardLocked called with not running userId " + userId);
+                    return null;
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException calling UserManager: " + e);
+                return null;
+            }
+            if (deviceId != DEVICE_ID_DEFAULT && !mVdm.isValidVirtualDeviceId(deviceId)) {
+                Slog.w(TAG, "getClipboardLocked called with invalid (possibly released) deviceId "
+                        + deviceId);
+                return null;
+            }
             clipboard = new Clipboard(userId, deviceId);
             mClipboards.add(userId, deviceId, clipboard);
         }
@@ -876,8 +904,11 @@ public class ClipboardService extends SystemService {
         final int userId = UserHandle.getUserId(uid);
 
         // Update this user
-        setPrimaryClipInternalLocked(getClipboardLocked(userId, deviceId), clip, uid,
-                sourcePackage);
+        Clipboard clipboard = getClipboardLocked(userId, deviceId);
+        if (clipboard == null) {
+            return;
+        }
+        setPrimaryClipInternalLocked(clipboard, clip, uid, sourcePackage);
 
         // Update related users
         List<UserInfo> related = getRelatedProfiles(userId);
@@ -911,8 +942,11 @@ public class ClipboardService extends SystemService {
                         final boolean canCopyIntoProfile = !hasRestriction(
                                 UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, id);
                         if (canCopyIntoProfile) {
-                            setPrimaryClipInternalNoClassifyLocked(
-                                    getClipboardLocked(id, deviceId), clip, uid, sourcePackage);
+                            Clipboard relatedClipboard = getClipboardLocked(id, deviceId);
+                            if (relatedClipboard != null) {
+                                setPrimaryClipInternalNoClassifyLocked(relatedClipboard, clip, uid,
+                                        sourcePackage);
+                            }
                         }
                     }
                 }
@@ -1046,6 +1080,9 @@ public class ClipboardService extends SystemService {
 
         synchronized (mLock) {
             Clipboard clipboard = getClipboardLocked(userId, deviceId);
+            if (clipboard == null) {
+                return;
+            }
             if (clipboard.primaryClip == clip) {
                 applyClassificationAndSendBroadcastLocked(
                         clipboard, confidences, links, classifier);
@@ -1061,7 +1098,8 @@ public class ClipboardService extends SystemService {
                                     UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, id);
                             if (canCopyIntoProfile) {
                                 Clipboard relatedClipboard = getClipboardLocked(id, deviceId);
-                                if (hasTextLocked(relatedClipboard, text)) {
+                                if (relatedClipboard != null
+                                        && hasTextLocked(relatedClipboard, text)) {
                                     applyClassificationAndSendBroadcastLocked(
                                             relatedClipboard, confidences, links, classifier);
                                 }
@@ -1184,9 +1222,10 @@ public class ClipboardService extends SystemService {
             Binder.restoreCallingIdentity(oldIdentity);
         }
         Clipboard clipboard = getClipboardLocked(UserHandle.getUserId(uid), deviceId);
-        if (clipboard.primaryClip != null && !clipboard.activePermissionOwners.contains(pkg)) {
+        if (clipboard != null && clipboard.primaryClip != null
+                && !clipboard.activePermissionOwners.contains(pkg)) {
             final int N = clipboard.primaryClip.getItemCount();
-            for (int i=0; i<N; i++) {
+            for (int i = 0; i < N; i++) {
                 grantItemPermission(clipboard.primaryClip.getItemAt(i), clipboard.primaryClipUid,
                         pkg, UserHandle.getUserId(uid));
             }
