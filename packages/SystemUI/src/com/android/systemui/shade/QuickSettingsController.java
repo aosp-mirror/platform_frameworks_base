@@ -233,7 +233,6 @@ public class QuickSettingsController implements Dumpable {
     private int mMaxExpansionHeight;
     /** Expansion fraction of the notification shade */
     private float mShadeExpandedFraction;
-    private int mPeekHeight;
     private float mLastOverscroll;
     private boolean mExpansionFromOverscroll;
     private boolean mExpansionEnabledPolicy = true;
@@ -429,7 +428,6 @@ public class QuickSettingsController implements Dumpable {
         final ViewConfiguration configuration = ViewConfiguration.get(this.mPanelView.getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
         mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
-        mPeekHeight = mResources.getDimensionPixelSize(R.dimen.qs_peek_height);
         mStatusBarMinHeight = SystemBarUtils.getStatusBarHeight(mPanelView.getContext());
         mScrimCornerRadius = mResources.getDimensionPixelSize(
                 R.dimen.notification_scrim_corner_radius);
@@ -500,12 +498,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     int getHeaderHeight() {
-        return mQs.getHeader().getHeight();
-    }
-
-    /** Returns the padding of the stackscroller when unlocked */
-    int getUnlockedStackScrollerPadding() {
-        return (mQs != null ? mQs.getHeader().getHeight() : 0) + mPeekHeight;
+        return isQsFragmentCreated() ? mQs.getHeader().getHeight() : 0;
     }
 
     private boolean isRemoteInputActiveWithKeyboardUp() {
@@ -2090,8 +2083,6 @@ public class QuickSettingsController implements Dumpable {
         ipw.println(mMaxExpansionHeight);
         ipw.print("mShadeExpandedFraction=");
         ipw.println(mShadeExpandedFraction);
-        ipw.print("mPeekHeight=");
-        ipw.println(mPeekHeight);
         ipw.print("mLastOverscroll=");
         ipw.println(mLastOverscroll);
         ipw.print("mExpansionFromOverscroll=");
