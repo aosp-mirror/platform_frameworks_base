@@ -48,6 +48,7 @@ import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorPropertiesInternal;
+import android.hardware.camera2.CameraManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.net.Uri;
@@ -125,7 +126,7 @@ public class BiometricService extends SystemService {
     AuthSession mAuthSession;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
-    private final BiometricSensorPrivacy mBiometricSensorPrivacy;
+    private final BiometricCameraManager mBiometricCameraManager;
 
     /**
      * Tracks authenticatorId invalidation. For more details, see
@@ -936,7 +937,7 @@ public class BiometricService extends SystemService {
 
         return PreAuthInfo.create(mTrustManager, mDevicePolicyManager, mSettingObserver, mSensors,
                 userId, promptInfo, opPackageName, false /* checkDevicePolicyManager */,
-                getContext(), mBiometricSensorPrivacy);
+                getContext(), mBiometricCameraManager);
     }
 
     /**
@@ -1030,9 +1031,9 @@ public class BiometricService extends SystemService {
             return context.getSystemService(UserManager.class);
         }
 
-        public BiometricSensorPrivacy getBiometricSensorPrivacy(Context context) {
-            return new BiometricSensorPrivacyImpl(context.getSystemService(
-                    SensorPrivacyManager.class));
+        public BiometricCameraManager getBiometricCameraManager(Context context) {
+            return new BiometricCameraManagerImpl(context.getSystemService(CameraManager.class),
+                    context.getSystemService(SensorPrivacyManager.class));
         }
     }
 
@@ -1062,7 +1063,7 @@ public class BiometricService extends SystemService {
         mRequestCounter = mInjector.getRequestGenerator();
         mBiometricContext = injector.getBiometricContext(context);
         mUserManager = injector.getUserManager(context);
-        mBiometricSensorPrivacy = injector.getBiometricSensorPrivacy(context);
+        mBiometricCameraManager = injector.getBiometricCameraManager(context);
 
         try {
             injector.getActivityManagerService().registerUserSwitchObserver(
@@ -1299,7 +1300,7 @@ public class BiometricService extends SystemService {
                 final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager,
                         mDevicePolicyManager, mSettingObserver, mSensors, userId, promptInfo,
                         opPackageName, promptInfo.isDisallowBiometricsIfPolicyExists(),
-                        getContext(), mBiometricSensorPrivacy);
+                        getContext(), mBiometricCameraManager);
 
                 final Pair<Integer, Integer> preAuthStatus = preAuthInfo.getPreAuthenticateStatus();
 
