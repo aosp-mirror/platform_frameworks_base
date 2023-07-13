@@ -52,6 +52,7 @@ import android.app.GameModeConfiguration;
 import android.app.GameModeInfo;
 import android.app.GameState;
 import android.app.IGameModeListener;
+import android.app.IGameStateListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -1576,6 +1577,71 @@ public class GameManagerServiceTests {
         GameState gameState = new GameState(true, GameState.MODE_NONE);
         gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
         assertFalse(gameManagerService.mHandler.hasMessages(SET_GAME_STATE));
+    }
+
+    @Test
+    public void testAddGameStateListener() throws Exception {
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        mockDeviceConfigAll();
+        startUser(gameManagerService, USER_ID_1);
+
+        IGameStateListener mockListener = Mockito.mock(IGameStateListener.class);
+        IBinder binder = Mockito.mock(IBinder.class);
+        when(mockListener.asBinder()).thenReturn(binder);
+        gameManagerService.addGameStateListener(mockListener);
+        verify(binder).linkToDeath(mDeathRecipientCaptor.capture(), anyInt());
+
+        mockAppCategory(mPackageName, ApplicationInfo.CATEGORY_AUDIO);
+        GameState gameState = new GameState(true, GameState.MODE_NONE);
+        gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        assertFalse(gameManagerService.mHandler.hasMessages(SET_GAME_STATE));
+        mTestLooper.dispatchAll();
+        verify(mockListener, never()).onGameStateChanged(anyString(), any(), anyInt());
+
+        mockAppCategory(mPackageName, ApplicationInfo.CATEGORY_GAME);
+        gameState = new GameState(true, GameState.MODE_NONE);
+        gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        assertTrue(gameManagerService.mHandler.hasMessages(SET_GAME_STATE));
+        mTestLooper.dispatchAll();
+        verify(mockListener).onGameStateChanged(mPackageName, gameState, USER_ID_1);
+        reset(mockListener);
+
+        gameState = new GameState(false, GameState.MODE_CONTENT);
+        gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        mTestLooper.dispatchAll();
+        verify(mockListener).onGameStateChanged(mPackageName, gameState, USER_ID_1);
+        reset(mockListener);
+
+        mDeathRecipientCaptor.getValue().binderDied();
+        verify(binder).unlinkToDeath(eq(mDeathRecipientCaptor.getValue()), anyInt());
+        gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        assertTrue(gameManagerService.mHandler.hasMessages(SET_GAME_STATE));
+        mTestLooper.dispatchAll();
+        verify(mockListener, never()).onGameStateChanged(anyString(), any(), anyInt());
+    }
+
+    @Test
+    public void testRemoveGameStateListener() throws Exception {
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        mockDeviceConfigAll();
+        startUser(gameManagerService, USER_ID_1);
+
+        IGameStateListener mockListener = Mockito.mock(IGameStateListener.class);
+        IBinder binder = Mockito.mock(IBinder.class);
+        when(mockListener.asBinder()).thenReturn(binder);
+
+        gameManagerService.addGameStateListener(mockListener);
+        gameManagerService.removeGameStateListener(mockListener);
+        mockAppCategory(mPackageName, ApplicationInfo.CATEGORY_GAME);
+        GameState gameState = new GameState(false, GameState.MODE_CONTENT);
+        gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        assertTrue(gameManagerService.mHandler.hasMessages(SET_GAME_STATE));
+        mTestLooper.dispatchAll();
+        verify(mockListener, never()).onGameStateChanged(anyString(), any(), anyInt());
     }
 
     private List<String> readGameModeInterventionList() throws Exception {
