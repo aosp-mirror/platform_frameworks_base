@@ -64,7 +64,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
@@ -142,7 +141,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    @Mock private FeatureFlags mFeatureFlags;
 
     private static class AnimatorListener implements Animator.AnimatorListener {
         private int mNumStarts;
@@ -280,8 +278,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mMainDispatcher,
-                mLinearLargeScreenShadeInterpolator,
-                mFeatureFlags);
+                mLinearLargeScreenShadeInterpolator);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -974,8 +971,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
                 mMainDispatcher,
-                mLinearLargeScreenShadeInterpolator,
-                mFeatureFlags);
+                mLinearLargeScreenShadeInterpolator);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
