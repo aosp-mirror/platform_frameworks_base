@@ -25,6 +25,7 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.setRotation
@@ -78,6 +79,7 @@ class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: LegacyF
         flicker.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp)
     }
 
+    @FlakyTest(bugId = 290767483)
     @Postsubmit
     @Test
     fun imeLayerAlphaOneAfterSnapshotStartingWindowRemoval() {
