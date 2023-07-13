@@ -33,16 +33,19 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.app.Application;
 import android.app.LoadedApk;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.appwidget.AppWidgetHostView;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
@@ -65,10 +68,12 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.system.Os;
@@ -98,8 +103,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.android.internal.R;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.util.Preconditions;
+import com.android.internal.widget.IRemoteViewsFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -124,7 +131,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -322,6 +331,13 @@ public class RemoteViews implements Parcelable, Filter {
      */
     private static final LayoutInflater.Filter INFLATER_FILTER =
             (clazz) -> clazz.isAnnotationPresent(RemoteViews.RemoteView.class);
+
+    /**
+     * The maximum waiting time for remote adapter conversion in milliseconds
+     *
+     * @hide
+     */
+    private static final int MAX_ADAPTER_CONVERSION_WAITING_TIME_MS = 2000;
 
     /**
      * Application that hosts the remote views.
@@ -1042,28 +1058,96 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private class SetRemoteCollectionItemListAdapterAction extends Action {
-        private final RemoteCollectionItems mItems;
+        private @NonNull CompletableFuture<RemoteCollectionItems> mItemsFuture;
 
-        SetRemoteCollectionItemListAdapterAction(@IdRes int id, RemoteCollectionItems items) {
+        SetRemoteCollectionItemListAdapterAction(@IdRes int id,
+                @NonNull RemoteCollectionItems items) {
             viewId = id;
-            mItems = items;
-            mItems.setHierarchyRootData(getHierarchyRootData());
+            items.setHierarchyRootData(getHierarchyRootData());
+            mItemsFuture = CompletableFuture.completedFuture(items);
+        }
+
+        SetRemoteCollectionItemListAdapterAction(@IdRes int id, Intent intent) {
+            viewId = id;
+            mItemsFuture = getItemsFutureFromIntentWithTimeout(intent);
+            setHierarchyRootData(getHierarchyRootData());
+        }
+
+        private static CompletableFuture<RemoteCollectionItems> getItemsFutureFromIntentWithTimeout(
+                Intent intent) {
+            if (intent == null) {
+                Log.e(LOG_TAG, "Null intent received when generating adapter future");
+                return CompletableFuture.completedFuture(new RemoteCollectionItems
+                        .Builder().build());
+            }
+
+            final Context context = ActivityThread.currentApplication();
+            final CompletableFuture<RemoteCollectionItems> result = new CompletableFuture<>();
+
+            context.bindService(intent, Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
+                    result.defaultExecutor(), new ServiceConnection() {
+                        @Override
+                        public void onServiceConnected(ComponentName componentName,
+                                IBinder iBinder) {
+                            RemoteCollectionItems items;
+                            try {
+                                items = IRemoteViewsFactory.Stub.asInterface(iBinder)
+                                        .getRemoteCollectionItems();
+                            } catch (RemoteException re) {
+                                items = new RemoteCollectionItems.Builder().build();
+                                Log.e(LOG_TAG, "Error getting collection items from the factory",
+                                        re);
+                            } finally {
+                                context.unbindService(this);
+                            }
+
+                            result.complete(items);
+                        }
+
+                        @Override
+                        public void onServiceDisconnected(ComponentName componentName) { }
+                    });
+
+            result.completeOnTimeout(
+                    new RemoteCollectionItems.Builder().build(),
+                    MAX_ADAPTER_CONVERSION_WAITING_TIME_MS, TimeUnit.MILLISECONDS);
+
+            return result;
         }
 
         SetRemoteCollectionItemListAdapterAction(Parcel parcel) {
             viewId = parcel.readInt();
-            mItems = new RemoteCollectionItems(parcel, getHierarchyRootData());
+            mItemsFuture = CompletableFuture.completedFuture(
+                    new RemoteCollectionItems(parcel, getHierarchyRootData()));
         }
 
         @Override
         public void setHierarchyRootData(HierarchyRootData rootData) {
-            mItems.setHierarchyRootData(rootData);
+            mItemsFuture = mItemsFuture
+                    .thenApply(rc -> {
+                        rc.setHierarchyRootData(rootData);
+                        return rc;
+                    });
+        }
+
+        private static RemoteCollectionItems getCollectionItemsFromFuture(
+                CompletableFuture<RemoteCollectionItems> itemsFuture) {
+            RemoteCollectionItems items;
+            try {
+                items = itemsFuture.get();
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Error getting collection items from future", e);
+                items = new RemoteCollectionItems.Builder().build();
+            }
+
+            return items;
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(viewId);
-            mItems.writeToParcel(dest, flags, /* attached= */ true);
+            RemoteCollectionItems items = getCollectionItemsFromFuture(mItemsFuture);
+            items.writeToParcel(dest, flags, /* attached= */ true);
         }
 
         @Override
@@ -1071,6 +1155,8 @@ public class RemoteViews implements Parcelable, Filter {
                 throws ActionException {
             View target = root.findViewById(viewId);
             if (target == null) return;
+
+            RemoteCollectionItems items = getCollectionItemsFromFuture(mItemsFuture);
 
             // Ensure that we are applying to an AppWidget root
             if (!(rootParent instanceof AppWidgetHostView)) {
@@ -1092,10 +1178,10 @@ public class RemoteViews implements Parcelable, Filter {
             // recycling in setAdapter, so we must call setAdapter again if the number of view types
             // increases.
             if (adapter instanceof RemoteCollectionItemsAdapter
-                    && adapter.getViewTypeCount() >= mItems.getViewTypeCount()) {
+                    && adapter.getViewTypeCount() >= items.getViewTypeCount()) {
                 try {
                     ((RemoteCollectionItemsAdapter) adapter).setData(
-                            mItems, params.handler, params.colorResources);
+                            items, params.handler, params.colorResources);
                 } catch (Throwable throwable) {
                     // setData should never failed with the validation in the items builder, but if
                     // it does, catch and rethrow.
@@ -1105,7 +1191,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
 
             try {
-                adapterView.setAdapter(new RemoteCollectionItemsAdapter(mItems,
+                adapterView.setAdapter(new RemoteCollectionItemsAdapter(items,
                         params.handler, params.colorResources));
             } catch (Throwable throwable) {
                 // This could throw if the AdapterView somehow doesn't accept BaseAdapter due to
@@ -4679,6 +4765,12 @@ public class RemoteViews implements Parcelable, Filter {
      *            providing data to the RemoteViewsAdapter
      */
     public void setRemoteAdapter(@IdRes int viewId, Intent intent) {
+        if (AppGlobals.getIntCoreSetting(
+                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION,
+                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION_DEFAULT ? 1 : 0) == 1) {
+            addAction(new SetRemoteCollectionItemListAdapterAction(viewId, intent));
+            return;
+        }
         addAction(new SetRemoteViewsAdapterIntent(viewId, intent));
     }
 
