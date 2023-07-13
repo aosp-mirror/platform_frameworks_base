@@ -17,6 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 
 /**
  * A callback class for monitoring satellite position update and datagram transfer state change
@@ -24,6 +25,7 @@ import android.annotation.NonNull;
  *
  * @hide
  */
+@SystemApi
 public interface SatelliteTransmissionUpdateCallback {
     /**
      * Called when the satellite position changed.

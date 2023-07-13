@@ -17,12 +17,19 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
+ * PointingInfo is used to store the position of satellite received from satellite modem.
+ * The position of satellite is represented by azimuth and elevation angles
+ * with degrees as unit of measurement.
  * @hide
  */
+@SystemApi
 public final class PointingInfo implements Parcelable {
     /** Satellite azimuth in degrees */
     private float mSatelliteAzimuthDegrees;
@@ -33,7 +40,6 @@ public final class PointingInfo implements Parcelable {
     /**
      * @hide
      */
-
     public PointingInfo(float satelliteAzimuthDegrees, float satelliteElevationDegrees) {
         mSatelliteAzimuthDegrees = satelliteAzimuthDegrees;
         mSatelliteElevationDegrees = satelliteElevationDegrees;
@@ -66,6 +72,20 @@ public final class PointingInfo implements Parcelable {
                     return new PointingInfo[size];
                 }
             };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PointingInfo that = (PointingInfo) o;
+        return mSatelliteAzimuthDegrees == that.mSatelliteAzimuthDegrees
+                && mSatelliteElevationDegrees == that.mSatelliteElevationDegrees;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mSatelliteAzimuthDegrees, mSatelliteElevationDegrees);
+    }
 
     @NonNull
     @Override

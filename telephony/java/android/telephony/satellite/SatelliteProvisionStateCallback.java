@@ -16,17 +16,22 @@
 
 package android.telephony.satellite;
 
+import android.annotation.SystemApi;
+
 /**
  * A callback class for monitoring satellite provision state change events.
  *
  * @hide
  */
+@SystemApi
 public interface SatelliteProvisionStateCallback {
     /**
      * Called when satellite provision state changes.
      *
      * @param provisioned The new provision state. {@code true} means satellite is provisioned
      *                    {@code false} means satellite is not provisioned.
+     *                    It is generally expected that the provisioning app retries if
+     *                    provisioning fails.
      */
     void onSatelliteProvisionStateChanged(boolean provisioned);
 }

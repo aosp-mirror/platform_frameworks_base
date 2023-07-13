@@ -17,12 +17,16 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * SatelliteDatagram is used to store data that is to be sent or received over satellite.
+ * Data is stored in byte array format.
  * @hide
  */
+@SystemApi
 public final class SatelliteDatagram implements Parcelable {
     /**
      * Datagram to be sent or received over satellite.
@@ -63,6 +67,12 @@ public final class SatelliteDatagram implements Parcelable {
                 }
             };
 
+    /**
+     * Get satellite datagram.
+     * @return byte array. The format of the byte array is determined by the corresponding
+     * satellite provider. Client application should be aware of how to encode the datagram based
+     * upon the satellite provider.
+     */
     @NonNull public byte[] getSatelliteDatagram() {
         return mData;
     }

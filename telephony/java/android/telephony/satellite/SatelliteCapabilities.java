@@ -17,6 +17,8 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,8 +29,11 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
+ * SatelliteCapabilities is used to represent the capabilities of the satellite service
+ * received from satellite modem.
  * @hide
  */
+@SystemApi
 public final class SatelliteCapabilities implements Parcelable {
     /**
      * List of technologies supported by the satellite modem.
@@ -56,7 +61,7 @@ public final class SatelliteCapabilities implements Parcelable {
     /**
      * @hide
      */
-    public SatelliteCapabilities(Set<Integer> supportedRadioTechnologies,
+    public SatelliteCapabilities(@Nullable Set<Integer> supportedRadioTechnologies,
             boolean isPointingRequired, int maxBytesPerOutgoingDatagram,
             @NonNull Map<Integer, AntennaPosition> antennaPositionMap) {
         mSupportedRadioTechnologies = supportedRadioTechnologies == null

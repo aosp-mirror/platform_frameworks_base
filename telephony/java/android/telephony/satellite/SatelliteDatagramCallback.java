@@ -17,6 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 
 import java.util.function.Consumer;
 
@@ -25,6 +26,7 @@ import java.util.function.Consumer;
  *
  * @hide
  */
+@SystemApi
 public interface SatelliteDatagramCallback {
     /**
      * Called when there is an incoming datagram to be received.
