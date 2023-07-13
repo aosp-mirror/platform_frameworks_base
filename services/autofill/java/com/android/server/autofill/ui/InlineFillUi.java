@@ -216,6 +216,16 @@ public final class InlineFillUi {
             }
             return new InlineSuggestionsResponse(inlineSuggestions);
         }
+
+        // Do not show suggestion if user entered four or more characters
+        if (!TextUtils.isEmpty(mFilterText) && mFilterText.length() > 3) {
+            if (sVerbose) {
+                Slog.v(TAG, "Not showing inline suggestion because user entered more than 3 "
+                        + "characters");
+            }
+            return new InlineSuggestionsResponse(inlineSuggestions);
+        }
+
         for (int i = 0; i < size; i++) {
             final Dataset dataset = mDatasets.get(i);
             final int fieldIndex = dataset.getFieldIds().indexOf(mAutofillId);
