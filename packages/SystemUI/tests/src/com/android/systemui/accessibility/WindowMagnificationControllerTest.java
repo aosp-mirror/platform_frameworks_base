@@ -71,6 +71,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.text.TextUtils;
+import android.util.Size;
 import android.view.Display;
 import android.view.IWindowSession;
 import android.view.MotionEvent;
@@ -544,17 +545,22 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onScreenSizeChanged_enabledAtTheCenterOfScreen_keepSameWindowSizeRatio() {
+    public void onScreenSizeAndDensityChanged_enabledAtTheCenterOfScreen_keepSameWindowSizeRatio() {
         // The default position is at the center of the screen.
         final float expectedRatio = 0.5f;
-        final Rect testWindowBounds = new Rect(
-                mWindowManager.getCurrentWindowMetrics().getBounds());
-        testWindowBounds.set(testWindowBounds.left, testWindowBounds.top,
-                testWindowBounds.right + 100, testWindowBounds.bottom + 100);
+
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
+
+        // Screen size and density change
+        mContext.getResources().getConfiguration().smallestScreenWidthDp =
+                mContext.getResources().getConfiguration().smallestScreenWidthDp * 2;
+        final Rect testWindowBounds = new Rect(
+                mWindowManager.getCurrentWindowMetrics().getBounds());
+        testWindowBounds.set(testWindowBounds.left, testWindowBounds.top,
+                testWindowBounds.right + 100, testWindowBounds.bottom + 100);
         mWindowManager.setWindowBounds(testWindowBounds);
 
         mInstrumentation.runOnMainSync(() -> {
@@ -571,12 +577,34 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onScreenChangedToSavedDensity_enabled_restoreSavedMagnifierWindow() {
+        mContext.getResources().getConfiguration().smallestScreenWidthDp =
+                mContext.getResources().getConfiguration().smallestScreenWidthDp * 2;
+        int windowFrameSize = mResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.accessibility_window_magnifier_min_size);
+        mWindowMagnificationController.mWindowMagnificationSizePrefs.saveSizeForCurrentDensity(
+                new Size(windowFrameSize, windowFrameSize));
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+                    Float.NaN);
+        });
+
+        WindowManager.LayoutParams params = mWindowManager.getLayoutParamsFromAttachedView();
+        assertTrue(params.width == windowFrameSize);
+        assertTrue(params.height == windowFrameSize);
+    }
+
+    @Test
     public void screenSizeIsChangedToLarge_enabled_defaultWindowSize() {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
         final int screenSize = mWindowManager.getCurrentWindowMetrics().getBounds().width() * 10;
+        // Screen size and density change
+        mContext.getResources().getConfiguration().smallestScreenWidthDp =
+                mContext.getResources().getConfiguration().smallestScreenWidthDp * 2;
         mWindowManager.setWindowBounds(new Rect(0, 0, screenSize, screenSize));
 
         mInstrumentation.runOnMainSync(() -> {
@@ -1136,6 +1164,11 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                 .setInsets(systemGestures(), Insets.of(0, 0, 0, 10))
                 .build();
         mWindowManager.setWindowInsets(testInsets);
+    }
+
+    private int updateMirrorSurfaceMarginDimension() {
+        return mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnification_mirror_surface_margin);
     }
 
     @Surface.Rotation
