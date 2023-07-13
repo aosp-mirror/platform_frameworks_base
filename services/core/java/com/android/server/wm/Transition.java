@@ -723,6 +723,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mFlags |= WindowManager.TRANSIT_FLAG_INVISIBLE;
             return;
         }
+        // Activity doesn't need to capture snapshot if the starting window has associated to task.
+        if (wc.asActivityRecord() != null) {
+            final ActivityRecord activityRecord = wc.asActivityRecord();
+            if (activityRecord.mStartingData != null
+                    && activityRecord.mStartingData.mAssociatedTask != null) {
+                return;
+            }
+        }
 
         if (mContainerFreezer == null) {
             mContainerFreezer = new ScreenshotFreezer();
