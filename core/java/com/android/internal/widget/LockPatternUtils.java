@@ -1035,7 +1035,7 @@ public class LockPatternUtils {
                     CREDENTIAL_TYPE_API, CREDENTIAL_TYPE_API, mCredentialTypeQuery);
 
     /**
-     * Invalidate the credential cache
+     * Invalidate the credential type cache
      * @hide
      */
     public final static void invalidateCredentialTypeCache() {
