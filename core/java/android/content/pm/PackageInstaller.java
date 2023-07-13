@@ -4132,7 +4132,8 @@ public class PackageInstaller {
          * @param label
          *   The label representing the app to be installed.
          * @param locale
-         *   The locale of the app label being used.
+         *   The locale is used to get the app label from the APKs (includes the base APK and
+         *   split APKs) related to the package to be installed.
          * @param packageName
          *   The package name of the app to be installed.
          * @hide
@@ -4239,7 +4240,10 @@ public class PackageInstaller {
             }
 
             /**
-             * The locale of the app label being used.
+             * The locale is used to get the app label from the APKs (includes the base APK and
+             * split APKs) related to the package to be installed. The caller needs to make sure
+             * the app label is consistent with the app label of {@link PreapprovalDetails} when
+             * validating the installation. Otherwise, the pre-approval install session will fail.
              */
             public @NonNull Builder setLocale(@NonNull ULocale value) {
                 checkNotUsed();
