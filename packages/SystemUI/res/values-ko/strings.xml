@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"탭하여 보기"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"화면 녹화 저장 중에 오류가 발생했습니다."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"화면 녹화 시작 중 오류 발생"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"전체 화면 모드"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"종료하려면 위에서 아래로 스와이프합니다."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"확인"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"뒤로"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"홈"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"메뉴"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"공유, 녹화 또는 전송 중에 Android가 화면에 표시되거나 기기에서 재생되는 모든 항목에 액세스할 수 있습니다. 따라서 비밀번호, 결제 세부정보, 메시지, 사진, 오디오 및 동영상 등이 노출되지 않도록 주의하세요."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"앱을 공유, 녹화 또는 전송할 때는 Android가 해당 앱에 표시되거나 재생되는 모든 항목에 액세스할 수 있으므로 비밀번호, 결제 세부정보, 메시지, 사진, 오디오 및 동영상 등이 노출되지 않도록 주의하세요."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"시작"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"IT 관리자에 의해 차단됨"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"기기 정책에 의해 화면 캡처가 사용 중지되었습니다."</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"모두 지우기"</string>
