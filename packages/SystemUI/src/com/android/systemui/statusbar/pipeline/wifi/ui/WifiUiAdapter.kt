@@ -68,12 +68,7 @@ constructor(
                 launch {
                     locationViewModel.wifiIcon.collect { wifiIcon ->
                         // Only notify the icon controller if we want to *render* the new icon.
-                        // Note that this flow may still run if
-                        // [statusBarPipelineFlags.runNewWifiIconBackend] is true because we may
-                        // want to get the logging data without rendering.
-                        if (
-                            wifiIcon is WifiIcon.Visible && statusBarPipelineFlags.useNewWifiIcon()
-                        ) {
+                        if (wifiIcon is WifiIcon.Visible) {
                             iconController.setNewWifiIcon()
                         }
                     }
