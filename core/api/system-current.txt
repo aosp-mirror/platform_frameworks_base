@@ -3790,6 +3790,10 @@ package android.content.pm {
     field @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS) public static final int FLAG_GET_PERSONS_DATA = 2048; // 0x800
   }
 
+  public class PackageArchiver {
+    method @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void requestArchive(@NonNull String, @NonNull android.content.IntentSender) throws android.content.pm.PackageManager.NameNotFoundException;
+  }
+
   public class PackageInstaller {
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
@@ -3887,6 +3891,7 @@ package android.content.pm {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_INSTANT_APPS) public abstract java.util.List<android.content.pm.InstantAppInfo> getInstantApps();
     method @Deprecated @NonNull public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(@NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract int getIntentVerificationStatusAsUser(@NonNull String, int);
+    method @NonNull public android.content.pm.PackageArchiver getPackageArchiver();
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public int getPackageUidAsUser(@NonNull String, @NonNull android.content.pm.PackageManager.PackageInfoFlags, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @android.content.pm.PackageManager.PermissionFlags @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.GET_RUNTIME_PERMISSIONS}) public abstract int getPermissionFlags(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] getUnsuspendablePackages(@NonNull String[]);

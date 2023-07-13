@@ -9934,6 +9934,16 @@ public abstract class PackageManager {
     public abstract @NonNull PackageInstaller getPackageInstaller();
 
     /**
+     * {@link PackageArchiver} can be used to archive and restore archived packages.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull PackageArchiver getPackageArchiver() {
+        throw new UnsupportedOperationException(
+                "getPackageArchiver not implemented in subclass");
+    }
+    /**
      * Adds a {@code CrossProfileIntentFilter}. After calling this method all
      * intents sent from the user with id sourceUserId can also be be resolved
      * by activities in the user with id targetUserId if they match the

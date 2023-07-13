@@ -64,6 +64,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageArchiver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
@@ -172,6 +173,7 @@ public class ApplicationPackageManager extends PackageManager {
     private volatile UserManager mUserManager;
     private volatile PermissionManager mPermissionManager;
     private volatile PackageInstaller mInstaller;
+    private volatile PackageArchiver mPackageArchiver;
     private volatile ArtManager mArtManager;
     private volatile DevicePolicyManager mDevicePolicyManager;
     private volatile String mPermissionsControllerPackageName;
@@ -3279,6 +3281,18 @@ public class ApplicationPackageManager extends PackageManager {
             }
         }
         return mInstaller;
+    }
+
+    @Override
+    public PackageArchiver getPackageArchiver() {
+        if (mPackageArchiver == null) {
+            try {
+                mPackageArchiver = new PackageArchiver(mContext, mPM.getPackageArchiverService());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return mPackageArchiver;
     }
 
     @Override
