@@ -17,6 +17,7 @@
 #ifndef FRAMEWORKS_BASE_CORE_JNI_FD_UTILS_H_
 #define FRAMEWORKS_BASE_CORE_JNI_FD_UTILS_H_
 
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -98,12 +99,12 @@ class FileDescriptorTable {
   void ReopenOrDetach(fail_fn_t fail_fn);
 
  private:
-  explicit FileDescriptorTable(const std::unordered_map<int, FileDescriptorInfo*>& map);
+  explicit FileDescriptorTable(std::unordered_map<int, std::unique_ptr<FileDescriptorInfo>> map);
 
   void RestatInternal(std::set<int>& open_fds, fail_fn_t fail_fn);
 
   // Invariant: All values in this unordered_map are non-NULL.
-  std::unordered_map<int, FileDescriptorInfo*> open_fd_map_;
+  std::unordered_map<int, std::unique_ptr<FileDescriptorInfo>> open_fd_map_;
 
   DISALLOW_COPY_AND_ASSIGN(FileDescriptorTable);
 };
