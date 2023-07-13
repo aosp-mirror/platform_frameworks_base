@@ -321,4 +321,7 @@
 
     <!-- Whether vibrate icon is shown in the status bar by default. -->
     <integer name="def_statusBarVibrateIconEnabled">0</integer>
+
+    <!-- Whether predictive back animation is enabled by default. -->
+    <bool name="def_enable_back_animation">false</bool>
 </resources>
