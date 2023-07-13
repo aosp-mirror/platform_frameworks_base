@@ -32,7 +32,7 @@ open class RegionSampler
 @JvmOverloads
 constructor(
     val sampledView: View,
-    mainExecutor: Executor?,
+    val mainExecutor: Executor?,
     val bgExecutor: Executor?,
     val regionSamplingEnabled: Boolean,
     val isLockscreen: Boolean = false,
@@ -166,7 +166,7 @@ constructor(
                         if (isLockscreen) WallpaperManager.FLAG_LOCK
                         else WallpaperManager.FLAG_SYSTEM
                     )
-                onColorsChanged(sampledRegionWithOffset, initialSampling)
+                mainExecutor?.execute { onColorsChanged(sampledRegionWithOffset, initialSampling) }
             }
         )
     }
