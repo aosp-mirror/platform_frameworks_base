@@ -59,6 +59,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ShadeInterpolation;
@@ -77,9 +78,11 @@ import com.android.systemui.shade.transition.LinearLargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.utils.os.FakeHandler;
+import com.android.systemui.wallpapers.data.repository.FakeWallpaperRepository;
 
 import com.google.common.truth.Expect;
 
@@ -100,6 +103,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.test.TestScope;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -112,6 +116,9 @@ public class ScrimControllerTest extends SysuiTestCase {
             new FakeConfigurationController();
     private final LargeScreenShadeInterpolator
             mLinearLargeScreenShadeInterpolator = new LinearLargeScreenShadeInterpolator();
+
+    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
 
     private ScrimController mScrimController;
     private ScrimView mScrimBehind;
@@ -136,6 +143,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private final FakeWallpaperRepository mWallpaperRepository = new FakeWallpaperRepository();
     @Mock private CoroutineDispatcher mMainDispatcher;
     @Mock private TypedArray mMockTypedArray;
 
@@ -274,20 +282,26 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDockManager,
                 mConfigurationController,
                 new FakeExecutor(new FakeSystemClock()),
+                mJavaAdapter,
                 mScreenOffAnimationController,
                 mKeyguardUnlockAnimationController,
                 mStatusBarKeyguardViewManager,
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
+                mWallpaperRepository,
                 mMainDispatcher,
                 mLinearLargeScreenShadeInterpolator,
                 mFeatureFlags);
+        mScrimController.start();
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
 
         mScrimController.setHasBackdrop(false);
-        mScrimController.setWallpaperSupportsAmbientMode(false);
+
+        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(false);
+        mTestScope.getTestScheduler().runCurrent();
+
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         finishAnimationsImmediately();
     }
@@ -388,7 +402,9 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void transitionToAod_withAodWallpaper() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
+        mTestScope.getTestScheduler().runCurrent();
+
         mScrimController.transitionTo(ScrimState.AOD);
         finishAnimationsImmediately();
 
@@ -410,7 +426,9 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void transitionToAod_withAodWallpaperAndLockScreenWallpaper() {
         mScrimController.setHasBackdrop(true);
-        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
+        mTestScope.getTestScheduler().runCurrent();
+
         mScrimController.transitionTo(ScrimState.AOD);
         finishAnimationsImmediately();
 
@@ -427,7 +445,9 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void setHasBackdrop_withAodWallpaperAndAlbumArt() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
+        mTestScope.getTestScheduler().runCurrent();
+
         mScrimController.transitionTo(ScrimState.AOD);
         finishAnimationsImmediately();
         mScrimController.setHasBackdrop(true);
@@ -540,7 +560,9 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Pre-condition
         // Need to go to AoD first because PULSING doesn't change
         // the back scrim opacity - otherwise it would hide AoD wallpapers.
-        mScrimController.setWallpaperSupportsAmbientMode(false);
+        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(false);
+        mTestScope.getTestScheduler().runCurrent();
+
         mScrimController.transitionTo(ScrimState.AOD);
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
@@ -968,19 +990,23 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDockManager,
                 mConfigurationController,
                 new FakeExecutor(new FakeSystemClock()),
+                mJavaAdapter,
                 mScreenOffAnimationController,
                 mKeyguardUnlockAnimationController,
                 mStatusBarKeyguardViewManager,
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
+                mWallpaperRepository,
                 mMainDispatcher,
                 mLinearLargeScreenShadeInterpolator,
                 mFeatureFlags);
+        mScrimController.start();
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
         mScrimController.setHasBackdrop(false);
-        mScrimController.setWallpaperSupportsAmbientMode(false);
+        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(false);
+        mTestScope.getTestScheduler().runCurrent();
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         finishAnimationsImmediately();
 
@@ -1105,7 +1131,9 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testWillHideAodWallpaper() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
+        mTestScope.getTestScheduler().runCurrent();
+
         mScrimController.transitionTo(ScrimState.AOD);
         verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
         mScrimController.transitionTo(ScrimState.KEYGUARD);
@@ -1116,7 +1144,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testWillHideDockedWallpaper() {
         mAlwaysOnEnabled = false;
         when(mDockManager.isDocked()).thenReturn(true);
-        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
+        mTestScope.getTestScheduler().runCurrent();
 
         mScrimController.transitionTo(ScrimState.AOD);
 
@@ -1165,7 +1194,9 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testHidesShowWhenLockedActivity() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
+        mTestScope.getTestScheduler().runCurrent();
+
         mScrimController.setKeyguardOccluded(true);
         mScrimController.transitionTo(ScrimState.AOD);
         finishAnimationsImmediately();
@@ -1182,7 +1213,9 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testHidesShowWhenLockedActivity_whenAlreadyInAod() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mWallpaperRepository.getWallpaperSupportsAmbientMode().setValue(true);
+        mTestScope.getTestScheduler().runCurrent();
+
         mScrimController.transitionTo(ScrimState.AOD);
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
