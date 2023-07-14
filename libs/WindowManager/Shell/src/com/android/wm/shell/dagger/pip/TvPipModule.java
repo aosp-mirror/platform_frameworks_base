@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.dagger;
+package com.android.wm.shell.dagger.pip;
 
 import android.content.Context;
 import android.os.Handler;
@@ -28,6 +28,8 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.dagger.WMShellBaseModule;
+import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipAppOpsListener;
@@ -62,7 +64,9 @@ import java.util.Optional;
 /**
  * Provides TV specific dependencies for Pip.
  */
-@Module(includes = {WMShellBaseModule.class})
+@Module(includes = {
+        WMShellBaseModule.class,
+        Pip1SharedModule.class})
 public abstract class TvPipModule {
     @WMSingleton
     @Provides

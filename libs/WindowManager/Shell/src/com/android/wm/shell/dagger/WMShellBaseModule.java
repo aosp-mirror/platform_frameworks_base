@@ -20,7 +20,6 @@ import static com.android.wm.shell.onehanded.OneHandedController.SUPPORT_ONE_HAN
 
 import android.app.ActivityTaskManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.view.IWindowManager;
@@ -45,7 +44,6 @@ import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.DockStateReader;
-import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -76,10 +74,6 @@ import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.pip.PipMediaController;
-import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
-import com.android.wm.shell.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
@@ -103,12 +97,12 @@ import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
-import java.util.Optional;
-
 import dagger.BindsOptionalOf;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
 
 /**
  * Provides basic dependencies from {@link com.android.wm.shell}, these dependencies are only
@@ -470,40 +464,6 @@ public abstract class WMShellBaseModule {
     }
 
     //
-    // Pip (optional feature)
-    //
-
-    @WMSingleton
-    @Provides
-    static FloatingContentCoordinator provideFloatingContentCoordinator() {
-        return new FloatingContentCoordinator();
-    }
-
-    // Needs handler for registering broadcast receivers
-    @WMSingleton
-    @Provides
-    static PipMediaController providePipMediaController(Context context,
-            @ShellMainThread Handler mainHandler) {
-        return new PipMediaController(context, mainHandler);
-    }
-
-    @WMSingleton
-    @Provides
-    static PipSurfaceTransactionHelper providePipSurfaceTransactionHelper(Context context) {
-        return new PipSurfaceTransactionHelper(context);
-    }
-
-    @WMSingleton
-    @Provides
-    static PipUiEventLogger providePipUiEventLogger(UiEventLogger uiEventLogger,
-            PackageManager packageManager) {
-        return new PipUiEventLogger(uiEventLogger, packageManager);
-    }
-
-    @BindsOptionalOf
-    abstract PipTouchHandler optionalPipTouchHandler();
-
-    //
     // Recent tasks
     //
 
@@ -838,7 +798,6 @@ public abstract class WMShellBaseModule {
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
-            Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
