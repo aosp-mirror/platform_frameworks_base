@@ -1509,29 +1509,34 @@ final class InstallPackageHelper {
         } else {
             // Enable SCAN_NO_DEX flag to skip dexopt at a later stage
             scanFlags |= SCAN_NO_DEX;
+            // The native libs of Apex is located in apex_payload.img, don't need to parse it from
+            // the original apex file
+            if (!isApex) {
+                try {
+                    PackageSetting pkgSetting;
+                    synchronized (mPm.mLock) {
+                        pkgSetting = mPm.mSettings.getPackageLPr(pkgName);
+                    }
+                    boolean isUpdatedSystemAppFromExistingSetting = pkgSetting != null
+                            && pkgSetting.isUpdatedSystemApp();
+                    final String abiOverride = deriveAbiOverride(request.getAbiOverride());
 
-            try {
-                PackageSetting pkgSetting;
-                synchronized (mPm.mLock) {
-                    pkgSetting = mPm.mSettings.getPackageLPr(pkgName);
+                    // TODO: Are these system flags actually set properly at this stage?
+                    boolean isUpdatedSystemAppInferred =
+                            pkgSetting != null && pkgSetting.isSystem();
+                    final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
+                            derivedAbi = mPackageAbiHelper.derivePackageAbi(parsedPackage,
+                            systemApp, (isUpdatedSystemAppFromExistingSetting
+                                    || isUpdatedSystemAppInferred), abiOverride,
+                            ScanPackageUtils.getAppLib32InstallDir());
+                    derivedAbi.first.applyTo(parsedPackage);
+                    derivedAbi.second.applyTo(parsedPackage);
+                } catch (PackageManagerException pme) {
+                    Slog.e(TAG, "Error deriving application ABI", pme);
+                    throw PrepareFailure.ofInternalError(
+                            "Error deriving application ABI: " + pme.getMessage(),
+                            PackageManagerException.INTERNAL_ERROR_DERIVING_ABI);
                 }
-                boolean isUpdatedSystemAppFromExistingSetting = pkgSetting != null
-                        && pkgSetting.isUpdatedSystemApp();
-                final String abiOverride = deriveAbiOverride(request.getAbiOverride());
-
-                // TODO: Are these system flags actually set properly at this stage?
-                boolean isUpdatedSystemAppInferred = pkgSetting != null && pkgSetting.isSystem();
-                final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
-                        derivedAbi = mPackageAbiHelper.derivePackageAbi(parsedPackage, systemApp,
-                        isUpdatedSystemAppFromExistingSetting || isUpdatedSystemAppInferred,
-                        abiOverride, ScanPackageUtils.getAppLib32InstallDir());
-                derivedAbi.first.applyTo(parsedPackage);
-                derivedAbi.second.applyTo(parsedPackage);
-            } catch (PackageManagerException pme) {
-                Slog.e(TAG, "Error deriving application ABI", pme);
-                throw PrepareFailure.ofInternalError(
-                        "Error deriving application ABI: " + pme.getMessage(),
-                        PackageManagerException.INTERNAL_ERROR_DERIVING_ABI);
             }
         }
 
