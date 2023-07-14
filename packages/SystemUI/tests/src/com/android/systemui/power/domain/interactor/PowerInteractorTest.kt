@@ -182,6 +182,21 @@ class PowerInteractorTest : SysuiTestCase() {
         assertThat(repository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_APPLICATION)
     }
 
+    @Test
+    fun wakeUpIfDreaming_notDozing() =
+        runBlocking(IMMEDIATE) {
+            // GIVEN device is dreaming and not dozing
+            whenever(statusBarStateController.isDozing).thenReturn(false)
+            whenever(statusBarStateController.isDreaming).thenReturn(true)
+
+            // WHEN wakeUpIfDreaming is called
+            underTest.wakeUpIfDreaming("testReason", PowerManager.WAKE_REASON_GESTURE)
+
+            // THEN device is waken up
+            assertThat(repository.lastWakeWhy).isEqualTo("testReason")
+            assertThat(repository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_GESTURE)
+        }
+
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
     }
