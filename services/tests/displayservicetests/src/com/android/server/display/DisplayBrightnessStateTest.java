@@ -43,25 +43,50 @@ public class DisplayBrightnessStateTest {
     public void validateAllDisplayBrightnessStateFieldsAreSetAsExpected() {
         float brightness = 0.3f;
         float sdrBrightness = 0.2f;
+        boolean shouldUseAutoBrightness = true;
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_AUTOMATIC);
         brightnessReason.setModifier(BrightnessReason.MODIFIER_DIMMED);
-        DisplayBrightnessState displayBrightnessState =
-                mDisplayBrightnessStateBuilder.setBrightness(brightness).setSdrBrightness(
-                        sdrBrightness).setBrightnessReason(brightnessReason).build();
+        DisplayBrightnessState displayBrightnessState = mDisplayBrightnessStateBuilder
+                .setBrightness(brightness)
+                .setSdrBrightness(sdrBrightness)
+                .setBrightnessReason(brightnessReason)
+                .setShouldUseAutoBrightness(shouldUseAutoBrightness)
+                .build();
 
         assertEquals(displayBrightnessState.getBrightness(), brightness, FLOAT_DELTA);
         assertEquals(displayBrightnessState.getSdrBrightness(), sdrBrightness, FLOAT_DELTA);
         assertEquals(displayBrightnessState.getBrightnessReason(), brightnessReason);
+        assertEquals(displayBrightnessState.getShouldUseAutoBrightness(), shouldUseAutoBrightness);
         assertEquals(displayBrightnessState.toString(), getString(displayBrightnessState));
+    }
+
+    @Test
+    public void testFrom() {
+        BrightnessReason reason = new BrightnessReason();
+        reason.setReason(BrightnessReason.REASON_MANUAL);
+        reason.setModifier(BrightnessReason.MODIFIER_DIMMED);
+        DisplayBrightnessState state1 = new DisplayBrightnessState.Builder()
+                .setBrightnessReason(reason)
+                .setBrightness(0.26f)
+                .setSdrBrightness(0.23f)
+                .setShouldUseAutoBrightness(false)
+                .build();
+        DisplayBrightnessState state2 = DisplayBrightnessState.Builder.from(state1).build();
+        assertEquals(state1, state2);
     }
 
     private String getString(DisplayBrightnessState displayBrightnessState) {
         StringBuilder sb = new StringBuilder();
-        sb.append("DisplayBrightnessState:");
-        sb.append("\n    brightness:" + displayBrightnessState.getBrightness());
-        sb.append("\n    sdrBrightness:" + displayBrightnessState.getSdrBrightness());
-        sb.append("\n    brightnessReason:" + displayBrightnessState.getBrightnessReason());
+        sb.append("DisplayBrightnessState:")
+                .append("\n    brightness:")
+                .append(displayBrightnessState.getBrightness())
+                .append("\n    sdrBrightness:")
+                .append(displayBrightnessState.getSdrBrightness())
+                .append("\n    brightnessReason:")
+                .append(displayBrightnessState.getBrightnessReason())
+                .append("\n    shouldUseAutoBrightness:")
+                .append(displayBrightnessState.getShouldUseAutoBrightness());
         return sb.toString();
     }
 }

@@ -29,6 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.AutomaticBrightnessController;
 import com.android.server.display.BrightnessSetting;
 import com.android.server.display.DisplayBrightnessState;
+import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 
 import java.io.PrintWriter;
@@ -134,11 +135,21 @@ public final class DisplayBrightnessController {
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState) {
+
+        DisplayBrightnessState state;
         synchronized (mLock) {
             mDisplayBrightnessStrategy = mDisplayBrightnessStrategySelector.selectStrategy(
                     displayPowerRequest, targetDisplayState);
-            return mDisplayBrightnessStrategy.updateBrightness(displayPowerRequest);
+            state = mDisplayBrightnessStrategy.updateBrightness(displayPowerRequest);
         }
+
+        // This is a temporary measure until AutomaticBrightnessStrategy works as a traditional
+        // strategy.
+        // TODO: Remove when AutomaticBrightnessStrategy is populating the values directly.
+        if (state != null) {
+            state = addAutomaticBrightnessState(state);
+        }
+        return state;
     }
 
     /**
@@ -322,6 +333,13 @@ public final class DisplayBrightnessController {
     }
 
     /**
+     * TODO(b/253226419): Remove once auto-brightness is a fully-functioning strategy.
+     */
+    public AutomaticBrightnessStrategy getAutomaticBrightnessStrategy() {
+        return mDisplayBrightnessStrategySelector.getAutomaticBrightnessStrategy();
+    }
+
+    /**
      * Convert a brightness float scale value to a nit value. Adjustments, such as RBC, are not
      * applied. This is used when storing the brightness in nits for the default display and when
      * passing the brightness value to follower displays.
@@ -423,6 +441,18 @@ public final class DisplayBrightnessController {
         synchronized (mLock) {
             return mDisplayBrightnessStrategy;
         }
+    }
+
+    /**
+     * TODO(b/253226419): Remove once auto-brightness is a fully-functioning strategy.
+     */
+    private DisplayBrightnessState addAutomaticBrightnessState(DisplayBrightnessState state) {
+        AutomaticBrightnessStrategy autoStrat = getAutomaticBrightnessStrategy();
+
+        DisplayBrightnessState.Builder builder = DisplayBrightnessState.Builder.from(state);
+        builder.setShouldUseAutoBrightness(
+                autoStrat != null && autoStrat.shouldUseAutoBrightness());
+        return builder.build();
     }
 
     @GuardedBy("mLock")
