@@ -68,9 +68,6 @@ object Flags {
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
         unreleasedFlag(119, "notification_memory_logging_enabled")
 
-    // TODO(b/257315550): Tracking Bug
-    val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
-
     // TODO(b/260335638): Tracking Bug
     @JvmField
     val NOTIFICATION_INLINE_REPLY_ANIMATION =
