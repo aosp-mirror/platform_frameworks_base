@@ -17,10 +17,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.frameworks.displayservicetests">
 
-    <!--
-    Insert permissions here. eg:
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-    -->
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
@@ -31,6 +28,10 @@
     <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+
+    <!-- Permissions needed for DisplayTransformManagerTest -->
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+    <uses-permission android:name="android.permission.HARDWARE_TEST"/>
 
     <application android:debuggable="true"
                  android:testOnly="true">
