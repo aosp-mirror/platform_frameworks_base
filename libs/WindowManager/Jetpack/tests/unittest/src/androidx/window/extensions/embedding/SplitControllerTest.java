@@ -1462,6 +1462,51 @@ public class SplitControllerTest {
         verify(testRecord).apply(eq(false));
     }
 
+    @Test
+    public void testPinTopActivityStack() {
+        // Create two activities.
+        final Activity primaryActivity = createMockActivity();
+        final Activity secondaryActivity = createMockActivity();
+
+        // Unable to pin if not being embedded.
+        SplitPinRule splitPinRule = new SplitPinRule.Builder(new SplitAttributes.Builder().build(),
+                parentWindowMetrics -> true /* parentWindowMetricsPredicate */).build();
+        assertFalse(mSplitController.pinTopActivityStack(TASK_ID, splitPinRule));
+
+        // Split the two activities.
+        addSplitTaskFragments(primaryActivity, secondaryActivity);
+        final TaskFragmentContainer primaryContainer =
+                mSplitController.getContainerWithActivity(primaryActivity);
+        spyOn(primaryContainer);
+
+        // Unable to pin if no valid TaskFragment.
+        doReturn(true).when(primaryContainer).isFinished();
+        assertFalse(mSplitController.pinTopActivityStack(TASK_ID, splitPinRule));
+
+        // Otherwise, should pin successfully.
+        doReturn(false).when(primaryContainer).isFinished();
+        assertTrue(mSplitController.pinTopActivityStack(TASK_ID, splitPinRule));
+
+        // Unable to pin if there is already a pinned TaskFragment
+        assertFalse(mSplitController.pinTopActivityStack(TASK_ID, splitPinRule));
+
+        // Unable to pin on an unknown Task.
+        assertFalse(mSplitController.pinTopActivityStack(TASK_ID + 1, splitPinRule));
+
+        // Gets the current size of all the SplitContainers.
+        final TaskContainer taskContainer = mSplitController.getTaskContainer(TASK_ID);
+        final int splitContainerCount = taskContainer.getSplitContainers().size();
+
+        // Create another activity and split with primary activity.
+        final Activity thirdActivity = createMockActivity();
+        addSplitTaskFragments(primaryActivity, thirdActivity);
+
+        // Ensure another SplitContainer is added and the pinned TaskFragment still on top
+        assertTrue(taskContainer.getSplitContainers().size() == splitContainerCount + +1);
+        assertTrue(mSplitController.getTopActiveContainer(TASK_ID).getTopNonFinishingActivity()
+                == secondaryActivity);
+    }
+
     /** Creates a mock activity in the organizer process. */
     private Activity createMockActivity() {
         return createMockActivity(TASK_ID);
