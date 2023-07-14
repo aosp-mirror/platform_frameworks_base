@@ -23,7 +23,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,8 +41,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 /**
  * A dialog fragment with a sound and/or vibration tab based on the picker type.
  * <ul>
@@ -58,6 +55,17 @@ public class TabbedDialogFragment extends Hilt_TabbedDialogFragment {
     static final String TAG = "TabbedDialogFragment";
 
     private RingtonePickerViewModel mRingtonePickerViewModel;
+
+    private final ViewPager2.OnPageChangeCallback mOnPageChangeCallback =
+            new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageScrollStateChanged(int state) {
+                    super.onPageScrollStateChanged(state);
+                    if (state == ViewPager2.SCROLL_STATE_IDLE) {
+                        mRingtonePickerViewModel.onStop(/* isChangingConfigurations= */ false);
+                    }
+                }
+            };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,8 +85,7 @@ public class TabbedDialogFragment extends Hilt_TabbedDialogFragment {
             dialogBuilder
                     .setPositiveButton(getString(com.android.internal.R.string.ok),
                             (dialog, whichButton) -> {
-                                setSuccessResultWithRingtone(
-                                        mRingtonePickerViewModel.getCurrentlySelectedRingtoneUri());
+                                setSuccessResultWithSelectedRingtone();
                                 requireActivity().finish();
                             })
                     .setNegativeButton(getString(com.android.internal.R.string.cancel),
@@ -110,9 +117,10 @@ public class TabbedDialogFragment extends Hilt_TabbedDialogFragment {
         }
     }
 
-    private void setSuccessResultWithRingtone(Uri ringtoneUri) {
+    private void setSuccessResultWithSelectedRingtone() {
         requireActivity().setResult(Activity.RESULT_OK,
-                new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI, ringtoneUri));
+                new Intent().putExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI,
+                        mRingtonePickerViewModel.getSelectedRingtoneUri()));
     }
 
     /**
@@ -123,10 +131,8 @@ public class TabbedDialogFragment extends Hilt_TabbedDialogFragment {
      */
     private View buildTabbedView(@NonNull LayoutInflater inflater) {
         View view = inflater.inflate(R.layout.fragment_tabbed_dialog, null, false);
-        TabLayout tabLayout = view.findViewById(R.id.tabLayout);
-        ViewPager2 viewPager = view.findViewById(R.id.masterViewPager);
-        Objects.requireNonNull(tabLayout);
-        Objects.requireNonNull(viewPager);
+        TabLayout tabLayout = view.requireViewById(R.id.tabLayout);
+        ViewPager2 viewPager = view.requireViewById(R.id.masterViewPager);
 
         ViewPagerAdapter adapter = new ViewPagerAdapter(requireActivity());
         addFragments(adapter);
@@ -137,6 +143,7 @@ public class TabbedDialogFragment extends Hilt_TabbedDialogFragment {
         }
 
         viewPager.setAdapter(adapter);
+        viewPager.registerOnPageChangeCallback(mOnPageChangeCallback);
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> tab.setText(adapter.getTitle(position))).attach();
 

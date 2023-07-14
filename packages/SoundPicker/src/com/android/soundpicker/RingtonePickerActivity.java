@@ -40,12 +40,15 @@ import dagger.hilt.android.AndroidEntryPoint;
 public final class RingtonePickerActivity extends Hilt_RingtonePickerActivity {
 
     private static final String TAG = "RingtonePickerActivity";
-    // TODO: Use the extra key from RingtoneManager once it's added.
+    // TODO: Use the extra keys from RingtoneManager once they're added.
     private static final String EXTRA_RINGTONE_PICKER_CATEGORY = "EXTRA_RINGTONE_PICKER_CATEGORY";
+    private static final String EXTRA_VIBRATION_SHOW_DEFAULT = "EXTRA_VIBRATION_SHOW_DEFAULT";
+    private static final String EXTRA_VIBRATION_DEFAULT_URI = "EXTRA_VIBRATION_DEFAULT_URI";
+    private static final String EXTRA_VIBRATION_SHOW_SILENT = "EXTRA_VIBRATION_SHOW_SILENT";
+    private static final String EXTRA_VIBRATION_EXISTING_URI = "EXTRA_VIBRATION_EXISTING_URI";
     private static final boolean RINGTONE_PICKER_CATEGORY_FEATURE_ENABLED = false;
 
     private RingtonePickerViewModel mRingtonePickerViewModel;
-
     private int mAttributesFlags;
 
     @Override
@@ -65,29 +68,12 @@ public final class RingtonePickerActivity extends Hilt_RingtonePickerActivity {
         int ringtoneType = intent.getIntExtra(RingtoneManager.EXTRA_RINGTONE_TYPE,
                 RingtonePickerViewModel.RINGTONE_TYPE_UNKNOWN);
 
-        // Get whether to show the 'Default' item, and the URI to play when the default is clicked
-        boolean hasDefaultItem =
-                intent.getBooleanExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
-        // The Uri to play when the 'Default' item is clicked.
-        Uri uriForDefaultItem =
-                intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI);
-        if (uriForDefaultItem == null) {
-            uriForDefaultItem = RingtonePickerViewModel.getDefaultItemUriByType(ringtoneType);
-        }
-
-        // Get whether this list has the 'Silent' item.
-        boolean hasSilentItem =
-                intent.getBooleanExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
         // AudioAttributes flags
         mAttributesFlags |= intent.getIntExtra(
                 RingtoneManager.EXTRA_RINGTONE_AUDIO_ATTRIBUTES_FLAGS,
                 0 /*defaultValue == no flags*/);
 
         boolean showOkCancelButtons = getResources().getBoolean(R.bool.config_showOkCancelButtons);
-
-        // Get the URI whose list item should have a checkmark
-        Uri existingUri = intent
-                .getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI);
 
         String title = intent.getStringExtra(RingtoneManager.EXTRA_RINGTONE_TITLE);
         if (title == null) {
@@ -97,12 +83,15 @@ public final class RingtonePickerActivity extends Hilt_RingtonePickerActivity {
         RingtonePickerViewModel.PickerType pickerType = mapCategoryToPickerType(
                 ringtonePickerCategory);
 
-        mRingtonePickerViewModel.init(new RingtonePickerViewModel.PickerConfig(title, pickerUserId,
-                ringtoneType, hasDefaultItem, uriForDefaultItem, hasSilentItem,
-                mAttributesFlags, existingUri, showOkCancelButtons, pickerType));
+        RingtoneListHandler.Config soundListConfig = getSoundListConfig(pickerType, intent,
+                ringtoneType);
+        RingtoneListHandler.Config vibrationListConfig = getVibrationListConfig(pickerType, intent);
 
-        // The volume keys will control the stream that we are choosing a ringtone for
-        setVolumeControlStream(mRingtonePickerViewModel.getRingtoneStreamType());
+        RingtonePickerViewModel.Config pickerConfig =
+                new RingtonePickerViewModel.Config(title, pickerUserId, ringtoneType,
+                        showOkCancelButtons, mAttributesFlags, pickerType);
+
+        mRingtonePickerViewModel.init(pickerConfig, soundListConfig, vibrationListConfig);
 
         if (savedInstanceState == null) {
             TabbedDialogFragment dialogFragment = new TabbedDialogFragment();
@@ -115,8 +104,73 @@ public final class RingtonePickerActivity extends Hilt_RingtonePickerActivity {
             ft.addToBackStack(null);
             dialogFragment.show(ft, TabbedDialogFragment.TAG);
         }
+
+        // The volume keys will control the stream that we are choosing a ringtone for
+        setVolumeControlStream(mRingtonePickerViewModel.getRingtoneStreamType());
     }
 
+    private RingtoneListHandler.Config getSoundListConfig(
+            RingtonePickerViewModel.PickerType pickerType, Intent intent, int ringtoneType) {
+        if (pickerType != RingtonePickerViewModel.PickerType.SOUND_PICKER
+                && pickerType != RingtonePickerViewModel.PickerType.RINGTONE_PICKER) {
+            // This ringtone picker does not require a sound picker.
+            return null;
+        }
+
+        // Get whether to show the 'Default' sound item, and the URI to play when it's clicked
+        boolean hasDefaultSoundItem =
+                intent.getBooleanExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
+
+        // The Uri to play when the 'Default' sound item is clicked.
+        Uri uriForDefaultSoundItem =
+                intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI);
+        if (uriForDefaultSoundItem == null) {
+            uriForDefaultSoundItem = RingtonePickerViewModel.getDefaultItemUriByType(ringtoneType);
+        }
+
+        // Get whether this list has the 'Silent' sound item.
+        boolean hasSilentSoundItem =
+                intent.getBooleanExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true);
+
+        // AudioAttributes flags
+        mAttributesFlags |= intent.getIntExtra(
+                RingtoneManager.EXTRA_RINGTONE_AUDIO_ATTRIBUTES_FLAGS,
+                0 /*defaultValue == no flags*/);
+
+        // Get the sound URI whose list item should have a checkmark
+        Uri existingSoundUri = intent
+                .getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI);
+
+        return new RingtoneListHandler.Config(hasDefaultSoundItem,
+                uriForDefaultSoundItem, hasSilentSoundItem, existingSoundUri);
+    }
+
+    private RingtoneListHandler.Config getVibrationListConfig(
+            RingtonePickerViewModel.PickerType pickerType, Intent intent) {
+        if (pickerType != RingtonePickerViewModel.PickerType.VIBRATION_PICKER
+                && pickerType != RingtonePickerViewModel.PickerType.RINGTONE_PICKER) {
+            // This ringtone picker does not require a vibration picker.
+            return null;
+        }
+
+        // Get whether to show the 'Default' vibration item, and the URI to play when it's clicked
+        boolean hasDefaultVibrationItem =
+                intent.getBooleanExtra(EXTRA_VIBRATION_SHOW_DEFAULT, false);
+
+        // The Uri to play when the 'Default' vibration item is clicked.
+        Uri uriForDefaultVibrationItem = intent.getParcelableExtra(EXTRA_VIBRATION_DEFAULT_URI);
+
+        // Get whether this list has the 'Silent' vibration item.
+        boolean hasSilentVibrationItem =
+                intent.getBooleanExtra(EXTRA_VIBRATION_SHOW_SILENT, true);
+
+        // Get the vibration URI whose list item should have a checkmark
+        Uri existingVibrationUri = intent.getParcelableExtra(EXTRA_VIBRATION_EXISTING_URI);
+
+        return new RingtoneListHandler.Config(
+                hasDefaultVibrationItem, uriForDefaultVibrationItem, hasSilentVibrationItem,
+                existingVibrationUri);
+    }
 
     @Override
     public void onDestroy() {

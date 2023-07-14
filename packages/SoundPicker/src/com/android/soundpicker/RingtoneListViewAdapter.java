@@ -51,36 +51,30 @@ import java.util.Objects;
  * but not selected and its position will never change.
  * </ul>
  */
-final class RingtoneAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+final class RingtoneListViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int VIEW_TYPE_FIXED_ITEM = 0;
     private static final int VIEW_TYPE_DYNAMIC_ITEM = 1;
     private static final int VIEW_TYPE_ADD_RINGTONE_ITEM = 2;
     private final Cursor mCursor;
     private final List<Integer> mFixedItemTitles;
-    private final WorkRingtoneProvider mWorkRingtoneProvider;
-    private final RingtoneSelectionListener mRingtoneSelectionListener;
+    private final Callbacks mCallbacks;
     private final int mRowIDColumn;
     private int mSelectedItem = -1;
     @StringRes private Integer mAddRingtoneItemTitle;
 
-    /** Listener for ringtone selections. */
-    interface RingtoneSelectionListener {
+    /** Provides callbacks for the adapter. */
+    interface Callbacks {
         void onRingtoneSelected(int position);
         void onAddRingtoneSelected();
-    }
-    /** Provides a mean to detect work ringtones. */
-    interface WorkRingtoneProvider {
         boolean isWorkRingtone(int position);
-
         Drawable getWorkIconDrawable();
     }
 
-    RingtoneAdapter(Cursor cursor, RingtoneSelectionListener ringtoneSelectionListener,
-            WorkRingtoneProvider workRingtoneProvider) {
+    RingtoneListViewAdapter(Cursor cursor,
+            Callbacks callbacks) {
         mCursor = cursor;
-        mRingtoneSelectionListener = ringtoneSelectionListener;
-        mWorkRingtoneProvider = workRingtoneProvider;
+        mCallbacks = callbacks;
         mFixedItemTitles = new ArrayList<>();
         mRowIDColumn = mCursor != null ? mCursor.getColumnIndex("_id") : -1;
         setHasStableIds(true);
@@ -92,9 +86,15 @@ final class RingtoneAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         notifyItemChanged(mSelectedItem);
     }
 
-    void addTitleForFixedItem(@StringRes int textResId) {
+    /**
+     * Adds title to the fixed items list and returns the index of the newest added item.
+     * @param textResId the title to add to the fixed items list.
+     * @return The index of the newest added item in the fixed items list.
+     */
+    int addTitleForFixedItem(@StringRes int textResId) {
         mFixedItemTitles.add(textResId);
         notifyItemInserted(mFixedItemTitles.size() - 1);
+        return mFixedItemTitles.size() - 1;
     }
 
     void addTitleForAddRingtoneItem(@StringRes int textResId) {
@@ -112,18 +112,19 @@ final class RingtoneAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     com.android.internal.R.layout.select_dialog_singlechoice_material, parent,
                     false);
 
-            return new FixedItemViewHolder(fixedItemView, mRingtoneSelectionListener);
+            return new FixedItemViewHolder(fixedItemView, mCallbacks);
         }
 
         if (viewType == VIEW_TYPE_ADD_RINGTONE_ITEM) {
             View addRingtoneItemView = inflater.inflate(R.layout.add_new_sound_item, parent, false);
 
-            return new AddRingtoneItemViewHolder(addRingtoneItemView, mRingtoneSelectionListener);
+            return new AddRingtoneItemViewHolder(addRingtoneItemView,
+                    mCallbacks);
         }
 
         View view = inflater.inflate(R.layout.radio_with_work_badge, parent, false);
 
-        return new DynamicItemViewHolder(view, mRingtoneSelectionListener);
+        return new DynamicItemViewHolder(view, mCallbacks);
     }
 
     @Override
@@ -152,9 +153,9 @@ final class RingtoneAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             throw new IllegalStateException("Could not move cursor to position: " + pos);
         }
 
-        Drawable workIcon = (mWorkRingtoneProvider != null)
-                && mWorkRingtoneProvider.isWorkRingtone(position)
-                ? mWorkRingtoneProvider.getWorkIconDrawable() : null;
+        Drawable workIcon = (mCallbacks != null)
+                && mCallbacks.isWorkRingtone(position)
+                ? mCallbacks.getWorkIconDrawable() : null;
 
         viewHolder.onBind(mCursor.getString(RingtoneManager.TITLE_COLUMN_INDEX),
                 /* isChecked= */ position == mSelectedItem, workIcon);
@@ -207,18 +208,15 @@ final class RingtoneAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private final CheckedTextView mTitleTextView;
         private final ImageView mWorkIcon;
 
-        DynamicItemViewHolder(View itemView, RingtoneSelectionListener listener) {
+        DynamicItemViewHolder(View itemView, Callbacks listener) {
             super(itemView);
 
-            mTitleTextView = itemView.findViewById(R.id.checked_text_view);
-            mWorkIcon = itemView.findViewById(R.id.work_icon);
+            mTitleTextView = itemView.requireViewById(R.id.checked_text_view);
+            mWorkIcon = itemView.requireViewById(R.id.work_icon);
             itemView.setOnClickListener(v -> listener.onRingtoneSelected(this.getLayoutPosition()));
         }
 
         void onBind(String title, boolean isChecked, Drawable workIcon) {
-            Objects.requireNonNull(mTitleTextView);
-            Objects.requireNonNull(mWorkIcon);
-
             mTitleTextView.setText(title);
             mTitleTextView.setChecked(isChecked);
 
@@ -234,7 +232,7 @@ final class RingtoneAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static class FixedItemViewHolder extends RecyclerView.ViewHolder {
         private final CheckedTextView mTitleTextView;
 
-        FixedItemViewHolder(View itemView, RingtoneSelectionListener listener) {
+        FixedItemViewHolder(View itemView, Callbacks listener) {
             super(itemView);
 
             mTitleTextView = (CheckedTextView) itemView;
@@ -252,16 +250,14 @@ final class RingtoneAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static class AddRingtoneItemViewHolder extends RecyclerView.ViewHolder {
         private final TextView mTitleTextView;
 
-        AddRingtoneItemViewHolder(View itemView, RingtoneSelectionListener listener) {
+        AddRingtoneItemViewHolder(View itemView, Callbacks listener) {
             super(itemView);
 
-            mTitleTextView = itemView.findViewById(R.id.add_new_sound_text);
+            mTitleTextView = itemView.requireViewById(R.id.add_new_sound_text);
             itemView.setOnClickListener(v -> listener.onAddRingtoneSelected());
         }
 
         void onBind(@StringRes int title) {
-            Objects.requireNonNull(mTitleTextView);
-
             mTitleTextView.setText(title);
         }
     }

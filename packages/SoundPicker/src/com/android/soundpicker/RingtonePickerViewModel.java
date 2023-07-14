@@ -20,8 +20,6 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.Nullable;
 import android.annotation.StringRes;
-import android.database.Cursor;
-import android.media.AudioAttributes;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -45,7 +43,8 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 /**
- * View model for {@link RingtonePickerActivity}.
+ * A view model which holds immutable info about the picker state and means to retrieve and play
+ * currently selected ringtones.
  */
 @HiltViewModel
 public final class RingtonePickerViewModel extends ViewModel {
@@ -58,39 +57,25 @@ public final class RingtonePickerViewModel extends ViewModel {
      */
     @VisibleForTesting
     static Ringtone sPlayingRingtone;
+
     private static final String TAG = "RingtonePickerViewModel";
-    private static final String RINGTONE_MANAGER_NULL_MESSAGE =
-            "RingtoneManager must not be null. Did you forget to call "
-                    + "RingtonePickerViewModel#initRingtoneManager?";
-    private static final int ITEM_POSITION_UNKNOWN = -1;
 
     private final RingtoneManagerFactory mRingtoneManagerFactory;
     private final RingtoneFactory mRingtoneFactory;
+    private final RingtoneListHandler mSoundListHandler;
+    private final RingtoneListHandler mVibrationListHandler;
     private final ListeningExecutorService mListeningExecutorService;
 
-    /** The position in the list of the 'Silent' item. */
-    private int mSilentItemPosition = ITEM_POSITION_UNKNOWN;
-    /** The position in the list of the ringtone to sample. */
-    private int mSampleItemPosition = ITEM_POSITION_UNKNOWN;
-    /** The position in the list of the 'Default' item. */
-    private int mDefaultItemPosition = ITEM_POSITION_UNKNOWN;
-    /** The number of fixed items in the list. */
-    private int mFixedItemCount;
-    private ListenableFuture<Uri> mAddCustomRingtoneFuture;
     private RingtoneManager mRingtoneManager;
-
-    /**
-     * Stable ID for the ringtone that is currently selected (may be -1 if no ringtone is selected).
-     */
-    private long mSelectedItemId = -1;
-    private int mSelectedItemPosition = ITEM_POSITION_UNKNOWN;
 
     /**
      * The ringtone that's currently playing.
      */
     private Ringtone mCurrentRingtone;
 
-    private PickerConfig mPickerConfig;
+    private Config mPickerConfig;
+
+    private ListenableFuture<Uri> mAddCustomRingtoneFuture;
 
     public enum PickerType {
         RINGTONE_PICKER,
@@ -101,7 +86,7 @@ public final class RingtonePickerViewModel extends ViewModel {
     /**
      * Holds immutable info on the picker that should be displayed.
      */
-    static final class PickerConfig {
+    static final class Config {
         public final String title;
         /**
          * Id of the user to which the ringtone picker should list the ringtones.
@@ -112,25 +97,9 @@ public final class RingtonePickerViewModel extends ViewModel {
          */
         public final int ringtoneType;
         /**
-         * Whether this list has the 'Default' item.
-         */
-        public final boolean hasDefaultItem;
-        /**
-         * The Uri to play when the 'Default' item is clicked.
-         */
-        public final Uri uriForDefaultItem;
-        /**
-         * Whether this list has the 'Silent' item.
-         */
-        public final boolean hasSilentItem;
-        /**
          * AudioAttributes flags.
          */
         public final int audioAttributesFlags;
-        /**
-         * The Uri to place a checkmark next to.
-         */
-        public final Uri existingUri;
         /**
          * In the buttonless (watch-only) version we don't show the OK/Cancel buttons.
          */
@@ -138,19 +107,13 @@ public final class RingtonePickerViewModel extends ViewModel {
 
         public final PickerType mPickerType;
 
-        PickerConfig(String title, int userId, int ringtoneType,
-                boolean hasDefaultItem, Uri uriForDefaultItem, boolean hasSilentItem,
-                int audioAttributesFlags, Uri existingUri, boolean showOkCancelButtons,
-                PickerType pickerType) {
+        Config(String title, int userId, int ringtoneType, boolean showOkCancelButtons,
+                int audioAttributesFlags, PickerType pickerType) {
             this.title = title;
             this.userId = userId;
             this.ringtoneType = ringtoneType;
-            this.hasDefaultItem = hasDefaultItem;
-            this.uriForDefaultItem = uriForDefaultItem;
-            this.hasSilentItem = hasSilentItem;
-            this.audioAttributesFlags = audioAttributesFlags;
-            this.existingUri = existingUri;
             this.showOkCancelButtons = showOkCancelButtons;
+            this.audioAttributesFlags = audioAttributesFlags;
             this.mPickerType = pickerType;
         }
     }
@@ -158,17 +121,14 @@ public final class RingtonePickerViewModel extends ViewModel {
     @Inject
     RingtonePickerViewModel(RingtoneManagerFactory ringtoneManagerFactory,
             RingtoneFactory ringtoneFactory,
-            ListeningExecutorServiceFactory listeningExecutorServiceFactory) {
+            ListeningExecutorServiceFactory listeningExecutorServiceFactory,
+            RingtoneListHandler soundListHandler,
+            RingtoneListHandler vibrationListHandler) {
         mRingtoneManagerFactory = ringtoneManagerFactory;
         mRingtoneFactory = ringtoneFactory;
         mListeningExecutorService = listeningExecutorServiceFactory.createSingleThreadExecutor();
-    }
-
-    @NonNull
-    PickerConfig getPickerConfig() {
-        return requireNonNull(mPickerConfig,
-                "PickerConfig was never set. Did you forget to call "
-                        + "RingtonePickerViewModel#init?");
+        mSoundListHandler = soundListHandler;
+        mVibrationListHandler = vibrationListHandler;
     }
 
     @StringRes
@@ -218,127 +178,66 @@ public final class RingtonePickerViewModel extends ViewModel {
         }
     }
 
-    void init(@NonNull PickerConfig pickerConfig) {
+    void init(@NonNull Config pickerConfig,
+            RingtoneListHandler.Config soundListConfig,
+            RingtoneListHandler.Config vibrationListConfig) {
         mRingtoneManager = mRingtoneManagerFactory.create();
         mPickerConfig = pickerConfig;
-        if (pickerConfig.ringtoneType != RINGTONE_TYPE_UNKNOWN) {
-            mRingtoneManager.setType(pickerConfig.ringtoneType);
+        if (mPickerConfig.ringtoneType != RINGTONE_TYPE_UNKNOWN) {
+            mRingtoneManager.setType(mPickerConfig.ringtoneType);
+        }
+        if (soundListConfig != null) {
+            mSoundListHandler.init(soundListConfig, mRingtoneManager,
+                    mRingtoneManager.getCursor());
+        }
+        if (vibrationListConfig != null) {
+            // TODO: Switch to the vibration cursor, once the API is made available.
+            mVibrationListHandler.init(vibrationListConfig, mRingtoneManager,
+                    mRingtoneManager.getCursor());
         }
     }
 
     /**
-     * Adds an audio file to the list of ringtones asynchronously.
-     * Any previous async tasks are canceled before start the new one.
+     * Re-initializes the view model which is required after updating any of the picker lists.
+     * This could happen when adding a custom ringtone.
+     */
+    void reinit() {
+        init(mPickerConfig, mSoundListHandler.getRingtoneListConfig(),
+                mVibrationListHandler.getRingtoneListConfig());
+    }
+
+    @NonNull
+    Config getPickerConfig() {
+        requireInitCalled();
+        return mPickerConfig;
+    }
+
+    @NonNull
+    RingtoneListHandler getSoundListHandler() {
+        return mSoundListHandler;
+    }
+
+    @NonNull
+    RingtoneListHandler getVibrationListHandler() {
+        return mVibrationListHandler;
+    }
+
+    /**
+     * Combined the currently selected sound and vibration URIs and returns a unified URI. If the
+     * picker does not show either sound or vibration, that portion of the URI will be null.
      *
-     * @param uri  Uri of the file to be added as ringtone. Must be a media file.
-     * @param type The type of the ringtone to be added.
-     * @param callback The callback to invoke when the task is completed.
-     * @param executor The executor to run the callback on when the task completes.
+     * Currently only the sound URI is returned, since we don't have the API to retrieve vibrations
+     * yet.
+     * @return Combined sound and vibration URI.
      */
-    void addRingtoneAsync(Uri uri, int type, FutureCallback<Uri> callback, Executor executor) {
-        // Cancel any currently running add ringtone tasks before starting a new one
-        cancelPendingAsyncTasks();
-        mAddCustomRingtoneFuture = mListeningExecutorService.submit(() -> addRingtone(uri, type));
-        Futures.addCallback(mAddCustomRingtoneFuture, callback, executor);
-    }
-
-    /**
-     * Cancels all pending async tasks.
-     */
-    void cancelPendingAsyncTasks() {
-        if (mAddCustomRingtoneFuture != null && !mAddCustomRingtoneFuture.isDone()) {
-            mAddCustomRingtoneFuture.cancel(/* mayInterruptIfRunning= */ true);
-        }
+    Uri getSelectedRingtoneUri() {
+        // TODO: Combine sound and vibration URIs before returning.
+        return mSoundListHandler.getSelectedRingtoneUri();
     }
 
     int getRingtoneStreamType() {
-        requireNonNull(mRingtoneManager, RINGTONE_MANAGER_NULL_MESSAGE);
+        requireInitCalled();
         return mRingtoneManager.inferStreamType();
-    }
-
-    Cursor getRingtoneCursor() {
-        requireNonNull(mRingtoneManager, RINGTONE_MANAGER_NULL_MESSAGE);
-        return mRingtoneManager.getCursor();
-    }
-
-    Uri getRingtoneUri(int position) {
-        requireNonNull(mRingtoneManager, RINGTONE_MANAGER_NULL_MESSAGE);
-        return mRingtoneManager.getRingtoneUri(mapListPositionToRingtonePosition(position));
-    }
-
-    int getRingtonePosition(Uri uri) {
-        requireNonNull(mRingtoneManager, RINGTONE_MANAGER_NULL_MESSAGE);
-        return mapRingtonePositionToListPosition(mRingtoneManager.getRingtonePosition(uri));
-    }
-
-    /**
-     * Maps the item position in the list, to its equivalent position in the RingtoneManager.
-     *
-     * @param itemPosition the position of item in the list.
-     * @return position of the item in the RingtoneManager.
-     */
-    private int mapListPositionToRingtonePosition(int itemPosition) {
-        // If the manager position is -1 (for not found), then return that.
-        if (itemPosition < 0) return itemPosition;
-
-        return itemPosition - mFixedItemCount;
-    }
-
-    /**
-     * Maps the item position in the RingtoneManager, to its equivalent position in the list.
-     *
-     * @param itemPosition the position of the item in the RingtoneManager.
-     * @return position of the item in the list.
-     */
-    private int mapRingtonePositionToListPosition(int itemPosition) {
-        // If the manager position is -1 (for not found), then return that.
-        if (itemPosition < 0) return itemPosition;
-
-        return itemPosition + mFixedItemCount;
-    }
-
-    void resetFixedItemCount() {
-        mFixedItemCount = 0;
-    }
-
-    int incrementAndGetFixedItemCount() {
-        return mFixedItemCount++;
-    }
-
-    void setDefaultItemPosition(int defaultItemPosition) {
-        mDefaultItemPosition = defaultItemPosition;
-    }
-
-    int getSilentItemPosition() {
-        return mSilentItemPosition;
-    }
-
-    void setSilentItemPosition(int silentItemPosition) {
-        mSilentItemPosition = silentItemPosition;
-    }
-
-    public int getSampleItemPosition() {
-        return mSampleItemPosition;
-    }
-
-    public void setSampleItemPosition(int sampleItemPosition) {
-        mSampleItemPosition = sampleItemPosition;
-    }
-
-    public int getSelectedItemPosition() {
-        return mSelectedItemPosition;
-    }
-
-    public void setSelectedItemPosition(int selectedItemPosition) {
-        mSelectedItemPosition = selectedItemPosition;
-    }
-
-    public void setSelectedItemId(long selectedItemId) {
-        mSelectedItemId = selectedItemId;
-    }
-
-    public long getSelectedItemId() {
-        return mSelectedItemId;
     }
 
     void onPause(boolean isChangingConfigurations) {
@@ -355,51 +254,50 @@ public final class RingtonePickerViewModel extends ViewModel {
         }
     }
 
-    @Nullable
-    Uri getCurrentlySelectedRingtoneUri() {
-        if (mSelectedItemPosition == ITEM_POSITION_UNKNOWN) {
-            // When the selected item is POS_UNKNOWN, it is not the case we expected.
-            // We return null for this case.
-            return null;
-        } else if (mSelectedItemPosition == mDefaultItemPosition) {
-            // Use the default Uri that they originally gave us.
-            return mPickerConfig.uriForDefaultItem;
-        } else if (mSelectedItemPosition == mSilentItemPosition) {
-            // Use a null Uri for the 'Silent' item.
-            return null;
-        } else {
-            return getRingtoneUri(mSelectedItemPosition);
+    /**
+     * Plays a ringtone which is created using the currently selected sound and vibration URIs. If
+     * this is a sound or vibration only picker, then the other portion of the URI will be empty
+     * and should not affect the played ringtone.
+     *
+     * Currently, we only use the sound URI to create the ringtone, since we still don't have the
+     * API to retrieve the available vibrations list.
+     */
+    void playRingtone() {
+        requireInitCalled();
+        stopAnyPlayingRingtone();
+
+        mCurrentRingtone = mRingtoneFactory.create(getSelectedRingtoneUri(),
+                mPickerConfig.audioAttributesFlags);
+
+        if (mCurrentRingtone != null) {
+            mCurrentRingtone.play();
         }
     }
 
-    void playRingtone(int position, Uri uriForDefaultItem, int attributesFlags) {
-        requireNonNull(mRingtoneManager, RINGTONE_MANAGER_NULL_MESSAGE);
-        stopAnyPlayingRingtone();
-        if (mSampleItemPosition == mSilentItemPosition) {
-            return;
+    /**
+     * Cancels all pending async tasks.
+     */
+    void cancelPendingAsyncTasks() {
+        if (mAddCustomRingtoneFuture != null && !mAddCustomRingtoneFuture.isDone()) {
+            mAddCustomRingtoneFuture.cancel(/* mayInterruptIfRunning= */ true);
         }
+    }
 
-        if (mSampleItemPosition == mDefaultItemPosition) {
-            mCurrentRingtone = mRingtoneFactory.create(uriForDefaultItem);
-            /*
-             * Stream type of mDefaultRingtone is not set explicitly here. It should be set in
-             * accordance with mRingtoneManager of this Activity.
-             */
-            if (mCurrentRingtone != null) {
-                mCurrentRingtone.setStreamType(mRingtoneManager.inferStreamType());
-            }
-        } else {
-            mCurrentRingtone = mRingtoneManager.getRingtone(
-                    mapListPositionToRingtonePosition(position));
-        }
-
-        if (mCurrentRingtone != null) {
-            if (attributesFlags != 0) {
-                mCurrentRingtone.setAudioAttributes(new AudioAttributes.Builder(
-                        mCurrentRingtone.getAudioAttributes()).setFlags(attributesFlags).build());
-            }
-            mCurrentRingtone.play();
-        }
+    /**
+     * Adds an audio file to the list of ringtones asynchronously.
+     * Any previous async tasks are canceled before start the new one.
+     *
+     * @param uri      Uri of the file to be added as ringtone. Must be a media file.
+     * @param type     The type of the ringtone to be added.
+     * @param callback The callback to invoke when the task is completed.
+     * @param executor The executor to run the callback on when the task completes.
+     */
+    void addSoundRingtoneAsync(Uri uri, int type, FutureCallback<Uri> callback, Executor executor) {
+        // Cancel any currently running add ringtone tasks before starting a new one
+        cancelPendingAsyncTasks();
+        mAddCustomRingtoneFuture = mListeningExecutorService.submit(
+                () -> addRingtone(uri, type));
+        Futures.addCallback(mAddCustomRingtoneFuture, callback, executor);
     }
 
     /**
@@ -412,7 +310,7 @@ public final class RingtonePickerViewModel extends ViewModel {
      */
     @Nullable
     private Uri addRingtone(Uri uri, int type) throws IOException {
-        requireNonNull(mRingtoneManager, RINGTONE_MANAGER_NULL_MESSAGE);
+        requireInitCalled();
         return mRingtoneManager.addCustomExternalRingtone(uri, type);
     }
 
@@ -433,5 +331,10 @@ public final class RingtonePickerViewModel extends ViewModel {
             mCurrentRingtone.stop();
         }
         mCurrentRingtone = null;
+    }
+
+    private void requireInitCalled() {
+        requireNonNull(mRingtoneManager);
+        requireNonNull(mPickerConfig);
     }
 }

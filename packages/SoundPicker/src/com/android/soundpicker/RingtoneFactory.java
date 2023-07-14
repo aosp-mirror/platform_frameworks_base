@@ -17,8 +17,8 @@
 package com.android.soundpicker;
 
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
@@ -40,12 +40,23 @@ public class RingtoneFactory {
     }
 
     /**
-     * Returns a {@link Ringtone} based on the provided URI.
+     * Returns a {@link Ringtone} built from the provided URI and audio attributes flags.
      *
-     * @param uri The URI used to get the {@link Ringtone}
-     * @return a {@link Ringtone}
+     * @param uri The URI used to build the {@link Ringtone}.
+     * @param audioAttributesFlags A combination of audio attribute flags that affect the volume
+     *                             and settings when playing the ringtone.
+     * @return the built {@link Ringtone}.
      */
-    public Ringtone create(Uri uri) {
-        return RingtoneManager.getRingtone(mApplicationContext, uri);
+    public Ringtone create(Uri uri, int audioAttributesFlags) {
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setFlags(audioAttributesFlags)
+                .build();
+        // TODO: We are currently only using MEDIA_SOUND for enabledMedia. This will change once we
+        //  start playing sound and/or vibration.
+        return new Ringtone.Builder(mApplicationContext, Ringtone.MEDIA_SOUND, audioAttributes)
+                .setUri(uri)
+                .build();
     }
 }
