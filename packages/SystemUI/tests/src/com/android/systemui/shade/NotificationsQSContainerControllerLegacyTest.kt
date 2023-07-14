@@ -63,10 +63,11 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+/** Uses Flags.MIGRATE_NSSL set to false. If all goes well, this set of tests will be deleted. */
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 @SmallTest
-class NotificationsQSContainerControllerTest : SysuiTestCase() {
+class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
 
     @Mock lateinit var view: NotificationsQuickSettingsContainer
     @Mock lateinit var navigationModeController: NavigationModeController
@@ -99,7 +100,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeSystemClock = FakeSystemClock()
         delayableExecutor = FakeExecutor(fakeSystemClock)
-        featureFlags = FakeFeatureFlags().apply { set(Flags.MIGRATE_NSSL, true) }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.MIGRATE_NSSL, false) }
         mContext.ensureTestableResources()
         whenever(view.context).thenReturn(mContext)
         whenever(view.resources).thenReturn(mContext.resources)
@@ -344,6 +345,8 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         enableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd).isEqualTo(R.id.qs_edge_guideline)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startToStart)
+            .isEqualTo(R.id.qs_edge_guideline)
     }
 
     @Test
@@ -352,7 +355,14 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         underTest.updateResources()
         val qsStartMargin = getConstraintSetLayout(R.id.qs_frame).startMargin
         val qsEndMargin = getConstraintSetLayout(R.id.qs_frame).endMargin
-        assertThat(qsStartMargin == qsEndMargin).isTrue()
+        val notifStartMargin = getConstraintSetLayout(R.id.notification_stack_scroller).startMargin
+        val notifEndMargin = getConstraintSetLayout(R.id.notification_stack_scroller).endMargin
+        assertThat(
+                qsStartMargin == qsEndMargin &&
+                    notifStartMargin == notifEndMargin &&
+                    qsStartMargin == notifStartMargin
+            )
+            .isTrue()
     }
 
     @Test
@@ -360,6 +370,8 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         enableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endMargin).isEqualTo(0)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startMargin)
+            .isEqualTo(0)
     }
 
     @Test
@@ -380,6 +392,8 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
 
         assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin)
             .isEqualTo(largeScreenHeaderHeight)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).topMargin)
+            .isEqualTo(largeScreenHeaderHeight)
     }
 
     @Test
@@ -387,6 +401,7 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         setSmallScreen()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).topMargin).isEqualTo(0)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).topMargin).isEqualTo(0)
     }
 
     @Test
@@ -406,6 +421,8 @@ class NotificationsQSContainerControllerTest : SysuiTestCase() {
         disableSplitShade()
         underTest.updateResources()
         assertThat(getConstraintSetLayout(R.id.qs_frame).endToEnd)
+            .isEqualTo(ConstraintSet.PARENT_ID)
+        assertThat(getConstraintSetLayout(R.id.notification_stack_scroller).startToStart)
             .isEqualTo(ConstraintSet.PARENT_ID)
     }
 

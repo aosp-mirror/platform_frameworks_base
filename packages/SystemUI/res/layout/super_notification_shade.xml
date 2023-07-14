@@ -76,6 +76,13 @@
              android:layout_height="match_parent"
              android:visibility="invisible" />
 
+    <!-- Shared container for the notification stack. Can be positioned by either
+         the keyguard_root_view or notification_panel -->
+    <com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+        android:id="@+id/shared_notification_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <include layout="@layout/brightness_mirror_container" />
 
     <com.android.systemui.scrim.ScrimView
