@@ -301,8 +301,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Күн шыққанға дейін"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Қосылу уақыты: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> дейін"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Ұйқы уақытында"</string>
-    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Ұйқы уақыты аяқталғанға дейін"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Ұйқы режимінде"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Ұйқы режимі аяқталғанға дейін"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC өшірулі"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC қосулы"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Қуат мәзірі"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g> ішінен <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Құлыптаулы экран"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон қызып кеткендіктен өшірілді"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефоныңыз қалыпты жұмыс істеп тұр.\nТолығырақ ақпарат алу үшін түртіңіз."</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефоныңыз қатты қызып кеткендіктен өшірілді. Телефоныңыз қазір қалыпты жұмыс істеп тұр.\n\nТелефоныңыз мына жағдайларда ыстық болуы мүмкін:\n	• Ресурстар талап ететін қолданбаларды пайдалану (ойын, бейне немесе навигация қолданбалары)\n	• Үлкен көлемді файлдарды жүктеу немесе жүктеп салу\n	• Телефонды жоғары температурада пайдалану"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Пайдалану нұсқаулығын қараңыз"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Телефон қызуда"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Телефон толық суығанға дейін, кейбір функциялардың жұмысы шектеледі.\nТолығырақ ақпарат үшін түртіңіз."</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефон автоматты түрде суи бастайды. Оны пайдалана бере аласыз, бірақ ол баяуырақ жұмыс істеуі мүмкін.\n\nТелефон суығаннан кейін, оның жұмысы қалпына келеді."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Пайдалану нұсқаулығын қараңыз"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Құрылғыны ажыратыңыз"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Құрылғының зарядтау ұяшығы тұрған бөлігі қызып келеді. Зарядтағышқа немесе USB құрылғысына жалғанған болса, оны ажыратыңыз. Абайлаңыз, кабель де ыстық болуы мүмкін."</string>
