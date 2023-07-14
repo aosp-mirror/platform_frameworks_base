@@ -33,6 +33,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -74,9 +75,9 @@ import java.util.StringJoiner;
  */
 class AccessibilityInputFilter extends InputFilter implements EventStreamTransformation {
 
-    private static final String TAG = AccessibilityInputFilter.class.getSimpleName();
+    private static final String TAG = "A11yInputFilter";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
      * Flag for enabling the screen magnification feature.

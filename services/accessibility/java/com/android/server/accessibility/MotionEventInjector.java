@@ -105,12 +105,14 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
      * either complete or cancelled.
      */
     public void injectEvents(List<GestureStep> gestureSteps,
-            IAccessibilityServiceClient serviceInterface, int sequence, int displayId) {
+            IAccessibilityServiceClient serviceInterface, int sequence, int displayId,
+            boolean fromAccessibilityTool) {
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = gestureSteps;
         args.arg2 = serviceInterface;
         args.argi1 = sequence;
         args.argi2 = displayId;
+        args.argi3 = fromAccessibilityTool ? 1 : 0;
         mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_INJECT_EVENTS, args));
     }
 
@@ -132,9 +134,11 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
             return;
         }
         cancelAnyPendingInjectedEvents();
-        // Indicate that the input event is injected from accessibility, to let applications
-        // distinguish it from events injected by other means.
-        policyFlags |= WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY;
+        if (!android.view.accessibility.Flags.preventA11yNontoolFromInjectingIntoSensitiveViews()) {
+            // Indicate that the input event is injected from accessibility, to let applications
+            // distinguish it from events injected by other means.
+            policyFlags |= WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY;
+        }
         sendMotionEventToNext(event, rawEvent, policyFlags);
     }
 
@@ -159,8 +163,12 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
     public boolean handleMessage(Message message) {
         if (message.what == MESSAGE_INJECT_EVENTS) {
             SomeArgs args = (SomeArgs) message.obj;
-            injectEventsMainThread((List<GestureStep>) args.arg1,
-                    (IAccessibilityServiceClient) args.arg2, args.argi1, args.argi2);
+            injectEventsMainThread(
+                    /*gestureSteps=*/(List<GestureStep>) args.arg1,
+                    /*serviceInterface=*/(IAccessibilityServiceClient) args.arg2,
+                    /*sequence=*/args.argi1,
+                    /*displayId=*/args.argi2,
+                    /*fromAccessibilityTool=*/args.argi3 == 1);
             args.recycle();
             return true;
         }
@@ -169,9 +177,15 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
             return false;
         }
         MotionEvent motionEvent = (MotionEvent) message.obj;
-        sendMotionEventToNext(motionEvent, motionEvent,
-                WindowManagerPolicyConstants.FLAG_PASS_TO_USER
-                | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY);
+        int policyFlags = WindowManagerPolicyConstants.FLAG_PASS_TO_USER
+                | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY;
+        if (android.view.accessibility.Flags.preventA11yNontoolFromInjectingIntoSensitiveViews()) {
+            boolean fromAccessibilityTool = message.arg2 == 1;
+            if (fromAccessibilityTool) {
+                policyFlags |= WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY_TOOL;
+            }
+        }
+        sendMotionEventToNext(motionEvent, motionEvent, policyFlags);
         boolean isEndOfSequence = message.arg1 != 0;
         if (isEndOfSequence) {
             notifyService(mServiceInterfaceForCurrentGesture, mSequencesInProgress.get(0), true);
@@ -181,7 +195,8 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
     }
 
     private void injectEventsMainThread(List<GestureStep> gestureSteps,
-            IAccessibilityServiceClient serviceInterface, int sequence, int displayId) {
+            IAccessibilityServiceClient serviceInterface, int sequence, int displayId,
+            boolean fromAccessibilityTool) {
         if (mIsDestroyed) {
             try {
                 serviceInterface.onPerformGestureResult(sequence, false);
@@ -228,7 +243,8 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
             event.setDisplayId(displayId);
             int isEndOfSequence = (i == events.size() - 1) ? 1 : 0;
             Message message = mHandler.obtainMessage(
-                    MESSAGE_SEND_MOTION_EVENT, isEndOfSequence, 0, event);
+                    MESSAGE_SEND_MOTION_EVENT, isEndOfSequence,
+                    fromAccessibilityTool ? 1 : 0, event);
             mLastScheduledEventTime = event.getEventTime();
             mHandler.sendMessageDelayed(message, Math.max(0, event.getEventTime() - currentTime));
         }
@@ -322,9 +338,16 @@ public class MotionEventInjector extends BaseEventStreamTransformation implement
             long now = SystemClock.uptimeMillis();
             MotionEvent cancelEvent =
                     obtainMotionEvent(now, now, MotionEvent.ACTION_CANCEL, getLastTouchPoints(), 1);
-            sendMotionEventToNext(cancelEvent, cancelEvent,
-                    WindowManagerPolicyConstants.FLAG_PASS_TO_USER
-                    | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY);
+            int policyFlags = WindowManagerPolicyConstants.FLAG_PASS_TO_USER
+                    | WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY;
+            if (android.view.accessibility.Flags
+                    .preventA11yNontoolFromInjectingIntoSensitiveViews()) {
+                // ACTION_CANCEL events are internal system details for event stream state
+                // management and not used for performing new actions, so always treat them as
+                // originating from an accessibility tool.
+                policyFlags |= WindowManagerPolicyConstants.FLAG_INJECTED_FROM_ACCESSIBILITY_TOOL;
+            }
+            sendMotionEventToNext(cancelEvent, cancelEvent, policyFlags);
             mOpenGesturesInProgress.put(source, false);
         }
     }
