@@ -71,14 +71,14 @@ public class WindowContextControllerTest {
         mController = new WindowContextController(mMockToken);
         doNothing().when(mMockToken).onConfigurationChanged(any(), anyInt(), anyBoolean());
         mOriginalController = WindowTokenClientController.getInstance();
-        WindowTokenClientController.overrideInstance(mWindowTokenClientController);
+        WindowTokenClientController.overrideForTesting(mWindowTokenClientController);
         doReturn(true).when(mWindowTokenClientController).attachToDisplayArea(
                 eq(mMockToken), anyInt(), anyInt(), any());
     }
 
     @After
     public void tearDown() {
-        WindowTokenClientController.overrideInstance(mOriginalController);
+        WindowTokenClientController.overrideForTesting(mOriginalController);
     }
 
     @Test(expected = IllegalStateException.class)

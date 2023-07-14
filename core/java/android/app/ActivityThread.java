@@ -65,6 +65,7 @@ import android.app.servertransaction.PendingTransactionActions.StopInfo;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.TransactionExecutor;
 import android.app.servertransaction.TransactionExecutorHelper;
+import android.app.servertransaction.WindowTokenClientController;
 import android.bluetooth.BluetoothFrameworkInitializer;
 import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -6219,6 +6220,18 @@ public final class ActivityThread extends ClientTransactionHandler
         mConfiguration = mConfigurationController.getConfiguration();
         mPendingConfiguration = mConfigurationController.getPendingConfiguration(
                 false /* clearPending */);
+    }
+
+    @Override
+    public void handleWindowContextConfigurationChanged(@NonNull IBinder clientToken,
+            @NonNull Configuration configuration, int displayId) {
+        WindowTokenClientController.getInstance().onWindowContextConfigurationChanged(clientToken,
+                configuration, displayId);
+    }
+
+    @Override
+    public void handleWindowContextWindowRemoval(@NonNull IBinder clientToken) {
+        WindowTokenClientController.getInstance().onWindowContextWindowRemoved(clientToken);
     }
 
     /**

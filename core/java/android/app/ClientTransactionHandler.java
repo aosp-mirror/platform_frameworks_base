@@ -163,6 +163,13 @@ public abstract class ClientTransactionHandler {
     public abstract void handleActivityConfigurationChanged(@NonNull ActivityClientRecord r,
             Configuration overrideConfig, int displayId);
 
+    /** Deliver {@link android.window.WindowContext} configuration change. */
+    public abstract void handleWindowContextConfigurationChanged(@NonNull IBinder clientToken,
+            @NonNull Configuration configuration, int displayId);
+
+    /** Deliver {@link android.window.WindowContext} window removal event. */
+    public abstract void handleWindowContextWindowRemoval(@NonNull IBinder clientToken);
+
     /** Deliver result from another activity. */
     public abstract void handleSendResult(
             @NonNull ActivityClientRecord r, List<ResultInfo> results, String reason);

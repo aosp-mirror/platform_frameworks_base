@@ -21,6 +21,7 @@ import static android.content.Intent.ACTION_EDIT;
 import static android.content.Intent.ACTION_VIEW;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -29,6 +30,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -46,6 +49,7 @@ import android.app.servertransaction.ConfigurationChangeItem;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
+import android.app.servertransaction.WindowTokenClientController;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.CompatibilityInfo;
@@ -70,6 +74,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.content.ReferrerIntent;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,7 +88,7 @@ import java.util.function.Consumer;
 /**
  * Test for verifying {@link android.app.ActivityThread} class.
  * Build/Install/Run:
- *  atest FrameworksCoreTests:android.app.activity.ActivityThreadTest
+ *  atest FrameworksCoreTests:ActivityThreadTest
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
@@ -100,7 +105,16 @@ public class ActivityThreadTest {
             new ActivityTestRule<>(TestActivity.class, true /* initialTouchMode */,
                     false /* launchActivity */);
 
+    private WindowTokenClientController mOriginalWindowTokenClientController;
+
     private ArrayList<VirtualDisplay> mCreatedVirtualDisplays;
+
+    @Before
+    public void setup() {
+        // Keep track of the original controller, so that it can be used to restore in tearDown()
+        // when there is override in some test cases.
+        mOriginalWindowTokenClientController = WindowTokenClientController.getInstance();
+    }
 
     @After
     public void tearDown() {
@@ -108,6 +122,7 @@ public class ActivityThreadTest {
             mCreatedVirtualDisplays.forEach(VirtualDisplay::release);
             mCreatedVirtualDisplays = null;
         }
+        WindowTokenClientController.overrideForTesting(mOriginalWindowTokenClientController);
     }
 
     @Test
@@ -728,6 +743,39 @@ public class ActivityThreadTest {
         assertTrue(activity.pipRequested());
         assertFalse(activity.enteredPip());
         assertFalse(activity.enterPipSkipped());
+    }
+
+    @Test
+    public void testHandleWindowContextConfigurationChanged() {
+        final Activity activity = mActivityTestRule.launchActivity(new Intent());
+        final ActivityThread activityThread = activity.getActivityThread();
+        final WindowTokenClientController windowTokenClientController =
+                mock(WindowTokenClientController.class);
+        WindowTokenClientController.overrideForTesting(windowTokenClientController);
+        final IBinder clientToken = mock(IBinder.class);
+        final Configuration configuration = new Configuration();
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> activityThread
+                .handleWindowContextConfigurationChanged(
+                        clientToken, configuration, DEFAULT_DISPLAY));
+
+        verify(windowTokenClientController).onWindowContextConfigurationChanged(
+                clientToken, configuration, DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testHandleWindowContextWindowRemoval() {
+        final Activity activity = mActivityTestRule.launchActivity(new Intent());
+        final ActivityThread activityThread = activity.getActivityThread();
+        final WindowTokenClientController windowTokenClientController =
+                mock(WindowTokenClientController.class);
+        WindowTokenClientController.overrideForTesting(windowTokenClientController);
+        final IBinder clientToken = mock(IBinder.class);
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> activityThread
+                .handleWindowContextWindowRemoval(clientToken));
+
+        verify(windowTokenClientController).onWindowContextWindowRemoved(clientToken);
     }
 
     /**
