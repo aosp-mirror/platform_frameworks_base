@@ -16,18 +16,19 @@
 
 package com.android.systemui.shade.ui.composable
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.notifications.ui.composable.Notifications
+import com.android.systemui.qs.footer.ui.compose.QuickSettings
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -62,12 +63,7 @@ class ShadeScene(
     override fun Content(
         containerName: String,
         modifier: Modifier,
-    ) {
-        ShadeScene(
-            viewModel = viewModel,
-            modifier = modifier,
-        )
-    }
+    ) = ShadeScene(viewModel, modifier)
 
     private fun destinationScenes(
         up: SceneKey,
@@ -84,23 +80,15 @@ private fun ShadeScene(
     viewModel: ShadeSceneViewModel,
     modifier: Modifier = Modifier,
 ) {
-    // TODO(b/280887022): implement the real UI.
-
-    Box(modifier = modifier) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.align(Alignment.Center)
-        ) {
-            Text("Shade", style = MaterialTheme.typography.headlineMedium)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Button(
-                    onClick = { viewModel.onContentClicked() },
-                ) {
-                    Text("Open some content")
-                }
-            }
-        }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier =
+            Modifier.fillMaxSize()
+                .clickable(onClick = { viewModel.onContentClicked() })
+                .padding(horizontal = 16.dp, vertical = 48.dp)
+    ) {
+        QuickSettings(modifier = modifier.height(160.dp))
+        Notifications(modifier = modifier.weight(1f))
     }
 }
