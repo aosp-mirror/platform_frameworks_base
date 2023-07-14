@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.PipelineDumpable
 import com.android.systemui.statusbar.notification.collection.PipelineDumper
@@ -31,32 +33,34 @@ interface NotifCoordinators : Coordinator, PipelineDumpable
 
 @CoordinatorScope
 class NotifCoordinatorsImpl @Inject constructor(
-        sectionStyleProvider: SectionStyleProvider,
-        dataStoreCoordinator: DataStoreCoordinator,
-        hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
-        hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
-        keyguardCoordinator: KeyguardCoordinator,
-        rankingCoordinator: RankingCoordinator,
-        appOpsCoordinator: AppOpsCoordinator,
-        deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
-        bubbleCoordinator: BubbleCoordinator,
-        headsUpCoordinator: HeadsUpCoordinator,
-        gutsCoordinator: GutsCoordinator,
-        conversationCoordinator: ConversationCoordinator,
-        debugModeCoordinator: DebugModeCoordinator,
-        groupCountCoordinator: GroupCountCoordinator,
-        groupWhenCoordinator: GroupWhenCoordinator,
-        mediaCoordinator: MediaCoordinator,
-        preparationCoordinator: PreparationCoordinator,
-        remoteInputCoordinator: RemoteInputCoordinator,
-        rowAppearanceCoordinator: RowAppearanceCoordinator,
-        stackCoordinator: StackCoordinator,
-        shadeEventCoordinator: ShadeEventCoordinator,
-        smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
-        viewConfigCoordinator: ViewConfigCoordinator,
-        visualStabilityCoordinator: VisualStabilityCoordinator,
-        sensitiveContentCoordinator: SensitiveContentCoordinator,
-        dismissibilityCoordinator: DismissibilityCoordinator,
+    sectionStyleProvider: SectionStyleProvider,
+    featureFlags: FeatureFlags,
+    dataStoreCoordinator: DataStoreCoordinator,
+    hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
+    hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
+    keyguardCoordinator: KeyguardCoordinator,
+    rankingCoordinator: RankingCoordinator,
+    appOpsCoordinator: AppOpsCoordinator,
+    deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
+    bubbleCoordinator: BubbleCoordinator,
+    headsUpCoordinator: HeadsUpCoordinator,
+    gutsCoordinator: GutsCoordinator,
+    conversationCoordinator: ConversationCoordinator,
+    debugModeCoordinator: DebugModeCoordinator,
+    groupCountCoordinator: GroupCountCoordinator,
+    groupWhenCoordinator: GroupWhenCoordinator,
+    mediaCoordinator: MediaCoordinator,
+    preparationCoordinator: PreparationCoordinator,
+    remoteInputCoordinator: RemoteInputCoordinator,
+    rowAppearanceCoordinator: RowAppearanceCoordinator,
+    stackCoordinator: StackCoordinator,
+    shadeEventCoordinator: ShadeEventCoordinator,
+    smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
+    viewConfigCoordinator: ViewConfigCoordinator,
+    visualStabilityCoordinator: VisualStabilityCoordinator,
+    sensitiveContentCoordinator: SensitiveContentCoordinator,
+    dismissibilityCoordinator: DismissibilityCoordinator,
+    dreamCoordinator: DreamCoordinator,
 ) : NotifCoordinators {
 
     private val mCoreCoordinators: MutableList<CoreCoordinator> = ArrayList()
@@ -95,6 +99,10 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(preparationCoordinator)
         mCoordinators.add(remoteInputCoordinator)
         mCoordinators.add(dismissibilityCoordinator)
+
+        if (featureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
+            mCoordinators.add(dreamCoordinator)
+        }
 
         // Manually add Ordered Sections
         mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
