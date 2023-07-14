@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import android.text.TextUtils;
+
 import com.android.server.display.brightness.BrightnessReason;
 
 import java.util.Objects;
@@ -29,12 +31,14 @@ public final class DisplayBrightnessState {
     private final float mSdrBrightness;
     private final BrightnessReason mBrightnessReason;
     private final String mDisplayBrightnessStrategyName;
+    private final boolean mShouldUseAutoBrightness;
 
     private DisplayBrightnessState(Builder builder) {
-        this.mBrightness = builder.getBrightness();
-        this.mSdrBrightness = builder.getSdrBrightness();
-        this.mBrightnessReason = builder.getBrightnessReason();
-        this.mDisplayBrightnessStrategyName = builder.getDisplayBrightnessStrategyName();
+        mBrightness = builder.getBrightness();
+        mSdrBrightness = builder.getSdrBrightness();
+        mBrightnessReason = builder.getBrightnessReason();
+        mDisplayBrightnessStrategyName = builder.getDisplayBrightnessStrategyName();
+        mShouldUseAutoBrightness = builder.getShouldUseAutoBrightness();
     }
 
     /**
@@ -66,6 +70,13 @@ public final class DisplayBrightnessState {
         return mDisplayBrightnessStrategyName;
     }
 
+    /**
+     * @return {@code true} if the device is set up to run auto-brightness.
+     */
+    public boolean getShouldUseAutoBrightness() {
+        return mShouldUseAutoBrightness;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("DisplayBrightnessState:");
@@ -75,6 +86,8 @@ public final class DisplayBrightnessState {
         stringBuilder.append(getSdrBrightness());
         stringBuilder.append("\n    brightnessReason:");
         stringBuilder.append(getBrightnessReason());
+        stringBuilder.append("\n    shouldUseAutoBrightness:");
+        stringBuilder.append(getShouldUseAutoBrightness());
         return stringBuilder.toString();
     }
 
@@ -91,28 +104,20 @@ public final class DisplayBrightnessState {
             return false;
         }
 
-        DisplayBrightnessState
-                displayBrightnessState = (DisplayBrightnessState) other;
+        DisplayBrightnessState otherState = (DisplayBrightnessState) other;
 
-        if (mBrightness != displayBrightnessState.getBrightness()) {
-            return false;
-        }
-        if (mSdrBrightness != displayBrightnessState.getSdrBrightness()) {
-            return false;
-        }
-        if (!mBrightnessReason.equals(displayBrightnessState.getBrightnessReason())) {
-            return false;
-        }
-        if (!mDisplayBrightnessStrategyName.equals(
-                displayBrightnessState.getDisplayBrightnessStrategyName())) {
-            return false;
-        }
-        return true;
+        return mBrightness == otherState.getBrightness()
+                && mSdrBrightness == otherState.getSdrBrightness()
+                && mBrightnessReason.equals(otherState.getBrightnessReason())
+                && TextUtils.equals(mDisplayBrightnessStrategyName,
+                        otherState.getDisplayBrightnessStrategyName())
+                && mShouldUseAutoBrightness == otherState.getShouldUseAutoBrightness();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason);
+        return Objects.hash(
+                mBrightness, mSdrBrightness, mBrightnessReason, mShouldUseAutoBrightness);
     }
 
     /**
@@ -123,6 +128,23 @@ public final class DisplayBrightnessState {
         private float mSdrBrightness;
         private BrightnessReason mBrightnessReason = new BrightnessReason();
         private String mDisplayBrightnessStrategyName;
+        private boolean mShouldUseAutoBrightness;
+
+        /**
+         * Create a builder starting with the values from the specified {@link
+         * DisplayBrightnessState}.
+         *
+         * @param state The state from which to initialize.
+         */
+        public static Builder from(DisplayBrightnessState state) {
+            Builder builder = new Builder();
+            builder.setBrightness(state.getBrightness());
+            builder.setSdrBrightness(state.getSdrBrightness());
+            builder.setBrightnessReason(state.getBrightnessReason());
+            builder.setDisplayBrightnessStrategyName(state.getDisplayBrightnessStrategyName());
+            builder.setShouldUseAutoBrightness(state.getShouldUseAutoBrightness());
+            return builder;
+        }
 
         /**
          * Gets the brightness
@@ -197,6 +219,21 @@ public final class DisplayBrightnessState {
         public Builder setDisplayBrightnessStrategyName(String displayBrightnessStrategyName) {
             this.mDisplayBrightnessStrategyName = displayBrightnessStrategyName;
             return this;
+        }
+
+        /**
+         * See {@link DisplayBrightnessState#getShouldUseAutoBrightness}.
+         */
+        public Builder setShouldUseAutoBrightness(boolean shouldUseAutoBrightness) {
+            this.mShouldUseAutoBrightness = shouldUseAutoBrightness;
+            return this;
+        }
+
+        /**
+         * See {@link DisplayBrightnessState#getShouldUseAutoBrightness}.
+         */
+        public boolean getShouldUseAutoBrightness() {
+            return mShouldUseAutoBrightness;
         }
 
         /**
