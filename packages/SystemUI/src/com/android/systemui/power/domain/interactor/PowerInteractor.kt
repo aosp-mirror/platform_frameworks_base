@@ -70,19 +70,6 @@ constructor(
         }
     }
 
-    /**
-     * Wakes up the device if dreaming with a screensaver.
-     *
-     * @param why a string explaining why we're waking the device for debugging purposes. Should be
-     *   in SCREAMING_SNAKE_CASE.
-     * @param wakeReason the PowerManager-based reason why we're waking the device.
-     */
-    fun wakeUpIfDreaming(why: String, @PowerManager.WakeReason wakeReason: Int) {
-        if (statusBarStateController.isDreaming) {
-            repository.wakeUp(why, wakeReason)
-        }
-    }
-
     companion object {
         private const val FSI_WAKE_WHY = "full_screen_intent"
     }
