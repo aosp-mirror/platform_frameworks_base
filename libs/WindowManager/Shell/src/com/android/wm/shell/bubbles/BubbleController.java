@@ -1053,20 +1053,6 @@ public class BubbleController implements ConfigurationChangeListener,
         mBubbleData.setExpanded(false /* expanded */);
     }
 
-    /**
-     * Update expanded state when a single bubble is dragged in Launcher.
-     * Will be called only when bubble bar is expanded.
-     * @param bubbleKey key of the bubble to collapse/expand
-     * @param collapse whether to collapse or expand
-     */
-    public void collapseWhileDragging(String bubbleKey, boolean collapse) {
-        if (mBubbleData.getSelectedBubble() != null
-                && mBubbleData.getSelectedBubble().getKey().equals(bubbleKey)) {
-            // Should collapse/expand only if equals to selected bubble.
-            mBubbleBarViewCallback.expansionChanged(/* isExpanded = */ !collapse);
-        }
-    }
-
     @VisibleForTesting
     public boolean isBubbleNotificationSuppressedFromShade(String key, String groupKey) {
         boolean isSuppressedBubble = (mBubbleData.hasAnyBubbleWithKey(key)
@@ -1450,17 +1436,6 @@ public class BubbleController implements ConfigurationChangeListener,
         if (mBubbleData.hasAnyBubbleWithKey(key)) {
             mBubbleData.dismissBubbleWithKey(key, reason);
         }
-    }
-
-    /**
-     * Removes all the bubbles.
-     * <p>
-     * Must be called from the main thread.
-     */
-    @VisibleForTesting
-    @MainThread
-    public void removeAllBubbles(@Bubbles.DismissReason int reason) {
-        mBubbleData.dismissAll(reason);
     }
 
     private void onEntryAdded(BubbleEntry entry) {
@@ -2124,24 +2099,13 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void removeBubble(String key) {
-            mMainExecutor.execute(
-                    () -> mController.removeBubble(key, Bubbles.DISMISS_USER_GESTURE));
-        }
-
-        @Override
-        public void removeAllBubbles() {
-            mMainExecutor.execute(() -> mController.removeAllBubbles(Bubbles.DISMISS_USER_GESTURE));
+        public void removeBubble(String key, int reason) {
+            // TODO (b/271466616) allow removals from launcher
         }
 
         @Override
         public void collapseBubbles() {
             mMainExecutor.execute(() -> mController.collapseStack());
-        }
-
-        @Override
-        public void collapseWhileDragging(String bubbleKey, boolean collapse) {
-            mMainExecutor.execute(() -> mController.collapseWhileDragging(bubbleKey, collapse));
         }
     }
 
