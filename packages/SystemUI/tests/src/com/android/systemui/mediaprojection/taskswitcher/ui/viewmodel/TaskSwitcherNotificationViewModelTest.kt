@@ -17,6 +17,7 @@
 package com.android.systemui.mediaprojection.taskswitcher.ui.viewmodel
 
 import android.content.Intent
+import android.os.Handler
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -24,7 +25,10 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionRepository
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager.Companion.createDisplaySession
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager.Companion.createSingleTaskSession
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionManagerRepository
 import com.android.systemui.mediaprojection.taskswitcher.domain.interactor.TaskSwitchInteractor
 import com.android.systemui.mediaprojection.taskswitcher.ui.model.TaskSwitcherNotificationUiState
 import com.google.common.truth.Truth.assertThat
@@ -44,13 +48,23 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
     private val testScope = TestScope(dispatcher)
 
     private val fakeActivityTaskManager = FakeActivityTaskManager()
-    private val mediaRepo = FakeMediaProjectionRepository()
+    private val fakeMediaProjectionManager = FakeMediaProjectionManager()
+
     private val tasksRepo =
         ActivityTaskManagerTasksRepository(
             activityTaskManager = fakeActivityTaskManager.activityTaskManager,
             applicationScope = testScope.backgroundScope,
             backgroundDispatcher = dispatcher
         )
+
+    private val mediaRepo =
+        MediaProjectionManagerRepository(
+            mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
+            handler = Handler.getMain(),
+            applicationScope = testScope.backgroundScope,
+            tasksRepository = tasksRepo,
+        )
+
     private val interactor = TaskSwitchInteractor(mediaRepo, tasksRepo)
 
     private val viewModel = TaskSwitcherNotificationViewModel(interactor)
@@ -58,8 +72,9 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
     @Test
     fun uiState_notProjecting_emitsNotShowing() =
         testScope.runTest {
-            mediaRepo.stopProjecting()
             val uiState by collectLastValue(viewModel.uiState)
+
+            fakeMediaProjectionManager.dispatchOnStop()
 
             assertThat(uiState).isEqualTo(TaskSwitcherNotificationUiState.NotShowing)
         }
@@ -67,10 +82,13 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
     @Test
     fun uiState_notProjecting_foregroundTaskChanged_emitsNotShowing() =
         testScope.runTest {
-            mediaRepo.stopProjecting()
+            val backgroundTask = createTask(taskId = 0)
+            val foregroundTask = createTask(taskId = 1)
             val uiState by collectLastValue(viewModel.uiState)
 
-            mediaRepo.switchProjectedTask(createTask(taskId = 1))
+            fakeActivityTaskManager.addRunningTasks(backgroundTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnStop()
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
 
             assertThat(uiState).isEqualTo(TaskSwitcherNotificationUiState.NotShowing)
         }
@@ -78,8 +96,9 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
     @Test
     fun uiState_projectingEntireScreen_emitsNotShowing() =
         testScope.runTest {
-            mediaRepo.projectEntireScreen()
             val uiState by collectLastValue(viewModel.uiState)
+
+            fakeMediaProjectionManager.dispatchOnSessionSet(session = createDisplaySession())
 
             assertThat(uiState).isEqualTo(TaskSwitcherNotificationUiState.NotShowing)
         }
@@ -87,10 +106,13 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
     @Test
     fun uiState_projectingEntireScreen_foregroundTaskChanged_emitsNotShowing() =
         testScope.runTest {
-            mediaRepo.projectEntireScreen()
+            val backgroundTask = createTask(taskId = 0)
+            val foregroundTask = createTask(taskId = 1)
             val uiState by collectLastValue(viewModel.uiState)
 
-            mediaRepo.switchProjectedTask(createTask(taskId = 1))
+            fakeActivityTaskManager.addRunningTasks(backgroundTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(session = createDisplaySession())
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
 
             assertThat(uiState).isEqualTo(TaskSwitcherNotificationUiState.NotShowing)
         }
@@ -100,9 +122,12 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val projectedTask = createTask(taskId = 1)
             val foregroundTask = createTask(taskId = 2)
-            mediaRepo.switchProjectedTask(projectedTask)
             val uiState by collectLastValue(viewModel.uiState)
 
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
             fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
 
             assertThat(uiState)
@@ -113,9 +138,12 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
     fun uiState_projectingTask_foregroundTaskChanged_same_emitsNotShowing() =
         testScope.runTest {
             val projectedTask = createTask(taskId = 1)
-            mediaRepo.switchProjectedTask(projectedTask)
             val uiState by collectLastValue(viewModel.uiState)
 
+            fakeActivityTaskManager.addRunningTasks(projectedTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
             fakeActivityTaskManager.moveTaskToForeground(projectedTask)
 
             assertThat(uiState).isEqualTo(TaskSwitcherNotificationUiState.NotShowing)
@@ -126,9 +154,12 @@ class TaskSwitcherNotificationViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val projectedTask = createTask(taskId = 1)
             val foregroundTask = createTask(taskId = 2, baseIntent = LAUNCHER_INTENT)
-            mediaRepo.switchProjectedTask(projectedTask)
             val uiState by collectLastValue(viewModel.uiState)
 
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
             fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
 
             assertThat(uiState).isEqualTo(TaskSwitcherNotificationUiState.NotShowing)
