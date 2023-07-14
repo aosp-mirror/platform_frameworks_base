@@ -17,12 +17,7 @@ package com.android.systemui.biometrics
 
 import android.app.ActivityTaskManager
 import android.content.Context
-import android.content.res.Configuration
-import android.graphics.Color
 import android.graphics.PixelFormat
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
-import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTINGS
@@ -33,27 +28,23 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.ISidefpsController
 import android.os.Handler
 import android.util.Log
-import android.util.RotationUtils
 import android.view.Display
 import android.view.DisplayInfo
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
-import android.view.View.AccessibilityDelegate
 import android.view.ViewPropertyAnimator
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
-import android.view.accessibility.AccessibilityEvent
-import androidx.annotation.RawRes
 import com.airbnb.lottie.LottieAnimationView
-import com.airbnb.lottie.LottieProperty
-import com.airbnb.lottie.model.KeyPath
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
+import com.android.systemui.biometrics.ui.binder.SideFpsOverlayViewBinder
+import com.android.systemui.biometrics.ui.viewmodel.SideFpsOverlayViewModel
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -64,6 +55,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.traceSection
 import java.io.PrintWriter
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -86,6 +78,7 @@ constructor(
     @Main private val mainExecutor: DelayableExecutor,
     @Main private val handler: Handler,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    private val sideFpsOverlayViewModelFactory: Provider<SideFpsOverlayViewModel>,
     @Application private val scope: CoroutineScope,
     dumpManager: DumpManager
 ) : Dumpable {
@@ -250,105 +243,15 @@ constructor(
     private fun createOverlayForDisplay(@BiometricOverlayConstants.ShowReason reason: Int) {
         val view = layoutInflater.inflate(R.layout.sidefps_view, null, false)
         overlayView = view
-        val display = context.display!!
-        // b/284098873 `context.display.rotation` may not up-to-date, we use displayInfo.rotation
-        display.getDisplayInfo(displayInfo)
-        val offsets =
-            sensorProps.getLocation(display.uniqueId).let { location ->
-                if (location == null) {
-                    Log.w(TAG, "No location specified for display: ${display.uniqueId}")
-                }
-                location ?: sensorProps.location
-            }
-        overlayOffsets = offsets
-
-        val lottie = view.findViewById(R.id.sidefps_animation) as LottieAnimationView
-        view.rotation =
-            display.asSideFpsAnimationRotation(
-                offsets.isYAligned(),
-                getRotationFromDefault(displayInfo.rotation)
-            )
-        lottie.setAnimation(
-            display.asSideFpsAnimation(
-                offsets.isYAligned(),
-                getRotationFromDefault(displayInfo.rotation)
-            )
+        SideFpsOverlayViewBinder.bind(
+            view = view,
+            viewModel = sideFpsOverlayViewModelFactory.get(),
+            overlayViewParams = overlayViewParams,
+            reason = reason,
+            context = context,
         )
-        lottie.addLottieOnCompositionLoadedListener {
-            // Check that view is not stale, and that overlayView has not been hidden/removed
-            if (overlayView != null && overlayView == view) {
-                updateOverlayParams(display, it.bounds)
-            }
-        }
         orientationReasonListener.reason = reason
-        lottie.addOverlayDynamicColor(context, reason)
-
-        /**
-         * Intercepts TYPE_WINDOW_STATE_CHANGED accessibility event, preventing Talkback from
-         * speaking @string/accessibility_fingerprint_label twice when sensor location indicator is
-         * in focus
-         */
-        view.setAccessibilityDelegate(
-            object : AccessibilityDelegate() {
-                override fun dispatchPopulateAccessibilityEvent(
-                    host: View,
-                    event: AccessibilityEvent
-                ): Boolean {
-                    return if (
-                        event.getEventType() === AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-                    ) {
-                        true
-                    } else {
-                        super.dispatchPopulateAccessibilityEvent(host, event)
-                    }
-                }
-            }
-        )
     }
-
-    @VisibleForTesting
-    fun updateOverlayParams(display: Display, bounds: Rect) {
-        val isNaturalOrientation = display.isNaturalOrientation()
-        val isDefaultOrientation =
-            if (isReverseDefaultRotation) !isNaturalOrientation else isNaturalOrientation
-        val size = windowManager.maximumWindowMetrics.bounds
-
-        val displayWidth = if (isDefaultOrientation) size.width() else size.height()
-        val displayHeight = if (isDefaultOrientation) size.height() else size.width()
-        val boundsWidth = if (isDefaultOrientation) bounds.width() else bounds.height()
-        val boundsHeight = if (isDefaultOrientation) bounds.height() else bounds.width()
-
-        val sensorBounds =
-            if (overlayOffsets.isYAligned()) {
-                Rect(
-                    displayWidth - boundsWidth,
-                    overlayOffsets.sensorLocationY,
-                    displayWidth,
-                    overlayOffsets.sensorLocationY + boundsHeight
-                )
-            } else {
-                Rect(
-                    overlayOffsets.sensorLocationX,
-                    0,
-                    overlayOffsets.sensorLocationX + boundsWidth,
-                    boundsHeight
-                )
-            }
-
-        RotationUtils.rotateBounds(
-            sensorBounds,
-            Rect(0, 0, displayWidth, displayHeight),
-            getRotationFromDefault(display.rotation)
-        )
-
-        overlayViewParams.x = sensorBounds.left
-        overlayViewParams.y = sensorBounds.top
-
-        windowManager.updateViewLayout(overlayView, overlayViewParams)
-    }
-
-    private fun getRotationFromDefault(rotation: Int): Int =
-        if (isReverseDefaultRotation) (rotation + 1) % 4 else rotation
 }
 
 private val FingerprintManager?.sideFpsSensorProperties: FingerprintSensorPropertiesInternal?
@@ -373,89 +276,12 @@ private fun Int.isReasonToAutoShow(activityTaskManager: ActivityTaskManager): Bo
 private fun ActivityTaskManager.topClass(): String =
     getTasks(1).firstOrNull()?.topActivity?.className ?: ""
 
-@RawRes
-private fun Display.asSideFpsAnimation(yAligned: Boolean, rotationFromDefault: Int): Int =
-    when (rotationFromDefault) {
-        Surface.ROTATION_0 -> if (yAligned) R.raw.sfps_pulse else R.raw.sfps_pulse_landscape
-        Surface.ROTATION_180 -> if (yAligned) R.raw.sfps_pulse else R.raw.sfps_pulse_landscape
-        else -> if (yAligned) R.raw.sfps_pulse_landscape else R.raw.sfps_pulse
-    }
-
-private fun Display.asSideFpsAnimationRotation(yAligned: Boolean, rotationFromDefault: Int): Float =
-    when (rotationFromDefault) {
-        Surface.ROTATION_90 -> if (yAligned) 0f else 180f
-        Surface.ROTATION_180 -> 180f
-        Surface.ROTATION_270 -> if (yAligned) 180f else 0f
-        else -> 0f
-    }
-
 private fun SensorLocationInternal.isYAligned(): Boolean = sensorLocationY != 0
 
 private fun Display.isNaturalOrientation(): Boolean =
     rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
 
-private fun LottieAnimationView.addOverlayDynamicColor(
-    context: Context,
-    @BiometricOverlayConstants.ShowReason reason: Int
-) {
-    fun update() {
-        val isKeyguard = reason == REASON_AUTH_KEYGUARD
-        if (isKeyguard) {
-            val color =
-                com.android.settingslib.Utils.getColorAttrDefaultColor(
-                    context,
-                    com.android.internal.R.attr.materialColorPrimaryFixed
-                )
-            val outerRimColor =
-                com.android.settingslib.Utils.getColorAttrDefaultColor(
-                    context,
-                    com.android.internal.R.attr.materialColorPrimaryFixedDim
-                )
-            val chevronFill =
-                com.android.settingslib.Utils.getColorAttrDefaultColor(
-                    context,
-                    com.android.internal.R.attr.materialColorOnPrimaryFixed
-                )
-            addValueCallback(KeyPath(".blue600", "**"), LottieProperty.COLOR_FILTER) {
-                PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)
-            }
-            addValueCallback(KeyPath(".blue400", "**"), LottieProperty.COLOR_FILTER) {
-                PorterDuffColorFilter(outerRimColor, PorterDuff.Mode.SRC_ATOP)
-            }
-            addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
-                PorterDuffColorFilter(chevronFill, PorterDuff.Mode.SRC_ATOP)
-            }
-        } else {
-            if (!isDarkMode(context)) {
-                addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
-                    PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
-                }
-            }
-            for (key in listOf(".blue600", ".blue400")) {
-                addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
-                    PorterDuffColorFilter(
-                        context.getColor(R.color.settingslib_color_blue400),
-                        PorterDuff.Mode.SRC_ATOP
-                    )
-                }
-            }
-        }
-    }
-
-    if (composition != null) {
-        update()
-    } else {
-        addLottieOnCompositionLoadedListener { update() }
-    }
-}
-
-private fun isDarkMode(context: Context): Boolean {
-    val darkMode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-    return darkMode == Configuration.UI_MODE_NIGHT_YES
-}
-
-@VisibleForTesting
-class OrientationReasonListener(
+public class OrientationReasonListener(
     context: Context,
     displayManager: DisplayManager,
     handler: Handler,
