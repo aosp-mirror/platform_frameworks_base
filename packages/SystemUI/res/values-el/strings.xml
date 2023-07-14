@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Πατήστε για προβολή"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Σφάλμα κατά την αποθήκευση της εγγραφής οθόνης"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Σφάλμα κατά την έναρξη της εγγραφής οθόνης"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Προβολή σε πλήρη οθόνη"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"Για έξοδο, σύρετε προς τα κάτω από το επάνω μέρος."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Το κατάλαβα"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Πίσω"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Αρχική οθόνη"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Μενού"</string>
@@ -412,6 +415,10 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Όταν κάνετε κοινή χρήση, εγγραφή ή μετάδοση, το Android έχει πρόσβαση σε οτιδήποτε είναι ορατό στην οθόνη σας ή αναπαράγεται στη συσκευή σας. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα, τις φωτογραφίες, τον ήχο και το βίντεο."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Όταν κάνετε κοινή χρήση, εγγραφή ή μετάδοση μιας εφαρμογής, το Android έχει πρόσβαση σε οτιδήποτε είναι ορατό ή αναπαράγεται στη συγκεκριμένη εφαρμογή. Επομένως, να είστε προσεκτικοί με τους κωδικούς πρόσβασης, τα στοιχεία πληρωμής, τα μηνύματα, τις φωτογραφίες, τον ήχο και το βίντεο."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Έναρξη"</string>
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Η κοινοποίηση τίθεται σε παύση κατά την εναλλαγή μεταξύ εφαρμογών"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Εναλλακτικά, κοινοποιήστε την εφαρμογή"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Επιστροφή"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"Εναλλαγή μεταξύ εφαρμογών"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Αποκλείστηκε από τον διαχειριστή IT"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Η καταγραφή οθόνης έχει απενεργοποιηθεί από την πολιτική χρήσης συσκευής."</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Διαγραφή όλων"</string>

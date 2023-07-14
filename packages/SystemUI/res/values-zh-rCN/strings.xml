@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"点按即可查看"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"保存屏幕录制内容时出错"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"启动屏幕录制时出错"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"目前处于全屏模式"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"要退出，请从顶部向下滑动。"</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"知道了"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"返回"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"主屏幕"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"菜单"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"在分享内容时，Android 可以访问屏幕上显示或设备中播放的所有内容。因此，请务必小心操作，谨防密码、付款信息、消息、照片、音频和视频等内容遭到泄露。"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"在分享、录制或投放内容时，Android 可以访问通过此应用显示或播放的所有内容。因此，请务必小心操作，谨防密码、付款信息、消息、照片、音频和视频等内容遭到泄露。"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"开始"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"已被 IT 管理员禁止"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"设备政策已停用屏幕截图功能"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>

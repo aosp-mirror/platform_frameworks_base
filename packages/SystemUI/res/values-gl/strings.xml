@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Toca para ver o contido"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Produciuse un erro ao gardar a gravación da pantalla"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Produciuse un erro ao iniciar a gravación da pantalla"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Vendo pantalla completa"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"Para saír, pasa o dedo cara abaixo desde a parte superior."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Entendido"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Volver"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inicio"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menú"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Cando compartes, gravas ou emites contido, Android ten acceso a todo o que se vexa na pantalla ou se reproduza no teu dispositivo. Polo tanto, debes ter coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como o contido de audio e de vídeo."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Cando compartes, gravas ou emites unha aplicación, Android ten acceso a todo o que se vexa ou se reproduza nela. Polo tanto, debes ter coidado con determinada información, como os contrasinais, os detalles de pago, as mensaxes e as fotos, así como o contido de audio e de vídeo."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Iniciar"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"O teu administrador de TI bloqueou esta aplicación"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"A política do dispositivo desactivou a opción de capturar a pantalla"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Eliminar todo"</string>
@@ -1040,7 +1051,7 @@
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Produciuse un problema ao ler o medidor da batería"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toca para obter máis información"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Sen alarmas postas"</string>
-    <string name="accessibility_bouncer" msgid="5896923685673320070">"introducir bloqueo de pantalla"</string>
+    <string name="accessibility_bouncer" msgid="5896923685673320070">"introducir o bloqueo de pantalla"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor de impresión dixital"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autenticar"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"poñer o dispositivo"</string>

@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Tap to view"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Error saving screen recording"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Error starting screen recording"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Viewing full screen"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"To exit, swipe down from the top."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Got it"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Back"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Home"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menu"</string>
@@ -412,6 +415,10 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"When you’re sharing, recording, or casting, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"When you’re sharing, recording, or casting an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Start"</string>
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Sharing pauses when you switch apps"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Share this app instead"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Switch back"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"App switch"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blocked by your IT admin"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Screen capturing is disabled by device policy"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Clear all"</string>
