@@ -1429,6 +1429,30 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTransientLaunchWithKeyguard() {
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        final ActivityRecord target = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord top = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final KeyguardController keyguard = mSupervisor.getKeyguardController();
+        doReturn(true).when(keyguard).isKeyguardLocked(anyInt());
+        doReturn(true).when(keyguard).isDisplayOccluded(anyInt());
+        registerTestTransitionPlayer();
+        starter.setReason("testTransientLaunchWithKeyguard")
+                .setActivityOptions(ActivityOptions.makeBasic().setTransientLaunch().toBundle())
+                .setIntent(target.intent)
+                .execute();
+        final TransitionController controller = mRootWindowContainer.mTransitionController;
+        final Transition transition = controller.getCollectingTransition();
+        final Transition.ChangeInfo targetChangeInfo = transition.mChanges.get(target);
+
+        assertThat(targetChangeInfo).isNotNull();
+        assertThat(targetChangeInfo.hasChanged()).isTrue();
+        assertThat(controller.isCollecting(top.getTask())).isTrue();
+        assertThat(transition.isTransientLaunch(target)).isTrue();
+        assertThat(transition.isInTransientHide(top.getTask())).isTrue();
+    }
+
+    @Test
     public void testActivityStart_expectAddedToRecentTask() {
         RecentTasks recentTasks = mock(RecentTasks.class);
         mAtm.mTaskSupervisor.setRecentTasks(recentTasks);
