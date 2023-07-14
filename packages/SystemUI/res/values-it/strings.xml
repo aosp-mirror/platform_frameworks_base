@@ -478,14 +478,14 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"Accessibilità"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Attiva suoneria"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Attiva vibrazione"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Disattiva suoneria"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Silenzia"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Tocca per riattivare l\'audio."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Tocca per attivare la vibrazione. L\'audio dei servizi di accessibilità può essere disattivato."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Tocca per disattivare l\'audio. L\'audio dei servizi di accessibilità può essere disattivato."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="2742330052979397471">"%1$s. Tocca per attivare la vibrazione."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="5743548478357238156">"%1$s. Tocca per disattivare l\'audio."</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Tocca per cambiare la modalità della suoneria"</string>
-    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"disattiva l\'audio"</string>
+    <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"silenzia"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"riattiva l\'audio"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibrazione"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"Controlli del volume %s"</string>
