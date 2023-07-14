@@ -3247,6 +3247,7 @@
   <!-- WallpaperManager config -->
   <java-symbol type="string" name="config_wallpaperCropperPackage" />
   <java-symbol type="string" name="expand_action_accessibility" />
+  <java-symbol type="bool" name="config_wallpaperTopApp" />
 
   <java-symbol type="id" name="textSpacerNoTitle" />
   <java-symbol type="id" name="titleDividerNoCustom" />
