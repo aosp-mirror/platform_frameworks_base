@@ -322,7 +322,6 @@ import com.android.server.notification.toast.ToastRecord;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.PermissionPolicyInternal;
-import com.android.server.powerstats.StatsPullAtomCallbackImpl;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.Slogf;
@@ -1715,7 +1714,6 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
 
-            boolean queryRestart = false;
             boolean queryRemove = false;
             boolean packageChanged = false;
             boolean cancelNotifications = true;
@@ -1727,7 +1725,6 @@ public class NotificationManagerService extends SystemService {
                     || (queryRemove=action.equals(Intent.ACTION_PACKAGE_REMOVED))
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
                     || (packageChanged=action.equals(Intent.ACTION_PACKAGE_CHANGED))
-                    || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
                     || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)
                     || action.equals(Intent.ACTION_PACKAGES_SUSPENDED)
                     || action.equals(Intent.ACTION_PACKAGES_UNSUSPENDED)
@@ -1768,10 +1765,6 @@ public class NotificationManagerService extends SystemService {
                         cancelNotifications = false;
                         unhideNotifications = true;
                     }
-
-                } else if (queryRestart) {
-                    pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
-                    uidList = new int[] {intent.getIntExtra(Intent.EXTRA_UID, -1)};
                 } else {
                     Uri uri = intent.getData();
                     if (uri == null) {
@@ -1809,7 +1802,7 @@ public class NotificationManagerService extends SystemService {
                     if (cancelNotifications) {
                         for (String pkgName : pkgList) {
                             cancelAllNotificationsInt(MY_UID, MY_PID, pkgName, null, 0, 0,
-                                    !queryRestart, changeUserId, reason, null);
+                                    changeUserId, reason);
                         }
                     } else if (hideNotifications && uidList != null && (uidList.length > 0)) {
                         hideNotificationsForPackages(pkgList, uidList);
@@ -1843,14 +1836,14 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_STOPPED)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 if (userHandle >= 0) {
-                    cancelAllNotificationsInt(MY_UID, MY_PID, null, null, 0, 0, true, userHandle,
-                            REASON_USER_STOPPED, null);
+                    cancelAllNotificationsInt(MY_UID, MY_PID, null, null, 0, 0, userHandle,
+                            REASON_USER_STOPPED);
                 }
             } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)) {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 if (userHandle >= 0 && !mDpm.isKeepProfilesRunningEnabled()) {
-                    cancelAllNotificationsInt(MY_UID, MY_PID, null, null, 0, 0, true, userHandle,
-                            REASON_PROFILE_TURNED_OFF, null);
+                    cancelAllNotificationsInt(MY_UID, MY_PID, null, null, 0, 0, userHandle,
+                            REASON_PROFILE_TURNED_OFF);
                     mSnoozeHelper.clearData(userHandle);
                 }
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
@@ -2468,7 +2461,6 @@ public class NotificationManagerService extends SystemService {
         pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         pkgFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         pkgFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
         pkgFilter.addDataScheme("package");
         getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL, pkgFilter, null,
                 null);
@@ -2499,6 +2491,16 @@ public class NotificationManagerService extends SystemService {
         getContext().registerReceiver(mReviewNotificationPermissionsReceiver,
                 ReviewNotificationPermissionsReceiver.getFilter(),
                 Context.RECEIVER_NOT_EXPORTED);
+
+        mAppOps.startWatchingMode(AppOpsManager.OP_POST_NOTIFICATION, null,
+                new AppOpsManager.OnOpChangedInternalListener() {
+                    @Override
+                    public void onOpChanged(@NonNull String op, @NonNull String packageName,
+                            int userId) {
+                        mHandler.post(
+                                () -> handleNotificationPermissionChange(packageName, userId));
+                    }
+                });
     }
 
     /**
@@ -2855,17 +2857,17 @@ public class NotificationManagerService extends SystemService {
             boolean fromListener) {
         if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
             // cancel
-            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
-                    UserHandle.getUserId(uid), REASON_CHANNEL_BANNED,
-                    null);
+            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0,
+                    UserHandle.getUserId(uid), REASON_CHANNEL_BANNED
+            );
             if (isUidSystemOrPhone(uid)) {
                 IntArray profileIds = mUserProfiles.getCurrentProfileIds();
                 int N = profileIds.size();
                 for (int i = 0; i < N; i++) {
                     int profileId = profileIds.get(i);
-                    cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0, true,
-                            profileId, REASON_CHANNEL_BANNED,
-                            null);
+                    cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channel.getId(), 0, 0,
+                            profileId, REASON_CHANNEL_BANNED
+                    );
                 }
             }
         }
@@ -3539,7 +3541,7 @@ public class NotificationManagerService extends SystemService {
             // Don't allow the app to cancel active FGS or UIJ notifications
             cancelAllNotificationsInt(Binder.getCallingUid(), Binder.getCallingPid(),
                     pkg, null, 0, FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB,
-                    true, userId, REASON_APP_CANCEL_ALL, null);
+                    userId, REASON_APP_CANCEL_ALL);
         }
 
         @Override
@@ -3558,20 +3560,16 @@ public class NotificationManagerService extends SystemService {
             }
             mPermissionHelper.setNotificationPermission(
                     pkg, UserHandle.getUserId(uid), enabled, true);
-            sendAppBlockStateChangedBroadcast(pkg, uid, !enabled);
 
             mMetricsLogger.write(new LogMaker(MetricsEvent.ACTION_BAN_APP_NOTES)
                     .setType(MetricsEvent.TYPE_ACTION)
                     .setPackageName(pkg)
                     .setSubtype(enabled ? 1 : 0));
             mNotificationChannelLogger.logAppNotificationsAllowed(uid, pkg, enabled);
-            // Now, cancel any outstanding notifications that are part of a just-disabled app
-            if (!enabled) {
-                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, null, 0, 0, true,
-                        UserHandle.getUserId(uid), REASON_PACKAGE_BANNED, null);
-            }
 
-            handleSavePolicyFile();
+            // Outstanding notifications from this package will be cancelled, and the package will
+            // be sent the ACTION_APP_BLOCK_STATE_CHANGED broadcast, as soon as we get the
+            // callback from AppOpsManager.
         }
 
         /**
@@ -4030,8 +4028,8 @@ public class NotificationManagerService extends SystemService {
             }
             enforceDeletingChannelHasNoFgService(pkg, callingUser, channelId);
             enforceDeletingChannelHasNoUserInitiatedJob(pkg, callingUser, channelId);
-            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
-                    callingUser, REASON_CHANNEL_REMOVED, null);
+            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0,
+                    callingUser, REASON_CHANNEL_REMOVED);
             boolean previouslyExisted = mPreferencesHelper.deleteNotificationChannel(
                     pkg, callingUid, channelId, callingUid, isSystemOrSystemUi);
             if (previouslyExisted) {
@@ -4085,9 +4083,8 @@ public class NotificationManagerService extends SystemService {
                 for (int i = 0; i < deletedChannels.size(); i++) {
                     final NotificationChannel deletedChannel = deletedChannels.get(i);
                     cancelAllNotificationsInt(MY_UID, MY_PID, pkg, deletedChannel.getId(), 0, 0,
-                            true,
-                            userId, REASON_CHANNEL_REMOVED,
-                            null);
+                            userId, REASON_CHANNEL_REMOVED
+                    );
                     mListeners.notifyNotificationChannelChanged(pkg,
                             UserHandle.getUserHandleForUid(callingUid),
                             deletedChannel,
@@ -4256,8 +4253,8 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystem();
             // Cancel posted notifications
             final int userId = UserHandle.getUserId(uid);
-            cancelAllNotificationsInt(MY_UID, MY_PID, packageName, null, 0, 0, true,
-                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CLEAR_DATA, null);
+            cancelAllNotificationsInt(MY_UID, MY_PID, packageName, null, 0, 0,
+                    UserHandle.getUserId(Binder.getCallingUid()), REASON_CLEAR_DATA);
 
             // Zen
             packagesChanged |=
@@ -5892,6 +5889,21 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
+    private void handleNotificationPermissionChange(String pkg, @UserIdInt int userId) {
+        int uid = mPackageManagerInternal.getPackageUid(pkg, 0, userId);
+        if (uid == INVALID_UID) {
+            Log.e(TAG, String.format("No uid found for %s, %s!", pkg, userId));
+            return;
+        }
+        boolean hasPermission = mPermissionHelper.hasPermission(uid);
+        sendAppBlockStateChangedBroadcast(pkg, uid, !hasPermission);
+        if (!hasPermission) {
+            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, /* channelId= */ null,
+                    /* mustHaveFlags= */ 0, /* mustNotHaveFlags= */ 0, userId,
+                    REASON_PACKAGE_BANNED);
+        }
+    }
+
     protected void checkNotificationListenerAccess() {
         if (!isCallerSystemOrPhone()) {
             getContext().enforceCallingPermission(
@@ -6828,9 +6840,9 @@ public class NotificationManagerService extends SystemService {
                 mPreferencesHelper.deleteConversations(pkg, uid, shortcuts,
                         /* callingUid */ Process.SYSTEM_UID, /* is system */ true);
         for (String channelId : deletedChannelIds) {
-            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
-                    UserHandle.getUserId(uid), REASON_CHANNEL_REMOVED,
-                    null);
+            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0,
+                    UserHandle.getUserId(uid), REASON_CHANNEL_REMOVED
+            );
         }
         handleSavePolicyFile();
     }
@@ -9532,25 +9544,18 @@ public class NotificationManagerService extends SystemService {
 
     /**
      * Cancels all notifications from a given package that have all of the
-     * {@code mustHaveFlags}.
+     * {@code mustHaveFlags} and none of the {@code mustNotHaveFlags}.
      */
-    void cancelAllNotificationsInt(int callingUid, int callingPid, String pkg, String channelId,
-            int mustHaveFlags, int mustNotHaveFlags, boolean doit, int userId, int reason,
-            ManagedServiceInfo listener) {
+    void cancelAllNotificationsInt(int callingUid, int callingPid, String pkg,
+            @Nullable String channelId, int mustHaveFlags, int mustNotHaveFlags, int userId,
+            int reason) {
         final long cancellationElapsedTimeMs = SystemClock.elapsedRealtime();
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                String listenerName = listener == null ? null : listener.component.toShortString();
                 EventLogTags.writeNotificationCancelAll(callingUid, callingPid,
                         pkg, userId, mustHaveFlags, mustNotHaveFlags, reason,
-                        listenerName);
-
-                // Why does this parameter exist? Do we actually want to execute the above if doit
-                // is false?
-                if (!doit) {
-                    return;
-                }
+                        /* listener= */ null);
 
                 synchronized (mNotificationLock) {
                     FlagChecker flagChecker = (int flags) -> {
@@ -9562,14 +9567,15 @@ public class NotificationManagerService extends SystemService {
                         }
                         return true;
                     };
-                    cancelAllNotificationsByListLocked(mNotificationList, callingUid, callingPid,
-                            pkg, true /*nullPkgIndicatesUserSwitch*/, channelId, flagChecker,
+                    cancelAllNotificationsByListLocked(mNotificationList, pkg,
+                            true /*nullPkgIndicatesUserSwitch*/, channelId, flagChecker,
                             false /*includeCurrentProfiles*/, userId, false /*sendDelete*/, reason,
-                            listenerName, true /* wasPosted */, cancellationElapsedTimeMs);
-                    cancelAllNotificationsByListLocked(mEnqueuedNotifications, callingUid,
-                            callingPid, pkg, true /*nullPkgIndicatesUserSwitch*/, channelId,
-                            flagChecker, false /*includeCurrentProfiles*/, userId,
-                            false /*sendDelete*/, reason, listenerName, false /* wasPosted */,
+                            null /* listenerName */, true /* wasPosted */,
+                            cancellationElapsedTimeMs);
+                    cancelAllNotificationsByListLocked(mEnqueuedNotifications, pkg,
+                            true /*nullPkgIndicatesUserSwitch*/, channelId, flagChecker,
+                            false /*includeCurrentProfiles*/, userId, false /*sendDelete*/, reason,
+                            null /* listenerName */, false /* wasPosted */,
                             cancellationElapsedTimeMs);
                     mSnoozeHelper.cancel(userId, pkg);
                 }
@@ -9584,9 +9590,9 @@ public class NotificationManagerService extends SystemService {
 
     @GuardedBy("mNotificationLock")
     private void cancelAllNotificationsByListLocked(ArrayList<NotificationRecord> notificationList,
-            int callingUid, int callingPid, String pkg, boolean nullPkgIndicatesUserSwitch,
-            String channelId, FlagChecker flagChecker, boolean includeCurrentProfiles, int userId,
-            boolean sendDelete, int reason, String listenerName, boolean wasPosted,
+            @Nullable String pkg, boolean nullPkgIndicatesUserSwitch, @Nullable String channelId,
+            FlagChecker flagChecker, boolean includeCurrentProfiles, int userId, boolean sendDelete,
+            int reason, String listenerName, boolean wasPosted,
             @ElapsedRealtimeLong long cancellationElapsedTimeMs) {
         Set<String> childNotifications = null;
         for (int i = notificationList.size() - 1; i >= 0; --i) {
@@ -9703,12 +9709,12 @@ public class NotificationManagerService extends SystemService {
                         return true;
                     };
 
-                    cancelAllNotificationsByListLocked(mNotificationList, callingUid, callingPid,
+                    cancelAllNotificationsByListLocked(mNotificationList,
                             null, false /*nullPkgIndicatesUserSwitch*/, null, flagChecker,
                             includeCurrentProfiles, userId, true /*sendDelete*/, reason,
                             listenerName, true, cancellationElapsedTimeMs);
-                    cancelAllNotificationsByListLocked(mEnqueuedNotifications, callingUid,
-                            callingPid, null, false /*nullPkgIndicatesUserSwitch*/, null,
+                    cancelAllNotificationsByListLocked(mEnqueuedNotifications,
+                            null, false /*nullPkgIndicatesUserSwitch*/, null,
                             flagChecker, includeCurrentProfiles, userId, true /*sendDelete*/,
                             reason, listenerName, false, cancellationElapsedTimeMs);
                     mSnoozeHelper.cancel(userId, includeCurrentProfiles);
