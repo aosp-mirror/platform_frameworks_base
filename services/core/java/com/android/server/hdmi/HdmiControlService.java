@@ -4855,11 +4855,13 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void handleEarcStateChange(int status, int portId) {
         assertRunOnServiceThread();
+        int oldEarcStatus = getEarcStatus();
         if (!getPortInfo(portId).isEarcSupported()) {
             Slog.w(TAG, "Tried to update eARC status on a port that doesn't support eARC.");
+            getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(), oldEarcStatus,
+                    status, HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED_UNSUPPORTED_PORT);
             return;
         }
-        int oldEarcStatus = getEarcStatus();
         if (mEarcLocalDevice != null) {
             mEarcLocalDevice.handleEarcStateChange(status);
             getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(),
@@ -4872,6 +4874,10 @@ public class HdmiControlService extends SystemService {
             startArcAction(true, null);
             getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(),
                     oldEarcStatus, status, HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED);
+        } else {
+            getAtomWriter().earcStatusChanged(isEarcSupported(), isEarcEnabled(),
+                    oldEarcStatus, status,
+                    HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED_WRONG_STATE);
         }
     }
 
