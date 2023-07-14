@@ -21,8 +21,6 @@ import static com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.ST
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import com.android.systemui.scene.ui.view.WindowRootView;
-import com.android.systemui.shade.NotificationShadeWindowView;
-import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeHeaderController;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -75,16 +73,6 @@ public interface CentralSurfacesComponent {
 
     /** Creates the root view of the main SysUI window}. */
     WindowRootView getWindowRootView();
-
-    /**
-     * Creates or returns a {@link NotificationShadeWindowView}.
-     */
-    NotificationShadeWindowView getNotificationShadeWindowView();
-
-    /**
-     * Creates a NotificationShadeWindowViewController.
-     */
-    NotificationShadeWindowViewController getNotificationShadeWindowViewController();
 
     /**
      * Creates a StatusBarHeadsUpChangeListener.
