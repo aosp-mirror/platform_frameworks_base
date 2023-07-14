@@ -2312,6 +2312,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Impossibile accedere alla fotocamera del telefono dal tuo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Impossibile accedere alla fotocamera del tablet dal tuo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Impossibile accedere a questi contenuti durante lo streaming. Prova a usare il telefono."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Impossibile visualizzare Picture in picture durante lo streaming"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predefinita di sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"SCHEDA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Autorizzazione per il profilo degli smartwatch complementari per gestire gli smartwatch"</string>
