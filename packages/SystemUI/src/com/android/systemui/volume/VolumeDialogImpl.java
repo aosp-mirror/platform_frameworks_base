@@ -1333,21 +1333,30 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
         if (!isServiceComponentEnabled) return;
 
-        updateCaptionsIcon();
+        checkEnabledStateForCaptionsIconUpdate();
         if (fromTooltip) showCaptionsTooltip();
     }
 
-    private void updateCaptionsIcon() {
-        boolean captionsEnabled = mController.areCaptionsEnabled();
-        if (mODICaptionsIcon.getCaptionsEnabled() != captionsEnabled) {
-            mHandler.post(mODICaptionsIcon.setCaptionsEnabled(captionsEnabled));
+    private void updateCaptionsEnabledH(boolean isCaptionsEnabled, boolean checkForSwitchState) {
+        if (checkForSwitchState) {
+            mController.setCaptionsEnabledState(!isCaptionsEnabled);
+        } else {
+            updateCaptionsIcon(isCaptionsEnabled);
+        }
+    }
+
+    private void checkEnabledStateForCaptionsIconUpdate() {
+        mController.getCaptionsEnabledState(false);
+    }
+
+    private void updateCaptionsIcon(boolean isCaptionsEnabled) {
+        if (mODICaptionsIcon.getCaptionsEnabled() != isCaptionsEnabled) {
+            mHandler.post(mODICaptionsIcon.setCaptionsEnabled(isCaptionsEnabled));
         }
     }
 
     private void onCaptionIconClicked() {
-        boolean isEnabled = mController.areCaptionsEnabled();
-        mController.setCaptionsEnabled(!isEnabled);
-        updateCaptionsIcon();
+        mController.getCaptionsEnabledState(true);
     }
 
     private void incrementManualToggleCount() {
@@ -2363,13 +2372,17 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             } else {
                 updateRowsH(activeRow);
             }
-
         }
 
         @Override
         public void onCaptionComponentStateChanged(
                 Boolean isComponentEnabled, Boolean fromTooltip) {
             updateODICaptionsH(isComponentEnabled, fromTooltip);
+        }
+
+        @Override
+        public void onCaptionEnabledStateChanged(Boolean isEnabled, Boolean checkForSwitchState) {
+            updateCaptionsEnabledH(isEnabled, checkForSwitchState);
         }
     };
 
