@@ -1081,7 +1081,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             float userBrightness = BrightnessMappingStrategy.NO_USER_BRIGHTNESS;
             if (userNits >= 0) {
                 userBrightness = mInteractiveModeBrightnessMapper.convertToFloatScale(userNits);
-                if (userBrightness == PowerManager.BRIGHTNESS_INVALID_FLOAT) {
+                if (Float.isNaN(userBrightness)) {
                     userBrightness = BrightnessMappingStrategy.NO_USER_BRIGHTNESS;
                 }
             }

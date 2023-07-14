@@ -5122,13 +5122,18 @@
          a threshold.
          For example, no higher refresh rate if
              display brightness <= disp0 && ambient brightness <= amb0
-             || display brightness <= disp1 && ambient brightness <= amb1 -->
+             || display brightness <= disp1 && ambient brightness <= amb1
+         Brightness thresholds are paired with lux thresholds - they both have to be met.
+         A negative brightness or lux value means that only one threshold should be used - e.g. if
+         the brightness value is negative, only the lux threshold is applied. -->
+    <!-- Low zone brightness thresholds in the range [0, 255] -->
     <integer-array translatable="false" name="config_brightnessThresholdsOfPeakRefreshRate">
          <!--
            <item>disp0</item>
            <item>disp1</item>
         -->
     </integer-array>
+    <!-- Low zone lux thresholds -->
     <integer-array translatable="false" name="config_ambientThresholdsOfPeakRefreshRate">
          <!--
            <item>amb0</item>
@@ -5149,14 +5154,18 @@
          may have lower display brightness requirements for the flickering is visible.
          For example, fixed refresh rate if
              display brightness >= disp0 && ambient brightness >= amb0
-             || display brightness >= disp1 && ambient brightness >= amb1 -->
+             || display brightness >= disp1 && ambient brightness >= amb1
+         Brightness thresholds are paired with lux thresholds - they both have to be met.
+         A negative brightness or lux value means that only one threshold should be used - e.g. if
+         the brightness value is negative, only the lux threshold is applied. -->
+    <!-- High zone brightness thresholds in the range [0, 255] -->
     <integer-array translatable="false" name="config_highDisplayBrightnessThresholdsOfFixedRefreshRate">
          <!--
            <item>disp0</item>
            <item>disp1</item>
         -->
     </integer-array>
-
+    <!-- High zone lux thresholds -->
     <integer-array translatable="false" name="config_highAmbientBrightnessThresholdsOfFixedRefreshRate">
          <!--
            <item>amb0</item>
