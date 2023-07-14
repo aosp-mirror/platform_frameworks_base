@@ -26,7 +26,6 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
-import android.platform.test.annotations.Presubmit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,13 +35,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
-/**
- * Tests for {@link RampToStepAdapter}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:RampToStepAdapterTest
- */
-@Presubmit
 public class RampToStepAdapterTest {
     private static final int TEST_STEP_DURATION = 5;
     private static final float[] TEST_AMPLITUDE_MAP = new float[]{

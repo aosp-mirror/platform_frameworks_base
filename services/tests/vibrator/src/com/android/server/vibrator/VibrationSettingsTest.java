@@ -70,7 +70,6 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.test.TestLooper;
 import android.os.vibrator.VibrationConfig;
-import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.view.Display;
@@ -94,13 +93,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Tests for {@link VibrationSettings}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:VibrationSettingsTest
- */
-@Presubmit
 public class VibrationSettingsTest {
 
     private static final int UID = 1;

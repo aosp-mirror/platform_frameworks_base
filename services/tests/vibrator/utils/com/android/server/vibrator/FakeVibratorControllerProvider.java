@@ -37,10 +37,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Provides {@link VibratorController} with controlled vibrator hardware capabilities and
- * interactions.
+ * Provides {@link VibratorController} with configurable vibrator hardware capabilities and
+ * fake interactions for tests.
  */
-final class FakeVibratorControllerProvider {
+public final class FakeVibratorControllerProvider {
     private static final int EFFECT_DURATION = 20;
 
     private final Map<Long, PrebakedSegment> mEnabledAlwaysOnEffects = new HashMap<>();

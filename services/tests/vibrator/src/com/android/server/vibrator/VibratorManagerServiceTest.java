@@ -70,13 +70,13 @@ import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorInfo;
+import android.os.test.FakeVibrator;
 import android.os.test.TestLooper;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
-import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.SparseBooleanArray;
@@ -111,13 +111,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-/**
- * Tests for {@link VibratorManagerService}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:VibratorManagerServiceTest
- */
-@Presubmit
 public class VibratorManagerServiceTest {
 
     private static final int TEST_TIMEOUT_MILLIS = 1_000;

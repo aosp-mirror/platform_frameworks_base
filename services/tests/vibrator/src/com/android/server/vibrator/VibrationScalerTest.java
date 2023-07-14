@@ -48,7 +48,6 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
-import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
@@ -65,13 +64,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-/**
- * Tests for {@link VibrationScaler}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:VibrationScalerTest
- */
-@Presubmit
 public class VibrationScalerTest {
 
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();

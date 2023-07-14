@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.os.Handler;
 import android.os.test.TestLooper;
-import android.platform.test.annotations.Presubmit;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,13 +28,6 @@ import org.junit.Test;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-/**
- * Tests for {@link VibratorFrameworkStatsLogger}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:VibratorFrameworkStatsLoggerTest
- */
-@Presubmit
 public class VibratorFrameworkStatsLoggerTest {
 
     @Rule public MockitoRule rule = MockitoJUnit.rule();

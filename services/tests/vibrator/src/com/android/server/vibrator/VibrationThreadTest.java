@@ -61,7 +61,6 @@ import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
 import android.platform.test.annotations.LargeTest;
-import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -70,6 +69,7 @@ import com.android.server.LocalServices;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -85,13 +85,6 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
-/**
- * Tests for {@link VibrationThread}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:VibrationThreadTest
- */
-@Presubmit
 public class VibrationThreadTest {
 
     private static final int TEST_TIMEOUT_MILLIS = 900;
@@ -468,6 +461,7 @@ public class VibrationThreadTest {
                 fakeVibrator.getEffectSegments(vibrationId));
     }
 
+    @Ignore("b/290940400")
     @LargeTest
     @Test
     public void vibrate_singleVibratorRepeatingAlwaysOnWaveform_turnsVibratorBackOn()

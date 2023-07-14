@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.vibrator;
+package android.os.test;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -23,9 +23,9 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 
 /** Fake implementation of {@link Vibrator} for service tests. */
-final class FakeVibrator extends Vibrator {
+public final class FakeVibrator extends Vibrator {
 
-    FakeVibrator(Context context) {
+    public FakeVibrator(Context context) {
         super(context);
     }
 

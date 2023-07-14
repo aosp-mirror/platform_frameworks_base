@@ -20,19 +20,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static java.util.stream.Collectors.toList;
 
-import android.platform.test.annotations.Presubmit;
-
 import org.junit.Test;
 
 import java.util.Arrays;
 
-/**
- * Tests for {@link Vibration}.
- *
- * Build/Install/Run:
- * atest FrameworksServicesTests:VibrationTest
- */
-@Presubmit
 public class VibrationTest {
 
     @Test
