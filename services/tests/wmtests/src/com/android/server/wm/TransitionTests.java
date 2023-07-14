@@ -1474,6 +1474,47 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testIsTransientVisible() {
+        final ActivityRecord appB = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setVisible(false).build();
+        final ActivityRecord recent = new ActivityBuilder(mAtm).setCreateTask(true)
+                .setVisible(false).build();
+        final ActivityRecord appA = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task taskA = appA.getTask();
+        final Task taskB = appB.getTask();
+        final Task taskRecent = recent.getTask();
+        registerTestTransitionPlayer();
+        final TransitionController controller = mRootWindowContainer.mTransitionController;
+        final Transition transition = createTestTransition(TRANSIT_OPEN, controller);
+        controller.moveToCollecting(transition);
+        transition.collect(recent);
+        transition.collect(taskA);
+        transition.setTransientLaunch(recent, taskA);
+        taskRecent.moveToFront("move-recent-to-front");
+
+        // During collecting and playing, the recent is on top so it is visible naturally.
+        // While B needs isTransientVisible to keep visibility because it is occluded by recents.
+        assertFalse(controller.isTransientVisible(taskB));
+        assertTrue(controller.isTransientVisible(taskA));
+        assertFalse(controller.isTransientVisible(taskRecent));
+        // Switch to playing state.
+        transition.onTransactionReady(transition.getSyncId(), mMockT);
+        assertTrue(controller.isTransientVisible(taskA));
+
+        // Switch to another task. For example, use gesture navigation to switch tasks.
+        taskB.moveToFront("move-b-to-front");
+        // The previous app (taskA) should be paused first so it loses transient visible. Because
+        // visually it is taskA -> taskB, the pause -> resume order should be the same.
+        assertFalse(controller.isTransientVisible(taskA));
+        // Keep the recent visible so there won't be 2 activities pausing at the same time. It is
+        // to avoid the latency to resume the current top, i.e. appB.
+        assertTrue(controller.isTransientVisible(taskRecent));
+        // The recent is paused after the transient transition is finished.
+        controller.finishTransition(transition);
+        assertFalse(controller.isTransientVisible(taskRecent));
+    }
+
+    @Test
     public void testNotReadyPushPop() {
         final TransitionController controller = new TestTransitionController(mAtm);
         controller.setSyncEngine(mWm.mSyncEngine);

@@ -468,11 +468,18 @@ class TransitionController {
         if (mCollectingTransition != null && mCollectingTransition.isInTransientHide(task)) {
             return true;
         }
-        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
-            if (mWaitingTransitions.get(i).isInTransientHide(task)) return true;
-        }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             if (mPlayingTransitions.get(i).isInTransientHide(task)) return true;
+        }
+        return false;
+    }
+
+    boolean isTransientVisible(@NonNull Task task) {
+        if (mCollectingTransition != null && mCollectingTransition.isTransientVisible(task)) {
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (mPlayingTransitions.get(i).isTransientVisible(task)) return true;
         }
         return false;
     }

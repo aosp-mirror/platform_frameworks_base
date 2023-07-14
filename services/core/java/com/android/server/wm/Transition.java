@@ -407,6 +407,36 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return false;
     }
 
+    /** Returns {@code true} if the task should keep visible if this is a transient transition. */
+    boolean isTransientVisible(@NonNull Task task) {
+        if (mTransientLaunches == null) return false;
+        int occludedCount = 0;
+        final int numTransient = mTransientLaunches.size();
+        for (int i = numTransient - 1; i >= 0; --i) {
+            final Task transientRoot = mTransientLaunches.keyAt(i).getRootTask();
+            if (transientRoot == null) continue;
+            final WindowContainer<?> rootParent = transientRoot.getParent();
+            if (rootParent == null || rootParent.getTopChild() == transientRoot) continue;
+            final ActivityRecord topOpaque = mController.mAtm.mTaskSupervisor
+                    .mOpaqueActivityHelper.getOpaqueActivity(rootParent);
+            if (transientRoot.compareTo(topOpaque.getRootTask()) < 0) {
+                occludedCount++;
+            }
+        }
+        if (occludedCount == numTransient) {
+            for (int i = mTransientLaunches.size() - 1; i >= 0; --i) {
+                if (mTransientLaunches.keyAt(i).isDescendantOf(task)) {
+                    // Keep transient activity visible until transition finished, so it won't pause
+                    // with transient-hide tasks that may delay resuming the next top.
+                    return true;
+                }
+            }
+            // Let transient-hide activities pause before transition is finished.
+            return false;
+        }
+        return isInTransientHide(task);
+    }
+
     boolean canApplyDim(@NonNull Task task) {
         if (mTransientLaunches == null) return true;
         final Dimmer dimmer = task.getDimmer();
