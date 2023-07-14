@@ -17,7 +17,7 @@
 package com.android.inputmethod.stresstest;
 
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.REQUEST_FOCUS_ON_CREATE;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.TestActivity.createIntent;
@@ -75,14 +75,17 @@ public final class DefaultImeVisibilityTest {
     public void showHideDefaultIme() {
         Intent intent =
                 createIntent(
-                        0x0, /* No window focus flags */
-                        SOFT_INPUT_STATE_UNSPECIFIED | SOFT_INPUT_ADJUST_RESIZE,
+                        0x0 /* No window focus flags */,
+                        SOFT_INPUT_STATE_HIDDEN | SOFT_INPUT_ADJUST_RESIZE,
                         Collections.singletonList(REQUEST_FOCUS_ON_CREATE));
         ImeStressTestUtil.TestActivity activity = ImeStressTestUtil.TestActivity.start(intent);
         EditText editText = activity.getEditText();
         for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
-            callOnMainSync(activity::showImeWithInputMethodManager);
+            // TODO(b/291752364): Remove the explicit focus request once the issue with view focus
+            //  change between fullscreen IME and actual editText is fixed.
+            callOnMainSync(editText::requestFocus);
             verifyWindowAndViewFocus(editText, true, true);
+            callOnMainSync(activity::showImeWithInputMethodManager);
             waitOnMainUntilImeIsShown(editText);
 
             callOnMainSync(activity::hideImeWithInputMethodManager);
