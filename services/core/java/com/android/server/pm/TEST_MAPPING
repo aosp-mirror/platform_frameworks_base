@@ -90,7 +90,7 @@
       ]
     },
     {
-      "name": "CtsAppSecurityHostTestCases",
+      "name": "CtsInstantAppsHostTestCases",
       "file_patterns": ["(/|^)PackageMonitorCallbackHelper\\.java"],
       "options": [
         {
@@ -125,7 +125,7 @@
       ]
     },
     {
-      "name": "CtsAppSecurityHostTestCases"
+      "name": "CtsPackageManagerHostTestCases"
     },
     {
       "name": "PackageManagerServiceHostTests"
