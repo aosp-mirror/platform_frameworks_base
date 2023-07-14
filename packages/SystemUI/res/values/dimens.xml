@@ -663,9 +663,6 @@
 
     <dimen name="restricted_padlock_pading">4dp</dimen>
 
-    <!-- How far the expanded QS panel peeks from the header in collapsed state. -->
-    <dimen name="qs_peek_height">0dp</dimen>
-
     <!-- Padding between subtitles and the following text in the QSFooter dialog -->
     <dimen name="qs_footer_dialog_subtitle_padding">20dp</dimen>
 
