@@ -496,16 +496,6 @@ public abstract class InfoMediaManager extends MediaManager {
         return info.getName();
     }
 
-    boolean shouldDisableMediaOutput(String packageName) {
-        if (TextUtils.isEmpty(packageName)) {
-            Log.w(TAG, "shouldDisableMediaOutput() package name is null or empty!");
-            return true;
-        }
-
-        // Disable when there is no transferable route
-        return getTransferableRoutes(packageName).isEmpty();
-    }
-
     @TargetApi(Build.VERSION_CODES.R)
     boolean shouldEnableVolumeSeekBar(RoutingSessionInfo sessionInfo) {
         return sessionInfo.isSystemSession() // System sessions are not remote
