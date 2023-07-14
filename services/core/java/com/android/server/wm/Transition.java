@@ -1191,16 +1191,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 hasParticipatedDisplay = true;
                 continue;
             }
-            final WallpaperWindowToken wt = participant.asWallpaperToken();
-            if (wt != null) {
-                final boolean visibleAtTransitionEnd = mVisibleAtTransitionEndTokens.contains(wt);
-                if (!visibleAtTransitionEnd && !wt.isVisibleRequested()) {
-                    ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                            "  Commit wallpaper becoming invisible: %s", wt);
-                    wt.commitVisibility(false /* visible */);
-                }
-                continue;
-            }
             final Task tr = participant.asTask();
             if (tr != null && tr.isVisibleRequested() && tr.inPinnedWindowingMode()) {
                 final ActivityRecord top = tr.getTopNonFinishingActivity();
@@ -1218,6 +1208,20 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         tr.abortPipEnter(currTop);
                     });
                 }
+            }
+        }
+        // Commit wallpaper visibility after activity, because usually the wallpaper target token is
+        // an activity, and wallpaper's visibility is depends on activity's visibility.
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
+            if (wt == null) continue;
+            final WindowState target = wt.mDisplayContent.mWallpaperController.getWallpaperTarget();
+            final boolean isTargetInvisible = target == null || !target.mToken.isVisible();
+            if (isTargetInvisible || (!wt.isVisibleRequested()
+                    && !mVisibleAtTransitionEndTokens.contains(wt))) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "  Commit wallpaper becoming invisible: %s", wt);
+                wt.commitVisibility(false /* visible */);
             }
         }
         if (committedSomeInvisible) {

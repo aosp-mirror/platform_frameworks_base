@@ -5672,13 +5672,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final DisplayContent displayContent = getDisplayContent();
         if (!visible) {
             mImeInsetsFrozenUntilStartInput = true;
-            if (usingShellTransitions) {
-                final WindowState wallpaperTarget =
-                        displayContent.mWallpaperController.getWallpaperTarget();
-                if (wallpaperTarget != null && wallpaperTarget.mActivityRecord == this) {
-                    displayContent.mWallpaperController.hideWallpapers(wallpaperTarget);
-                }
-            }
         }
 
         if (!displayContent.mClosingApps.contains(this)
