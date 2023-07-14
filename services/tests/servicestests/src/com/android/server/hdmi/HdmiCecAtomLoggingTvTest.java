@@ -19,7 +19,9 @@ import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_EARC_PENDING;
 import static com.android.server.hdmi.Constants.HDMI_EARC_STATUS_UNKNOWN;
 import static com.android.server.hdmi.HdmiControlService.WAKE_UP_SCREEN_ON;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -205,5 +207,46 @@ public class HdmiCecAtomLoggingTvTest {
         verify(mHdmiCecAtomWriterSpy, times(1))
                 .earcStatusChanged(false, false, HDMI_EARC_STATUS_UNKNOWN,
                         HDMI_EARC_STATUS_UNKNOWN, HdmiStatsEnums.LOG_REASON_WAKE);
+    }
+
+    @Test
+    public void testEarcStatusChanged_handleEarcStateChange_unSupportedPort_writesAtom() {
+        // Initialize HDMI port with eARC not supported.
+        HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
+        hdmiPortInfos[0] =
+                new HdmiPortInfo.Builder(EARC_PORT_ID, HdmiPortInfo.PORT_OUTPUT, 0x0000)
+                        .setCecSupported(true)
+                        .setMhlSupported(false)
+                        .setArcSupported(false)
+                        .setEarcSupported(false)
+                        .build();
+        mNativeWrapper.setPortInfo(hdmiPortInfos);
+        mNativeWrapper.setPortConnectionStatus(EARC_PORT_ID, true);
+        mHdmiControlServiceSpy.initService();
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiCecAtomWriterSpy);
+
+        mHdmiControlServiceSpy.handleEarcStateChange(HDMI_EARC_STATUS_EARC_PENDING, EARC_PORT_ID);
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .earcStatusChanged(eq(false), eq(true), anyInt(),
+                        eq(HDMI_EARC_STATUS_EARC_PENDING),
+                        eq(HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED_UNSUPPORTED_PORT));
+    }
+
+    @Test
+    public void testEarcStatusChanged_handleEarcStateChange_wrongState_writesAtom() {
+        mHdmiControlServiceSpy.setEarcEnabled(HdmiControlManager.EARC_FEATURE_DISABLED);
+        mTestLooper.dispatchAll();
+        Mockito.clearInvocations(mHdmiCecAtomWriterSpy);
+
+        // mEarcLocalDevice should be empty since eARC is disabled.
+        mHdmiControlServiceSpy.handleEarcStateChange(HDMI_EARC_STATUS_EARC_PENDING, EARC_PORT_ID);
+        verify(mHdmiCecAtomWriterSpy, times(1))
+                .earcStatusChanged(eq(true), eq(false), anyInt(),
+                        eq(HDMI_EARC_STATUS_EARC_PENDING),
+                        eq(HdmiStatsEnums.LOG_REASON_EARC_STATUS_CHANGED_WRONG_STATE));
     }
 }
