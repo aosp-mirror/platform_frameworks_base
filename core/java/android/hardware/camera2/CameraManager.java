@@ -130,14 +130,17 @@ public final class CameraManager {
     /**
      * Enable physical camera availability callbacks when the logical camera is unavailable
      *
-     * <p>Previously once a logical camera becomes unavailable, no {@link
-     * #onPhysicalCameraAvailable} or {@link #onPhysicalCameraUnavailable} will be called until
-     * the logical camera becomes available again. The results in the app opening the logical
-     * camera not able to receive physical camera availability change.</p>
+     * <p>Previously once a logical camera becomes unavailable, no
+     * {@link AvailabilityCallback#onPhysicalCameraAvailable} or
+     * {@link AvailabilityCallback#onPhysicalCameraUnavailable} will
+     * be called until the logical camera becomes available again. The
+     * results in the app opening the logical camera not able to
+     * receive physical camera availability change.</p>
      *
-     * <p>With this change, the {@link #onPhysicalCameraAvailable} and {@link
-     * #onPhysicalCameraUnavailable} can still be called while the logical camera is unavailable.
-     * </p>
+     * <p>With this change, the {@link
+     * AvailabilityCallback#onPhysicalCameraAvailable} and {@link
+     * AvailabilityCallback#onPhysicalCameraUnavailable} can still be
+     * called while the logical camera is unavailable.  </p>
      */
     @ChangeId
     @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
