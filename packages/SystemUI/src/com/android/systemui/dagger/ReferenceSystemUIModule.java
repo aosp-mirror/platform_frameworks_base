@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerIm
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.volume.dagger.VolumeModule;
+import com.android.systemui.wallpapers.dagger.WallpaperModule;
 
 import dagger.Binds;
 import dagger.Module;
@@ -106,6 +107,7 @@ import javax.inject.Named;
         StatusBarEventsModule.class,
         StartCentralSurfacesModule.class,
         VolumeModule.class,
+        WallpaperModule.class,
         KeyboardShortcutsModule.class
 })
 public abstract class ReferenceSystemUIModule {

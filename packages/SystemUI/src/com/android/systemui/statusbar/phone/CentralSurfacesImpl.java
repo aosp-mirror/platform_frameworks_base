@@ -3550,6 +3550,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     };
 
+    /**
+     * @deprecated See {@link com.android.systemui.wallpapers.data.repository.WallpaperRepository}
+     * instead.
+     */
     private final BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -3569,7 +3573,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     && (info != null && info.supportsAmbientMode());
 
             mNotificationShadeWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
-            mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mKeyguardViewMediator.setWallpaperSupportsAmbientMode(supportsAmbientMode);
         }
     };
