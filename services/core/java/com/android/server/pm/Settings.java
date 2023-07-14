@@ -107,6 +107,7 @@ import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -153,6 +154,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -316,6 +318,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final String TAG_SUSPEND_PARAMS = "suspend-params";
     private static final String TAG_MIME_GROUP = "mime-group";
     private static final String TAG_MIME_TYPE = "mime-type";
+    private static final String TAG_ARCHIVE_STATE = "archive-state";
+    private static final String TAG_ARCHIVE_ACTIVITY_INFO = "archive-activity-info";
 
     public static final String ATTR_NAME = "name";
     public static final String ATTR_PACKAGE = "package";
@@ -362,6 +366,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final String ATTR_DATABASE_VERSION = "databaseVersion";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_FIRST_INSTALL_TIME = "first-install-time";
+    private static final String ATTR_ARCHIVE_ACTIVITY_TITLE = "activity-title";
+    private static final String ATTR_ARCHIVE_INSTALLER_TITLE = "installer-title";
+    private static final String ATTR_ARCHIVE_ICON_PATH = "icon-path";
+    private static final String ATTR_ARCHIVE_MONOCHROME_ICON_PATH = "monochrome-icon-path";
 
     private final Handler mHandler;
 
@@ -1131,7 +1139,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 null /*harmfulAppWarning*/,
                                 null /*splashscreenTheme*/,
                                 0 /*firstInstallTime*/,
-                                PackageManager.USER_MIN_ASPECT_RATIO_UNSET
+                                PackageManager.USER_MIN_ASPECT_RATIO_UNSET,
+                                null /*archiveState*/
                         );
                     }
                 }
@@ -1807,7 +1816,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                     null /*harmfulAppWarning*/,
                                     null /* splashScreenTheme*/,
                                     0 /*firstInstallTime*/,
-                                    PackageManager.USER_MIN_ASPECT_RATIO_UNSET
+                                    PackageManager.USER_MIN_ASPECT_RATIO_UNSET,
+                                    null /*archiveState*/
                             );
                         }
                         return;
@@ -1911,6 +1921,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         PersistableBundle suspendedAppExtras = null;
                         PersistableBundle suspendedLauncherExtras = null;
                         SuspendDialogInfo oldSuspendDialogInfo = null;
+                        ArchiveState archiveState = null;
 
                         int packageDepth = parser.getDepth();
                         ArrayMap<String, SuspendParams> suspendParamsMap = null;
@@ -1952,6 +1963,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                     suspendParamsMap.put(suspendingPackage,
                                             SuspendParams.restoreFromXml(parser));
                                     break;
+                                case TAG_ARCHIVE_STATE:
+                                    archiveState = parseArchiveState(parser);
+                                    break;
                                 default:
                                     Slog.wtf(TAG, "Unknown tag " + parser.getName() + " under tag "
                                             + TAG_PACKAGE);
@@ -1982,7 +1996,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 uninstallReason, harmfulAppWarning, splashScreenTheme,
                                 firstInstallTime != 0 ? firstInstallTime :
                                         origFirstInstallTimes.getOrDefault(name, 0L),
-                                minAspectRatio);
+                                minAspectRatio, archiveState);
 
                         mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
                     } else if (tagName.equals("preferred-activities")) {
@@ -2009,6 +2023,64 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 readPackageRestrictionsLPr(userId, origFirstInstallTimes);
             }
         }
+    }
+
+    private static ArchiveState parseArchiveState(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        String installerTitle = parser.getAttributeValue(null,
+                ATTR_ARCHIVE_INSTALLER_TITLE);
+        List<ArchiveState.ArchiveActivityInfo> activityInfos =
+                parseArchiveActivityInfos(parser);
+
+        if (installerTitle == null) {
+            Slog.wtf(TAG, "parseArchiveState: installerTitle is null");
+            return null;
+        }
+
+        if (activityInfos.size() < 1) {
+            Slog.wtf(TAG, "parseArchiveState: activityInfos is empty");
+            return null;
+        }
+
+        return new ArchiveState(activityInfos, installerTitle);
+    }
+
+    private static List<ArchiveState.ArchiveActivityInfo> parseArchiveActivityInfos(
+            TypedXmlPullParser parser) throws XmlPullParserException, IOException {
+        List<ArchiveState.ArchiveActivityInfo> activityInfos = new ArrayList<>();
+        int type;
+        int outerDepth = parser.getDepth();
+        String tagName;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG
+                || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG
+                    || type == XmlPullParser.TEXT) {
+                continue;
+            }
+            tagName = parser.getName();
+            if (tagName.equals(TAG_ARCHIVE_ACTIVITY_INFO)) {
+                String title = parser.getAttributeValue(null,
+                        ATTR_ARCHIVE_ACTIVITY_TITLE);
+                Path iconPath = Path.of(parser.getAttributeValue(null,
+                        ATTR_ARCHIVE_ICON_PATH));
+                Path monochromeIconPath = Path.of(parser.getAttributeValue(null,
+                        ATTR_ARCHIVE_MONOCHROME_ICON_PATH));
+
+                if (title == null || iconPath == null) {
+                    Slog.wtf(TAG,
+                            TextUtils.formatSimple("Missing attributes in tag %s. %s: %s, %s: %s",
+                                    TAG_ARCHIVE_ACTIVITY_INFO, ATTR_ARCHIVE_ACTIVITY_TITLE, title,
+                                    ATTR_ARCHIVE_ICON_PATH,
+                                    iconPath));
+                    continue;
+                }
+
+                activityInfos.add(
+                        new ArchiveState.ArchiveActivityInfo(title, iconPath, monochromeIconPath));
+            }
+        }
+        return activityInfos;
     }
 
     void setBlockUninstallLPw(int userId, String packageName, boolean blockUninstall) {
@@ -2323,6 +2395,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                             }
                             serializer.endTag(null, TAG_DISABLED_COMPONENTS);
                         }
+                        writeArchiveStateLPr(serializer, ustate.getArchiveState());
 
                         serializer.endTag(null, TAG_PACKAGE);
                     }
@@ -2359,6 +2432,28 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 }
             }
         }
+    }
+
+    private void writeArchiveStateLPr(TypedXmlSerializer serializer, ArchiveState archiveState)
+            throws IOException {
+        if (archiveState == null) {
+            return;
+        }
+
+        serializer.startTag(null, TAG_ARCHIVE_STATE);
+        serializer.attribute(null, ATTR_ARCHIVE_INSTALLER_TITLE, archiveState.getInstallerTitle());
+        for (ArchiveState.ArchiveActivityInfo activityInfo : archiveState.getActivityInfos()) {
+            serializer.startTag(null, TAG_ARCHIVE_ACTIVITY_INFO);
+            serializer.attribute(null, ATTR_ARCHIVE_ACTIVITY_TITLE, activityInfo.getTitle());
+            serializer.attribute(null, ATTR_ARCHIVE_ICON_PATH,
+                    activityInfo.getIconBitmap().toAbsolutePath().toString());
+            if (activityInfo.getMonochromeIconBitmap() != null) {
+                serializer.attribute(null, ATTR_ARCHIVE_MONOCHROME_ICON_PATH,
+                        activityInfo.getMonochromeIconBitmap().toAbsolutePath().toString());
+            }
+            serializer.endTag(null, TAG_ARCHIVE_ACTIVITY_INFO);
+        }
+        serializer.endTag(null, TAG_ARCHIVE_STATE);
     }
 
     void readInstallPermissionsLPr(TypedXmlPullParser parser,
@@ -5202,6 +5297,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         pw.print(prefix); pw.print("      "); pw.println(cmp.valueAt(i));
                     }
                 }
+            }
+            ArchiveState archiveState = userState.getArchiveState();
+            if (archiveState != null) {
+                pw.print(archiveState.toString());
             }
         }
     }

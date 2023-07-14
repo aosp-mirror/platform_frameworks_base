@@ -225,4 +225,12 @@ public interface PackageUserState {
      */
     @PackageManager.UserMinAspectRatio
     int getMinAspectRatio();
+    /**
+     * Information about the archived state of an app. Set only if an app is archived.
+     *
+     * @hide
+     */
+    @Immutable.Ignore
+    @Nullable
+    ArchiveState getArchiveState();
 }

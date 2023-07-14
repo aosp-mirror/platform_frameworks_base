@@ -35,6 +35,7 @@ import android.util.ArraySet;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.PackageStateUnserialized;
 import com.android.server.pm.pkg.PackageUserStateImpl;
 import com.android.server.pm.pkg.SuspendParams;
@@ -43,6 +44,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+
+import java.nio.file.Path;
+import java.util.List;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -394,4 +398,14 @@ public class PackageUserStateTest {
         assertFalse(testState.setSharedLibraryOverlayPaths(LIB_ONE, null));
     }
 
+    @Test
+    public void archiveState() {
+        PackageUserStateImpl packageUserState = new PackageUserStateImpl();
+        ArchiveState.ArchiveActivityInfo archiveActivityInfo = new ArchiveState.ArchiveActivityInfo(
+                "appTitle", Path.of("/path1"), Path.of("/path2"));
+        ArchiveState archiveState = new ArchiveState(List.of(archiveActivityInfo),
+                "installerTitle");
+        packageUserState.setArchiveState(archiveState);
+        assertEquals(archiveState, packageUserState.getArchiveState());
+    }
 }
