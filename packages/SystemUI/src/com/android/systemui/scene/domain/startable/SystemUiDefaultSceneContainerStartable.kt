@@ -77,7 +77,7 @@ constructor(
             authenticationInteractor.isUnlocked
                 .map { isUnlocked ->
                     val currentSceneKey = sceneInteractor.currentScene(CONTAINER_NAME).value.key
-                    val isBypassEnabled = authenticationInteractor.isBypassEnabled.value
+                    val isBypassEnabled = authenticationInteractor.isBypassEnabled()
                     when {
                         isUnlocked ->
                             when (currentSceneKey) {

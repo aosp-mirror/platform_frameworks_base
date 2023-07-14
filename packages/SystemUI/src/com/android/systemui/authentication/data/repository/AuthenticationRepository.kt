@@ -64,14 +64,6 @@ interface AuthenticationRepository {
     val isUnlocked: StateFlow<Boolean>
 
     /**
-     * Whether lock screen bypass is enabled. When enabled, the lock screen will be automatically
-     * dismisses once the authentication challenge is completed. For example, completing a biometric
-     * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
-     * lock screen.
-     */
-    val isBypassEnabled: StateFlow<Boolean>
-
-    /**
      * Whether the auto confirm feature is enabled for the currently-selected user.
      *
      * Note that the length of the PIN is also important to take into consideration, please see
@@ -112,9 +104,6 @@ interface AuthenticationRepository {
      * is considered not secure (for example, "swipe" is considered to be "none").
      */
     suspend fun isLockscreenEnabled(): Boolean
-
-    /** See [isBypassEnabled]. */
-    fun setBypassEnabled(isBypassEnabled: Boolean)
 
     /** Reports an authentication attempt. */
     suspend fun reportAuthenticationAttempt(isSuccessful: Boolean)
@@ -157,7 +146,7 @@ constructor(
     private val lockPatternUtils: LockPatternUtils,
 ) : AuthenticationRepository {
 
-    override val isUnlocked: StateFlow<Boolean> = keyguardRepository.isKeyguardUnlocked
+    override val isUnlocked = keyguardRepository.isKeyguardUnlocked
 
     override suspend fun isLockscreenEnabled(): Boolean {
         return withContext(backgroundDispatcher) {
@@ -165,9 +154,6 @@ constructor(
             !lockPatternUtils.isLockPatternEnabled(selectedUserId)
         }
     }
-
-    private val _isBypassEnabled = MutableStateFlow(false)
-    override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled.asStateFlow()
 
     override val isAutoConfirmEnabled: StateFlow<Boolean> =
         userRepository.selectedUserInfo
@@ -223,10 +209,6 @@ constructor(
             val selectedUserId = userRepository.selectedUserId
             lockPatternUtils.getPinLength(selectedUserId)
         }
-    }
-
-    override fun setBypassEnabled(isBypassEnabled: Boolean) {
-        _isBypassEnabled.value = isBypassEnabled
     }
 
     override suspend fun reportAuthenticationAttempt(isSuccessful: Boolean) {
