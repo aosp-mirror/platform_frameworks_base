@@ -355,14 +355,10 @@ public interface CentralSurfaces extends Dumpable, LifecycleOwner {
 
     void updateNotificationPanelTouchState();
 
-    int getDisplayId();
-
     int getRotation();
 
     @VisibleForTesting
     void setBarStateForTest(int state);
-
-    void wakeUpForFullScreenIntent();
 
     void showTransientUnchecked();
 

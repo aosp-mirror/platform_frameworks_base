@@ -2311,7 +2311,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से फ़ोन के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"आपके <xliff:g id="DEVICE">%1$s</xliff:g> से टैबलेट के कैमरे को ऐक्सेस नहीं किया जा सकता"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"स्ट्रीमिंग के दौरान, इसे ऐक्सेस नहीं किया जा सकता. इसके बजाय, अपने फ़ोन पर ऐक्सेस करके देखें."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"स्ट्रीमिंग करते समय, \'पिक्चर में पिक्चर\' सुविधा इस्तेमाल नहीं की जा सकती"</string>
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टम डिफ़ॉल्ट"</string>
     <string name="default_card_name" msgid="9198284935962911468">"कार्ड <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"स्मार्टवॉच मैनेज करने के लिए, स्मार्टवॉच के साथ काम करने वाले साथी ऐप्लिकेशन पर प्रोफ़ाइल से जुड़ी अनुमति"</string>

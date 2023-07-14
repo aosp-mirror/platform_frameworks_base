@@ -73,7 +73,6 @@ import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.policy.CallbackController;
-import com.android.systemui.tracing.ProtoTracer;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -190,7 +189,6 @@ public class CommandQueue extends IStatusBar.Stub implements
      */
     private int mLastUpdatedImeDisplayId = INVALID_DISPLAY;
     private final DisplayTracker mDisplayTracker;
-    private ProtoTracer mProtoTracer;
     private final @Nullable CommandRegistry mRegistry;
     private final @Nullable DumpHandler mDumpHandler;
 
@@ -504,18 +502,16 @@ public class CommandQueue extends IStatusBar.Stub implements
 
     @VisibleForTesting
     public CommandQueue(Context context, DisplayTracker displayTracker) {
-        this(context, displayTracker, null, null, null);
+        this(context, displayTracker, null, null);
     }
 
     public CommandQueue(
             Context context,
             DisplayTracker displayTracker,
-            ProtoTracer protoTracer,
             CommandRegistry registry,
             DumpHandler dumpHandler
     ) {
         mDisplayTracker = displayTracker;
-        mProtoTracer = protoTracer;
         mRegistry = registry;
         mDumpHandler = dumpHandler;
         mDisplayTracker.addDisplayChangeCallback(new DisplayTracker.Callback() {
@@ -1160,9 +1156,6 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void startTracing() {
         synchronized (mLock) {
-            if (mProtoTracer != null) {
-                mProtoTracer.start();
-            }
             mHandler.obtainMessage(MSG_TRACING_STATE_CHANGED, true).sendToTarget();
         }
     }
@@ -1170,9 +1163,6 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void stopTracing() {
         synchronized (mLock) {
-            if (mProtoTracer != null) {
-                mProtoTracer.stop();
-            }
             mHandler.obtainMessage(MSG_TRACING_STATE_CHANGED, false).sendToTarget();
         }
     }

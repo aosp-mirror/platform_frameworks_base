@@ -22,7 +22,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 
 import static junit.framework.Assert.assertTrue;
 
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,8 +44,6 @@ import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -65,20 +62,13 @@ public class LightBarControllerTest extends SysuiTestCase {
 
     private static final GradientColors COLORS_LIGHT = makeColors(Color.WHITE);
     private static final GradientColors COLORS_DARK = makeColors(Color.BLACK);
-    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     private LightBarTransitionsController mLightBarTransitionsController;
     private LightBarTransitionsController mNavBarController;
     private SysuiDarkIconDispatcher mStatusBarIconController;
     private LightBarController mLightBarController;
 
-    /** Allow testing with NEW_LIGHT_BAR_LOGIC flag in different states */
-    protected boolean testNewLightBarLogic() {
-        return false;
-    }
-
     @Before
     public void setup() {
-        mFeatureFlags.set(Flags.NEW_LIGHT_BAR_LOGIC, testNewLightBarLogic());
         mStatusBarIconController = mock(SysuiDarkIconDispatcher.class);
         mNavBarController = mock(LightBarTransitionsController.class);
         when(mNavBarController.supportsIconTintForNavMode(anyInt())).thenReturn(true);
@@ -90,7 +80,6 @@ public class LightBarControllerTest extends SysuiTestCase {
                 mStatusBarIconController,
                 mock(BatteryController.class),
                 mock(NavigationModeController.class),
-                mFeatureFlags,
                 mock(DumpManager.class),
                 new FakeDisplayTracker(mContext));
     }
@@ -211,8 +200,6 @@ public class LightBarControllerTest extends SysuiTestCase {
 
     @Test
     public void validateNavBarChangesUpdateIcons() {
-        assumeTrue(testNewLightBarLogic());  // Only run in the new suite
-
         // On the launcher in dark mode buttons are light
         mLightBarController.setScrimState(ScrimState.UNLOCKED, 0f, COLORS_DARK);
         mLightBarController.onNavigationBarAppearanceChanged(
@@ -251,8 +238,6 @@ public class LightBarControllerTest extends SysuiTestCase {
 
     @Test
     public void navBarHasDarkIconsInLockedShade_lightMode() {
-        assumeTrue(testNewLightBarLogic());  // Only run in the new suite
-
         // On the locked shade QS in light mode buttons are light
         mLightBarController.setScrimState(ScrimState.SHADE_LOCKED, 1f, COLORS_LIGHT);
         mLightBarController.onNavigationBarAppearanceChanged(
@@ -287,8 +272,6 @@ public class LightBarControllerTest extends SysuiTestCase {
 
     @Test
     public void navBarHasLightIconsInLockedShade_darkMode() {
-        assumeTrue(testNewLightBarLogic());  // Only run in the new suite
-
         // On the locked shade QS in light mode buttons are light
         mLightBarController.setScrimState(ScrimState.SHADE_LOCKED, 1f, COLORS_DARK);
         mLightBarController.onNavigationBarAppearanceChanged(

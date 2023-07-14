@@ -164,7 +164,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isThrottled by collectLastValue(underTest.isThrottled)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isTrue()
             assertThat(isThrottled).isFalse()
         }
 
@@ -172,7 +172,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun authenticate_withIncorrectPin_returnsFalse() =
         testScope.runTest {
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            assertThat(underTest.authenticate(listOf(9, 8, 7))).isFalse()
+            assertThat(underTest.authenticate(listOf(9, 8, 7, 6, 5, 4))).isFalse()
         }
 
     @Test(expected = IllegalArgumentException::class)
@@ -270,7 +270,15 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val isThrottled by collectLastValue(underTest.isThrottled)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setAutoConfirmEnabled(true)
-            assertThat(underTest.authenticate(listOf(1, 2, 3), tryAutoConfirm = true)).isNull()
+            assertThat(
+                    underTest.authenticate(
+                        FakeAuthenticationRepository.DEFAULT_PIN.toMutableList().apply {
+                            removeLast()
+                        },
+                        tryAutoConfirm = true
+                    )
+                )
+                .isNull()
             assertThat(isThrottled).isFalse()
         }
 
@@ -280,7 +288,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setAutoConfirmEnabled(true)
-            assertThat(underTest.authenticate(listOf(1, 2, 4, 4), tryAutoConfirm = true)).isFalse()
+            assertThat(
+                    underTest.authenticate(
+                        FakeAuthenticationRepository.DEFAULT_PIN.map { it + 1 },
+                        tryAutoConfirm = true
+                    )
+                )
+                .isFalse()
             assertThat(isUnlocked).isFalse()
         }
 
@@ -290,7 +304,12 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setAutoConfirmEnabled(true)
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4, 5), tryAutoConfirm = true))
+            assertThat(
+                    underTest.authenticate(
+                        FakeAuthenticationRepository.DEFAULT_PIN + listOf(7),
+                        tryAutoConfirm = true
+                    )
+                )
                 .isFalse()
             assertThat(isUnlocked).isFalse()
         }
@@ -301,7 +320,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setAutoConfirmEnabled(true)
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4), tryAutoConfirm = true)).isTrue()
+            assertThat(
+                    underTest.authenticate(
+                        FakeAuthenticationRepository.DEFAULT_PIN,
+                        tryAutoConfirm = true
+                    )
+                )
+                .isTrue()
             assertThat(isUnlocked).isTrue()
         }
 
@@ -311,7 +336,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setAutoConfirmEnabled(false)
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4), tryAutoConfirm = true)).isNull()
+            assertThat(
+                    underTest.authenticate(
+                        FakeAuthenticationRepository.DEFAULT_PIN,
+                        tryAutoConfirm = true
+                    )
+                )
+                .isNull()
             assertThat(isUnlocked).isFalse()
         }
 
@@ -334,7 +365,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val throttling by collectLastValue(underTest.throttling)
             val isThrottled by collectLastValue(underTest.isThrottled)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            underTest.authenticate(listOf(1, 2, 3, 4))
+            underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
             assertThat(isUnlocked).isTrue()
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
@@ -366,7 +397,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 )
 
             // Correct PIN, but throttled, so doesn't attempt it:
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isNull()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isNull()
             assertThat(isUnlocked).isFalse()
             assertThat(isThrottled).isTrue()
             assertThat(throttling)
@@ -412,9 +443,62 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 )
 
             // Correct PIN and no longer throttled so unlocks successfully:
-            assertThat(underTest.authenticate(listOf(1, 2, 3, 4))).isTrue()
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)).isTrue()
             assertThat(isUnlocked).isTrue()
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
+        }
+
+    @Test
+    fun hintedPinLength_withoutAutoConfirm_isNull() =
+        testScope.runTest {
+            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAutoConfirmEnabled(false)
+
+            assertThat(hintedPinLength).isNull()
+        }
+
+    @Test
+    fun hintedPinLength_withAutoConfirmPinTooShort_isNull() =
+        testScope.runTest {
+            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.overrideCredential(
+                buildList {
+                    repeat(utils.authenticationRepository.hintedPinLength - 1) { add(it + 1) }
+                }
+            )
+            utils.authenticationRepository.setAutoConfirmEnabled(true)
+
+            assertThat(hintedPinLength).isNull()
+        }
+
+    @Test
+    fun hintedPinLength_withAutoConfirmPinAtRightLength_isSameLength() =
+        testScope.runTest {
+            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.setAutoConfirmEnabled(true)
+            utils.authenticationRepository.overrideCredential(
+                buildList { repeat(utils.authenticationRepository.hintedPinLength) { add(it + 1) } }
+            )
+
+            assertThat(hintedPinLength).isEqualTo(utils.authenticationRepository.hintedPinLength)
+        }
+
+    @Test
+    fun hintedPinLength_withAutoConfirmPinTooLong_isNull() =
+        testScope.runTest {
+            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.authenticationRepository.overrideCredential(
+                buildList {
+                    repeat(utils.authenticationRepository.hintedPinLength + 1) { add(it + 1) }
+                }
+            )
+            utils.authenticationRepository.setAutoConfirmEnabled(true)
+
+            assertThat(hintedPinLength).isNull()
         }
 }

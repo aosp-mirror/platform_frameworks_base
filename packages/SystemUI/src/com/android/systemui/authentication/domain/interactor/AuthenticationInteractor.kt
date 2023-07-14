@@ -37,7 +37,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -103,10 +102,11 @@ constructor(
 
     /** The length of the hinted PIN, or `null` if pin length hint should not be shown. */
     val hintedPinLength: StateFlow<Int?> =
-        flow { emit(repository.getPinLength()) }
-            .map { currentPinLength ->
-                // Hinting is enabled for 6-digit codes only
-                currentPinLength.takeIf { repository.hintedPinLength == it }
+        repository.isAutoConfirmEnabled
+            .map { isAutoConfirmEnabled ->
+                repository.getPinLength().takeIf {
+                    isAutoConfirmEnabled && it == repository.hintedPinLength
+                }
             }
             .stateIn(
                 scope = applicationScope,

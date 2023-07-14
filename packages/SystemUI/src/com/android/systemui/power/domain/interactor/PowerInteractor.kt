@@ -20,6 +20,7 @@ package com.android.systemui.power.domain.interactor
 import android.os.PowerManager
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.PowerRepository
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
@@ -32,6 +33,7 @@ class PowerInteractor
 @Inject
 constructor(
     private val repository: PowerRepository,
+    private val keyguardRepository: KeyguardRepository,
     private val falsingCollector: FalsingCollector,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val statusBarStateController: StatusBarStateController,
@@ -53,5 +55,22 @@ constructor(
             repository.wakeUp(why, wakeReason)
             falsingCollector.onScreenOnFromTouch()
         }
+    }
+
+    /**
+     * Wakes up the device if the device was dozing or going to sleep in order to display a
+     * full-screen intent.
+     */
+    fun wakeUpForFullScreenIntent() {
+        if (
+            keyguardRepository.wakefulness.value.isStartingToSleep() ||
+                statusBarStateController.isDozing
+        ) {
+            repository.wakeUp(why = FSI_WAKE_WHY, wakeReason = PowerManager.WAKE_REASON_APPLICATION)
+        }
+    }
+
+    companion object {
+        private const val FSI_WAKE_WHY = "full_screen_intent"
     }
 }

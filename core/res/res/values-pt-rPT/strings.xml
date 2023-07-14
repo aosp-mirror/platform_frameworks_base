@@ -2312,7 +2312,6 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Não é possível aceder à câmara do telemóvel a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Não é possível aceder à câmara do tablet a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Não é possível aceder a isto durante o streaming. Em alternativa, experimente no telemóvel."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Não é possível ver o ecrã no ecrã durante o streaming"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predefinição do sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"CARTÃO <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Autorização do perfil de relógio associado para gerir relógios"</string>
