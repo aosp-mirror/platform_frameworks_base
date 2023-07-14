@@ -282,9 +282,9 @@ public class RotationButtonController {
         TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
     }
 
-    public void setRotationLockedAtAngle(int rotationSuggestion) {
+    public void setRotationLockedAtAngle(int rotationSuggestion, String caller) {
         RotationPolicy.setRotationLockAtAngle(mContext, /* enabled= */ isRotationLocked(),
-                /* rotation= */ rotationSuggestion);
+                /* rotation= */ rotationSuggestion, caller);
     }
 
     public boolean isRotationLocked() {
@@ -468,7 +468,8 @@ public class RotationButtonController {
         if (rotationLocked || mRotationButton.isVisible()) {
             // Do not allow a change in rotation to set user rotation when docked.
             if (shouldOverrideUserLockPrefs(rotation) && rotationLocked && !mDocked) {
-                setRotationLockedAtAngle(rotation);
+                setRotationLockedAtAngle(rotation, /* caller= */
+                        "RotationButtonController#onRotationWatcherChanged");
             }
             setRotateSuggestionButtonState(false /* visible */, true /* forced */);
         }
@@ -572,7 +573,8 @@ public class RotationButtonController {
     private void onRotateSuggestionClick(View v) {
         mUiEventLogger.log(RotationButtonEvent.ROTATION_SUGGESTION_ACCEPTED);
         incrementNumAcceptedRotationSuggestionsIfNeeded();
-        setRotationLockedAtAngle(mLastRotationSuggestion);
+        setRotationLockedAtAngle(mLastRotationSuggestion,
+                /* caller= */ "RotationButtonController#onRotateSuggestionClick");
         Log.i(TAG, "onRotateSuggestionClick() mLastRotationSuggestion=" + mLastRotationSuggestion);
         v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }

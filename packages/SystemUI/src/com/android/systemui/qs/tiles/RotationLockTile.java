@@ -133,7 +133,7 @@ public class RotationLockTile extends QSTileImpl<BooleanState> implements
     @Override
     protected void handleClick(@Nullable View view) {
         final boolean newState = !mState.value;
-        mController.setRotationLocked(!newState);
+        mController.setRotationLocked(!newState, /* caller= */ "RotationLockTile#handleClick");
         refreshState(newState);
     }
 

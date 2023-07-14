@@ -65,7 +65,7 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
 
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
-    private final RotationPolicyWrapper mFakeRotationPolicy = new FakeRotationPolicy();
+    private final FakeRotationPolicy mFakeRotationPolicy = new FakeRotationPolicy();
     private DeviceStateRotationLockSettingController mDeviceStateRotationLockSettingController;
     private DeviceStateManager.DeviceStateCallback mDeviceStateCallback;
     private DeviceStateRotationLockSettingsManager mSettingsManager;
@@ -324,13 +324,21 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
 
         private boolean mRotationLock;
 
-        @Override
         public void setRotationLock(boolean enabled) {
-            mRotationLock = enabled;
+            setRotationLock(enabled, /* caller= */ "FakeRotationPolicy");
         }
 
         @Override
+        public void setRotationLock(boolean enabled, String caller) {
+            mRotationLock = enabled;
+        }
+
         public void setRotationLockAtAngle(boolean enabled, int rotation) {
+            setRotationLockAtAngle(enabled, rotation, /* caller= */ "FakeRotationPolicy");
+        }
+
+        @Override
+        public void setRotationLockAtAngle(boolean enabled, int rotation, String caller) {
             mRotationLock = enabled;
         }
 

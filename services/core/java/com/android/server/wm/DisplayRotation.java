@@ -130,6 +130,7 @@ public class DisplayRotation {
     private final int mUndockedHdmiRotation;
     private final RotationAnimationPair mTmpRotationAnim = new RotationAnimationPair();
     private final RotationHistory mRotationHistory = new RotationHistory();
+    private final RotationLockHistory mRotationLockHistory = new RotationLockHistory();
 
     private OrientationListener mOrientationListener;
     private StatusBarManagerInternal mStatusBarManagerInternal;
@@ -922,7 +923,8 @@ public class DisplayRotation {
     }
 
     @VisibleForTesting
-    void setUserRotation(int userRotationMode, int userRotation) {
+    void setUserRotation(int userRotationMode, int userRotation, String caller) {
+        mRotationLockHistory.addRecord(userRotationMode, userRotation, caller);
         mRotationChoiceShownToUserForConfirmation = ROTATION_UNDEFINED;
         if (useDefaultSettingsProvider()) {
             // We'll be notified via settings listener, so we don't need to update internal values.
@@ -953,17 +955,17 @@ public class DisplayRotation {
         }
     }
 
-    void freezeRotation(int rotation) {
+    void freezeRotation(int rotation, String caller) {
         if (mDeviceStateController.shouldReverseRotationDirectionAroundZAxis(mDisplayContent)) {
             rotation = RotationUtils.reverseRotationDirectionAroundZAxis(rotation);
         }
 
         rotation = (rotation == -1) ? mRotation : rotation;
-        setUserRotation(WindowManagerPolicy.USER_ROTATION_LOCKED, rotation);
+        setUserRotation(WindowManagerPolicy.USER_ROTATION_LOCKED, rotation, caller);
     }
 
-    void thawRotation() {
-        setUserRotation(WindowManagerPolicy.USER_ROTATION_FREE, mUserRotation);
+    void thawRotation(String caller) {
+        setUserRotation(WindowManagerPolicy.USER_ROTATION_FREE, mUserRotation, caller);
     }
 
     boolean isRotationFrozen() {
@@ -1712,6 +1714,15 @@ public class DisplayRotation {
                 r.dump(prefix, pw);
             }
         }
+
+        if (!mRotationLockHistory.mRecords.isEmpty()) {
+            pw.println();
+            pw.println(prefix + "  RotationLockHistory");
+            prefix = "    " + prefix;
+            for (RotationLockHistory.Record r : mRotationLockHistory.mRecords) {
+                r.dump(prefix, pw);
+            }
+        }
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
@@ -2130,6 +2141,40 @@ public class DisplayRotation {
                 mService.updateRotation(false /* alwaysSendConfiguration */,
                         false /* forceRelayout */);
             }
+        }
+    }
+
+    private static class RotationLockHistory {
+        private static final int MAX_SIZE = 8;
+
+        private static class Record {
+            @WindowManagerPolicy.UserRotationMode final int mUserRotationMode;
+            @Surface.Rotation final int mUserRotation;
+            final String mCaller;
+            final long mTimestamp = System.currentTimeMillis();
+
+            private Record(int userRotationMode, int userRotation, String caller) {
+                mUserRotationMode = userRotationMode;
+                mUserRotation = userRotation;
+                mCaller = caller;
+            }
+
+            void dump(String prefix, PrintWriter pw) {
+                pw.println(prefix + TimeUtils.logTimeOfDay(mTimestamp) + ": "
+                        + "mode="  + WindowManagerPolicy.userRotationModeToString(mUserRotationMode)
+                        + ", rotation=" + Surface.rotationToString(mUserRotation)
+                        + ", caller=" + mCaller);
+            }
+        }
+
+        private final ArrayDeque<RotationLockHistory.Record> mRecords = new ArrayDeque<>(MAX_SIZE);
+
+        void addRecord(@WindowManagerPolicy.UserRotationMode int userRotationMode,
+                @Surface.Rotation int userRotation, String caller) {
+            if (mRecords.size() >= MAX_SIZE) {
+                mRecords.removeFirst();
+            }
+            mRecords.addLast(new Record(userRotationMode, userRotation, caller));
         }
     }
 

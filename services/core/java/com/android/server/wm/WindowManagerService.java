@@ -4281,8 +4281,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void freezeRotation(int rotation) {
-        freezeDisplayRotation(Display.DEFAULT_DISPLAY, rotation);
+    public void freezeRotation(int rotation, String caller) {
+        freezeDisplayRotation(Display.DEFAULT_DISPLAY, rotation, caller);
     }
 
     /**
@@ -4292,7 +4292,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param rotation The desired rotation to freeze to, or -1 to use the current rotation.
      */
     @Override
-    public void freezeDisplayRotation(int displayId, int rotation) {
+    public void freezeDisplayRotation(int displayId, int rotation, String caller) {
         // TODO(multi-display): Track which display is rotated.
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "freezeRotation()")) {
@@ -4302,6 +4302,9 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new IllegalArgumentException("Rotation argument must be -1 or a valid "
                     + "rotation constant.");
         }
+        ProtoLog.v(WM_DEBUG_ORIENTATION,
+                "freezeDisplayRotation: current rotation=%d, new rotation=%d, caller=%s",
+                getDefaultDisplayRotation(), rotation, caller);
 
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -4311,7 +4314,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG, "Trying to freeze rotation for a missing display.");
                     return;
                 }
-                display.getDisplayRotation().freezeRotation(rotation);
+                display.getDisplayRotation().freezeRotation(rotation, caller);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4321,8 +4324,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void thawRotation() {
-        thawDisplayRotation(Display.DEFAULT_DISPLAY);
+    public void thawRotation(String caller) {
+        thawDisplayRotation(Display.DEFAULT_DISPLAY, caller);
     }
 
     /**
@@ -4330,13 +4333,14 @@ public class WindowManagerService extends IWindowManager.Stub
      * Persists across reboots.
      */
     @Override
-    public void thawDisplayRotation(int displayId) {
+    public void thawDisplayRotation(int displayId, String caller) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "thawRotation()")) {
             throw new SecurityException("Requires SET_ORIENTATION permission");
         }
 
-        ProtoLog.v(WM_DEBUG_ORIENTATION, "thawRotation: mRotation=%d", getDefaultDisplayRotation());
+        ProtoLog.v(WM_DEBUG_ORIENTATION, "thawRotation: mRotation=%d, caller=%s",
+                getDefaultDisplayRotation(), caller);
 
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -4346,7 +4350,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG, "Trying to thaw rotation for a missing display.");
                     return;
                 }
-                display.getDisplayRotation().thawRotation();
+                display.getDisplayRotation().thawRotation(caller);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
