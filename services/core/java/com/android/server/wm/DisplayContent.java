@@ -3457,6 +3457,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 this, this, null /* remoteTransition */, displayChange);
         if (t != null) {
             mAtmService.startLaunchPowerMode(POWER_MODE_REASON_CHANGE_DISPLAY);
+            if (mAsyncRotationController != null) {
+                // Give a chance to update the transform if the current rotation is changed when
+                // some windows haven't finished previous rotation.
+                mAsyncRotationController.updateRotation();
+            }
             if (mFixedRotationLaunchingApp != null) {
                 // A fixed-rotation transition is done, then continue to start a seamless display
                 // transition.

@@ -93,15 +93,12 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     /** Whether the start transaction of the transition is committed (by shell). */
     private boolean mIsStartTransactionCommitted;
 
-    /** Whether all windows should wait for the start transaction. */
-    private boolean mAlwaysWaitForStartTransaction;
-
     /** Whether the target windows have been requested to sync their draw transactions. */
     private boolean mIsSyncDrawRequested;
 
     private SeamlessRotator mRotator;
 
-    private final int mOriginalRotation;
+    private int mOriginalRotation;
     private final boolean mHasScreenRotationAnimation;
 
     AsyncRotationController(DisplayContent displayContent) {
@@ -147,15 +144,6 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (mTransitionOp == OP_LEGACY) {
             mIsStartTransactionCommitted = true;
         } else if (displayContent.mTransitionController.isCollecting(displayContent)) {
-            final Transition transition =
-                    mDisplayContent.mTransitionController.getCollectingTransition();
-            if (transition != null) {
-                final BLASTSyncEngine.SyncGroup syncGroup =
-                        mDisplayContent.mWmService.mSyncEngine.getSyncSet(transition.getSyncId());
-                if (syncGroup != null && syncGroup.mSyncMethod == BLASTSyncEngine.METHOD_BLAST) {
-                    mAlwaysWaitForStartTransaction = true;
-                }
-            }
             keepAppearanceInPreviousRotation();
         }
     }
@@ -279,10 +267,12 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             // The previous animation leash will be dropped when preparing fade-in animation, so
             // simply apply new animation without restoring the transformation.
             fadeWindowToken(true /* show */, windowToken, ANIMATION_TYPE_TOKEN_TRANSFORM);
-        } else if (op.mAction == Operation.ACTION_SEAMLESS && mRotator != null
+        } else if (op.mAction == Operation.ACTION_SEAMLESS
                 && op.mLeash != null && op.mLeash.isValid()) {
             if (DEBUG) Slog.d(TAG, "finishOp undo seamless " + windowToken.getTopChild());
-            mRotator.setIdentityMatrix(windowToken.getSyncTransaction(), op.mLeash);
+            final SurfaceControl.Transaction t = windowToken.getSyncTransaction();
+            t.setMatrix(op.mLeash, 1, 0, 0, 1);
+            t.setPosition(op.mLeash, 0, 0);
         }
     }
 
@@ -363,6 +353,32 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (mHasScreenRotationAnimation) {
             scheduleTimeout();
         }
+    }
+
+    /**
+     * Re-initialize the states if the current display rotation has changed to a different rotation.
+     * This is mainly for seamless rotation to update the transform based on new rotation.
+     */
+    void updateRotation() {
+        if (mRotator == null) return;
+        final int currentRotation = mDisplayContent.getWindowConfiguration().getRotation();
+        if (mOriginalRotation == currentRotation) {
+            return;
+        }
+        Slog.d(TAG, "Update original rotation " + currentRotation);
+        mOriginalRotation = currentRotation;
+        mDisplayContent.forAllWindows(w -> {
+            if (w.mForceSeamlesslyRotate && w.mHasSurface
+                    && !mTargetWindowTokens.containsKey(w.mToken)) {
+                final Operation op = new Operation(Operation.ACTION_SEAMLESS);
+                op.mLeash = w.mToken.mSurfaceControl;
+                mTargetWindowTokens.put(w.mToken, op);
+            }
+        }, true /* traverseTopToBottom */);
+        mRotator = null;
+        mIsStartTransactionCommitted = false;
+        mIsSyncDrawRequested = false;
+        keepAppearanceInPreviousRotation();
     }
 
     private void scheduleTimeout() {
@@ -589,7 +605,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      * start transaction of rotation transition is applied.
      */
     private boolean canDrawBeforeStartTransaction(Operation op) {
-        return !mAlwaysWaitForStartTransaction && op.mAction != Operation.ACTION_SEAMLESS;
+        return op.mAction != Operation.ACTION_SEAMLESS;
     }
 
     /** The operation to control the rotation appearance associated with window token. */
