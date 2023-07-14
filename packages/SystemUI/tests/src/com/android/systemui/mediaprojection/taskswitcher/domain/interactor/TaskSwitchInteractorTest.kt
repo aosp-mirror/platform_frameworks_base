@@ -17,6 +17,7 @@
 package com.android.systemui.mediaprojection.taskswitcher.domain.interactor
 
 import android.content.Intent
+import android.os.Handler
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -24,7 +25,9 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.ActivityTaskManagerTasksRepository
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager
 import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeActivityTaskManager.Companion.createTask
-import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionRepository
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.FakeMediaProjectionManager.Companion.createSingleTaskSession
+import com.android.systemui.mediaprojection.taskswitcher.data.repository.MediaProjectionManagerRepository
 import com.android.systemui.mediaprojection.taskswitcher.domain.model.TaskSwitchState
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,7 +46,8 @@ class TaskSwitchInteractorTest : SysuiTestCase() {
     private val testScope = TestScope(dispatcher)
 
     private val fakeActivityTaskManager = FakeActivityTaskManager()
-    private val mediaRepo = FakeMediaProjectionRepository()
+    private val fakeMediaProjectionManager = FakeMediaProjectionManager()
+
     private val tasksRepo =
         ActivityTaskManagerTasksRepository(
             activityTaskManager = fakeActivityTaskManager.activityTaskManager,
@@ -51,15 +55,26 @@ class TaskSwitchInteractorTest : SysuiTestCase() {
             backgroundDispatcher = dispatcher
         )
 
+    private val mediaRepo =
+        MediaProjectionManagerRepository(
+            mediaProjectionManager = fakeMediaProjectionManager.mediaProjectionManager,
+            handler = Handler.getMain(),
+            applicationScope = testScope.backgroundScope,
+            tasksRepository = tasksRepo,
+        )
+
     private val interactor = TaskSwitchInteractor(mediaRepo, tasksRepo)
 
     @Test
     fun taskSwitchChanges_notProjecting_foregroundTaskChange_emitsNotProjectingTask() =
         testScope.runTest {
-            mediaRepo.stopProjecting()
+            val backgroundTask = createTask(taskId = 0)
+            val foregroundTask = createTask(taskId = 1)
             val taskSwitchState by collectLastValue(interactor.taskSwitchChanges)
 
-            fakeActivityTaskManager.moveTaskToForeground(createTask(taskId = 1))
+            fakeActivityTaskManager.addRunningTasks(backgroundTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnStop()
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
 
             assertThat(taskSwitchState).isEqualTo(TaskSwitchState.NotProjectingTask)
         }
@@ -67,10 +82,15 @@ class TaskSwitchInteractorTest : SysuiTestCase() {
     @Test
     fun taskSwitchChanges_projectingScreen_foregroundTaskChange_emitsNotProjectingTask() =
         testScope.runTest {
-            mediaRepo.projectEntireScreen()
+            val backgroundTask = createTask(taskId = 0)
+            val foregroundTask = createTask(taskId = 1)
             val taskSwitchState by collectLastValue(interactor.taskSwitchChanges)
 
-            fakeActivityTaskManager.moveTaskToForeground(createTask(taskId = 1))
+            fakeActivityTaskManager.addRunningTasks(backgroundTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = FakeMediaProjectionManager.createDisplaySession()
+            )
+            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
 
             assertThat(taskSwitchState).isEqualTo(TaskSwitchState.NotProjectingTask)
         }
@@ -80,9 +100,12 @@ class TaskSwitchInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val projectedTask = createTask(taskId = 0)
             val foregroundTask = createTask(taskId = 1)
-            mediaRepo.switchProjectedTask(projectedTask)
             val taskSwitchState by collectLastValue(interactor.taskSwitchChanges)
 
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(token = projectedTask.token.asBinder())
+            )
             fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
 
             assertThat(taskSwitchState)
@@ -99,9 +122,12 @@ class TaskSwitchInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val projectedTask = createTask(taskId = 0)
             val foregroundTask = createTask(taskId = 1, baseIntent = LAUNCHER_INTENT)
-            mediaRepo.switchProjectedTask(projectedTask)
             val taskSwitchState by collectLastValue(interactor.taskSwitchChanges)
 
+            fakeActivityTaskManager.addRunningTasks(projectedTask, foregroundTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
             fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
 
             assertThat(taskSwitchState).isEqualTo(TaskSwitchState.TaskUnchanged)
@@ -111,11 +137,13 @@ class TaskSwitchInteractorTest : SysuiTestCase() {
     fun taskSwitchChanges_projectingTask_foregroundTaskSame_emitsTaskUnchanged() =
         testScope.runTest {
             val projectedTask = createTask(taskId = 0)
-            val foregroundTask = createTask(taskId = 0)
-            mediaRepo.switchProjectedTask(projectedTask)
             val taskSwitchState by collectLastValue(interactor.taskSwitchChanges)
 
-            fakeActivityTaskManager.moveTaskToForeground(foregroundTask)
+            fakeActivityTaskManager.addRunningTasks(projectedTask)
+            fakeMediaProjectionManager.dispatchOnSessionSet(
+                session = createSingleTaskSession(projectedTask.token.asBinder())
+            )
+            fakeActivityTaskManager.moveTaskToForeground(projectedTask)
 
             assertThat(taskSwitchState).isEqualTo(TaskSwitchState.TaskUnchanged)
         }
