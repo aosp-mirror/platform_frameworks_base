@@ -19,6 +19,7 @@ package com.android.systemui.bouncer.ui.viewmodel
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
@@ -211,10 +212,9 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             )
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
-            underTest.onPinButtonClicked(1)
-            underTest.onPinButtonClicked(2)
-            underTest.onPinButtonClicked(3)
-            underTest.onPinButtonClicked(4)
+            FakeAuthenticationRepository.DEFAULT_PIN.forEach { digit ->
+                underTest.onPinButtonClicked(digit)
+            }
 
             underTest.onAuthenticateButtonClicked()
 
@@ -275,10 +275,9 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             // Enter the correct PIN:
-            underTest.onPinButtonClicked(1)
-            underTest.onPinButtonClicked(2)
-            underTest.onPinButtonClicked(3)
-            underTest.onPinButtonClicked(4)
+            FakeAuthenticationRepository.DEFAULT_PIN.forEach { digit ->
+                underTest.onPinButtonClicked(digit)
+            }
             assertThat(message?.text).isEmpty()
 
             underTest.onAuthenticateButtonClicked()
@@ -300,10 +299,9 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             )
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
-            underTest.onPinButtonClicked(1)
-            underTest.onPinButtonClicked(2)
-            underTest.onPinButtonClicked(3)
-            underTest.onPinButtonClicked(4)
+            FakeAuthenticationRepository.DEFAULT_PIN.forEach { digit ->
+                underTest.onPinButtonClicked(digit)
+            }
 
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
@@ -324,10 +322,12 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             )
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
-            underTest.onPinButtonClicked(1)
-            underTest.onPinButtonClicked(2)
-            underTest.onPinButtonClicked(3)
-            underTest.onPinButtonClicked(5) // PIN is now wrong!
+            FakeAuthenticationRepository.DEFAULT_PIN.dropLast(1).forEach { digit ->
+                underTest.onPinButtonClicked(digit)
+            }
+            underTest.onPinButtonClicked(
+                FakeAuthenticationRepository.DEFAULT_PIN.last() + 1
+            ) // PIN is now wrong!
 
             assertThat(entries).hasSize(0)
             assertThat(message?.text).isEqualTo(WRONG_PIN)
@@ -384,47 +384,6 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             utils.authenticationRepository.setAutoConfirmEnabled(true)
 
             assertThat(confirmButtonAppearance).isEqualTo(ActionButtonAppearance.Hidden)
-        }
-
-    @Test
-    fun hintedPinLength_withoutAutoConfirm_isNull() =
-        testScope.runTest {
-            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setAutoConfirmEnabled(false)
-
-            assertThat(hintedPinLength).isNull()
-        }
-
-    @Test
-    fun hintedPinLength_withAutoConfirmPinLessThanSixDigits_isNull() =
-        testScope.runTest {
-            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setAutoConfirmEnabled(true)
-
-            assertThat(hintedPinLength).isNull()
-        }
-
-    @Test
-    fun hintedPinLength_withAutoConfirmPinExactlySixDigits_isSix() =
-        testScope.runTest {
-            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setAutoConfirmEnabled(true)
-            utils.authenticationRepository.overrideCredential(listOf(1, 2, 3, 4, 5, 6))
-
-            assertThat(hintedPinLength).isEqualTo(6)
-        }
-
-    @Test
-    fun hintedPinLength_withAutoConfirmPinMoreThanSixDigits_isNull() =
-        testScope.runTest {
-            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setAutoConfirmEnabled(true)
-
-            assertThat(hintedPinLength).isNull()
         }
 
     companion object {

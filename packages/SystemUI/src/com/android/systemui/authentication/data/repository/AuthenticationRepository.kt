@@ -71,10 +71,23 @@ interface AuthenticationRepository {
      */
     val isBypassEnabled: StateFlow<Boolean>
 
-    /** Whether the auto confirm feature is enabled for the currently-selected user. */
+    /**
+     * Whether the auto confirm feature is enabled for the currently-selected user.
+     *
+     * Note that the length of the PIN is also important to take into consideration, please see
+     * [hintedPinLength].
+     */
     val isAutoConfirmEnabled: StateFlow<Boolean>
 
-    /** The length of the PIN for which we should show a hint. */
+    /**
+     * The exact length a PIN should be for us to enable PIN length hinting.
+     *
+     * A PIN that's shorter or longer than this is not eligible for the UI to render hints showing
+     * how many digits the current PIN is, even if [isAutoConfirmEnabled] is enabled.
+     *
+     * Note that PIN length hinting is only available if the PIN auto confirmation feature is
+     * available.
+     */
     val hintedPinLength: Int
 
     /** Whether the pattern should be visible for the currently-selected user. */
@@ -166,10 +179,10 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = true,
+                initialValue = false,
             )
 
-    override val hintedPinLength: Int = LockPatternUtils.MIN_AUTO_PIN_REQUIREMENT_LENGTH
+    override val hintedPinLength: Int = 6
 
     override val isPatternVisible: StateFlow<Boolean> =
         userRepository.selectedUserInfo
