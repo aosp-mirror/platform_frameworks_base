@@ -2999,14 +2999,14 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             // action. When the targetPkg is set, it sends the broadcast to specific app, e.g.
             // installer app or null for registered apps. The callback only need to send back to the
             // registered apps so we check the null condition here.
-            notifyPackageMonitor(action, pkg, extras, userIds, instantUserIds);
+            notifyPackageMonitor(action, pkg, extras, userIds, instantUserIds, broadcastAllowList);
         }
     }
 
     void notifyPackageMonitor(String action, String pkg, Bundle extras, int[] userIds,
-            int[] instantUserIds) {
+            int[] instantUserIds, SparseArray<int[]> broadcastAllowList) {
         mPackageMonitorCallbackHelper.notifyPackageMonitor(action, pkg, extras, userIds,
-                instantUserIds);
+                instantUserIds, broadcastAllowList);
     }
 
     void notifyResourcesChanged(boolean mediaStatus, boolean replacing,
@@ -3062,7 +3062,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mHandler.post(() -> mBroadcastHelper.sendPackageAddedForNewUsers(
                 packageName, appId, userIds, instantUserIds, dataLoaderType, broadcastAllowList));
         mPackageMonitorCallbackHelper.notifyPackageAddedForNewUsers(packageName, appId, userIds,
-                instantUserIds, dataLoaderType);
+                instantUserIds, dataLoaderType, broadcastAllowList);
         if (sendBootCompleted && !ArrayUtils.isEmpty(userIds)) {
             mHandler.post(() -> {
                         for (int userId : userIds) {
@@ -4068,7 +4068,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 packageName, dontKillApp, componentNames, packageUid, reason, userIds,
                 instantUserIds, broadcastAllowList));
         mPackageMonitorCallbackHelper.notifyPackageChanged(packageName, dontKillApp, componentNames,
-                packageUid, reason, userIds, instantUserIds);
+                packageUid, reason, userIds, instantUserIds, broadcastAllowList);
     }
 
     /**
@@ -6238,7 +6238,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public void registerPackageMonitorCallback(@NonNull IRemoteCallback callback, int userId) {
-            mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, userId);
+            int uid = Binder.getCallingUid();
+            mPackageMonitorCallbackHelper.registerPackageMonitorCallback(callback, userId, uid);
         }
 
         @Override
