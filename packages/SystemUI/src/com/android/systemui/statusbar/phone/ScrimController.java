@@ -57,8 +57,6 @@ import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.ScrimAlpha;
@@ -254,8 +252,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private int mScrimsVisibility;
     private final TriConsumer<ScrimState, Float, GradientColors> mScrimStateListener;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
-    private final FeatureFlags mFeatureFlags;
-    private final boolean mUseNewLightBarLogic;
     private Consumer<Integer> mScrimVisibleListener;
     private boolean mBlankScreen;
     private boolean mScreenBlankingCallbackCalled;
@@ -311,12 +307,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             WallpaperRepository wallpaperRepository,
             @Main CoroutineDispatcher mainDispatcher,
-            LargeScreenShadeInterpolator largeScreenShadeInterpolator,
-            FeatureFlags featureFlags) {
+            LargeScreenShadeInterpolator largeScreenShadeInterpolator) {
         mScrimStateListener = lightBarController::setScrimState;
         mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
-        mFeatureFlags = featureFlags;
-        mUseNewLightBarLogic = featureFlags.isEnabled(Flags.NEW_LIGHT_BAR_LOGIC);
         mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
 
         mKeyguardStateController = keyguardStateController;
@@ -1170,13 +1163,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (mClipsQsScrim && mQsBottomVisible) {
             alpha = mNotificationsAlpha;
         }
-        if (mUseNewLightBarLogic) {
-            mScrimStateListener.accept(mState, alpha, mColors);
-        } else {
-            // NOTE: This wasn't wrong, but it implied that each scrim might have different colors,
-            //  when in fact they all share the same GradientColors instance, which we own.
-            mScrimStateListener.accept(mState, alpha, mScrimInFront.getColors());
-        }
+        mScrimStateListener.accept(mState, alpha, mColors);
     }
 
     private void dispatchScrimsVisible() {
@@ -1500,15 +1487,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         int accent = Utils.getColorAccent(mScrimBehind.getContext()).getDefaultColor();
         mColors.setMainColor(background);
         mColors.setSecondaryColor(accent);
-        if (mUseNewLightBarLogic) {
-            final boolean isBackgroundLight = !ContrastColorUtil.isColorDark(background);
-            mColors.setSupportsDarkText(isBackgroundLight);
-        } else {
-            // NOTE: This was totally backward, but LightBarController was flipping it back.
-            // There may be other consumers of this which would struggle though
-            mColors.setSupportsDarkText(
-                    ColorUtils.calculateContrast(mColors.getMainColor(), Color.WHITE) > 4.5);
-        }
+        final boolean isBackgroundLight = !ContrastColorUtil.isColorDark(background);
+        mColors.setSupportsDarkText(isBackgroundLight);
 
         int surface = Utils.getColorAttr(mScrimBehind.getContext(),
                 com.android.internal.R.attr.materialColorSurface).getDefaultColor();
