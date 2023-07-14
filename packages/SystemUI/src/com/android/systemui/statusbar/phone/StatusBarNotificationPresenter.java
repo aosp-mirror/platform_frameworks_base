@@ -28,7 +28,6 @@ import android.service.vr.IVrStateCallbacks;
 import android.util.Log;
 import android.util.Slog;
 import android.view.View;
-import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.InitController;
@@ -50,7 +49,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsInteractor;
@@ -59,7 +57,6 @@ import com.android.systemui.statusbar.notification.interruption.NotificationInte
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
-import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
@@ -78,21 +75,18 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     private final NotifShadeEventSource mNotifShadeEventSource;
     private final NotificationMediaManager mMediaManager;
     private final NotificationGutsManager mGutsManager;
-
     private final ShadeViewController mNotificationPanel;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
     private final CentralSurfaces mCentralSurfaces;
     private final NotificationsInteractor mNotificationsInteractor;
+    private final NotificationStackScrollLayoutController mNsslController;
     private final LockscreenShadeTransitionController mShadeTransitionController;
     private final PowerInteractor mPowerInteractor;
     private final CommandQueue mCommandQueue;
-
-    private final AccessibilityManager mAccessibilityManager;
     private final KeyguardManager mKeyguardManager;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
-    private final NotifPipelineFlags mNotifPipelineFlags;
     private final IStatusBarService mBarService;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final NotificationListContainer mNotifListContainer;
@@ -123,11 +117,9 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
             NotifShadeEventSource notifShadeEventSource,
             NotificationMediaManager notificationMediaManager,
             NotificationGutsManager notificationGutsManager,
-            LockscreenGestureLogger lockscreenGestureLogger,
             InitController initController,
             NotificationInterruptStateProvider notificationInterruptStateProvider,
             NotificationRemoteInputManager remoteInputManager,
-            NotifPipelineFlags notifPipelineFlags,
             NotificationRemoteInputManager.Callback remoteInputManagerCallback,
             NotificationListContainer notificationListContainer) {
         mActivityStarter = activityStarter;
@@ -139,6 +131,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         // TODO: use KeyguardStateController#isOccluded to remove this dependency
         mCentralSurfaces = centralSurfaces;
         mNotificationsInteractor = notificationsInteractor;
+        mNsslController = stackScrollerController;
         mShadeTransitionController = shadeTransitionController;
         mPowerInteractor = powerInteractor;
         mCommandQueue = commandQueue;
@@ -149,10 +142,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         mGutsManager = notificationGutsManager;
         mAboveShelfObserver = new AboveShelfObserver(stackScrollerController.getView());
         mNotificationShadeWindowController = notificationShadeWindowController;
-        mNotifPipelineFlags = notifPipelineFlags;
         mAboveShelfObserver.setListener(statusBarWindow.findViewById(
                 R.id.notification_container_parent));
-        mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mDozeScrimController = dozeScrimController;
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mBarService = IStatusBarService.Stub.asInterface(
@@ -170,7 +161,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         }
         remoteInputManager.setUpWithCallback(
                 remoteInputManagerCallback,
-                mNotificationPanel.getShadeNotificationPresenter().createRemoteInputDelegate());
+                mNsslController.createDelegate());
 
         initController.addPostInitTask(() -> {
             mNotifShadeEventSource.setShadeEmptiedCallback(this::maybeClosePanelForShadeEmptied);
@@ -202,7 +193,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     }
 
     private void maybeEndAmbientPulse() {
-        if (mNotificationPanel.getShadeNotificationPresenter().hasPulsingNotifications()
+        if (mNsslController.getNotificationListContainer().hasPulsingNotifications()
                 && !mHeadsUpManager.hasNotifications()) {
             // We were showing a pulse for a notification, but no notifications are pulsing anymore.
             // Finish the pulse.
@@ -269,22 +260,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         @Override
         public void onVrStateChanged(boolean enabled) {
             mVrMode = enabled;
-        }
-    };
-
-    private final CheckSaveListener mCheckSaveListener = new CheckSaveListener() {
-        @Override
-        public void checkSave(Runnable saveImportance, StatusBarNotification sbn) {
-            // If the user has security enabled, show challenge if the setting is changed.
-            if (mLockscreenUserManager.isLockscreenPublicMode(sbn.getUser().getIdentifier())
-                    && mKeyguardManager.isKeyguardLocked()) {
-                onLockedNotificationImportanceChange(() -> {
-                    saveImportance.run();
-                    return true;
-                });
-            } else {
-                saveImportance.run();
-            }
         }
     };
 
