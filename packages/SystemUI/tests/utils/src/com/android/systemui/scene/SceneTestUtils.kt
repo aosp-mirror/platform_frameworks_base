@@ -142,6 +142,7 @@ class SceneTestUtils(
             repository = repository,
             backgroundDispatcher = testDispatcher,
             userRepository = userRepository,
+            keyguardRepository = keyguardRepository,
             clock = mock { whenever(elapsedRealtime()).thenAnswer { testScope.currentTime } }
         )
     }

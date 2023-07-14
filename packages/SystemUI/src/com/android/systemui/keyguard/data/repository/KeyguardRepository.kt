@@ -42,6 +42,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.WakeAndUnlockMode
 import com.android.systemui.statusbar.phone.DozeParameters
+import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -171,6 +172,14 @@ interface KeyguardRepository {
      */
     fun isKeyguardShowing(): Boolean
 
+    /**
+     * Whether lock screen bypass is enabled. When enabled, the lock screen will be automatically
+     * dismissed once the authentication challenge is completed. For example, completing a biometric
+     * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
+     * lock screen.
+     */
+    fun isBypassEnabled(): Boolean
+
     /** Sets whether the bottom area UI should animate the transition out of doze state. */
     fun setAnimateDozingTransitions(animate: Boolean)
 
@@ -206,6 +215,7 @@ constructor(
     wakefulnessLifecycle: WakefulnessLifecycle,
     biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
+    private val keyguardBypassController: KeyguardBypassController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val dozeTransitionListener: DozeTransitionListener,
     private val dozeParameters: DozeParameters,
@@ -252,23 +262,17 @@ constructor(
     override val isAodAvailable: Flow<Boolean> =
         conflatedCallbackFlow {
                 val callback =
-                    object : DozeParameters.Callback {
-                        override fun onAlwaysOnChange() {
-                            trySendWithFailureLogging(
-                                dozeParameters.getAlwaysOn(),
-                                TAG,
-                                "updated isAodAvailable"
-                            )
-                        }
+                    DozeParameters.Callback {
+                        trySendWithFailureLogging(
+                            dozeParameters.alwaysOn,
+                            TAG,
+                            "updated isAodAvailable"
+                        )
                     }
 
                 dozeParameters.addCallback(callback)
                 // Adding the callback does not send an initial update.
-                trySendWithFailureLogging(
-                    dozeParameters.getAlwaysOn(),
-                    TAG,
-                    "initial isAodAvailable"
-                )
+                trySendWithFailureLogging(dozeParameters.alwaysOn, TAG, "initial isAodAvailable")
 
                 awaitClose { dozeParameters.removeCallback(callback) }
             }
@@ -462,6 +466,10 @@ constructor(
 
     override fun isKeyguardShowing(): Boolean {
         return keyguardStateController.isShowing
+    }
+
+    override fun isBypassEnabled(): Boolean {
+        return keyguardBypassController.bypassEnabled
     }
 
     override val statusBarState: Flow<StatusBarState> = conflatedCallbackFlow {

@@ -24,6 +24,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationThrottling
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -51,6 +52,7 @@ constructor(
     private val repository: AuthenticationRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository,
+    private val keyguardRepository: KeyguardRepository,
     private val clock: SystemClock,
 ) {
     /**
@@ -75,14 +77,6 @@ constructor(
                 started = SharingStarted.Eagerly,
                 initialValue = true,
             )
-
-    /**
-     * Whether lock screen bypass is enabled. When enabled, the lock screen will be automatically
-     * dismisses once the authentication challenge is completed. For example, completing a biometric
-     * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
-     * lock screen.
-     */
-    val isBypassEnabled: StateFlow<Boolean> = repository.isBypassEnabled
 
     /** The current authentication throttling state, only meaningful if [isThrottled] is `true`. */
     val throttling: StateFlow<AuthenticationThrottlingModel> = repository.throttling
@@ -156,6 +150,16 @@ constructor(
     }
 
     /**
+     * Whether lock screen bypass is enabled. When enabled, the lock screen will be automatically
+     * dismisses once the authentication challenge is completed. For example, completing a biometric
+     * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
+     * lock screen.
+     */
+    fun isBypassEnabled(): Boolean {
+        return keyguardRepository.isBypassEnabled()
+    }
+
+    /**
      * Attempts to authenticate the user and unlock the device.
      *
      * If [tryAutoConfirm] is `true`, authentication is attempted if and only if the auth method
@@ -216,11 +220,6 @@ constructor(
         }
 
         return authenticationResult.isSuccessful
-    }
-
-    /** See [isBypassEnabled]. */
-    fun toggleBypassEnabled() {
-        repository.setBypassEnabled(!repository.isBypassEnabled.value)
     }
 
     /** Starts refreshing the throttling state every second. */

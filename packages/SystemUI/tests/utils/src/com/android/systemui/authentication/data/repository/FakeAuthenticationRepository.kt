@@ -31,9 +31,6 @@ class FakeAuthenticationRepository(
     private val currentTime: () -> Long,
 ) : AuthenticationRepository {
 
-    private val _isBypassEnabled = MutableStateFlow(false)
-    override val isBypassEnabled: StateFlow<Boolean> = _isBypassEnabled
-
     private val _isAutoConfirmEnabled = MutableStateFlow(false)
     override val isAutoConfirmEnabled: StateFlow<Boolean> = _isAutoConfirmEnabled.asStateFlow()
 
@@ -83,10 +80,6 @@ class FakeAuthenticationRepository(
 
     override suspend fun getPinLength(): Int {
         return (credentialOverride ?: DEFAULT_PIN).size
-    }
-
-    override fun setBypassEnabled(isBypassEnabled: Boolean) {
-        _isBypassEnabled.value = isBypassEnabled
     }
 
     override suspend fun getFailedAuthenticationAttemptCount(): Int {
