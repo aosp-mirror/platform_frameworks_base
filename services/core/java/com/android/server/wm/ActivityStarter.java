@@ -1594,6 +1594,9 @@ class ActivityStarter {
         if (forceTransientTransition) {
             transitionController.collect(mLastStartActivityRecord);
             transitionController.collect(mPriorAboveTask);
+            // If keyguard is active and occluded, the transient target won't be moved to front
+            // to be collected, so set transient again after it is collected.
+            transitionController.setTransientLaunch(mLastStartActivityRecord, mPriorAboveTask);
             final DisplayContent dc = mLastStartActivityRecord.getDisplayContent();
             // update wallpaper target to TransientHide
             dc.mWallpaperController.adjustWallpaperWindows();
