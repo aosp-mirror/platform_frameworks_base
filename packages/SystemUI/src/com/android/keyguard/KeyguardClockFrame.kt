@@ -12,6 +12,10 @@ class KeyguardClockFrame(
 ) : FrameLayout(context, attrs) {
     private var drawAlpha: Int = 255
 
+    init {
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+    }
+
     protected override fun onSetAlpha(alpha: Int): Boolean {
         drawAlpha = alpha
         return true
