@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Dotaknite se za ogled."</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Napaka pri shranjevanju posnetka zaslona"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Napaka pri začenjanju snemanja zaslona"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Vklopljen je celozaslonski način."</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"Zaprete ga tako, da z vrha s prstom povlečete navzdol."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Razumem"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Nazaj"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Začetni zaslon"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Meni"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Pri deljenju, snemanju ali predvajanju ima Android dostop do vsega, kar je prikazano na zaslonu ali se predvaja v napravi. Zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Pri deljenju, snemanju ali predvajanju aplikacije ima Android dostop do vsega, kar je prikazano ali predvajano v tej aplikaciji, zato bodite previdni z gesli, podatki za plačilo, sporočili, fotografijami ter z zvokom in videom."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Začni"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokiral skrbnik za IT"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Zajemanje zaslonske slike je onemogočil pravilnik za naprave."</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Izbriši vse"</string>

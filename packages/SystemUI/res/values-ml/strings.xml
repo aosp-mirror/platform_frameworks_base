@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"കാണാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"സ്ക്രീൻ റെക്കോർഡിംഗ് സംരക്ഷിക്കുന്നതിൽ പിശക്"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"സ്ക്രീൻ റെക്കോർഡിംഗ് ആരംഭിക്കുന്നതിൽ പിശക്"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"പൂർണ്ണ സ്‌ക്രീനിൽ കാണുന്നു"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"പുറത്തുകടക്കാൻ, മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പ് ചെയ്യുക."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"മനസ്സിലായി"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"മടങ്ങുക"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ഹോം"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"മെനു"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"പങ്കിടുമ്പോൾ, റെക്കോർഡ് ചെയ്യുമ്പോൾ അല്ലെങ്കിൽ കാസ്റ്റ് ചെയ്യുമ്പോൾ, Android-ന് നിങ്ങളുടെ സ്ക്രീനിൽ ദൃശ്യമാകുന്നതോ ഉപകരണത്തിൽ പ്ലേ ചെയ്യുന്നതോ ആയ ഏത് കാര്യത്തിലേക്കും ആക്സസ് ഉണ്ട്. അതിനാൽ പാസ്‍വേഡുകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, ഓഡിയോ, വീഡിയോ എന്നിവ പോലുള്ള കാര്യങ്ങൾ നൽകുമ്പോൾ സൂക്ഷിക്കുക."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"ഒരു ആപ്പ് പങ്കിടുമ്പോൾ, റെക്കോർഡ് ചെയ്യുമ്പോൾ അല്ലെങ്കിൽ കാസ്റ്റ് ചെയ്യുമ്പോൾ, Android-ന് ആ ആപ്പിൽ കാണിക്കുന്ന അല്ലെങ്കിൽ പ്ലേ ചെയ്യുന്ന എല്ലാത്തിലേക്കും ആക്സസ് ഉണ്ട്. അതിനാൽ പാസ്‍വേഡുകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, ഓഡിയോ, വീഡിയോ എന്നിവ പോലുള്ള കാര്യങ്ങൾ നൽകുമ്പോൾ സൂക്ഷിക്കുക."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ആരംഭിക്കുക"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"നിങ്ങളുടെ ഐടി അഡ്‌മിൻ ബ്ലോക്ക് ചെയ്‌തു"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ഉപകരണ നയം, സ്ക്രീൻ ക്യാപ്‌ചർ ചെയ്യൽ പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"എല്ലാം മായ്‌ക്കുക"</string>

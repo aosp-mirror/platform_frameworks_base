@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Toca para verla"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"No se ha podido guardar la grabación de pantalla"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"No se ha podido empezar a grabar la pantalla"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Modo de pantalla completa"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"Para salir, desliza el dedo de arriba abajo."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Entendido"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Atrás"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Inicio"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menú"</string>
@@ -412,6 +415,10 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Cuando compartes, grabas o envías contenido, Android puede acceder a todo lo que se muestre en la pantalla o se reproduzca en tu dispositivo. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Cuando compartes, grabas o envías una aplicación, Android puede acceder a todo lo que se muestre o se reproduzca en ella. Debes tener cuidado con elementos como contraseñas, detalles de pagos, mensajes, fotos, audio y vídeo."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Empezar"</string>
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"El uso compartido se detiene al cambiar de aplicación"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Compartir esta aplicación"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Volver"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"Cambio de aplicación"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloqueado por tu administrador de TI"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Las capturas de pantalla están inhabilitadas debido a la política de dispositivos"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
@@ -1030,7 +1037,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"El contenido se mostrará en breve"</string>
     <string name="missed_call" msgid="4228016077700161689">"Llamada perdida"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Consulta los mensajes recientes, las llamadas perdidas y los cambios de estado"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Consulta mensajes recientes, llamadas perdidas y cambios de estado"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversación"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Pausado por No molestar"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> ha enviado un mensaje: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

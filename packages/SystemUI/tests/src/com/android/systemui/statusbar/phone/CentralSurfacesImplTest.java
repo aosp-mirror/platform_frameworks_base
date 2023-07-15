@@ -129,7 +129,6 @@ import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
-import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
@@ -252,7 +251,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private StatusBarSignalPolicy mStatusBarSignalPolicy;
-    @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private AssistManager mAssistManager;
     @Mock private NotificationGutsManager mNotificationGutsManager;
@@ -276,6 +274,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
+    @Mock private Lazy<NotificationShadeWindowViewController>
+            mNotificationShadeWindowViewControllerLazy;
     @Mock private NotificationShelfController mNotificationShelfController;
     @Mock private DozeParameters mDozeParameters;
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
@@ -428,10 +428,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mLockscreenWallpaperLazy.get()).thenReturn(mLockscreenWallpaper);
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
         when(mCameraLauncherLazy.get()).thenReturn(mCameraLauncher);
+        when(mNotificationShadeWindowViewControllerLazy.get())
+                .thenReturn(mNotificationShadeWindowViewController);
 
         when(mStatusBarComponentFactory.create()).thenReturn(mCentralSurfacesComponent);
-        when(mCentralSurfacesComponent.getNotificationShadeWindowViewController()).thenReturn(
-                mNotificationShadeWindowViewController);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
@@ -510,6 +510,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 () -> mAssistManager,
                 configurationController,
                 mNotificationShadeWindowController,
+                mNotificationShadeWindowViewControllerLazy,
                 mNotificationShelfController,
                 mStackScrollerController,
                 mDozeParameters,
@@ -586,9 +587,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mKeyguardViewMediator.getViewMediatorCallback()).thenReturn(
                 mKeyguardVieMediatorCallback);
 
-        // TODO: we should be able to call mCentralSurfaces.start() and have all the below values
-        // initialized automatically and make NPVC private.
-        mCentralSurfaces.mNotificationShadeWindowView = mNotificationShadeWindowView;
+        // TODO(b/277764509): we should be able to call mCentralSurfaces.start() and have all the
+        //  below values initialized automatically.
         mCentralSurfaces.mDozeScrimController = mDozeScrimController;
         mCentralSurfaces.mPresenter = mNotificationPresenter;
         mCentralSurfaces.mKeyguardIndicationController = mKeyguardIndicationController;
@@ -823,8 +823,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
      */
     @Test
     public void testPredictiveBackCallback_invocationCollapsesPanel() {
-        mCentralSurfaces.setNotificationShadeWindowViewController(
-                mNotificationShadeWindowViewController);
         mCentralSurfaces.handleVisibleToUserChanged(true);
         verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
                 eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
@@ -841,8 +839,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
      */
     @Test
     public void testPredictiveBackAnimation_progressMaxScalesPanel() {
-        mCentralSurfaces.setNotificationShadeWindowViewController(
-                mNotificationShadeWindowViewController);
         mCentralSurfaces.handleVisibleToUserChanged(true);
         verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
                 eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
@@ -864,8 +860,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
      */
     @Test
     public void testPredictiveBackAnimation_progressMinScalesPanel() {
-        mCentralSurfaces.setNotificationShadeWindowViewController(
-                mNotificationShadeWindowViewController);
         mCentralSurfaces.handleVisibleToUserChanged(true);
         verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
                 eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),

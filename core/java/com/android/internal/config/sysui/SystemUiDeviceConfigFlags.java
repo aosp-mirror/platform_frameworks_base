@@ -532,6 +532,17 @@ public final class SystemUiDeviceConfigFlags {
     public static final String TASK_MANAGER_SHOW_FOOTER_DOT = "task_manager_show_footer_dot";
 
     /**
+     * (boolean) Whether to enable the adapter conversion in RemoteViews
+     */
+    public static final String REMOTEVIEWS_ADAPTER_CONVERSION = "remoteviews_adapter_conversion";
+
+    /**
+     * Default value for whether the adapter conversion is enabled or not. This is set for
+     * RemoteViews and should not be a common practice.
+     */
+    public static final boolean REMOTEVIEWS_ADAPTER_CONVERSION_DEFAULT = false;
+
+    /**
      * (boolean) Whether the task manager should show a stop button if the app is allowlisted
      * by the user.
      */

@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"দেখতে ট্যাপ করুন"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"স্ক্রিন রেকর্ডিং সেভ করার সময় কোনও সমস্যা হয়েছে"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"স্ক্রিন রেকর্ডিং শুরু করার সময় সমস্যা হয়েছে"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"ফুল-স্ক্রিনে দেখা হচ্ছে"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"বেরিয়ে যেতে উপর থেকে নিচের দিকে সোয়াইপ করুন।"</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"বুঝেছি"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"ফিরুন"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"হোম"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"মেনু"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"আপনি শেয়ার, রেকর্ড বা কাস্ট করার সময়, স্ক্রিনে দৃশ্যমান বা ডিভাইসে চালানো সব কিছুই Android অ্যাক্সেস করতে পারবে। তাই পাসওয়ার্ড, পেমেন্টের বিবরণ, মেসেজ, ফটো এবং অডিও ও ভিডিওর মতো বিষয়ে সতর্ক থাকুন।"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"আপনি কোনও অ্যাপ শেয়ার, রেকর্ড বা কাস্ট করার সময়, সেই অ্যাপে দেখা যায় বা চালানো হয় এমন সব কিছু Android অ্যাক্সেস করতে পারবে। তাই পাসওয়ার্ড, পেমেন্টের বিবরণ, মেসেজ, ফটো এবং অডিও ও ভিডিওর মতো বিষয়ে সতর্ক থাকুন।"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"শুরু করুন"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"আপনার আইটি অ্যাডমিন ব্লক করেছেন"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ডিভাইস নীতির কারণে স্ক্রিন ক্যাপচার করার প্রসেস বন্ধ করা আছে"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"সব মুছে দিন"</string>
