@@ -191,6 +191,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED)
                 && isPendingIntentValid(intent,
                         SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION)
+                && isPendingIntentValid(intent,
+                        SlicePurchaseController.EXTRA_INTENT_NOTIFICATIONS_DISABLED)
                 && isPendingIntentValid(intent, SlicePurchaseController.EXTRA_INTENT_SUCCESS)
                 && isPendingIntentValid(intent,
                         SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN);
@@ -276,6 +278,8 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
             case SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED: return "request failed";
             case SlicePurchaseController.EXTRA_INTENT_NOT_DEFAULT_DATA_SUBSCRIPTION:
                 return "not default data subscription";
+            case SlicePurchaseController.EXTRA_INTENT_NOTIFICATIONS_DISABLED:
+                return "notifications disabled";
             case SlicePurchaseController.EXTRA_INTENT_SUCCESS: return "success";
             case SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN:
                 return "notification shown";
@@ -321,26 +325,45 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
     }
 
     private void onDisplayPerformanceBoostNotification(@NonNull Context context,
-            @NonNull Intent intent, boolean repeat) {
-        if (!repeat && !isIntentValid(intent)) {
+            @NonNull Intent intent, boolean localeChanged) {
+        if (!localeChanged && !isIntentValid(intent)) {
             sendSlicePurchaseAppResponse(intent,
                     SlicePurchaseController.EXTRA_INTENT_REQUEST_FAILED);
             return;
         }
 
         Resources res = getResources(context);
-        NotificationChannel channel = new NotificationChannel(
-                PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID,
-                res.getString(R.string.performance_boost_notification_channel),
-                NotificationManager.IMPORTANCE_DEFAULT);
-        // CarrierDefaultApp notifications are unblockable by default. Make this channel blockable
-        //  to allow users to disable notifications posted to this channel without affecting other
-        //  notifications in this application.
-        channel.setBlockable(true);
-        context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        NotificationManager notificationManager =
+                context.getSystemService(NotificationManager.class);
+        NotificationChannel channel = notificationManager.getNotificationChannel(
+                PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID);
+        if (channel == null) {
+            channel = new NotificationChannel(
+                    PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID,
+                    res.getString(R.string.performance_boost_notification_channel),
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            // CarrierDefaultApp notifications are unblockable by default.
+            // Make this channel blockable to allow users to disable notifications posted to this
+            // channel without affecting other notifications in this application.
+            channel.setBlockable(true);
+            context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        } else if (localeChanged) {
+            // If the channel already exists but the locale has changed, update the channel name.
+            channel.setName(res.getString(R.string.performance_boost_notification_channel));
+        }
+
+        boolean channelNotificationsDisabled =
+                channel.getImportance() == NotificationManager.IMPORTANCE_NONE;
+        if (channelNotificationsDisabled || !notificationManager.areNotificationsEnabled()) {
+            // If notifications are disabled for the app or channel, fail the purchase request.
+            logd("Purchase request failed because notifications are disabled for the "
+                    + (channelNotificationsDisabled ? "channel." : "application."));
+            sendSlicePurchaseAppResponse(intent,
+                    SlicePurchaseController.EXTRA_INTENT_NOTIFICATIONS_DISABLED);
+            return;
+        }
 
         String carrier = intent.getStringExtra(SlicePurchaseController.EXTRA_CARRIER);
-
         Notification notification =
                 new Notification.Builder(context, PERFORMANCE_BOOST_NOTIFICATION_CHANNEL_ID)
                         .setContentTitle(res.getString(
@@ -369,11 +392,12 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
 
         int capability = intent.getIntExtra(SlicePurchaseController.EXTRA_PREMIUM_CAPABILITY,
                 SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
-        logd((repeat ? "Update" : "Display") + " the performance boost notification for capability "
+        logd((localeChanged ? "Update" : "Display")
+                + " the performance boost notification for capability "
                 + TelephonyManager.convertPremiumCapabilityToString(capability));
         context.getSystemService(NotificationManager.class).notifyAsUser(
                 PERFORMANCE_BOOST_NOTIFICATION_TAG, capability, notification, UserHandle.ALL);
-        if (!repeat) {
+        if (!localeChanged) {
             sIntents.put(capability, intent);
             sendSlicePurchaseAppResponse(intent,
                     SlicePurchaseController.EXTRA_INTENT_NOTIFICATION_SHOWN);

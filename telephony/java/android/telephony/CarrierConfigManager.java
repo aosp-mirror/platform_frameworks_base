@@ -9659,6 +9659,7 @@ public class CarrierConfigManager {
      *
      * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_CANCELED
      * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_TIMEOUT
+     * @see TelephonyManager#PURCHASE_PREMIUM_CAPABILITY_RESULT_USER_DISABLED
      */
     public static final String
             KEY_PREMIUM_CAPABILITY_NOTIFICATION_BACKOFF_HYSTERESIS_TIME_MILLIS_LONG =
