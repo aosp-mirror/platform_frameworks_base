@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"చూడటానికి ట్యాప్ చేయండి"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"స్క్రీన్ రికార్డింగ్‌ను సేవ్ చేయడంలో ఎర్రర్ ఏర్పడింది"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"స్క్రీన్ రికార్డింగ్ ప్రారంభించడంలో ఎర్రర్ ఏర్పడింది"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"ఫుల్ స్క్రీన్‌లో చూస్తున్నారు"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"నిష్క్రమించడానికి, పై నుండి కిందికి స్వైప్ చేయండి."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"సరే"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"వెనుకకు"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"హోమ్"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"మెనూ"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"మీరు షేర్ చేస్తున్నప్పుడు, రికార్డ్ చేస్తున్నప్పుడు, లేదా ప్రసారం చేస్తున్నప్పుడు, మీ స్క్రీన్‌పై కనిపించే దేనికైనా లేదా మీ పరికరంలో ప్లే అయిన దేనికైనా Androidకు యాక్సెస్ ఉంటుంది. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, ఇంకా వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"మీరు ఏదైనా యాప్‌ను షేర్ చేస్తున్నప్పుడు, రికార్డ్ చేస్తున్నప్పుడు, లేదా ప్రసారం చేస్తున్నప్పుడు, ఆ యాప్‌లో చూపబడిన దేనికైనా లేదా ప్లే అయిన దేనికైనా Androidకు యాక్సెస్ ఉంటుంది. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, ఇంకా వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ప్రారంభించండి"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"మీ IT అడ్మిన్ ద్వారా బ్లాక్ చేయబడింది"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"పరికర పాలసీ ద్వారా స్క్రీన్ క్యాప్చర్ చేయడం డిజేబుల్ చేయబడింది"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"అన్నీ క్లియర్ చేయండి"</string>

@@ -2311,6 +2311,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не може да се пристапи до камерата на вашиот телефон од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не може да се пристапи до камерата на вашиот таблет од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"До ова не може да се пристапи при стриминг. Наместо тоа, пробајте на вашиот телефон."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Не може да се прикажува слика во слика при стримување"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Стандарден за системот"</string>
     <string name="default_card_name" msgid="9198284935962911468">"КАРТИЧКА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Дозвола за профилот на придружен часовник за управување со часовници"</string>

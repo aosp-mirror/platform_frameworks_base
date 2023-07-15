@@ -103,19 +103,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun toggleBypassEnabled() =
-        testScope.runTest {
-            val isBypassEnabled by collectLastValue(underTest.isBypassEnabled)
-            assertThat(isBypassEnabled).isFalse()
-
-            underTest.toggleBypassEnabled()
-            assertThat(isBypassEnabled).isTrue()
-
-            underTest.toggleBypassEnabled()
-            assertThat(isBypassEnabled).isFalse()
-        }
-
-    @Test
     fun isAuthenticationRequired_lockedAndSecured_true() =
         testScope.runTest {
             utils.authenticationRepository.setUnlocked(false)

@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"輕按即可查看"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"儲存螢幕錄影時發生錯誤"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"開始錄影畫面時發生錯誤"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"開啟全螢幕"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"由頂部向下滑動即可退出。"</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"知道了"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"返回"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"首頁"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"選單"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"當你分享、錄影或投放時，Android 可存取顯示在螢幕畫面上或在裝置上播放的所有內容。因此，請謹慎處理密碼、付款資料、訊息、相片、音訊和影片等。"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"當你分享、錄影或投放應用程式時，Android 可存取顯示在該應用程式中顯示或播放的所有內容。因此，請謹慎處理密碼、付款資料、訊息、相片、音訊和影片等。"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"開始"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"已被你的 IT 管理員封鎖"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"螢幕截圖功能因裝置政策而停用"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"全部清除"</string>

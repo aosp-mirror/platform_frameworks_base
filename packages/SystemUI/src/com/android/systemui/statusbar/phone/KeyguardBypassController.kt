@@ -50,12 +50,6 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     @DevicePostureInt private var postureState: Int = DEVICE_POSTURE_UNKNOWN
     private var pendingUnlock: PendingUnlock? = null
     private val listeners = mutableListOf<OnBypassStateChangedListener>()
-    private val postureCallback = DevicePostureController.Callback { posture ->
-        if (postureState != posture) {
-            postureState = posture
-            notifyListeners()
-        }
-    }
     private val faceAuthEnabledChangedCallback = object : KeyguardStateController.Callback {
         override fun onFaceAuthEnabledChanged() = notifyListeners()
     }
@@ -162,10 +156,8 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
 
         val dismissByDefault = if (context.resources.getBoolean(
                         com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
-        tunerService.addTunable(object : TunerService.Tunable {
-            override fun onTuningChanged(key: String?, newValue: String?) {
-                bypassEnabled = tunerService.getValue(key, dismissByDefault) != 0
-            }
+        tunerService.addTunable({ key, _ ->
+            bypassEnabled = tunerService.getValue(key, dismissByDefault) != 0
         }, Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD)
         lockscreenUserManager.addUserChangedListener(
                 object : NotificationLockscreenUserManager.UserChangedListener {
@@ -281,8 +273,6 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     }
 
     companion object {
-        const val BYPASS_FADE_DURATION = 67
-
         private const val FACE_UNLOCK_BYPASS_NO_OVERRIDE = 0
         private const val FACE_UNLOCK_BYPASS_ALWAYS = 1
         private const val FACE_UNLOCK_BYPASS_NEVER = 2

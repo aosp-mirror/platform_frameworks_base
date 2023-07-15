@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Trykk for å se"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Feil ved lagring av skjermopptaket"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Feil ved start av skjermopptaket"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Visning i fullskjerm"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"Sveip ned fra toppen for å avslutte."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Skjønner"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Tilbake"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Startside"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Meny"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Når du deler, tar opp eller caster noe, har Android tilgang til alt som vises på skjermen eller spilles av på enheten. Derfor bør du være forsiktig med for eksempel passord, betalingsopplysninger, meldinger, bilder, lyd og video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Når du deler, tar opp eller caster en app, har Android tilgang til alt som vises eller spilles av i den aktuelle appen. Derfor bør du være forsiktig med for eksempel passord, betalingsopplysninger, meldinger, bilder, lyd og video."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Begynn"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokkert av IT-administratoren"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Skjermdumper er deaktivert av enhetsinnstillingene"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Fjern alt"</string>

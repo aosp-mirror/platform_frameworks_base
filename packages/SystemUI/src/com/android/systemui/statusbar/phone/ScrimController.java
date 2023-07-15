@@ -48,6 +48,7 @@ import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -69,8 +70,10 @@ import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.AlarmTimeout;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
+import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -87,7 +90,8 @@ import kotlinx.coroutines.CoroutineDispatcher;
  * security method gets shown).
  */
 @SysUISingleton
-public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dumpable {
+public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dumpable,
+        CoreStartable {
 
     static final String TAG = "ScrimController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -205,6 +209,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final KeyguardVisibilityCallback mKeyguardVisibilityCallback;
     private final Handler mHandler;
     private final Executor mMainExecutor;
+    private final JavaAdapter mJavaAdapter;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -264,6 +269,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private boolean mKeyguardOccluded;
 
     private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private final WallpaperRepository mWallpaperRepository;
     private CoroutineDispatcher mMainDispatcher;
     private boolean mIsBouncerToGoneTransitionRunning = false;
     private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
@@ -293,11 +299,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             DockManager dockManager,
             ConfigurationController configurationController,
             @Main Executor mainExecutor,
+            JavaAdapter javaAdapter,
             ScreenOffAnimationController screenOffAnimationController,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
+            WallpaperRepository wallpaperRepository,
             @Main CoroutineDispatcher mainDispatcher,
             LargeScreenShadeInterpolator largeScreenShadeInterpolator) {
         mScrimStateListener = lightBarController::setScrimState;
@@ -310,6 +318,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mKeyguardVisibilityCallback = new KeyguardVisibilityCallback();
         mHandler = handler;
         mMainExecutor = mainExecutor;
+        mJavaAdapter = javaAdapter;
         mScreenOffAnimationController = screenOffAnimationController;
         mTimeTicker = new AlarmTimeout(alarmManager, this::onHideWallpaperTimeout,
                 "hide_aod_wallpaper", mHandler);
@@ -341,7 +350,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mColors = new GradientColors();
         mPrimaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mWallpaperRepository = wallpaperRepository;
         mMainDispatcher = mainDispatcher;
+    }
+
+    @Override
+    public void start() {
+        mJavaAdapter.alwaysCollectFlow(
+                mWallpaperRepository.getWallpaperSupportsAmbientMode(),
+                this::setWallpaperSupportsAmbientMode);
     }
 
     /**
@@ -1531,7 +1548,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         pw.println(mState.getMaxLightRevealScrimAlpha());
     }
 
-    public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
+    private void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
         mWallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode;
         ScrimState[] states = ScrimState.values();
         for (int i = 0; i < states.length; i++) {

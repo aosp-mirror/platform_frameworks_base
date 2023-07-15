@@ -28,7 +28,6 @@ import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -36,7 +35,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(JUnit4::class)
 class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
@@ -385,7 +383,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     ) {
         featureFlags.set(Flags.SCENE_CONTAINER, isFeatureEnabled)
         authenticationRepository.setUnlocked(isDeviceUnlocked)
-        authenticationRepository.setBypassEnabled(isBypassEnabled)
+        keyguardRepository.setBypassEnabled(isBypassEnabled)
         initialSceneKey?.let {
             sceneInteractor.setCurrentScene(SceneContainerNames.SYSTEM_UI_DEFAULT, SceneModel(it))
         }

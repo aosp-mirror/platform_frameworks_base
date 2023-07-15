@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Докоснете за преглед"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Грешка при запазването на записа на екрана"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"При стартирането на записа на екрана възникна грешка"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Изглед на цял екран"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"За изход плъзнете пръст надолу от горната част."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Разбрах"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Назад"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Начало"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Меню"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Когато споделяте, записвате или предавате, Android има достъп до всичко, което се вижда на екрана ви или се възпроизвежда на устройството ви. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Когато споделяте, записвате или предавате дадено приложение, Android има достъп до всичко, което се показва или възпроизвежда в него. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Стартиране"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Блокирано от системния ви администратор"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Заснемането на екрана е деактивирано от правило за устройството"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Изчистване на всички"</string>

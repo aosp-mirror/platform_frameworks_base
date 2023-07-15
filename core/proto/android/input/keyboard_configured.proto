@@ -47,4 +47,8 @@ message KeyboardLayoutConfig {
   // IntDef annotation at:
   // services/core/java/com/android/server/input/KeyboardMetricsCollector.java
   optional int32 layout_selection_criteria = 4;
+  // Keyboard layout type provided by IME
+  optional int32 ime_layout_type = 5;
+  // Language tag provided by IME (e.g. en-US, ru-Cyrl etc.)
+  optional string ime_language_tag = 6;
 }

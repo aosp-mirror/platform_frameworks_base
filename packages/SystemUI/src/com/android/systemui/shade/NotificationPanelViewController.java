@@ -1473,7 +1473,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 // so we should not add a padding for them
                 stackScrollerPadding = 0;
             } else {
-                stackScrollerPadding = mQsController.getUnlockedStackScrollerPadding();
+                stackScrollerPadding = mQsController.getHeaderHeight();
             }
         } else {
             stackScrollerPadding = mClockPositionResult.stackScrollerPaddingExpanded;
@@ -1520,7 +1520,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 userSwitcherPreferredY,
                 darkAmount, mOverStretchAmount,
                 bypassEnabled,
-                mQsController.getUnlockedStackScrollerPadding(),
+                mQsController.getHeaderHeight(),
                 mQsController.computeExpansionFraction(),
                 mDisplayTopInset,
                 mSplitShadeEnabled,

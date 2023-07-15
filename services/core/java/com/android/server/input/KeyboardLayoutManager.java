@@ -16,6 +16,7 @@
 
 package com.android.server.input;
 
+import static com.android.server.input.KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEFAULT;
 import static com.android.server.input.KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE;
 import static com.android.server.input.KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_USER;
 import static com.android.server.input.KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD;
@@ -1272,7 +1273,7 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
             boolean noLayoutFound = layoutInfo == null || layoutInfo.mDescriptor == null;
             configurationEventBuilder.addLayoutSelection(imeInfoList.get(i).mImeSubtype,
                     noLayoutFound ? null : getKeyboardLayout(layoutInfo.mDescriptor),
-                    noLayoutFound ? LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD
+                    noLayoutFound ? LAYOUT_SELECTION_CRITERIA_DEFAULT
                             : layoutInfo.mSelectionCriteria);
         }
         KeyboardMetricsCollector.logKeyboardConfiguredAtom(configurationEventBuilder.build());

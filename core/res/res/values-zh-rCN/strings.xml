@@ -2311,6 +2311,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问手机的摄像头"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问平板电脑的摄像头"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"流式传输时无法访问此内容。您可以尝试在手机上访问。"</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"在线播放时无法查看画中画"</string>
     <string name="system_locale_title" msgid="711882686834677268">"系统默认设置"</string>
     <string name="default_card_name" msgid="9198284935962911468">"SIM 卡 <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"用于管理手表的配套手表个人资料权限"</string>

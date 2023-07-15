@@ -114,6 +114,11 @@ class FakeKeyguardRepository : KeyguardRepository {
         return _isKeyguardShowing.value
     }
 
+    private var _isBypassEnabled = false
+    override fun isBypassEnabled(): Boolean {
+        return _isBypassEnabled
+    }
+
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.tryEmit(animate)
     }
@@ -196,6 +201,10 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setKeyguardUnlocked(isUnlocked: Boolean) {
         _isKeyguardUnlocked.value = isUnlocked
+    }
+
+    fun setBypassEnabled(isEnabled: Boolean) {
+        _isBypassEnabled = isEnabled
     }
 
     override fun isUdfpsSupported(): Boolean {
