@@ -42,6 +42,7 @@ import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -283,4 +284,9 @@ public abstract class PipTransitionController implements Transitions.TransitionH
          */
         void onPipTransitionCanceled(int direction);
     }
+
+    /**
+     * Dumps internal states.
+     */
+    public void dump(PrintWriter pw, String prefix) {}
 }

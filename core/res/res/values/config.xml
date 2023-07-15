@@ -5175,7 +5175,7 @@
     </string-array>
 
     <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
-    <integer name="config_selected_udfps_touch_detection">3</integer>
+    <integer name="config_selected_udfps_touch_detection">0</integer>
 
     <!-- An array of arrays of side fingerprint sensor properties relative to each display.
          Note: this value is temporary and is expected to be queried directly
