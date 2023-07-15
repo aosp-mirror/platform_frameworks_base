@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Zobrazte klepnutím"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Pri ukladaní nahrávky obrazovky sa vyskytla chyba"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Pri spustení nahrávania obrazovky sa vyskytla chyba"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Zobrazenie na celú obrazovku"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"Ukončíte potiahnutím zhora nadol."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Dobre"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Späť"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Plocha"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menu"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Počas zdieľania, nahrávania alebo prenosu bude mať Android prístup k všetkému, čo sa zobrazuje na obrazovke alebo prehráva v zariadení. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Počas zdieľania, nahrávania alebo prenosu v aplikácii bude mať Android prístup k všetkému zobrazovanému alebo prehrávaného obsahu v danej aplikácii. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Začať"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokované vaším správcom IT"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Snímanie obrazovky je zakázané pravidlami pre zariadenie"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Vymazať všetko"</string>

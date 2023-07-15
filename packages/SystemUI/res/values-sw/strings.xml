@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Gusa ili uangalie"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Hitilafu imetokea wakati wa kuhifadhi rekodi ya skrini"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Hitilafu imetokea wakati wa kuanza kurekodi skrini"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Unatazama kwenye skrini nzima"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"Ili uondoke, telezesha kidole kutoka juu hadi chini."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Nimeelewa"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Nyuma"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Nyumbani"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Menyu"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Unaposhiriki, kurekodi au kutuma, Android inaweza kufikia kitu chochote kitakachoonekana kwenye skrini yako au kuchezwa kwenye kifaa chako. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Unaposhiriki, kurekodi au kutuma programu, Android inaweza kufikia kitu chochote kitakachoonekana au kuchezwa kwenye programu hiyo. Kwa hivyo kuwa mwangalifu na vitu kama vile manenosiri, maelezo ya malipo, ujumbe, picha na sauti na video."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Anza"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Umezuiwa na msimamizi wako wa TEHAMA"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Mchakato wa kurekodi skrini umezimwa na sera ya kifaa"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Futa zote"</string>

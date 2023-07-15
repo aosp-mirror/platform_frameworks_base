@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"ကြည့်ရှုရန် တို့ပါ"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"ဖန်သားပြင်ရိုက်ကူးမှုကို သိမ်းရာတွင် အမှားရှိသည်"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"ဖန်သားပြင် ရိုက်ကူးမှု စတင်ရာတွင် အမှားအယွင်းရှိနေသည်"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"ဖန်သားပြင်အပြည့် ကြည့်နေသည်"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"ထွက်ရန် အပေါ်မှ အောက်သို့ ပွတ်ဆွဲပါ။"</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"နားလည်ပြီ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"နောက်သို့"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ပင်မစာမျက်နှာ"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"မီနူး"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"မျှဝေ၊ ရုပ်သံဖမ်း (သို့) ကာစ်လုပ်သည့်အခါ Android သည် သင့်ဖန်သားပြင်တွင် မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"အက်ပ်တစ်ခုဖြင့် မျှဝေ၊ ရုပ်သံဖမ်း (သို့) ကာစ်လုပ်သည့်အခါ Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"စတင်ရန်"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"သင်၏ IT စီမံခန့်ခွဲသူက ပိတ်ထားသည်"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ကိရိယာ မူဝါဒက ဖန်သားပြင်ပုံဖမ်းခြင်းကို ပိတ်ထားသည်"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"အားလုံးရှင်းရန်"</string>

@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"Көру үшін түртіңіз."</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"Экран жазбасын сақтау кезінде қате шықты."</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Экрандағы бейнені жазу кезінде қате шықты."</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"Толық экранда көру"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"Шығу үшін жоғарыдан төмен қарай сырғытыңыз."</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"Түсінікті"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"Артқа"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"Үй"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"Mәзір"</string>
@@ -301,8 +304,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Күн шыққанға дейін"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Қосылу уақыты: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> дейін"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Ұйқы уақытында"</string>
-    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Ұйқы уақыты аяқталғанға дейін"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Ұйқы режимінде"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Ұйқы режимі аяқталғанға дейін"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC өшірулі"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC қосулы"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Бөлісу, жазу не трансляциялау кезінде Android жүйесі экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Қолданба экранын бөлісу, жазу не трансляциялау кезінде Android жүйесі онда көрінетін не ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Бастау"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Әкімшіңіз бөгеген"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Құрылғы саясатына байланысты экранды түсіру өшірілді."</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Барлығын тазарту"</string>

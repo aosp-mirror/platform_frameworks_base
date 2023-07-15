@@ -118,6 +118,9 @@
     <string name="screenrecord_save_text" msgid="3008973099800840163">"চাবলৈ টিপক"</string>
     <string name="screenrecord_save_error" msgid="5862648532560118815">"ৰেকৰ্ড কৰা স্ক্ৰীন ছেভ কৰোঁতে আসোঁৱাহ হৈছে"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"স্ক্রীন ৰেকৰ্ড কৰা আৰম্ভ কৰোঁতে আসোঁৱাহ হৈছে"</string>
+    <string name="immersive_cling_title" msgid="8372056499315585941">"পূৰ্ণ স্ক্ৰীনত চাই আছে"</string>
+    <string name="immersive_cling_description" msgid="6913958856085185775">"বাহিৰ হ’বলৈ ওপৰৰ পৰা তললৈ ছোৱাইপ কৰক।"</string>
+    <string name="immersive_cling_positive" msgid="3076681691468978568">"বুজি পালোঁ"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"উভতি যাওক"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"গৃহ পৃষ্ঠাৰ বুটাম"</string>
     <string name="accessibility_menu" msgid="2701163794470513040">"মেনু"</string>
@@ -412,6 +415,14 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"আপুনি শ্বেয়াৰ কৰা, ৰেকৰ্ড কৰা অথবা কাষ্ট কৰাৰ সময়ত, আপোনাৰ স্ক্ৰীনখনত দৃশ্যমান হোৱা যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ Androidৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা, ফট’ আৰু অডিঅ’ আৰু ভিডিঅ’ৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"আপুনি শ্বেয়াৰ কৰা, ৰেকৰ্ড কৰা অথবা কাষ্ট কৰাৰ সময়ত, সেইটো এপত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ Androidৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা, ফট’ আৰু অডিঅ’ আৰু ভিডিঅ’ৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"আৰম্ভ কৰক"</string>
+    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
+    <skip />
+    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
+    <skip />
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"আপোনাৰ আইটি প্ৰশাসকে অৱৰোধ কৰিছে"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ডিভাইচ সম্পৰ্কীয় নীতিয়ে স্ক্ৰীন কেপশ্বাৰ কৰাটো অক্ষম কৰিছে"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"আটাইবোৰ মচক"</string>
