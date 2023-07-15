@@ -2317,6 +2317,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Não é possível acessar a câmera do smartphone pelo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Não é possível acessar a câmera do tablet pelo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Não é possível acessar esse conteúdo durante o streaming. Tente pelo smartphone."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Não é possível usar o modo picture-in-picture durante o streaming"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Padrão do sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"CHIP <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Permissão do perfil do relógio complementar para gerenciar relógios"</string>

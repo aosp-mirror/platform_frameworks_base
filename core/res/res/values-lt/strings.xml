@@ -2318,6 +2318,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nepavyko pasiekti telefono fotoaparato iš „<xliff:g id="DEVICE">%1$s</xliff:g>“"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nepavyko pasiekti planšetinio kompiuterio fotoaparato iš „<xliff:g id="DEVICE">%1$s</xliff:g>“"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Nepavyksta pasiekti perduodant srautu. Pabandykite naudoti telefoną."</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"Negalima peržiūrėti vaizdo vaizde perduodant srautu"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Numatytoji sistemos vertė"</string>
     <string name="default_card_name" msgid="9198284935962911468">"KORTELĖ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Papildomos programos laikrodžio profilio leidimas valdyti laikrodžius"</string>
