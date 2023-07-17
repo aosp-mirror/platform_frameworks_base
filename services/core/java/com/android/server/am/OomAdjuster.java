@@ -2222,7 +2222,7 @@ public class OomAdjuster {
 
             if (s.isForeground) {
                 final int fgsType = s.foregroundServiceType;
-                if (s.mAllowWhileInUsePermissionInFgs) {
+                if (s.isFgsAllowedWIU()) {
                     capabilityFromFGS |=
                             (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
                                     != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
