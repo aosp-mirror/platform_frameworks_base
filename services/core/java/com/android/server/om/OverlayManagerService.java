@@ -1120,6 +1120,21 @@ public final class OverlayManagerService extends SystemService {
             int callingUid = Binder.getCallingUid();
             mActorEnforcer.enforceActor(overlayInfo, methodName, callingUid, realUserId);
         }
+
+        /**
+         * @hide
+         */
+        public String getPartitionOrder() {
+            return mImpl.getOverlayConfig().getPartitionOrder();
+        }
+
+        /**
+         * @hide
+         */
+        public boolean isDefaultPartitionOrder() {
+            return mImpl.getOverlayConfig().isDefaultPartitionOrder();
+        }
+
     };
 
     private static final class PackageManagerHelperImpl implements PackageManagerHelper {
