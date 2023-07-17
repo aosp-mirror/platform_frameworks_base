@@ -450,27 +450,27 @@ public final class MediaRoute2Info implements Parcelable {
     public static final String FEATURE_REMOTE_GROUP_PLAYBACK =
             "android.media.route.feature.REMOTE_GROUP_PLAYBACK";
 
-    final String mId;
-    final CharSequence mName;
-    final List<String> mFeatures;
+    private final String mId;
+    private final CharSequence mName;
+    private final List<String> mFeatures;
     @Type
-    final int mType;
-    final boolean mIsSystem;
-    final Uri mIconUri;
-    final CharSequence mDescription;
+    private final int mType;
+    private final boolean mIsSystem;
+    private final Uri mIconUri;
+    private final CharSequence mDescription;
     @ConnectionState
-    final int mConnectionState;
-    final String mClientPackageName;
-    final String mPackageName;
-    final int mVolumeHandling;
-    final int mVolumeMax;
-    final int mVolume;
-    final String mAddress;
-    final Set<String> mDeduplicationIds;
-    final Bundle mExtras;
-    final String mProviderId;
-    final boolean mIsVisibilityRestricted;
-    final Set<String> mAllowedPackages;
+    private final int mConnectionState;
+    private final String mClientPackageName;
+    private final String mPackageName;
+    private final int mVolumeHandling;
+    private final int mVolumeMax;
+    private final int mVolume;
+    private final String mAddress;
+    private final Set<String> mDeduplicationIds;
+    private final Bundle mExtras;
+    private final String mProviderId;
+    private final boolean mIsVisibilityRestricted;
+    private final Set<String> mAllowedPackages;
 
     MediaRoute2Info(@NonNull Builder builder) {
         mId = builder.mId;
