@@ -25,6 +25,7 @@ import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.wm.shell.flicker.service.Utils
 import org.junit.After
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -45,6 +46,8 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
     @Before
     fun setup() {
+        Assume.assumeTrue(tapl.isTablet)
+
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
 
