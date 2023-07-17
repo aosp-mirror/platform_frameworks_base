@@ -99,16 +99,17 @@ public class EnterDesktopTaskTransitionHandlerTest {
         final int taskId = 1;
         WindowContainerTransaction wct = new WindowContainerTransaction();
         doReturn(mToken).when(mTransitions)
-                .startTransition(Transitions.TRANSIT_ENTER_FREEFORM, wct,
+                .startTransition(Transitions.TRANSIT_START_MOVE_TO_DESKTOP_MODE, wct,
                         mEnterDesktopTaskTransitionHandler);
         doReturn(taskId).when(mMoveToDesktopAnimator).getTaskId();
 
-        mEnterDesktopTaskTransitionHandler.startMoveToFreeformAnimation(wct,
+        mEnterDesktopTaskTransitionHandler.startMoveToDesktop(wct,
                 mMoveToDesktopAnimator, null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FREEFORM);
-        TransitionInfo info = createTransitionInfo(Transitions.TRANSIT_ENTER_FREEFORM, change);
+        TransitionInfo info = createTransitionInfo(Transitions.TRANSIT_START_MOVE_TO_DESKTOP_MODE,
+                change);
 
 
         assertTrue(mEnterDesktopTaskTransitionHandler
@@ -120,17 +121,18 @@ public class EnterDesktopTaskTransitionHandlerTest {
 
     @Test
     public void testTransitEnterDesktopModeAnimation() throws Throwable {
-        final int transitionType = Transitions.TRANSIT_ENTER_DESKTOP_MODE;
+        final int transitionType = Transitions.TRANSIT_FINALIZE_MOVE_TO_DESKTOP_MODE;
         final int taskId = 1;
         WindowContainerTransaction wct = new WindowContainerTransaction();
         doReturn(mToken).when(mTransitions)
                 .startTransition(transitionType, wct, mEnterDesktopTaskTransitionHandler);
-        mEnterDesktopTaskTransitionHandler.startTransition(transitionType, wct, null);
+        mEnterDesktopTaskTransitionHandler.finalizeMoveToDesktop(wct, null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FREEFORM);
         change.setEndAbsBounds(new Rect(0, 0, 1, 1));
-        TransitionInfo info = createTransitionInfo(Transitions.TRANSIT_ENTER_DESKTOP_MODE, change);
+        TransitionInfo info = createTransitionInfo(
+                Transitions.TRANSIT_FINALIZE_MOVE_TO_DESKTOP_MODE, change);
 
         runOnUiThread(() -> {
             try {
