@@ -709,6 +709,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     != PackageManager.PERMISSION_GRANTED) {
                 params.installFlags &= ~PackageManager.INSTALL_ALLOW_TEST;
             }
+
+            // developmentInstallFlags can ony be set by shell or root.
+            params.developmentInstallFlags = 0;
         }
 
         String originatingPackageName = null;

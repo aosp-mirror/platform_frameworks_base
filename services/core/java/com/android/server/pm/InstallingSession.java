@@ -68,6 +68,7 @@ class InstallingSession {
     final MoveInfo mMoveInfo;
     final IPackageInstallObserver2 mObserver;
     int mInstallFlags;
+    int mDevelopmentInstallFlags;
     @NonNull
     final InstallSource mInstallSource;
     final String mVolumeUuid;
@@ -102,8 +103,8 @@ class InstallingSession {
 
     // For move install
     InstallingSession(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
-            int installFlags, InstallSource installSource, String volumeUuid,
-            UserHandle user, String packageAbiOverride, int packageSource,
+            int installFlags, int developmentInstallFlags, InstallSource installSource,
+            String volumeUuid, UserHandle user, String packageAbiOverride, int packageSource,
             PackageLite packageLite, PackageManagerService pm) {
         mPm = pm;
         mUser = user;
@@ -113,6 +114,7 @@ class InstallingSession {
         mMoveInfo = moveInfo;
         mObserver = observer;
         mInstallFlags = installFlags;
+        mDevelopmentInstallFlags = developmentInstallFlags;
         mInstallSource = Preconditions.checkNotNull(installSource);
         mVolumeUuid = volumeUuid;
         mPackageAbiOverride = packageAbiOverride;
@@ -149,6 +151,7 @@ class InstallingSession {
         mInstallScenario = sessionParams.installScenario;
         mObserver = observer;
         mInstallFlags = sessionParams.installFlags;
+        mDevelopmentInstallFlags = sessionParams.developmentInstallFlags;
         mInstallSource = installSource;
         mVolumeUuid = sessionParams.volumeUuid;
         mPackageAbiOverride = sessionParams.abiOverride;
@@ -592,6 +595,10 @@ class InstallingSession {
                     "Only a non-staged install of a single APEX is supported");
         }
         InstallRequest request = requests.get(0);
+        boolean force =
+                (request.getDevelopmentInstallFlags()
+                        & PackageManager.INSTALL_DEVELOPMENT_FORCE_NON_STAGED_APEX_UPDATE)
+                        != 0;
         try {
             // Should directory scanning logic be moved to ApexManager for better test coverage?
             final File dir = request.getOriginInfo().mResolvedFile;
@@ -608,7 +615,7 @@ class InstallingSession {
                         PackageManagerException.INTERNAL_ERROR_APEX_MORE_THAN_ONE_FILE);
             }
             try (PackageParser2 packageParser = mPm.mInjector.getScanningPackageParser()) {
-                ApexInfo apexInfo = mPm.mApexManager.installPackage(apexes[0]);
+                ApexInfo apexInfo = mPm.mApexManager.installPackage(apexes[0], force);
                 // APEX has been handled successfully by apexd. Let's continue the install flow
                 // so it will be scanned and registered with the system.
                 // TODO(b/225756739): Improve atomicity of rebootless APEX install.
