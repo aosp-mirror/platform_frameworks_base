@@ -6271,10 +6271,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.println(endcallBehaviorToString(mEndcallBehavior));
         pw.print(prefix);
         // TODO(b/117479243): handle it in InputPolicy
-        pw.print("mDisplayHomeButtonHandlers=");
+        pw.println("mDisplayHomeButtonHandlers=");
         for (int i = 0; i < mDisplayHomeButtonHandlers.size(); i++) {
             final int key = mDisplayHomeButtonHandlers.keyAt(i);
-            pw.println(mDisplayHomeButtonHandlers.get(key));
+            pw.print(prefix); pw.print("  "); pw.println(mDisplayHomeButtonHandlers.get(key));
         }
         pw.print(prefix); pw.print("mKeyguardOccluded="); pw.print(isKeyguardOccluded());
                 pw.print(" mKeyguardOccludedChanged="); pw.print(mKeyguardOccludedChanged);
