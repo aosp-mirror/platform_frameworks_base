@@ -3477,6 +3477,8 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         if (forceNonStaged) {
             sessionParams.isStaged = false;
+            sessionParams.developmentInstallFlags |=
+                    PackageManager.INSTALL_DEVELOPMENT_FORCE_NON_STAGED_APEX_UPDATE;
         } else if (staged) {
             sessionParams.setStaged();
         }
@@ -4394,7 +4396,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("          This flag is only useful for APEX installs that are implicitly");
         pw.println("          assumed to be staged.");
         pw.println("      --force-non-staged: force the installation to run under a non-staged");
-        pw.println("          session, which may complete without requiring a reboot");
+        pw.println("          session, which may complete without requiring a reboot. This will");
+        pw.println("          force a rebootless update even for APEXes that don't support it");
         pw.println("      --staged-ready-timeout: By default, staged sessions wait "
                 + DEFAULT_STAGED_READY_TIMEOUT_MS);
         pw.println("          milliseconds for pre-reboot verification to complete when");

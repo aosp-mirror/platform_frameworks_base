@@ -2415,6 +2415,8 @@ public class PackageInstaller {
         public int requireUserAction = USER_ACTION_UNSPECIFIED;
         /** {@hide} */
         public boolean applicationEnabledSettingPersistent = false;
+        /** {@hide} */
+        public int developmentInstallFlags = 0;
 
         private final ArrayMap<String, Integer> mPermissionStates;
 
@@ -2464,6 +2466,7 @@ public class PackageInstaller {
             requireUserAction = source.readInt();
             packageSource = source.readInt();
             applicationEnabledSettingPersistent = source.readBoolean();
+            developmentInstallFlags = source.readInt();
         }
 
         /** {@hide} */
@@ -2495,6 +2498,7 @@ public class PackageInstaller {
             ret.requireUserAction = requireUserAction;
             ret.packageSource = packageSource;
             ret.applicationEnabledSettingPersistent = applicationEnabledSettingPersistent;
+            ret.developmentInstallFlags = developmentInstallFlags;
             return ret;
         }
 
@@ -3159,6 +3163,7 @@ public class PackageInstaller {
             pw.printPair("rollbackDataPolicy", rollbackDataPolicy);
             pw.printPair("applicationEnabledSettingPersistent",
                     applicationEnabledSettingPersistent);
+            pw.printHexPair("developmentInstallFlags", developmentInstallFlags);
             pw.println();
         }
 
@@ -3200,6 +3205,7 @@ public class PackageInstaller {
             dest.writeInt(requireUserAction);
             dest.writeInt(packageSource);
             dest.writeBoolean(applicationEnabledSettingPersistent);
+            dest.writeInt(developmentInstallFlags);
         }
 
         public static final Parcelable.Creator<SessionParams>
