@@ -461,6 +461,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private IntentSender mRemoteStatusReceiver;
 
     @GuardedBy("mLock")
+    private IntentSender mPreapprovalRemoteStatusReceiver;
+
+    @GuardedBy("mLock")
     private PreapprovalDetails mPreapprovalDetails;
 
     /** Fields derived from commit parsing */
@@ -2040,11 +2043,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
          * {@link #setPermissionsResult(boolean)} is called and then
          * {@link #MSG_PRE_APPROVAL_REQUEST} is handled to come back here to check again.
          */
-        if (sendPendingUserActionIntentIfNeeded()) {
+        if (sendPendingUserActionIntentIfNeeded(/* forPreapproval= */true)) {
             return;
         }
 
-        dispatchSessionPreappoved();
+        dispatchSessionPreapproved();
     }
 
     private final class FileSystemConnector extends
@@ -2499,14 +2502,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * @return true if the session set requires user action for the installation, otherwise false.
      */
     @WorkerThread
-    private boolean sendPendingUserActionIntentIfNeeded() {
+    private boolean sendPendingUserActionIntentIfNeeded(boolean forPreapproval) {
         // To support pre-approval request of atomic install, we allow child session to handle
         // the result by itself since it has the status receiver.
         if (isCommitted()) {
             assertNotChild("PackageInstallerSession#sendPendingUserActionIntentIfNeeded");
         }
-
-        final IntentSender statusReceiver = getRemoteStatusReceiver();
+        // Since there are separate status receivers for session preapproval and commit,
+        // check whether user action is requested for session preapproval or commit
+        final IntentSender statusReceiver = forPreapproval ? getPreapprovalRemoteStatusReceiver()
+                                            : getRemoteStatusReceiver();
         return sessionContains(s -> checkUserActionRequirement(s, statusReceiver));
     }
 
@@ -2529,7 +2534,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
          * install. Since control may come back here more than 1 time, we must ensure that it's
          * value is not overwritten.
          */
-        boolean wasUserActionIntentSent = sendPendingUserActionIntentIfNeeded();
+        boolean wasUserActionIntentSent =
+                sendPendingUserActionIntentIfNeeded(/* forPreapproval= */false);
         if (mUserActionRequired == null) {
             mUserActionRequired = wasUserActionIntentSent;
         }
@@ -2588,6 +2594,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void setRemoteStatusReceiver(IntentSender remoteStatusReceiver) {
         synchronized (mLock) {
             mRemoteStatusReceiver = remoteStatusReceiver;
+        }
+    }
+
+    private IntentSender getPreapprovalRemoteStatusReceiver() {
+        synchronized (mLock) {
+            return mPreapprovalRemoteStatusReceiver;
+        }
+    }
+
+    private void setPreapprovalRemoteStatusReceiver(IntentSender remoteStatusReceiver) {
+        synchronized (mLock) {
+            mPreapprovalRemoteStatusReceiver = remoteStatusReceiver;
         }
     }
 
@@ -2828,7 +2846,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private void onVerificationComplete() {
         if (isStaged()) {
             mStagingManager.commitSession(mStagedSession);
-            sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED, "Session staged", null);
+            sendUpdateToRemoteStatusReceiver(INSTALL_SUCCEEDED, "Session staged",
+                    /* extras= */ null, /* forPreapproval= */ false);
             return;
         }
         install();
@@ -4585,7 +4604,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void dispatchSessionFinished(int returnCode, String msg, Bundle extras) {
-        sendUpdateToRemoteStatusReceiver(returnCode, msg, extras);
+        // Session can be marked as finished due to user rejecting pre approval or commit request,
+        // any internal error or after successful completion. As such, check whether
+        // the session is in the preapproval stage or the commit stage.
+        sendUpdateToRemoteStatusReceiver(returnCode, msg, extras,
+                /* forPreapproval= */ isPreapprovalRequested() && !isCommitted());
 
         synchronized (mLock) {
             mFinalStatus = returnCode;
@@ -4607,8 +4630,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void sendUpdateToRemoteStatusReceiver(int returnCode, String msg, Bundle extras) {
-        final IntentSender statusReceiver = getRemoteStatusReceiver();
+    private void sendUpdateToRemoteStatusReceiver(int returnCode, String msg, Bundle extras,
+            boolean forPreapproval) {
+        final IntentSender statusReceiver = forPreapproval ? getPreapprovalRemoteStatusReceiver()
+                                            : getRemoteStatusReceiver();
         if (statusReceiver != null) {
             // Execute observer.onPackageInstalled on different thread as we don't want callers
             // inside the system server have to worry about catching the callbacks while they are
@@ -4624,8 +4649,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private void dispatchSessionPreappoved() {
-        final IntentSender target = getRemoteStatusReceiver();
+    private void dispatchSessionPreapproved() {
+        final IntentSender target = getPreapprovalRemoteStatusReceiver();
         final Intent intent = new Intent();
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
         intent.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_SUCCESS);
@@ -4646,7 +4671,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         if (!mPm.isPreapprovalRequestAvailable()) {
             sendUpdateToRemoteStatusReceiver(INSTALL_FAILED_PRE_APPROVAL_NOT_AVAILABLE,
-                    "Request user pre-approval is currently not available.", null /* extras */);
+                    "Request user pre-approval is currently not available.", /* extras= */null,
+                    /* preapproval= */true);
             return;
         }
 
@@ -4668,7 +4694,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             assertPreparedAndNotSealedLocked("request of session " + sessionId);
             mPreapprovalDetails = details;
-            setRemoteStatusReceiver(statusReceiver);
+            setPreapprovalRemoteStatusReceiver(statusReceiver);
         }
     }
 
