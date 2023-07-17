@@ -176,6 +176,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private static native void nativeCancel(long connectionPtr);
     private static native void nativeResetCancel(long connectionPtr, boolean cancelable);
     private static native int nativeLastInsertRowId(long connectionPtr);
+    private static native long nativeChanges(long connectionPtr);
+    private static native long nativeTotalChanges(long connectionPtr);
 
     private SQLiteConnection(SQLiteConnectionPool pool,
             SQLiteDatabaseConfiguration configuration,
@@ -1823,9 +1825,34 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      * @return The ROWID of the last row to be inserted under this connection.
      * @hide
      */
-    long lastInsertRowId() {
+    long getLastInsertRowId() {
         try {
             return nativeLastInsertRowId(mConnectionPtr);
+        } finally {
+            Reference.reachabilityFence(this);
+        }
+    }
+
+    /**
+     * Return the number of database changes on the current connection made by the last SQL
+     * statement
+     * @hide
+     */
+    long getLastChangedRowsCount() {
+        try {
+            return nativeChanges(mConnectionPtr);
+        } finally {
+            Reference.reachabilityFence(this);
+        }
+    }
+
+    /**
+     * Return the total number of database changes made on the current connection.
+     * @hide
+     */
+    long getTotalChangedRowsCount() {
+        try {
+            return nativeTotalChanges(mConnectionPtr);
         } finally {
             Reference.reachabilityFence(this);
         }

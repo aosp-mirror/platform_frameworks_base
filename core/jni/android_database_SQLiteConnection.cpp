@@ -885,6 +885,16 @@ static jint nativeLastInsertRowId(JNIEnv* env, jclass, jlong connectionPtr) {
     return sqlite3_last_insert_rowid(connection->db);
 }
 
+static jlong nativeChanges(JNIEnv* env, jclass, jlong connectionPtr) {
+    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
+    return sqlite3_changes64(connection->db);
+}
+
+static jlong nativeTotalChanges(JNIEnv* env, jclass, jlong connectionPtr) {
+    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
+    return sqlite3_total_changes64(connection->db);
+}
+
 static const JNINativeMethod sMethods[] =
 {
     /* name, signature, funcPtr */
@@ -943,7 +953,9 @@ static const JNINativeMethod sMethods[] =
     { "nativeResetCancel", "(JZ)V",
             (void*)nativeResetCancel },
 
-    { "nativeLastInsertRowId", "(J)I", (void*) nativeLastInsertRowId }
+    { "nativeLastInsertRowId", "(J)I", (void*) nativeLastInsertRowId },
+    { "nativeChanges", "(J)J", (void*) nativeChanges },
+    { "nativeTotalChanges", "(J)J", (void*) nativeTotalChanges },
 };
 
 int register_android_database_SQLiteConnection(JNIEnv *env)

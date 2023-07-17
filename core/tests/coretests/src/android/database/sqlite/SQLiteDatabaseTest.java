@@ -137,4 +137,81 @@ public class SQLiteDatabaseTest {
             fail("Timed out");
         }
     }
+
+    /**
+     * Create a database with one table with three columns.
+     */
+    private void createComplexDatabase() {
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.execSQL("CREATE TABLE t1 (i int, d double, t text);");
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
+    /**
+     * A three-value insert for the complex database.
+     */
+    private String createComplexInsert() {
+        return "INSERT INTO t1 (i, d, t) VALUES (?1, ?2, ?3)";
+    }
+
+    @Test
+    public void testAutomaticCounters() {
+        final int size = 10;
+
+        createComplexDatabase();
+
+        // Put 10 lines in the database.
+        mDatabase.beginTransaction();
+        try {
+            try (SQLiteRawStatement s = mDatabase.createRawStatement(createComplexInsert())) {
+                for (int i = 0; i < size; i++) {
+                    int vi = i * 3;
+                    double vd = i * 2.5;
+                    String vt = String.format("text%02dvalue", i);
+                    s.bindInt(1, vi);
+                    s.bindDouble(2, vd);
+                    s.bindText(3, vt);
+                    boolean r = s.step();
+                    // No row is returned by this query.
+                    assertFalse(r);
+                    s.reset();
+                    assertEquals(i + 1, mDatabase.getLastInsertRowId());
+                    assertEquals(1, mDatabase.getLastChangedRowsCount());
+                    assertEquals(i + 2, mDatabase.getTotalChangedRowsCount());
+                }
+            }
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+
+        // Put a second 10 lines in the database.
+        mDatabase.beginTransaction();
+        try {
+            try (SQLiteRawStatement s = mDatabase.createRawStatement(createComplexInsert())) {
+                for (int i = 0; i < size; i++) {
+                    int vi = i * 3;
+                    double vd = i * 2.5;
+                    String vt = String.format("text%02dvalue", i);
+                    s.bindInt(1, vi);
+                    s.bindDouble(2, vd);
+                    s.bindText(3, vt);
+                    boolean r = s.step();
+                    // No row is returned by this query.
+                    assertFalse(r);
+                    s.reset();
+                    assertEquals(size + i + 1, mDatabase.getLastInsertRowId());
+                    assertEquals(1, mDatabase.getLastChangedRowsCount());
+                    assertEquals(size + i + 2, mDatabase.getTotalChangedRowsCount());
+                }
+            }
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
 }
