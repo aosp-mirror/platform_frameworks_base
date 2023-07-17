@@ -149,11 +149,13 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Transition type for maximize to freeform transition. */
     public static final int TRANSIT_RESTORE_FROM_MAXIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 9;
 
-    /** Transition type to freeform in desktop mode. */
-    public static final int TRANSIT_ENTER_FREEFORM = WindowManager.TRANSIT_FIRST_CUSTOM + 10;
+    /** Transition type for starting the move to desktop mode. */
+    public static final int TRANSIT_START_MOVE_TO_DESKTOP_MODE =
+            WindowManager.TRANSIT_FIRST_CUSTOM + 10;
 
-    /** Transition type to freeform in desktop mode. */
-    public static final int TRANSIT_ENTER_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 11;
+    /** Transition type for finalizing the move to desktop mode. */
+    public static final int TRANSIT_FINALIZE_MOVE_TO_DESKTOP_MODE =
+            WindowManager.TRANSIT_FIRST_CUSTOM + 11;
 
     /** Transition type to fullscreen from desktop mode. */
     public static final int TRANSIT_EXIT_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 12;

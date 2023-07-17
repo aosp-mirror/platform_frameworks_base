@@ -197,7 +197,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             @NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change) {
         if (change.getMode() == WindowManager.TRANSIT_CHANGE
-                && (info.getType() == Transitions.TRANSIT_ENTER_DESKTOP_MODE
+                && (info.getType() == Transitions.TRANSIT_FINALIZE_MOVE_TO_DESKTOP_MODE
                 || info.getType() == Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
                 || info.getType() == Transitions.TRANSIT_EXIT_DESKTOP_MODE
                 || info.getType() == Transitions.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE)) {
@@ -616,7 +616,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     } else if (mMoveToDesktopAnimator != null) {
                         relevantDecor.incrementRelayoutBlock();
                         mDesktopTasksController.ifPresent(
-                                c -> c.cancelMoveToFreeform(relevantDecor.mTaskInfo,
+                                c -> c.cancelMoveToDesktop(relevantDecor.mTaskInfo,
                                         mMoveToDesktopAnimator));
                         mMoveToDesktopAnimator = null;
                         return;
@@ -643,7 +643,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                                     mDragToDesktopAnimationStartBounds, relevantDecor.mTaskInfo,
                                     relevantDecor.mTaskSurface);
                             mDesktopTasksController.ifPresent(
-                                    c -> c.moveToFreeform(relevantDecor.mTaskInfo,
+                                    c -> c.startMoveToDesktop(relevantDecor.mTaskInfo,
                                             mDragToDesktopAnimationStartBounds,
                                             mMoveToDesktopAnimator));
                             mMoveToDesktopAnimator.startAnimation();
