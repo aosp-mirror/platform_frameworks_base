@@ -111,8 +111,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var lockIconViewController: LockIconViewController
     @Mock private lateinit var phoneStatusBarViewController: PhoneStatusBarViewController
     @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
-    @Mock
-    private lateinit var mLockscreenHostedDreamGestureListener: LockscreenHostedDreamGestureListener
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
@@ -149,7 +147,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         featureFlags.set(Flags.DUAL_SHADE, false)
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
-        featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
 
         val inputProxy = MultiShadeInputProxy()
         testScope = TestScope()
@@ -186,7 +183,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 notificationInsetsController,
                 ambientState,
                 pulsingGestureListener,
-                mLockscreenHostedDreamGestureListener,
                 keyguardBouncerViewModel,
                 keyguardBouncerComponentFactory,
                 mock(KeyguardMessageAreaController.Factory::class.java),
