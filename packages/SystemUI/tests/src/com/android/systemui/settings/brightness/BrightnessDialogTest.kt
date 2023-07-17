@@ -18,7 +18,6 @@ package com.android.systemui.settings.brightness
 
 import android.content.Intent
 import android.graphics.Rect
-import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -29,8 +28,6 @@ import androidx.test.rule.ActivityTestRule
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.SingleActivityFactory
-import com.android.systemui.settings.FakeDisplayTracker
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -53,16 +50,14 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper
 class BrightnessDialogTest : SysuiTestCase() {
 
-    @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var brightnessSliderControllerFactory: BrightnessSliderController.Factory
-    @Mock private lateinit var backgroundHandler: Handler
     @Mock private lateinit var brightnessSliderController: BrightnessSliderController
+    @Mock private lateinit var brightnessControllerFactory: BrightnessController.Factory
+    @Mock private lateinit var brightnessController: BrightnessController
     @Mock private lateinit var accessibilityMgr: AccessibilityManagerWrapper
 
     private val clock = FakeSystemClock()
     private val mainExecutor = FakeExecutor(clock)
-
-    private var displayTracker = FakeDisplayTracker(mContext)
 
     @Rule
     @JvmField
@@ -70,11 +65,9 @@ class BrightnessDialogTest : SysuiTestCase() {
         ActivityTestRule(
             /* activityFactory= */ SingleActivityFactory {
                 TestDialog(
-                    userTracker,
-                    displayTracker,
                     brightnessSliderControllerFactory,
+                    brightnessControllerFactory,
                     mainExecutor,
-                    backgroundHandler,
                     accessibilityMgr
                 )
             },
@@ -88,6 +81,7 @@ class BrightnessDialogTest : SysuiTestCase() {
         `when`(brightnessSliderControllerFactory.create(any(), any()))
             .thenReturn(brightnessSliderController)
         `when`(brightnessSliderController.rootView).thenReturn(View(context))
+        `when`(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
     }
 
     @After
@@ -178,19 +172,15 @@ class BrightnessDialogTest : SysuiTestCase() {
     }
 
     class TestDialog(
-        userTracker: UserTracker,
-        displayTracker: FakeDisplayTracker,
         brightnessSliderControllerFactory: BrightnessSliderController.Factory,
+        brightnessControllerFactory: BrightnessController.Factory,
         mainExecutor: DelayableExecutor,
-        backgroundHandler: Handler,
         accessibilityMgr: AccessibilityManagerWrapper
     ) :
         BrightnessDialog(
-            userTracker,
-            displayTracker,
             brightnessSliderControllerFactory,
+            brightnessControllerFactory,
             mainExecutor,
-            backgroundHandler,
             accessibilityMgr
         )
 }
