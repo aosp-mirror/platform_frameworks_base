@@ -142,6 +142,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private static final int MSG_STATSD_HBM_BRIGHTNESS = 11;
     private static final int MSG_SWITCH_USER = 12;
     private static final int MSG_BOOT_COMPLETED = 13;
+    private static final int MSG_SET_DWBC_STRONG_MODE = 14;
+    private static final int MSG_SET_DWBC_COLOR_OVERRIDE = 15;
+    private static final int MSG_SET_DWBC_LOGGING_ENABLED = 16;
 
     private static final int BRIGHTNESS_CHANGE_STATSD_REPORT_INTERVAL_MS = 500;
 
@@ -368,6 +371,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private final boolean mSkipScreenOnBrightnessRamp;
 
     // Display white balance components.
+    // Critical methods must be called on DPC2 handler thread.
     @Nullable
     private final DisplayWhiteBalanceSettings mDisplayWhiteBalanceSettings;
     @Nullable
@@ -572,9 +576,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         DisplayWhiteBalanceController displayWhiteBalanceController = null;
         if (mDisplayId == Display.DEFAULT_DISPLAY) {
             try {
+                displayWhiteBalanceController = mInjector.getDisplayWhiteBalanceController(
+                        mHandler, mSensorManager, resources);
                 displayWhiteBalanceSettings = new DisplayWhiteBalanceSettings(mContext, mHandler);
-                displayWhiteBalanceController = DisplayWhiteBalanceFactory.create(mHandler,
-                        mSensorManager, resources);
                 displayWhiteBalanceSettings.setCallbacks(this);
                 displayWhiteBalanceController.setCallbacks(this);
             } catch (Exception e) {
@@ -849,10 +853,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             mStopped = true;
             Message msg = mHandler.obtainMessage(MSG_STOP);
             mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
-
-            if (mDisplayWhiteBalanceController != null) {
-                mDisplayWhiteBalanceController.setEnabled(false);
-            }
 
             if (mAutomaticBrightnessController != null) {
                 mAutomaticBrightnessController.stop();
@@ -1164,9 +1164,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mAutomaticBrightnessController.switchToInteractiveScreenBrightnessMode();
             }
         }
-        if (mDisplayWhiteBalanceController != null) {
-            mDisplayWhiteBalanceController.setStrongModeEnabled(isIdle);
-        }
+        Message msg = mHandler.obtainMessage();
+        msg.what = MSG_SET_DWBC_STRONG_MODE;
+        msg.arg1 = isIdle ? 1 : 0;
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     private final Animator.AnimatorListener mAnimatorListener = new Animator.AnimatorListener() {
@@ -1221,8 +1222,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         if (mScreenOffBrightnessSensorController != null) {
             mScreenOffBrightnessSensorController.stop();
         }
+
+        if (mDisplayWhiteBalanceController != null) {
+            mDisplayWhiteBalanceController.setEnabled(false);
+        }
     }
 
+    // Call from handler thread
     private void updatePowerState() {
         Trace.traceBegin(Trace.TRACE_TAG_POWER,
                 "DisplayPowerController#updatePowerState");
@@ -1723,6 +1729,32 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         if (previousPolicy != mPowerRequest.policy) {
             logDisplayPolicyChanged(mPowerRequest.policy);
+        }
+    }
+
+    private void setDwbcOverride(float cct) {
+        if (mDisplayWhiteBalanceController != null) {
+            mDisplayWhiteBalanceController.setAmbientColorTemperatureOverride(cct);
+            // The ambient color temperature override is only applied when the ambient color
+            // temperature changes or is updated, so it doesn't necessarily change the screen color
+            // temperature immediately. So, let's make it!
+            // We can call this directly, since we're already on the handler thread.
+            updatePowerState();
+        }
+    }
+
+    private void setDwbcStrongMode(int arg) {
+        if (mDisplayWhiteBalanceController != null) {
+            final boolean isIdle = (arg == 1);
+            mDisplayWhiteBalanceController.setStrongModeEnabled(isIdle);
+        }
+    }
+
+    private void setDwbcLoggingEnabled(int arg) {
+        if (mDisplayWhiteBalanceController != null) {
+            final boolean enabled = (arg == 1);
+            mDisplayWhiteBalanceController.setLoggingEnabled(enabled);
+            mDisplayWhiteBalanceSettings.setLoggingEnabled(enabled);
         }
     }
 
@@ -2755,6 +2787,19 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     mBootCompleted = true;
                     updatePowerState();
                     break;
+
+                case MSG_SET_DWBC_STRONG_MODE:
+                    setDwbcStrongMode(msg.arg1);
+                    break;
+
+                case MSG_SET_DWBC_COLOR_OVERRIDE:
+                    final float cct = Float.intBitsToFloat(msg.arg1);
+                    setDwbcOverride(cct);
+                    break;
+
+                case MSG_SET_DWBC_LOGGING_ENABLED:
+                    setDwbcLoggingEnabled(msg.arg1);
+                    break;
             }
         }
     }
@@ -2805,21 +2850,18 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     @Override
     public void setDisplayWhiteBalanceLoggingEnabled(boolean enabled) {
-        if (mDisplayWhiteBalanceController != null) {
-            mDisplayWhiteBalanceController.setLoggingEnabled(enabled);
-            mDisplayWhiteBalanceSettings.setLoggingEnabled(enabled);
-        }
+        Message msg = mHandler.obtainMessage();
+        msg.what = MSG_SET_DWBC_LOGGING_ENABLED;
+        msg.arg1 = enabled ? 1 : 0;
+        msg.sendToTarget();
     }
 
     @Override
     public void setAmbientColorTemperatureOverride(float cct) {
-        if (mDisplayWhiteBalanceController != null) {
-            mDisplayWhiteBalanceController.setAmbientColorTemperatureOverride(cct);
-            // The ambient color temperature override is only applied when the ambient color
-            // temperature changes or is updated, so it doesn't necessarily change the screen color
-            // temperature immediately. So, let's make it!
-            sendUpdatePowerState();
-        }
+        Message msg = mHandler.obtainMessage();
+        msg.what = MSG_SET_DWBC_COLOR_OVERRIDE;
+        msg.arg1 = Float.floatToIntBits(cct);
+        msg.sendToTarget();
     }
 
     /** Functional interface for providing time. */
@@ -2945,6 +2987,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         boolean isColorFadeEnabled() {
             return !ActivityManager.isLowRamDeviceStatic();
+        }
+
+        DisplayWhiteBalanceController getDisplayWhiteBalanceController(Handler handler,
+                SensorManager sensorManager, Resources resources) {
+            return DisplayWhiteBalanceFactory.create(handler,
+                    sensorManager, resources);
         }
     }
 
