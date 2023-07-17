@@ -204,6 +204,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             userChipViewModel,
             centralSurfacesImpl,
             shadeControllerImpl,
+            shadeViewController,
             shadeLogger,
             viewUtil,
             configurationController

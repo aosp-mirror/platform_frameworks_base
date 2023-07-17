@@ -42,7 +42,6 @@ import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeNotificationPresenter;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -52,7 +51,6 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
@@ -86,14 +84,11 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
             mock(NotificationsInteractor.class);
     private final KeyguardStateController mKeyguardStateController =
             mock(KeyguardStateController.class);
-    private final NotifPipelineFlags mNotifPipelineFlags = mock(NotifPipelineFlags.class);
     private final InitController mInitController = new InitController();
 
     @Before
     public void setup() {
         mMetricsLogger = new FakeMetricsLogger();
-        LockscreenGestureLogger lockscreenGestureLogger = new LockscreenGestureLogger(
-                mMetricsLogger);
         mCommandQueue = new CommandQueue(mContext, new FakeDisplayTracker(mContext));
         mDependency.injectTestDependency(StatusBarStateController.class,
                 mock(SysuiStatusBarStateController.class));
@@ -111,8 +106,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         when(notificationShadeWindowView.getResources()).thenReturn(mContext.getResources());
 
         ShadeViewController shadeViewController = mock(ShadeViewController.class);
-        when(shadeViewController.getShadeNotificationPresenter())
-                .thenReturn(mock(ShadeNotificationPresenter.class));
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(
                 mContext,
                 shadeViewController,
@@ -135,11 +128,9 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotifShadeEventSource.class),
                 mock(NotificationMediaManager.class),
                 mock(NotificationGutsManager.class),
-                lockscreenGestureLogger,
                 mInitController,
                 mNotificationInterruptStateProvider,
                 mock(NotificationRemoteInputManager.class),
-                mNotifPipelineFlags,
                 mock(NotificationRemoteInputManager.Callback.class),
                 mock(NotificationListContainer.class));
         mInitController.executePostInitTasks();
