@@ -179,7 +179,8 @@ public abstract class Tile implements Parcelable {
      * Check whether tile has order.
      */
     public boolean hasOrder() {
-        return mMetaData.containsKey(META_DATA_KEY_ORDER)
+        return mMetaData != null
+                && mMetaData.containsKey(META_DATA_KEY_ORDER)
                 && mMetaData.get(META_DATA_KEY_ORDER) instanceof Integer;
     }
 
@@ -204,7 +205,7 @@ public abstract class Tile implements Parcelable {
         CharSequence title = null;
         ensureMetadataNotStale(context);
         final PackageManager packageManager = context.getPackageManager();
-        if (mMetaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
+        if (mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
             if (mMetaData.containsKey(META_DATA_PREFERENCE_TITLE_URI)) {
                 // If has as uri to provide dynamic title, skip loading here. UI will later load
                 // at tile binding time.
