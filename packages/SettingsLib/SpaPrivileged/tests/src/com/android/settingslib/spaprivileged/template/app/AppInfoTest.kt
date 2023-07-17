@@ -93,6 +93,7 @@ class AppInfoTest {
         val packageInfo = PackageInfo().apply {
             applicationInfo = APP
             versionName = VERSION_NAME
+            packageName = PACKAGE_NAME
         }
         val appInfoProvider = AppInfoProvider(packageInfo)
 
@@ -105,9 +106,45 @@ class AppInfoTest {
         composeTestRule.onNodeWithText("version $VERSION_NAME").assertIsDisplayed()
     }
 
+    @Test
+    fun footerAppVersion_developmentEnabled_packageNameIsDisplayed() {
+        val packageInfo = PackageInfo().apply {
+            applicationInfo = APP
+            versionName = VERSION_NAME
+            packageName = PACKAGE_NAME
+        }
+        val appInfoProvider = AppInfoProvider(packageInfo)
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalContext provides context) {
+                appInfoProvider.FooterAppVersion(true)
+            }
+        }
+        composeTestRule.onNodeWithText(PACKAGE_NAME).assertIsDisplayed()
+    }
+
+
+    @Test
+    fun footerAppVersion_developmentDisabled_packageNameDoesNotExist() {
+        val packageInfo = PackageInfo().apply {
+            applicationInfo = APP
+            versionName = VERSION_NAME
+            packageName = PACKAGE_NAME
+        }
+        val appInfoProvider = AppInfoProvider(packageInfo)
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalContext provides context) {
+                appInfoProvider.FooterAppVersion(false)
+            }
+        }
+        composeTestRule.onNodeWithText(PACKAGE_NAME).assertDoesNotExist()
+    }
+
     private companion object {
         const val LABEL = "Label"
         const val VERSION_NAME = "VersionName"
+        const val PACKAGE_NAME = "package.name"
         val APP = object : ApplicationInfo() {
             override fun loadLabel(pm: PackageManager) = LABEL
         }
