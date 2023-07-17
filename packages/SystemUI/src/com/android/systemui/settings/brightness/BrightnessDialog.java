@@ -23,7 +23,6 @@ import static android.view.WindowManagerPolicyConstants.EXTRA_FROM_BRIGHTNESS_KE
 import android.app.Activity;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -37,10 +36,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.settings.DisplayTracker;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -56,26 +52,21 @@ public class BrightnessDialog extends Activity {
 
     private BrightnessController mBrightnessController;
     private final BrightnessSliderController.Factory mToggleSliderFactory;
-    private final UserTracker mUserTracker;
-    private final DisplayTracker mDisplayTracker;
+    private final BrightnessController.Factory mBrightnessControllerFactory;
     private final DelayableExecutor mMainExecutor;
-    private final Handler mBackgroundHandler;
     private final AccessibilityManagerWrapper mAccessibilityMgr;
     private Runnable mCancelTimeoutRunnable;
 
     @Inject
     public BrightnessDialog(
-            UserTracker userTracker,
-            DisplayTracker displayTracker,
-            BrightnessSliderController.Factory factory,
+            BrightnessSliderController.Factory brightnessSliderfactory,
+            BrightnessController.Factory brightnessControllerFactory,
             @Main DelayableExecutor mainExecutor,
-            @Background Handler bgHandler,
-            AccessibilityManagerWrapper accessibilityMgr) {
-        mUserTracker = userTracker;
-        mDisplayTracker = displayTracker;
-        mToggleSliderFactory = factory;
+            AccessibilityManagerWrapper accessibilityMgr
+    ) {
+        mToggleSliderFactory = brightnessSliderfactory;
+        mBrightnessControllerFactory = brightnessControllerFactory;
         mMainExecutor = mainExecutor;
-        mBackgroundHandler = bgHandler;
         mAccessibilityMgr = accessibilityMgr;
     }
 
@@ -121,8 +112,7 @@ public class BrightnessDialog extends Activity {
         controller.init();
         frame.addView(controller.getRootView(), MATCH_PARENT, WRAP_CONTENT);
 
-        mBrightnessController = new BrightnessController(
-                this, controller, mUserTracker, mDisplayTracker, mMainExecutor, mBackgroundHandler);
+        mBrightnessController = mBrightnessControllerFactory.create(controller);
     }
 
     @Override
