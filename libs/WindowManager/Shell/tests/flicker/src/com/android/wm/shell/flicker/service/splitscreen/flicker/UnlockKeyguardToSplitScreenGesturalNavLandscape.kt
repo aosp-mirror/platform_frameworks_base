@@ -16,7 +16,11 @@
 
 package com.android.wm.shell.flicker.service.splitscreen.flicker
 
+import android.tools.common.flicker.FlickerConfig
 import android.tools.common.flicker.annotation.ExpectedScenarios
+import android.tools.common.flicker.annotation.FlickerConfigProvider
+import android.tools.common.flicker.config.FlickerConfig
+import android.tools.common.flicker.config.FlickerServiceConfig
 import android.tools.device.flicker.junit.FlickerServiceJUnit4ClassRunner
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.UnlockKeyguardToSplitScreen
 import org.junit.Test
@@ -28,4 +32,11 @@ class UnlockKeyguardToSplitScreenGesturalNavLandscape : UnlockKeyguardToSplitScr
     @ExpectedScenarios(["QUICKSWITCH"])
     @Test
     override fun unlockKeyguardToSplitScreen() = super.unlockKeyguardToSplitScreen()
+
+    companion object {
+        @JvmStatic
+        @FlickerConfigProvider
+        fun flickerConfigProvider(): FlickerConfig =
+            FlickerConfig().use(FlickerServiceConfig.DEFAULT)
+    }
 }
