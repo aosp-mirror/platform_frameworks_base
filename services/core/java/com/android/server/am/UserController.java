@@ -105,6 +105,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
@@ -921,13 +922,24 @@ class UserController implements Handler.Callback {
 
     int stopUser(final int userId, final boolean force, boolean allowDelayedLocking,
             final IStopUserCallback stopUserCallback, KeyEvictedCallback keyEvictedCallback) {
-        checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "stopUser");
-        Preconditions.checkArgument(userId >= 0, "Invalid user id %d", userId);
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
-        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
-        synchronized (mLock) {
-            return stopUsersLU(userId, force, allowDelayedLocking, stopUserCallback,
-                    keyEvictedCallback);
+        t.traceBegin("UserController"
+                + (force ? "-force" : "")
+                + (allowDelayedLocking ? "-allowDelayedLocking" : "")
+                + (stopUserCallback != null ? "-withStopUserCallback" : "")
+                + "-" + userId + "-[stopUser]");
+        try {
+            checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "stopUser");
+            Preconditions.checkArgument(userId >= 0, "Invalid user id %d", userId);
+
+            enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
+            synchronized (mLock) {
+                return stopUsersLU(userId, force, allowDelayedLocking, stopUserCallback,
+                        keyEvictedCallback);
+            }
+        } finally {
+            t.traceEnd();
         }
     }
 
@@ -944,10 +956,10 @@ class UserController implements Handler.Callback {
         if (isCurrentUserLU(userId)) {
             return USER_OP_IS_CURRENT;
         }
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         int[] usersToStop = getUsersToStopLU(userId);
         // If one of related users is system or current, no related users should be stopped
-        for (int i = 0; i < usersToStop.length; i++) {
-            int relatedUserId = usersToStop[i];
+        for (int relatedUserId : usersToStop) {
             if ((UserHandle.USER_SYSTEM == relatedUserId) || isCurrentUserLU(relatedUserId)) {
                 if (DEBUG_MU) {
                     Slogf.i(TAG, "stopUsersLocked cannot stop related user " + relatedUserId);
@@ -956,8 +968,10 @@ class UserController implements Handler.Callback {
                 if (force) {
                     Slogf.i(TAG,
                             "Force stop user " + userId + ". Related users will not be stopped");
+                    t.traceBegin("stopSingleUserLU-force-" + userId + "-[stopUser]");
                     stopSingleUserLU(userId, allowDelayedLocking, stopUserCallback,
                             keyEvictedCallback);
+                    t.traceEnd();
                     return USER_OP_SUCCESS;
                 }
                 return USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
@@ -965,9 +979,11 @@ class UserController implements Handler.Callback {
         }
         if (DEBUG_MU) Slogf.i(TAG, "stopUsersLocked usersToStop=" + Arrays.toString(usersToStop));
         for (int userIdToStop : usersToStop) {
+            t.traceBegin("stopSingleUserLU-" + userIdToStop + "-[stopUser]");
             stopSingleUserLU(userIdToStop, allowDelayedLocking,
                     userIdToStop == userId ? stopUserCallback : null,
                     userIdToStop == userId ? keyEvictedCallback : null);
+            t.traceEnd();
         }
         return USER_OP_SUCCESS;
     }
@@ -1047,14 +1063,24 @@ class UserController implements Handler.Callback {
                 && uss.state != UserState.STATE_SHUTDOWN) {
             uss.setState(UserState.STATE_STOPPING);
             UserManagerInternal userManagerInternal = mInjector.getUserManagerInternal();
+            TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+            t.traceBegin("setUserState-STATE_STOPPING-" + userId + "-[stopUser]");
             userManagerInternal.setUserState(userId, uss.state);
+            t.traceEnd();
+            t.traceBegin("unassignUserFromDisplayOnStop-" + userId + "-[stopUser]");
             userManagerInternal.unassignUserFromDisplayOnStop(userId);
+            t.traceEnd();
 
             updateStartedUserArrayLU();
 
             final boolean allowDelayedLockingCopied = allowDelayedLocking;
             Runnable finishUserStoppingAsync = () ->
-                    mHandler.post(() -> finishUserStopping(userId, uss, allowDelayedLockingCopied));
+                    mHandler.post(() -> {
+                        TimingsTraceAndSlog t2 = new TimingsTraceAndSlog();
+                        t2.traceBegin("finishUserStopping-" + userId + "-[stopUser]");
+                        finishUserStopping(userId, uss, allowDelayedLockingCopied);
+                        t2.traceEnd();
+                    });
 
             if (mInjector.getUserManager().isPreCreated(userId)) {
                 finishUserStoppingAsync.run();
@@ -1075,12 +1101,18 @@ class UserController implements Handler.Callback {
                     @Override
                     public void performReceive(Intent intent, int resultCode, String data,
                             Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                        asyncTraceEnd("broadcast-ACTION_USER_STOPPING-" + userId + "-[stopUser]",
+                                userId);
                         finishUserStoppingAsync.run();
                     }
                 };
 
+                TimingsTraceAndSlog t2 = new TimingsTraceAndSlog();
+                t2.traceBegin("clearBroadcastQueueForUser-" + userId + "-[stopUser]");
                 // Clear broadcast queue for the user to avoid delivering stale broadcasts
                 mInjector.clearBroadcastQueueForUser(userId);
+                t2.traceEnd();
+                asyncTraceBegin("broadcast-ACTION_USER_STOPPING-" + userId + "-[stopUser]", userId);
                 // Kick things off.
                 mInjector.broadcastIntent(stoppingIntent,
                         null, stoppingReceiver, 0, null, null,
@@ -1111,7 +1143,10 @@ class UserController implements Handler.Callback {
             }
             uss.setState(UserState.STATE_SHUTDOWN);
         }
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("setUserState-STATE_SHUTDOWN-" + userId + "-[stopUser]");
         mInjector.getUserManagerInternal().setUserState(userId, uss.state);
+        t.traceEnd();
 
         mInjector.batteryStatsServiceNoteEvent(
                 BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
@@ -1119,7 +1154,12 @@ class UserController implements Handler.Callback {
         mInjector.getSystemServiceManager().onUserStopping(userId);
 
         Runnable finishUserStoppedAsync = () ->
-                mHandler.post(() -> finishUserStopped(uss, allowDelayedLocking));
+                mHandler.post(() -> {
+                    TimingsTraceAndSlog t2 = new TimingsTraceAndSlog();
+                    t2.traceBegin("finishUserStopped-" + userId + "-[stopUser]");
+                    finishUserStopped(uss, allowDelayedLocking);
+                    t2.traceEnd();
+                });
         if (mInjector.getUserManager().isPreCreated(userId)) {
             finishUserStoppedAsync.run();
             return;
@@ -1132,9 +1172,11 @@ class UserController implements Handler.Callback {
             @Override
             public void performReceive(Intent intent, int resultCode, String data,
                     Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
+                asyncTraceEnd("broadcast-ACTION_SHUTDOWN-" + userId + "-[stopUser]", userId);
                 finishUserStoppedAsync.run();
             }
         };
+        asyncTraceBegin("broadcast-ACTION_SHUTDOWN-" + userId + "-[stopUser]", userId);
         mInjector.broadcastIntent(shutdownIntent,
                 null, shutdownReceiver, 0, null, null, null,
                 AppOpsManager.OP_NONE,
@@ -1185,6 +1227,7 @@ class UserController implements Handler.Callback {
                 }
             }
         }
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         if (stopped) {
             Slogf.i(TAG, "Removing user state from UserManager.mUserStates for user #" + userId
                     + " as a result of user being stopped");
@@ -1193,20 +1236,33 @@ class UserController implements Handler.Callback {
             mInjector.activityManagerOnUserStopped(userId);
             // Clean up all state and processes associated with the user.
             // Kill all the processes for the user.
+            t.traceBegin("forceStopUser-" + userId + "-[stopUser]");
             forceStopUser(userId, "finish user");
+            t.traceEnd();
         }
 
         for (final IStopUserCallback callback : stopCallbacks) {
             try {
-                if (stopped) callback.userStopped(userId);
-                else callback.userStopAborted(userId);
+                if (stopped) {
+                    t.traceBegin("stopCallbacks.userStopped-" + userId + "-[stopUser]");
+                    callback.userStopped(userId);
+                    t.traceEnd();
+                } else {
+                    t.traceBegin("stopCallbacks.userStopAborted-" + userId + "-[stopUser]");
+                    callback.userStopAborted(userId);
+                    t.traceEnd();
+                }
             } catch (RemoteException ignored) {
             }
         }
 
         if (stopped) {
+            t.traceBegin("systemServiceManagerOnUserStopped-" + userId + "-[stopUser]");
             mInjector.systemServiceManagerOnUserStopped(userId);
+            t.traceEnd();
+            t.traceBegin("taskSupervisorRemoveUser-" + userId + "-[stopUser]");
             mInjector.taskSupervisorRemoveUser(userId);
+            t.traceEnd();
 
             // Remove the user if it is ephemeral.
             if (userInfo.isEphemeral() && !userInfo.preCreated) {
@@ -3361,6 +3417,16 @@ class UserController implements Handler.Callback {
         return DEFAULT_USER_SWITCH_TIMEOUT_MS;
     }
 
+    private static void asyncTraceBegin(String msg, int cookie) {
+        Slogf.d(TAG, "%s - asyncTraceBegin(%d)", msg, cookie);
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, msg, cookie);
+    }
+
+    private static void asyncTraceEnd(String msg, int cookie) {
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, msg, cookie);
+        Slogf.d(TAG, "%s - asyncTraceEnd(%d)", msg, cookie);
+    }
+
     /**
      * Uptime when any user was being unlocked most recently. 0 if no users have been unlocked
      * yet. To avoid lock contention (since it's used by OomAdjuster), it's volatile internally.
@@ -3475,12 +3541,16 @@ class UserController implements Handler.Callback {
                 ordered = false;
             }
 
+            TimingsTraceAndSlog t = new TimingsTraceAndSlog();
             // TODO b/64165549 Verify that mLock is not held before calling AMS methods
             synchronized (mService) {
-                return mService.broadcastIntentLocked(null, null, null, intent, resolvedType,
-                        resultTo, resultCode, resultData, resultExtras, requiredPermissions, null,
-                        null, appOp, bOptions, ordered, sticky, callingPid, callingUid,
-                        realCallingUid, realCallingPid, userId);
+                t.traceBegin("broadcastIntent-" + userId + "-" + intent.getAction());
+                final int result = mService.broadcastIntentLocked(null, null, null, intent,
+                        resolvedType, resultTo, resultCode, resultData, resultExtras,
+                        requiredPermissions, null, null, appOp, bOptions, ordered, sticky,
+                        callingPid, callingUid, realCallingUid, realCallingPid, userId);
+                t.traceEnd();
+                return result;
             }
         }
 
