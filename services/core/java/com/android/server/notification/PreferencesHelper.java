@@ -202,7 +202,7 @@ public class PreferencesHelper implements RankingConfig {
     private SparseBooleanArray mLockScreenShowNotifications;
     private SparseBooleanArray mLockScreenPrivateNotifications;
     private boolean mIsMediaNotificationFilteringEnabled = DEFAULT_MEDIA_NOTIFICATION_FILTERING;
-    private boolean mAreChannelsBypassingDnd;
+    private boolean mCurrentUserHasChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
     private boolean mShowReviewPermissionsNotification;
 
@@ -230,7 +230,6 @@ public class PreferencesHelper implements RankingConfig {
         updateBadgingEnabled();
         updateBubblesEnabled();
         updateMediaNotificationFilteringEnabled();
-        syncChannelsBypassingDnd(Process.SYSTEM_UID, true);  // init comes from system
     }
 
     public void readXml(TypedXmlPullParser parser, boolean forRestore, int userId)
@@ -893,7 +892,7 @@ public class PreferencesHelper implements RankingConfig {
             r.groups.put(group.getId(), group);
         }
         if (needsDndChange) {
-            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+            updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
     }
 
@@ -972,7 +971,7 @@ public class PreferencesHelper implements RankingConfig {
                         existing.setBypassDnd(bypassDnd);
                         needsPolicyFileChange = true;
 
-                        if (bypassDnd != mAreChannelsBypassingDnd
+                        if (bypassDnd != mCurrentUserHasChannelsBypassingDnd
                                 || previousExistingImportance != existing.getImportance()) {
                             needsDndChange = true;
                         }
@@ -1031,7 +1030,7 @@ public class PreferencesHelper implements RankingConfig {
                 }
 
                 r.channels.put(channel.getId(), channel);
-                if (channel.canBypassDnd() != mAreChannelsBypassingDnd) {
+                if (channel.canBypassDnd() != mCurrentUserHasChannelsBypassingDnd) {
                     needsDndChange = true;
                 }
                 MetricsLogger.action(getChannelLog(channel, pkg).setType(
@@ -1041,7 +1040,7 @@ public class PreferencesHelper implements RankingConfig {
         }
 
         if (needsDndChange) {
-            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+            updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
 
         return needsPolicyFileChange;
@@ -1127,14 +1126,14 @@ public class PreferencesHelper implements RankingConfig {
                 // relevantly affected without the parent channel already having been.
             }
 
-            if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
+            if (updatedChannel.canBypassDnd() != mCurrentUserHasChannelsBypassingDnd
                     || channel.getImportance() != updatedChannel.getImportance()) {
                 needsDndChange = true;
                 changed = true;
             }
         }
         if (needsDndChange) {
-            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+            updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
         if (changed) {
             updateConfig();
@@ -1321,7 +1320,7 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         if (channelBypassedDnd) {
-            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+            updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
         return deletedChannel;
     }
@@ -1538,7 +1537,7 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         if (groupBypassedDnd) {
-            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+            updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
         return deletedChannels;
     }
@@ -1685,8 +1684,8 @@ public class PreferencesHelper implements RankingConfig {
                 }
             }
         }
-        if (!deletedChannelIds.isEmpty() && mAreChannelsBypassingDnd) {
-            updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+        if (!deletedChannelIds.isEmpty() && mCurrentUserHasChannelsBypassingDnd) {
+            updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
         return deletedChannelIds;
     }
@@ -1788,21 +1787,28 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     /**
-     * Syncs {@link #mAreChannelsBypassingDnd} with the current user's notification policy before
-     * updating
+     * Syncs {@link #mCurrentUserHasChannelsBypassingDnd} with the current user's notification
+     * policy before updating. Must be called:
+     * <ul>
+     *     <li>On system init, after channels and DND configurations are loaded.</li>
+     *     <li>When the current user changes, after the corresponding DND config is loaded.</li>
+     * </ul>
      */
-    private void syncChannelsBypassingDnd(int callingUid, boolean fromSystemOrSystemUi) {
-        mAreChannelsBypassingDnd = (mZenModeHelper.getNotificationPolicy().state
-                & NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND) == 1;
+    void syncChannelsBypassingDnd() {
+        mCurrentUserHasChannelsBypassingDnd = (mZenModeHelper.getNotificationPolicy().state
+                & NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND) != 0;
 
-        updateChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+        updateCurrentUserHasChannelsBypassingDnd(/* callingUid= */ Process.SYSTEM_UID,
+                /* fromSystemOrSystemUi= */ true);
     }
 
     /**
-     * Updates the user's NotificationPolicy based on whether the current userId
-     * has channels bypassing DND
+     * Updates the user's NotificationPolicy based on whether the current userId has channels
+     * bypassing DND. It should be called whenever a channel is created, updated, or deleted, or
+     * when the current user is switched.
      */
-    private void updateChannelsBypassingDnd(int callingUid, boolean fromSystemOrSystemUi) {
+    private void updateCurrentUserHasChannelsBypassingDnd(int callingUid,
+            boolean fromSystemOrSystemUi) {
         ArraySet<Pair<String, Integer>> candidatePkgs = new ArraySet<>();
 
         final int currentUserId = getCurrentUser();
@@ -1817,7 +1823,7 @@ public class PreferencesHelper implements RankingConfig {
 
                 for (NotificationChannel channel : r.channels.values()) {
                     if (channelIsLiveLocked(r, channel) && channel.canBypassDnd()) {
-                        candidatePkgs.add(new Pair(r.pkg, r.uid));
+                        candidatePkgs.add(new Pair<>(r.pkg, r.uid));
                         break;
                     }
                 }
@@ -1830,9 +1836,9 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         boolean haveBypassingApps = candidatePkgs.size() > 0;
-        if (mAreChannelsBypassingDnd != haveBypassingApps) {
-            mAreChannelsBypassingDnd = haveBypassingApps;
-            updateZenPolicy(mAreChannelsBypassingDnd, callingUid, fromSystemOrSystemUi);
+        if (mCurrentUserHasChannelsBypassingDnd != haveBypassingApps) {
+            mCurrentUserHasChannelsBypassingDnd = haveBypassingApps;
+            updateZenPolicy(mCurrentUserHasChannelsBypassingDnd, callingUid, fromSystemOrSystemUi);
         }
     }
 
@@ -1869,7 +1875,7 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     public boolean areChannelsBypassingDnd() {
-        return mAreChannelsBypassingDnd;
+        return mCurrentUserHasChannelsBypassingDnd;
     }
 
     /**

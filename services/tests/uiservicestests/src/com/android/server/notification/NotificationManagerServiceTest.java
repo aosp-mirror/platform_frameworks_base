@@ -422,6 +422,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     MultiRateLimiter mToastRateLimiter;
     BroadcastReceiver mPackageIntentReceiver;
+    BroadcastReceiver mUserSwitchIntentReceiver;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     TestableNotificationManagerService.StrongAuthTrackerFake mStrongAuthTracker;
 
@@ -652,8 +653,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     && filter.hasAction(Intent.ACTION_PACKAGES_SUSPENDED)) {
                 mPackageIntentReceiver = broadcastReceivers.get(i);
             }
+            if (filter.hasAction(Intent.ACTION_USER_SWITCHED)) {
+                mUserSwitchIntentReceiver = broadcastReceivers.get(i);
+            }
         }
         assertNotNull("package intent receiver should exist", mPackageIntentReceiver);
+        assertNotNull("User-switch receiver should exist", mUserSwitchIntentReceiver);
 
         // Pretend the shortcut exists
         List<ShortcutInfo> shortcutInfos = new ArrayList<>();
@@ -12172,6 +12177,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 eq(REASON_NOTIFICATION_SERVICE), any());
         verify(mAmi, times(4)).setPendingIntentAllowBgActivityStarts(any(),
                 any(), eq(FLAG_ACTIVITY_SENDER | FLAG_BROADCAST_SENDER | FLAG_SERVICE_SENDER));
+    }
+
+    @Test
+    public void onUserSwitched_updatesZenModeAndChannelsBypassingDnd() {
+        Intent intent = new Intent(Intent.ACTION_USER_SWITCHED);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, 20);
+        mService.mZenModeHelper = mock(ZenModeHelper.class);
+        mService.setPreferencesHelper(mPreferencesHelper);
+
+        mUserSwitchIntentReceiver.onReceive(mContext, intent);
+
+        InOrder inOrder = inOrder(mPreferencesHelper, mService.mZenModeHelper);
+        inOrder.verify(mService.mZenModeHelper).onUserSwitched(eq(20));
+        inOrder.verify(mPreferencesHelper).syncChannelsBypassingDnd();
+        inOrder.verifyNoMoreInteractions();
     }
 
     private static <T extends Parcelable> T parcelAndUnparcel(T source,
