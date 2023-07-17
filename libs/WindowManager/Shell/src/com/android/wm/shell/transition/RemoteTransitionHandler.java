@@ -186,9 +186,12 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         final RemoteTransition remoteTransition = mRequestedRemotes.get(mergeTarget);
-        final IRemoteTransition remote = remoteTransition.getRemoteTransition();
+        if (remoteTransition == null) return;
+
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "   Merge into remote: %s",
                 remoteTransition);
+
+        final IRemoteTransition remote = remoteTransition.getRemoteTransition();
         if (remote == null) return;
 
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
