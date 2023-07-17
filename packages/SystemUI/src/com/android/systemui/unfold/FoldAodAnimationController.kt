@@ -94,7 +94,7 @@ constructor(
         wakefulnessLifecycle.addObserver(this)
 
         // TODO(b/254878364): remove this call to NPVC.getView()
-        getShadeFoldAnimator().view.repeatWhenAttached {
+        getShadeFoldAnimator().view?.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) { listenForDozing(this) }
         }
     }
@@ -161,10 +161,9 @@ constructor(
             // but we should wait for the initial animation preparations to be drawn
             // (setting initial alpha/translation)
             // TODO(b/254878364): remove this call to NPVC.getView()
-            OneShotPreDrawListener.add(
-                getShadeFoldAnimator().view,
-                onReady
-            )
+            getShadeFoldAnimator().view?.let {
+                OneShotPreDrawListener.add(it, onReady)
+            }
         } else {
             // No animation, call ready callback immediately
             onReady.run()
