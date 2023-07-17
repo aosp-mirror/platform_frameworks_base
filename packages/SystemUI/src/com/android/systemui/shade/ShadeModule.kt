@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent
 import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
@@ -183,6 +184,14 @@ abstract class ShadeModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): KeyguardRootView {
             return notificationShadeWindowView.findViewById(R.id.keyguard_root_view)
+        }
+
+        @Provides
+        @SysUISingleton
+        fun providesSharedNotificationContainer(
+            notificationShadeWindowView: NotificationShadeWindowView,
+        ): SharedNotificationContainer {
+            return notificationShadeWindowView.findViewById(R.id.shared_notification_container)
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.
