@@ -319,6 +319,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runCreateUser();
                 case "remove-user":
                     return runRemoveUser();
+                case "mark-guest-for-deletion":
+                    return runMarkGuestForDeletion();
                 case "rename-user":
                     return runRenameUser();
                 case "set-user-restriction":
@@ -3203,6 +3205,24 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
+    private int runMarkGuestForDeletion() throws RemoteException {
+        String arg = getNextArg();
+        if (arg == null) {
+            getErrPrintWriter().println("Error: no user id specified.");
+            return 1;
+        }
+        int userId = resolveUserId(UserHandle.parseUserArg(arg));
+
+        IUserManager um = IUserManager.Stub.asInterface(
+                ServiceManager.getService(Context.USER_SERVICE));
+        if (!um.markGuestForDeletion(userId)) {
+            getErrPrintWriter().println("Error: could not mark guest for deletion");
+            return 1;
+        }
+
+        return 0;
+    }
+
     private int runRenameUser() throws RemoteException {
         String arg = getNextArg();
         if (arg == null) {
@@ -4515,6 +4535,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("        so that it will be automatically removed when possible (after user");
         pw.println("        switch or reboot)");
         pw.println("      --wait: Wait until user is removed. Ignored if set-ephemeral-if-in-use");
+        pw.println("");
+        pw.println("  mark-guest-for-deletion USER_ID");
+        pw.println("    Mark the guest user for deletion. After this, it is possible to create a");
+        pw.println("    new guest user and switch to it. This allows resetting the guest user");
+        pw.println("    without switching to another user.");
         pw.println("");
         pw.println("  rename-user USER_ID [USER_NAME]");
         pw.println("    Rename USER_ID with USER_NAME (or null when [USER_NAME] is not set)");
