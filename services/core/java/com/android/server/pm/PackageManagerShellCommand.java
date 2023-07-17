@@ -3208,6 +3208,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         if (forceNonStaged) {
             sessionParams.isStaged = false;
+            sessionParams.installFlags |= PackageManager.INSTALL_FORCE_NON_STAGED_APEX_UPDATE;
         } else if (staged) {
             sessionParams.setStaged();
         }
