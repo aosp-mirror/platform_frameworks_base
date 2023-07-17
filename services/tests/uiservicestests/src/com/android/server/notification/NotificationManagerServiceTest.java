@@ -78,6 +78,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
@@ -3172,6 +3173,30 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetListenerAccessForUser_grantWithNameTooLong_throws() {
+        UserHandle user = UserHandle.of(mContext.getUserId() + 10);
+        ComponentName c = new ComponentName("com.example.package",
+                com.google.common.base.Strings.repeat("Blah", 150));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mBinderService.setNotificationListenerAccessGrantedForUser(
+                        c, user.getIdentifier(), /* enabled= */ true, true));
+    }
+
+    @Test
+    public void testSetListenerAccessForUser_revokeWithNameTooLong_okay() throws Exception {
+        UserHandle user = UserHandle.of(mContext.getUserId() + 10);
+        ComponentName c = new ComponentName("com.example.package",
+                com.google.common.base.Strings.repeat("Blah", 150));
+
+        mBinderService.setNotificationListenerAccessGrantedForUser(
+                c, user.getIdentifier(), /* enabled= */ false, true);
+
+        verify(mListeners).setPackageOrComponentEnabled(
+                c.flattenToString(), user.getIdentifier(), true, /* enabled= */ false, true);
+    }
+
+    @Test
     public void testSetAssistantAccessForUser() throws Exception {
         UserInfo ui = new UserInfo();
         ui.id = mContext.getUserId() + 10;
@@ -4607,6 +4632,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(visitor, times(1)).accept(eq(personIcon.getUri()));
         verify(visitor, times(1)).accept(eq(verificationIcon.getUri()));
+    }
+
+    @Test
+    public void testVisitUris_wearableExtender() {
+        Icon actionIcon = Icon.createWithContentUri("content://media/action");
+        Icon wearActionIcon = Icon.createWithContentUri("content://media/wearAction");
+        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent(),
+                PendingIntent.FLAG_IMMUTABLE);
+        Notification n = new Notification.Builder(mContext, "a")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addAction(new Notification.Action.Builder(actionIcon, "Hey!", intent).build())
+                .extend(new Notification.WearableExtender().addAction(
+                        new Notification.Action.Builder(wearActionIcon, "Wear!", intent).build()))
+                .build();
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+
+        verify(visitor).accept(eq(actionIcon.getUri()));
+        verify(visitor).accept(eq(wearActionIcon.getUri()));
     }
 
     @Test
