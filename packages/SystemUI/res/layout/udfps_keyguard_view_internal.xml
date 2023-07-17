@@ -32,7 +32,7 @@
 
     <!-- Fingerprint -->
     <!-- AOD dashed fingerprint icon with moving dashes -->
-    <com.airbnb.lottie.LottieAnimationView
+    <com.android.systemui.keyguard.ui.view.UdfpsLottieViewWrapper
         android:id="@+id/udfps_aod_fp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -43,7 +43,7 @@
         app:lottie_rawRes="@raw/udfps_aod_fp"/>
 
     <!-- LockScreen fingerprint icon from 0 stroke width to full width -->
-    <com.airbnb.lottie.LottieAnimationView
+    <com.android.systemui.keyguard.ui.view.UdfpsLottieViewWrapper
         android:id="@+id/udfps_lockscreen_fp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
