@@ -9721,6 +9721,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             ResultReceiver resultReceiver) {
         final int callingUid = Binder.getCallingUid();
         if (callingUid != ROOT_UID && callingUid != Process.SHELL_UID) {
+            resultReceiver.send(-1, null);
             throw new SecurityException("Shell commands are only callable by root or shell");
         }
         (new ActivityManagerShellCommand(this, false)).exec(
