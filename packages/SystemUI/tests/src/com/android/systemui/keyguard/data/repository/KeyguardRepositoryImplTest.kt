@@ -41,6 +41,7 @@ import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
+import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
@@ -73,6 +74,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock private lateinit var dozeTransitionListener: DozeTransitionListener
     @Mock private lateinit var authController: AuthController
+    @Mock private lateinit var keyguardBypassController: KeyguardBypassController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dreamOverlayCallbackController: DreamOverlayCallbackController
     @Mock private lateinit var dozeParameters: DozeParameters
@@ -92,6 +94,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 wakefulnessLifecycle,
                 biometricUnlockController,
                 keyguardStateController,
+                keyguardBypassController,
                 keyguardUpdateMonitor,
                 dozeTransitionListener,
                 dozeParameters,
@@ -184,6 +187,20 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             job.cancel()
         }
+
+    @Test
+    fun isBypassEnabled_disabledInController() {
+        whenever(keyguardBypassController.isBypassEnabled).thenReturn(false)
+        whenever(keyguardBypassController.bypassEnabled).thenReturn(false)
+        assertThat(underTest.isBypassEnabled()).isFalse()
+    }
+
+    @Test
+    fun isBypassEnabled_enabledInController() {
+        whenever(keyguardBypassController.isBypassEnabled).thenReturn(true)
+        whenever(keyguardBypassController.bypassEnabled).thenReturn(true)
+        assertThat(underTest.isBypassEnabled()).isTrue()
+    }
 
     @Test
     fun isAodAvailable() = runTest {
