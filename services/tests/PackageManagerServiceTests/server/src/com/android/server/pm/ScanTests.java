@@ -21,6 +21,7 @@ import static android.content.pm.SharedLibraryInfo.TYPE_SDK_PACKAGE;
 import static android.content.pm.SharedLibraryInfo.TYPE_STATIC;
 import static android.content.pm.SharedLibraryInfo.VERSION_UNDEFINED;
 
+import static com.android.server.pm.PackageManagerService.SCAN_AS_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_FULL_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_INSTANT_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
@@ -362,6 +363,46 @@ public class ScanTests {
                 new ScanRequestBuilder(basicPackage).setPkgSetting(pkgSetting).build());
 
         assertThat(scanResult.mPkgSetting.getVolumeUuid(), is(UUID_TWO.toString()));
+    }
+
+    @Test
+    public void scanFirstBoot_apexDontDeriveAbis() throws Exception {
+        final PackageSetting pkgSetting =
+                createBasicPackageSettingBuilder(DUMMY_PACKAGE_NAME)
+                        .setPkgFlags(ApplicationInfo.FLAG_SYSTEM).build();
+
+        final String codePath = "/data/apex/" + DUMMY_PACKAGE_NAME + ".apex";
+
+        // Create the ParsedPackage for the apex
+        final ParsedPackage basicPackage =
+                ((ParsedPackage) new PackageImpl(DUMMY_PACKAGE_NAME, codePath, codePath,
+                        mock(TypedArray.class), false)
+                        .setVolumeUuid(UUID_ONE.toString())
+                        .hideAsParsed())
+                        .setVersionCodeMajor(1)
+                        .setVersionCode(2345)
+                        .setSystem(true);
+
+        when(mMockInjector.getAbiHelper()).thenReturn(new PackageAbiHelperImpl());
+
+        // prepare the scan request with the scanflag (SCAN_FIRST_BOOT_OR_UPGRADE | SCAN_AS_APEX)
+        final ScanResult scanResult = executeScan(new ScanRequestBuilder(basicPackage)
+                .setPkgSetting(pkgSetting)
+                .addScanFlag(SCAN_FIRST_BOOT_OR_UPGRADE | SCAN_AS_APEX)
+                .build());
+
+        final PackageSetting resultSetting = scanResult.mPkgSetting;
+        final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
+                resultSetting.getPkg(), 0, pkgSetting.getUserStateOrDefault(0), 0, resultSetting);
+        assertThat(applicationInfo.primaryCpuAbi, nullValue());
+        assertThat(applicationInfo.primaryCpuAbi, nullValue());
+        assertThat(applicationInfo.secondaryCpuAbi, nullValue());
+
+        assertThat(applicationInfo.nativeLibraryRootDir, nullValue());
+        assertThat(pkgSetting.getLegacyNativeLibraryPath(), nullValue());
+        assertThat(applicationInfo.nativeLibraryRootRequiresIsa, is(false));
+        assertThat(applicationInfo.nativeLibraryDir, nullValue());
+        assertThat(applicationInfo.secondaryNativeLibraryDir, nullValue());
     }
 
     @Test
