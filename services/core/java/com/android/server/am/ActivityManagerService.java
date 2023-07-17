@@ -559,6 +559,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real.
     static final int PROC_START_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+
+    // How long we wait for a launched process to complete its app startup before we ANR.
+    static final int BIND_APPLICATION_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+
     // How long we wait to kill an application zygote, after the last process using
     // it has gone away.
     static final int KILL_APP_ZYGOTE_DELAY_MS = 5 * 1000;
@@ -1625,6 +1629,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int UPDATE_CACHED_APP_HIGH_WATERMARK = 79;
     static final int ADD_UID_TO_OBSERVER_MSG = 80;
     static final int REMOVE_UID_FROM_OBSERVER_MSG = 81;
+    static final int BIND_APPLICATION_TIMEOUT_MSG = 82;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1976,6 +1981,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } break;
                 case UPDATE_CACHED_APP_HIGH_WATERMARK: {
                     mAppProfiler.mCachedAppsWatermarkData.updateCachedAppsSnapshot((long) msg.obj);
+                } break;
+                case BIND_APPLICATION_TIMEOUT_MSG: {
+                    ProcessRecord app = (ProcessRecord) msg.obj;
+
+                    final String anrMessage;
+                    synchronized (app) {
+                        anrMessage = "Process " + app + " failed to complete startup";
+                    }
+
+                    mAnrHelper.appNotResponding(app, TimeoutRecord.forAppStart(anrMessage));
                 } break;
             }
         }
@@ -4737,6 +4752,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.getDisabledCompatChanges(), serializedSystemFontMap,
                         app.getStartElapsedTime(), app.getStartUptime());
             }
+
+            Message msg = mHandler.obtainMessage(BIND_APPLICATION_TIMEOUT_MSG);
+            msg.obj = app;
+            mHandler.sendMessageDelayed(msg, BIND_APPLICATION_TIMEOUT);
+            mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
+
             if (profilerInfo != null) {
                 profilerInfo.closeFd();
                 profilerInfo = null;
@@ -4811,7 +4832,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (app != null && app.getStartUid() == uid && app.getStartSeq() == startSeq) {
-            mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
+            mHandler.removeMessages(BIND_APPLICATION_TIMEOUT_MSG, app);
         } else {
             Slog.wtf(TAG, "Mismatched or missing ProcessRecord: " + app + ". Pid: " + pid
                     + ". Uid: " + uid);
