@@ -16,9 +16,8 @@
 
 package android.content.res;
 
-import static android.content.res.Element.TAG_MANIFEST;
-
 import android.annotation.NonNull;
+import android.annotation.StyleableRes;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -55,24 +54,19 @@ public class Validator {
             return;
         }
         if (eventType == XmlPullParser.START_TAG) {
-            try {
-                String tag = parser.getName();
-                // only validate manifests
-                if (depth == 0 && mElements.size() == 0 && !TAG_MANIFEST.equals(tag)) {
-                    return;
-                }
+            String tag = parser.getName();
+            if (Element.shouldValidate(tag)) {
+                Element element = Element.obtain(tag);
                 Element parent = mElements.peek();
-                if (parent == null || parent.hasChild(tag)) {
-                    Element element = Element.obtain(tag);
-                    element.validateStringAttrs(parser);
-                    if (parent != null) {
+                if (parent != null && parent.hasChild(tag)) {
+                    try {
                         parent.seen(element);
+                    } catch (SecurityException e) {
+                        cleanUp();
+                        throw e;
                     }
-                    mElements.push(element);
                 }
-            } catch (XmlPullParserException e) {
-                cleanUp();
-                throw e;
+                mElements.push(element);
             }
         } else if (eventType == XmlPullParser.END_TAG && depth == mElements.size()) {
             mElements.pop().recycle();
@@ -84,11 +78,21 @@ public class Validator {
     /**
      * Validates the resource string of a manifest tag attribute.
      */
-    public void validateAttr(@NonNull XmlPullParser parser, int index, CharSequence stringValue)
-            throws XmlPullParserException {
+    public void validateResStrAttr(@NonNull XmlPullParser parser, @StyleableRes int index,
+            CharSequence stringValue) throws XmlPullParserException {
         if (parser.getDepth() > mElements.size()) {
             return;
         }
-        mElements.peek().validateResStringAttr(index, stringValue);
+        mElements.peek().validateResStrAttr(index, stringValue);
+    }
+
+    /**
+     * Validates the string of a manifest tag attribute by name.
+     */
+    public void validateStrAttr(@NonNull XmlPullParser parser, String attrName, String attrValue) {
+        if (parser.getDepth() > mElements.size()) {
+            return;
+        }
+        mElements.peek().validateStrAttr(attrName, attrValue);
     }
 }

@@ -319,7 +319,11 @@ public final class XmlBlock implements AutoCloseable {
                         "Namespace=" + getAttributeNamespace(idx)
                         + "Name=" + getAttributeName(idx)
                         + ", Value=" + getAttributeValue(idx));
-                return getAttributeValue(idx);
+                String value = getAttributeValue(idx);
+                if (mValidator != null) {
+                    mValidator.validateStrAttr(this, name, value);
+                }
+                return value;
             }
             return null;
         }

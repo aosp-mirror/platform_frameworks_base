@@ -18,6 +18,7 @@ package com.android.server.pm.parsing
 
 import android.content.res.Validator
 import android.os.Environment
+import android.os.SystemProperties.PROP_VALUE_MAX
 import android.platform.test.annotations.Postsubmit
 import com.android.internal.R
 import com.android.server.pm.PackageManagerService
@@ -28,7 +29,6 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.fail
 import org.junit.Test
 import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -75,548 +75,370 @@ class AndroidPackageParsingValidationTest {
     }
 
     @Test
-    fun parseBadManifests() {
+    fun parseManifestTag() {
         val tag = "manifest"
-        val prefix = "<manifest $ns>"
-        val suffix = "</manifest>"
-        parseTagBadAttr(tag, "package", 256, )
-        parseTagBadAttr(tag, "android:sharedUserId", 256)
-        parseTagBadAttr(tag, "android:versionName", 4000)
-        parseBadApplicationTags(100, prefix, suffix, tag)
-        parseBadOverlayTags(100, prefix, suffix, tag)
-        parseBadInstrumentationTags(100, prefix, suffix, tag)
-        parseBadPermissionGroupTags(100, prefix, suffix, tag)
-        parseBadPermissionTreeTags(100, prefix, suffix, tag)
-        parseBadSupportsGlTextureTags(100, prefix, suffix, tag)
-        parseBadSupportsScreensTags(100, prefix, suffix, tag)
-        parseBadUsesConfigurationTags(100, prefix, suffix, tag)
-        parseBadUsesPermissionSdk23Tags(100, prefix, suffix, tag)
-        parseBadUsesSdkTags(100, prefix, suffix, tag)
-        parseBadCompatibleScreensTags(200, prefix, suffix, tag)
-        parseBadQueriesTags(200, prefix, suffix, tag)
-        parseBadAttributionTags(400, prefix, suffix, tag)
-        parseBadUsesFeatureTags(400, prefix, suffix, tag)
-        parseBadPermissionTags(2000, prefix, suffix, tag)
-        parseBadUsesPermissionTags(20000, prefix, suffix, tag)
+        validateTagAttr(tag, "package", null, 256)
+        validateTagAttr(tag, "sharedUserId", null, 256)
+        validateTagAttr(tag, "versionName", null, 1024)
+        validateTagCount("application", 100, tag)
+        validateTagCount("overlay", 100, tag)
+        validateTagCount("instrumentation", 100, tag)
+        validateTagCount("permission-group", 100, tag)
+        validateTagCount("permission-tree", 100, tag)
+        validateTagCount("supports-gl-texture", 100, tag)
+        validateTagCount("supports-screens", 100, tag)
+        validateTagCount("uses-configuration", 100, tag)
+        validateTagCount("uses-sdk", 100, tag)
+        validateTagCount("compatible-screens", 200, tag)
+        validateTagCount("queries", 200, tag)
+        validateTagCount("attribution", 400, tag)
+        validateTagCount("uses-feature", 400, tag)
+        validateTagCount("permission", 2000, tag)
+        validateTagCount("uses-permission", 20000, tag)
     }
 
-    private fun parseBadApplicationTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseApplicationTag() {
         val tag = "application"
-        val newPrefix = "$prefix<$tag>"
-        val newSuffix = "</$tag>$suffix"
-
-        parseTagBadAttr(tag, "android:backupAgent", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:manageSpaceActivity", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:permission", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:process", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:requiredAccountType", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:restrictedAccountType", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:taskAffinity", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-
-        parseBadProfileableTags(100, newPrefix, newSuffix, tag)
-        parseBadUsesNativeLibraryTags(100, newPrefix, newSuffix, tag)
-        parseBadReceiverTags(1000, newPrefix, newSuffix, tag)
-        parseBadServiceTags(1000, newPrefix, newSuffix, tag)
-        parseBadActivityAliasTags(4000, newPrefix, newSuffix, tag)
-        parseBadUsesLibraryTags(4000, newPrefix, newSuffix, tag)
-        parseBadProviderTags(8000, newPrefix, newSuffix, tag)
-        parseBadMetaDataTags(8000, newPrefix, newSuffix, tag)
-        parseBadActivityTags(40000, newPrefix, newSuffix, tag)
+        validateTagAttr(tag, "backupAgent",
+            R.styleable.AndroidManifestApplication_backupAgent, 1024)
+        validateTagAttr(tag, "manageSpaceActivity",
+            R.styleable.AndroidManifestApplication_manageSpaceActivity, 1024)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestApplication_name, 1024)
+        validateTagAttr(tag, "permission", R.styleable.AndroidManifestApplication_permission, 1024)
+        validateTagAttr(tag, "process", R.styleable.AndroidManifestApplication_process, 1024)
+        validateTagAttr(tag, "requiredAccountType",
+            R.styleable.AndroidManifestApplication_requiredAccountType, 1024)
+        validateTagAttr(tag, "restrictedAccountType",
+            R.styleable.AndroidManifestApplication_restrictedAccountType, 1024)
+        validateTagAttr(tag, "taskAffinity",
+            R.styleable.AndroidManifestApplication_taskAffinity, 1024)
+        validateTagCount("profileable", 100, tag)
+        validateTagCount("uses-native-library", 100, tag)
+        validateTagCount("receiver", 1000, tag)
+        validateTagCount("service", 1000, tag)
+        validateTagCount("meta-data", 1000, tag)
+        validateTagCount("uses-library", 1000, tag)
+        validateTagCount("activity-alias", 4000, tag)
+        validateTagCount("provider", 8000, tag)
+        validateTagCount("activity", 40000, tag)
     }
 
-    private fun parseBadProfileableTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
-        val tag = "profileable"
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-    }
-
-    private fun parseBadUsesNativeLibraryTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseUsesNativeLibraryTag() {
         val tag = "uses-native-library"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestUsesNativeLibrary_name, 1024)
     }
 
-    private fun parseBadReceiverTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseReceiverTag() {
         val tag = "receiver"
-        val newPrefix = "$prefix<$tag>"
-        val newSuffix = "</$tag>$suffix"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:permission", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:process", 1024, prefix, suffix)
-
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-        parseBadMetaDataTags(8000, newPrefix, newSuffix, tag)
-        parseBadIntentFilterTags(20000, newPrefix, newSuffix, tag)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestReceiver_name, 1024)
+        validateTagAttr(tag, "permission", R.styleable.AndroidManifestReceiver_permission, 1024)
+        validateTagAttr(tag, "process", R.styleable.AndroidManifestReceiver_process, 1024)
+        validateTagCount("meta-data", 1000, tag)
+        validateTagCount("intent-filter", 20000, tag)
     }
 
-    private fun parseBadServiceTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseServiceTag() {
         val tag = "service"
-        val newPrefix = "$prefix<$tag>"
-        val newSuffix = "</$tag>$suffix"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:permission", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:process", 1024, prefix, suffix)
-
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-        parseBadMetaDataTags(8000, newPrefix, newSuffix, tag)
-        parseBadIntentFilterTags(20000, newPrefix, newSuffix, tag)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestService_name, 1024)
+        validateTagAttr(tag, "permission", R.styleable.AndroidManifestService_permission, 1024)
+        validateTagAttr(tag, "process", R.styleable.AndroidManifestService_process, 1024)
+        validateTagCount("meta-data", 1000, tag)
+        validateTagCount("intent-filter", 20000, tag)
     }
 
-    private fun parseBadActivityAliasTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseActivityAliasTag() {
         val tag = "activity-alias"
-        val newPrefix = "$prefix<$tag>"
-        val newSuffix = "</$tag>$suffix"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:permission", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:targetActivity", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-        parseBadMetaDataTags(8000, newPrefix, newSuffix, tag)
-        parseBadIntentFilterTags(20000, newPrefix, newSuffix, tag)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestActivityAlias_name, 1024)
+        validateTagAttr(tag, "permission",
+            R.styleable.AndroidManifestActivityAlias_permission, 1024)
+        validateTagAttr(tag, "targetActivity",
+            R.styleable.AndroidManifestActivityAlias_targetActivity, 1024)
+        validateTagCount("meta-data", 1000, tag)
+        validateTagCount("intent-filter", 20000, tag)
     }
 
-    private fun parseBadUsesLibraryTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseUsesLibraryTag() {
         val tag = "uses-library"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestUsesLibrary_name, 1024)
     }
 
-    private fun parseBadActivityTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseActivityTag() {
         val tag = "activity"
-        val newPrefix = "$prefix<$tag>"
-        val newSuffix = "</$tag>$suffix"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:parentActivityName", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:permission", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:process", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:taskAffinity", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-        parseBadLayoutTags(1000, newPrefix, newSuffix, tag)
-        parseBadMetaDataTags(8000, newPrefix, newSuffix, tag)
-        parseBadIntentFilterTags(20000, newPrefix, newSuffix, tag)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestActivity_name, 1024)
+        validateTagAttr(tag, "parentActivityName",
+            R.styleable.AndroidManifestActivity_parentActivityName, 1024)
+        validateTagAttr(tag, "permission", R.styleable.AndroidManifestActivity_permission, 1024)
+        validateTagAttr(tag, "process", R.styleable.AndroidManifestActivity_process, 1024)
+        validateTagAttr(tag, "taskAffinity", R.styleable.AndroidManifestActivity_taskAffinity, 1024)
+        validateTagCount("layout", 1000, tag)
+        validateTagCount("meta-data", 1000, tag)
+        validateTagCount("intent-filter", 20000, tag)
     }
 
-    private fun parseBadLayoutTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
-        val tag = "layout"
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-    }
-
-    private fun parseBadOverlayTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseOverlayTag() {
         val tag = "overlay"
-        parseTagBadAttr(tag, "android:category", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:requiredSystemPropertyName", 32768, prefix, suffix)
-        parseTagBadAttr(tag, "android:requiredSystemPropertyValue", 256, prefix, suffix)
-        parseTagBadAttr(tag, "android:targetPackage", 256, prefix, suffix)
-        parseTagBadAttr(tag, "android:targetName", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "category", R.styleable.AndroidManifestResourceOverlay_category, 1024)
+        validateTagAttr(tag, "requiredSystemPropertyName",
+            R.styleable.AndroidManifestResourceOverlay_requiredSystemPropertyName, 1024)
+        validateTagAttr(tag, "requiredSystemPropertyValue",
+            R.styleable.AndroidManifestResourceOverlay_requiredSystemPropertyValue, PROP_VALUE_MAX)
+        validateTagAttr(tag, "targetPackage",
+            R.styleable.AndroidManifestResourceOverlay_targetPackage, 256)
+        validateTagAttr(tag, "targetName",
+            R.styleable.AndroidManifestResourceOverlay_targetName, 1024)
     }
 
-    private fun parseBadInstrumentationTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseInstrumentationTag() {
         val tag = "instrumentation"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:targetPackage", 256, prefix, suffix)
-        parseTagBadAttr(tag, "android:targetProcesses", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestInstrumentation_name, 1024)
+        validateTagAttr(tag, "targetPackage",
+            R.styleable.AndroidManifestInstrumentation_targetPackage, 256)
+        validateTagAttr(tag, "targetProcesses",
+            R.styleable.AndroidManifestInstrumentation_targetProcesses, 1024)
     }
 
-    private fun parseBadPermissionGroupTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parsePermissionGroupTag() {
         val tag = "permission-group"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestPermissionGroup_name, 1024)
     }
 
-    private fun parseBadPermissionTreeTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parsePermissionTreeTag() {
         val tag = "permission-tree"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestPermissionTree_name, 1024)
     }
 
-    private fun parseBadSupportsGlTextureTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseSupportsGlTextureTag() {
         val tag = "supports-gl-texture"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", null, 1024)
     }
 
-    private fun parseBadSupportsScreensTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
-        val tag = "supports-screens"
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-    }
-
-    private fun parseBadUsesConfigurationTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
-        val tag = "uses-configuration"
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-    }
-
-    private fun parseBadUsesPermissionSdk23Tags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseUsesPermissionSdk23Tag() {
         val tag = "uses-permission-sdk-23"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestUsesPermission_name, 1024)
     }
 
-    private fun parseBadUsesSdkTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
-        val tag = "uses-sdk"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-    }
-
-    private fun parseBadCompatibleScreensTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseCompatibleScreensTag() {
         val tag = "compatible-screens"
-        val newPrefix = "$prefix<$tag>"
-        val newSuffix = "</$tag>$suffix"
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-        parseBadScreenTags(4000, newPrefix, newSuffix, tag)
+        validateTagCount("screen", 4000, tag)
     }
 
-    private fun parseBadScreenTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
-        val tag = "screen"
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-    }
-
-    private fun parseBadQueriesTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseQueriesTag() {
         val tag = "queries"
-        val newPrefix = "$prefix<$tag>"
-        val newSuffix = "</$tag>$suffix"
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-        parseBadPackageTags(1000, newPrefix, newSuffix, tag)
-        parseBadIntentTags(2000, newPrefix, newSuffix, tag)
-        parseBadProviderTags(8000, newPrefix, newSuffix, tag)
+        validateTagCount("package", 1000, tag)
+        validateTagCount("intent", 2000, tag)
+        validateTagCount("provider", 8000, tag)
     }
 
-    private fun parseBadPackageTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parsePackageTag() {
         val tag = "package"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", null, 1024)
     }
 
-    private fun parseBadIntentTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseIntentTag() {
         val tag = "intent"
-        val newPrefix = "$prefix<$tag>"
-        val newSuffix = "</$tag>$suffix"
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-        parseBadActionTags(20000, newPrefix, newSuffix, tag)
-        parseBadCategoryTags(40000, newPrefix, newSuffix, tag)
-        parseBadDataTags(40000, newPrefix, newSuffix, tag)
+        validateTagCount("action", 20000, tag)
+        validateTagCount("category", 40000, tag)
+        validateTagCount("data", 40000, tag)
     }
 
-    private fun parseBadProviderTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseProviderTag() {
         val tag = "provider"
-        val newPrefix = "$prefix<$tag>"
-        val newSuffix = "</$tag>$suffix"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:permission", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:process", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:readPermission", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:writePermission", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-        parseBadGrantUriPermissionTags(100, newPrefix, newSuffix, tag)
-        parseBadPathPermissionTags(100, newPrefix, newSuffix, tag)
-        parseBadMetaDataTags(8000, newPrefix, newSuffix, tag)
-        parseBadIntentFilterTags(20000, newPrefix, newSuffix, tag)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestProvider_name, 1024)
+        validateTagAttr(tag, "permission", R.styleable.AndroidManifestProvider_permission, 1024)
+        validateTagAttr(tag, "process", R.styleable.AndroidManifestProvider_process, 1024)
+        validateTagAttr(tag, "readPermission",
+            R.styleable.AndroidManifestProvider_readPermission, 1024)
+        validateTagAttr(tag, "writePermission",
+            R.styleable.AndroidManifestProvider_writePermission, 1024)
+        validateTagCount("grant-uri-permission", 100, tag)
+        validateTagCount("path-permission", 100, tag)
+        validateTagCount("meta-data", 1000, tag)
+        validateTagCount("intent-filter", 20000, tag)
     }
 
-    private fun parseBadGrantUriPermissionTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseGrantUriPermissionTag() {
         val tag = "grant-uri-permission"
-        parseTagBadAttr(tag, "android:path", 4000, prefix, suffix)
-        parseTagBadAttr(tag, "android:pathPrefix", 4000, prefix, suffix)
-        parseTagBadAttr(tag, "android:pathPattern", 4000, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "path", R.styleable.AndroidManifestGrantUriPermission_path, 4000)
+        validateTagAttr(tag, "pathPrefix",
+            R.styleable.AndroidManifestGrantUriPermission_pathPrefix, 4000)
+        validateTagAttr(tag, "pathPattern",
+            R.styleable.AndroidManifestGrantUriPermission_pathPattern, 4000)
     }
 
-    private fun parseBadPathPermissionTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parsePathPermissionTag() {
         val tag = "path-permission"
-        parseTagBadAttr(tag, "android:path", 4000, prefix, suffix)
-        parseTagBadAttr(tag, "android:pathPrefix", 4000, prefix, suffix)
-        parseTagBadAttr(tag, "android:pathPattern", 4000, prefix, suffix)
-        parseTagBadAttr(tag, "android:permission", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:readPermission", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:writePermission", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "path", R.styleable.AndroidManifestPathPermission_path, 4000)
+        validateTagAttr(tag, "pathPrefix",
+            R.styleable.AndroidManifestPathPermission_pathPrefix, 4000)
+        validateTagAttr(tag, "pathPattern",
+            R.styleable.AndroidManifestPathPermission_pathPattern, 4000)
+        validateTagAttr(tag, "permission",
+            R.styleable.AndroidManifestPathPermission_permission, 1024)
+        validateTagAttr(tag, "readPermission",
+            R.styleable.AndroidManifestPathPermission_readPermission, 1024)
+        validateTagAttr(tag, "writePermission",
+            R.styleable.AndroidManifestPathPermission_writePermission, 1024)
     }
 
-    private fun parseBadMetaDataTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseMetaDataTag() {
         val tag = "meta-data"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:value", 32768, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestMetaData_name, 1024)
+        validateTagAttr(tag, "value", R.styleable.AndroidManifestMetaData_value, 4000)
     }
 
-    private fun parseBadIntentFilterTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseIntentFilterTag() {
         val tag = "intent-filter"
-        val newPrefix = "$prefix<$tag>"
-        val newSuffix = "</$tag>$suffix"
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-        parseBadActionTags(20000, newPrefix, newSuffix, tag)
-        parseBadCategoryTags(40000, newPrefix, newSuffix, tag)
-        parseBadDataTags(40000, newPrefix, newSuffix, tag)
+        validateTagCount("action", 20000, tag)
+        validateTagCount("category", 40000, tag)
+        validateTagCount("data", 40000, tag)
     }
 
-    private fun parseBadActionTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseActionTag() {
         val tag = "action"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestAction_name, 1024)
     }
 
-    private fun parseBadCategoryTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseCategoryTag() {
         val tag = "category"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestCategory_name, 1024)
     }
 
-    private fun parseBadDataTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseDataTag() {
         val tag = "data"
-        parseTagBadAttr(tag, "android:scheme", 256, prefix, suffix)
-        parseTagBadAttr(tag, "android:host", 256, prefix, suffix)
-        parseTagBadAttr(tag, "android:path", 4000, prefix, suffix)
-        parseTagBadAttr(tag, "android:pathPattern", 4000, prefix, suffix)
-        parseTagBadAttr(tag, "android:pathPrefix", 4000, prefix, suffix)
-        parseTagBadAttr(tag, "android:pathSuffix", 4000, prefix, suffix)
-        parseTagBadAttr(tag, "android:pathAdvancedPattern", 4000, prefix, suffix)
-        parseTagBadAttr(tag, "android:mimeType", 512, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "scheme", R.styleable.AndroidManifestData_scheme, 256)
+        validateTagAttr(tag, "host", R.styleable.AndroidManifestData_host, 256)
+        validateTagAttr(tag, "path", R.styleable.AndroidManifestData_path, 4000)
+        validateTagAttr(tag, "pathPattern", R.styleable.AndroidManifestData_pathPattern, 4000)
+        validateTagAttr(tag, "pathPrefix", R.styleable.AndroidManifestData_pathPrefix, 4000)
+        validateTagAttr(tag, "pathSuffix", R.styleable.AndroidManifestData_pathSuffix, 4000)
+        validateTagAttr(tag, "pathAdvancedPattern",
+            R.styleable.AndroidManifestData_pathAdvancedPattern, 4000)
+        validateTagAttr(tag, "mimeType", R.styleable.AndroidManifestData_mimeType, 512)
     }
 
-    private fun parseBadAttributionTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
-        val tag = "attribution"
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
-    }
-
-    private fun parseBadUsesFeatureTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseUsesFeatureTag() {
         val tag = "uses-feature"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestUsesFeature_name, 1024)
     }
 
-    private fun parseBadPermissionTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parsePermissionTag() {
         val tag = "permission"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseTagBadAttr(tag, "android:permissionGroup", 256, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestPermission_name, 1024)
+        validateTagAttr(tag, "permissionGroup",
+            R.styleable.AndroidManifestPermission_permissionGroup, 256)
     }
 
-    private fun parseBadUsesPermissionTags(
-            maxNum: Int,
-            prefix: String,
-            suffix: String,
-            parentTag: String
-    ) {
+    @Test
+    fun parseUsesPermissionTag() {
         val tag = "uses-permission"
-        parseTagBadAttr(tag, "android:name", 1024, prefix, suffix)
-        parseBadTagCount(tag, maxNum, parentTag, prefix, suffix)
+        validateTagAttr(tag, "name", R.styleable.AndroidManifestUsesPermission_name, 1024)
     }
 
-    private fun parseTagBadAttr(
-            tag: String,
-            attrName: String,
-            maxLength: Int,
-            prefix: String = "",
-            suffix: String = ""
+    private fun validateTagAttr(tag: String, name: String, index: Int?, maxLen: Int) {
+        validateTagAttr_shouldPass(tag, name, index, maxLen)
+        validateTagAttr_shouldFail(tag, name, index, maxLen)
+    }
+
+    private fun validateTagAttr_shouldPass(
+        tag: String,
+        name: String,
+        index: Int?,
+        maxLen: Int
     ) {
-        var attrValue = "x".repeat(maxLength)
-        var tagValue = if (tag.equals("manifest")) "$tag $ns" else tag
-        var manifestStr = "$prefix<$tagValue $attrName=\"$attrValue\" />$suffix"
+        val value = "x".repeat(maxLen)
+        val xml = "<$tag $name=\"$value\" />"
+        pullParser.setInput(ByteArrayInputStream(xml.toByteArray()), null)
+        val validator = Validator()
+        pullParser.nextTag()
+        validator.validate(pullParser)
         try {
-            parseManifestStr(manifestStr)
-        } catch (e: XmlPullParserException) {
-            fail("Failed to parse valid <$tag> attribute $attrName with max length of $maxLength:" +
+            validator.validateStrAttr(pullParser, name, value)
+        } catch (e: SecurityException) {
+            fail("Failed to parse valid <$tag> attribute $name with max length of $maxLen:" +
                     " ${e.message}")
         }
-        attrValue = "x".repeat(maxLength + 1)
-        manifestStr = "$prefix<$tagValue $attrName=\"$attrValue\" />$suffix"
-        val e = assertThrows(XmlPullParserException::class.java) {
-            parseManifestStr(manifestStr)
+        if (index != null) {
+            try {
+                validator.validateResStrAttr(pullParser, index, value)
+            } catch (e: SecurityException) {
+                fail("Failed to parse valid <$tag> resource string attribute $name with max" +
+                        " length of $maxLen: ${e.message}")
+            }
         }
-        assertEquals(expectedAttrLengthErrorMsg(attrName.split(":").last(), tag), e.message)
     }
 
-    private fun parseBadTagCount(
-            tag: String,
-            maxNum: Int,
-            parentTag: String,
-            prefix: String,
-            suffix: String
+    private fun validateTagAttr_shouldFail(
+        tag: String,
+        name: String,
+        index: Int?,
+        maxLen: Int
     ) {
-        var tags = "<$tag />".repeat(maxNum)
-        var manifestStr = "$prefix$tags$suffix"
+        val value = "x".repeat(maxLen + 1)
+        val xml = "<$tag $name=\"$value\" />"
+        pullParser.setInput(ByteArrayInputStream(xml.toByteArray()), null)
+        val validator = Validator()
+        pullParser.nextTag()
+        validator.validate(pullParser)
+        val e1 = assertThrows(SecurityException::class.java) {
+            validator.validateStrAttr(pullParser, name, value)
+        }
+        assertEquals(expectedAttrLengthErrorMsg(name, tag), e1.message)
+        if (index != null) {
+            val e2 = assertThrows(SecurityException::class.java) {
+                validator.validateResStrAttr(pullParser, index, value)
+            }
+            assertEquals(expectedResAttrLengthErrorMsg(tag), e2.message)
+        }
+    }
+
+    private fun validateTagCount(tag: String, maxNum: Int, parentTag: String) {
+        validateTagCount_shouldPass(tag, maxNum, parentTag)
+        validateTagCount_shouldFail(tag, maxNum, parentTag)
+    }
+
+    private fun validateTagCount_shouldPass(tag: String, maxNum: Int, parentTag: String) {
+        val tags = "<$tag />".repeat(maxNum)
+        val xml = "<$parentTag>$tags</$parentTag>"
         try {
-            parseManifestStr(manifestStr)
-        } catch (e: XmlPullParserException) {
+            parseXmlStr(xml)
+        } catch (e: SecurityException) {
             fail("Failed to parse <$tag> with max count limit of $maxNum under" +
                     " <$parentTag>: ${e.message}")
         }
-        tags = "<$tag />".repeat(maxNum + 1)
-        manifestStr = "$prefix$tags$suffix"
-        val e = assertThrows(XmlPullParserException::class.java) {
-            parseManifestStr(manifestStr)
+    }
+
+    private fun validateTagCount_shouldFail(tag: String, maxNum: Int, parentTag: String) {
+        val tags = "<$tag />".repeat(maxNum + 1)
+        val xml = "<$parentTag>$tags</$parentTag>"
+        val e = assertThrows(SecurityException::class.java) {
+            parseXmlStr(xml)
         }
         assertEquals(expectedCountErrorMsg(tag, parentTag), e.message)
     }
@@ -624,13 +446,12 @@ class AndroidPackageParsingValidationTest {
     @Test
     fun parseUnexpectedTag_shouldSkip() {
         val host = "x".repeat(256)
-        val dataTags = "<data android:host=\"$host\" />".repeat(2049)
-        val ns = "http://schemas.android.com/apk/res/android"
-        val manifestStr = "<manifest xmlns:android=\"$ns\" package=\"test\">$dataTags</manifest>"
-        parseManifestStr(manifestStr)
+        val dataTags = "<data host=\"$host\" />".repeat(2049)
+        val xml = "<manifest package=\"test\">$dataTags</manifest>"
+        parseXmlStr(xml)
     }
 
-    fun parseManifestStr(manifestStr: String) {
+    fun parseXmlStr(manifestStr: String) {
         pullParser.setInput(ByteArrayInputStream(manifestStr.toByteArray()), null)
         val validator = Validator()
         do {
@@ -647,39 +468,4 @@ class AndroidPackageParsingValidationTest {
 
     fun expectedResAttrLengthErrorMsg(tag: String) =
             "String length limit exceeded for attribute in $tag"
-
-    @Test
-    fun validateResAttrs() {
-        pullParser.setInput(ByteArrayInputStream("<manifest />".toByteArray()), null)
-        pullParser.next()
-        val validator = Validator()
-        validator.validate(pullParser)
-        validateResAttr(pullParser, validator, R.styleable.AndroidManifestData_host,
-                "R.styleable.AndroidManifestData_host", 255)
-        validateResAttr(pullParser, validator, R.styleable.AndroidManifestData_port,
-                "R.styleable.AndroidManifestData_port", 255)
-        validateResAttr(pullParser, validator, R.styleable.AndroidManifestData_scheme,
-                "R.styleable.AndroidManifestData_scheme", 255)
-        validateResAttr(pullParser, validator, R.styleable.AndroidManifestData_mimeType,
-                "R.styleable.AndroidManifestData_mimeType", 512)
-    }
-
-    fun validateResAttr(
-            parser: XmlPullParser,
-            validator: Validator,
-            resId: Int,
-            resIdStr: String,
-            maxLength: Int
-    ) {
-        try {
-            validator.validateAttr(parser, resId, "x".repeat(maxLength))
-        } catch (e: XmlPullParserException) {
-            fail("Failed to parse valid string resource attribute $resIdStr with max length of" +
-                    " $maxLength: ${e.message}")
-        }
-        val e = assertThrows(XmlPullParserException::class.java) {
-            validator.validateAttr(parser, resId, "x".repeat(maxLength + 1))
-        }
-        assertEquals(expectedResAttrLengthErrorMsg("manifest"), e.message)
-    }
 }
