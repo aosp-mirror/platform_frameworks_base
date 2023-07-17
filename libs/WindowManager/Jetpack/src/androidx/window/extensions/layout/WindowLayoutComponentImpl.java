@@ -296,7 +296,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * {@link IllegalArgumentException} since this can cause negative UI effects down stream.
      *
      * @param context a proxy for the {@link android.view.Window} that contains the
-     * {@link DisplayFeature}.
+     *                {@link DisplayFeature}.
      * @return a {@link List}  of {@link DisplayFeature}s that are within the
      * {@link android.view.Window} of the {@link Activity}
      */
@@ -328,10 +328,32 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             rotateRectToDisplayRotation(displayId, featureRect);
             transformToWindowSpaceRect(windowConfiguration, featureRect);
 
-            if (!isZero(featureRect)) {
+            if (isZero(featureRect)) {
                 // TODO(b/228641877): Remove guarding when fixed.
-                features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
+                continue;
             }
+            if (featureRect.left != 0 && featureRect.top != 0) {
+                throw new IllegalArgumentException("Bounding rectangle must start at the top or "
+                        + "left of the window. BaseFeatureRect: " + baseFeature.getRect()
+                        + ", FeatureRect: " + featureRect
+                        + ", WindowConfiguration: " + windowConfiguration);
+
+            }
+            if (featureRect.left == 0
+                    && featureRect.width() != windowConfiguration.getBounds().width()) {
+                throw new IllegalArgumentException("Horizontal FoldingFeature must have full width."
+                        + " BaseFeatureRect: " + baseFeature.getRect()
+                        + ", FeatureRect: " + featureRect
+                        + ", WindowConfiguration: " + windowConfiguration);
+            }
+            if (featureRect.top == 0
+                    && featureRect.height() != windowConfiguration.getBounds().height()) {
+                throw new IllegalArgumentException("Vertical FoldingFeature must have full height."
+                        + " BaseFeatureRect: " + baseFeature.getRect()
+                        + ", FeatureRect: " + featureRect
+                        + ", WindowConfiguration: " + windowConfiguration);
+            }
+            features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
         }
         return features;
     }
