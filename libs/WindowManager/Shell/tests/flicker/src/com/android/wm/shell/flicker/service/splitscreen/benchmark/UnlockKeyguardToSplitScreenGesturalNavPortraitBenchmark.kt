@@ -18,13 +18,11 @@ package com.android.wm.shell.flicker.service.splitscreen.benchmark
 
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
-import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.UnlockKeyguardToSplitScreen
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.BlockJUnit4ClassRunner
 
-@RequiresDevice
 @RunWith(BlockJUnit4ClassRunner::class)
 class UnlockKeyguardToSplitScreenGesturalNavPortraitBenchmark : UnlockKeyguardToSplitScreen() {
     @PlatinumTest(focusArea = "sysui")
