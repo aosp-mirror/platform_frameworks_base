@@ -479,8 +479,8 @@ public class ForegroundServiceTypeLoggerModule {
                 r.appInfo.uid,
                 r.shortInstanceName,
                 fgsState, // FGS State
-                r.mAllowWhileInUsePermissionInFgs, // allowWhileInUsePermissionInFgs
-                r.mAllowStartForeground, // fgsStartReasonCode
+                r.isFgsAllowedWIU(), // allowWhileInUsePermissionInFgs
+                r.getFgsAllowStart(), // fgsStartReasonCode
                 r.appInfo.targetSdkVersion,
                 r.mRecentCallingUid,
                 0, // callerTargetSdkVersion
