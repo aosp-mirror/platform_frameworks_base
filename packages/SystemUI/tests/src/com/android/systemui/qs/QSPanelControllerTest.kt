@@ -154,6 +154,21 @@ class QSPanelControllerTest : SysuiTestCase() {
         verify(qsPanel).setCanCollapse(true)
     }
 
+    @Test
+    fun multipleListeningOnlyCallsBrightnessControllerOnce() {
+        controller.setListening(true, true)
+        controller.setListening(true, false)
+        controller.setListening(true, true)
+
+        verify(brightnessController).registerCallbacks()
+
+        controller.setListening(false, true)
+        controller.setListening(false, false)
+        controller.setListening(false, true)
+
+        verify(brightnessController).unregisterCallbacks()
+    }
+
     private fun setShouldUseSplitShade(shouldUse: Boolean) {
         testableResources.addOverride(R.bool.config_use_split_notification_shade, shouldUse)
     }

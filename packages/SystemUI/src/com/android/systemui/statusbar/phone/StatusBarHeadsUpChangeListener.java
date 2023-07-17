@@ -21,6 +21,7 @@ import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
@@ -35,6 +36,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarWindowController mStatusBarWindowController;
     private final ShadeViewController mShadeViewController;
+    private final NotificationStackScrollLayoutController mNsslController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
@@ -45,14 +47,15 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarWindowController statusBarWindowController,
             ShadeViewController shadeViewController,
+            NotificationStackScrollLayoutController nsslController,
             KeyguardBypassController keyguardBypassController,
             HeadsUpManagerPhone headsUpManager,
             StatusBarStateController statusBarStateController,
             NotificationRemoteInputManager notificationRemoteInputManager) {
-
         mNotificationShadeWindowController = notificationShadeWindowController;
         mStatusBarWindowController = statusBarWindowController;
         mShadeViewController = shadeViewController;
+        mNsslController = nsslController;
         mKeyguardBypassController = keyguardBypassController;
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
@@ -85,8 +88,7 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
                 //animation
                 // is finished.
                 mHeadsUpManager.setHeadsUpGoingAway(true);
-                mShadeViewController.getNotificationStackScrollLayoutController()
-                        .runAfterAnimationFinished(() -> {
+                mNsslController.runAfterAnimationFinished(() -> {
                     if (!mHeadsUpManager.hasPinnedHeadsUp()) {
                         mNotificationShadeWindowController.setHeadsUpShowing(false);
                         mHeadsUpManager.setHeadsUpGoingAway(false);

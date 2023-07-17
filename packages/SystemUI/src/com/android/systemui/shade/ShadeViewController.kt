@@ -19,9 +19,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.statusbar.RemoteInputController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController
@@ -141,9 +139,6 @@ interface ShadeViewController {
     /** Returns the StatusBarState. */
     val barState: Int
 
-    /** Returns the NSSL controller. */
-    val notificationStackScrollLayoutController: NotificationStackScrollLayoutController
-
     /** Sets the amount of progress in the status bar launch animation. */
     fun applyLaunchAnimationProgress(linearProgress: Float)
 
@@ -261,9 +256,6 @@ interface ShadeViewController {
     /** Returns the ShadeFoldAnimator. */
     val shadeFoldAnimator: ShadeFoldAnimator
 
-    /** Returns the ShadeNotificationPresenter. */
-    val shadeNotificationPresenter: ShadeNotificationPresenter
-
     companion object {
         /**
          * Returns a multiplicative factor to use when determining the falsing threshold for touches
@@ -325,16 +317,7 @@ interface ShadeFoldAnimator {
     fun cancelFoldToAodAnimation()
 
     /** Returns the main view of the shade. */
-    val view: ViewGroup
-}
-
-/** Handles the shade's interactions with StatusBarNotificationPresenter. */
-interface ShadeNotificationPresenter {
-    /** Returns a new delegate for some view controller pieces of the remote input process. */
-    fun createRemoteInputDelegate(): RemoteInputController.Delegate
-
-    /** Returns whether the screen has temporarily woken up to display notifications. */
-    fun hasPulsingNotifications(): Boolean
+    val view: ViewGroup?
 }
 
 /**
