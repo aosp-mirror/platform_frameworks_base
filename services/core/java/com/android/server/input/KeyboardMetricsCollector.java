@@ -53,7 +53,8 @@ public final class KeyboardMetricsCollector {
     @IntDef(prefix = { "LAYOUT_SELECTION_CRITERIA_" }, value = {
             LAYOUT_SELECTION_CRITERIA_USER,
             LAYOUT_SELECTION_CRITERIA_DEVICE,
-            LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD
+            LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD,
+            LAYOUT_SELECTION_CRITERIA_DEFAULT
     })
     public @interface LayoutSelectionCriteria {}
 
@@ -66,8 +67,14 @@ public final class KeyboardMetricsCollector {
     /** Auto-detection based on IME provided language tag and layout type */
     public static final int LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD = 2;
 
+    /** Default selection */
+    public static final int LAYOUT_SELECTION_CRITERIA_DEFAULT = 3;
+
     @VisibleForTesting
     static final String DEFAULT_LAYOUT = "Default";
+
+    @VisibleForTesting
+    static final String DEFAULT_LANGUAGE_TAG = "None";
 
     /**
      * Log keyboard system shortcuts for the proto
@@ -131,6 +138,10 @@ public final class KeyboardMetricsCollector {
                 layoutConfiguration.keyboardLayoutName);
         proto.write(KeyboardLayoutConfig.LAYOUT_SELECTION_CRITERIA,
                 layoutConfiguration.layoutSelectionCriteria);
+        proto.write(KeyboardLayoutConfig.IME_LANGUAGE_TAG,
+                layoutConfiguration.imeLanguageTag);
+        proto.write(KeyboardLayoutConfig.IME_LAYOUT_TYPE,
+                layoutConfiguration.imeLayoutType);
         proto.end(keyboardLayoutConfigToken);
     }
 
@@ -231,27 +242,29 @@ public final class KeyboardMetricsCollector {
                     @LayoutSelectionCriteria int layoutSelectionCriteria =
                             mLayoutSelectionCriteriaList.get(i);
                     InputMethodSubtype imeSubtype =  mImeSubtypeList.get(i);
-                    String keyboardLanguageTag;
-                    String keyboardLayoutStringType;
-                    if (layoutSelectionCriteria == LAYOUT_SELECTION_CRITERIA_DEVICE) {
-                        keyboardLanguageTag = mInputDevice.getKeyboardLanguageTag();
-                        keyboardLayoutStringType = mInputDevice.getKeyboardLayoutType();
-                    } else {
-                        ULocale pkLocale = imeSubtype.getPhysicalKeyboardHintLanguageTag();
-                        keyboardLanguageTag = pkLocale != null ? pkLocale.toLanguageTag()
-                                : imeSubtype.getCanonicalizedLanguageTag();
-                        keyboardLayoutStringType = imeSubtype.getPhysicalKeyboardHintLayoutType();
-                    }
+                    String keyboardLanguageTag = mInputDevice.getKeyboardLanguageTag();
+                    keyboardLanguageTag = keyboardLanguageTag == null ? DEFAULT_LANGUAGE_TAG
+                            : keyboardLanguageTag;
+                    int keyboardLayoutType = KeyboardLayout.LayoutType.getLayoutTypeEnumValue(
+                            mInputDevice.getKeyboardLayoutType());
+
+                    ULocale pkLocale = imeSubtype.getPhysicalKeyboardHintLanguageTag();
+                    String canonicalizedLanguageTag =
+                            imeSubtype.getCanonicalizedLanguageTag().equals("")
+                            ? DEFAULT_LANGUAGE_TAG : imeSubtype.getCanonicalizedLanguageTag();
+                    String imeLanguageTag = pkLocale != null ? pkLocale.toLanguageTag()
+                            : canonicalizedLanguageTag;
+                    int imeLayoutType = KeyboardLayout.LayoutType.getLayoutTypeEnumValue(
+                            imeSubtype.getPhysicalKeyboardHintLayoutType());
+
                     // Sanitize null values
                     String keyboardLayoutName =
                             selectedLayout == null ? DEFAULT_LAYOUT : selectedLayout.getLabel();
-                    keyboardLanguageTag = keyboardLanguageTag == null ? "" : keyboardLanguageTag;
-                    int keyboardLayoutType = KeyboardLayout.LayoutType.getLayoutTypeEnumValue(
-                            keyboardLayoutStringType);
 
                     configurationList.add(
                             new LayoutConfiguration(keyboardLayoutType, keyboardLanguageTag,
-                                    keyboardLayoutName, layoutSelectionCriteria));
+                                    keyboardLayoutName, layoutSelectionCriteria,
+                                    imeLayoutType, imeLanguageTag));
                 }
                 return new KeyboardConfigurationEvent(mInputDevice, mIsFirstConfiguration,
                         configurationList);
@@ -267,13 +280,18 @@ public final class KeyboardMetricsCollector {
         public final String keyboardLayoutName;
         @LayoutSelectionCriteria
         public final int layoutSelectionCriteria;
+        public final int imeLayoutType;
+        public final String imeLanguageTag;
 
         private LayoutConfiguration(int keyboardLayoutType, String keyboardLanguageTag,
-                String keyboardLayoutName, @LayoutSelectionCriteria int layoutSelectionCriteria) {
+                String keyboardLayoutName, @LayoutSelectionCriteria int layoutSelectionCriteria,
+                int imeLayoutType, String imeLanguageTag) {
             this.keyboardLayoutType = keyboardLayoutType;
             this.keyboardLanguageTag = keyboardLanguageTag;
             this.keyboardLayoutName = keyboardLayoutName;
             this.layoutSelectionCriteria = layoutSelectionCriteria;
+            this.imeLayoutType = imeLayoutType;
+            this.imeLanguageTag = imeLanguageTag;
         }
 
         @Override
@@ -281,7 +299,9 @@ public final class KeyboardMetricsCollector {
             return "{keyboardLanguageTag = " + keyboardLanguageTag + " keyboardLayoutType = "
                     + KeyboardLayout.LayoutType.getLayoutNameFromValue(keyboardLayoutType)
                     + " keyboardLayoutName = " + keyboardLayoutName + " layoutSelectionCriteria = "
-                    + getStringForSelectionCriteria(layoutSelectionCriteria) + "}";
+                    + getStringForSelectionCriteria(layoutSelectionCriteria)
+                    + "imeLanguageTag = " + imeLanguageTag + " imeLayoutType = "
+                    + KeyboardLayout.LayoutType.getLayoutNameFromValue(imeLayoutType) + "}";
         }
     }
 
@@ -294,6 +314,8 @@ public final class KeyboardMetricsCollector {
                 return "LAYOUT_SELECTION_CRITERIA_DEVICE";
             case LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD:
                 return "LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD";
+            case LAYOUT_SELECTION_CRITERIA_DEFAULT:
+                return "LAYOUT_SELECTION_CRITERIA_DEFAULT";
             default:
                 return "INVALID_CRITERIA";
         }
@@ -302,7 +324,8 @@ public final class KeyboardMetricsCollector {
     private static boolean isValidSelectionCriteria(int layoutSelectionCriteria) {
         return layoutSelectionCriteria == LAYOUT_SELECTION_CRITERIA_USER
                 || layoutSelectionCriteria == LAYOUT_SELECTION_CRITERIA_DEVICE
-                || layoutSelectionCriteria == LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD;
+                || layoutSelectionCriteria == LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD
+                || layoutSelectionCriteria == LAYOUT_SELECTION_CRITERIA_DEFAULT;
     }
 }
 
