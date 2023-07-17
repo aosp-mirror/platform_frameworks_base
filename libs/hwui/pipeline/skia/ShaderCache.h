@@ -97,18 +97,16 @@ private:
     void operator=(const ShaderCache&) = delete;
 
     /**
-     * "getBlobCacheLocked" returns the BlobCache object being used to store the
-     * key/value blob pairs.  If the BlobCache object has not yet been created,
-     * this will do so, loading the serialized cache contents from disk if
-     * possible.
-     */
-    BlobCache* getBlobCacheLocked() REQUIRES(mMutex);
-
-    /**
      * "validateCache" updates the cache to match the given identity.  If the
      * cache currently has the wrong identity, all entries in the cache are cleared.
      */
     bool validateCache(const void* identity, ssize_t size) REQUIRES(mMutex);
+
+    /**
+     * Helper for BlobCache::set to trace the result and ensure the identity hash
+     * does not get evicted.
+     */
+    void set(const void* key, size_t keySize, const void* value, size_t valueSize) REQUIRES(mMutex);
 
     /**
      * "saveToDiskLocked" attempts to save the current contents of the cache to
@@ -128,11 +126,9 @@ private:
     bool mInitialized GUARDED_BY(mMutex) = false;
 
     /**
-     * "mBlobCache" is the cache in which the key/value blob pairs are stored.  It
-     * is initially NULL, and will be initialized by getBlobCacheLocked the
-     * first time it's needed.
-     * The blob cache contains the Android build number. We treat version mismatches as an empty
-     * cache (logic implemented in BlobCache::unflatten).
+     * "mBlobCache" is the cache in which the key/value blob pairs are stored.
+     * The blob cache contains the Android build number. We treat version mismatches
+     * as an empty cache (logic implemented in BlobCache::unflatten).
      */
     std::unique_ptr<FileBlobCache> mBlobCache GUARDED_BY(mMutex);
 
