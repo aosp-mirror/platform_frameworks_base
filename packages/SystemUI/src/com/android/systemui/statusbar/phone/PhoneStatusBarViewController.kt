@@ -30,6 +30,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeLogger
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
@@ -51,6 +52,7 @@ class PhoneStatusBarViewController private constructor(
     @Named(UNFOLD_STATUS_BAR) private val progressProvider: ScopedUnfoldTransitionProgressProvider?,
     private val centralSurfaces: CentralSurfaces,
     private val shadeController: ShadeController,
+    private val shadeViewController: ShadeViewController,
     private val shadeLogger: ShadeLogger,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
     private val userChipViewModel: StatusBarUserChipViewModel,
@@ -165,20 +167,20 @@ class PhoneStatusBarViewController private constructor(
             if (event.action == MotionEvent.ACTION_DOWN) {
                 // If the view that would receive the touch is disabled, just have status
                 // bar eat the gesture.
-                if (!centralSurfaces.shadeViewController.isViewEnabled) {
+                if (!shadeViewController.isViewEnabled) {
                     shadeLogger.logMotionEvent(event,
                             "onTouchForwardedFromStatusBar: panel view disabled")
                     return true
                 }
-                if (centralSurfaces.shadeViewController.isFullyCollapsed &&
+                if (shadeViewController.isFullyCollapsed &&
                         event.y < 1f) {
                     // b/235889526 Eat events on the top edge of the phone when collapsed
                     shadeLogger.logMotionEvent(event, "top edge touch ignored")
                     return true
                 }
-                centralSurfaces.shadeViewController.startTrackingExpansionFromStatusBar()
+                shadeViewController.startTrackingExpansionFromStatusBar()
             }
-            return centralSurfaces.shadeViewController.handleExternalTouch(event)
+            return shadeViewController.handleExternalTouch(event)
         }
     }
 
@@ -222,6 +224,7 @@ class PhoneStatusBarViewController private constructor(
         private val userChipViewModel: StatusBarUserChipViewModel,
         private val centralSurfaces: CentralSurfaces,
         private val shadeController: ShadeController,
+        private val shadeViewController: ShadeViewController,
         private val shadeLogger: ShadeLogger,
         private val viewUtil: ViewUtil,
         private val configurationController: ConfigurationController,
@@ -241,6 +244,7 @@ class PhoneStatusBarViewController private constructor(
                     progressProvider.getOrNull(),
                     centralSurfaces,
                     shadeController,
+                    shadeViewController,
                     shadeLogger,
                     statusBarMoveFromCenterAnimationController,
                     userChipViewModel,

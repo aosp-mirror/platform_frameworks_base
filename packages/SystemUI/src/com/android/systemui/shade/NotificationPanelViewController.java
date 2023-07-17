@@ -168,7 +168,6 @@ import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
-import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -224,6 +223,8 @@ import com.android.systemui.util.Utils;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -233,8 +234,6 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlin.Unit;
 
 import kotlinx.coroutines.CoroutineDispatcher;
 
@@ -440,8 +439,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final FalsingCollector mFalsingCollector;
     private final ShadeHeadsUpTrackerImpl mShadeHeadsUpTracker = new ShadeHeadsUpTrackerImpl();
     private final ShadeFoldAnimator mShadeFoldAnimator = new ShadeFoldAnimatorImpl();
-    private final ShadeNotificationPresenterImpl mShadeNotificationPresenter =
-            new ShadeNotificationPresenterImpl();
 
     private boolean mShowIconsWhenExpanded;
     private int mIndicationBottomPadding;
@@ -3321,23 +3318,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 NPVCDownEventState.TABLE_HEADERS,
                 mLastDownEvents.toList()
         ).printTableData(ipw);
-    }
-
-    private final class ShadeNotificationPresenterImpl implements ShadeNotificationPresenter{
-        @Override
-        public RemoteInputController.Delegate createRemoteInputDelegate() {
-            return mNotificationStackScrollLayoutController.createDelegate();
-        }
-
-        @Override
-        public boolean hasPulsingNotifications() {
-            return mNotificationListContainer.hasPulsingNotifications();
-        }
-    }
-
-    @Override
-    public ShadeNotificationPresenter getShadeNotificationPresenter() {
-        return mShadeNotificationPresenter;
     }
 
     @Override
