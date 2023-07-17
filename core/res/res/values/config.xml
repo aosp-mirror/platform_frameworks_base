@@ -198,6 +198,9 @@
          service. Off by default, since the service may not be available on some devices. -->
     <bool name="config_enableProximityService">false</bool>
 
+    <!-- Enable or disable android.companion.virtual.VirtualDeviceManager. Enabled by default. -->
+    <bool name="config_enableVirtualDeviceManager">true</bool>
+
     <!-- Whether dialogs should close automatically when the user touches outside
          of them.  This should not normally be modified. -->
     <bool name="config_closeDialogWhenTouchOutside">true</bool>
