@@ -190,4 +190,15 @@ interface IOverlayManager {
      * @throws SecurityException if the transaction failed
      */
     void commit(in OverlayManagerTransaction transaction);
+
+    /**
+     * Returns a String of a list of partitions from low priority to high.
+     */
+    String getPartitionOrder();
+
+    /**
+     * Returns a boolean which represent whether the partition list is sorted by default.
+     * If not then it should be sorted by /product/overlay/partition_order.xml.
+     */
+    boolean isDefaultPartitionOrder();
 }
