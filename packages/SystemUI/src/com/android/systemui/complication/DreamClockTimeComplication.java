@@ -21,11 +21,13 @@ import static com.android.systemui.complication.dagger.RegisteredComplicationsMo
 
 import android.view.View;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.complication.dagger.DreamClockTimeComplicationComponent;
 import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.shared.condition.Monitor;
+import com.android.systemui.util.ViewController;
 import com.android.systemui.util.condition.ConditionalCoreStartable;
 
 import javax.inject.Inject;
@@ -94,11 +96,14 @@ public class DreamClockTimeComplication implements Complication {
         private final ComplicationLayoutParams mLayoutParams;
 
         @Inject
-        DreamClockTimeViewHolder(@Named(DREAM_CLOCK_TIME_COMPLICATION_VIEW) View view,
+        DreamClockTimeViewHolder(
+                @Named(DREAM_CLOCK_TIME_COMPLICATION_VIEW) View view,
                 @Named(DREAM_CLOCK_TIME_COMPLICATION_LAYOUT_PARAMS)
-                        ComplicationLayoutParams layoutParams) {
+                        ComplicationLayoutParams layoutParams,
+                DreamClockTimeViewController viewController) {
             mView = view;
             mLayoutParams = layoutParams;
+            viewController.init();
         }
 
         @Override
@@ -109,6 +114,31 @@ public class DreamClockTimeComplication implements Complication {
         @Override
         public ComplicationLayoutParams getLayoutParams() {
             return mLayoutParams;
+        }
+    }
+
+    static class DreamClockTimeViewController extends ViewController<View> {
+        private final UiEventLogger mUiEventLogger;
+
+        @Inject
+        DreamClockTimeViewController(
+                @Named(DREAM_CLOCK_TIME_COMPLICATION_VIEW) View view,
+                UiEventLogger uiEventLogger) {
+            super(view);
+
+            mUiEventLogger = uiEventLogger;
+        }
+
+        @Override
+        protected void onViewAttached() {
+            mView.setOnClickListener(this::onClick);
+        }
+
+        @Override
+        protected void onViewDetached() {}
+
+        private void onClick(View v) {
+            mUiEventLogger.log(DreamOverlayUiEvent.DREAM_CLOCK_TAPPED);
         }
     }
 }
