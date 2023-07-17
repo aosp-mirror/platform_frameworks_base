@@ -42,7 +42,6 @@ data class KeyguardFingerprintListenModel(
     var keyguardIsVisible: Boolean = false,
     var keyguardOccluded: Boolean = false,
     var occludingAppRequestingFp: Boolean = false,
-    var shouldListenSfpsState: Boolean = false,
     var shouldListenForFingerprintAssistant: Boolean = false,
     var strongerAuthRequired: Boolean = false,
     var switchingUser: Boolean = false,
@@ -74,7 +73,6 @@ data class KeyguardFingerprintListenModel(
             keyguardIsVisible.toString(),
             keyguardOccluded.toString(),
             occludingAppRequestingFp.toString(),
-            shouldListenSfpsState.toString(),
             shouldListenForFingerprintAssistant.toString(),
             strongerAuthRequired.toString(),
             switchingUser.toString(),
@@ -115,7 +113,6 @@ data class KeyguardFingerprintListenModel(
                 keyguardIsVisible = model.keyguardIsVisible
                 keyguardOccluded = model.keyguardOccluded
                 occludingAppRequestingFp = model.occludingAppRequestingFp
-                shouldListenSfpsState = model.shouldListenSfpsState
                 shouldListenForFingerprintAssistant = model.shouldListenForFingerprintAssistant
                 strongerAuthRequired = model.strongerAuthRequired
                 switchingUser = model.switchingUser
