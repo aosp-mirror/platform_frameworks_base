@@ -26,7 +26,6 @@ import com.android.systemui.media.controls.ui.MediaHostStatesManager;
 import com.android.systemui.media.controls.util.MediaFlags;
 import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
-import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogBuffer;
@@ -131,17 +130,5 @@ public interface MediaModule {
             return Optional.empty();
         }
         return Optional.of(muteAwaitConnectionCliLazy.get());
-    }
-
-    /** */
-    @Provides
-    @SysUISingleton
-    static Optional<NearbyMediaDevicesManager> providesNearbyMediaDevicesManager(
-            MediaFlags mediaFlags,
-            Lazy<NearbyMediaDevicesManager> nearbyMediaDevicesManagerLazy) {
-        if (!mediaFlags.areNearbyMediaDevicesEnabled()) {
-            return Optional.empty();
-        }
-        return Optional.of(nearbyMediaDevicesManagerLazy.get());
     }
 }

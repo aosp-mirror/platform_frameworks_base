@@ -38,12 +38,6 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
     fun areMuteAwaitConnectionsEnabled() = featureFlags.isEnabled(Flags.MEDIA_MUTE_AWAIT)
 
     /**
-     * Check whether we enable support for nearby media devices. See
-     * [android.app.StatusBarManager.registerNearbyMediaDevicesProvider] for more information.
-     */
-    fun areNearbyMediaDevicesEnabled() = featureFlags.isEnabled(Flags.MEDIA_NEARBY_DEVICES)
-
-    /**
      * If true, keep active media controls for the lifetime of the MediaSession, regardless of
      * whether the underlying notification was dismissed
      */

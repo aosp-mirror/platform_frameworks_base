@@ -226,7 +226,7 @@ public interface SysUIComponent {
     Optional<MediaMuteAwaitConnectionCli> getMediaMuteAwaitConnectionCli();
 
     /** */
-    Optional<NearbyMediaDevicesManager> getNearbyMediaDevicesManager();
+    NearbyMediaDevicesManager getNearbyMediaDevicesManager();
 
     /**
      * Returns {@link CoreStartable}s that should be started with the application.
