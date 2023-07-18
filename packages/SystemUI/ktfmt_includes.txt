@@ -422,9 +422,6 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallFlags.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallLogger.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/phone/userswitcher/StatusBarUserSwitcherContainer.kt
--packages/SystemUI/src/com/android/systemui/statusbar/pipeline/dagger/StatusBarPipelineModule.kt
--packages/SystemUI/src/com/android/systemui/statusbar/pipeline/shared/data/model/ConnectivitySlots.kt
--packages/SystemUI/src/com/android/systemui/statusbar/pipeline/wifi/ui/view/ModernStatusBarWifiView.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/policy/BatteryStateNotifier.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/policy/DeviceControlsController.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/policy/DeviceControlsControllerImpl.kt
@@ -696,7 +693,6 @@
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallChronometerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallControllerTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/phone/ongoingcall/OngoingCallLoggerTest.kt
--packages/SystemUI/tests/src/com/android/systemui/statusbar/pipeline/mobile/ui/viewmodel/MobileIconViewModelTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/BatteryStateNotifierTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/ClockTest.kt
 -packages/SystemUI/tests/src/com/android/systemui/statusbar/policy/DeviceControlsControllerImplTest.kt
