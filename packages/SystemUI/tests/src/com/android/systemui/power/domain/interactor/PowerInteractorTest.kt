@@ -182,6 +182,32 @@ class PowerInteractorTest : SysuiTestCase() {
         assertThat(repository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_APPLICATION)
     }
 
+    @Test
+    fun wakeUpIfDreaming_dreaming_woken() {
+        // GIVEN device is dreaming
+        whenever(statusBarStateController.isDreaming).thenReturn(true)
+
+        // WHEN wakeUpIfDreaming is called
+        underTest.wakeUpIfDreaming("testReason", PowerManager.WAKE_REASON_GESTURE)
+
+        // THEN device is woken up
+        assertThat(repository.lastWakeWhy).isEqualTo("testReason")
+        assertThat(repository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_GESTURE)
+    }
+
+    @Test
+    fun wakeUpIfDreaming_notDreaming_notWoken() {
+        // GIVEN device is not dreaming
+        whenever(statusBarStateController.isDreaming).thenReturn(false)
+
+        // WHEN wakeUpIfDreaming is called
+        underTest.wakeUpIfDreaming("why", PowerManager.WAKE_REASON_TAP)
+
+        // THEN device is not woken
+        assertThat(repository.lastWakeWhy).isNull()
+        assertThat(repository.lastWakeReason).isNull()
+    }
+
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
     }
