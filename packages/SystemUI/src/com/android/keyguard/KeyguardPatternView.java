@@ -104,8 +104,10 @@ public class KeyguardPatternView extends KeyguardInputView
     }
 
     void onDevicePostureChanged(@DevicePostureInt int posture) {
-        mLastDevicePosture = posture;
-        updateMargins();
+        if (mLastDevicePosture != posture) {
+            mLastDevicePosture = posture;
+            updateMargins();
+        }
     }
 
     private void updateMargins() {

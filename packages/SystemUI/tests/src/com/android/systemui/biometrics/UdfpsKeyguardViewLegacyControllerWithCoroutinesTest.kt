@@ -34,7 +34,6 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -106,8 +105,8 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 mock(KeyguardStateController::class.java),
                 keyguardBouncerRepository,
                 mock(BiometricSettingsRepository::class.java),
-                mock(DeviceEntryFingerprintAuthRepository::class.java),
                 mock(SystemClock::class.java),
+                mKeyguardUpdateMonitor,
             )
         return createUdfpsKeyguardViewController(
             /* useModernBouncer */ true, /* useExpandedOverlay */

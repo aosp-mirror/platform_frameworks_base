@@ -164,13 +164,13 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.FaceAuthenticationListener;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.shared.constants.TrustAgentUiEvent;
-import com.android.systemui.keyguard.shared.model.AcquiredAuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.AuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.DetectionStatus;
-import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.FailedAuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.HelpAuthenticationStatus;
-import com.android.systemui.keyguard.shared.model.SuccessAuthenticationStatus;
+import com.android.systemui.keyguard.shared.model.AcquiredFaceAuthenticationStatus;
+import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus;
+import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus;
+import com.android.systemui.keyguard.shared.model.FaceDetectionStatus;
+import com.android.systemui.keyguard.shared.model.FailedFaceAuthenticationStatus;
+import com.android.systemui.keyguard.shared.model.HelpFaceAuthenticationStatus;
+import com.android.systemui.keyguard.shared.model.SuccessFaceAuthenticationStatus;
 import com.android.systemui.keyguard.shared.model.SysUiFaceAuthenticateOptions;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.WeatherData;
@@ -1471,27 +1471,31 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private FaceAuthenticationListener mFaceAuthenticationListener =
             new FaceAuthenticationListener() {
                 @Override
-                public void onAuthenticationStatusChanged(@NonNull AuthenticationStatus status) {
-                    if (status instanceof AcquiredAuthenticationStatus) {
+                public void onAuthenticationStatusChanged(
+                        @NonNull FaceAuthenticationStatus status
+                ) {
+                    if (status instanceof AcquiredFaceAuthenticationStatus) {
                         handleFaceAcquired(
-                                ((AcquiredAuthenticationStatus) status).getAcquiredInfo());
-                    } else if (status instanceof ErrorAuthenticationStatus) {
-                        ErrorAuthenticationStatus error = (ErrorAuthenticationStatus) status;
+                                ((AcquiredFaceAuthenticationStatus) status).getAcquiredInfo());
+                    } else if (status instanceof ErrorFaceAuthenticationStatus) {
+                        ErrorFaceAuthenticationStatus error =
+                                (ErrorFaceAuthenticationStatus) status;
                         handleFaceError(error.getMsgId(), error.getMsg());
-                    } else if (status instanceof FailedAuthenticationStatus) {
+                    } else if (status instanceof FailedFaceAuthenticationStatus) {
                         handleFaceAuthFailed();
-                    } else if (status instanceof HelpAuthenticationStatus) {
-                        HelpAuthenticationStatus helpMsg = (HelpAuthenticationStatus) status;
+                    } else if (status instanceof HelpFaceAuthenticationStatus) {
+                        HelpFaceAuthenticationStatus helpMsg =
+                                (HelpFaceAuthenticationStatus) status;
                         handleFaceHelp(helpMsg.getMsgId(), helpMsg.getMsg());
-                    } else if (status instanceof SuccessAuthenticationStatus) {
+                    } else if (status instanceof SuccessFaceAuthenticationStatus) {
                         FaceManager.AuthenticationResult result =
-                                ((SuccessAuthenticationStatus) status).getSuccessResult();
+                                ((SuccessFaceAuthenticationStatus) status).getSuccessResult();
                         handleFaceAuthenticated(result.getUserId(), result.isStrongBiometric());
                     }
                 }
 
                 @Override
-                public void onDetectionStatusChanged(@NonNull DetectionStatus status) {
+                public void onDetectionStatusChanged(@NonNull FaceDetectionStatus status) {
                     handleFaceAuthenticated(status.getUserId(), status.isStrongBiometric());
                 }
             };

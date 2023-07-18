@@ -22,11 +22,14 @@ import com.android.systemui.common.shared.model.Position
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.ScreenModel
+import com.android.systemui.keyguard.shared.model.ScreenState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,6 +58,9 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     private val _isDozing = MutableStateFlow(false)
     override val isDozing: StateFlow<Boolean> = _isDozing
+
+    private val _dozeTimeTick = MutableSharedFlow<Unit>()
+    override val dozeTimeTick = _dozeTimeTick
 
     private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)
     override val lastDozeTapToWakePosition = _lastDozeTapToWakePosition.asStateFlow()
@@ -85,6 +91,9 @@ class FakeKeyguardRepository : KeyguardRepository {
             WakefulnessModel(WakefulnessState.ASLEEP, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
         )
     override val wakefulness = _wakefulnessModel
+
+    private val _screenModel = MutableStateFlow(ScreenModel(ScreenState.SCREEN_OFF))
+    override val screenModel = _screenModel
 
     private val _isUdfpsSupported = MutableStateFlow(false)
 
@@ -145,6 +154,10 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     override fun setIsDozing(isDozing: Boolean) {
         _isDozing.value = isDozing
+    }
+
+    override fun dozeTimeTick() {
+        _dozeTimeTick.tryEmit(Unit)
     }
 
     override fun setLastDozeTapToWakePosition(position: Point) {

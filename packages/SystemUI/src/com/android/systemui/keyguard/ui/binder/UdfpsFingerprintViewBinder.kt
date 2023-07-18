@@ -42,6 +42,7 @@ object UdfpsFingerprintViewBinder {
         view: LottieAnimationView,
         viewModel: FingerprintViewModel,
     ) {
+        view.alpha = 0f
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {

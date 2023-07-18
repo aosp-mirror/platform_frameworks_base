@@ -16,9 +16,11 @@
 
 package com.android.systemui.wallpapers.data.repository
 
+import android.app.WallpaperInfo
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
@@ -29,5 +31,6 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 @SysUISingleton
 class NoopWallpaperRepository @Inject constructor() : WallpaperRepository {
+    override val wallpaperInfo: StateFlow<WallpaperInfo?> = MutableStateFlow(null).asStateFlow()
     override val wallpaperSupportsAmbientMode = MutableStateFlow(false).asStateFlow()
 }

@@ -70,6 +70,8 @@ constructor(
     val dozeAmount: Flow<Float> = repository.linearDozeAmount
     /** Whether the system is in doze mode. */
     val isDozing: Flow<Boolean> = repository.isDozing
+    /** Receive an event for doze time tick */
+    val dozeTimeTick: Flow<Unit> = repository.dozeTimeTick
     /** Whether Always-on Display mode is available. */
     val isAodAvailable: Flow<Boolean> = repository.isAodAvailable
     /** Doze transition information. */
