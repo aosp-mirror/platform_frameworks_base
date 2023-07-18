@@ -142,7 +142,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mNotificationMediaManager, mWakefulnessLifecycle, mScreenLifecycle,
                 mAuthController, mStatusBarStateController,
                 mSessionTracker, mLatencyTracker, mScreenOffAnimationController, mVibratorHelper,
-                mSystemClock
+                mSystemClock,
+                mStatusBarKeyguardViewManager
         );
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.addListener(mBiometricUnlockEventsListener);
@@ -464,6 +465,69 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onSideFingerprintSuccess_dreaming_unlockThenWake() {
+        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
+        when(mWakefulnessLifecycle.getLastWakeReason())
+                .thenReturn(PowerManager.WAKE_REASON_POWER_BUTTON);
+        final ArgumentCaptor<Runnable> afterKeyguardGoneRunnableCaptor =
+                ArgumentCaptor.forClass(Runnable.class);
+        givenDreamingLocked();
+        mBiometricUnlockController.startWakeAndUnlock(BiometricSourceType.FINGERPRINT, true);
+
+        // Make sure the BiometricUnlockController has registered a callback for when the keyguard
+        // is gone
+        verify(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(
+                afterKeyguardGoneRunnableCaptor.capture());
+        // Ensure that the power hasn't been told to wake up yet.
+        verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+        // Check that the keyguard has been told to unlock.
+        verify(mKeyguardViewMediator).onWakeAndUnlocking();
+
+        // Simulate the keyguard disappearing.
+        afterKeyguardGoneRunnableCaptor.getValue().run();
+        // Verify that the power manager has been told to wake up now.
+        verify(mPowerManager).wakeUp(anyLong(), anyInt(), anyString());
+    }
+
+    @Test
+    public void onSideFingerprintSuccess_dreaming_unlockIfStillLockedNotDreaming() {
+        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
+        when(mWakefulnessLifecycle.getLastWakeReason())
+                .thenReturn(PowerManager.WAKE_REASON_POWER_BUTTON);
+        final ArgumentCaptor<Runnable> afterKeyguardGoneRunnableCaptor =
+                ArgumentCaptor.forClass(Runnable.class);
+        givenDreamingLocked();
+        mBiometricUnlockController.startWakeAndUnlock(BiometricSourceType.FINGERPRINT, true);
+
+        // Make sure the BiometricUnlockController has registered a callback for when the keyguard
+        // is gone
+        verify(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(
+                afterKeyguardGoneRunnableCaptor.capture());
+        // Ensure that the power hasn't been told to wake up yet.
+        verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+        // Check that the keyguard has been told to unlock.
+        verify(mKeyguardViewMediator).onWakeAndUnlocking();
+
+        when(mUpdateMonitor.isDreaming()).thenReturn(false);
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+
+        // Simulate the keyguard disappearing.
+        afterKeyguardGoneRunnableCaptor.getValue().run();
+
+        final ArgumentCaptor<Runnable> dismissKeyguardRunnableCaptor =
+                ArgumentCaptor.forClass(Runnable.class);
+        verify(mHandler).post(dismissKeyguardRunnableCaptor.capture());
+
+        // Verify that the power manager was not told to wake up.
+        verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+
+        dismissKeyguardRunnableCaptor.getValue().run();
+        // Verify that the keyguard controller is told to unlock.
+        verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(eq(false));
+    }
+
+
+    @Test
     public void onSideFingerprintSuccess_oldPowerButtonPress_playHaptic() {
         // GIVEN side fingerprint enrolled, last wake reason was power button
         when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
@@ -535,6 +599,11 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
 
         // THEN shows primary bouncer
         verify(mStatusBarKeyguardViewManager).showPrimaryBouncer(anyBoolean());
+    }
+
+    private void givenDreamingLocked() {
+        when(mUpdateMonitor.isDreaming()).thenReturn(true);
+        when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
     }
 
     private void givenFingerprintModeUnlockCollapsing() {
