@@ -98,8 +98,13 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     @Override
-    public void requestCreateSession(long requestId, String packageName, String routeId,
-            Bundle sessionHints) {
+    public void requestCreateSession(
+            long requestId,
+            UserHandle userHandle,
+            String packageName,
+            String routeId,
+            Bundle sessionHints,
+            @RoutingSessionInfo.TransferReason int transferReason) {
         if (mConnectionReady) {
             mActiveConnection.requestCreateSession(requestId, packageName, routeId, sessionHints);
             updateBinding();
@@ -141,7 +146,13 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     }
 
     @Override
-    public void transferToRoute(long requestId, String sessionId, String routeId) {
+    public void transferToRoute(
+            long requestId,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName,
+            String sessionId,
+            String routeId,
+            @RoutingSessionInfo.TransferReason int transferReason) {
         if (mConnectionReady) {
             mActiveConnection.transferToRoute(requestId, sessionId, routeId);
         }
@@ -646,6 +657,14 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
                 if (route.isSystemRoute()) {
                     throw new SecurityException(
                             "Only the system is allowed to publish system routes. "
+                                    + "Disallowed route: "
+                                    + route);
+                }
+
+                if (route.getSuitabilityStatus()
+                        == MediaRoute2Info.SUITABILITY_STATUS_NOT_SUITABLE_FOR_TRANSFER) {
+                    throw new SecurityException(
+                            "Only the system is allowed to set not suitable for transfer status. "
                                     + "Disallowed route: "
                                     + route);
                 }

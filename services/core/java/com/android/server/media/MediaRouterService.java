@@ -601,9 +601,20 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void transferToRouteWithManager(IMediaRouter2Manager manager, int requestId,
-            String sessionId, MediaRoute2Info route) {
-        mService2.transferToRouteWithManager(manager, requestId, sessionId, route);
+    public void transferToRouteWithManager(
+            IMediaRouter2Manager manager,
+            int requestId,
+            String sessionId,
+            MediaRoute2Info route,
+            UserHandle transferInitiatorUserHandle,
+            String transferInitiatorPackageName) {
+        mService2.transferToRouteWithManager(
+                manager,
+                requestId,
+                sessionId,
+                route,
+                transferInitiatorUserHandle,
+                transferInitiatorPackageName);
     }
 
     // Binder call

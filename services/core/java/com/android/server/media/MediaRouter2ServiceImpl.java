@@ -344,11 +344,18 @@ class MediaRouter2ServiceImpl {
         Objects.requireNonNull(oldSession, "oldSession must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
+        UserHandle transferInitiatorUserHandle = Binder.getCallingUserHandle();
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                requestCreateSessionWithRouter2Locked(requestId, managerRequestId,
-                        router, oldSession, route, sessionHints);
+                requestCreateSessionWithRouter2Locked(
+                        requestId,
+                        managerRequestId,
+                        transferInitiatorUserHandle,
+                        router,
+                        oldSession,
+                        route,
+                        sessionHints);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -399,10 +406,11 @@ class MediaRouter2ServiceImpl {
             throw new IllegalArgumentException("uniqueSessionId must not be empty");
         }
 
+        UserHandle userHandle = Binder.getCallingUserHandle();
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                transferToRouteWithRouter2Locked(router, uniqueSessionId, route);
+                transferToRouteWithRouter2Locked(router, userHandle, uniqueSessionId, route);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -640,18 +648,32 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    public void transferToRouteWithManager(@NonNull IMediaRouter2Manager manager, int requestId,
-            @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
+    public void transferToRouteWithManager(
+            @NonNull IMediaRouter2Manager manager,
+            int requestId,
+            @NonNull String uniqueSessionId,
+            @NonNull MediaRoute2Info route,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName) {
         Objects.requireNonNull(manager, "manager must not be null");
         if (TextUtils.isEmpty(uniqueSessionId)) {
             throw new IllegalArgumentException("uniqueSessionId must not be empty");
         }
         Objects.requireNonNull(route, "route must not be null");
+        Objects.requireNonNull(transferInitiatorUserHandle);
+        Objects.requireNonNull(transferInitiatorPackageName);
 
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                transferToRouteWithManagerLocked(requestId, manager, uniqueSessionId, route);
+                transferToRouteWithManagerLocked(
+                        requestId,
+                        manager,
+                        uniqueSessionId,
+                        route,
+                        RoutingSessionInfo.TRANSFER_REASON_SYSTEM_REQUEST,
+                        transferInitiatorUserHandle,
+                        transferInitiatorPackageName);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1038,9 +1060,14 @@ class MediaRouter2ServiceImpl {
     }
 
     @GuardedBy("mLock")
-    private void requestCreateSessionWithRouter2Locked(int requestId, long managerRequestId,
-            @NonNull IMediaRouter2 router, @NonNull RoutingSessionInfo oldSession,
-            @NonNull MediaRoute2Info route, @Nullable Bundle sessionHints) {
+    private void requestCreateSessionWithRouter2Locked(
+            int requestId,
+            long managerRequestId,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull IMediaRouter2 router,
+            @NonNull RoutingSessionInfo oldSession,
+            @NonNull MediaRoute2Info route,
+            @Nullable Bundle sessionHints) {
         final IBinder binder = router.asBinder();
         final RouterRecord routerRecord = mAllRouterRecords.get(binder);
 
@@ -1114,9 +1141,16 @@ class MediaRouter2ServiceImpl {
 
         long uniqueRequestId = toUniqueRequestId(routerRecord.mRouterId, requestId);
         routerRecord.mUserRecord.mHandler.sendMessage(
-                obtainMessage(UserHandler::requestCreateSessionWithRouter2OnHandler,
+                obtainMessage(
+                        UserHandler::requestCreateSessionWithRouter2OnHandler,
                         routerRecord.mUserRecord.mHandler,
-                        uniqueRequestId, managerRequestId, routerRecord, oldSession, route,
+                        uniqueRequestId,
+                        managerRequestId,
+                        transferInitiatorUserHandle,
+                        routerRecord.mPackageName,
+                        routerRecord,
+                        oldSession,
+                        route,
                         sessionHints));
     }
 
@@ -1165,8 +1199,11 @@ class MediaRouter2ServiceImpl {
     }
 
     @GuardedBy("mLock")
-    private void transferToRouteWithRouter2Locked(@NonNull IMediaRouter2 router,
-            @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
+    private void transferToRouteWithRouter2Locked(
+            @NonNull IMediaRouter2 router,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String uniqueSessionId,
+            @NonNull MediaRoute2Info route) {
         final IBinder binder = router.asBinder();
         final RouterRecord routerRecord = mAllRouterRecords.get(binder);
 
@@ -1191,9 +1228,16 @@ class MediaRouter2ServiceImpl {
                             routerRecord, toOriginalRequestId(DUMMY_REQUEST_ID)));
         } else {
             routerRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::transferToRouteOnHandler,
+                    obtainMessage(
+                            UserHandler::transferToRouteOnHandler,
                             routerRecord.mUserRecord.mHandler,
-                            DUMMY_REQUEST_ID, routerRecord, uniqueSessionId, route));
+                            DUMMY_REQUEST_ID,
+                            transferInitiatorUserHandle,
+                            routerRecord.mPackageName,
+                            routerRecord,
+                            uniqueSessionId,
+                            route,
+                            RoutingSessionInfo.TRANSFER_REASON_APP));
         }
     }
 
@@ -1521,9 +1565,14 @@ class MediaRouter2ServiceImpl {
     }
 
     @GuardedBy("mLock")
-    private void transferToRouteWithManagerLocked(int requestId,
+    private void transferToRouteWithManagerLocked(
+            int requestId,
             @NonNull IMediaRouter2Manager manager,
-            @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
+            @NonNull String uniqueSessionId,
+            @NonNull MediaRoute2Info route,
+            @RoutingSessionInfo.TransferReason int transferReason,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
@@ -1541,9 +1590,16 @@ class MediaRouter2ServiceImpl {
 
         long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
         managerRecord.mUserRecord.mHandler.sendMessage(
-                obtainMessage(UserHandler::transferToRouteOnHandler,
+                obtainMessage(
+                        UserHandler::transferToRouteOnHandler,
                         managerRecord.mUserRecord.mHandler,
-                        uniqueRequestId, routerRecord, uniqueSessionId, route));
+                        uniqueRequestId,
+                        transferInitiatorUserHandle,
+                        transferInitiatorPackageName,
+                        routerRecord,
+                        uniqueSessionId,
+                        route,
+                        transferReason));
     }
 
     @GuardedBy("mLock")
@@ -1850,6 +1906,19 @@ class MediaRouter2ServiceImpl {
             }
         }
 
+        public void notifySessionCreated(int requestId, @NonNull RoutingSessionInfo sessionInfo) {
+            try {
+                mRouter.notifySessionCreated(
+                        requestId, maybeClearTransferInitiatorIdentity(sessionInfo));
+            } catch (RemoteException ex) {
+                Slog.w(
+                        TAG,
+                        "Failed to notify router of the session creation."
+                                + " Router probably died.",
+                        ex);
+            }
+        }
+
         /**
          * Sends the corresponding router an update for the given session.
          *
@@ -1857,10 +1926,25 @@ class MediaRouter2ServiceImpl {
          */
         public void notifySessionInfoChanged(RoutingSessionInfo sessionInfo) {
             try {
-                mRouter.notifySessionInfoChanged(sessionInfo);
+                mRouter.notifySessionInfoChanged(maybeClearTransferInitiatorIdentity(sessionInfo));
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify session info changed. Router probably died.", ex);
             }
+        }
+
+        private RoutingSessionInfo maybeClearTransferInitiatorIdentity(
+                @NonNull RoutingSessionInfo sessionInfo) {
+            UserHandle transferInitiatorUserHandle = sessionInfo.getTransferInitiatorUserHandle();
+            String transferInitiatorPackageName = sessionInfo.getTransferInitiatorPackageName();
+
+            if (!Objects.equals(UserHandle.of(mUserRecord.mUserId), transferInitiatorUserHandle)
+                    || !Objects.equals(mPackageName, transferInitiatorPackageName)) {
+                return new RoutingSessionInfo.Builder(sessionInfo)
+                        .setTransferInitiator(null, null)
+                        .build();
+            }
+
+            return sessionInfo;
         }
 
         /**
@@ -2326,10 +2410,15 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void requestCreateSessionWithRouter2OnHandler(long uniqueRequestId,
-                long managerRequestId, @NonNull RouterRecord routerRecord,
+        private void requestCreateSessionWithRouter2OnHandler(
+                long uniqueRequestId,
+                long managerRequestId,
+                @NonNull UserHandle transferInitiatorUserHandle,
+                @NonNull String transferInitiatorPackageName,
+                @NonNull RouterRecord routerRecord,
                 @NonNull RoutingSessionInfo oldSession,
-                @NonNull MediaRoute2Info route, @Nullable Bundle sessionHints) {
+                @NonNull MediaRoute2Info route,
+                @Nullable Bundle sessionHints) {
 
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider == null) {
@@ -2345,8 +2434,18 @@ class MediaRouter2ServiceImpl {
                             managerRequestId, oldSession, route);
             mSessionCreationRequests.add(request);
 
-            provider.requestCreateSession(uniqueRequestId, routerRecord.mPackageName,
-                    route.getOriginalId(), sessionHints);
+            int transferReason = RoutingSessionInfo.TRANSFER_REASON_APP;
+            if (managerRequestId != MediaRoute2ProviderService.REQUEST_ID_NONE) {
+                transferReason = RoutingSessionInfo.TRANSFER_REASON_SYSTEM_REQUEST;
+            }
+
+            provider.requestCreateSession(
+                    uniqueRequestId,
+                    transferInitiatorUserHandle,
+                    routerRecord.mPackageName,
+                    route.getOriginalId(),
+                    sessionHints,
+                    transferReason);
         }
 
         // routerRecord can be null if the session is system's or RCN.
@@ -2386,9 +2485,14 @@ class MediaRouter2ServiceImpl {
         }
 
         // routerRecord can be null if the session is system's or RCN.
-        private void transferToRouteOnHandler(long uniqueRequestId,
+        private void transferToRouteOnHandler(
+                long uniqueRequestId,
+                @NonNull UserHandle transferInitiatorUserHandle,
+                @NonNull String transferInitiatorPackageName,
                 @Nullable RouterRecord routerRecord,
-                @NonNull String uniqueSessionId, @NonNull MediaRoute2Info route) {
+                @NonNull String uniqueSessionId,
+                @NonNull MediaRoute2Info route,
+                @RoutingSessionInfo.TransferReason int transferReason) {
             if (!checkArgumentsForSessionControl(routerRecord, uniqueSessionId, route,
                     "transferring to")) {
                 return;
@@ -2399,8 +2503,13 @@ class MediaRouter2ServiceImpl {
             if (provider == null) {
                 return;
             }
-            provider.transferToRoute(uniqueRequestId, getOriginalId(uniqueSessionId),
-                    route.getOriginalId());
+            provider.transferToRoute(
+                    uniqueRequestId,
+                    transferInitiatorUserHandle,
+                    transferInitiatorPackageName,
+                    getOriginalId(uniqueSessionId),
+                    route.getOriginalId(),
+                    transferReason);
         }
 
         // routerRecord is null if and only if the session is created without the request, which
@@ -2535,6 +2644,7 @@ class MediaRouter2ServiceImpl {
                 // session info from them.
                 sessionInfo = mSystemProvider.getDefaultSessionInfo();
             }
+            // TODO: b/279555229 - replace with matchingRequest.mRouterRecord.notifySessionCreated.
             notifySessionCreatedToRouter(
                     matchingRequest.mRouterRecord,
                     toOriginalRequestId(uniqueRequestId),
@@ -2648,12 +2758,7 @@ class MediaRouter2ServiceImpl {
 
         private void notifySessionCreatedToRouter(@NonNull RouterRecord routerRecord,
                 int requestId, @NonNull RoutingSessionInfo sessionInfo) {
-            try {
-                routerRecord.mRouter.notifySessionCreated(requestId, sessionInfo);
-            } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to notify router of the session creation."
-                        + " Router probably died.", ex);
-            }
+            routerRecord.notifySessionCreated(requestId, sessionInfo);
         }
 
         private void notifySessionCreationFailedToRouter(@NonNull RouterRecord routerRecord,

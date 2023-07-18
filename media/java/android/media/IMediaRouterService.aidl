@@ -89,8 +89,10 @@ interface IMediaRouterService {
             String sessionId, in MediaRoute2Info route);
     void deselectRouteWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId, in MediaRoute2Info route);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL)")
     void transferToRouteWithManager(IMediaRouter2Manager manager, int requestId,
-            String sessionId, in MediaRoute2Info route);
+            String sessionId, in MediaRoute2Info route,
+            in UserHandle transferInitiatorUserHandle, String transferInitiatorPackageName);
     void setSessionVolumeWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId, int volume);
     void releaseSessionWithManager(IMediaRouter2Manager manager, int requestId, String sessionId);

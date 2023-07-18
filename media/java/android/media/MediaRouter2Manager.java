@@ -18,9 +18,11 @@ package android.media;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -28,6 +30,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -467,30 +470,42 @@ public final class MediaRouter2Manager {
      * <p>Same as {@link #transfer(RoutingSessionInfo, MediaRoute2Info)}, but resolves the routing
      * session based on the provided package name.
      */
-    public void transfer(@NonNull String packageName, @NonNull MediaRoute2Info route) {
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void transfer(
+            @NonNull String packageName,
+            @NonNull MediaRoute2Info route,
+            @NonNull UserHandle userHandle) {
         Objects.requireNonNull(packageName, "packageName must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
         List<RoutingSessionInfo> sessionInfos = getRoutingSessions(packageName);
         RoutingSessionInfo targetSession = sessionInfos.get(sessionInfos.size() - 1);
-        transfer(targetSession, route);
+        transfer(targetSession, route, userHandle, packageName);
     }
 
     /**
      * Transfers a routing session to a media route.
+     *
      * <p>{@link Callback#onTransferred} or {@link Callback#onTransferFailed} will be called
      * depending on the result.
      *
      * @param sessionInfo the routing session info to transfer
      * @param route the route transfer to
-     *
+     * @param transferInitiatorUserHandle the user handle of an app initiated the transfer
+     * @param transferInitiatorPackageName the package name of an app initiated the transfer
      * @see Callback#onTransferred(RoutingSessionInfo, RoutingSessionInfo)
      * @see Callback#onTransferFailed(RoutingSessionInfo, MediaRoute2Info)
      */
-    public void transfer(@NonNull RoutingSessionInfo sessionInfo,
-            @NonNull MediaRoute2Info route) {
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void transfer(
+            @NonNull RoutingSessionInfo sessionInfo,
+            @NonNull MediaRoute2Info route,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
         Objects.requireNonNull(route, "route must not be null");
+        Objects.requireNonNull(transferInitiatorUserHandle);
+        Objects.requireNonNull(transferInitiatorPackageName);
 
         Log.v(TAG, "Transferring routing session. session= " + sessionInfo + ", route=" + route);
 
@@ -503,8 +518,10 @@ public final class MediaRouter2Manager {
         }
 
         if (sessionInfo.getTransferableRoutes().contains(route.getId())) {
-            transferToRoute(sessionInfo, route);
+            transferToRoute(
+                    sessionInfo, route, transferInitiatorUserHandle, transferInitiatorPackageName);
         } else {
+            // TODO: b/279555229 - propagate transferInitiationUid to remote routes as well.
             requestCreateSession(sessionInfo, route);
         }
     }
@@ -873,13 +890,22 @@ public final class MediaRouter2Manager {
      *
      * @hide
      */
-    private void transferToRoute(@NonNull RoutingSessionInfo session,
-            @NonNull MediaRoute2Info route) {
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    private void transferToRoute(
+            @NonNull RoutingSessionInfo session,
+            @NonNull MediaRoute2Info route,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName) {
         int requestId = createTransferRequest(session, route);
 
         try {
             mMediaRouterService.transferToRouteWithManager(
-                    mClient, requestId, session.getId(), route);
+                    mClient,
+                    requestId,
+                    session.getId(),
+                    route,
+                    transferInitiatorUserHandle,
+                    transferInitiatorPackageName);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
