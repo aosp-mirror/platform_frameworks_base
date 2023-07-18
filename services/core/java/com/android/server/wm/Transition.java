@@ -1041,6 +1041,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             ar.getTaskFragment().startPausing(false /* uiSleeping */,
                     null /* resuming */, "finishTransition");
         } finally {
+            // Didn't schedule for pip, clear the supportsEnterPipOnTaskSwitch flag.
+            if (!ar.mPauseSchedulePendingForPip) {
+                ar.supportsEnterPipOnTaskSwitch = false;
+            }
             mController.mAtm.mTaskSupervisor.mUserLeaving = false;
         }
         // Return false anyway because there's no guarantee that the app will enter pip.
