@@ -19,11 +19,9 @@ package com.android.wm.shell.flicker.service.splitscreen.benchmark
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.SwitchAppByDoubleTapDivider
 import org.junit.Test
 
-@RequiresDevice
 class SwitchAppByDoubleTapDividerGesturalNavLandscapeBenchmark :
     SwitchAppByDoubleTapDivider(Rotation.ROTATION_90) {
     @PlatinumTest(focusArea = "sysui")

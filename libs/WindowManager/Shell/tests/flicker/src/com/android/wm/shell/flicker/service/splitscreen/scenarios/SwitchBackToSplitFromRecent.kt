@@ -47,6 +47,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun setup() {
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
+        tapl.workspace.switchToOverview().dismissAllTasks()
 
         SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp)
 
