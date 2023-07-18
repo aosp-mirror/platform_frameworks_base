@@ -35,14 +35,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class AppListSwitchItemTest {
+class AppListTwoTargetSwitchItemTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
     @Test
     fun appLabel_displayed() {
         composeTestRule.setContent {
-            ITEM_MODEL.AppListSwitchItem(
+            ITEM_MODEL.AppListTwoTargetSwitchItem(
+                onClick = {},
                 checked = stateOf(null),
                 changeable = stateOf(false),
                 onCheckedChange = {},
@@ -55,7 +56,8 @@ class AppListSwitchItemTest {
     @Test
     fun summary_displayed() {
         composeTestRule.setContent {
-            ITEM_MODEL.AppListSwitchItem(
+            ITEM_MODEL.AppListTwoTargetSwitchItem(
+                onClick = {},
                 checked = stateOf(null),
                 changeable = stateOf(false),
                 onCheckedChange = {},
@@ -66,9 +68,27 @@ class AppListSwitchItemTest {
     }
 
     @Test
+    fun title_onClick() {
+        var titleClicked = false
+        composeTestRule.setContent {
+            ITEM_MODEL.AppListTwoTargetSwitchItem(
+                onClick = { titleClicked = true },
+                checked = stateOf(false),
+                changeable = stateOf(false),
+                onCheckedChange = {},
+            )
+        }
+
+        composeTestRule.onNodeWithText(LABEL).performClick()
+
+        assertThat(titleClicked).isTrue()
+    }
+
+    @Test
     fun switch_checkIsNull() {
         composeTestRule.setContent {
-            ITEM_MODEL.AppListSwitchItem(
+            ITEM_MODEL.AppListTwoTargetSwitchItem(
+                onClick = {},
                 checked = stateOf(null),
                 changeable = stateOf(false),
                 onCheckedChange = {},
@@ -81,7 +101,8 @@ class AppListSwitchItemTest {
     @Test
     fun switch_checked() {
         composeTestRule.setContent {
-            ITEM_MODEL.AppListSwitchItem(
+            ITEM_MODEL.AppListTwoTargetSwitchItem(
+                onClick = {},
                 checked = stateOf(true),
                 changeable = stateOf(false),
                 onCheckedChange = {},
@@ -94,7 +115,8 @@ class AppListSwitchItemTest {
     @Test
     fun switch_notChecked() {
         composeTestRule.setContent {
-            ITEM_MODEL.AppListSwitchItem(
+            ITEM_MODEL.AppListTwoTargetSwitchItem(
+                onClick = {},
                 checked = stateOf(false),
                 changeable = stateOf(false),
                 onCheckedChange = {},
@@ -107,7 +129,8 @@ class AppListSwitchItemTest {
     @Test
     fun switch_changeable() {
         composeTestRule.setContent {
-            ITEM_MODEL.AppListSwitchItem(
+            ITEM_MODEL.AppListTwoTargetSwitchItem(
+                onClick = {},
                 checked = stateOf(false),
                 changeable = stateOf(true),
                 onCheckedChange = {},
@@ -120,7 +143,8 @@ class AppListSwitchItemTest {
     @Test
     fun switch_notChangeable() {
         composeTestRule.setContent {
-            ITEM_MODEL.AppListSwitchItem(
+            ITEM_MODEL.AppListTwoTargetSwitchItem(
+                onClick = {},
                 checked = stateOf(false),
                 changeable = stateOf(false),
                 onCheckedChange = {},
@@ -134,7 +158,8 @@ class AppListSwitchItemTest {
     fun switch_onClick() {
         var switchClicked = false
         composeTestRule.setContent {
-            ITEM_MODEL.AppListSwitchItem(
+            ITEM_MODEL.AppListTwoTargetSwitchItem(
+                onClick = {},
                 checked = stateOf(false),
                 changeable = stateOf(true),
                 onCheckedChange = { switchClicked = true },
