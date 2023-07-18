@@ -1846,8 +1846,7 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCreateBubbleFromOngoingNotification_OngoingDismissalEnabled() {
-        when(mNotifPipelineFlags.allowDismissOngoing()).thenReturn(true);
+    public void testCreateBubbleFromOngoingNotification() {
         NotificationEntry notif = new NotificationEntryBuilder()
                 .setFlag(mContext, Notification.FLAG_ONGOING_EVENT, true)
                 .setCanBubble(true)
@@ -1860,8 +1859,7 @@ public class BubblesTest extends SysuiTestCase {
 
 
     @Test
-    public void testCreateBubbleFromNoDismissNotification_OngoingDismissalEnabled() {
-        when(mNotifPipelineFlags.allowDismissOngoing()).thenReturn(true);
+    public void testCreateBubbleFromNoDismissNotification() {
         NotificationEntry notif = new NotificationEntryBuilder()
                 .setFlag(mContext, Notification.FLAG_NO_DISMISS, true)
                 .setCanBubble(true)
@@ -1870,37 +1868,6 @@ public class BubblesTest extends SysuiTestCase {
         BubbleEntry bubble = mBubblesManager.notifToBubbleEntry(notif);
 
         assertFalse("FLAG_NO_DISMISS Notifs should be non-dismissable", bubble.isDismissable());
-    }
-
-    @Test
-    public void testCreateBubbleFromOngoingNotification_OngoingDismissalDisabled() {
-        NotificationEntry notif = new NotificationEntryBuilder()
-                .setFlag(mContext, Notification.FLAG_ONGOING_EVENT, true)
-                .setCanBubble(true)
-                .build();
-
-        BubbleEntry bubble = mBubblesManager.notifToBubbleEntry(notif);
-
-        assertFalse(
-                "Ongoing Notifis should be dismissable, if the feature is off",
-                bubble.isDismissable()
-        );
-    }
-
-
-    @Test
-    public void testCreateBubbleFromNoDismissNotification_OngoingDismissalDisabled() {
-        NotificationEntry notif = new NotificationEntryBuilder()
-                .setFlag(mContext, Notification.FLAG_NO_DISMISS, true)
-                .setCanBubble(true)
-                .build();
-
-        BubbleEntry bubble = mBubblesManager.notifToBubbleEntry(notif);
-
-        assertTrue(
-                "FLAG_NO_DISMISS should be ignored, if the feature is off",
-                bubble.isDismissable()
-        );
     }
 
     @Test

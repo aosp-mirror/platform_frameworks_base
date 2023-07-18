@@ -20,7 +20,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.withIncreasedIndent
@@ -28,9 +27,7 @@ import java.io.PrintWriter
 import javax.inject.Inject
 
 @SysUISingleton
-class NotificationDismissibilityProviderImpl
-@Inject
-constructor(private val notifPipelineFlags: NotifPipelineFlags, dumpManager: DumpManager) :
+class NotificationDismissibilityProviderImpl @Inject constructor(dumpManager: DumpManager) :
     NotificationDismissibilityProvider, Dumpable {
 
     init {
@@ -43,11 +40,7 @@ constructor(private val notifPipelineFlags: NotifPipelineFlags, dumpManager: Dum
         private set
 
     override fun isDismissable(entry: NotificationEntry): Boolean {
-        return if (notifPipelineFlags.allowDismissOngoing()) {
-            entry.key !in nonDismissableEntryKeys
-        } else {
-            entry.legacyIsDismissableRecursive()
-        }
+        return entry.key !in nonDismissableEntryKeys
     }
 
     @Synchronized
