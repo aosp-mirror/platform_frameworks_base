@@ -216,9 +216,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var recCardTitle: TextView
     @Mock private lateinit var coverItem: ImageView
     @Mock private lateinit var matrix: Matrix
-    private lateinit var coverItem1: ImageView
-    private lateinit var coverItem2: ImageView
-    private lateinit var coverItem3: ImageView
     private lateinit var recTitle1: TextView
     private lateinit var recTitle2: TextView
     private lateinit var recTitle3: TextView
@@ -233,7 +230,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
         FakeFeatureFlags().apply {
             this.set(Flags.UMO_SURFACE_RIPPLE, false)
             this.set(Flags.UMO_TURBULENCE_NOISE, false)
-            this.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, false)
         }
     @Mock private lateinit var globalSettings: GlobalSettings
 
@@ -467,21 +463,25 @@ public class MediaControlPanelTest : SysuiTestCase() {
         recSubtitle3 = TextView(context)
 
         whenever(recommendationViewHolder.recommendations).thenReturn(view)
-        whenever(recommendationViewHolder.cardIcon).thenReturn(appIcon)
-
-        // Add a recommendation item
-        coverItem1 = ImageView(context).also { it.setId(R.id.media_cover1) }
-        coverItem2 = ImageView(context).also { it.setId(R.id.media_cover2) }
-        coverItem3 = ImageView(context).also { it.setId(R.id.media_cover3) }
-
+        whenever(recommendationViewHolder.mediaAppIcons)
+            .thenReturn(listOf(recAppIconItem, recAppIconItem, recAppIconItem))
+        whenever(recommendationViewHolder.cardTitle).thenReturn(recCardTitle)
         whenever(recommendationViewHolder.mediaCoverItems)
-            .thenReturn(listOf(coverItem1, coverItem2, coverItem3))
+            .thenReturn(listOf(coverItem, coverItem, coverItem))
         whenever(recommendationViewHolder.mediaCoverContainers)
             .thenReturn(listOf(coverContainer1, coverContainer2, coverContainer3))
         whenever(recommendationViewHolder.mediaTitles)
             .thenReturn(listOf(recTitle1, recTitle2, recTitle3))
         whenever(recommendationViewHolder.mediaSubtitles)
             .thenReturn(listOf(recSubtitle1, recSubtitle2, recSubtitle3))
+        whenever(recommendationViewHolder.mediaProgressBars)
+            .thenReturn(listOf(recProgressBar1, recProgressBar2, recProgressBar3))
+        whenever(coverItem.imageMatrix).thenReturn(matrix)
+
+        // set ids for recommendation containers
+        whenever(coverContainer1.id).thenReturn(1)
+        whenever(coverContainer2.id).thenReturn(2)
+        whenever(coverContainer3.id).thenReturn(3)
 
         whenever(recommendationViewHolder.gutsViewHolder).thenReturn(gutsViewHolder)
 
@@ -1561,7 +1561,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
         val description = descriptionCaptor.value.toString()
 
-        assertThat(description).contains(REC_APP_NAME)
+        assertThat(description)
+            .isEqualTo(context.getString(R.string.controls_media_smartspace_rec_header))
     }
 
     @Test
@@ -1585,7 +1586,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(viewHolder.player).contentDescription = descriptionCaptor.capture()
         val description = descriptionCaptor.value.toString()
 
-        assertThat(description).contains(REC_APP_NAME)
+        assertThat(description)
+            .isEqualTo(context.getString(R.string.controls_media_smartspace_rec_header))
     }
 
     @Test
@@ -2151,7 +2153,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindRecommendation_setAfterExecutors() {
-        setupUpdatedRecommendationViewHolder()
         val albumArt = getColorIcon(Color.RED)
         val data =
             smartspaceData.copy(
@@ -2189,7 +2190,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindRecommendationWithProgressBars() {
         useRealConstraintSets()
-        setupUpdatedRecommendationViewHolder()
         val albumArt = getColorIcon(Color.RED)
         val bundle =
             Bundle().apply {
@@ -2236,7 +2236,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindRecommendation_carouselNotFitThreeRecs_OrientationPortrait() {
         useRealConstraintSets()
-        setupUpdatedRecommendationViewHolder()
         val albumArt = getColorIcon(Color.RED)
         val data =
             smartspaceData.copy(
@@ -2290,7 +2289,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindRecommendation_carouselNotFitThreeRecs_OrientationLandscape() {
         useRealConstraintSets()
-        setupUpdatedRecommendationViewHolder()
         val albumArt = getColorIcon(Color.RED)
         val data =
             smartspaceData.copy(
@@ -2503,27 +2501,6 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         // Then we request keyguard dismissal
         verify(activityStarter).postStartActivityDismissingKeyguard(eq(pendingIntent))
-    }
-
-    private fun setupUpdatedRecommendationViewHolder() {
-        fakeFeatureFlag.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, true)
-        whenever(recommendationViewHolder.mediaAppIcons)
-            .thenReturn(listOf(recAppIconItem, recAppIconItem, recAppIconItem))
-        whenever(recommendationViewHolder.cardTitle).thenReturn(recCardTitle)
-        whenever(recommendationViewHolder.mediaCoverContainers)
-            .thenReturn(listOf(coverContainer1, coverContainer2, coverContainer3))
-        whenever(recommendationViewHolder.mediaCoverItems)
-            .thenReturn(listOf(coverItem, coverItem, coverItem))
-        whenever(recommendationViewHolder.mediaProgressBars)
-            .thenReturn(listOf(recProgressBar1, recProgressBar2, recProgressBar3))
-        whenever(recommendationViewHolder.mediaSubtitles)
-            .thenReturn(listOf(recSubtitle1, recSubtitle2, recSubtitle3))
-        whenever(coverItem.imageMatrix).thenReturn(matrix)
-
-        // set ids for recommendation containers
-        whenever(coverContainer1.id).thenReturn(1)
-        whenever(coverContainer2.id).thenReturn(2)
-        whenever(coverContainer3.id).thenReturn(3)
     }
 
     private fun getColorIcon(color: Int): Icon {

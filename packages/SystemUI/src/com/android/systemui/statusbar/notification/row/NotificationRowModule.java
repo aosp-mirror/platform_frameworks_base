@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.row;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 
 import dagger.Binds;
 import dagger.Module;
@@ -58,9 +59,13 @@ public abstract class NotificationRowModule {
     @ElementsIntoSet
     @Named(NOTIF_REMOTEVIEWS_FACTORIES)
     static Set<NotifRemoteViewsFactory> provideNotifRemoteViewsFactories(
-            FeatureFlags featureFlags
+            FeatureFlags featureFlags,
+            PrecomputedTextViewFactory precomputedTextViewFactory
     ) {
         final Set<NotifRemoteViewsFactory> replacementFactories = new HashSet<>();
+        if (featureFlags.isEnabled(Flags.PRECOMPUTED_TEXT)) {
+            replacementFactories.add(precomputedTextViewFactory);
+        }
         return replacementFactories;
     }
 }
