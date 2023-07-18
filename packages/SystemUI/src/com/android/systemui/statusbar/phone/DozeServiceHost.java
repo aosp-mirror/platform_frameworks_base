@@ -311,6 +311,7 @@ public final class DozeServiceHost implements DozeHost {
 
     @Override
     public void dozeTimeTick() {
+        mDozeInteractor.dozeTimeTick();
         mNotificationPanel.dozeTimeTick();
         mAuthController.dozeTimeTick();
         if (mAmbientIndicationContainer instanceof DozeReceiver) {
