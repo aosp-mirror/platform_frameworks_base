@@ -31,11 +31,14 @@ import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.dreams.DreamOverlayCallbackController
+import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.ScreenModel
+import com.android.systemui.keyguard.shared.model.ScreenState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -71,6 +74,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
+    @Mock private lateinit var screenLifecycle: ScreenLifecycle
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock private lateinit var dozeTransitionListener: DozeTransitionListener
     @Mock private lateinit var authController: AuthController
@@ -92,6 +96,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             KeyguardRepositoryImpl(
                 statusBarStateController,
                 wakefulnessLifecycle,
+                screenLifecycle,
                 biometricUnlockController,
                 keyguardStateController,
                 keyguardBypassController,
@@ -157,6 +162,16 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             underTest.setClockPosition(3, 1)
             assertThat(underTest.clockPosition.value).isEqualTo(Position(3, 1))
+        }
+
+    @Test
+    fun dozeTimeTick() =
+        testScope.runTest {
+            var dozeTimeTickValue = collectLastValue(underTest.dozeTimeTick)
+            underTest.dozeTimeTick()
+            runCurrent()
+
+            assertThat(dozeTimeTickValue()).isNull()
         }
 
     @Test
@@ -364,6 +379,48 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                         WakefulnessState.AWAKE,
                         WakefulnessState.STARTING_TO_SLEEP,
                         WakefulnessState.ASLEEP,
+                    )
+                )
+
+            job.cancel()
+        }
+
+    @Test
+    fun screenModel() =
+        testScope.runTest {
+            val values = mutableListOf<ScreenModel>()
+            val job = underTest.screenModel.onEach(values::add).launchIn(this)
+
+            runCurrent()
+            val captor = argumentCaptor<ScreenLifecycle.Observer>()
+            verify(screenLifecycle).addObserver(captor.capture())
+
+            whenever(screenLifecycle.getScreenState()).thenReturn(ScreenLifecycle.SCREEN_TURNING_ON)
+            captor.value.onScreenTurningOn()
+            runCurrent()
+
+            whenever(screenLifecycle.getScreenState()).thenReturn(ScreenLifecycle.SCREEN_ON)
+            captor.value.onScreenTurnedOn()
+            runCurrent()
+
+            whenever(screenLifecycle.getScreenState())
+                .thenReturn(ScreenLifecycle.SCREEN_TURNING_OFF)
+            captor.value.onScreenTurningOff()
+            runCurrent()
+
+            whenever(screenLifecycle.getScreenState()).thenReturn(ScreenLifecycle.SCREEN_OFF)
+            captor.value.onScreenTurnedOff()
+            runCurrent()
+
+            assertThat(values.map { it.state })
+                .isEqualTo(
+                    listOf(
+                        // Initial value will be OFF
+                        ScreenState.SCREEN_OFF,
+                        ScreenState.SCREEN_TURNING_ON,
+                        ScreenState.SCREEN_ON,
+                        ScreenState.SCREEN_TURNING_OFF,
+                        ScreenState.SCREEN_OFF,
                     )
                 )
 
