@@ -26,7 +26,10 @@ package {
 android_app {
     // the build system in pi-dev can't quite handle R.java in kt
     // so we will have a mix of java and kotlin files
-    srcs: ["src/**/*.java", "src/**/*.kt"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     resource_dirs: ["res"],
 
@@ -39,16 +42,16 @@ android_app {
         proguard_flags_files: ["proguard.flags"],
     },
 
-	static_libs: [
-		"androidx.core_core",
-		"androidx.recyclerview_recyclerview",
+    static_libs: [
+        "androidx.core_core",
+        "androidx.recyclerview_recyclerview",
         "androidx.annotation_annotation",
-		"kotlinx-coroutines-android",
-		"kotlinx-coroutines-core",
-		//"kotlinx-coroutines-reactive",
-	],
+        "kotlinx-coroutines-android",
+        "kotlinx-coroutines-core",
+        //"kotlinx-coroutines-reactive",
+    ],
 
     manifest: "AndroidManifest.xml",
 
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
 }
