@@ -33,8 +33,6 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import java.io.File;
-
 /**
  * Installation failed: Return status code to the caller or display failure UI to user
  */
@@ -101,14 +99,8 @@ public class InstallFailed extends AlertActivity {
             // Set header icon and title
             PackageUtil.AppSnippet as;
             PackageManager pm = getPackageManager();
-
-            if ("package".equals(packageURI.getScheme())) {
-                as = new PackageUtil.AppSnippet(pm.getApplicationLabel(appInfo),
-                        pm.getApplicationIcon(appInfo));
-            } else {
-                final File sourceFile = new File(packageURI.getPath());
-                as = PackageUtil.getAppSnippet(this, appInfo, sourceFile);
-            }
+            as = intent.getParcelableExtra(PackageInstallerActivity.EXTRA_APP_SNIPPET,
+                    PackageUtil.AppSnippet.class);
 
             // Store label for dialog
             mLabel = as.label;
