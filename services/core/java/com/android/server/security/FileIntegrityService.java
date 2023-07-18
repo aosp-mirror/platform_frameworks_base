@@ -184,13 +184,7 @@ public class FileIntegrityService extends SystemService {
     }
 
     private void loadAllCertificates() {
-        // A better alternative to load certificates would be to read from .fs-verity kernel
-        // keyring, which fsverity_init loads to during earlier boot time from the same sources
-        // below. But since the read operation from keyring is not provided in kernel, we need to
-        // duplicate the same loading logic here.
-
         // Load certificates trusted by the device manufacturer.
-        // NB: Directories need to be synced with system/security/fsverity_init/fsverity_init.cpp.
         final String relativeDir = "etc/security/fsverity";
         loadCertificatesFromDirectory(Environment.getRootDirectory().toPath()
                 .resolve(relativeDir));
