@@ -50,7 +50,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
-import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.FrameworkParsingPackageUtils;
 import android.content.pm.parsing.PackageLite;
@@ -74,7 +73,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.ext.SdkExtensions;
-import android.os.incremental.IncrementalManager;
 import android.permission.PermissionManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -559,26 +557,6 @@ public class ParsingPackageUtils {
                 pkg.setSigningDetails(ret.getResult());
             } else {
                 pkg.setSigningDetails(SigningDetails.UNKNOWN);
-            }
-
-            // 1. The apkFile is an apk file
-            // 2. The flags include PARSE_EXTRACT_PROFILE_FROM_APK
-            // 3. The apk patch is NOT an incremental path
-            // 4. If the .dm file exists in the current apk directory, it means the caller
-            // prepares the .dm file. Don't extract the profiles from the apk again.
-            if (ApkLiteParseUtils.isApkFile(apkFile)
-                    && (flags & PARSE_EXTRACT_BASELINE_PROFILES_FROM_APK) != 0
-                    && !IncrementalManager.isIncrementalPath(apkPath)
-                    && DexMetadataHelper.findDexMetadataForFile(apkFile) == null) {
-                // Extract the baseline profiles from the apk if the profiles exist in the assets
-                // directory in the apk.
-                boolean extractedResult =
-                        DexMetadataHelper.extractBaselineProfilesToDexMetadataFileFromApk(assets,
-                                apkPath);
-
-                if (DEBUG_JAR) {
-                    Slog.d(TAG, "Extract profiles " + (extractedResult ? "success" : "fail"));
-                }
             }
 
             return input.success(pkg);
