@@ -228,6 +228,17 @@ filegroup {
 }
 
 filegroup {
+    name: "SystemUI-test-fakes",
+    srcs: [
+        /* Status bar fakes */
+        "tests/src/com/android/systemui/statusbar/pipeline/airplane/data/repository/FakeAirplaneModeRepository.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/shared/data/repository/FakeConnectivityRepository.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/FakeWifiRepository.kt",
+    ],
+    path: "tests/src",
+}
+
+filegroup {
     name: "SystemUI-tests-robolectric-pilots",
     srcs: [
         /* Keyguard converted tests */
@@ -291,6 +302,11 @@ filegroup {
         "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewLegacyControllerWithCoroutinesTest.kt",
         "tests/src/com/android/systemui/biometrics/UdfpsShellTest.kt",
         "tests/src/com/android/systemui/biometrics/UdfpsViewTest.kt",
+
+        /* Status bar wifi converted tests */
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/WifiRepositorySwitcherTest.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/DisabledWifiRepositoryTest.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/WifiRepositoryImplTest.kt",
     ],
     path: "tests/src",
 }
@@ -449,6 +465,7 @@ android_robolectric_test {
         "tests/robolectric/src/**/*.kt",
         "tests/robolectric/src/**/*.java",
         ":SystemUI-tests-utils",
+        ":SystemUI-test-fakes",
         ":SystemUI-tests-robolectric-pilots",
     ],
     static_libs: [
