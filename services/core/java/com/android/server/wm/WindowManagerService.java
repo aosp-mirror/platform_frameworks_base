@@ -1698,8 +1698,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         return WindowManagerGlobal.ADD_INVALID_TYPE;
                     }
                 } else {
-                    mWindowContextListenerController.registerWindowContainerListener(
-                            windowContextToken, token, callingUid, type, options);
+                    mWindowContextListenerController.updateContainerForWindowContextListener(
+                            windowContextToken, token);
                 }
             }
 
@@ -2744,10 +2744,17 @@ public class WindowManagerService extends IWindowManager.Stub
         Objects.requireNonNull(clientToken);
         final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
                 "attachWindowContextToDisplayArea", false /* printLog */);
+        final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                final WindowProcessController wpc = mAtmService.getProcessController(appThread);
+                if (wpc == null) {
+                    ProtoLog.w(WM_ERROR, "attachWindowContextToDisplayArea: calling from"
+                            + " non-existing process pid=%d uid=%d", callingPid, callingUid);
+                    return null;
+                }
                 final DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
                 if (dc == null) {
                     ProtoLog.w(WM_ERROR, "attachWindowContextToDisplayArea: trying to attach"
@@ -2758,8 +2765,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 // the feature b/155340867 is completed.
                 final DisplayArea<?> da = dc.findAreaForWindowType(type, options,
                         callerCanManageAppTokens, false /* roundedCornerOverlay */);
-                mWindowContextListenerController.registerWindowContainerListener(clientToken, da,
-                        callingUid, type, options, false /* shouDispatchConfigWhenRegistering */);
+                mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
+                        da, callingUid, type, options,
+                        false /* shouDispatchConfigWhenRegistering */);
                 return da.getConfiguration();
             }
         } finally {
@@ -2773,10 +2781,17 @@ public class WindowManagerService extends IWindowManager.Stub
             @NonNull IBinder clientToken, int displayId) {
         Objects.requireNonNull(appThread);
         Objects.requireNonNull(clientToken);
+        final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                final WindowProcessController wpc = mAtmService.getProcessController(appThread);
+                if (wpc == null) {
+                    ProtoLog.w(WM_ERROR, "attachWindowContextToDisplayContent: calling from"
+                            + " non-existing process pid=%d uid=%d", callingPid, callingUid);
+                    return null;
+                }
                 // We use "getDisplayContent" instead of "getDisplayContentOrCreate" because
                 // this method may be called in DisplayPolicy's constructor and may cause
                 // infinite loop. In this scenario, we early return here and switch to do the
@@ -2793,8 +2808,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     return null;
                 }
 
-                mWindowContextListenerController.registerWindowContainerListener(clientToken, dc,
-                        callingUid, INVALID_WINDOW_TYPE, null /* options */,
+                mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
+                        dc, callingUid, INVALID_WINDOW_TYPE, null /* options */,
                         false /* shouDispatchConfigWhenRegistering */);
                 return dc.getConfiguration();
             }
@@ -2811,10 +2826,17 @@ public class WindowManagerService extends IWindowManager.Stub
         Objects.requireNonNull(token);
         final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
                 "attachWindowContextToWindowToken", false /* printLog */);
+        final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                final WindowProcessController wpc = mAtmService.getProcessController(appThread);
+                if (wpc == null) {
+                    ProtoLog.w(WM_ERROR, "attachWindowContextToWindowToken: calling from"
+                            + " non-existing process pid=%d uid=%d", callingPid, callingUid);
+                    return;
+                }
                 final WindowToken windowToken = mRoot.getWindowToken(token);
                 if (windowToken == null) {
                     ProtoLog.w(WM_ERROR, "Then token:%s is invalid. It might be "
@@ -2835,7 +2857,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         callerCanManageAppTokens, callingUid)) {
                     return;
                 }
-                mWindowContextListenerController.registerWindowContainerListener(clientToken,
+                mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
                         windowToken, callingUid, windowToken.windowType, windowToken.mOptions);
             }
         } finally {

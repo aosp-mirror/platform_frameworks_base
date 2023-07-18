@@ -427,12 +427,6 @@
       "group": "WM_DEBUG_BACK_PREVIEW",
       "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
-    "-1715268616": {
-      "message": "Last window, removing starting window %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-1710206702": {
       "message": "Display id=%d is frozen while keyguard locked, return %d",
       "level": "VERBOSE",
@@ -462,6 +456,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "-1671601441": {
+      "message": "attachWindowContextToDisplayContent: calling from non-existing process pid=%d uid=%d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-1670695197": {
       "message": "Attempted to add presentation window to a non-suitable display.  Aborting.",
@@ -1224,6 +1224,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "-961053385": {
+      "message": "attachWindowContextToDisplayArea: calling from non-existing process pid=%d uid=%d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-957060823": {
       "message": "Moving to PAUSING: %s",
@@ -4057,12 +4063,6 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
-    "1671994402": {
-      "message": "Nulling last startingData",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "1674747211": {
       "message": "%s forcing orientation to %d for display id=%d",
       "level": "VERBOSE",
@@ -4243,12 +4243,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "1853793312": {
-      "message": "Notify removed startingWindow %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "1856783490": {
       "message": "resumeTopActivity: Restarting %s",
       "level": "DEBUG",
@@ -4278,6 +4272,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
+    "1879463933": {
+      "message": "attachWindowContextToWindowToken: calling from non-existing process pid=%d uid=%d",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "1891501279": {
       "message": "cancelAnimation(): reason=%s",
