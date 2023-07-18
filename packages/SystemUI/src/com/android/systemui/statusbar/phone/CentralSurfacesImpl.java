@@ -3572,7 +3572,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     && (info != null && info.supportsAmbientMode());
 
             mNotificationShadeWindowController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
-            mKeyguardViewMediator.setWallpaperSupportsAmbientMode(supportsAmbientMode);
         }
     };
 
