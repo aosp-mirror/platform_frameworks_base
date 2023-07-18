@@ -72,6 +72,8 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManagerInternal;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.hdmi.HdmiAudioSystemClient;
 import android.hardware.hdmi.HdmiClient;
 import android.hardware.hdmi.HdmiControlManager;
@@ -180,6 +182,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
@@ -977,6 +980,36 @@ public class AudioService extends IAudioService.Stub
 
     private AtomicBoolean mMasterMute = new AtomicBoolean(false);
 
+    private DisplayManager mDisplayManager;
+
+    private DisplayListener mDisplayListener =
+      new DisplayListener() {
+        @Override
+        public void onDisplayAdded(int displayId) {}
+
+        @Override
+        public void onDisplayRemoved(int displayId) {}
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            if (displayId != Display.DEFAULT_DISPLAY) {
+                return;
+            }
+            int displayState = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY).getState();
+            if (displayState == Display.STATE_ON) {
+                if (mMonitorRotation) {
+                    RotationHelper.enable();
+                }
+                AudioSystem.setParameters("screen_state=on");
+            } else {
+                if (mMonitorRotation) {
+                    //reduce wakeups (save current) by only listening when display is on
+                    RotationHelper.disable();
+                }
+                AudioSystem.setParameters("screen_state=off");
+            }
+        }
+      };
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -1255,6 +1288,8 @@ public class AudioService extends IAudioService.Stub
                 0 /* arg1 */,  0 /* arg2 */, null /* obj */,  0 /* delay */);
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_SPATIALIZER,
                 0 /* arg1 */, 0 /* arg2 */, null /* obj */, 0 /* delay */);
+
+        mDisplayManager = context.getSystemService(DisplayManager.class);
     }
 
     private void initVolumeStreamStates() {
@@ -1351,8 +1386,6 @@ public class AudioService extends IAudioService.Stub
                 new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED);
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_USER_BACKGROUND);
         intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
@@ -1382,6 +1415,8 @@ public class AudioService extends IAudioService.Stub
         } else {
             subscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionChangedListener);
         }
+
+        mDisplayManager.registerDisplayListener(mDisplayListener, mAudioHandler);
     }
 
     public void systemReady() {
@@ -9552,17 +9587,6 @@ public class AudioService extends IAudioService.Stub
             } else if (action.equals(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED)
                     || action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 mDeviceBroker.receiveBtEvent(intent);
-            } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
-                if (mMonitorRotation) {
-                    RotationHelper.enable();
-                }
-                AudioSystem.setParameters("screen_state=on");
-            } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-                if (mMonitorRotation) {
-                    //reduce wakeups (save current) by only listening when display is on
-                    RotationHelper.disable();
-                }
-                AudioSystem.setParameters("screen_state=off");
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 sendMsg(mAudioHandler,
                         MSG_CONFIGURATION_CHANGED,
