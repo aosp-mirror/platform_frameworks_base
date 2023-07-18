@@ -6404,9 +6404,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // Don't do recursive work.
             return;
         }
-        mInEnsureActivitiesVisible = true;
         mAtmService.mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
+            mInEnsureActivitiesVisible = true;
             forAllRootTasks(rootTask -> {
                 rootTask.ensureActivitiesVisible(starting, configChanges, preserveWindows,
                         notifyClients);
