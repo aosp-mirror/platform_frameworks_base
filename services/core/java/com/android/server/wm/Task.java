@@ -5251,17 +5251,18 @@ class Task extends TaskFragment {
             // Ensure that we do not trigger entering PiP an activity on the root pinned task.
             return;
         }
-        final boolean isTransient = opts != null && opts.getTransientLaunch();
         final Task targetRootTask = toFrontTask != null
                 ? toFrontTask.getRootTask() : toFrontActivity.getRootTask();
-        if (targetRootTask != null && (targetRootTask.isActivityTypeAssistant() || isTransient)) {
-            // Ensure the task/activity being brought forward is not the assistant and is not
-            // transient. In the case of transient-launch, we want to wait until the end of the
-            // transition and only allow switch if the transient launch was committed.
-            return;
-        }
-        pipCandidate.supportsEnterPipOnTaskSwitch = true;
+        final boolean isTransient = opts != null && opts.getTransientLaunch()
+                || (targetRootTask != null
+                && targetRootTask.mTransitionController.isTransientHide(targetRootTask));
 
+        // Ensure the task/activity being brought forward is not the assistant and is not transient
+        // nor transient hide target. In the case of transient-launch, we want to wait until the end
+        // of the transition and only allow to enter pip on task switch after the transient launch
+        // was committed.
+        pipCandidate.supportsEnterPipOnTaskSwitch = targetRootTask == null
+                || !(targetRootTask.isActivityTypeAssistant() || isTransient);
     }
 
     /**
