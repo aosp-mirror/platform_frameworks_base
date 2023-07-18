@@ -479,10 +479,10 @@ private class Spaghetti(
                 failureReason,
                 messageAfterError = modalities.asDefaultHelpMessage(applicationContext),
                 authenticateAfterError = modalities.hasFingerprint,
-                suppressIf = { currentMessage ->
+                suppressIf = { currentMessage, history ->
                     modalities.hasFaceAndFingerprint &&
                         failedModality == BiometricModality.Face &&
-                        currentMessage.isError
+                        (currentMessage.isError || history.faceFailed)
                 },
                 failedModality = failedModality,
             )
