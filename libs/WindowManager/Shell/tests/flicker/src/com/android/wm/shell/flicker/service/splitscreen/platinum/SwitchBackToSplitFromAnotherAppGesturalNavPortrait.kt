@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.service.splitscreen.benchmark
+package com.android.wm.shell.flicker.service.splitscreen.platinum
 
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import com.android.wm.shell.flicker.service.splitscreen.scenarios.CopyContentInSplit
+import com.android.wm.shell.flicker.service.splitscreen.scenarios.SwitchBackToSplitFromAnotherApp
 import org.junit.Test
 
-class CopyContentInSplitGesturalNavPortraitBenchmark : CopyContentInSplit(Rotation.ROTATION_0) {
+class SwitchBackToSplitFromAnotherAppGesturalNavPortrait :
+    SwitchBackToSplitFromAnotherApp(Rotation.ROTATION_0) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
-    override fun copyContentInSplit() = super.copyContentInSplit()
+    override fun switchBackToSplitFromAnotherApp() = super.switchBackToSplitFromAnotherApp()
 }

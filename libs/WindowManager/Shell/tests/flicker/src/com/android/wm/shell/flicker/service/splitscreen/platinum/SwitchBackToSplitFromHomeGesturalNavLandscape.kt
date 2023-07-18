@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.service.splitscreen.benchmark
+package com.android.wm.shell.flicker.service.splitscreen.platinum
 
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import com.android.wm.shell.flicker.service.splitscreen.scenarios.SwitchAppByDoubleTapDivider
+import com.android.wm.shell.flicker.service.splitscreen.scenarios.SwitchBackToSplitFromHome
 import org.junit.Test
 
-class SwitchAppByDoubleTapDividerGesturalNavPortraitBenchmark :
-    SwitchAppByDoubleTapDivider(Rotation.ROTATION_0) {
+class SwitchBackToSplitFromHomeGesturalNavLandscape :
+    SwitchBackToSplitFromHome(Rotation.ROTATION_90) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
-    override fun switchAppByDoubleTapDivider() = super.switchAppByDoubleTapDivider()
+    override fun switchBackToSplitFromHome() = super.switchBackToSplitFromHome()
 }

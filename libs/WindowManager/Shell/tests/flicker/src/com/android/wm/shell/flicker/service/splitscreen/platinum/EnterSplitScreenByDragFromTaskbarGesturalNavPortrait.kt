@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.service.splitscreen.benchmark
+package com.android.wm.shell.flicker.service.splitscreen.platinum
 
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import com.android.wm.shell.flicker.service.splitscreen.scenarios.SwitchBackToSplitFromRecent
+import com.android.wm.shell.flicker.service.splitscreen.scenarios.EnterSplitScreenByDragFromTaskbar
 import org.junit.Test
 
-class SwitchBackToSplitFromRecentGesturalNavPortraitBenchmark :
-    SwitchBackToSplitFromRecent(Rotation.ROTATION_0) {
+class EnterSplitScreenByDragFromTaskbarGesturalNavPortrait :
+    EnterSplitScreenByDragFromTaskbar(Rotation.ROTATION_0) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
-    override fun switchBackToSplitFromRecent() = super.switchBackToSplitFromRecent()
+    override fun enterSplitScreenByDragFromTaskbar() = super.enterSplitScreenByDragFromTaskbar()
 }
