@@ -19,26 +19,26 @@ package com.android.settingslib.spaprivileged.template.app
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import com.android.settingslib.spa.framework.theme.SettingsDimension
-import com.android.settingslib.spa.widget.preference.SwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
+import com.android.settingslib.spa.widget.preference.TwoTargetSwitchPreference
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 
 @Composable
-fun <T : AppRecord> AppListItemModel<T>.AppListSwitchItem(
+fun <T : AppRecord> AppListItemModel<T>.AppListTwoTargetSwitchItem(
+    onClick: () -> Unit,
     checked: State<Boolean?>,
     changeable: State<Boolean>,
     onCheckedChange: ((newChecked: Boolean) -> Unit)?,
 ) {
-    SwitchPreference(
+    TwoTargetSwitchPreference(
         model = object : SwitchPreferenceModel {
             override val title = label
-            override val summary = this@AppListSwitchItem.summary
-            override val icon = @Composable {
-                AppIcon(record.app, SettingsDimension.appIconItemSize)
-            }
+            override val summary = this@AppListTwoTargetSwitchItem.summary
             override val checked = checked
             override val changeable = changeable
             override val onCheckedChange = onCheckedChange
         },
+        icon = { AppIcon(record.app, SettingsDimension.appIconItemSize) },
+        onClick = onClick,
     )
 }
