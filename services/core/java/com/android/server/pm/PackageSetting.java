@@ -1195,8 +1195,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     public PackageSetting setLoadingProgress(float progress) {
-        mLoadingProgress = progress;
-        onChanged();
+        // To prevent race conditions, we don't allow progress to ever go down
+        if (mLoadingProgress < progress) {
+            mLoadingProgress = progress;
+            onChanged();
+        }
         return this;
     }
 
