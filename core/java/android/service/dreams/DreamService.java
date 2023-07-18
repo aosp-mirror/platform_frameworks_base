@@ -244,13 +244,7 @@ public class DreamService extends Service implements Window.Callback {
 
     private DreamOverlayConnectionHandler mOverlayConnection;
 
-    private final IDreamOverlayCallback mOverlayCallback = new IDreamOverlayCallback.Stub() {
-        @Override
-        public void onExitRequested() {
-            // Simply finish dream when exit is requested.
-            mHandler.post(() -> finish());
-        }
-    };
+    private IDreamOverlayCallback mOverlayCallback;
 
 
     public DreamService() {
@@ -877,6 +871,13 @@ public class DreamService extends Service implements Window.Callback {
         mDreamComponent = new ComponentName(this, getClass());
         mShouldShowComplications = fetchShouldShowComplications(this /*context*/,
                 fetchServiceInfo(this /*context*/, mDreamComponent));
+        mOverlayCallback = new IDreamOverlayCallback.Stub() {
+            @Override
+            public void onExitRequested() {
+                // Simply finish dream when exit is requested.
+                mHandler.post(() -> finish());
+            }
+        };
 
         super.onCreate();
     }
@@ -1083,7 +1084,7 @@ public class DreamService extends Service implements Window.Callback {
 
         // Just in case destroy came in before detach, let's take care of that now
         detach();
-
+        mOverlayCallback = null;
         super.onDestroy();
     }
 
