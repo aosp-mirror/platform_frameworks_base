@@ -162,11 +162,11 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     @Test
     fun convenienceBiometricAllowedChange() =
         testScope.runTest {
+            overrideResource(com.android.internal.R.bool.config_strongAuthRequiredOnBoot, false)
             createBiometricSettingsRepository()
             val convenienceBiometricAllowed =
                 collectLastValue(underTest.isNonStrongBiometricAllowed)
             runCurrent()
-
             onNonStrongAuthChanged(true, PRIMARY_USER_ID)
             assertThat(convenienceBiometricAllowed()).isTrue()
 
@@ -175,6 +175,45 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
 
             onNonStrongAuthChanged(false, PRIMARY_USER_ID)
             assertThat(convenienceBiometricAllowed()).isFalse()
+            mContext.orCreateTestableResources.removeOverride(
+                com.android.internal.R.bool.config_strongAuthRequiredOnBoot
+            )
+        }
+
+    @Test
+    fun whenStrongAuthRequiredAfterBoot_nonStrongBiometricNotAllowed() =
+        testScope.runTest {
+            overrideResource(com.android.internal.R.bool.config_strongAuthRequiredOnBoot, true)
+            createBiometricSettingsRepository()
+
+            val convenienceBiometricAllowed =
+                collectLastValue(underTest.isNonStrongBiometricAllowed)
+            runCurrent()
+            onNonStrongAuthChanged(true, PRIMARY_USER_ID)
+
+            assertThat(convenienceBiometricAllowed()).isFalse()
+            mContext.orCreateTestableResources.removeOverride(
+                com.android.internal.R.bool.config_strongAuthRequiredOnBoot
+            )
+        }
+
+    @Test
+    fun whenStrongBiometricAuthIsNotAllowed_nonStrongBiometrics_alsoNotAllowed() =
+        testScope.runTest {
+            overrideResource(com.android.internal.R.bool.config_strongAuthRequiredOnBoot, false)
+            createBiometricSettingsRepository()
+
+            val convenienceBiometricAllowed =
+                collectLastValue(underTest.isNonStrongBiometricAllowed)
+            runCurrent()
+            onNonStrongAuthChanged(true, PRIMARY_USER_ID)
+            assertThat(convenienceBiometricAllowed()).isTrue()
+
+            onStrongAuthChanged(STRONG_AUTH_REQUIRED_AFTER_TIMEOUT, PRIMARY_USER_ID)
+            assertThat(convenienceBiometricAllowed()).isFalse()
+            mContext.orCreateTestableResources.removeOverride(
+                com.android.internal.R.bool.config_strongAuthRequiredOnBoot
+            )
         }
 
     private fun onStrongAuthChanged(flags: Int, userId: Int) {
