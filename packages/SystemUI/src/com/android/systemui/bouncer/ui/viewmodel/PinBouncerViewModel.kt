@@ -40,9 +40,10 @@ class PinBouncerViewModel(
     ) {
 
     val pinShapes = PinShapeAdapter(applicationContext)
+    private val mutablePinInput = MutableStateFlow(PinInputViewModel.empty())
 
-    private val mutablePinEntries = MutableStateFlow<List<EnteredKey>>(emptyList())
-    val pinEntries: StateFlow<List<EnteredKey>> = mutablePinEntries
+    /** Currently entered pin keys. */
+    val pinInput: StateFlow<PinInputViewModel> = mutablePinInput
 
     /** The length of the PIN for which we should show a hint. */
     val hintedPinLength: StateFlow<Int?> = interactor.hintedPinLength
@@ -50,11 +51,11 @@ class PinBouncerViewModel(
     /** Appearance of the backspace button. */
     val backspaceButtonAppearance: StateFlow<ActionButtonAppearance> =
         combine(
-                mutablePinEntries,
+                mutablePinInput,
                 interactor.isAutoConfirmEnabled,
             ) { mutablePinEntries, isAutoConfirmEnabled ->
                 computeBackspaceButtonAppearance(
-                    enteredPin = mutablePinEntries,
+                    pinInput = mutablePinEntries,
                     isAutoConfirmEnabled = isAutoConfirmEnabled,
                 )
             }
@@ -87,26 +88,23 @@ class PinBouncerViewModel(
 
     /** Notifies that the user clicked on a PIN button with the given digit value. */
     fun onPinButtonClicked(input: Int) {
-        if (mutablePinEntries.value.isEmpty()) {
+        val pinInput = mutablePinInput.value
+        if (pinInput.isEmpty()) {
             interactor.clearMessage()
         }
 
-        mutablePinEntries.value += EnteredKey(input)
-
+        mutablePinInput.value = pinInput.append(input)
         tryAuthenticate(useAutoConfirm = true)
     }
 
     /** Notifies that the user clicked the backspace button. */
     fun onBackspaceButtonClicked() {
-        if (mutablePinEntries.value.isEmpty()) {
-            return
-        }
-        mutablePinEntries.value = mutablePinEntries.value.toMutableList().apply { removeLast() }
+        mutablePinInput.value = mutablePinInput.value.deleteLast()
     }
 
     /** Notifies that the user long-pressed the backspace button. */
     fun onBackspaceButtonLongPressed() {
-        mutablePinEntries.value = emptyList()
+        mutablePinInput.value = mutablePinInput.value.clearAll()
     }
 
     /** Notifies that the user clicked the "enter" button. */
@@ -115,7 +113,7 @@ class PinBouncerViewModel(
     }
 
     private fun tryAuthenticate(useAutoConfirm: Boolean) {
-        val pinCode = mutablePinEntries.value.map { it.input }
+        val pinCode = mutablePinInput.value.getPin()
 
         applicationScope.launch {
             val isSuccess = interactor.authenticate(pinCode, useAutoConfirm) ?: return@launch
@@ -124,15 +122,17 @@ class PinBouncerViewModel(
                 showFailureAnimation()
             }
 
-            mutablePinEntries.value = emptyList()
+            // TODO(b/291528545): this should not be cleared on success (at least until the view
+            // is animated away).
+            mutablePinInput.value = mutablePinInput.value.clearAll()
         }
     }
 
     private fun computeBackspaceButtonAppearance(
-        enteredPin: List<EnteredKey>,
+        pinInput: PinInputViewModel,
         isAutoConfirmEnabled: Boolean,
     ): ActionButtonAppearance {
-        val isEmpty = enteredPin.isEmpty()
+        val isEmpty = pinInput.isEmpty()
 
         return when {
             isAutoConfirmEnabled && isEmpty -> ActionButtonAppearance.Hidden
@@ -150,20 +150,4 @@ enum class ActionButtonAppearance {
     Subtle,
     /** Button is shown. */
     Shown,
-}
-
-private var nextSequenceNumber = 1
-
-/**
- * The pin bouncer [input] as digits 0-9, together with a [sequenceNumber] to indicate the ordering.
- *
- * Since the model only allows appending/removing [EnteredKey]s from the end, the [sequenceNumber]
- * is strictly increasing in input order of the pin, but not guaranteed to be monotonic or start at
- * a specific number.
- */
-data class EnteredKey
-internal constructor(val input: Int, val sequenceNumber: Int = nextSequenceNumber++) :
-    Comparable<EnteredKey> {
-    override fun compareTo(other: EnteredKey): Int =
-        compareValuesBy(this, other, EnteredKey::sequenceNumber)
 }
