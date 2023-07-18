@@ -386,7 +386,10 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             detectionCallback.value.onFaceDetected(1, 1, true)
 
-            assertThat(detectStatus()).isEqualTo(FaceDetectionStatus(1, 1, true))
+            val status = detectStatus()!!
+            assertThat(status.sensorId).isEqualTo(1)
+            assertThat(status.userId).isEqualTo(1)
+            assertThat(status.isStrongBiometric).isEqualTo(true)
         }
 
     @Test

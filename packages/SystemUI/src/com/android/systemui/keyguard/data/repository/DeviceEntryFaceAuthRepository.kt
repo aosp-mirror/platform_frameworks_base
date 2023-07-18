@@ -545,11 +545,11 @@ constructor(
             faceAuthLogger.detectionNotSupported(faceManager, faceManager?.sensorPropertiesInternal)
             return
         }
-        if (_isAuthRunning.value || detectCancellationSignal != null) {
+        if (_isAuthRunning.value) {
             faceAuthLogger.skippingDetection(_isAuthRunning.value, detectCancellationSignal != null)
             return
         }
-
+        detectCancellationSignal?.cancel()
         detectCancellationSignal = CancellationSignal()
         withContext(mainDispatcher) {
             // We always want to invoke face detect in the main thread.
