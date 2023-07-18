@@ -136,7 +136,7 @@ public:
     }
 };
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
+RENDERTHREAD_TEST(SkiaDisplayList, prepareListAndChildren) {
     auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
@@ -195,7 +195,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren) {
     canvasContext->destroy();
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren_vdOffscreen) {
+RENDERTHREAD_TEST(SkiaDisplayList, prepareListAndChildren_vdOffscreen) {
     auto rootNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
     ContextFactory contextFactory;
     std::unique_ptr<CanvasContext> canvasContext(
