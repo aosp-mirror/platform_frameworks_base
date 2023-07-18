@@ -1326,7 +1326,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             }
         });
 
-        mScreenOffAnimationController.initialize(this, mLightRevealScrim);
+        mScreenOffAnimationController.initialize(this, mShadeSurface, mLightRevealScrim);
         updateLightRevealScrimVisibility();
 
         mShadeSurface.initDependencies(
