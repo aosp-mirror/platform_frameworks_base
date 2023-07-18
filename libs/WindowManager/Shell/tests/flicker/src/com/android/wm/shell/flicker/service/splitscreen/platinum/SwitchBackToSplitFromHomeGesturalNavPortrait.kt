@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.service.splitscreen.benchmark
+package com.android.wm.shell.flicker.service.splitscreen.platinum
 
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import com.android.wm.shell.flicker.service.splitscreen.scenarios.DismissSplitScreenByDivider
+import com.android.wm.shell.flicker.service.splitscreen.scenarios.SwitchBackToSplitFromHome
 import org.junit.Test
 
-class DismissSplitScreenByDividerGesturalNavLandscapeBenchmark :
-    DismissSplitScreenByDivider(Rotation.ROTATION_90) {
+class SwitchBackToSplitFromHomeGesturalNavPortrait :
+    SwitchBackToSplitFromHome(Rotation.ROTATION_0) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
-    override fun dismissSplitScreenByDivider() = super.dismissSplitScreenByDivider()
+    override fun switchBackToSplitFromHome() = super.switchBackToSplitFromHome()
 }

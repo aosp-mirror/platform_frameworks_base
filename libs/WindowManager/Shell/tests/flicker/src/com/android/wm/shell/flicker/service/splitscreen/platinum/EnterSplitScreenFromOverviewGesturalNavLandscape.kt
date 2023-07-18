@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.service.splitscreen.benchmark
+package com.android.wm.shell.flicker.service.splitscreen.platinum
 
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import com.android.wm.shell.flicker.service.splitscreen.scenarios.EnterSplitScreenByDragFromNotification
+import com.android.wm.shell.flicker.service.splitscreen.scenarios.EnterSplitScreenFromOverview
 import org.junit.Test
 
-class EnterSplitScreenByDragFromNotificationGesturalNavLandscapeBenchmark :
-    EnterSplitScreenByDragFromNotification(Rotation.ROTATION_90) {
+class EnterSplitScreenFromOverviewGesturalNavLandscape :
+    EnterSplitScreenFromOverview(Rotation.ROTATION_90) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
-    override fun enterSplitScreenByDragFromNotification() =
-        super.enterSplitScreenByDragFromNotification()
+    override fun enterSplitScreenFromOverview() = super.enterSplitScreenFromOverview()
 }

@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.service.splitscreen.benchmark
+package com.android.wm.shell.flicker.service.splitscreen.platinum
 
 import android.platform.test.annotations.PlatinumTest
 import android.platform.test.annotations.Presubmit
-import com.android.wm.shell.flicker.service.splitscreen.scenarios.UnlockKeyguardToSplitScreen
+import android.tools.common.Rotation
+import com.android.wm.shell.flicker.service.splitscreen.scenarios.SwitchAppByDoubleTapDivider
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.BlockJUnit4ClassRunner
 
-@RunWith(BlockJUnit4ClassRunner::class)
-class UnlockKeyguardToSplitScreenGesturalNavLandscapeBenchmark : UnlockKeyguardToSplitScreen() {
+class SwitchAppByDoubleTapDividerGesturalNavLandscape :
+    SwitchAppByDoubleTapDivider(Rotation.ROTATION_90) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
-    override fun unlockKeyguardToSplitScreen() = super.unlockKeyguardToSplitScreen()
+    override fun switchAppByDoubleTapDivider() = super.switchAppByDoubleTapDivider()
 }
