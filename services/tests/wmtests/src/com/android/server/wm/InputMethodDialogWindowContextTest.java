@@ -91,14 +91,14 @@ public class InputMethodDialogWindowContextTest extends WindowTestsBase {
         spyOn(mIWindowManager);
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
-            IBinder clientToken = (IBinder) args[0];
-            int displayId = (int) args[2];
+            IBinder clientToken = (IBinder) args[1];
+            int displayId = (int) args[3];
             DisplayContent dc = mWm.mRoot.getDisplayContent(displayId);
             mWm.mWindowContextListenerController.registerWindowContainerListener(clientToken,
                     dc.getImeContainer(), 1000 /* ownerUid */, TYPE_INPUT_METHOD_DIALOG,
                     null /* options */);
             return dc.getImeContainer().getConfiguration();
-        }).when(mIWindowManager).attachWindowContextToDisplayArea(any(),
+        }).when(mIWindowManager).attachWindowContextToDisplayArea(any(), any(),
                 eq(TYPE_INPUT_METHOD_DIALOG), anyInt(), any());
         mDisplayManagerGlobal = DisplayManagerGlobal.getInstance();
         spyOn(mDisplayManagerGlobal);

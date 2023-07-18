@@ -68,6 +68,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityThread;
+import android.app.IApplicationThread;
 import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -118,6 +120,9 @@ import org.mockito.ArgumentCaptor;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class WindowManagerServiceTests extends WindowTestsBase {
+
+    private final IApplicationThread mAppThread = ActivityThread.currentActivityThread()
+            .getApplicationThread();
 
     @Rule
     public AdoptShellPermissionsRule mAdoptShellPermissionsRule = new AdoptShellPermissionsRule(
@@ -428,7 +433,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     public void testAttachWindowContextToWindowToken_InvalidToken_EarlyReturn() {
         spyOn(mWm.mWindowContextListenerController);
 
-        mWm.attachWindowContextToWindowToken(new Binder(), new Binder());
+        mWm.attachWindowContextToWindowToken(mAppThread, new Binder(), new Binder());
 
         verify(mWm.mWindowContextListenerController, never()).getWindowType(any());
     }
@@ -441,7 +446,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         doReturn(INVALID_WINDOW_TYPE).when(mWm.mWindowContextListenerController)
                 .getWindowType(any());
 
-        mWm.attachWindowContextToWindowToken(new Binder(), windowToken.token);
+        mWm.attachWindowContextToWindowToken(mAppThread, new Binder(), windowToken.token);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -452,7 +457,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         doReturn(TYPE_APPLICATION).when(mWm.mWindowContextListenerController)
                 .getWindowType(any());
 
-        mWm.attachWindowContextToWindowToken(new Binder(), windowToken.token);
+        mWm.attachWindowContextToWindowToken(mAppThread, new Binder(), windowToken.token);
     }
 
     @Test
@@ -465,7 +470,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         doReturn(false).when(mWm.mWindowContextListenerController)
                 .assertCallerCanModifyListener(any(), anyBoolean(), anyInt());
 
-        mWm.attachWindowContextToWindowToken(new Binder(), windowToken.token);
+        mWm.attachWindowContextToWindowToken(mAppThread, new Binder(), windowToken.token);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(
                 any(), any(), anyInt(), anyInt(), any());
@@ -482,7 +487,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 .assertCallerCanModifyListener(any(), anyBoolean(), anyInt());
 
         final IBinder clientToken = new Binder();
-        mWm.attachWindowContextToWindowToken(clientToken, windowToken.token);
+        mWm.attachWindowContextToWindowToken(mAppThread, clientToken, windowToken.token);
 
         verify(mWm.mWindowContextListenerController).registerWindowContainerListener(
                 eq(clientToken), eq(windowToken), anyInt(), eq(TYPE_INPUT_METHOD),

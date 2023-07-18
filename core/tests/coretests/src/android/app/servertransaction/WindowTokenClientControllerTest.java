@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import android.app.ActivityThread;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -87,16 +88,17 @@ public class WindowTokenClientControllerTest {
     @Test
     public void testAttachToDisplayArea() throws RemoteException {
         doReturn(null).when(mWindowManagerService).attachWindowContextToDisplayArea(
-                any(), anyInt(), anyInt(), any());
+                any(), any(), anyInt(), anyInt(), any());
 
         assertFalse(mController.attachToDisplayArea(mWindowTokenClient, TYPE_APPLICATION_OVERLAY,
                 DEFAULT_DISPLAY, null /* options */));
-        verify(mWindowManagerService).attachWindowContextToDisplayArea(mWindowTokenClient,
+        verify(mWindowManagerService).attachWindowContextToDisplayArea(
+                ActivityThread.currentActivityThread().getApplicationThread(), mWindowTokenClient,
                 TYPE_APPLICATION_OVERLAY, DEFAULT_DISPLAY, null /* options */);
         verify(mWindowTokenClient, never()).onConfigurationChanged(any(), anyInt(), anyBoolean());
 
         doReturn(mConfiguration).when(mWindowManagerService).attachWindowContextToDisplayArea(
-                any(), anyInt(), anyInt(), any());
+                any(), any(), anyInt(), anyInt(), any());
 
         assertTrue(mController.attachToDisplayArea(mWindowTokenClient, TYPE_APPLICATION_OVERLAY,
                 DEFAULT_DISPLAY, null /* options */));
@@ -108,36 +110,38 @@ public class WindowTokenClientControllerTest {
     public void testAttachToDisplayArea_detachIfNeeded() throws RemoteException {
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService, never()).detachWindowContextFromWindowContainer(any());
+        verify(mWindowManagerService, never()).detachWindowContext(any());
 
         doReturn(null).when(mWindowManagerService).attachWindowContextToDisplayArea(
-                any(), anyInt(), anyInt(), any());
+                any(), any(), anyInt(), anyInt(), any());
         mController.attachToDisplayArea(mWindowTokenClient, TYPE_APPLICATION_OVERLAY,
                 DEFAULT_DISPLAY, null /* options */);
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService, never()).detachWindowContextFromWindowContainer(any());
+        verify(mWindowManagerService, never()).detachWindowContext(any());
 
         doReturn(mConfiguration).when(mWindowManagerService).attachWindowContextToDisplayArea(
-                any(), anyInt(), anyInt(), any());
+                any(), any(), anyInt(), anyInt(), any());
         mController.attachToDisplayArea(mWindowTokenClient, TYPE_APPLICATION_OVERLAY,
                 DEFAULT_DISPLAY, null /* options */);
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService).detachWindowContextFromWindowContainer(any());
+        verify(mWindowManagerService).detachWindowContext(any());
     }
 
     @Test
     public void testAttachToDisplayContent() throws RemoteException {
-        doReturn(null).when(mWindowManagerService).attachToDisplayContent(
-                any(), anyInt());
+        doReturn(null).when(mWindowManagerService).attachWindowContextToDisplayContent(
+                any(), any(), anyInt());
 
         assertFalse(mController.attachToDisplayContent(mWindowTokenClient, DEFAULT_DISPLAY));
-        verify(mWindowManagerService).attachToDisplayContent(mWindowTokenClient, DEFAULT_DISPLAY);
+        verify(mWindowManagerService).attachWindowContextToDisplayContent(
+                ActivityThread.currentActivityThread().getApplicationThread(), mWindowTokenClient,
+                DEFAULT_DISPLAY);
         verify(mWindowTokenClient, never()).onConfigurationChanged(any(), anyInt(), anyBoolean());
 
-        doReturn(mConfiguration).when(mWindowManagerService).attachToDisplayContent(
-                any(), anyInt());
+        doReturn(mConfiguration).when(mWindowManagerService).attachWindowContextToDisplayContent(
+                any(), any(), anyInt());
 
         assertTrue(mController.attachToDisplayContent(mWindowTokenClient, DEFAULT_DISPLAY));
         verify(mWindowTokenClient).onConfigurationChanged(mConfiguration, DEFAULT_DISPLAY,
@@ -148,28 +152,29 @@ public class WindowTokenClientControllerTest {
     public void testAttachToDisplayContent_detachIfNeeded() throws RemoteException {
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService, never()).detachWindowContextFromWindowContainer(any());
+        verify(mWindowManagerService, never()).detachWindowContext(any());
 
-        doReturn(null).when(mWindowManagerService).attachToDisplayContent(
-                any(), anyInt());
+        doReturn(null).when(mWindowManagerService).attachWindowContextToDisplayContent(
+                any(), any(), anyInt());
         mController.attachToDisplayContent(mWindowTokenClient, DEFAULT_DISPLAY);
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService, never()).detachWindowContextFromWindowContainer(any());
+        verify(mWindowManagerService, never()).detachWindowContext(any());
 
-        doReturn(mConfiguration).when(mWindowManagerService).attachToDisplayContent(
-                any(), anyInt());
+        doReturn(mConfiguration).when(mWindowManagerService).attachWindowContextToDisplayContent(
+                any(), any(), anyInt());
         mController.attachToDisplayContent(mWindowTokenClient, DEFAULT_DISPLAY);
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService).detachWindowContextFromWindowContainer(any());
+        verify(mWindowManagerService).detachWindowContext(any());
     }
 
     @Test
     public void testAttachToWindowToken() throws RemoteException {
         mController.attachToWindowToken(mWindowTokenClient, mWindowToken);
 
-        verify(mWindowManagerService).attachWindowContextToWindowToken(mWindowTokenClient,
+        verify(mWindowManagerService).attachWindowContextToWindowToken(
+                ActivityThread.currentActivityThread().getApplicationThread(), mWindowTokenClient,
                 mWindowToken);
     }
 
@@ -177,12 +182,12 @@ public class WindowTokenClientControllerTest {
     public void testAttachToWindowToken_detachIfNeeded() throws RemoteException {
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService, never()).detachWindowContextFromWindowContainer(any());
+        verify(mWindowManagerService, never()).detachWindowContext(any());
 
         mController.attachToWindowToken(mWindowTokenClient, mWindowToken);
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService).detachWindowContextFromWindowContainer(any());
+        verify(mWindowManagerService).detachWindowContext(any());
     }
 
     @Test

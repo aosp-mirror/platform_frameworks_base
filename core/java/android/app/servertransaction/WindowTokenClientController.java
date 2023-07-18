@@ -21,6 +21,8 @@ import static android.view.WindowManagerGlobal.getWindowManagerService;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
+import android.app.IApplicationThread;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -46,6 +48,8 @@ public class WindowTokenClientController {
     private static WindowTokenClientController sController;
 
     private final Object mLock = new Object();
+    private final IApplicationThread mAppThread = ActivityThread.currentActivityThread()
+            .getApplicationThread();
 
     /** Mapping from a client defined token to the {@link WindowTokenClient} it represents. */
     @GuardedBy("mLock")
@@ -84,8 +88,8 @@ public class WindowTokenClientController {
             @WindowType int type, int displayId, @Nullable Bundle options) {
         final Configuration configuration;
         try {
-            configuration = getWindowManagerService()
-                    .attachWindowContextToDisplayArea(client, type, displayId, options);
+            configuration = getWindowManagerService().attachWindowContextToDisplayArea(
+                    mAppThread, client, type, displayId, options);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -111,7 +115,7 @@ public class WindowTokenClientController {
         }
         final Configuration configuration;
         try {
-            configuration = wms.attachToDisplayContent(client, displayId);
+            configuration = wms.attachWindowContextToDisplayContent(mAppThread, client, displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -131,7 +135,8 @@ public class WindowTokenClientController {
     public void attachToWindowToken(@NonNull WindowTokenClient client,
             @NonNull IBinder windowToken) {
         try {
-            getWindowManagerService().attachWindowContextToWindowToken(client, windowToken);
+            getWindowManagerService().attachWindowContextToWindowToken(
+                    mAppThread, client, windowToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -149,7 +154,7 @@ public class WindowTokenClientController {
             }
         }
         try {
-            getWindowManagerService().detachWindowContextFromWindowContainer(client);
+            getWindowManagerService().detachWindowContext(client);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

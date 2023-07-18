@@ -47,7 +47,7 @@ import java.util.Objects;
  *
  * <ul>
  *   <li>When a {@link WindowContext} is created, it registers the listener via
- *     {@link WindowManagerService#attachWindowContextToDisplayArea(IBinder, int, int, Bundle)}
+ *     {@link WindowManagerService#attachWindowContextToDisplayArea
  *     automatically.</li>
  *   <li>When the {@link WindowContext} adds the first window to the screen via
  *     {@link android.view.WindowManager#addView(View, android.view.ViewGroup.LayoutParams)},
@@ -55,7 +55,7 @@ import java.util.Objects;
  *     to corresponding {@link WindowToken} via this controller.</li>
  *   <li>When the {@link WindowContext} is GCed, it unregisters the previously
  *     registered listener via
- *     {@link WindowManagerService#detachWindowContextFromWindowContainer(IBinder)}.
+ *     {@link WindowManagerService#detachWindowContext(IBinder)}.
  *     {@link WindowManagerService} is also responsible for removing the
  *     {@link WindowContext} created {@link WindowToken}.</li>
  * </ul>
