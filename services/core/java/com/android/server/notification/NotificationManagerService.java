@@ -8757,7 +8757,7 @@ public class NotificationManagerService extends SystemService {
                     if (DBG) Slog.v(TAG, "Playing sound " + soundUri
                             + " with attributes " + record.getAudioAttributes());
                     player.playAsync(soundUri, record.getSbn().getUser(), looping,
-                            record.getAudioAttributes());
+                            record.getAudioAttributes(), 1.0f);
                     return true;
                 }
             } catch (RemoteException e) {
