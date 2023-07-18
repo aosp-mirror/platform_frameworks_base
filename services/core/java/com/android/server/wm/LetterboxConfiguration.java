@@ -294,16 +294,15 @@ final class LetterboxConfiguration {
     @NonNull private final SynchedDeviceConfig mDeviceConfig;
 
     LetterboxConfiguration(@NonNull final Context systemUiContext) {
-        this(systemUiContext,
-                new LetterboxConfigurationPersister(systemUiContext,
-                        () -> readLetterboxHorizontalReachabilityPositionFromConfig(
-                                systemUiContext, /* forBookMode */ false),
-                        () -> readLetterboxVerticalReachabilityPositionFromConfig(
-                                systemUiContext, /* forTabletopMode */ false),
-                        () -> readLetterboxHorizontalReachabilityPositionFromConfig(
-                                systemUiContext, /* forBookMode */ true),
-                        () -> readLetterboxVerticalReachabilityPositionFromConfig(
-                                systemUiContext, /* forTabletopMode */ true)));
+        this(systemUiContext, new LetterboxConfigurationPersister(
+                () -> readLetterboxHorizontalReachabilityPositionFromConfig(
+                        systemUiContext, /* forBookMode */ false),
+                () -> readLetterboxVerticalReachabilityPositionFromConfig(
+                        systemUiContext, /* forTabletopMode */ false),
+                () -> readLetterboxHorizontalReachabilityPositionFromConfig(
+                        systemUiContext, /* forBookMode */ true),
+                () -> readLetterboxVerticalReachabilityPositionFromConfig(
+                        systemUiContext, /* forTabletopMode */ true)));
     }
 
     @VisibleForTesting
