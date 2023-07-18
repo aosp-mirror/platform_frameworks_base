@@ -16,6 +16,9 @@
 
 package android.media;
 
+import static com.android.media.codec.flags.Flags.FLAG_CODEC_IMPORTANCE;
+
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1634,6 +1637,34 @@ public final class MediaFormat {
      * {@link MediaCodec} describes the semantics.
      */
     public static final String KEY_ALLOW_FRAME_DROP = "allow-frame-drop";
+
+    /**
+     * A key describing the desired codec importance for the application.
+     * <p>
+     * The associated value is a positive integer including zero.
+     * Higher value means lesser importance.
+     * <p>
+     * The resource manager may use the codec importance, along with other factors
+     * when reclaiming codecs from an application.
+     * The specifics of reclaim policy is device dependent, but specifying the codec importance,
+     * will allow the resource manager to prioritize reclaiming less important codecs
+     * (assigned higher values) from the (reclaim) requesting application first.
+     * So, the codec importance is only relevant within the context of that application.
+     * <p>
+     * The codec importance can be set:
+     * <ul>
+     * <li>through {@link MediaCodec#configure}. </li>
+     * <li>through {@link MediaCodec#setParameters} if the codec has been configured already,
+     * which allows the users to change the codec importance multiple times.
+     * </ul>
+     * Any change/update in codec importance is guaranteed upon the completion of the function call
+     * that sets the codec importance. So, in case of concurrent codec operations,
+     * make sure to wait for the change in codec importance, before using another codec.
+     * Note that unless specified, by default the codecs will have highest importance (of value 0).
+     *
+     */
+    @FlaggedApi(FLAG_CODEC_IMPORTANCE)
+    public static final String KEY_IMPORTANCE = "importance";
 
     /* package private */ MediaFormat(@NonNull Map<String, Object> map) {
         mMap = map;

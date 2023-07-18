@@ -25,6 +25,7 @@ aconfig_srcjars = [
     ":com.android.hardware.input-aconfig-java{.generated_srcjars}",
     ":com.android.text.flags-aconfig-java{.generated_srcjars}",
     ":com.android.net.flags-aconfig-java{.generated_srcjars}",
+    ":aconfig_mediacodec_flags_java_lib{.generated_srcjars}",
 ]
 
 filegroup {
