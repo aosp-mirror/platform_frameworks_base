@@ -18,6 +18,7 @@ package com.android.systemui.bouncer.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
@@ -54,6 +55,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var systemClock: SystemClock
     @Mock private lateinit var bouncerLogger: TableLogBuffer
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     @Before
     fun setup() {
@@ -72,8 +74,8 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
                 keyguardStateController,
                 bouncerRepository,
                 biometricSettingsRepository,
-                deviceEntryFingerprintAuthRepository,
                 systemClock,
+                keyguardUpdateMonitor,
             )
     }
 
@@ -118,7 +120,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun canShowAlternateBouncerForFingerprint_fingerprintLockedOut() {
         givenCanShowAlternateBouncer()
-        deviceEntryFingerprintAuthRepository.setLockedOut(true)
+        whenever(keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(true)
 
         assertFalse(underTest.canShowAlternateBouncerForFingerprint())
     }
@@ -168,7 +170,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         biometricSettingsRepository.setFingerprintEnrolled(true)
         biometricSettingsRepository.setStrongBiometricAllowed(true)
         biometricSettingsRepository.setFingerprintEnabledByDevicePolicy(true)
-        deviceEntryFingerprintAuthRepository.setLockedOut(false)
+        whenever(keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(false)
         whenever(keyguardStateController.isUnlocked).thenReturn(false)
     }
 

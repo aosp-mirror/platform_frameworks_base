@@ -23,33 +23,35 @@ import android.os.SystemClock.elapsedRealtime
  * Authentication status provided by
  * [com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository]
  */
-sealed class AuthenticationStatus
+sealed class FaceAuthenticationStatus
 
 /** Success authentication status. */
-data class SuccessAuthenticationStatus(val successResult: FaceManager.AuthenticationResult) :
-    AuthenticationStatus()
+data class SuccessFaceAuthenticationStatus(val successResult: FaceManager.AuthenticationResult) :
+    FaceAuthenticationStatus()
 
 /** Face authentication help message. */
-data class HelpAuthenticationStatus(val msgId: Int, val msg: String?) : AuthenticationStatus()
+data class HelpFaceAuthenticationStatus(val msgId: Int, val msg: String?) :
+    FaceAuthenticationStatus()
 
 /** Face acquired message. */
-data class AcquiredAuthenticationStatus(val acquiredInfo: Int) : AuthenticationStatus()
+data class AcquiredFaceAuthenticationStatus(val acquiredInfo: Int) : FaceAuthenticationStatus()
 
 /** Face authentication failed message. */
-object FailedAuthenticationStatus : AuthenticationStatus()
+object FailedFaceAuthenticationStatus : FaceAuthenticationStatus()
 
 /** Face authentication error message */
-data class ErrorAuthenticationStatus(
+data class ErrorFaceAuthenticationStatus(
     val msgId: Int,
     val msg: String? = null,
     // present to break equality check if the same error occurs repeatedly.
     val createdAt: Long = elapsedRealtime()
-) : AuthenticationStatus() {
+) : FaceAuthenticationStatus() {
     /**
      * Method that checks if [msgId] is a lockout error. A lockout error means that face
      * authentication is locked out.
      */
-    fun isLockoutError() = msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT
+    fun isLockoutError() =
+        msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT || msgId == FaceManager.FACE_ERROR_LOCKOUT
 
     /**
      * Method that checks if [msgId] is a cancellation error. This means that face authentication
@@ -64,4 +66,4 @@ data class ErrorAuthenticationStatus(
 }
 
 /** Face detection success message. */
-data class DetectionStatus(val sensorId: Int, val userId: Int, val isStrongBiometric: Boolean)
+data class FaceDetectionStatus(val sensorId: Int, val userId: Int, val isStrongBiometric: Boolean)

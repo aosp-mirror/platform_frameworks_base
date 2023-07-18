@@ -18,8 +18,8 @@ package com.android.systemui.keyguard.data.repository
 
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.shared.model.AuthenticationStatus
-import com.android.systemui.keyguard.shared.model.DetectionStatus
+import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,10 +40,10 @@ class NoopDeviceEntryFaceAuthRepository @Inject constructor() : DeviceEntryFaceA
     private val _canRunFaceAuth = MutableStateFlow(false)
     override val canRunFaceAuth: StateFlow<Boolean> = _canRunFaceAuth
 
-    override val authenticationStatus: Flow<AuthenticationStatus>
+    override val authenticationStatus: Flow<FaceAuthenticationStatus>
         get() = emptyFlow()
 
-    override val detectionStatus: Flow<DetectionStatus>
+    override val detectionStatus: Flow<FaceDetectionStatus>
         get() = emptyFlow()
 
     private val _isLockedOut = MutableStateFlow(false)

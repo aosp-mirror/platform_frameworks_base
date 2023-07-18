@@ -38,13 +38,13 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.AcquiredAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.AuthenticationStatus
-import com.android.systemui.keyguard.shared.model.DetectionStatus
-import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.FailedAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.HelpAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.SuccessAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.AcquiredFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
+import com.android.systemui.keyguard.shared.model.FailedFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.HelpFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
@@ -88,10 +88,10 @@ interface DeviceEntryFaceAuthRepository {
     val canRunFaceAuth: StateFlow<Boolean>
 
     /** Provide the current status of face authentication. */
-    val authenticationStatus: Flow<AuthenticationStatus>
+    val authenticationStatus: Flow<FaceAuthenticationStatus>
 
     /** Provide the current status of face detection. */
-    val detectionStatus: Flow<DetectionStatus>
+    val detectionStatus: Flow<FaceDetectionStatus>
 
     /** Current state of whether face authentication is locked out or not. */
     val isLockedOut: StateFlow<Boolean>
@@ -151,13 +151,13 @@ constructor(
     private var cancelNotReceivedHandlerJob: Job? = null
     private var halErrorRetryJob: Job? = null
 
-    private val _authenticationStatus: MutableStateFlow<AuthenticationStatus?> =
+    private val _authenticationStatus: MutableStateFlow<FaceAuthenticationStatus?> =
         MutableStateFlow(null)
-    override val authenticationStatus: Flow<AuthenticationStatus>
+    override val authenticationStatus: Flow<FaceAuthenticationStatus>
         get() = _authenticationStatus.filterNotNull()
 
-    private val _detectionStatus = MutableStateFlow<DetectionStatus?>(null)
-    override val detectionStatus: Flow<DetectionStatus>
+    private val _detectionStatus = MutableStateFlow<FaceDetectionStatus?>(null)
+    override val detectionStatus: Flow<FaceDetectionStatus>
         get() = _detectionStatus.filterNotNull()
 
     private val _isLockedOut = MutableStateFlow(false)
@@ -396,18 +396,18 @@ constructor(
     private val faceAuthCallback =
         object : FaceManager.AuthenticationCallback() {
             override fun onAuthenticationFailed() {
-                _authenticationStatus.value = FailedAuthenticationStatus
+                _authenticationStatus.value = FailedFaceAuthenticationStatus
                 _isAuthenticated.value = false
                 faceAuthLogger.authenticationFailed()
                 onFaceAuthRequestCompleted()
             }
 
             override fun onAuthenticationAcquired(acquireInfo: Int) {
-                _authenticationStatus.value = AcquiredAuthenticationStatus(acquireInfo)
+                _authenticationStatus.value = AcquiredFaceAuthenticationStatus(acquireInfo)
             }
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
-                val errorStatus = ErrorAuthenticationStatus(errorCode, errString.toString())
+                val errorStatus = ErrorFaceAuthenticationStatus(errorCode, errString.toString())
                 if (errorStatus.isLockoutError()) {
                     _isLockedOut.value = true
                 }
@@ -433,11 +433,11 @@ constructor(
                 if (faceAcquiredInfoIgnoreList.contains(code)) {
                     return
                 }
-                _authenticationStatus.value = HelpAuthenticationStatus(code, helpStr.toString())
+                _authenticationStatus.value = HelpFaceAuthenticationStatus(code, helpStr.toString())
             }
 
             override fun onAuthenticationSucceeded(result: FaceManager.AuthenticationResult) {
-                _authenticationStatus.value = SuccessAuthenticationStatus(result)
+                _authenticationStatus.value = SuccessFaceAuthenticationStatus(result)
                 _isAuthenticated.value = true
                 faceAuthLogger.faceAuthSuccess(result)
                 onFaceAuthRequestCompleted()
@@ -482,7 +482,7 @@ constructor(
     private val detectionCallback =
         FaceManager.FaceDetectionCallback { sensorId, userId, isStrong ->
             faceAuthLogger.faceDetected()
-            _detectionStatus.value = DetectionStatus(sensorId, userId, isStrong)
+            _detectionStatus.value = FaceDetectionStatus(sensorId, userId, isStrong)
         }
 
     private var cancellationInProgress = false
