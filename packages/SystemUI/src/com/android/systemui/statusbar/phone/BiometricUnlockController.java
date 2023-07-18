@@ -160,6 +160,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private KeyguardViewController mKeyguardViewController;
     private DozeScrimController mDozeScrimController;
     private KeyguardViewMediator mKeyguardViewMediator;
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private PendingAuthenticated mPendingAuthenticated = null;
     private boolean mHasScreenTurnedOnSinceAuthenticating;
     private boolean mFadedAwayAfterWakeAndUnlock;
@@ -280,7 +281,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             LatencyTracker latencyTracker,
             ScreenOffAnimationController screenOffAnimationController,
             VibratorHelper vibrator,
-            SystemClock systemClock
+            SystemClock systemClock,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager
     ) {
         mPowerManager = powerManager;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -308,6 +310,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mVibratorHelper = vibrator;
         mLogger = biometricUnlockLogger;
         mSystemClock = systemClock;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
 
         dumpManager.registerDumpable(getClass().getName(), this);
     }
@@ -449,8 +452,19 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         // During wake and unlock, we need to draw black before waking up to avoid abrupt
         // brightness changes due to display state transitions.
         Runnable wakeUp = ()-> {
-            if (!wasDeviceInteractive || mUpdateMonitor.isDreaming()) {
+            // Check to see if we are still locked when we are waking and unlocking from dream.
+            // This runnable should be executed after unlock. If that's true, we could be not
+            // dreaming, but still locked. In this case, we should attempt to authenticate instead
+            // of waking up.
+            if (mode == MODE_WAKE_AND_UNLOCK_FROM_DREAM
+                    && !mKeyguardStateController.isUnlocked()
+                    && !mUpdateMonitor.isDreaming()) {
+                // Post wakeUp runnable is called from a callback in keyguard.
+                mHandler.post(() -> mKeyguardViewController.notifyKeyguardAuthenticated(
+                        false /* primaryAuth */));
+            } else if (!wasDeviceInteractive || mUpdateMonitor.isDreaming()) {
                 mLogger.i("bio wakelock: Authenticated, waking up...");
+
                 mPowerManager.wakeUp(
                         mSystemClock.uptimeMillis(),
                         PowerManager.WAKE_REASON_BIOMETRIC,
@@ -462,7 +476,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             Trace.endSection();
         };
 
-        if (mMode != MODE_NONE) {
+        if (mMode != MODE_NONE && mMode != MODE_WAKE_AND_UNLOCK_FROM_DREAM) {
             wakeUp.run();
         }
         switch (mMode) {
@@ -484,6 +498,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 Trace.endSection();
                 break;
             case MODE_WAKE_AND_UNLOCK_FROM_DREAM:
+                // In the case of waking and unlocking from dream, waking up is delayed until after
+                // unlock is complete to avoid conflicts during each sequence's transitions.
+                mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(wakeUp);
+                // Execution falls through here to proceed unlocking.
             case MODE_WAKE_AND_UNLOCK_PULSING:
             case MODE_WAKE_AND_UNLOCK:
                 if (mMode == MODE_WAKE_AND_UNLOCK_PULSING) {
