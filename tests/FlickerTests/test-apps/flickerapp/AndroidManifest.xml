@@ -102,6 +102,24 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".LaunchTransparentActivity"
+                  android:resizeableActivity="false"
+                  android:screenOrientation="portrait"
+                  android:theme="@android:style/Theme"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchTransparentActivity"
+                  android:label="LaunchTransparentActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".TransparentActivity"
+                  android:theme="@style/TransparentTheme"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.TransparentActivity"
+                  android:label="TransparentActivity"
+                  android:exported="false">
+        </activity>
         <activity android:name=".LaunchNewActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchNewActivity"
                   android:theme="@style/CutoutShortEdges"
