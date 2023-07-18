@@ -32,7 +32,9 @@ import org.junit.runners.Parameterized
 /**
  * Test launching a fixed portrait letterboxed app in landscape and repositioning to the right.
  *
- * To run this test: `atest WMShellFlickerTests:RepositionFixedPortraitAppTest` Actions:
+ * To run this test: `atest WMShellFlickerTestsOther:RepositionFixedPortraitAppTest`
+ *
+ * Actions:
  *
  *  ```
  *      Launch a fixed portrait app in landscape to letterbox app

@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.appcompat
 
 import android.content.Context
-import android.system.helpers.CommandsHelper
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTestData
@@ -29,15 +28,18 @@ import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
 import com.android.wm.shell.flicker.appWindowKeepVisible
 import com.android.wm.shell.flicker.layerKeepVisible
-import org.junit.After
+
 import org.junit.Assume
 import org.junit.Before
+import org.junit.Rule
 
 abstract class BaseAppCompat(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     protected val context: Context = instrumentation.context
     protected val letterboxApp = LetterboxAppHelper(instrumentation)
-    lateinit var cmdHelper: CommandsHelper
-    private lateinit var letterboxStyle: HashMap<String, String>
+
+    @JvmField
+    @Rule
+    val letterboxRule: LetterboxRule = LetterboxRule()
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
@@ -52,50 +54,7 @@ abstract class BaseAppCompat(flicker: LegacyFlickerTest) : BaseTest(flicker) {
 
     @Before
     fun before() {
-        cmdHelper = CommandsHelper.getInstance(instrumentation)
-        Assume.assumeTrue(tapl.isTablet && isIgnoreOrientationRequest())
-        letterboxStyle = mapLetterboxStyle()
-        resetLetterboxStyle()
-        setLetterboxEducationEnabled(false)
-    }
-
-    @After
-    fun after() {
-        resetLetterboxStyle()
-    }
-
-    private fun mapLetterboxStyle(): HashMap<String, String> {
-        val res = cmdHelper.executeShellCommand("wm get-letterbox-style")
-        val lines = res.lines()
-        val map = HashMap<String, String>()
-        for (line in lines) {
-            val keyValuePair = line.split(":")
-            if (keyValuePair.size == 2) {
-                val key = keyValuePair[0].trim()
-                map[key] = keyValuePair[1].trim()
-            }
-        }
-        return map
-    }
-
-    private fun getLetterboxStyle(): HashMap<String, String> {
-        if (!::letterboxStyle.isInitialized) {
-            letterboxStyle = mapLetterboxStyle()
-        }
-        return letterboxStyle
-    }
-
-    private fun resetLetterboxStyle() {
-        cmdHelper.executeShellCommand("wm reset-letterbox-style")
-    }
-
-    private fun setLetterboxEducationEnabled(enabled: Boolean) {
-        cmdHelper.executeShellCommand("wm set-letterbox-style --isEducationEnabled $enabled")
-    }
-
-    private fun isIgnoreOrientationRequest(): Boolean {
-        val res = cmdHelper.executeShellCommand("wm get-ignore-orientation-request")
-        return res != null && res.contains("true")
+        Assume.assumeTrue(tapl.isTablet && letterboxRule.isIgnoreOrientationRequest)
     }
 
     fun FlickerTestData.setStartRotation() = setRotation(flicker.scenario.startRotation)
@@ -115,7 +74,7 @@ abstract class BaseAppCompat(flicker: LegacyFlickerTest) : BaseTest(flicker) {
 
     /** Only run on tests with config_letterboxActivityCornersRadius != 0 in devices */
     private fun assumeLetterboxRoundedCornersEnabled() {
-        Assume.assumeTrue(getLetterboxStyle().getValue("Corner radius") != "0")
+        Assume.assumeTrue(letterboxRule.hasCornerRadius)
     }
 
     fun assertLetterboxAppVisibleAtStartAndEnd() {
