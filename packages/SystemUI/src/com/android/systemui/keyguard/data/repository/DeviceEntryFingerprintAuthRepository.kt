@@ -28,7 +28,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.FailedFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
@@ -214,7 +214,7 @@ constructor(
                     ) {
                         sendUpdateIfFingerprint(
                             biometricSourceType,
-                            FailedFingerprintAuthenticationStatus,
+                            FailFingerprintAuthenticationStatus,
                         )
                     }
 

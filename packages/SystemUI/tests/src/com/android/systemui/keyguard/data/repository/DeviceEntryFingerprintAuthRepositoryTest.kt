@@ -28,7 +28,7 @@ import com.android.systemui.biometrics.AuthController
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.FailedFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.util.mockito.whenever
@@ -210,7 +210,7 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
             )
 
             assertThat(authenticationStatus)
-                .isInstanceOf(FailedFingerprintAuthenticationStatus::class.java)
+                .isInstanceOf(FailFingerprintAuthenticationStatus::class.java)
         }
 
     @Test
