@@ -242,11 +242,6 @@ public class ParsingPackageUtils {
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
     public static final int PARSE_APK_IN_APEX = 1 << 9;
 
-    /**
-     * This flag is to determine whether to extract the baseline profiles from the apk or not.
-     */
-    public static final int PARSE_EXTRACT_BASELINE_PROFILES_FROM_APK = 1 << 10;
-
     public static final int PARSE_CHATTY = 1 << 31;
 
     /** The total maximum number of activities, services, providers and activity-aliases */
@@ -258,16 +253,14 @@ public class ParsingPackageUtils {
     private static final int MAX_PERMISSION_NAME_LENGTH = 512;
 
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
-            PARSE_APK_IN_APEX,
             PARSE_CHATTY,
             PARSE_COLLECT_CERTIFICATES,
             PARSE_ENFORCE_CODE,
             PARSE_EXTERNAL_STORAGE,
-            PARSE_EXTRACT_BASELINE_PROFILES_FROM_APK,
-            PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY,
             PARSE_IGNORE_PROCESSES,
             PARSE_IS_SYSTEM_DIR,
             PARSE_MUST_BE_APK,
+            PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ParseFlags {}
