@@ -63,6 +63,14 @@ data class ErrorFaceAuthenticationStatus(
     fun isHardwareError() =
         msgId == FaceManager.FACE_ERROR_HW_UNAVAILABLE ||
             msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS
+
+    companion object {
+        /**
+         * Error message that is created when cancel confirmation is not received from FaceManager
+         * after we request for a cancellation of face auth.
+         */
+        fun cancelNotReceivedError() = ErrorFaceAuthenticationStatus(-1, "")
+    }
 }
 
 /** Face detection success message. */

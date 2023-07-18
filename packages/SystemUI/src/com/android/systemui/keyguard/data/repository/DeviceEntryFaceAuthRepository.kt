@@ -574,6 +574,7 @@ constructor(
         if (authCancellationSignal == null) return
 
         authCancellationSignal?.cancel()
+        cancelNotReceivedHandlerJob?.cancel()
         cancelNotReceivedHandlerJob =
             applicationScope.launch {
                 delay(DEFAULT_CANCEL_SIGNAL_TIMEOUT)
@@ -583,6 +584,7 @@ constructor(
                     cancellationInProgress,
                     faceAuthRequestedWhileCancellation
                 )
+                _authenticationStatus.value = ErrorFaceAuthenticationStatus.cancelNotReceivedError()
                 onFaceAuthRequestCompleted()
             }
         cancellationInProgress = true

@@ -44,6 +44,7 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
@@ -448,6 +449,29 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
             faceAuthenticateIsCalled()
+        }
+
+    @Test
+    fun multipleCancelCallsShouldNotCauseMultipleCancellationStatusBeingEmitted() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+            val emittedValues by collectValues(underTest.authenticationStatus)
+
+            underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
+            underTest.cancel()
+            advanceTimeBy(100)
+            underTest.cancel()
+
+            advanceTimeBy(DeviceEntryFaceAuthRepositoryImpl.DEFAULT_CANCEL_SIGNAL_TIMEOUT)
+            runCurrent()
+            advanceTimeBy(DeviceEntryFaceAuthRepositoryImpl.DEFAULT_CANCEL_SIGNAL_TIMEOUT)
+            runCurrent()
+
+            assertThat(emittedValues.size).isEqualTo(1)
+            assertThat(emittedValues.first())
+                .isInstanceOf(ErrorFaceAuthenticationStatus::class.java)
+            assertThat((emittedValues.first() as ErrorFaceAuthenticationStatus).msgId).isEqualTo(-1)
         }
 
     @Test
