@@ -208,7 +208,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         // End old BaseStatusBar.userSwitched
         mCommandQueue.animateCollapsePanels();
         mMediaManager.clearCurrentMediaNotification();
-        mCentralSurfaces.setLockscreenUser(newUserId);
         updateMediaMetaData(true, false);
     }
 

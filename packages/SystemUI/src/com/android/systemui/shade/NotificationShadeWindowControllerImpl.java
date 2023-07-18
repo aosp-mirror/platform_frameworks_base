@@ -543,7 +543,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 state.forceUserActivity,
                 state.launchingActivityFromNotification,
                 state.mediaBackdropShowing,
-                state.wallpaperSupportsAmbientMode,
                 state.windowNotTouchable,
                 state.componentsForcingTopUi,
                 state.forceOpenTokens,
@@ -731,12 +730,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             return;
         }
         mCurrentState.lightRevealScrimOpaque = opaque;
-        apply(mCurrentState);
-    }
-
-    @Override
-    public void setWallpaperSupportsAmbientMode(boolean supportsAmbientMode) {
-        mCurrentState.wallpaperSupportsAmbientMode = supportsAmbientMode;
         apply(mCurrentState);
     }
 
