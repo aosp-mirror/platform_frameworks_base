@@ -737,12 +737,23 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         Intent fillInIntent2 = null;
         final String packageName1 = SplitScreenUtils.getPackageName(pendingIntent1);
         final String packageName2 = SplitScreenUtils.getPackageName(pendingIntent2);
+        final ActivityOptions activityOptions1 = options1 != null
+                ? ActivityOptions.fromBundle(options1) : ActivityOptions.makeBasic();
+        final ActivityOptions activityOptions2 = options2 != null
+                ? ActivityOptions.fromBundle(options2) : ActivityOptions.makeBasic();
         if (samePackage(packageName1, packageName2, userId1, userId2)) {
             if (supportMultiInstancesSplit(packageName1)) {
                 fillInIntent1 = new Intent();
                 fillInIntent1.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
                 fillInIntent2 = new Intent();
                 fillInIntent2.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+
+                if (shortcutInfo1 != null) {
+                    activityOptions1.setApplyMultipleTaskFlagForShortcut(true);
+                }
+                if (shortcutInfo2 != null) {
+                    activityOptions2.setApplyMultipleTaskFlagForShortcut(true);
+                }
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
             } else {
                 pendingIntent2 = null;
@@ -754,9 +765,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                         Toast.LENGTH_SHORT).show();
             }
         }
-        mStageCoordinator.startIntents(pendingIntent1, fillInIntent1, shortcutInfo1, options1,
-                pendingIntent2, fillInIntent2, shortcutInfo2, options2, splitPosition, splitRatio,
-                remoteTransition, instanceId);
+        mStageCoordinator.startIntents(pendingIntent1, fillInIntent1, shortcutInfo1,
+                activityOptions1.toBundle(), pendingIntent2, fillInIntent2, shortcutInfo2,
+                activityOptions2.toBundle(), splitPosition, splitRatio, remoteTransition,
+                instanceId);
     }
 
     @Override
