@@ -203,6 +203,12 @@ public final class NetworkRegistrationInfo implements Parcelable {
      */
     public static final int SERVICE_TYPE_EMERGENCY  = 5;
 
+    /** @hide  */
+    public static final int FIRST_SERVICE_TYPE = SERVICE_TYPE_VOICE;
+
+    /** @hide  */
+    public static final int LAST_SERVICE_TYPE = SERVICE_TYPE_EMERGENCY;
+
     @Domain
     private final int mDomain;
 
@@ -240,7 +246,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     private final boolean mEmergencyOnly;
 
     @ServiceType
-    private final ArrayList<Integer> mAvailableServices;
+    private ArrayList<Integer> mAvailableServices;
 
     @Nullable
     private CellIdentity mCellIdentity;
@@ -601,6 +607,16 @@ public final class NetworkRegistrationInfo implements Parcelable {
     @ServiceType
     public List<Integer> getAvailableServices() {
         return Collections.unmodifiableList(mAvailableServices);
+    }
+
+    /**
+     * Set available service types.
+     *
+     * @param availableServices The list of available services for this network.
+     * @hide
+     */
+    public void setAvailableServices(@NonNull @ServiceType List<Integer> availableServices) {
+        mAvailableServices = new ArrayList<>(availableServices);
     }
 
     /**
