@@ -201,7 +201,7 @@ android_library {
     manifest: "AndroidManifest.xml",
 
     javacflags: ["-Adagger.fastInit=enabled"],
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
 
     plugins: ["dagger2-compiler"],
 
@@ -393,7 +393,7 @@ android_library {
         "android.test.base",
         "android.test.mock",
     ],
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
     aaptflags: [
         "--extra-packages",
         "com.android.systemui",
@@ -515,7 +515,7 @@ android_app {
     certificate: "platform",
     privileged: true,
 
-    kotlincflags: ["-Xjvm-default=enable"],
+    kotlincflags: ["-Xjvm-default=all"],
 
     dxflags: ["--multi-dex"],
     optimize: {
