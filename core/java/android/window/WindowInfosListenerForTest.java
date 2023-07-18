@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.InputConfig;
@@ -78,14 +79,21 @@ public class WindowInfosListenerForTest {
          */
         public final boolean isVisible;
 
+        /**
+         * Return the transform to get the bounds from display space into window space.
+         */
+        @NonNull
+        public final Matrix transform;
+
         WindowInfo(@NonNull IBinder windowToken, @NonNull String name, int displayId,
-                @NonNull Rect bounds, int inputConfig) {
+                @NonNull Rect bounds, int inputConfig, @NonNull Matrix transform) {
             this.windowToken = windowToken;
             this.name = name;
             this.displayId = displayId;
             this.bounds = bounds;
             this.isTrustedOverlay = (inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
             this.isVisible = (inputConfig & InputConfig.NOT_VISIBLE) == 0;
+            this.transform = transform;
         }
 
         @Override
@@ -94,7 +102,8 @@ public class WindowInfosListenerForTest {
                     + ", frame=" + bounds
                     + ", isVisible=" + isVisible
                     + ", isTrustedOverlay=" + isTrustedOverlay
-                    + ", token=" + windowToken;
+                    + ", token=" + windowToken
+                    + ", transform=" + transform;
         }
     }
 
@@ -155,7 +164,7 @@ public class WindowInfosListenerForTest {
             var bounds = new Rect(handle.frameLeft, handle.frameTop, handle.frameRight,
                     handle.frameBottom);
             windowInfos.add(new WindowInfo(handle.getWindowToken(), handle.name, handle.displayId,
-                    bounds, handle.inputConfig));
+                    bounds, handle.inputConfig, handle.transform));
         }
         return windowInfos;
     }
