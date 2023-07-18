@@ -88,7 +88,7 @@ constructor(
     private val chipbarAnimator: ChipbarAnimator,
     private val falsingManager: FalsingManager,
     private val falsingCollector: FalsingCollector,
-    private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler?,
+    private val swipeChipbarAwayGestureHandler: SwipeChipbarAwayGestureHandler,
     private val viewUtil: ViewUtil,
     private val vibratorHelper: VibratorHelper,
     wakeLockBuilder: WakeLock.Builder,
@@ -289,10 +289,6 @@ constructor(
     }
 
     private fun updateGestureListening() {
-        if (swipeChipbarAwayGestureHandler == null) {
-            return
-        }
-
         val currentDisplayInfo = getCurrentDisplayInfo()
         if (currentDisplayInfo != null && currentDisplayInfo.info.allowSwipeToDismiss) {
             swipeChipbarAwayGestureHandler.setViewFetcher { currentDisplayInfo.view }
