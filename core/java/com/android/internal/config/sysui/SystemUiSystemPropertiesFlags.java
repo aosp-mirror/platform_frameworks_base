@@ -81,6 +81,11 @@ public class SystemUiSystemPropertiesFlags {
         public static final Flag PROPAGATE_CHANNEL_UPDATES_TO_CONVERSATIONS = releasedFlag(
                 "persist.sysui.notification.propagate_channel_updates_to_conversations");
 
+        // TODO: b/291907312 - remove feature flags
+        /** Gating the NMS->NotificationAttentionHelper buzzBeepBlink refactor */
+        public static final Flag ENABLE_ATTENTION_HELPER_REFACTOR = devFlag(
+                "persist.debug.sysui.notification.enable_attention_helper_refactor");
+
         /** b/301242692: Visit extra URIs used in notifications to prevent security issues. */
         public static final Flag VISIT_RISKY_URIS = devFlag(
                 "persist.sysui.notification.visit_risky_uris");
