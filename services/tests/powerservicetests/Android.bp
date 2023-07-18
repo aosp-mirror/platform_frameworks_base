@@ -23,6 +23,10 @@ android_test {
         "android.test.mock",
     ],
 
+    defaults: [
+        "modules-utils-testable-device-config-defaults",
+    ],
+
     platform_apis: true,
     test_suites: [
         "device-tests",

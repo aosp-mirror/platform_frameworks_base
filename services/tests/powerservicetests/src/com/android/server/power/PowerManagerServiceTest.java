@@ -60,6 +60,8 @@ import android.content.IntentFilter;
 import android.content.PermissionChecker;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceStateManager;
+import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
@@ -160,6 +162,7 @@ public class PowerManagerServiceTest {
     @Mock private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
     @Mock private PowerManagerService.PermissionCheckerWrapper mPermissionCheckerWrapperMock;
     @Mock private PowerManagerService.PowerPropertiesWrapper mPowerPropertiesWrapper;
+    @Mock private DeviceStateManager mDeviceStateManagerMock;
 
     @Rule public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
@@ -2708,6 +2711,50 @@ public class PowerManagerServiceTest {
         mService.getBinderServiceInstance().userActivity(Display.DEFAULT_DISPLAY, eventTime,
                 USER_ACTIVITY_EVENT_BUTTON, /* flags= */ 0);
         verify(mNotifierMock, never()).onUserActivity(anyInt(),  anyInt(), anyInt());
+    }
+
+    @Test
+    public void testUserActivityOnDeviceStateChange() {
+        when(mContextSpy.getSystemService(DeviceStateManager.class))
+                .thenReturn(mDeviceStateManagerMock);
+
+        createService();
+        mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+
+        final DisplayInfo info = new DisplayInfo();
+        info.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY)).thenReturn(info);
+
+        final ArgumentCaptor<DeviceStateCallback> deviceStateCallbackCaptor =
+                ArgumentCaptor.forClass(DeviceStateCallback.class);
+        verify(mDeviceStateManagerMock).registerCallback(any(),
+                deviceStateCallbackCaptor.capture());
+
+        // Advance the time 10001 and verify that the device thinks it has been idle
+        // for just less than that.
+        mService.onUserActivity();
+        advanceTime(10001);
+        assertThat(mService.wasDeviceIdleForInternal(10000)).isTrue();
+
+        // Send a display state change event and advance the clock 10.
+        final DeviceStateCallback deviceStateCallback = deviceStateCallbackCaptor.getValue();
+        deviceStateCallback.onStateChanged(1);
+        final long timeToAdvance = 10;
+        advanceTime(timeToAdvance);
+
+        // Ensure that the device has been idle for only 10 (doesn't include the idle time
+        // before the display state event).
+        assertThat(mService.wasDeviceIdleForInternal(timeToAdvance - 1)).isTrue();
+        assertThat(mService.wasDeviceIdleForInternal(timeToAdvance)).isFalse();
+
+        // Send the same state and ensure that does not trigger an update.
+        deviceStateCallback.onStateChanged(1);
+        advanceTime(timeToAdvance);
+        final long newTime = timeToAdvance * 2;
+
+        assertThat(mService.wasDeviceIdleForInternal(newTime - 1)).isTrue();
+        assertThat(mService.wasDeviceIdleForInternal(newTime)).isFalse();
     }
 
 }
