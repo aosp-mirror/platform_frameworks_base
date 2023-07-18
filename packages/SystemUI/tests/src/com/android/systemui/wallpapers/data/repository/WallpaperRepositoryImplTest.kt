@@ -65,6 +65,171 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun wallpaperInfo_nullInfo() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wallpaperInfo)
+
+            whenever(wallpaperManager.getWallpaperInfoForUser(any())).thenReturn(null)
+
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_WALLPAPER_CHANGED),
+            )
+
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun wallpaperInfo_hasInfoFromManager() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wallpaperInfo)
+
+            whenever(wallpaperManager.getWallpaperInfoForUser(any())).thenReturn(UNSUPPORTED_WP)
+
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_WALLPAPER_CHANGED),
+            )
+
+            assertThat(latest).isEqualTo(UNSUPPORTED_WP)
+        }
+
+    @Test
+    fun wallpaperInfo_initialValueIsFetched() =
+        testScope.runTest {
+            whenever(wallpaperManager.getWallpaperInfoForUser(USER_WITH_SUPPORTED_WP.id))
+                .thenReturn(SUPPORTED_WP)
+            userRepository.setUserInfos(listOf(USER_WITH_SUPPORTED_WP))
+            userRepository.setSelectedUserInfo(USER_WITH_SUPPORTED_WP)
+
+            // WHEN the repo initially starts up (underTest is lazy), then it fetches the current
+            // value for the wallpaper
+            assertThat(underTest.wallpaperInfo.value).isEqualTo(SUPPORTED_WP)
+        }
+
+    @Test
+    fun wallpaperInfo_updatesOnUserChanged() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wallpaperInfo)
+
+            val user3 = UserInfo(/* id= */ 3, /* name= */ "user3", /* flags= */ 0)
+            val user3Wp = mock<WallpaperInfo>()
+            whenever(wallpaperManager.getWallpaperInfoForUser(user3.id)).thenReturn(user3Wp)
+
+            val user4 = UserInfo(/* id= */ 4, /* name= */ "user4", /* flags= */ 0)
+            val user4Wp = mock<WallpaperInfo>()
+            whenever(wallpaperManager.getWallpaperInfoForUser(user4.id)).thenReturn(user4Wp)
+
+            userRepository.setUserInfos(listOf(user3, user4))
+
+            // WHEN user3 is selected
+            userRepository.setSelectedUserInfo(user3)
+
+            // THEN user3's wallpaper is used
+            assertThat(latest).isEqualTo(user3Wp)
+
+            // WHEN the user is switched to user4
+            userRepository.setSelectedUserInfo(user4)
+
+            // THEN user4's wallpaper is used
+            assertThat(latest).isEqualTo(user4Wp)
+        }
+
+    @Test
+    fun wallpaperInfo_doesNotUpdateOnUserChanging() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wallpaperInfo)
+
+            val user3 = UserInfo(/* id= */ 3, /* name= */ "user3", /* flags= */ 0)
+            val user3Wp = mock<WallpaperInfo>()
+            whenever(wallpaperManager.getWallpaperInfoForUser(user3.id)).thenReturn(user3Wp)
+
+            val user4 = UserInfo(/* id= */ 4, /* name= */ "user4", /* flags= */ 0)
+            val user4Wp = mock<WallpaperInfo>()
+            whenever(wallpaperManager.getWallpaperInfoForUser(user4.id)).thenReturn(user4Wp)
+
+            userRepository.setUserInfos(listOf(user3, user4))
+
+            // WHEN user3 is selected
+            userRepository.setSelectedUserInfo(user3)
+
+            // THEN user3's wallpaper is used
+            assertThat(latest).isEqualTo(user3Wp)
+
+            // WHEN the user has started switching to user4 but hasn't finished yet
+            userRepository.selectedUser.value =
+                SelectedUserModel(user4, SelectionStatus.SELECTION_IN_PROGRESS)
+
+            // THEN the wallpaper still matches user3
+            assertThat(latest).isEqualTo(user3Wp)
+        }
+
+    @Test
+    fun wallpaperInfo_updatesOnIntent() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wallpaperInfo)
+
+            val wp1 = mock<WallpaperInfo>()
+            whenever(wallpaperManager.getWallpaperInfoForUser(any())).thenReturn(wp1)
+
+            assertThat(latest).isEqualTo(wp1)
+
+            // WHEN the info is new and a broadcast is sent
+            val wp2 = mock<WallpaperInfo>()
+            whenever(wallpaperManager.getWallpaperInfoForUser(any())).thenReturn(wp2)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_WALLPAPER_CHANGED),
+            )
+
+            // THEN the flow updates
+            assertThat(latest).isEqualTo(wp2)
+        }
+
+    @Test
+    fun wallpaperInfo_wallpaperNotSupported_alwaysNull() =
+        testScope.runTest {
+            whenever(wallpaperManager.isWallpaperSupported).thenReturn(false)
+
+            val latest by collectLastValue(underTest.wallpaperInfo)
+            assertThat(latest).isNull()
+
+            // Even WHEN there *is* current wallpaper
+            val wp1 = mock<WallpaperInfo>()
+            whenever(wallpaperManager.getWallpaperInfoForUser(any())).thenReturn(wp1)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_WALLPAPER_CHANGED),
+            )
+
+            // THEN the value is still null because wallpaper isn't supported
+            assertThat(latest).isNull()
+        }
+
+    @Test
+    fun wallpaperInfo_deviceDoesNotSupportAmbientWallpaper_alwaysFalse() =
+        testScope.runTest {
+            context.orCreateTestableResources.addOverride(
+                com.android.internal.R.bool.config_dozeSupportsAodWallpaper,
+                false
+            )
+
+            val latest by collectLastValue(underTest.wallpaperInfo)
+            assertThat(latest).isNull()
+
+            // Even WHEN there *is* current wallpaper
+            val wp1 = mock<WallpaperInfo>()
+            whenever(wallpaperManager.getWallpaperInfoForUser(any())).thenReturn(wp1)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_WALLPAPER_CHANGED),
+            )
+
+            // THEN the value is still null because wallpaper isn't supported
+            assertThat(latest).isNull()
+        }
+
+    @Test
     fun wallpaperSupportsAmbientMode_nullInfo_false() =
         testScope.runTest {
             val latest by collectLastValue(underTest.wallpaperSupportsAmbientMode)
@@ -190,14 +355,12 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.wallpaperSupportsAmbientMode)
 
-            val info: WallpaperInfo = mock()
-            whenever(info.supportsAmbientMode()).thenReturn(false)
-            whenever(wallpaperManager.getWallpaperInfoForUser(any())).thenReturn(info)
+            whenever(wallpaperManager.getWallpaperInfoForUser(any())).thenReturn(UNSUPPORTED_WP)
 
             assertThat(latest).isFalse()
 
             // WHEN the info now supports ambient mode and a broadcast is sent
-            whenever(info.supportsAmbientMode()).thenReturn(true)
+            whenever(wallpaperManager.getWallpaperInfoForUser(any())).thenReturn(SUPPORTED_WP)
             fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
                 context,
                 Intent(Intent.ACTION_WALLPAPER_CHANGED),

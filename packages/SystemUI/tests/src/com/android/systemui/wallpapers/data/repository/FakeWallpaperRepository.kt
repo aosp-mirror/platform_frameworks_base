@@ -16,9 +16,11 @@
 
 package com.android.systemui.wallpapers.data.repository
 
+import android.app.WallpaperInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Fake implementation of the wallpaper repository. */
 class FakeWallpaperRepository : WallpaperRepository {
+    override val wallpaperInfo = MutableStateFlow<WallpaperInfo?>(null)
     override val wallpaperSupportsAmbientMode = MutableStateFlow(false)
 }
