@@ -16244,7 +16244,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             NP = in.readInt();
-            if (NP > 1000) {
+            if (NP > 10000) {
                 throw new ParcelFormatException("File corrupt: too many processes " + NP);
             }
             for (int ip = 0; ip < NP; ip++) {
