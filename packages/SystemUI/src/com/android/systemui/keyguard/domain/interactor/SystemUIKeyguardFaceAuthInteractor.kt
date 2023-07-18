@@ -30,8 +30,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
-import com.android.systemui.keyguard.shared.model.AuthenticationStatus
-import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.util.kotlin.pairwise
@@ -165,10 +165,10 @@ constructor(
         repository.cancel()
     }
 
-    private val _authenticationStatusOverride = MutableStateFlow<AuthenticationStatus?>(null)
+    private val faceAuthenticationStatusOverride = MutableStateFlow<FaceAuthenticationStatus?>(null)
     /** Provide the status of face authentication */
     override val authenticationStatus =
-        merge(_authenticationStatusOverride.filterNotNull(), repository.authenticationStatus)
+        merge(faceAuthenticationStatusOverride.filterNotNull(), repository.authenticationStatus)
 
     /** Provide the status of face detection */
     override val detectionStatus = repository.detectionStatus
@@ -176,13 +176,13 @@ constructor(
     private fun runFaceAuth(uiEvent: FaceAuthUiEvent, fallbackToDetect: Boolean) {
         if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
             if (repository.isLockedOut.value) {
-                _authenticationStatusOverride.value =
-                    ErrorAuthenticationStatus(
+                faceAuthenticationStatusOverride.value =
+                    ErrorFaceAuthenticationStatus(
                         BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT,
                         context.resources.getString(R.string.keyguard_face_unlock_unavailable)
                     )
             } else {
-                _authenticationStatusOverride.value = null
+                faceAuthenticationStatusOverride.value = null
                 applicationScope.launch {
                     faceAuthenticationLogger.authRequested(uiEvent)
                     repository.authenticate(uiEvent, fallbackToDetection = fallbackToDetect)
