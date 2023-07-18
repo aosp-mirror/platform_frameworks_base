@@ -254,7 +254,7 @@ object Flags {
     /** Migrate the indication area to the new keyguard root view. */
     // TODO(b/280067944): Tracking bug.
     @JvmField
-    val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area", teamfood = true)
+    val MIGRATE_INDICATION_AREA = releasedFlag(236, "migrate_indication_area")
 
     /**
      * Migrate the bottom area to the new keyguard root view.
