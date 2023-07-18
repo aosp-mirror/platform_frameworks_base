@@ -411,9 +411,6 @@ object Flags {
     // TODO(b/254512502): Tracking Bug
     val MEDIA_SESSION_ACTIONS = unreleasedFlag(901, "media_session_actions")
 
-    // TODO(b/254512695): Tracking Bug
-    val MEDIA_MUTE_AWAIT = releasedFlag(904, "media_mute_await")
-
     // TODO(b/254512654): Tracking Bug
     @JvmField val DREAM_MEDIA_COMPLICATION = unreleasedFlag(905, "dream_media_complication")
 

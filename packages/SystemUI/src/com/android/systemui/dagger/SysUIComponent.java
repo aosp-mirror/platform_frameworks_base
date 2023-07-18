@@ -223,7 +223,7 @@ public interface SysUIComponent {
     Optional<NaturalRotationUnfoldProgressProvider> getNaturalRotationUnfoldProgressProvider();
 
     /** */
-    Optional<MediaMuteAwaitConnectionCli> getMediaMuteAwaitConnectionCli();
+    MediaMuteAwaitConnectionCli getMediaMuteAwaitConnectionCli();
 
     /** */
     NearbyMediaDevicesManager getNearbyMediaDevicesManager();
