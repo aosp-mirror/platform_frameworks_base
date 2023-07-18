@@ -29,7 +29,6 @@ import android.os.SystemVibrator;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorInfo;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -37,7 +36,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-@Presubmit
 @RunWith(MockitoJUnitRunner.class)
 public class PrimitiveSegmentTest {
     private static final float TOLERANCE = 1e-2f;

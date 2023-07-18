@@ -1,6 +1,19 @@
 {
   "presubmit": [
     {
+      "file_patterns": [
+        "[^/]*(Vibrator|Vibration)[^/]*\\.java",
+        "vibrator/.*"
+      ],
+      "name": "FrameworksVibratorCoreTests",
+      "options": [
+        {"exclude-annotation": "android.platform.test.annotations.LargeTest"},
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    },
+    {
       "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "BugreportManagerTestCases",
       "options": [

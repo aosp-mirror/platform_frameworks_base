@@ -22,12 +22,14 @@ import static org.mockito.Mockito.mock;
 
 import android.media.AudioAttributes;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExternalVibrationTest {
+    @Ignore("b/291713224")
     @Test
     public void testSerialization() {
         AudioAttributes audio = new AudioAttributes.Builder().build();

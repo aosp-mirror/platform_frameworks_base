@@ -40,7 +40,6 @@ import android.content.ContextWrapper;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.os.test.TestLooper;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -55,13 +54,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.junit.MockitoJUnitRunner;
 
-/**
- * Tests for {@link Vibrator}.
- *
- * Build/Install/Run:
- * atest FrameworksCoreTests:VibratorTest
- */
-@Presubmit
 @RunWith(MockitoJUnitRunner.class)
 public class VibratorTest {
 

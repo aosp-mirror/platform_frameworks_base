@@ -22,8 +22,6 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.testng.Assert.assertThrows;
 
-import android.platform.test.annotations.Presubmit;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -31,7 +29,6 @@ import org.junit.runners.JUnit4;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-@Presubmit
 @RunWith(JUnit4.class)
 public class CombinedVibrationTest {
     private static final VibrationEffect VALID_EFFECT = VibrationEffect.createOneShot(10, 255);
