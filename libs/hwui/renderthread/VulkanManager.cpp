@@ -41,7 +41,7 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-static std::array<std::string_view, 19> sEnableExtensions{
+static std::array<std::string_view, 20> sEnableExtensions{
         VK_KHR_BIND_MEMORY_2_EXTENSION_NAME,
         VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME,
         VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
@@ -61,6 +61,7 @@ static std::array<std::string_view, 19> sEnableExtensions{
         VK_EXT_QUEUE_FAMILY_FOREIGN_EXTENSION_NAME,
         VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME,
         VK_KHR_ANDROID_SURFACE_EXTENSION_NAME,
+        VK_EXT_GLOBAL_PRIORITY_EXTENSION_NAME,
 };
 
 static bool shouldEnableExtension(const std::string_view& extension) {
