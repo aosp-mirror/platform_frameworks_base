@@ -113,6 +113,7 @@ public class KeyguardStatusView extends GridLayout {
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusView:");
         pw.println("  mDarkAmount: " + mDarkAmount);
+        pw.println("  visibility: " + getVisibility());
         if (mClockView != null) {
             mClockView.dump(pw, args);
         }
