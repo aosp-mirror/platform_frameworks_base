@@ -294,6 +294,11 @@ object Flags {
     @JvmField
     val MIGRATE_NSSL = unreleasedFlag(242, "migrate_nssl")
 
+    /** Migrate the status view from the notification panel to keyguard root view. */
+    // TODO(b/291767565): Tracking bug.
+    @JvmField
+    val MIGRATE_KEYGUARD_STATUS_VIEW = unreleasedFlag(243, "migrate_keyguard_status_view")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
