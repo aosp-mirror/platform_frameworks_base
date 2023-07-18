@@ -28,7 +28,6 @@ import com.android.internal.vibrator.persistence.VibrationEffectXmlParser;
 import com.android.internal.vibrator.persistence.XmlConstants;
 import com.android.internal.vibrator.persistence.XmlParserException;
 import com.android.internal.vibrator.persistence.XmlReader;
-import com.android.internal.vibrator.persistence.XmlSerializedVibration;
 import com.android.modules.utils.TypedXmlPullParser;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -178,22 +177,59 @@ public final class VibrationXmlParser {
             // Ensure XML starts with expected root tag.
             XmlReader.readDocumentStartTag(parser, XmlConstants.TAG_VIBRATION);
 
-            int parserFlags = 0;
-            if ((flags & FLAG_ALLOW_HIDDEN_APIS) != 0) {
-                parserFlags |= XmlConstants.FLAG_ALLOW_HIDDEN_APIS;
-            }
-
             // Parse root tag as a vibration effect.
-            XmlSerializedVibration<VibrationEffect> serializedVibration =
-                    VibrationEffectXmlParser.parseTag(parser, parserFlags);
+            VibrationEffect effect = parseTag(parser, flags);
 
             // Ensure XML ends after root tag is consumed.
             XmlReader.readDocumentEndTag(parser);
 
-            return serializedVibration.deserialize();
-        } catch (XmlParserException e) {
+            return effect;
+        } catch (XmlParserException | VibrationXmlParserException e) {
             Slog.w(TAG, "Error parsing vibration XML", e);
             return null;
+        }
+    }
+
+    /**
+     * Parses XML content from given open {@link TypedXmlPullParser} into a {@link VibrationEffect}.
+     *
+     * <p>The provided parser should be pointing to a start of a valid vibration XML (i.e. to a
+     * start <vibration> tag). No other parser position, including start of document, is considered
+     * valid.
+     *
+     * <p>This method parses as long as it reads a valid vibration XML, and until an end vibration
+     * tag. After a successful parsing, the parser will point to the end vibration tag (i.e. to a
+     * </vibration> tag).
+     *
+     * @throws IOException error parsing from given {@link TypedXmlPullParser}.
+     * @throws VibrationXmlParserException if the XML tag cannot be parsed into a
+     *      {@link VibrationEffect}. The given {@code parser} might be pointing to a child XML tag
+     *      that caused the parser failure.
+     *
+     * @hide
+     */
+    @NonNull
+    public static VibrationEffect parseTag(@NonNull TypedXmlPullParser parser, @Flags int flags)
+            throws IOException, VibrationXmlParserException {
+        int parserFlags = 0;
+        if ((flags & VibrationXmlParser.FLAG_ALLOW_HIDDEN_APIS) != 0) {
+            parserFlags |= XmlConstants.FLAG_ALLOW_HIDDEN_APIS;
+        }
+        try {
+            return VibrationEffectXmlParser.parseTag(parser, parserFlags).deserialize();
+        } catch (XmlParserException e) {
+            throw new VibrationXmlParserException("Error parsing vibration effect.", e);
+        }
+    }
+
+    /**
+     * Represents an error while parsing a vibration XML input.
+     *
+     * @hide
+     */
+    public static final class VibrationXmlParserException extends Exception {
+        private VibrationXmlParserException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 
