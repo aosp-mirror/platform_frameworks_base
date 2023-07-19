@@ -113,6 +113,21 @@ constructor(
             .waitForAndVerify()
     }
 
+    fun secondaryActivityEnterPip(wmHelper: WindowManagerStateHelper) {
+        val pipButton =
+                uiDevice.wait(
+                        Until.findObject(By.res(getPackage(), "secondary_enter_pip_button")),
+                        FIND_TIMEOUT
+                )
+        require(pipButton != null) { "Can't find enter pip button on screen." }
+        pipButton.click()
+        wmHelper
+                .StateSyncBuilder()
+                .withAppTransitionIdle()
+                .withPipShown()
+                .waitForAndVerify()
+    }
+
     /**
      * Clicks the button to launch a secondary activity with alwaysExpand enabled, which will launch
      * a fullscreen window on top of the visible region.
