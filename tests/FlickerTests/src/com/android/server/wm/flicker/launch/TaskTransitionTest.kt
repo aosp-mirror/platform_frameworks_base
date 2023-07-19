@@ -21,6 +21,7 @@ import android.app.WallpaperManager
 import android.content.res.Resources
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
+import android.tools.common.flicker.subject.layers.LayersTraceSubject.Companion.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.common.traces.component.ComponentNameMatcher.Companion.SPLASH_SCREEN
 import android.tools.common.traces.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
@@ -187,6 +188,16 @@ class TaskTransitionTest(flicker: LegacyFlickerTest) : BaseTest(flicker) {
                 .isAppWindowOnTop(SPLASH_SCREEN, isOptional = true)
                 .then()
                 .isAppWindowOnTop(launchNewTaskApp.componentMatcher)
+        }
+    }
+
+    @Presubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        flicker.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS + listOf(launchNewTaskApp)
+            )
         }
     }
 
