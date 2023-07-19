@@ -2982,6 +2982,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     private void onKeyguardExitFinished() {
+        if (DEBUG) Log.d(TAG, "onKeyguardExitFinished()");
         // only play "unlock" noises if not on a call (since the incall UI
         // disables the keyguard)
         if (TelephonyManager.EXTRA_STATE_IDLE.equals(mPhoneState)) {
@@ -3203,13 +3204,14 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 flags |= StatusBarManager.DISABLE_RECENT;
             }
 
-            if (mPowerGestureIntercepted) {
+            if (mPowerGestureIntercepted && mOccluded && isSecure()) {
                 flags |= StatusBarManager.DISABLE_RECENT;
             }
 
             if (DEBUG) {
                 Log.d(TAG, "adjustStatusBarLocked: mShowing=" + mShowing + " mOccluded=" + mOccluded
                         + " isSecure=" + isSecure() + " force=" + forceHideHomeRecentsButtons
+                        + " mPowerGestureIntercepted=" + mPowerGestureIntercepted
                         +  " --> flags=0x" + Integer.toHexString(flags));
             }
 
@@ -3437,6 +3439,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         pw.print("  mPendingLock: "); pw.println(mPendingLock);
         pw.print("  wakeAndUnlocking: "); pw.println(mWakeAndUnlocking);
         pw.print("  mPendingPinLock: "); pw.println(mPendingPinLock);
+        pw.print("  mPowerGestureIntercepted: "); pw.println(mPowerGestureIntercepted);
     }
 
     /**
