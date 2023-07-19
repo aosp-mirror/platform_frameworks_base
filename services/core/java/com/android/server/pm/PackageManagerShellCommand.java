@@ -3308,6 +3308,13 @@ class PackageManagerShellCommand extends ShellCommand {
         // Set package source to other by default
         sessionParams.setPackageSource(PackageInstaller.PACKAGE_SOURCE_OTHER);
 
+        // Encodes one of the states:
+        //  1. Install request explicitly specified --staged, then value will be true.
+        //  2. Install request explicitly specified --non-staged, then value will be false.
+        //  3. Install request did not specify either --staged or --non-staged, then for APEX
+        //      installs the value will be true, and for apk installs it will be false.
+        Boolean staged = null;
+
         String opt;
         boolean replaceExisting = true;
         boolean forceNonStaged = false;
@@ -3416,7 +3423,6 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--apex":
                     sessionParams.setInstallAsApex();
-                    sessionParams.setStaged();
                     break;
                 case "--force-non-staged":
                     forceNonStaged = true;
@@ -3425,7 +3431,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.setMultiPackage();
                     break;
                 case "--staged":
-                    sessionParams.setStaged();
+                    staged = true;
+                    break;
+                case "--non-staged":
+                    staged = false;
                     break;
                 case "--force-queryable":
                     sessionParams.setForceQueryable();
@@ -3460,11 +3469,16 @@ class PackageManagerShellCommand extends ShellCommand {
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
         }
+        if (staged == null) {
+            staged = (sessionParams.installFlags & PackageManager.INSTALL_APEX) != 0;
+        }
         if (replaceExisting) {
             sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
         }
         if (forceNonStaged) {
             sessionParams.isStaged = false;
+        } else if (staged) {
+            sessionParams.setStaged();
         }
         return params;
     }
@@ -4346,7 +4360,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--preload] [--instant] [--full] [--dont-kill]");
         pw.println("       [--enable-rollback]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
-        pw.println("       [--apex] [--force-non-staged] [--staged-ready-timeout TIMEOUT]");
+        pw.println("       [--apex] [--non-staged] [--force-non-staged]");
+        pw.println("       [--staged-ready-timeout TIMEOUT]");
         pw.println("       [PATH [SPLIT...]|-]");
         pw.println("    Install an application.  Must provide the apk data to install, either as");
         pw.println("    file path(s) or '-' to read from stdin.  Options are:");
@@ -4375,6 +4390,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --update-ownership: request the update ownership enforcement");
         pw.println("      --force-uuid: force install on to disk volume with given UUID");
         pw.println("      --apex: install an .apex file, not an .apk");
+        pw.println("      --non-staged: explicitly set this installation to be non-staged.");
+        pw.println("          This flag is only useful for APEX installs that are implicitly");
+        pw.println("          assumed to be staged.");
         pw.println("      --force-non-staged: force the installation to run under a non-staged");
         pw.println("          session, which may complete without requiring a reboot");
         pw.println("      --staged-ready-timeout: By default, staged sessions wait "
