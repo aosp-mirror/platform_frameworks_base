@@ -5080,6 +5080,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Tell anyone interested that we are done booting!
             SystemProperties.set("sys.boot_completed", "1");
             SystemProperties.set("dev.bootcomplete", "1");
+
+            // Start PSI monitoring in LMKD if it was skipped earlier.
+            ProcessList.startPsiMonitoringAfterBoot();
+
             mUserController.onBootComplete(
                     new IIntentReceiver.Stub() {
                         @Override
