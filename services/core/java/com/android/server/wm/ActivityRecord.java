@@ -9413,6 +9413,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (info.applicationInfo == null) {
             return info.getMinAspectRatio();
         }
+        if (mLetterboxUiController.shouldApplyUserMinAspectRatioOverride()) {
+            return mLetterboxUiController.getUserMinAspectRatio();
+        }
         if (!mLetterboxUiController.shouldOverrideMinAspectRatio()) {
             return info.getMinAspectRatio();
         }
