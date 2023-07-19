@@ -284,10 +284,10 @@ public abstract class Tile implements Parcelable {
      * Optional key to use for this tile.
      */
     public String getKey(Context context) {
+        ensureMetadataNotStale(context);
         if (!hasKey()) {
             return null;
         }
-        ensureMetadataNotStale(context);
         if (mMetaData.get(META_DATA_PREFERENCE_KEYHINT) instanceof Integer) {
             return context.getResources().getString(mMetaData.getInt(META_DATA_PREFERENCE_KEYHINT));
         } else {
