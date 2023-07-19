@@ -7994,6 +7994,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mLastReportedConfiguration.getMergedConfiguration())) {
             ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */,
                     false /* ignoreVisibility */, true /* isRequestedOrientationChanged */);
+            if (mTransitionController.inPlayingTransition(this)) {
+                mTransitionController.mValidateActivityCompat.add(this);
+            }
         }
 
         mAtmService.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
