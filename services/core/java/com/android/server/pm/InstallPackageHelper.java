@@ -4311,7 +4311,8 @@ final class InstallPackageHelper {
         //   - It's an APEX or overlay package since stopped state does not affect them.
         //   - It is enumerated with a <initial-package-state> tag having the stopped attribute
         //     set to false
-        //   - It doesn't have a launcher entry which means the user doesn't have a way to unstop it
+        //   - It doesn't have an enabled and exported launcher activity, which means the user
+        //     wouldn't have a way to un-stop it
         final boolean isApexPkg = (scanFlags & SCAN_AS_APEX) != 0;
         if (mPm.mShouldStopSystemPackagesByDefault
                 && scanSystemPartition
@@ -4337,7 +4338,11 @@ final class InstallPackageHelper {
         categories.add(Intent.CATEGORY_LAUNCHER);
         final List<ParsedActivity> activities = parsedPackage.getActivities();
         for (int indexActivity = 0; indexActivity < activities.size(); indexActivity++) {
-            final List<ParsedIntentInfo> intents = activities.get(indexActivity).getIntents();
+            final ParsedActivity activity = activities.get(indexActivity);
+            if (!activity.isEnabled() || !activity.isExported()) {
+                continue;
+            }
+            final List<ParsedIntentInfo> intents = activity.getIntents();
             for (int indexIntent = 0; indexIntent < intents.size(); indexIntent++) {
                 final IntentFilter intentFilter = intents.get(indexIntent).getIntentFilter();
                 if (intentFilter != null && intentFilter.matchCategories(categories) == null) {
