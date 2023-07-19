@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -106,5 +107,11 @@ open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) :
         // in gestural nav the focus goes to different activity on swipe up
         Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
         super.focusChanges()
+    }
+
+    @FlakyTest(bugId = 289943985)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 }
