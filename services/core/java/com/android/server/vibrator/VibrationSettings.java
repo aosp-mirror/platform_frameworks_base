@@ -698,7 +698,23 @@ final class VibrationSettings {
 
     @Nullable
     private VibrationEffect createEffectFromResource(int resId) {
-        long[] timings = getLongIntArray(mContext.getResources(), resId);
+        return createEffectFromResource(mContext.getResources(), resId);
+    }
+
+    /**
+     * Provides a {@link VibrationEffect} from a timings-array provided as an int-array resource..
+     *
+     * <p>If the timings array is {@code null} or empty, it returns {@code null}.
+     *
+     * <p>If the timings array has a size of one, it returns a one-shot vibration with duration that
+     * is equal to the single value in the array.
+     *
+     * <p>If the timings array has more than one values, it returns a non-repeating wave-form
+     * vibration with off-on timings as per the provided timings array.
+     */
+    @Nullable
+    static VibrationEffect createEffectFromResource(Resources res, int resId) {
+        long[] timings = getLongIntArray(res, resId);
         return createEffectFromTimings(timings);
     }
 
