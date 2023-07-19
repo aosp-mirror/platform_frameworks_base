@@ -171,7 +171,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
          * for the canned animation (if applicable) so interested parties can sync with it. If no
          * canned animation is playing, these are both 0.
          */
-        @JvmDefault
         fun onUnlockAnimationStarted(
             playingCannedAnimation: Boolean,
             isWakeAndUnlockNotFromDream: Boolean,
@@ -184,7 +183,6 @@ class KeyguardUnlockAnimationController @Inject constructor(
          * The keyguard is no longer visible in this state and the app/launcher behind the keyguard
          * is now completely visible.
          */
-        @JvmDefault
         fun onUnlockAnimationFinished() {}
     }
 
