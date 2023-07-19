@@ -102,6 +102,8 @@ public class RemoteInputViewTest extends SysuiTestCase {
             "com.android.sysuitest.dummynotificationsender";
     private static final int DUMMY_MESSAGE_APP_ID = Process.LAST_APPLICATION_UID - 1;
 
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
+
     @Mock private RemoteInputController mController;
     @Mock private ShortcutManager mShortcutManager;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
@@ -453,8 +455,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
     private RemoteInputViewController bindController(
             RemoteInputView view,
             NotificationEntry entry) {
-        FakeFeatureFlags fakeFeatureFlags = new FakeFeatureFlags();
-        fakeFeatureFlags.set(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION, true);
+        mFeatureFlags.set(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION, true);
         RemoteInputViewControllerImpl viewController = new RemoteInputViewControllerImpl(
                 view,
                 entry,
@@ -462,7 +463,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 mController,
                 mShortcutManager,
                 mUiEventLoggerFake,
-                fakeFeatureFlags
+                mFeatureFlags
                 );
         viewController.bind();
         return viewController;
