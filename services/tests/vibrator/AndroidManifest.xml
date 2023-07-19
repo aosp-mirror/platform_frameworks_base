@@ -31,8 +31,7 @@
     <!-- Required to set always-on vibrations -->
     <uses-permission android:name="android.permission.VIBRATE_ALWAYS_ON" />
 
-    <application android:debuggable="true"
-        android:testOnly="true">
+    <application android:debuggable="true">
         <uses-library android:name="android.test.mock" android:required="true" />
         <uses-library android:name="android.test.runner" />
     </application>
