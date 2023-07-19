@@ -16,19 +16,25 @@
 
 package com.android.systemui.scene.ui.view
 
+import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.R
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import java.time.Instant
 import kotlinx.coroutines.launch
 
 object SceneWindowRootViewBinder {
@@ -77,6 +83,9 @@ object SceneWindowRootViewBinder {
                         )
                     )
 
+                    val legacyView = view.requireViewById<View>(R.id.legacy_window_root)
+                    view.addView(createVisibilityToggleView(legacyView))
+
                     launch {
                         viewModel.isVisible.collect { isVisible ->
                             onVisibilityChangedInternal(isVisible)
@@ -88,5 +97,29 @@ object SceneWindowRootViewBinder {
                 view.removeAllViews()
             }
         }
+    }
+
+    private var clickCount = 0
+    private var lastClick = Instant.now()
+
+    /**
+     * A temporary UI to toggle on/off the visibility of the given [otherView]. It is toggled by
+     * tapping 5 times in quick succession on the device camera (top center).
+     */
+    // TODO(b/291321285): Remove this when the Flexiglass UI is mature enough to turn off legacy
+    //  SysUI altogether.
+    private fun createVisibilityToggleView(otherView: View): View {
+        val toggleView = View(otherView.context)
+        toggleView.layoutParams = FrameLayout.LayoutParams(200, 200, Gravity.CENTER_HORIZONTAL)
+        toggleView.setOnClickListener {
+            val now = Instant.now()
+            clickCount = if (now.minusSeconds(2) > lastClick) 1 else clickCount + 1
+            if (clickCount == 5) {
+                otherView.isVisible = !otherView.isVisible
+                clickCount = 0
+            }
+            lastClick = now
+        }
+        return toggleView
     }
 }

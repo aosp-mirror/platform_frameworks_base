@@ -16,6 +16,7 @@
 
 package com.android.systemui.wallpapers.data.repository
 
+import android.app.WallpaperInfo
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
@@ -36,11 +37,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 /** A repository storing information about the current wallpaper. */
 interface WallpaperRepository {
+    /** Emits the current user's current wallpaper. */
+    val wallpaperInfo: StateFlow<WallpaperInfo?>
+
     /** Emits true if the current user's current wallpaper supports ambient mode. */
     val wallpaperSupportsAmbientMode: StateFlow<Boolean>
 }
@@ -78,28 +83,35 @@ constructor(
             // Only update the wallpaper status once the user selection has finished.
             .filter { it.selectionStatus == SelectionStatus.SELECTION_COMPLETE }
 
-    override val wallpaperSupportsAmbientMode: StateFlow<Boolean> =
+    override val wallpaperInfo: StateFlow<WallpaperInfo?> =
         if (!wallpaperManager.isWallpaperSupported || !deviceSupportsAodWallpaper) {
-            MutableStateFlow(false).asStateFlow()
+            MutableStateFlow(null).asStateFlow()
         } else {
             combine(wallpaperChanged, selectedUser) { _, selectedUser ->
-                    doesWallpaperSupportAmbientMode(selectedUser)
+                    getWallpaper(selectedUser)
                 }
                 .stateIn(
                     scope,
                     // Always be listening for wallpaper changes.
                     SharingStarted.Eagerly,
-                    initialValue =
-                        doesWallpaperSupportAmbientMode(userRepository.selectedUser.value),
+                    initialValue = getWallpaper(userRepository.selectedUser.value),
                 )
         }
 
-    private fun doesWallpaperSupportAmbientMode(selectedUser: SelectedUserModel): Boolean {
-        return wallpaperManager
-            .getWallpaperInfoForUser(
-                selectedUser.userInfo.id,
+    override val wallpaperSupportsAmbientMode: StateFlow<Boolean> =
+        wallpaperInfo
+            .map {
+                // If WallpaperInfo is null, it's ImageWallpaper which never supports ambient mode.
+                it?.supportsAmbientMode() == true
+            }
+            .stateIn(
+                scope,
+                // Always be listening for wallpaper changes.
+                SharingStarted.Eagerly,
+                initialValue = wallpaperInfo.value?.supportsAmbientMode() == true,
             )
-            // If WallpaperInfo is null, it's ImageWallpaper which never supports ambient mode.
-            ?.supportsAmbientMode() == true
+
+    private fun getWallpaper(selectedUser: SelectedUserModel): WallpaperInfo? {
+        return wallpaperManager.getWallpaperInfoForUser(selectedUser.userInfo.id)
     }
 }

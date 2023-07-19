@@ -163,9 +163,11 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.settings.SystemSettings;
 import com.android.systemui.util.time.SystemClock;
+import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
 import dagger.Lazy;
@@ -290,6 +292,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     public static final String SYS_BOOT_REASON_PROP = "sys.boot.reason.last";
     public static final String REBOOT_MAINLINE_UPDATE = "reboot,mainline_update";
     private final DreamOverlayStateController mDreamOverlayStateController;
+    private final JavaAdapter mJavaAdapter;
+    private final WallpaperRepository mWallpaperRepository;
 
     /** The stream type that the lock sounds are tied to. */
     private int mUiSoundsStreamType;
@@ -1322,6 +1326,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             KeyguardTransitions keyguardTransitions,
             InteractionJankMonitor interactionJankMonitor,
             DreamOverlayStateController dreamOverlayStateController,
+            JavaAdapter javaAdapter,
+            WallpaperRepository wallpaperRepository,
             Lazy<ShadeController> shadeControllerLazy,
             Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy,
             Lazy<ActivityLaunchAnimator> activityLaunchAnimator,
@@ -1382,6 +1388,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mScreenOffAnimationController = screenOffAnimationController;
         mInteractionJankMonitor = interactionJankMonitor;
         mDreamOverlayStateController = dreamOverlayStateController;
+        mJavaAdapter = javaAdapter;
+        mWallpaperRepository = wallpaperRepository;
 
         mActivityLaunchAnimator = activityLaunchAnimator;
         mScrimControllerLazy = scrimControllerLazy;
@@ -1484,6 +1492,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 com.android.internal.R.anim.lock_screen_behind_enter);
 
         mWorkLockController = new WorkLockActivityController(mContext, mUserTracker);
+
+        mJavaAdapter.alwaysCollectFlow(
+                mWallpaperRepository.getWallpaperSupportsAmbientMode(),
+                this::setWallpaperSupportsAmbientMode);
     }
 
     // TODO(b/273443374) remove, temporary util to get a feature flag
@@ -3458,7 +3470,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      * In case it does support it, we have to fade in the incoming app, otherwise we'll reveal it
      * with the light reveal scrim.
      */
-    public void setWallpaperSupportsAmbientMode(boolean supportsAmbientMode) {
+    private void setWallpaperSupportsAmbientMode(boolean supportsAmbientMode) {
         mWallpaperSupportsAmbientMode = supportsAmbientMode;
     }
 

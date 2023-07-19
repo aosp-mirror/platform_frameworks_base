@@ -36,6 +36,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN
 import com.android.keyguard.FaceAuthUiEvent.FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
@@ -50,12 +51,12 @@ import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
-import com.android.systemui.keyguard.shared.model.AuthenticationStatus
-import com.android.systemui.keyguard.shared.model.DetectionStatus
-import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
-import com.android.systemui.keyguard.shared.model.HelpAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FaceDetectionStatus
+import com.android.systemui.keyguard.shared.model.HelpFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.SuccessAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.SuccessFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
@@ -113,6 +114,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var sessionTracker: SessionTracker
     @Mock private lateinit var uiEventLogger: UiEventLogger
     @Mock private lateinit var dumpManager: DumpManager
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     @Captor
     private lateinit var authenticationCallback: ArgumentCaptor<FaceManager.AuthenticationCallback>
@@ -131,8 +133,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
     private lateinit var testScope: TestScope
     private lateinit var fakeUserRepository: FakeUserRepository
-    private lateinit var authStatus: FlowValue<AuthenticationStatus?>
-    private lateinit var detectStatus: FlowValue<DetectionStatus?>
+    private lateinit var authStatus: FlowValue<FaceAuthenticationStatus?>
+    private lateinit var detectStatus: FlowValue<FaceDetectionStatus?>
     private lateinit var authRunning: FlowValue<Boolean?>
     private lateinit var bypassEnabled: FlowValue<Boolean?>
     private lateinit var lockedOut: FlowValue<Boolean?>
@@ -175,10 +177,10 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             AlternateBouncerInteractor(
                 bouncerRepository = bouncerRepository,
                 biometricSettingsRepository = biometricSettingsRepository,
-                deviceEntryFingerprintAuthRepository = deviceEntryFingerprintAuthRepository,
                 systemClock = mock(SystemClock::class.java),
                 keyguardStateController = FakeKeyguardStateController(),
                 statusBarStateController = mock(StatusBarStateController::class.java),
+                keyguardUpdateMonitor = keyguardUpdateMonitor,
             )
 
         bypassStateChangedListener =
@@ -262,7 +264,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             val successResult = successResult()
             authenticationCallback.value.onAuthenticationSucceeded(successResult)
 
-            assertThat(authStatus()).isEqualTo(SuccessAuthenticationStatus(successResult))
+            assertThat(authStatus()).isEqualTo(SuccessFaceAuthenticationStatus(successResult))
             assertThat(authenticated()).isTrue()
             assertThat(authRunning()).isFalse()
             assertThat(canFaceAuthRun()).isFalse()
@@ -383,7 +385,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             detectionCallback.value.onFaceDetected(1, 1, true)
 
-            assertThat(detectStatus()).isEqualTo(DetectionStatus(1, 1, true))
+            assertThat(detectStatus()).isEqualTo(FaceDetectionStatus(1, 1, true))
         }
 
     @Test
@@ -423,7 +425,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
                 FACE_ERROR_CANCELED,
                 "First auth attempt cancellation completed"
             )
-            val value = authStatus() as ErrorAuthenticationStatus
+            val value = authStatus() as ErrorFaceAuthenticationStatus
             assertThat(value.msgId).isEqualTo(FACE_ERROR_CANCELED)
             assertThat(value.msg).isEqualTo("First auth attempt cancellation completed")
 
@@ -465,7 +467,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             authenticationCallback.value.onAuthenticationHelp(10, "Ignored help msg")
             authenticationCallback.value.onAuthenticationHelp(11, "Ignored help msg")
 
-            assertThat(authStatus()).isEqualTo(HelpAuthenticationStatus(9, "help msg"))
+            assertThat(authStatus()).isEqualTo(HelpFaceAuthenticationStatus(9, "help msg"))
         }
 
     @Test

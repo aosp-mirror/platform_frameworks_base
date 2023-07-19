@@ -76,7 +76,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
   private lateinit var mKeyguardMessageAreaController:
       KeyguardMessageAreaController<BouncerKeyguardMessageArea>
 
-    @Mock private lateinit var mPostureController: DevicePostureController
+  @Mock private lateinit var mPostureController: DevicePostureController
 
   private lateinit var mKeyguardPatternViewController: KeyguardPatternViewController
   private lateinit var fakeFeatureFlags: FakeFeatureFlags
@@ -119,7 +119,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
 
         mKeyguardPatternViewController.onViewAttached()
 
-        assertThat(getPatternTopGuideline()).isEqualTo(getExpectedTopGuideline())
+        assertThat(getPatternTopGuideline()).isEqualTo(getHalfOpenedBouncerHeightRatio())
     }
 
     @Test
@@ -131,15 +131,20 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
         mKeyguardPatternViewController.onViewAttached()
 
         // Verify view begins in posture state DEVICE_POSTURE_HALF_OPENED
-        assertThat(getPatternTopGuideline()).isEqualTo(getExpectedTopGuideline())
+        assertThat(getPatternTopGuideline()).isEqualTo(getHalfOpenedBouncerHeightRatio())
 
         // Simulate posture change to state DEVICE_POSTURE_OPENED with callback
         verify(mPostureController).addCallback(postureCallbackCaptor.capture())
         val postureCallback: DevicePostureController.Callback = postureCallbackCaptor.value
         postureCallback.onPostureChanged(DEVICE_POSTURE_OPENED)
 
-        // Verify view is now in posture state DEVICE_POSTURE_OPENED
-        assertThat(getPatternTopGuideline()).isNotEqualTo(getExpectedTopGuideline())
+        // Simulate posture change to same state with callback
+        assertThat(getPatternTopGuideline()).isNotEqualTo(getHalfOpenedBouncerHeightRatio())
+
+        postureCallback.onPostureChanged(DEVICE_POSTURE_OPENED)
+
+        // Verify view is still in posture state DEVICE_POSTURE_OPENED
+        assertThat(getPatternTopGuideline()).isNotEqualTo(getHalfOpenedBouncerHeightRatio())
     }
 
     private fun getPatternTopGuideline(): Float {
@@ -150,7 +155,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
         return cs.getConstraint(R.id.pattern_top_guideline).layout.guidePercent
     }
 
-    private fun getExpectedTopGuideline(): Float {
+    private fun getHalfOpenedBouncerHeightRatio(): Float {
         return mContext.resources.getFloat(R.dimen.half_opened_bouncer_height_ratio)
     }
 
