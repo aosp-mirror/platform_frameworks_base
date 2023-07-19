@@ -366,9 +366,15 @@
 
     <!-- Whether or not notifications that can be expanded will always be in their expanded state.
          This value only affects notifications that are not a group of notifications from the same
-         applications. If this value is false, then only the first notification will be expanded;
-         the other notifications need to be manually expanded by the user. -->
+         applications. If this value is false, then only the first notification will be expanded
+         when config_autoExpandFirstNotification is true; the other notifications need to be
+         manually expanded by the user. -->
     <bool name="config_alwaysExpandNonGroupedNotifications">false</bool>
+
+    <!-- Whether or not the first expandable notification will be expanded automatically by the
+         system. This value only affects notifications that are not a group of notifications from
+         the same applications and when config_alwaysExpandNonGroupedNotifications is false. -->
+    <bool name="config_autoExpandFirstNotification">true</bool>
 
     <!-- Whether or not an expandable notification can be manually expanded or collapsed by the
          user. Grouped notifications are still expandable even if this value is false. -->
