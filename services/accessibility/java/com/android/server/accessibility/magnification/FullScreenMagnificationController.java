@@ -246,6 +246,31 @@ public class FullScreenMagnificationController implements
         }
 
         @GuardedBy("mLock")
+        boolean isAtEdge() {
+            return isAtLeftEdge() || isAtRightEdge() || isAtTopEdge() || isAtBottomEdge();
+        }
+
+        @GuardedBy("mLock")
+        boolean isAtLeftEdge() {
+            return getOffsetX() == getMaxOffsetXLocked();
+        }
+
+        @GuardedBy("mLock")
+        boolean isAtRightEdge() {
+            return getOffsetX() == getMinOffsetXLocked();
+        }
+
+        @GuardedBy("mLock")
+        boolean isAtTopEdge() {
+            return getOffsetY() == getMaxOffsetYLocked();
+        }
+
+        @GuardedBy("mLock")
+        boolean isAtBottomEdge() {
+            return getOffsetY() == getMinOffsetYLocked();
+        }
+
+        @GuardedBy("mLock")
         float getCenterX() {
             return (mMagnificationBounds.width() / 2.0f
                     + mMagnificationBounds.left - getOffsetX()) / getScale();
@@ -1082,6 +1107,87 @@ public class FullScreenMagnificationController implements
                 return 0.0f;
             }
             return display.getCenterX();
+        }
+    }
+
+    /**
+     * Returns whether the user is at one of the edges (left, right, top, bottom)
+     * of the magnification viewport
+     *
+     * @param displayId
+     * @return if user is at the edge of the view
+     */
+    public boolean isAtEdge(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return false;
+            }
+            return display.isAtEdge();
+        }
+    }
+
+    /**
+     * Returns whether the user is at the left edge of the viewport
+     *
+     * @param displayId
+     * @return if user is at left edge of view
+     */
+    public boolean isAtLeftEdge(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return false;
+            }
+            return display.isAtLeftEdge();
+        }
+    }
+
+    /**
+     * Returns whether the user is at the right edge of the viewport
+     *
+     * @param displayId
+     * @return if user is at right edge of view
+     */
+    public boolean isAtRightEdge(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return false;
+            }
+            return display.isAtRightEdge();
+        }
+    }
+
+    /**
+     * Returns whether the user is at the top edge of the viewport
+     *
+     * @param displayId
+     * @return if user is at top edge of view
+     */
+    public boolean isAtTopEdge(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return false;
+            }
+            return display.isAtTopEdge();
+        }
+    }
+
+    /**
+     * Returns whether the user is at the bottom edge of the viewport
+     *
+     * @param displayId
+     * @return if user is at bottom edge of view
+     */
+    public boolean isAtBottomEdge(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null) {
+                return false;
+            }
+            return display.isAtBottomEdge();
         }
     }
 
