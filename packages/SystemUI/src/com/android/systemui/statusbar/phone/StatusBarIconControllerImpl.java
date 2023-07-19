@@ -39,7 +39,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -215,41 +214,10 @@ public class StatusBarIconControllerImpl implements Tunable,
     /**
      * Accept a list of MobileIconStates, which all live in the same slot(?!), and then are sorted
      * by subId. Don't worry this definitely makes sense and works.
-     * @param slot da slot
-     * @param iconStates All of the mobile icon states
+     * @param subIds list of subscription ID integers that provide the key to the icon to display.
      */
     @Override
-    public void setMobileIcons(String slot, List<MobileIconState> iconStates) {
-        if (mStatusBarPipelineFlags.useNewMobileIcons()) {
-            Log.d(TAG, "ignoring old pipeline callbacks, because the new mobile "
-                    + "icons are enabled");
-            return;
-        }
-        Slot mobileSlot = mStatusBarIconList.getSlot(slot);
-
-        // Reverse the sort order to show icons with left to right([Slot1][Slot2]..).
-        // StatusBarIconList has UI design that first items go to the right of second items.
-        Collections.reverse(iconStates);
-
-        for (MobileIconState state : iconStates) {
-            StatusBarIconHolder holder = mobileSlot.getHolderForTag(state.subId);
-            if (holder == null) {
-                holder = StatusBarIconHolder.fromMobileIconState(state);
-                setIcon(slot, holder);
-            } else {
-                holder.setMobileState(state);
-                handleSet(slot, holder);
-            }
-        }
-    }
-
-    @Override
     public void setNewMobileIconSubIds(List<Integer> subIds) {
-        if (!mStatusBarPipelineFlags.useNewMobileIcons()) {
-            Log.d(TAG, "ignoring new pipeline callback, "
-                    + "since the new mobile icons are disabled");
-            return;
-        }
         String slotName = mContext.getString(com.android.internal.R.string.status_bar_mobile);
         Slot mobileSlot = mStatusBarIconList.getSlot(slotName);
 

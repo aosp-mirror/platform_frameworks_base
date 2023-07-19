@@ -20,7 +20,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.phone.StatusBarLocation
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
@@ -58,7 +57,6 @@ class WifiViewModelTest : SysuiTestCase() {
 
     private lateinit var underTest: WifiViewModel
 
-    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
@@ -107,11 +105,9 @@ class WifiViewModelTest : SysuiTestCase() {
     @Test
     fun wifiIcon_allLocationViewModelsReceiveSameData() =
         runBlocking(IMMEDIATE) {
-            val home =
-                viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.HOME)
-            val keyguard =
-                viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.KEYGUARD)
-            val qs = viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.QS)
+            val home = viewModelForLocation(underTest, StatusBarLocation.HOME)
+            val keyguard = viewModelForLocation(underTest, StatusBarLocation.KEYGUARD)
+            val qs = viewModelForLocation(underTest, StatusBarLocation.QS)
 
             var latestHome: WifiIcon? = null
             val jobHome = home.wifiIcon.onEach { latestHome = it }.launchIn(this)
@@ -249,11 +245,9 @@ class WifiViewModelTest : SysuiTestCase() {
             createAndSetViewModel()
             wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
-            val home =
-                viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.HOME)
-            val keyguard =
-                viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.KEYGUARD)
-            val qs = viewModelForLocation(underTest, statusBarPipelineFlags, StatusBarLocation.QS)
+            val home = viewModelForLocation(underTest, StatusBarLocation.HOME)
+            val keyguard = viewModelForLocation(underTest, StatusBarLocation.KEYGUARD)
+            val qs = viewModelForLocation(underTest, StatusBarLocation.QS)
 
             var latestHome: Boolean? = null
             val jobHome = home.isActivityInViewVisible.onEach { latestHome = it }.launchIn(this)
