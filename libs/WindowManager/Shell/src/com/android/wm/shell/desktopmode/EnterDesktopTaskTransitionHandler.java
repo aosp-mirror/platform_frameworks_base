@@ -88,7 +88,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     }
 
     /**
-     * Starts Transition of type TRANSIT_START_MOVE_TO_DESKTOP_MODE
+     * Starts Transition of type TRANSIT_START_DRAG_TO_DESKTOP_MODE
      * @param wct WindowContainerTransaction for transition
      * @param moveToDesktopAnimator Animator that shrinks and positions task during two part move
      *                              to desktop animation
@@ -98,18 +98,18 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             @NonNull MoveToDesktopAnimator moveToDesktopAnimator,
             Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
         mMoveToDesktopAnimator = moveToDesktopAnimator;
-        startTransition(Transitions.TRANSIT_START_MOVE_TO_DESKTOP_MODE, wct,
+        startTransition(Transitions.TRANSIT_START_DRAG_TO_DESKTOP_MODE, wct,
                 onAnimationEndCallback);
     }
 
     /**
-     * Starts Transition of type TRANSIT_FINALIZE_MOVE_TO_DESKTOP_MODE
+     * Starts Transition of type TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE
      * @param wct WindowContainerTransaction for transition
      * @param onAnimationEndCallback to be called after animation
      */
     public void finalizeMoveToDesktop(@NonNull WindowContainerTransaction wct,
             Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
-        startTransition(Transitions.TRANSIT_FINALIZE_MOVE_TO_DESKTOP_MODE, wct,
+        startTransition(Transitions.TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE, wct,
                 onAnimationEndCallback);
     }
 
@@ -124,7 +124,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             MoveToDesktopAnimator moveToDesktopAnimator,
             Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
         mMoveToDesktopAnimator = moveToDesktopAnimator;
-        startTransition(Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE, wct,
+        startTransition(Transitions.TRANSIT_CANCEL_DRAG_TO_DESKTOP_MODE, wct,
                 onAnimationEndCallback);
     }
 
@@ -167,7 +167,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
         }
 
         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-        if (type == Transitions.TRANSIT_START_MOVE_TO_DESKTOP_MODE
+        if (type == Transitions.TRANSIT_START_DRAG_TO_DESKTOP_MODE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             // Transitioning to freeform but keeping fullscreen bounds, so the crop is set
             // to null and we don't require an animation
@@ -194,7 +194,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
         }
 
         Rect endBounds = change.getEndAbsBounds();
-        if (type == Transitions.TRANSIT_FINALIZE_MOVE_TO_DESKTOP_MODE
+        if (type == Transitions.TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
                 && !endBounds.isEmpty()) {
             // This Transition animates a task to freeform bounds after being dragged into freeform
@@ -246,7 +246,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             return true;
         }
 
-        if (type == Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
+        if (type == Transitions.TRANSIT_CANCEL_DRAG_TO_DESKTOP_MODE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             // This Transition animates a task to fullscreen after being dragged from the status
             // bar and then released back into the status bar area
