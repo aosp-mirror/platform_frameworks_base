@@ -27,6 +27,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.shade.ShadeControllerImpl
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
@@ -50,6 +51,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.util.Optional
+import javax.inject.Provider
 
 @SmallTest
 class PhoneStatusBarViewControllerTest : SysuiTestCase() {
@@ -72,6 +74,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private lateinit var centralSurfacesImpl: CentralSurfacesImpl
     @Mock
     private lateinit var shadeControllerImpl: ShadeControllerImpl
+    @Mock
+    private lateinit var sceneInteractor: Provider<SceneInteractor>
     @Mock
     private lateinit var shadeLogger: ShadeLogger
     @Mock
@@ -197,6 +201,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
             centralSurfacesImpl,
             shadeControllerImpl,
             shadeViewController,
+            sceneInteractor,
             shadeLogger,
             viewUtil,
             configurationController

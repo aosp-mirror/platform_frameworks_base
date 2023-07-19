@@ -28,6 +28,9 @@ import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.RemoteUserInput
+import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
@@ -43,6 +46,7 @@ import com.android.systemui.util.view.ViewUtil
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 
 private const val TAG = "PhoneStatusBarViewController"
 
@@ -53,10 +57,12 @@ class PhoneStatusBarViewController private constructor(
     private val centralSurfaces: CentralSurfaces,
     private val shadeController: ShadeController,
     private val shadeViewController: ShadeViewController,
+    private val sceneInteractor: Provider<SceneInteractor>,
     private val shadeLogger: ShadeLogger,
     private val moveFromCenterAnimationController: StatusBarMoveFromCenterAnimationController?,
     private val userChipViewModel: StatusBarUserChipViewModel,
     private val viewUtil: ViewUtil,
+    private val featureFlags: FeatureFlags,
     private val configurationController: ConfigurationController
 ) : ViewController<PhoneStatusBarView>(view) {
 
@@ -164,6 +170,16 @@ class PhoneStatusBarViewController private constructor(
                 return false
             }
 
+            // If scene framework is enabled, route the touch to it and
+            // ignore the rest of the gesture.
+            if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+                sceneInteractor.get()
+                    .onRemoteUserInput(RemoteUserInput.translateMotionEvent(event))
+                // TODO(b/291965119): remove once view is expanded to cover the status bar
+                sceneInteractor.get().setVisible(SceneContainerNames.SYSTEM_UI_DEFAULT, true)
+                return false
+            }
+
             if (event.action == MotionEvent.ACTION_DOWN) {
                 // If the view that would receive the touch is disabled, just have status
                 // bar eat the gesture.
@@ -225,6 +241,7 @@ class PhoneStatusBarViewController private constructor(
         private val centralSurfaces: CentralSurfaces,
         private val shadeController: ShadeController,
         private val shadeViewController: ShadeViewController,
+        private val sceneInteractor: Provider<SceneInteractor>,
         private val shadeLogger: ShadeLogger,
         private val viewUtil: ViewUtil,
         private val configurationController: ConfigurationController,
@@ -245,10 +262,12 @@ class PhoneStatusBarViewController private constructor(
                     centralSurfaces,
                     shadeController,
                     shadeViewController,
+                    sceneInteractor,
                     shadeLogger,
                     statusBarMoveFromCenterAnimationController,
                     userChipViewModel,
                     viewUtil,
+                    featureFlags,
                     configurationController
             )
         }

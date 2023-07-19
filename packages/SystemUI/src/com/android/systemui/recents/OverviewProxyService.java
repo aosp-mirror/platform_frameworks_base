@@ -84,6 +84,8 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -94,6 +96,8 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.model.SceneContainerNames;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
@@ -120,6 +124,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Class to send information from overview to launcher with a binder.
@@ -139,6 +144,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
+    private final FeatureFlags mFeatureFlags;
     private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -147,6 +153,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
     private final NotificationShadeWindowController mStatusBarWinController;
+    private final Provider<SceneInteractor> mSceneInteractor;
+
     private final Runnable mConnectionRunnable = () ->
             internalConnectToCurrentUser("runnable: startConnectionToCurrentUser");
     private final ComponentName mRecentsComponentName;
@@ -209,17 +217,28 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             mInputFocusTransferStarted = true;
                             mInputFocusTransferStartY = event.getY();
                             mInputFocusTransferStartMillis = event.getEventTime();
-                            centralSurfaces.onInputFocusTransfer(
-                                    mInputFocusTransferStarted, false /* cancel */,
-                                    0 /* velocity */);
+
+                            // If scene framework is enabled, set the scene container window to
+                            // visible and let the touch "slip" into that window.
+                            if (mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+                                mSceneInteractor.get().setVisible(
+                                        SceneContainerNames.SYSTEM_UI_DEFAULT, true);
+                            } else {
+                                centralSurfaces.onInputFocusTransfer(
+                                        mInputFocusTransferStarted, false /* cancel */,
+                                        0 /* velocity */);
+                            }
                         }
                         if (action == ACTION_UP || action == ACTION_CANCEL) {
                             mInputFocusTransferStarted = false;
-                            float velocity = (event.getY() - mInputFocusTransferStartY)
-                                    / (event.getEventTime() - mInputFocusTransferStartMillis);
-                            centralSurfaces.onInputFocusTransfer(mInputFocusTransferStarted,
-                                    action == ACTION_CANCEL,
-                                    velocity);
+
+                            if (!mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+                                float velocity = (event.getY() - mInputFocusTransferStartY)
+                                        / (event.getEventTime() - mInputFocusTransferStartMillis);
+                                centralSurfaces.onInputFocusTransfer(mInputFocusTransferStarted,
+                                        action == ACTION_CANCEL,
+                                        velocity);
+                            }
                         }
                         event.recycle();
                     });
@@ -552,6 +571,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController,
             SysUiState sysUiState,
+            Provider<SceneInteractor> sceneInteractor,
             UserTracker userTracker,
             ScreenLifecycle screenLifecycle,
             WakefulnessLifecycle wakefulnessLifecycle,
@@ -559,6 +579,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             DisplayTracker displayTracker,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             AssistUtils assistUtils,
+            FeatureFlags featureFlags,
             DumpManager dumpManager,
             Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder
     ) {
@@ -568,6 +589,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         mContext = context;
+        mFeatureFlags = featureFlags;
         mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
@@ -575,6 +597,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
         mStatusBarWinController = statusBarWinController;
+        mSceneInteractor = sceneInteractor;
         mUserTracker = userTracker;
         mConnectionBackoffAttempts = 0;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(

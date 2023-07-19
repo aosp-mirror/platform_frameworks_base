@@ -100,4 +100,15 @@ class SceneInteractorTest : SysuiTestCase() {
                 )
             )
     }
+
+    @Test
+    fun remoteUserInput() = runTest {
+        val remoteUserInput by collectLastValue(underTest.remoteUserInput)
+        assertThat(remoteUserInput).isNull()
+
+        for (input in SceneTestUtils.REMOTE_INPUT_DOWN_GESTURE) {
+            underTest.onRemoteUserInput(input)
+            assertThat(remoteUserInput).isEqualTo(input)
+        }
+    }
 }

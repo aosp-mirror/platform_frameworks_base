@@ -2,6 +2,7 @@ package com.android.systemui.scene.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
@@ -16,11 +17,15 @@ class SceneWindowRootView(
         context,
         attrs,
     ) {
+
+    private lateinit var viewModel: SceneContainerViewModel
+
     fun init(
         viewModel: SceneContainerViewModel,
         containerConfig: SceneContainerConfig,
         scenes: Set<Scene>,
     ) {
+        this.viewModel = viewModel
         SceneWindowRootViewBinder.bind(
             view = this@SceneWindowRootView,
             viewModel = viewModel,
@@ -30,6 +35,14 @@ class SceneWindowRootView(
                 super.setVisibility(if (isVisible) View.VISIBLE else View.INVISIBLE)
             }
         )
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        return event?.let {
+            viewModel.onRemoteUserInput(event)
+            true
+        }
+            ?: false
     }
 
     override fun setVisibility(visibility: Int) {
