@@ -63,6 +63,7 @@ import com.android.server.utils.EventLogger;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -2495,13 +2496,13 @@ public class AudioDeviceBroker {
 
     void onPersistAudioDeviceSettings() {
         final String deviceSettings = mDeviceInventory.getDeviceSettings();
-        Log.v(TAG, "saving audio device settings: " + deviceSettings);
+        Log.v(TAG, "saving AdiDeviceState: " + deviceSettings);
         final SettingsAdapter settings = mAudioService.getSettings();
         boolean res = settings.putSecureStringForUser(mAudioService.getContentResolver(),
                 Settings.Secure.AUDIO_DEVICE_INVENTORY,
                 deviceSettings, UserHandle.USER_CURRENT);
         if (!res) {
-            Log.e(TAG, "error saving audio device settings: " + deviceSettings);
+            Log.e(TAG, "error saving AdiDeviceState: " + deviceSettings);
         }
     }
 
@@ -2511,7 +2512,7 @@ public class AudioDeviceBroker {
         String settings = settingsAdapter.getSecureStringForUser(contentResolver,
                 Settings.Secure.AUDIO_DEVICE_INVENTORY, UserHandle.USER_CURRENT);
         if (settings == null) {
-            Log.i(TAG, "reading spatial audio device settings from legacy key"
+            Log.i(TAG, "reading AdiDeviceState from legacy key"
                     + Settings.Secure.SPATIAL_AUDIO_ENABLED);
             // legacy string format for key SPATIAL_AUDIO_ENABLED has the same order of fields like
             // the strings for key AUDIO_DEVICE_INVENTORY. This will ensure to construct valid
@@ -2519,21 +2520,21 @@ public class AudioDeviceBroker {
             settings = settingsAdapter.getSecureStringForUser(contentResolver,
                     Settings.Secure.SPATIAL_AUDIO_ENABLED, UserHandle.USER_CURRENT);
             if (settings == null) {
-                Log.i(TAG, "no spatial audio device settings stored with legacy key");
+                Log.i(TAG, "no AdiDeviceState stored with legacy key");
             } else if (!settings.equals("")) {
                 // Delete old key value and update the new key
                 if (!settingsAdapter.putSecureStringForUser(contentResolver,
                         Settings.Secure.SPATIAL_AUDIO_ENABLED,
                         /*value=*/"",
                         UserHandle.USER_CURRENT)) {
-                    Log.w(TAG, "cannot erase the legacy audio device settings with key "
+                    Log.w(TAG, "cannot erase the legacy AdiDeviceState with key "
                             + Settings.Secure.SPATIAL_AUDIO_ENABLED);
                 }
                 if (!settingsAdapter.putSecureStringForUser(contentResolver,
                         Settings.Secure.AUDIO_DEVICE_INVENTORY,
                         settings,
                         UserHandle.USER_CURRENT)) {
-                    Log.e(TAG, "error updating the new audio device settings with key "
+                    Log.e(TAG, "error updating the new AdiDeviceState with key "
                             + Settings.Secure.AUDIO_DEVICE_INVENTORY);
                 }
             }
@@ -2553,17 +2554,27 @@ public class AudioDeviceBroker {
         return mDeviceInventory.getDeviceSettings();
     }
 
-    List<AdiDeviceState> getImmutableDeviceInventory() {
+    Collection<AdiDeviceState> getImmutableDeviceInventory() {
         return mDeviceInventory.getImmutableDeviceInventory();
     }
 
-    void addDeviceStateToInventory(AdiDeviceState deviceState) {
-        mDeviceInventory.addDeviceStateToInventory(deviceState);
+    void addOrUpdateDeviceSAStateInInventory(AdiDeviceState deviceState) {
+        mDeviceInventory.addOrUpdateDeviceSAStateInInventory(deviceState);
     }
 
+    void addOrUpdateBtAudioDeviceCategoryInInventory(AdiDeviceState deviceState) {
+        mDeviceInventory.addOrUpdateAudioDeviceCategoryInInventory(deviceState);
+    }
+
+    @Nullable
     AdiDeviceState findDeviceStateForAudioDeviceAttributes(AudioDeviceAttributes ada,
             int canonicalType) {
         return mDeviceInventory.findDeviceStateForAudioDeviceAttributes(ada, canonicalType);
+    }
+
+    @Nullable
+    AdiDeviceState findBtDeviceStateForAddress(String address, boolean isBle) {
+        return mDeviceInventory.findBtDeviceStateForAddress(address, isBle);
     }
 
     //------------------------------------------------
