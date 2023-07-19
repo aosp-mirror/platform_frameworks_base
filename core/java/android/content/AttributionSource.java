@@ -115,14 +115,14 @@ public final class AttributionSource implements Parcelable {
     public AttributionSource(int uid, @Nullable String packageName,
             @Nullable String attributionTag, @NonNull IBinder token) {
         this(uid, Process.INVALID_PID, packageName, attributionTag, token,
-                /*renouncedPermissions*/ null, /*next*/ null);
+                /*renouncedPermissions*/ null, Context.DEVICE_ID_DEFAULT, /*next*/ null);
     }
 
     /** @hide */
     public AttributionSource(int uid, int pid, @Nullable String packageName,
             @Nullable String attributionTag, @NonNull IBinder token) {
         this(uid, pid, packageName, attributionTag, token, /*renouncedPermissions*/ null,
-                /*next*/ null);
+                Context.DEVICE_ID_DEFAULT, /*next*/ null);
     }
 
     /** @hide */
@@ -132,21 +132,23 @@ public final class AttributionSource implements Parcelable {
             @Nullable AttributionSource next) {
         this(uid, Process.INVALID_PID, packageName, attributionTag, sDefaultToken,
                 (renouncedPermissions != null)
-                ? renouncedPermissions.toArray(new String[0]) : null, /*next*/ next);
+                ? renouncedPermissions.toArray(new String[0]) : null, Context.DEVICE_ID_DEFAULT,
+                /*next*/ next);
     }
 
     /** @hide */
     public AttributionSource(@NonNull AttributionSource current, @Nullable AttributionSource next) {
         this(current.getUid(), current.getPid(), current.getPackageName(),
                 current.getAttributionTag(), current.getToken(),
-                current.mAttributionSourceState.renouncedPermissions, next);
+                current.mAttributionSourceState.renouncedPermissions, current.getDeviceId(), next);
     }
 
     /** @hide */
     public AttributionSource(int uid, int pid, @Nullable String packageName,
-            @Nullable String attributionTag, @Nullable String[] renouncedPermissions,
+            @Nullable String attributionTag, @Nullable String[] renouncedPermissions, int deviceId,
             @Nullable AttributionSource next) {
-        this(uid, pid, packageName, attributionTag, sDefaultToken, renouncedPermissions, next);
+        this(uid, pid, packageName, attributionTag, sDefaultToken, renouncedPermissions, deviceId,
+                next);
     }
 
     /** @hide */
@@ -155,6 +157,16 @@ public final class AttributionSource implements Parcelable {
             @Nullable String attributionTag, @NonNull IBinder token,
             @Nullable String[] renouncedPermissions,
             @Nullable AttributionSource next) {
+        this(uid, pid, packageName, attributionTag, token, renouncedPermissions,
+                Context.DEVICE_ID_DEFAULT, next);
+    }
+
+    /** @hide */
+    @TestApi
+    public AttributionSource(int uid, int pid, @Nullable String packageName,
+            @Nullable String attributionTag, @NonNull IBinder token,
+            @Nullable String[] renouncedPermissions,
+            int deviceId, @Nullable AttributionSource next) {
         mAttributionSourceState = new AttributionSourceState();
         mAttributionSourceState.uid = uid;
         mAttributionSourceState.pid = pid;
@@ -162,6 +174,7 @@ public final class AttributionSource implements Parcelable {
         mAttributionSourceState.packageName = packageName;
         mAttributionSourceState.attributionTag = attributionTag;
         mAttributionSourceState.renouncedPermissions = renouncedPermissions;
+        mAttributionSourceState.deviceId = deviceId;
         mAttributionSourceState.next = (next != null) ? new AttributionSourceState[]
                 {next.mAttributionSourceState} : new AttributionSourceState[0];
     }
@@ -197,25 +210,31 @@ public final class AttributionSource implements Parcelable {
     /** @hide */
     public AttributionSource withNextAttributionSource(@Nullable AttributionSource next) {
         return new AttributionSource(getUid(), getPid(), getPackageName(), getAttributionTag(),
-                getToken(), mAttributionSourceState.renouncedPermissions, next);
+                getToken(), mAttributionSourceState.renouncedPermissions, getDeviceId(), next);
     }
 
     /** @hide */
     public AttributionSource withPackageName(@Nullable String packageName) {
         return new AttributionSource(getUid(), getPid(), packageName, getAttributionTag(),
-               getToken(), mAttributionSourceState.renouncedPermissions, getNext());
+               getToken(), mAttributionSourceState.renouncedPermissions, getDeviceId(), getNext());
     }
 
     /** @hide */
     public AttributionSource withToken(@NonNull Binder token) {
         return new AttributionSource(getUid(), getPid(), getPackageName(), getAttributionTag(),
-                token, mAttributionSourceState.renouncedPermissions, getNext());
+                token, mAttributionSourceState.renouncedPermissions, getDeviceId(), getNext());
     }
 
     /** @hide */
     public AttributionSource withPid(int pid) {
         return new AttributionSource(getUid(), pid, getPackageName(), getAttributionTag(),
-                getToken(), mAttributionSourceState.renouncedPermissions, getNext());
+                getToken(), mAttributionSourceState.renouncedPermissions, getDeviceId(), getNext());
+    }
+
+    /** @hide */
+    public AttributionSource withDeviceId(int deviceId) {
+        return new AttributionSource(getUid(), getPid(), getPackageName(), getAttributionTag(),
+                getToken(), mAttributionSourceState.renouncedPermissions, deviceId, getNext());
     }
 
     /** @hide */
@@ -259,6 +278,7 @@ public final class AttributionSource implements Parcelable {
         try {
             return new AttributionSource.Builder(uid)
                 .setPid(Process.myPid())
+                .setDeviceId(Context.DEVICE_ID_DEFAULT)
                 .setPackageName(AppGlobals.getPackageManager().getPackagesForUid(uid)[0])
                 .build();
         } catch (Exception ignored) {
@@ -497,6 +517,13 @@ public final class AttributionSource implements Parcelable {
     }
 
     /**
+     * The device ID for which permissions are checked.
+     */
+    public int getDeviceId() {
+        return mAttributionSourceState.deviceId;
+    }
+
+    /**
      * Unique token for that source.
      *
      * @hide
@@ -662,6 +689,19 @@ public final class AttributionSource implements Parcelable {
         }
 
         /**
+         * Set the device ID for this attribution source, permission check would happen
+         * against this device ID.
+         *
+         * @return the builder
+         */
+        public @NonNull Builder setDeviceId(int deviceId) {
+            checkNotUsed();
+            mBuilderFieldsSet |= 0x12;
+            mAttributionSourceState.deviceId = deviceId;
+            return this;
+        }
+
+        /**
          * The next app to receive the permission protected data.
          *
          * @deprecated Use {@link setNextAttributionSource} instead.
@@ -702,6 +742,9 @@ public final class AttributionSource implements Parcelable {
             }
             if ((mBuilderFieldsSet & 0x10) == 0) {
                 mAttributionSourceState.renouncedPermissions = null;
+            }
+            if ((mBuilderFieldsSet & 0x12) == 0) {
+                mAttributionSourceState.deviceId = Context.DEVICE_ID_DEFAULT;
             }
             if ((mBuilderFieldsSet & 0x20) == 0) {
                 mAttributionSourceState.next = null;

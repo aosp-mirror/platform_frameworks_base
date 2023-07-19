@@ -1230,8 +1230,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
 
             if (!fromDatasource && !checkPermission(context, permissionManagerServiceInt,
-                    permission, attributionSource.getUid(),
-                    attributionSource.getRenouncedPermissions())) {
+                    permission, attributionSource)) {
                 return PermissionChecker.PERMISSION_HARD_DENIED;
             }
 
@@ -1292,12 +1291,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     }
                     case AppOpsManager.MODE_DEFAULT: {
                         if (!skipCurrentChecks && !checkPermission(context,
-                                permissionManagerServiceInt, permission, attributionSource.getUid(),
-                                attributionSource.getRenouncedPermissions())) {
+                                permissionManagerServiceInt, permission, attributionSource)) {
                             return PermissionChecker.PERMISSION_HARD_DENIED;
                         }
                         if (next != null && !checkPermission(context, permissionManagerServiceInt,
-                                permission, next.getUid(), next.getRenouncedPermissions())) {
+                                permission, next)) {
                             return PermissionChecker.PERMISSION_HARD_DENIED;
                         }
                     }
@@ -1326,8 +1324,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // We consider the chain trusted if the start node has UPDATE_APP_OPS_STATS, and
             // every attributionSource in the chain is registered with the system.
             final boolean isChainStartTrusted = !hasChain || checkPermission(context,
-                    permissionManagerServiceInt, UPDATE_APP_OPS_STATS, current.getUid(),
-                    current.getRenouncedPermissions());
+                    permissionManagerServiceInt, UPDATE_APP_OPS_STATS, current);
 
             while (true) {
                 final boolean skipCurrentChecks = (fromDatasource || next != null);
@@ -1342,12 +1339,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                 // If we already checked the permission for this one, skip the work
                 if (!skipCurrentChecks && !checkPermission(context, permissionManagerServiceInt,
-                        permission, current.getUid(), current.getRenouncedPermissions())) {
+                        permission, current)) {
                     return PermissionChecker.PERMISSION_HARD_DENIED;
                 }
 
                 if (next != null && !checkPermission(context, permissionManagerServiceInt,
-                        permission, next.getUid(), next.getRenouncedPermissions())) {
+                        permission, next)) {
                     return PermissionChecker.PERMISSION_HARD_DENIED;
                 }
 
@@ -1415,9 +1412,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         private static boolean checkPermission(@NonNull Context context,
                 @NonNull PermissionManagerServiceInternal permissionManagerServiceInt,
-                @NonNull String permission, int uid, @NonNull Set<String> renouncedPermissions) {
-            boolean permissionGranted = context.checkPermission(permission, /*pid*/ -1,
-                    uid) == PackageManager.PERMISSION_GRANTED;
+                @NonNull String permission, AttributionSource attributionSource) {
+            int uid = attributionSource.getUid();
+            int deviceId = attributionSource.getDeviceId();
+            final Context deviceContext = context.getDeviceId() == deviceId ? context
+                    : context.createDeviceContext(deviceId);
+            boolean permissionGranted = deviceContext.checkPermission(permission,
+                    Process.INVALID_PID, uid) == PackageManager.PERMISSION_GRANTED;
 
             // Override certain permissions checks for the shared isolated process for both
             // HotwordDetectionService and VisualQueryDetectionService, which ordinarily cannot hold
@@ -1433,10 +1434,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 permissionGranted = hotwordServiceProvider != null
                         && uid == hotwordServiceProvider.getUid();
             }
-
+            Set<String> renouncedPermissions = attributionSource.getRenouncedPermissions();
             if (permissionGranted && renouncedPermissions.contains(permission)
-                    && context.checkPermission(Manifest.permission.RENOUNCE_PERMISSIONS,
-                    /*pid*/ -1, uid) == PackageManager.PERMISSION_GRANTED) {
+                    && deviceContext.checkPermission(Manifest.permission.RENOUNCE_PERMISSIONS,
+                        Process.INVALID_PID, uid) == PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
             return permissionGranted;
@@ -1507,8 +1508,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // We consider the chain trusted if the start node has UPDATE_APP_OPS_STATS, and
             // every attributionSource in the chain is registered with the system.
             final boolean isChainStartTrusted = !hasChain || checkPermission(context,
-                    permissionManagerServiceInt, UPDATE_APP_OPS_STATS, current.getUid(),
-                    current.getRenouncedPermissions());
+                    permissionManagerServiceInt, UPDATE_APP_OPS_STATS, current);
 
             while (true) {
                 final boolean skipCurrentChecks = (next != null);
