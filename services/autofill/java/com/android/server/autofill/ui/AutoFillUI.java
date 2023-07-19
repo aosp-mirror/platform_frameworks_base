@@ -95,6 +95,7 @@ public final class AutoFillUI {
         void requestShowFillUi(AutofillId id, int width, int height,
                 IAutofillWindowPresenter presenter);
         void requestHideFillUi(AutofillId id);
+        void requestHideFillUiWhenDestroyed(AutofillId id);
         void startIntentSenderAndFinishSession(IntentSender intentSender);
         void startIntentSender(IntentSender intentSender, Intent intent);
         void dispatchUnhandledKey(AutofillId id, KeyEvent keyEvent);
@@ -285,6 +286,13 @@ public final class AutoFillUI {
                 public void requestHideFillUi() {
                     if (mCallback != null) {
                         mCallback.requestHideFillUi(focusedId);
+                    }
+                }
+
+                @Override
+                public void requestHideFillUiWhenDestroyed() {
+                    if (mCallback != null) {
+                        mCallback.requestHideFillUiWhenDestroyed(focusedId);
                     }
                 }
 
