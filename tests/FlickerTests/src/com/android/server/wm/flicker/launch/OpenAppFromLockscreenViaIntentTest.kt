@@ -200,7 +200,7 @@ open class OpenAppFromLockscreenViaIntentTest(flicker: LegacyFlickerTest) :
     override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
         super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
-    @FlakyTest(bugId = 251217585)
+    @FlakyTest(bugId = 285980483)
     @Test
     override fun focusChanges() {
         super.focusChanges()
