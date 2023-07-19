@@ -9,6 +9,9 @@
       ]
     },
     {
+      "name": "CtsPackageManagerIncrementalStatsHostTestCases"
+    },
+    {
       "name": "CtsIncrementalInstallHostTestCases"
     },
     {
