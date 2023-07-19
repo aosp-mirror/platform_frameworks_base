@@ -40,6 +40,7 @@ import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.text.TextUtils;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -169,14 +170,14 @@ public class ArchiveManagerTest {
     }
 
     @Test
-    public void archiveApp_callerNotInstallerOfRecord() {
+    public void archiveApp_noInstallerFound() {
         InstallSource otherInstallSource =
                 InstallSource.create(
                         CALLER_PACKAGE,
                         CALLER_PACKAGE,
-                        /* installerPackageName= */ "different",
+                        /* installerPackageName= */ null,
                         Binder.getCallingUid(),
-                        CALLER_PACKAGE,
+                        /* updateOwnerPackageName= */ null,
                         /* installerAttributionTag= */ null,
                         /* packageSource= */ 0);
         when(mPackageState.getInstallSource()).thenReturn(otherInstallSource);
@@ -187,29 +188,8 @@ public class ArchiveManagerTest {
                         mIntentSender)
         );
         assertThat(e).hasMessageThat().isEqualTo(
-                String.format("Caller is not the installer of record for %s.", PACKAGE));
-    }
-
-    @Test
-    public void archiveApp_callerNotUpdateOwner() {
-        InstallSource otherInstallSource =
-                InstallSource.create(
-                        CALLER_PACKAGE,
-                        CALLER_PACKAGE,
-                        CALLER_PACKAGE,
-                        Binder.getCallingUid(),
-                        /* updateOwnerPackageName= */ "different",
-                        /* installerAttributionTag= */ null,
-                        /* packageSource= */ 0);
-        when(mPackageState.getInstallSource()).thenReturn(otherInstallSource);
-
-        Exception e = assertThrows(
-                SecurityException.class,
-                () -> mArchiveManager.archiveApp(PACKAGE, CALLER_PACKAGE, UserHandle.CURRENT,
-                        mIntentSender)
-        );
-        assertThat(e).hasMessageThat().isEqualTo(
-                String.format("Caller is not the update owner for %s.", PACKAGE));
+                TextUtils.formatSimple("No installer found to archive app %s.",
+                        PACKAGE));
     }
 
     @Test
