@@ -36,16 +36,18 @@ class BrightnessRangeController {
 
 
     BrightnessRangeController(HighBrightnessModeController hbmController,
-            Runnable modeChangeCallback) {
-        this(hbmController, modeChangeCallback,
+            Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig) {
+        this(hbmController, modeChangeCallback, displayDeviceConfig,
                 new DeviceConfigParameterProvider(DeviceConfigInterface.REAL));
     }
 
     BrightnessRangeController(HighBrightnessModeController hbmController,
-            Runnable modeChangeCallback, DeviceConfigParameterProvider configParameterProvider) {
+            Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig,
+            DeviceConfigParameterProvider configParameterProvider) {
         mHbmController = hbmController;
         mModeChangeCallback = modeChangeCallback;
         mUseNbmController = configParameterProvider.isNormalBrightnessControllerFeatureEnabled();
+        mNormalBrightnessModeController.resetNbmData(displayDeviceConfig.getLuxThrottlingData());
     }
 
     void dump(PrintWriter pw) {
