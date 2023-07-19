@@ -178,4 +178,15 @@ TEST_F(PerformanceHintTest, SetThreads) {
             .WillOnce(Return(Status()));
     result = APerformanceHint_setThreads(session, newTids.data(), newTids.size());
     EXPECT_EQ(0, result);
+
+    testing::Mock::VerifyAndClearExpectations(mMockIHintManager);
+    std::vector<int32_t> invalidTids;
+    auto status = Status::fromExceptionCode(binder::Status::Exception::EX_SECURITY);
+    invalidTids.push_back(4);
+    invalidTids.push_back(6);
+    EXPECT_CALL(*mMockIHintManager, setHintSessionThreads(_, Eq(invalidTids)))
+            .Times(Exactly(1))
+            .WillOnce(Return(status));
+    result = APerformanceHint_setThreads(session, invalidTids.data(), invalidTids.size());
+    EXPECT_EQ(EPERM, result);
 }

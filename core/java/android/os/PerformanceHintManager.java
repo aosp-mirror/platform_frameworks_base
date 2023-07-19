@@ -29,6 +29,7 @@ import java.io.Closeable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.Reference;
+import java.util.Objects;
 
 
 /** The PerformanceHintManager allows apps to send performance hint to system. */
@@ -239,6 +240,7 @@ public final class PerformanceHintManager {
             if (mNativeSessionPtr == 0) {
                 return;
             }
+            Objects.requireNonNull(tids, "tids cannot be null");
             if (tids.length == 0) {
                 throw new IllegalArgumentException("Thread id list can't be empty.");
             }

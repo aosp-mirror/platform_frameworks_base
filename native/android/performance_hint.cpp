@@ -274,9 +274,10 @@ int APerformanceHintSession::setThreads(const int32_t* threadIds, size_t size) {
     binder::Status ret = mHintManager->setHintSessionThreads(mHintSession, tids);
     if (!ret.isOk()) {
         ALOGE("%s: failed: %s", __FUNCTION__, ret.exceptionMessage().c_str());
-        if (ret.exceptionCode() == binder::Status::Exception::EX_SECURITY ||
-            ret.exceptionCode() == binder::Status::Exception::EX_ILLEGAL_ARGUMENT) {
+        if (ret.exceptionCode() == binder::Status::Exception::EX_ILLEGAL_ARGUMENT) {
             return EINVAL;
+        } else if (ret.exceptionCode() == binder::Status::Exception::EX_SECURITY) {
+            return EPERM;
         }
         return EPIPE;
     }
