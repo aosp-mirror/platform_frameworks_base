@@ -585,7 +585,17 @@ final class PreferredActivityHelper {
                     (parser1, userId1) -> {
                         final String defaultBrowser = Settings.readDefaultApps(parser1);
                         if (defaultBrowser != null) {
-                            mPm.setDefaultBrowser(defaultBrowser, false, userId1);
+                            final PackageStateInternal packageState = mPm.snapshotComputer()
+                                    .getPackageStateInternal(defaultBrowser);
+                            if (packageState != null
+                                    && packageState.getUserStateOrDefault(userId1).isInstalled()) {
+                                mPm.setDefaultBrowser(defaultBrowser, userId1);
+                            } else {
+                                synchronized (mPm.mLock) {
+                                    mPm.mSettings.setPendingDefaultBrowserLPw(defaultBrowser,
+                                            userId1);
+                                }
+                            }
                         }
                     });
         } catch (Exception e) {
