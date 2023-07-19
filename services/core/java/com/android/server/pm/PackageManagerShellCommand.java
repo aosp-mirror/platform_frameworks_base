@@ -1641,8 +1641,8 @@ class PackageManagerShellCommand extends ShellCommand {
         // broadcast only if packageInstallerName is "android". We can't always force
         // "android" as packageIntallerName, e.g, rollback auto implies
         // "-i com.android.shell".
-        while (currentTime < endTime) {
-            if (si != null && (si.isStagedSessionReady() || si.isStagedSessionFailed())) {
+        while (si != null && currentTime < endTime) {
+            if (si.isStagedSessionReady() || si.isStagedSessionFailed()) {
                 break;
             }
             SystemClock.sleep(Math.min(endTime - currentTime, 100));

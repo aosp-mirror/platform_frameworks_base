@@ -2029,8 +2029,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mHandler.obtainMessage(MSG_INSTALL).sendToTarget();
             }
         } catch (PackageManagerException e) {
-            destroy();
             String msg = ExceptionUtils.getCompleteMessage(e);
+            destroy(msg);
             dispatchSessionFinished(e.error, msg, null);
             maybeFinishChildSessions(e.error, msg);
         }
@@ -2283,7 +2283,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void onSessionValidationFailure(int error, String detailMessage) {
         // Session is sealed but could not be validated, we need to destroy it.
-        destroyInternal();
+        destroyInternal("Failed to validate session, error: " + error + ", " + detailMessage);
         // Dispatch message to remove session from PackageInstallerService.
         dispatchSessionFinished(error, detailMessage, null);
     }
@@ -4013,7 +4013,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             root.mHandler.obtainMessage(
                     isCommitted() ? MSG_INSTALL : MSG_PRE_APPROVAL_REQUEST).sendToTarget();
         } else {
-            root.destroy();
+            root.destroy("User rejected permissions");
             root.dispatchSessionFinished(INSTALL_FAILED_ABORTED, "User rejected permissions", null);
             root.maybeFinishChildSessions(INSTALL_FAILED_ABORTED, "User rejected permissions");
         }
@@ -4128,7 +4128,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 if (isStaged() && isCommitted()) {
                     mStagingManager.abortCommittedSession(mStagedSession);
                 }
-                destroy();
+                destroy("Session was abandoned");
                 dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
                 maybeFinishChildSessions(INSTALL_FAILED_ABORTED,
                         "Session was abandoned because the parent session is abandoned");
@@ -4750,7 +4750,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mSessionErrorMessage = errorMessage;
             Slog.d(TAG, "Marking session " + sessionId + " as failed: " + errorMessage);
         }
-        destroy();
+        destroy("Session marked as failed: " + errorMessage);
         mCallback.onSessionChanged(this);
     }
 
@@ -4765,7 +4765,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mSessionErrorMessage = "";
             Slog.d(TAG, "Marking session " + sessionId + " as applied");
         }
-        destroy();
+        destroy(null);
         mCallback.onSessionChanged(this);
     }
 
@@ -4808,7 +4808,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * Free up storage used by this session and its children.
      * Must not be called on a child session.
      */
-    private void destroy() {
+    private void destroy(String reason) {
         // TODO(b/173194203): destroy() is called indirectly by
         //  PackageInstallerService#restoreAndApplyStagedSessionIfNeeded on an orphan child session.
         //  Enable this assertion when we figure out a better way to clean up orphan sessions.
@@ -4817,16 +4817,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // TODO(b/173194203): destroyInternal() should be used by destroy() only.
         //  For the sake of consistency, a session should be destroyed as a whole. The caller
         //  should always call destroy() for cleanup without knowing it has child sessions or not.
-        destroyInternal();
+        destroyInternal(reason);
         for (PackageInstallerSession child : getChildSessions()) {
-            child.destroyInternal();
+            child.destroyInternal(reason);
         }
     }
 
     /**
      * Free up storage used by this session.
      */
-    private void destroyInternal() {
+    private void destroyInternal(String reason) {
+        if (reason != null) {
+            Slog.i(TAG,
+                    "Session [" + this.sessionId + "] was destroyed because of [" + reason + "]");
+        }
         final IncrementalFileStorages incrementalFileStorages;
         synchronized (mLock) {
             mSealed = true;
