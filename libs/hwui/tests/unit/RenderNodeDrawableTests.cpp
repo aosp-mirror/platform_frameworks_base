@@ -355,7 +355,7 @@ RENDERTHREAD_TEST(RenderNodeDrawable, projectionReorder) {
     EXPECT_EQ(3, canvas.getIndex());
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
+RENDERTHREAD_TEST(RenderNodeDrawable, emptyReceiver) {
     class ProjectionTestCanvas : public SkCanvas {
     public:
         ProjectionTestCanvas(int width, int height) : SkCanvas(width, height) {}
@@ -419,7 +419,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, emptyReceiver) {
     EXPECT_EQ(2, canvas.getDrawCounter());
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, projectionHwLayer) {
+RENDERTHREAD_TEST(RenderNodeDrawable, projectionHwLayer) {
     /* R is backward projected on B and C is a layer.
                 A
                / \
@@ -1052,7 +1052,7 @@ TEST(RenderNodeDrawable, renderNode) {
 }
 
 // Verify that layers are composed with linear filtering.
-RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
+RENDERTHREAD_TEST(RenderNodeDrawable, layerComposeQuality) {
     static const int CANVAS_WIDTH = 1;
     static const int CANVAS_HEIGHT = 1;
     static const int LAYER_WIDTH = 1;
@@ -1170,7 +1170,7 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
 }
 
 // Draw a vector drawable twice but with different bounds and verify correct bounds are used.
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
+RENDERTHREAD_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
     static const int CANVAS_WIDTH = 100;
     static const int CANVAS_HEIGHT = 200;
     class VectorDrawableTestCanvas : public TestCanvasBase {

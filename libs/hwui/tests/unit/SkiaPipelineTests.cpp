@@ -42,7 +42,7 @@ using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
 using namespace android::uirenderer::skiapipeline;
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
+RENDERTHREAD_TEST(SkiaPipeline, renderFrame) {
     auto redNode = TestUtils::createSkiaNode(
             0, 0, 1, 1, [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
                 redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
@@ -62,7 +62,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
+RENDERTHREAD_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     auto halfGreenNode = TestUtils::createSkiaNode(
             0, 0, 2, 2, [](RenderProperties& props, SkiaRecordingCanvas& bottomHalfGreenCanvas) {
                 Paint greenPaint;
@@ -89,7 +89,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 1), SK_ColorGREEN);
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckDirtyRect) {
+RENDERTHREAD_TEST(SkiaPipeline, renderFrameCheckDirtyRect) {
     auto redNode = TestUtils::createSkiaNode(
             0, 0, 2, 2, [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
                 redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
@@ -111,7 +111,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckDirtyRect) {
     ASSERT_EQ(TestUtils::getColor(surface, 1, 1), SK_ColorRED);
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderLayer) {
+RENDERTHREAD_TEST(SkiaPipeline, renderLayer) {
     auto redNode = TestUtils::createSkiaNode(
             0, 0, 1, 1, [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
                 redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
@@ -154,7 +154,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderLayer) {
     blueNode->setLayerSurface(sk_sp<SkSurface>());
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderOverdraw) {
+RENDERTHREAD_TEST(SkiaPipeline, renderOverdraw) {
     ScopedProperty<bool> prop(Properties::debugOverdraw, true);
 
     auto whiteNode = TestUtils::createSkiaNode(
@@ -227,7 +227,7 @@ public:
 };
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, deferRenderNodeScene) {
+RENDERTHREAD_TEST(SkiaPipeline, deferRenderNodeScene) {
     class DeferTestCanvas : public SkCanvas {
     public:
         DeferTestCanvas() : SkCanvas(800, 600) {}
@@ -297,7 +297,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, deferRenderNodeScene) {
     EXPECT_EQ(4, surface->canvas()->mDrawCounter);
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clipped) {
+RENDERTHREAD_TEST(SkiaPipeline, clipped) {
     static const int CANVAS_WIDTH = 200;
     static const int CANVAS_HEIGHT = 200;
     class ClippedTestCanvas : public SkCanvas {
@@ -330,7 +330,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clipped) {
 }
 
 // Test renderFrame with a dirty clip and a pre-transform matrix.
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clipped_rotated) {
+RENDERTHREAD_TEST(SkiaPipeline, clipped_rotated) {
     static const int CANVAS_WIDTH = 200;
     static const int CANVAS_HEIGHT = 100;
     static const SkMatrix rotateMatrix = SkMatrix::MakeAll(0, -1, CANVAS_HEIGHT, 1, 0, 0, 0, 0, 1);
@@ -366,7 +366,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clipped_rotated) {
     EXPECT_EQ(1, surface->canvas()->mDrawCounter);
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clip_replace) {
+RENDERTHREAD_TEST(SkiaPipeline, clip_replace) {
     static const int CANVAS_WIDTH = 50;
     static const int CANVAS_HEIGHT = 50;
     class ClipReplaceTestCanvas : public SkCanvas {
@@ -396,7 +396,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clip_replace) {
     EXPECT_EQ(1, surface->canvas()->mDrawCounter);
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
+RENDERTHREAD_TEST(SkiaPipeline, context_lost) {
     test::TestContext context;
     auto surface = context.surface();
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
@@ -410,7 +410,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
     EXPECT_TRUE(pipeline->isSurfaceReady());
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, pictureCallback) {
+RENDERTHREAD_TEST(SkiaPipeline, pictureCallback) {
     // create a pipeline and add a picture callback
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     int callbackCount = 0;

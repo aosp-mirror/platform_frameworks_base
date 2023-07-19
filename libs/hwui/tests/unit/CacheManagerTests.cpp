@@ -35,7 +35,7 @@ static size_t getCacheUsage(GrDirectContext* grContext) {
 }
 
 // TOOD(258700630): fix this test and re-enable
-RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, DISABLED_trimMemory) {
+RENDERTHREAD_TEST(CacheManager, DISABLED_trimMemory) {
     int32_t width = DeviceInfo::get()->getWidth();
     int32_t height = DeviceInfo::get()->getHeight();
     GrDirectContext* grContext = renderThread.getGrContext();
