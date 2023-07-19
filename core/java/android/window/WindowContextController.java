@@ -21,7 +21,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.servertransaction.WindowTokenClientController;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -105,8 +104,7 @@ public class WindowContextController {
             throw new IllegalStateException("A Window Context can be only attached to "
                     + "a DisplayArea once.");
         }
-        mAttachedToDisplayArea = WindowTokenClientController.getInstance().attachToDisplayArea(
-                mToken, type, displayId, options)
+        mAttachedToDisplayArea = mToken.attachToDisplayArea(type, displayId, options)
                 ? AttachStatus.STATUS_ATTACHED : AttachStatus.STATUS_FAILED;
         if (mAttachedToDisplayArea == AttachStatus.STATUS_FAILED) {
             Log.w(TAG, "attachToDisplayArea fail, type:" + type + ", displayId:"
@@ -142,13 +140,13 @@ public class WindowContextController {
             throw new IllegalStateException("The Window Context should have been attached"
                     + " to a DisplayArea. AttachToDisplayArea:" + mAttachedToDisplayArea);
         }
-        WindowTokenClientController.getInstance().attachToWindowToken(mToken, windowToken);
+        mToken.attachToWindowToken(windowToken);
     }
 
     /** Detaches the window context from the node it's currently associated with. */
     public void detachIfNeeded() {
         if (mAttachedToDisplayArea == AttachStatus.STATUS_ATTACHED) {
-            WindowTokenClientController.getInstance().detachIfNeeded(mToken);
+            mToken.detachFromWindowContainerIfNeeded();
             mAttachedToDisplayArea = AttachStatus.STATUS_DETACHED;
             if (DEBUG_ATTACH) {
                 Log.d(TAG, "Detach Window Context.");
