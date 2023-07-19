@@ -65,6 +65,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.flags.ViewRefactorFlag;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
@@ -205,6 +206,7 @@ public class NotificationStackScrollLayoutController {
     private boolean mIsInTransitionToAod = false;
 
     private final FeatureFlags mFeatureFlags;
+    private final ViewRefactorFlag mShelfRefactor;
     private final NotificationTargetsHelper mNotificationTargetsHelper;
     private final SecureSettings mSecureSettings;
     private final NotificationDismissibilityProvider mDismissibilityProvider;
@@ -718,6 +720,7 @@ public class NotificationStackScrollLayoutController {
         mShadeController = shadeController;
         mNotifIconAreaController = notifIconAreaController;
         mFeatureFlags = featureFlags;
+        mShelfRefactor = new ViewRefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
         mNotificationTargetsHelper = notificationTargetsHelper;
         mSecureSettings = secureSettings;
         mDismissibilityProvider = dismissibilityProvider;
@@ -1432,7 +1435,7 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void setShelfController(NotificationShelfController notificationShelfController) {
-        NotificationShelfController.assertRefactorFlagDisabled(mFeatureFlags);
+        mShelfRefactor.assertDisabled();
         mView.setShelfController(notificationShelfController);
     }
 
@@ -1645,12 +1648,12 @@ public class NotificationStackScrollLayoutController {
     }
 
     public void setShelf(NotificationShelf shelf) {
-        if (!NotificationShelfController.checkRefactorFlagEnabled(mFeatureFlags)) return;
+        if (!mShelfRefactor.expectEnabled()) return;
         mView.setShelf(shelf);
     }
 
     public int getShelfHeight() {
-        if (!NotificationShelfController.checkRefactorFlagEnabled(mFeatureFlags)) {
+        if (!mShelfRefactor.expectEnabled()) {
             return 0;
         }
         ExpandableView shelf = mView.getShelf();

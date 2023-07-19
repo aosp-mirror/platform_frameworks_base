@@ -30,6 +30,8 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -43,12 +45,14 @@ import org.junit.runner.RunWith;
 @RunWithLooper
 public class ExpandHelperTest extends SysuiTestCase {
 
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     private ExpandableNotificationRow mRow;
     private ExpandHelper mExpandHelper;
     private ExpandHelper.Callback mCallback;
 
     @Before
     public void setUp() throws Exception {
+        mFeatureFlags.setDefault(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION);
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectMockDependency(NotificationMediaManager.class);
         allowTestableLooperAsMainThread();
@@ -56,7 +60,8 @@ public class ExpandHelperTest extends SysuiTestCase {
         NotificationTestHelper helper = new NotificationTestHelper(
                 mContext,
                 mDependency,
-                TestableLooper.get(this));
+                TestableLooper.get(this),
+                mFeatureFlags);
         mRow = helper.createRow();
         mCallback = mock(ExpandHelper.Callback.class);
         mExpandHelper = new ExpandHelper(context, mCallback, 10, 100);

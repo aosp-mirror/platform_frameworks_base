@@ -24,6 +24,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.flags.ViewRefactorFlag;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -88,7 +90,7 @@ public class NotificationIconAreaController implements
     private final ArrayList<Rect> mTintAreas = new ArrayList<>();
     private final Context mContext;
 
-    private final FeatureFlags mFeatureFlags;
+    private final ViewRefactorFlag mShelfRefactor;
 
     private int mAodIconAppearTranslation;
 
@@ -120,12 +122,13 @@ public class NotificationIconAreaController implements
             Optional<Bubbles> bubblesOptional,
             DemoModeController demoModeController,
             DarkIconDispatcher darkIconDispatcher,
-            FeatureFlags featureFlags, StatusBarWindowController statusBarWindowController,
+            FeatureFlags featureFlags,
+            StatusBarWindowController statusBarWindowController,
             ScreenOffAnimationController screenOffAnimationController) {
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mStatusBarStateController = statusBarStateController;
-        mFeatureFlags = featureFlags;
+        mShelfRefactor = new ViewRefactorFlag(featureFlags, Flags.NOTIFICATION_SHELF_REFACTOR);
         mStatusBarStateController.addCallback(this);
         mMediaManager = notificationMediaManager;
         mDozeParameters = dozeParameters;
@@ -179,12 +182,12 @@ public class NotificationIconAreaController implements
     }
 
     public void setupShelf(NotificationShelfController notificationShelfController) {
-        NotificationShelfController.assertRefactorFlagDisabled(mFeatureFlags);
+        mShelfRefactor.assertDisabled();
         mShelfIcons = notificationShelfController.getShelfIcons();
     }
 
     public void setShelfIcons(NotificationIconContainer icons) {
-        if (NotificationShelfController.checkRefactorFlagEnabled(mFeatureFlags)) {
+        if (mShelfRefactor.expectEnabled()) {
             mShelfIcons = icons;
         }
     }

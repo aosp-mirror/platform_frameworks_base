@@ -48,12 +48,16 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.util.MediaFeatureFlag;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -90,6 +94,7 @@ import com.android.systemui.wmshell.BubblesTestActivity;
 
 import org.mockito.ArgumentCaptor;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -130,14 +135,24 @@ public class NotificationTestHelper {
     private final NotificationDismissibilityProvider mDismissibilityProvider;
     public final Runnable mFutureDismissalRunnable;
     private @InflationFlag int mDefaultInflationFlags;
-    private FeatureFlags mFeatureFlags;
+    private final FakeFeatureFlags mFeatureFlags;
 
     public NotificationTestHelper(
             Context context,
             TestableDependency dependency,
             TestableLooper testLooper) {
+        this(context, dependency, testLooper, new FakeFeatureFlags());
+    }
+
+    public NotificationTestHelper(
+            Context context,
+            TestableDependency dependency,
+            TestableLooper testLooper,
+            @NonNull FakeFeatureFlags featureFlags) {
         mContext = context;
         mTestLooper = testLooper;
+        mFeatureFlags = Objects.requireNonNull(featureFlags);
+        dependency.injectTestDependency(FeatureFlags.class, mFeatureFlags);
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(NotificationShadeWindowController.class);
         dependency.injectMockDependency(MediaOutputDialogFactory.class);
@@ -183,15 +198,10 @@ public class NotificationTestHelper {
         mFutureDismissalRunnable = mock(Runnable.class);
         when(mOnUserInteractionCallback.registerFutureDismissal(any(), anyInt()))
                 .thenReturn(mFutureDismissalRunnable);
-        mFeatureFlags = mock(FeatureFlags.class);
     }
 
     public void setDefaultInflationFlags(@InflationFlag int defaultInflationFlags) {
         mDefaultInflationFlags = defaultInflationFlags;
-    }
-
-    public void setFeatureFlags(FeatureFlags featureFlags) {
-        mFeatureFlags = featureFlags;
     }
 
     public ExpandableNotificationRowLogger getMockLogger() {
@@ -527,6 +537,10 @@ public class NotificationTestHelper {
             @InflationFlag int extraInflationFlags,
             int importance)
             throws Exception {
+        // NOTE: This flag is read when the ExpandableNotificationRow is inflated, so it needs to be
+        //  set, but we do not want to override an existing value that is needed by a specific test.
+        mFeatureFlags.setDefault(Flags.IMPROVED_HUN_ANIMATIONS);
+
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 mContext.LAYOUT_INFLATER_SERVICE);
         mRow = (ExpandableNotificationRow) inflater.inflate(

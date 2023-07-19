@@ -64,7 +64,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingCollectorFake;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -117,6 +117,7 @@ import java.util.Optional;
 public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
     private static final int DISPLAY_ID = 0;
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     @Mock
     private AssistManager mAssistManager;
@@ -256,7 +257,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         notificationAnimationProvider,
                         mock(LaunchFullScreenIntentProvider.class),
                         mPowerInteractor,
-                        mock(FeatureFlags.class),
+                        mFeatureFlags,
                         mUserTracker
                 );
 
