@@ -407,7 +407,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             change.getEndAbsBounds().width(), change.getEndAbsBounds().height());
                 }
                 // Rotation change of independent non display window container.
-                if (change.getParent() == null
+                if (change.getParent() == null && !change.hasFlags(FLAG_IS_DISPLAY)
                         && change.getStartRotation() != change.getEndRotation()) {
                     startRotationAnimation(startTransaction, change, info,
                             ROTATION_ANIMATION_ROTATE, animations, onAnimFinish);
