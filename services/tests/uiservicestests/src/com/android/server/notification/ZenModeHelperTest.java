@@ -771,7 +771,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mConfig = null; // will evaluate config to zen mode off
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
-            mZenModeHelper.evaluateZenMode("test", true);
+            mZenModeHelper.evaluateZenModeLocked("test", true);
         }
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 mZenModeHelper.TAG);
@@ -798,7 +798,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
-            mZenModeHelper.evaluateZenMode("test", true);
+            mZenModeHelper.evaluateZenModeLocked("test", true);
         }
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 mZenModeHelper.TAG);
@@ -825,7 +825,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
-            mZenModeHelper.evaluateZenMode("test", true);
+            mZenModeHelper.evaluateZenModeLocked("test", true);
         }
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 mZenModeHelper.TAG);
@@ -2269,7 +2269,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Artificially turn zen mode "on". Re-evaluating zen mode should cause it to turn back off
         // given that we don't have any zen rules active.
         mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelper.evaluateZenMode("test", true);
+        mZenModeHelper.evaluateZenModeLocked("test", true);
 
         // Check that the change actually took: zen mode should be off now
         assertEquals(Global.ZEN_MODE_OFF, mZenModeHelper.mZenMode);

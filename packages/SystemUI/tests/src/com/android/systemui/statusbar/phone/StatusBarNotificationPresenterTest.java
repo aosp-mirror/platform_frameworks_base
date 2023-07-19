@@ -79,7 +79,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private CommandQueue mCommandQueue;
     private FakeMetricsLogger mMetricsLogger;
     private final ShadeController mShadeController = mock(ShadeController.class);
-    private final CentralSurfaces mCentralSurfaces = mock(CentralSurfaces.class);
     private final NotificationsInteractor mNotificationsInteractor =
             mock(NotificationsInteractor.class);
     private final KeyguardStateController mKeyguardStateController =
@@ -118,7 +117,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationShadeWindowController.class),
                 mock(DynamicPrivacyController.class),
                 mKeyguardStateController,
-                mCentralSurfaces,
                 mNotificationsInteractor,
                 mock(LockscreenShadeTransitionController.class),
                 mock(PowerInteractor.class),
@@ -202,7 +200,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
 
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mKeyguardStateController.isOccluded()).thenReturn(false);
-        when(mCentralSurfaces.isOccluded()).thenReturn(false);
         assertFalse(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
     }
 

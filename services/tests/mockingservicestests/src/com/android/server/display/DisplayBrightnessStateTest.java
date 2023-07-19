@@ -86,7 +86,9 @@ public class DisplayBrightnessStateTest {
                 .append("\n    brightnessReason:")
                 .append(displayBrightnessState.getBrightnessReason())
                 .append("\n    shouldUseAutoBrightness:")
-                .append(displayBrightnessState.getShouldUseAutoBrightness());
+                .append(displayBrightnessState.getShouldUseAutoBrightness())
+                .append("\n    isSlowChange:")
+                .append(displayBrightnessState.isSlowChange());
         return sb.toString();
     }
 }

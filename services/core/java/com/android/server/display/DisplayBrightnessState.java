@@ -33,12 +33,15 @@ public final class DisplayBrightnessState {
     private final String mDisplayBrightnessStrategyName;
     private final boolean mShouldUseAutoBrightness;
 
+    private final boolean mIsSlowChange;
+
     private DisplayBrightnessState(Builder builder) {
         mBrightness = builder.getBrightness();
         mSdrBrightness = builder.getSdrBrightness();
         mBrightnessReason = builder.getBrightnessReason();
         mDisplayBrightnessStrategyName = builder.getDisplayBrightnessStrategyName();
         mShouldUseAutoBrightness = builder.getShouldUseAutoBrightness();
+        mIsSlowChange = builder.isSlowChange();
     }
 
     /**
@@ -77,6 +80,13 @@ public final class DisplayBrightnessState {
         return mShouldUseAutoBrightness;
     }
 
+    /**
+     * @return {@code true} if the should transit to new state slowly
+     */
+    public boolean isSlowChange() {
+        return mIsSlowChange;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("DisplayBrightnessState:");
@@ -88,6 +98,8 @@ public final class DisplayBrightnessState {
         stringBuilder.append(getBrightnessReason());
         stringBuilder.append("\n    shouldUseAutoBrightness:");
         stringBuilder.append(getShouldUseAutoBrightness());
+        stringBuilder.append("\n    isSlowChange:");
+        stringBuilder.append(mIsSlowChange);
         return stringBuilder.toString();
     }
 
@@ -111,13 +123,14 @@ public final class DisplayBrightnessState {
                 && mBrightnessReason.equals(otherState.getBrightnessReason())
                 && TextUtils.equals(mDisplayBrightnessStrategyName,
                         otherState.getDisplayBrightnessStrategyName())
-                && mShouldUseAutoBrightness == otherState.getShouldUseAutoBrightness();
+                && mShouldUseAutoBrightness == otherState.getShouldUseAutoBrightness()
+                && mIsSlowChange == otherState.isSlowChange();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                mBrightness, mSdrBrightness, mBrightnessReason, mShouldUseAutoBrightness);
+        return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason,
+                mShouldUseAutoBrightness, mIsSlowChange);
     }
 
     /**
@@ -129,6 +142,7 @@ public final class DisplayBrightnessState {
         private BrightnessReason mBrightnessReason = new BrightnessReason();
         private String mDisplayBrightnessStrategyName;
         private boolean mShouldUseAutoBrightness;
+        private boolean mIsSlowChange;
 
         /**
          * Create a builder starting with the values from the specified {@link
@@ -143,6 +157,7 @@ public final class DisplayBrightnessState {
             builder.setBrightnessReason(state.getBrightnessReason());
             builder.setDisplayBrightnessStrategyName(state.getDisplayBrightnessStrategyName());
             builder.setShouldUseAutoBrightness(state.getShouldUseAutoBrightness());
+            builder.setIsSlowChange(state.isSlowChange());
             return builder;
         }
 
@@ -234,6 +249,21 @@ public final class DisplayBrightnessState {
          */
         public boolean getShouldUseAutoBrightness() {
             return mShouldUseAutoBrightness;
+        }
+
+        /**
+         * See {@link DisplayBrightnessState#isSlowChange()}.
+         */
+        public Builder setIsSlowChange(boolean shouldUseAutoBrightness) {
+            this.mIsSlowChange = shouldUseAutoBrightness;
+            return this;
+        }
+
+        /**
+         * See {@link DisplayBrightnessState#isSlowChange()}.
+         */
+        public boolean isSlowChange() {
+            return mIsSlowChange;
         }
 
         /**

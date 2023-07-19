@@ -254,7 +254,7 @@ object Flags {
     /** Migrate the indication area to the new keyguard root view. */
     // TODO(b/280067944): Tracking bug.
     @JvmField
-    val MIGRATE_INDICATION_AREA = unreleasedFlag(236, "migrate_indication_area", teamfood = true)
+    val MIGRATE_INDICATION_AREA = releasedFlag(236, "migrate_indication_area")
 
     /**
      * Migrate the bottom area to the new keyguard root view.
@@ -293,6 +293,11 @@ object Flags {
     // TODO(b/288074305): Tracking bug.
     @JvmField
     val MIGRATE_NSSL = unreleasedFlag(242, "migrate_nssl")
+
+    /** Migrate the status view from the notification panel to keyguard root view. */
+    // TODO(b/291767565): Tracking bug.
+    @JvmField
+    val MIGRATE_KEYGUARD_STATUS_VIEW = unreleasedFlag(243, "migrate_keyguard_status_view")
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -362,16 +367,6 @@ object Flags {
 
     // 600- status bar
 
-    // TODO(b/256614753): Tracking Bug
-    val NEW_STATUS_BAR_MOBILE_ICONS = releasedFlag(606, "new_status_bar_mobile_icons")
-
-    // TODO(b/256614751): Tracking Bug
-    val NEW_STATUS_BAR_MOBILE_ICONS_BACKEND =
-        unreleasedFlag(608, "new_status_bar_mobile_icons_backend", teamfood = true)
-
-    // TODO(b/260881289): Tracking Bug
-    val NEW_STATUS_BAR_ICONS_DEBUG_COLORING =
-        unreleasedFlag(611, "new_status_bar_icons_debug_coloring")
 
     // TODO(b/265892345): Tracking Bug
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag(265892345, "plug_in_status_bar_chip")
@@ -411,12 +406,6 @@ object Flags {
     // TODO(b/254512502): Tracking Bug
     val MEDIA_SESSION_ACTIONS = unreleasedFlag(901, "media_session_actions")
 
-    // TODO(b/254512726): Tracking Bug
-    val MEDIA_NEARBY_DEVICES = releasedFlag(903, "media_nearby_devices")
-
-    // TODO(b/254512695): Tracking Bug
-    val MEDIA_MUTE_AWAIT = releasedFlag(904, "media_mute_await")
-
     // TODO(b/254512654): Tracking Bug
     @JvmField val DREAM_MEDIA_COMPLICATION = unreleasedFlag(905, "dream_media_complication")
 
@@ -431,9 +420,6 @@ object Flags {
 
     // TODO(b/263272731): Tracking Bug
     val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag(910, "media_ttt_receiver_success_ripple")
-
-    // TODO(b/265813373): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE = releasedFlag(912, "media_ttt_dismiss_gesture")
 
     // TODO(b/266157412): Tracking Bug
     val MEDIA_RETAIN_SESSIONS = unreleasedFlag(913, "media_retain_sessions")
@@ -780,7 +766,8 @@ object Flags {
 
     // TODO(b/285174336): Tracking Bug
     @JvmField
-    val USE_REPOS_FOR_BOUNCER_SHOWING = unreleasedFlag(2900, "use_repos_for_bouncer_showing")
+    val USE_REPOS_FOR_BOUNCER_SHOWING =
+        unreleasedFlag(2900, "use_repos_for_bouncer_showing", teamfood = true)
 
     // 3100 - Haptic interactions
 

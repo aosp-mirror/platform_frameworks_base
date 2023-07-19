@@ -2615,7 +2615,7 @@ static void android_media_MediaCodec_native_queueLinearBlock(
             return;
         }
         auto cryptoInfo =
-                cryptoInfoObj ? NativeCryptoInfo{size} : NativeCryptoInfo{env, cryptoInfoObj};
+                cryptoInfoObj ? NativeCryptoInfo{env, cryptoInfoObj} : NativeCryptoInfo{size};
         if (env->ExceptionCheck()) {
             // Creation of cryptoInfo failed. Let the exception bubble up.
             return;

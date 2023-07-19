@@ -41,7 +41,7 @@ data class AcquiredFingerprintAuthenticationStatus(val acquiredInfo: Int) :
     FingerprintAuthenticationStatus()
 
 /** Fingerprint authentication failed message. */
-object FailedFingerprintAuthenticationStatus : FingerprintAuthenticationStatus()
+object FailFingerprintAuthenticationStatus : FingerprintAuthenticationStatus()
 
 /** Fingerprint authentication error message */
 data class ErrorFingerprintAuthenticationStatus(
