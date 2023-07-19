@@ -91,7 +91,7 @@ public class ScreenshotTests {
     }
 
     @Test
-    public void testScreenshotSecureLayers() {
+    public void testScreenshotSecureLayers() throws InterruptedException {
         SurfaceControl secureSC = new SurfaceControl.Builder()
                 .setName("SecureChildSurfaceControl")
                 .setBLASTLayer()
@@ -197,6 +197,8 @@ public class ScreenshotTests {
         private static final long WAIT_TIMEOUT_S = 5;
         private final Handler mHandler = new Handler(Looper.getMainLooper());
 
+        private final CountDownLatch mAttachedLatch = new CountDownLatch(1);
+
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -204,7 +206,16 @@ public class ScreenshotTests {
                     PointerIcon.getSystemIcon(this, PointerIcon.TYPE_NULL));
         }
 
-        SurfaceControl.Transaction addChildSc(SurfaceControl surfaceControl) {
+        @Override
+        public void onAttachedToWindow() {
+            super.onAttachedToWindow();
+            mAttachedLatch.countDown();
+        }
+
+        SurfaceControl.Transaction addChildSc(SurfaceControl surfaceControl)
+                throws InterruptedException {
+            assertTrue("Failed to wait for onAttachedToWindow",
+                    mAttachedLatch.await(WAIT_TIMEOUT_S, TimeUnit.SECONDS));
             SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             CountDownLatch countDownLatch = new CountDownLatch(1);
             mHandler.post(() -> {
