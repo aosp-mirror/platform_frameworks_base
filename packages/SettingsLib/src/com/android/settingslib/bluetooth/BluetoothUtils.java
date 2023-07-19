@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
-import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -39,7 +38,7 @@ public class BluetoothUtils {
     private static final String TAG = "BluetoothUtils";
 
     public static final boolean V = false; // verbose logging
-    public static final boolean D = true;  // regular logging
+    public static final boolean D = false; // regular logging
 
     public static final int META_INT_ERROR = -1;
     public static final String BT_ADVANCED_HEADER_ENABLED = "bt_advanced_header_enabled";
@@ -163,21 +162,14 @@ public class BluetoothUtils {
                     resources, ((BitmapDrawable) pair.first).getBitmap()), pair.second);
         }
 
-        int hashCode;
-        if ((cachedDevice.getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID)) {
-            hashCode = new Integer(cachedDevice.getGroupId()).hashCode();
-        } else {
-            hashCode = cachedDevice.getAddress().hashCode();
-        }
-
         return new Pair<>(buildBtRainbowDrawable(context,
-                pair.first, hashCode), pair.second);
+                pair.first, cachedDevice.getAddress().hashCode()), pair.second);
     }
 
     /**
      * Build Bluetooth device icon with rainbow
      */
-    private static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
+    public static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
             int hashCode) {
         final Resources resources = context.getResources();
 

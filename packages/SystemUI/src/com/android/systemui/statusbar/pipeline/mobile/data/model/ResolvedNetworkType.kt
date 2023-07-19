@@ -17,12 +17,6 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.model
 
 import android.telephony.Annotation.NetworkType
-import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
-import com.android.settingslib.SignalIcon
-import com.android.settingslib.mobile.MobileMappings
-import com.android.settingslib.mobile.TelephonyIcons
-import com.android.systemui.log.table.Diffable
-import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 
 /**
@@ -30,19 +24,11 @@ import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
  * on whether or not the display info contains an override type, we may have to call different
  * methods on [MobileMappingsProxy] to generate an icon lookup key.
  */
-sealed interface ResolvedNetworkType : Diffable<ResolvedNetworkType> {
+sealed interface ResolvedNetworkType {
     val lookupKey: String
 
-    override fun logDiffs(prevVal: ResolvedNetworkType, row: TableRowLogger) {
-        if (prevVal != this) {
-            row.logChange(COL_NETWORK_TYPE, this.toString())
-        }
-    }
-
     object UnknownNetworkType : ResolvedNetworkType {
-        override val lookupKey: String = MobileMappings.toIconKey(NETWORK_TYPE_UNKNOWN)
-
-        override fun toString(): String = "Unknown"
+        override val lookupKey: String = "unknown"
     }
 
     data class DefaultNetworkType(
@@ -52,18 +38,4 @@ sealed interface ResolvedNetworkType : Diffable<ResolvedNetworkType> {
     data class OverrideNetworkType(
         override val lookupKey: String,
     ) : ResolvedNetworkType
-
-    /** Represents the carrier merged network. See [CarrierMergedConnectionRepository]. */
-    object CarrierMergedNetworkType : ResolvedNetworkType {
-        // Effectively unused since [iconGroupOverride] is used instead.
-        override val lookupKey: String = "cwf"
-
-        val iconGroupOverride: SignalIcon.MobileIconGroup = TelephonyIcons.CARRIER_MERGED_WIFI
-
-        override fun toString(): String = "CarrierMerged"
-    }
-
-    companion object {
-        private const val COL_NETWORK_TYPE = "networkType"
-    }
 }

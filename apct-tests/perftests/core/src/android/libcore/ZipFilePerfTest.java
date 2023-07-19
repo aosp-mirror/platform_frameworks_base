@@ -20,12 +20,12 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,18 +38,23 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Parameterized.class)
 @LargeTest
 public class ZipFilePerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private File mFile;
 
-    public static Collection<Object[]> getData() {
+    @Parameters(name = "numEntries={0}")
+    public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {{128}, {1024}, {8192}});
     }
 
-    public void setUp(int numEntries) throws Exception {
+    @Parameterized.Parameter(0)
+    public int numEntries;
+
+    @Before
+    public void setUp() throws Exception {
         mFile = File.createTempFile(getClass().getName(), ".zip");
         mFile.deleteOnExit();
         writeEntries(new ZipOutputStream(new FileOutputStream(mFile)), numEntries, 0);
@@ -61,9 +66,7 @@ public class ZipFilePerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
-    public void timeZipFileOpen(int numEntries) throws Exception {
-        setUp(numEntries);
+    public void timeZipFileOpen() throws Exception {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             ZipFile zf = new ZipFile(mFile);

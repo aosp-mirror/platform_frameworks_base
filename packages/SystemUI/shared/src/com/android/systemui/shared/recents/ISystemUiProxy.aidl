@@ -22,7 +22,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.view.MotionEvent;
-import com.android.internal.util.ScreenshotRequest;
 
 import com.android.systemui.shared.recents.model.Task;
 
@@ -88,6 +87,12 @@ interface ISystemUiProxy {
     void notifyPrioritizedRotation(int rotation) = 25;
 
     /**
+     * Handle the provided image as if it was a screenshot.
+     */
+    void handleImageBundleAsScreenshot(in Bundle screenImageBundle, in Rect locationInScreen,
+              in Insets visibleInsets, in Task.TaskKey task) = 28;
+
+    /**
      * Notifies to expand notification panel.
      */
     void expandNotificationPanel() = 29;
@@ -99,6 +104,9 @@ interface ISystemUiProxy {
 
     /** Sets home rotation enabled. */
     void setHomeRotationEnabled(boolean enabled) = 45;
+
+    /** Notifies when taskbar is enabled or disabled */
+    oneway void setTaskbarEnabled(boolean enabled) = 500;
 
     /** Notifies when taskbar status updated */
     oneway void notifyTaskbarStatus(boolean visible, boolean stashed) = 47;
@@ -120,10 +128,5 @@ interface ISystemUiProxy {
      */
     void toggleNotificationPanel() = 50;
 
-    /**
-     * Handle the screenshot request.
-     */
-    void takeScreenshot(in ScreenshotRequest request) = 51;
-
-    // Next id = 52
+    // Next id = 51
 }

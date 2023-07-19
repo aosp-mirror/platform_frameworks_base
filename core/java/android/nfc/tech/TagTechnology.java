@@ -176,7 +176,6 @@ public interface TagTechnology extends Closeable {
      * @see #close()
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or connect is canceled
-     * @throws SecurityException if the tag object is reused after the tag has left the field
      */
     public void connect() throws IOException;
 
@@ -194,7 +193,6 @@ public interface TagTechnology extends Closeable {
      * @see #close()
      * @throws TagLostException if the tag leaves the field
      * @throws IOException if there is an I/O failure, or connect is canceled
-     * @throws SecurityException if the tag object is reused after the tag has left the field
      * @hide
      */
     public void reconnect() throws IOException;
@@ -207,7 +205,6 @@ public interface TagTechnology extends Closeable {
      * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
      *
      * @see #connect()
-     * @throws SecurityException if the tag object is reused after the tag has left the field
      */
     public void close() throws IOException;
 

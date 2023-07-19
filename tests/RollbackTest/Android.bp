@@ -62,7 +62,6 @@ java_test_host {
     static_libs: ["RollbackTestLib", "frameworks-base-hostutils"],
     test_suites: ["general-tests"],
     test_config: "NetworkStagedRollbackTest.xml",
-    data: [":RollbackTest"],
 }
 
 java_test_host {

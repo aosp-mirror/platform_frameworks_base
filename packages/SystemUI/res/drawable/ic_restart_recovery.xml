@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2017 The Dirty Unicorns Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24.000000dp"
+    android:height="24.000000dp"
+    android:viewportWidth="512.000000"
+    android:viewportHeight="512.000000"
+    android:tint="?android:attr/colorControlNormal">
+
+    <group
+        android:translateY="512.000000"
+        android:scaleX="0.100000"
+        android:scaleY="-0.100000">
+        <path
+            android:fillColor="#FF000000"
+            android:strokeWidth="1"
+            android:pathData="M2176 4247 c-25 -25 -26 -31 -66 -312 -32 -231 -25 -210 -83 -239 -72 -35 -188
+-105 -214 -129 -14 -12 -30 -18 -45 -14 -13 3 -117 44 -233 91 -115 47 -222 86
+-237 86 -17 0 -40 -11 -57 -27 -16 -16 -111 -169 -210 -341 -218 -377 -216 -371
+-123 -449 33 -26 94 -75 137 -108 42 -33 106 -83 142 -111 l64 -51 0 -179 0 -179
+-84 -65 c-46 -36 -113 -87 -148 -114 -35 -28 -88 -70 -116 -94 -87 -73 -87 -71 128
+-444 99 -172 194 -325 210 -340 17 -17 40 -28 57 -28 15 0 122 39 237 86 116 47
+219 88 231 91 14 3 42 -10 85 -40 35 -24 101 -63 146 -87 71 -37 82 -46 87 -73 3
+-18 15 -99 26 -182 40 -281 41 -287 66 -312 l23 -23 403 0 c302 1 407 4 418 13 33
+27 41 50 56 158 16 126 54 372 57 375 1 1 38 21 82 44 44 24 109 63 144 87 43 30
+71 43 85 40 12 -3 116 -44 231 -91 116 -47 222 -86 236 -86 45 0 73 34 180 217 56
+98 140 242 186 321 69 119 83 150 83 186 0 48 -11 60 -169 182 -35 27 -102 78 -148
+114 l-84 65 0 180 0 179 153 119 c253 196 248 191 248 242 0 38 -17 73 -126 262
+-69 120 -155 268 -190 329 -64 111 -88 134 -137 134 -12 0 -116 -39 -232 -86 -115
+-47 -218 -88 -227 -91 -11 -3 -45 13 -86 40 -38 25 -105 64 -149 87 l-81 43 -21
+136 c-12 75 -26 177 -32 226 -5 50 -15 105 -20 122 -20 64 -12 63 -457 63 l-403 0
+-23 -23z m564 -1173 c183 -43 338 -163 417 -324 97 -197 97 -373 0 -570 -79 -161
+-234 -281 -417 -324 -270 -64 -565 76 -687 324 -97 196 -97 371 -2 569 98 202 317
+338 549 340 41 0 104 -6 140 -15z" />
+    </group>
+</vector>

@@ -22,7 +22,6 @@ import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioFormat;
 import android.media.AudioFocusInfo;
-import android.media.AudioHalVersionInfo;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
@@ -125,22 +124,18 @@ interface IAudioService {
     @UnsupportedAppUsage
     int getStreamMaxVolume(int streamType);
 
+    void setStreamMaxVolume(int streamType, int maxVol);
+
     List<AudioVolumeGroup> getAudioVolumeGroups();
 
-    void setVolumeGroupVolumeIndex(int groupId, int index, int flags, String callingPackage,
-            in String attributionTag);
+    void setVolumeIndexForAttributes(in AudioAttributes aa, int index, int flags,
+            String callingPackage, in String attributionTag);
 
-    int getVolumeGroupVolumeIndex(int groupId);
+    int getVolumeIndexForAttributes(in AudioAttributes aa);
 
-    int getVolumeGroupMaxVolumeIndex(int groupId);
+    int getMaxVolumeIndexForAttributes(in AudioAttributes aa);
 
-    int getVolumeGroupMinVolumeIndex(int groupId);
-
-    int getLastAudibleVolumeGroupVolume(int groupId);
-
-    boolean isVolumeGroupMuted(int groupId);
-
-    void adjustVolumeGroupVolume(int groupId, int direction, int flags, String callingPackage);
+    int getMinVolumeIndexForAttributes(in AudioAttributes aa);
 
     int getLastAudibleStreamVolume(int streamType);
 
@@ -525,17 +520,12 @@ interface IAudioService {
             in AudioDeviceAttributes device, in List<VolumeInfo> volumes,
             boolean handlesvolumeAdjustment);
 
-    AudioHalVersionInfo getHalVersion();
+    String getHalVersion();
 
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
-    boolean supportsBluetoothVariableLatency();
-
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
-    void setBluetoothVariableLatencyEnabled(boolean enabled);
-
-    @EnforcePermission("MODIFY_AUDIO_ROUTING")
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
-    boolean isBluetoothVariableLatencyEnabled();
+    /**
+     * Internal api to protect Pulse
+     * @hide
+     */
+    void setVisualizerLocked(boolean doLock);
+    boolean isVisualizerLocked(String callingPackage);
 }

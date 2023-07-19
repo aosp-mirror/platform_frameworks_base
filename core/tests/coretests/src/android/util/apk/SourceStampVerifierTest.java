@@ -100,7 +100,7 @@ public class SourceStampVerifierTest {
         SourceStampVerificationResult result =
                 SourceStampVerifier.verify(mPrimaryApk.getAbsolutePath());
 
-        assertFalse(result.isPresent());
+        assertTrue(result.isPresent());
         assertFalse(result.isVerified());
         assertNull(result.getCertificate());
     }

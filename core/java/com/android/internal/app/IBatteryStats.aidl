@@ -145,6 +145,8 @@ interface IBatteryStats {
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
 
+    void noteBluetoothOn(int uid, int reason, String packageName);
+    void noteBluetoothOff(int uid, int reason, String packageName);
     void noteBleScanStarted(in WorkSource ws, boolean isUnoptimized);
     void noteBleScanStopped(in WorkSource ws, boolean isUnoptimized);
     void noteBleScanReset();
@@ -187,4 +189,7 @@ interface IBatteryStats {
     void resetBattery(boolean forceUpdate);
     /** Exposed as a test API. */
     void suspendBatteryInput();
+
+    /** {@hide} */
+    void resetStatistics();
 }

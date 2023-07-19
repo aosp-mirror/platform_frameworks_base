@@ -24,8 +24,8 @@
     android:stateListAnimator="@anim/control_state_list_animator">
     <ImageView
         android:id="@*android:id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:layout_marginBottom="@dimen/global_actions_power_dialog_item_bottom_margin"
         android:scaleType="centerInside"
         android:tint="@color/control_primary_text" />
@@ -35,9 +35,9 @@
         android:layout_height="wrap_content"
         android:marqueeRepeatLimit="marquee_forever"
         android:ellipsize="marquee"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="14dp"
         android:maxLines="1"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:gravity="center"
         android:textColor="@color/control_primary_text"
         android:textAppearance="?android:attr/textAppearanceSmall" />

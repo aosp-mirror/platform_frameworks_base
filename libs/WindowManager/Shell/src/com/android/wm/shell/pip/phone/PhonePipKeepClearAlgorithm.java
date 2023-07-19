@@ -26,14 +26,14 @@ import android.view.Gravity;
 import com.android.wm.shell.R;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
+import com.android.wm.shell.pip.PipKeepClearAlgorithm;
 
 import java.util.Set;
 
 /**
  * Calculates the adjusted position that does not occlude keep clear areas.
  */
-public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithmInterface {
+public class PhonePipKeepClearAlgorithm implements PipKeepClearAlgorithm {
 
     private boolean mKeepClearAreaGravityEnabled =
             SystemProperties.getBoolean(

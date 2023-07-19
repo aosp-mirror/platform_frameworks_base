@@ -30,7 +30,7 @@ import android.hardware.camera2.CameraMetadata;
 import android.view.Display;
 import android.view.Surface;
 
-import java.util.Map;
+import java.util.HashMap;
 
 @RunWith(JUnit4.class)
 public class CameraServiceProxyTest {
@@ -75,22 +75,24 @@ public class CameraServiceProxyTest {
                 /*ignoreResizableAndSdkCheck*/true)).isEqualTo(
                 CameraMetadata.SCALER_ROTATE_AND_CROP_NONE);
         // Check rotation and lens facing combinations
-        Map<Integer, Integer> backFacingMap = Map.of(
-                Surface.ROTATION_0, CameraMetadata.SCALER_ROTATE_AND_CROP_NONE,
-                Surface.ROTATION_90, CameraMetadata.SCALER_ROTATE_AND_CROP_90,
-                Surface.ROTATION_270, CameraMetadata.SCALER_ROTATE_AND_CROP_270,
-                Surface.ROTATION_180, CameraMetadata.SCALER_ROTATE_AND_CROP_180);
+        HashMap<Integer, Integer> backFacingMap = new HashMap<Integer, Integer>() {{
+            put(Surface.ROTATION_0, CameraMetadata.SCALER_ROTATE_AND_CROP_NONE);
+            put(Surface.ROTATION_90, CameraMetadata.SCALER_ROTATE_AND_CROP_90);
+            put(Surface.ROTATION_270, CameraMetadata.SCALER_ROTATE_AND_CROP_270);
+            put(Surface.ROTATION_180, CameraMetadata.SCALER_ROTATE_AND_CROP_180);
+        }};
         taskInfo.isFixedOrientationPortrait = true;
         backFacingMap.forEach((key, value) -> {
             assertThat(CameraServiceProxy.getCropRotateScale(ctx, ctx.getPackageName(), taskInfo,
                     key, CameraCharacteristics.LENS_FACING_BACK,
                     /*ignoreResizableAndSdkCheck*/true)).isEqualTo(value);
         });
-        Map<Integer, Integer> frontFacingMap = Map.of(
-                Surface.ROTATION_0, CameraMetadata.SCALER_ROTATE_AND_CROP_NONE,
-                Surface.ROTATION_90, CameraMetadata.SCALER_ROTATE_AND_CROP_270,
-                Surface.ROTATION_270, CameraMetadata.SCALER_ROTATE_AND_CROP_90,
-                Surface.ROTATION_180, CameraMetadata.SCALER_ROTATE_AND_CROP_180);
+        HashMap<Integer, Integer> frontFacingMap = new HashMap<Integer, Integer>() {{
+            put(Surface.ROTATION_0, CameraMetadata.SCALER_ROTATE_AND_CROP_NONE);
+            put(Surface.ROTATION_90, CameraMetadata.SCALER_ROTATE_AND_CROP_270);
+            put(Surface.ROTATION_270, CameraMetadata.SCALER_ROTATE_AND_CROP_90);
+            put(Surface.ROTATION_180, CameraMetadata.SCALER_ROTATE_AND_CROP_180);
+        }};
         frontFacingMap.forEach((key, value) -> {
             assertThat(CameraServiceProxy.getCropRotateScale(ctx, ctx.getPackageName(), taskInfo,
                     key, CameraCharacteristics.LENS_FACING_FRONT,

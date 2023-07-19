@@ -122,19 +122,16 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
     method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method public long getTotalRam();
-    method @NonNull @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int[] getUidFrozenState(@NonNull int[]);
     method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessCapabilities(int);
     method @RequiresPermission(allOf={android.Manifest.permission.PACKAGE_USAGE_STATS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public int getUidProcessState(int);
     method public void holdLock(android.os.IBinder, int);
     method public static boolean isHighEndGfx();
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void registerUidFrozenStateChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.app.ActivityManager.UidFrozenStateChangedCallback);
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
     method @RequiresPermission(android.Manifest.permission.RESET_APP_ERRORS) public void resetAppErrors();
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void setStopUserOnSwitch(int);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean stopUser(int, boolean);
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void unregisterUidFrozenStateChangedCallback(@NonNull android.app.ActivityManager.UidFrozenStateChangedCallback);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.DUMP) public void waitForBroadcastIdle();
     field public static final long LOCK_DOWN_CLOSE_SYSTEM_DIALOGS = 174664365L; // 0xa692aadL
@@ -144,9 +141,8 @@ package android.app {
     field public static final int PROCESS_CAPABILITY_FOREGROUND_CAMERA = 2; // 0x2
     field public static final int PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 4; // 0x4
-    field @Deprecated public static final int PROCESS_CAPABILITY_NETWORK = 8; // 0x8
+    field public static final int PROCESS_CAPABILITY_NETWORK = 8; // 0x8
     field public static final int PROCESS_CAPABILITY_NONE = 0; // 0x0
-    field public static final int PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK = 8; // 0x8
     field public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4; // 0x4
     field public static final int PROCESS_STATE_TOP = 2; // 0x2
     field public static final int STOP_USER_ON_SWITCH_DEFAULT = -1; // 0xffffffff
@@ -164,12 +160,6 @@ package android.app {
     method @Nullable public String getIconResourcePackage();
   }
 
-  public static interface ActivityManager.UidFrozenStateChangedCallback {
-    method public void onUidFrozenStateChanged(@NonNull int[], @NonNull int[]);
-    field public static final int UID_FROZEN_STATE_FROZEN = 1; // 0x1
-    field public static final int UID_FROZEN_STATE_UNFROZEN = 2; // 0x2
-  }
-
   public class ActivityOptions {
     method public boolean isEligibleForLegacyPermissionPrompt();
     method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
@@ -177,7 +167,6 @@ package android.app {
     method public void setEligibleForLegacyPermissionPrompt(boolean);
     method public static void setExitTransitionTimeout(long);
     method public void setLaunchActivityType(int);
-    method public void setLaunchTaskDisplayAreaFeatureId(int);
     method public void setLaunchWindowingMode(int);
     method public void setLaunchedFromBubble(boolean);
     method public void setTaskAlwaysOnTop(boolean);
@@ -274,7 +263,6 @@ package android.app {
   }
 
   public class BroadcastOptions {
-    ctor public BroadcastOptions();
     ctor public BroadcastOptions(@NonNull android.os.Bundle);
     method @Deprecated public int getMaxManifestReceiverApiLevel();
     method public long getTemporaryAppAllowlistDuration();
@@ -683,7 +671,6 @@ package android.app.usage {
 
   public final class UsageStatsManager {
     method public void forceUsageSourceSettingRead();
-    method public boolean isAppStandbyEnabled();
   }
 
 }
@@ -810,7 +797,6 @@ package android.content.pm {
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_MEDIUM = 180326845L; // 0xabf91bdL
     field public static final float OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE = 1.5f;
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY = 203647190L; // 0xc2368d6L
-    field public static final long OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS = 237531167L; // 0xe28701fL
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
   }
 
@@ -1481,33 +1467,13 @@ package android.media {
     method public static boolean isEncodingLinearPcm(int);
   }
 
-  public final class AudioHalVersionInfo implements java.lang.Comparable<android.media.AudioHalVersionInfo> android.os.Parcelable {
-    method public int compareTo(@NonNull android.media.AudioHalVersionInfo);
-    method public int describeContents();
-    method public int getHalType();
-    method public int getMajorVersion();
-    method public int getMinorVersion();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.media.AudioHalVersionInfo AIDL_1_0;
-    field public static final int AUDIO_HAL_TYPE_AIDL = 1; // 0x1
-    field public static final int AUDIO_HAL_TYPE_HIDL = 0; // 0x0
-    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioHalVersionInfo> CREATOR;
-    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_2_0;
-    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_4_0;
-    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_5_0;
-    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_6_0;
-    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_7_0;
-    field @NonNull public static final android.media.AudioHalVersionInfo HIDL_7_1;
-    field @NonNull public static final java.util.List<android.media.AudioHalVersionInfo> VERSIONS;
-  }
-
   public class AudioManager {
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioRecord getCallDownlinkExtractionAudioRecord(@NonNull android.media.AudioFormat);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioTrack getCallUplinkInjectionAudioTrack(@NonNull android.media.AudioFormat);
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
-    method @Nullable public static android.media.AudioHalVersionInfo getHalVersion();
+    method @Nullable public static String getHalVersion();
     method public static final int[] getPublicStreamTypes();
     method @NonNull public java.util.List<java.lang.Integer> getReportedSurroundFormats();
     method public int getStreamMinVolumeInt(int);
@@ -1698,10 +1664,6 @@ package android.net {
 
 package android.os {
 
-  public class BatteryManager {
-    field public static final int BATTERY_PLUGGED_ANY = 15; // 0xf
-  }
-
   public final class BatteryStatsManager {
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void resetBattery(boolean);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void setBatteryLevel(int, boolean);
@@ -1713,12 +1675,7 @@ package android.os {
   public class Build {
     method public static boolean is64BitAbi(String);
     method public static boolean isDebuggable();
-    field @Nullable public static final String BRAND_FOR_ATTESTATION;
-    field @Nullable public static final String DEVICE_FOR_ATTESTATION;
     field public static final boolean IS_EMULATOR;
-    field @Nullable public static final String MANUFACTURER_FOR_ATTESTATION;
-    field @Nullable public static final String MODEL_FOR_ATTESTATION;
-    field @Nullable public static final String PRODUCT_FOR_ATTESTATION;
   }
 
   public static class Build.VERSION {
@@ -1835,7 +1792,6 @@ package android.os {
   }
 
   public final class PowerManager {
-    method public boolean areAutoPowerSaveModesEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void forceLowPowerStandbyActive(boolean);
     field public static final String ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED = "android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED";
     field @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public static final int SYSTEM_WAKELOCK = -2147483648; // 0x80000000
@@ -1858,6 +1814,10 @@ package android.os {
   public final class StrictMode {
     method public static void conditionallyCheckInstanceCounts();
     method public static void setViolationLogger(android.os.StrictMode.ViolationLogger);
+  }
+
+  public static final class StrictMode.ThreadPolicy.Builder {
+    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectExplicitGc();
   }
 
   public static final class StrictMode.ViolationInfo implements android.os.Parcelable {
@@ -2091,6 +2051,13 @@ package android.os.storage {
     method @NonNull public android.os.storage.StorageVolume.Builder setRemovable(boolean);
     method @NonNull public android.os.storage.StorageVolume.Builder setStorageUuid(@Nullable java.util.UUID);
     method @NonNull public android.os.storage.StorageVolume.Builder setUuid(@Nullable String);
+  }
+
+}
+
+package android.os.strictmode {
+
+  public final class ExplicitGcViolation extends android.os.strictmode.Violation {
   }
 
 }
@@ -2444,7 +2411,6 @@ package android.service.dreams {
   public abstract class DreamOverlayService extends android.app.Service {
     ctor public DreamOverlayService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public void onEndDream();
     method public abstract void onStartDream(@NonNull android.view.WindowManager.LayoutParams);
     method public final void requestExit();
     method public final boolean shouldShowComplications();
@@ -2950,9 +2916,7 @@ package android.view {
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
-    method public void getBoundsOnScreen(@NonNull android.graphics.Rect, boolean);
     method public android.view.View getTooltipView();
-    method public void getWindowDisplayFrame(@NonNull android.graphics.Rect);
     method public boolean isAutofilled();
     method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);

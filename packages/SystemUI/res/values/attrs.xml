@@ -93,6 +93,7 @@
 
     <declare-styleable name="StatusBarWindowView_Layout">
         <attr name="ignoreRightInset" format="boolean" />
+        <attr name="ignoreLeftInset" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="AnimatedImageView">
@@ -213,13 +214,6 @@
         <attr name="biometricsEnrollProgress" format="reference|color" />
         <attr name="biometricsEnrollProgressHelp" format="reference|color" />
         <attr name="biometricsEnrollProgressHelpWithTalkback" format="reference|color" />
-    </declare-styleable>
-
-    <declare-styleable name="SeekBarWithIconButtonsView_Layout">
-        <attr name="max" format="integer" />
-        <attr name="progress" format="integer" />
-        <attr name="iconStartContentDescription" format="reference" />
-        <attr name="iconEndContentDescription" format="reference" />
     </declare-styleable>
 </resources>
 

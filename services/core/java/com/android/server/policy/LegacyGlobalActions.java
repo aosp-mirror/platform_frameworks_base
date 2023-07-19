@@ -268,7 +268,7 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
 
         mItems = new ArrayList<Action>();
         String[] defaultActions = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_globalActionsList);
+                com.android.internal.R.array.custom_config_globalActionsList);
 
         ArraySet<String> addedKeys = new ArraySet<String>();
         for (int i = 0; i < defaultActions.length; i++) {

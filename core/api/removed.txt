@@ -252,22 +252,6 @@ package android.net {
 
 }
 
-package android.nfc {
-
-  public final class NfcAdapter {
-    method @Deprecated public void disableForegroundNdefPush(android.app.Activity);
-    method @Deprecated public void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
-    method @Deprecated public boolean invokeBeam(android.app.Activity);
-    method @Deprecated public boolean isNdefPushEnabled();
-    method @Deprecated public void setBeamPushUris(android.net.Uri[], android.app.Activity);
-    method @Deprecated public void setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity);
-    method @Deprecated public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, android.app.Activity...);
-    method @Deprecated public void setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...);
-    method @Deprecated public void setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...);
-  }
-
-}
-
 package android.os {
 
   public class BatteryManager {

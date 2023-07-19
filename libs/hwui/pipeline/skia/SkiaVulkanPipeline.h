@@ -49,7 +49,6 @@ public:
     void onStop() override;
     bool isSurfaceReady() override;
     bool isContextReady() override;
-    const SkM44& getPixelSnapMatrix() const override;
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
     static sk_sp<Bitmap> allocateHardwareBitmap(renderthread::RenderThread& thread,

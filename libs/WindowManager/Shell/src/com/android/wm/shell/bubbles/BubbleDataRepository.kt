@@ -109,8 +109,7 @@ internal class BubbleDataRepository(
                     b.rawDesiredHeightResId,
                     b.title,
                     b.taskId,
-                    b.locusId?.id,
-                    b.isDismissable
+                    b.locusId?.id
             )
         }
     }
@@ -206,7 +205,6 @@ internal class BubbleDataRepository(
                                 entity.title,
                                 entity.taskId,
                                 entity.locus,
-                                entity.isDismissable,
                                 mainExecutor,
                                 bubbleMetadataFlagListener
                         )

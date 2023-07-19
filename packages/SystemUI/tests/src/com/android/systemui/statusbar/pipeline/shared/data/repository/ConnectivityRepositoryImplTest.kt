@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.pipeline.shared.data.repository
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityInputLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlots
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.DEFAULT_HIDDEN_ICONS_RESOURCE
@@ -52,7 +52,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var connectivitySlots: ConnectivitySlots
     @Mock private lateinit var dumpManager: DumpManager
-    @Mock private lateinit var logger: ConnectivityInputLogger
+    @Mock private lateinit var logger: ConnectivityPipelineLogger
     private lateinit var scope: CoroutineScope
     @Mock private lateinit var tunerService: TunerService
 
@@ -61,15 +61,14 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         scope = CoroutineScope(IMMEDIATE)
 
-        underTest =
-            ConnectivityRepositoryImpl(
-                connectivitySlots,
-                context,
-                dumpManager,
-                logger,
-                scope,
-                tunerService,
-            )
+        underTest = ConnectivityRepositoryImpl(
+            connectivitySlots,
+            context,
+            dumpManager,
+            logger,
+            scope,
+            tunerService,
+        )
     }
 
     @After
@@ -78,179 +77,199 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun forceHiddenSlots_initiallyGetsDefault() =
-        runBlocking(IMMEDIATE) {
-            setUpEthernetWifiMobileSlotNames()
-            context
-                .getOrCreateTestableResources()
-                .addOverride(DEFAULT_HIDDEN_ICONS_RESOURCE, arrayOf(SLOT_WIFI, SLOT_ETHERNET))
-            // Re-create our [ConnectivityRepositoryImpl], since it fetches
-            // config_statusBarIconsToExclude when it's first constructed
-            underTest =
-                ConnectivityRepositoryImpl(
-                    connectivitySlots,
-                    context,
-                    dumpManager,
-                    logger,
-                    scope,
-                    tunerService,
-                )
+    fun forceHiddenSlots_initiallyGetsDefault() = runBlocking(IMMEDIATE) {
+        setUpEthernetWifiMobileSlotNames()
+        context.getOrCreateTestableResources().addOverride(
+            DEFAULT_HIDDEN_ICONS_RESOURCE,
+            arrayOf(SLOT_WIFI, SLOT_ETHERNET)
+        )
+        // Re-create our [ConnectivityRepositoryImpl], since it fetches
+        // config_statusBarIconsToExclude when it's first constructed
+        underTest = ConnectivityRepositoryImpl(
+            connectivitySlots,
+            context,
+            dumpManager,
+            logger,
+            scope,
+            tunerService,
+        )
 
-            var latest: Set<ConnectivitySlot>? = null
-            val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
+        var latest: Set<ConnectivitySlot>? = null
+        val job = underTest
+            .forceHiddenSlots
+            .onEach { latest = it }
+            .launchIn(this)
 
-            assertThat(latest).containsExactly(ConnectivitySlot.ETHERNET, ConnectivitySlot.WIFI)
+        assertThat(latest).containsExactly(ConnectivitySlot.ETHERNET, ConnectivitySlot.WIFI)
 
-            job.cancel()
-        }
-
-    @Test
-    fun forceHiddenSlots_slotNamesAdded_flowHasSlots() =
-        runBlocking(IMMEDIATE) {
-            setUpEthernetWifiMobileSlotNames()
-
-            var latest: Set<ConnectivitySlot>? = null
-            val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
-
-            getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, SLOT_MOBILE)
-
-            assertThat(latest).containsExactly(ConnectivitySlot.MOBILE)
-
-            job.cancel()
-        }
+        job.cancel()
+    }
 
     @Test
-    fun forceHiddenSlots_wrongKey_doesNotUpdate() =
-        runBlocking(IMMEDIATE) {
-            setUpEthernetWifiMobileSlotNames()
+    fun forceHiddenSlots_slotNamesAdded_flowHasSlots() = runBlocking(IMMEDIATE) {
+        setUpEthernetWifiMobileSlotNames()
 
-            var latest: Set<ConnectivitySlot>? = null
-            val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
+        var latest: Set<ConnectivitySlot>? = null
+        val job = underTest
+            .forceHiddenSlots
+            .onEach { latest = it }
+            .launchIn(this)
 
-            getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, SLOT_MOBILE)
+        getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, SLOT_MOBILE)
 
-            // WHEN onTuningChanged with the wrong key
-            getTunable().onTuningChanged("wrongKey", SLOT_WIFI)
-            yield()
+        assertThat(latest).containsExactly(ConnectivitySlot.MOBILE)
 
-            // THEN we didn't update our value and still have the old one
-            assertThat(latest).containsExactly(ConnectivitySlot.MOBILE)
-
-            job.cancel()
-        }
+        job.cancel()
+    }
 
     @Test
-    fun forceHiddenSlots_slotNamesAddedThenNull_flowHasDefault() =
-        runBlocking(IMMEDIATE) {
-            setUpEthernetWifiMobileSlotNames()
-            context
-                .getOrCreateTestableResources()
-                .addOverride(DEFAULT_HIDDEN_ICONS_RESOURCE, arrayOf(SLOT_WIFI, SLOT_ETHERNET))
-            // Re-create our [ConnectivityRepositoryImpl], since it fetches
-            // config_statusBarIconsToExclude when it's first constructed
-            underTest =
-                ConnectivityRepositoryImpl(
-                    connectivitySlots,
-                    context,
-                    dumpManager,
-                    logger,
-                    scope,
-                    tunerService,
-                )
+    fun forceHiddenSlots_wrongKey_doesNotUpdate() = runBlocking(IMMEDIATE) {
+        setUpEthernetWifiMobileSlotNames()
 
-            var latest: Set<ConnectivitySlot>? = null
-            val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
+        var latest: Set<ConnectivitySlot>? = null
+        val job = underTest
+            .forceHiddenSlots
+            .onEach { latest = it }
+            .launchIn(this)
 
-            // First, update the slots
-            getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, SLOT_MOBILE)
-            assertThat(latest).containsExactly(ConnectivitySlot.MOBILE)
+        getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, SLOT_MOBILE)
 
-            // WHEN we update to a null value
-            getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, null)
-            yield()
+        // WHEN onTuningChanged with the wrong key
+        getTunable().onTuningChanged("wrongKey", SLOT_WIFI)
+        yield()
 
-            // THEN we go back to our default value
-            assertThat(latest).containsExactly(ConnectivitySlot.ETHERNET, ConnectivitySlot.WIFI)
+        // THEN we didn't update our value and still have the old one
+        assertThat(latest).containsExactly(ConnectivitySlot.MOBILE)
 
-            job.cancel()
-        }
+        job.cancel()
+    }
 
     @Test
-    fun forceHiddenSlots_someInvalidSlotNames_flowHasValidSlotsOnly() =
-        runBlocking(IMMEDIATE) {
-            var latest: Set<ConnectivitySlot>? = null
-            val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
+    fun forceHiddenSlots_slotNamesAddedThenNull_flowHasDefault() = runBlocking(IMMEDIATE) {
+        setUpEthernetWifiMobileSlotNames()
+        context.getOrCreateTestableResources().addOverride(
+            DEFAULT_HIDDEN_ICONS_RESOURCE,
+            arrayOf(SLOT_WIFI, SLOT_ETHERNET)
+        )
+        // Re-create our [ConnectivityRepositoryImpl], since it fetches
+        // config_statusBarIconsToExclude when it's first constructed
+        underTest = ConnectivityRepositoryImpl(
+            connectivitySlots,
+            context,
+            dumpManager,
+            logger,
+            scope,
+            tunerService,
+        )
 
-            whenever(connectivitySlots.getSlotFromName(SLOT_WIFI)).thenReturn(ConnectivitySlot.WIFI)
-            whenever(connectivitySlots.getSlotFromName(SLOT_MOBILE)).thenReturn(null)
+        var latest: Set<ConnectivitySlot>? = null
+        val job = underTest
+            .forceHiddenSlots
+            .onEach { latest = it }
+            .launchIn(this)
 
-            getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, "$SLOT_WIFI,$SLOT_MOBILE")
+        // First, update the slots
+        getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, SLOT_MOBILE)
+        assertThat(latest).containsExactly(ConnectivitySlot.MOBILE)
 
-            assertThat(latest).containsExactly(ConnectivitySlot.WIFI)
+        // WHEN we update to a null value
+        getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, null)
+        yield()
 
-            job.cancel()
-        }
+        // THEN we go back to our default value
+        assertThat(latest).containsExactly(ConnectivitySlot.ETHERNET, ConnectivitySlot.WIFI)
 
-    @Test
-    fun forceHiddenSlots_someEmptySlotNames_flowHasValidSlotsOnly() =
-        runBlocking(IMMEDIATE) {
-            setUpEthernetWifiMobileSlotNames()
-
-            var latest: Set<ConnectivitySlot>? = null
-            val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
-
-            // WHEN there's empty and blank slot names
-            getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, "$SLOT_MOBILE,  ,,$SLOT_WIFI")
-
-            // THEN we skip that slot but still process the other ones
-            assertThat(latest).containsExactly(ConnectivitySlot.WIFI, ConnectivitySlot.MOBILE)
-
-            job.cancel()
-        }
-
-    @Test
-    fun forceHiddenSlots_allInvalidOrEmptySlotNames_flowHasEmpty() =
-        runBlocking(IMMEDIATE) {
-            var latest: Set<ConnectivitySlot>? = null
-            val job = underTest.forceHiddenSlots.onEach { latest = it }.launchIn(this)
-
-            whenever(connectivitySlots.getSlotFromName(SLOT_WIFI)).thenReturn(null)
-            whenever(connectivitySlots.getSlotFromName(SLOT_ETHERNET)).thenReturn(null)
-            whenever(connectivitySlots.getSlotFromName(SLOT_MOBILE)).thenReturn(null)
-
-            getTunable()
-                .onTuningChanged(
-                    HIDDEN_ICONS_TUNABLE_KEY,
-                    "$SLOT_MOBILE,,$SLOT_WIFI,$SLOT_ETHERNET,,,"
-                )
-
-            assertThat(latest).isEmpty()
-
-            job.cancel()
-        }
+        job.cancel()
+    }
 
     @Test
-    fun forceHiddenSlots_newSubscriberGetsCurrentValue() =
-        runBlocking(IMMEDIATE) {
-            setUpEthernetWifiMobileSlotNames()
+    fun forceHiddenSlots_someInvalidSlotNames_flowHasValidSlotsOnly() = runBlocking(IMMEDIATE) {
+        var latest: Set<ConnectivitySlot>? = null
+        val job = underTest
+            .forceHiddenSlots
+            .onEach { latest = it }
+            .launchIn(this)
 
-            var latest1: Set<ConnectivitySlot>? = null
-            val job1 = underTest.forceHiddenSlots.onEach { latest1 = it }.launchIn(this)
+        whenever(connectivitySlots.getSlotFromName(SLOT_WIFI))
+            .thenReturn(ConnectivitySlot.WIFI)
+        whenever(connectivitySlots.getSlotFromName(SLOT_MOBILE)).thenReturn(null)
 
-            getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, "$SLOT_WIFI,$SLOT_ETHERNET")
+        getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, "$SLOT_WIFI,$SLOT_MOBILE")
 
-            assertThat(latest1).containsExactly(ConnectivitySlot.WIFI, ConnectivitySlot.ETHERNET)
+        assertThat(latest).containsExactly(ConnectivitySlot.WIFI)
 
-            // WHEN we add a second subscriber after having already emitted a value
-            var latest2: Set<ConnectivitySlot>? = null
-            val job2 = underTest.forceHiddenSlots.onEach { latest2 = it }.launchIn(this)
+        job.cancel()
+    }
 
-            // THEN the second subscribe receives the already-emitted value
-            assertThat(latest2).containsExactly(ConnectivitySlot.WIFI, ConnectivitySlot.ETHERNET)
+    @Test
+    fun forceHiddenSlots_someEmptySlotNames_flowHasValidSlotsOnly() = runBlocking(IMMEDIATE) {
+        setUpEthernetWifiMobileSlotNames()
 
-            job1.cancel()
-            job2.cancel()
-        }
+        var latest: Set<ConnectivitySlot>? = null
+        val job = underTest
+            .forceHiddenSlots
+            .onEach { latest = it }
+            .launchIn(this)
+
+        // WHEN there's empty and blank slot names
+        getTunable().onTuningChanged(
+            HIDDEN_ICONS_TUNABLE_KEY, "$SLOT_MOBILE,  ,,$SLOT_WIFI"
+        )
+
+        // THEN we skip that slot but still process the other ones
+        assertThat(latest).containsExactly(ConnectivitySlot.WIFI, ConnectivitySlot.MOBILE)
+
+        job.cancel()
+    }
+
+    @Test
+    fun forceHiddenSlots_allInvalidOrEmptySlotNames_flowHasEmpty() = runBlocking(IMMEDIATE) {
+        var latest: Set<ConnectivitySlot>? = null
+        val job = underTest
+            .forceHiddenSlots
+            .onEach { latest = it }
+            .launchIn(this)
+
+        whenever(connectivitySlots.getSlotFromName(SLOT_WIFI)).thenReturn(null)
+        whenever(connectivitySlots.getSlotFromName(SLOT_ETHERNET)).thenReturn(null)
+        whenever(connectivitySlots.getSlotFromName(SLOT_MOBILE)).thenReturn(null)
+
+        getTunable().onTuningChanged(
+            HIDDEN_ICONS_TUNABLE_KEY, "$SLOT_MOBILE,,$SLOT_WIFI,$SLOT_ETHERNET,,,"
+        )
+
+        assertThat(latest).isEmpty()
+
+        job.cancel()
+    }
+
+    @Test
+    fun forceHiddenSlots_newSubscriberGetsCurrentValue() = runBlocking(IMMEDIATE) {
+        setUpEthernetWifiMobileSlotNames()
+
+        var latest1: Set<ConnectivitySlot>? = null
+        val job1 = underTest
+            .forceHiddenSlots
+            .onEach { latest1 = it }
+            .launchIn(this)
+
+        getTunable().onTuningChanged(HIDDEN_ICONS_TUNABLE_KEY, "$SLOT_WIFI,$SLOT_ETHERNET")
+
+        assertThat(latest1).containsExactly(ConnectivitySlot.WIFI, ConnectivitySlot.ETHERNET)
+
+        // WHEN we add a second subscriber after having already emitted a value
+        var latest2: Set<ConnectivitySlot>? = null
+        val job2 = underTest
+            .forceHiddenSlots
+            .onEach { latest2 = it }
+            .launchIn(this)
+
+        // THEN the second subscribe receives the already-emitted value
+        assertThat(latest2).containsExactly(ConnectivitySlot.WIFI, ConnectivitySlot.ETHERNET)
+
+        job1.cancel()
+        job2.cancel()
+    }
 
     private fun getTunable(): TunerService.Tunable {
         val callbackCaptor = argumentCaptor<TunerService.Tunable>()
@@ -261,8 +280,10 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     private fun setUpEthernetWifiMobileSlotNames() {
         whenever(connectivitySlots.getSlotFromName(SLOT_ETHERNET))
             .thenReturn(ConnectivitySlot.ETHERNET)
-        whenever(connectivitySlots.getSlotFromName(SLOT_WIFI)).thenReturn(ConnectivitySlot.WIFI)
-        whenever(connectivitySlots.getSlotFromName(SLOT_MOBILE)).thenReturn(ConnectivitySlot.MOBILE)
+        whenever(connectivitySlots.getSlotFromName(SLOT_WIFI))
+            .thenReturn(ConnectivitySlot.WIFI)
+        whenever(connectivitySlots.getSlotFromName(SLOT_MOBILE))
+            .thenReturn(ConnectivitySlot.MOBILE)
     }
 
     companion object {

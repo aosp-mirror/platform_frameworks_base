@@ -21,11 +21,12 @@ import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
+import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
+import com.android.systemui.statusbar.phone.KeyguardBouncer.EXPANSION_VISIBLE
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 
 /** Models UI state for the lock screen bouncer; handles user input. */
 class KeyguardBouncerViewModel
@@ -37,11 +38,18 @@ constructor(
     /** Observe on bouncer expansion amount. */
     val bouncerExpansionAmount: Flow<Float> = interactor.panelExpansionAmount
 
-    /** Can the user interact with the view? */
-    val isInteractable: Flow<Boolean> = interactor.isInteractable
+    /** Observe on bouncer visibility. */
+    val isBouncerVisible: Flow<Boolean> = interactor.isVisible
 
-    /** Observe whether bouncer is showing or not. */
-    val isShowing: Flow<Boolean> = interactor.isShowing
+    /** Observe whether bouncer is showing. */
+    val show: Flow<KeyguardBouncerModel> = interactor.show
+
+    /** Observe visible expansion when bouncer is showing. */
+    val showWithFullExpansion: Flow<KeyguardBouncerModel> =
+        interactor.show.filter { it.expansionAmount == EXPANSION_VISIBLE }
+
+    /** Observe whether bouncer is hiding. */
+    val hide: Flow<Unit> = interactor.hide
 
     /** Observe whether bouncer is starting to hide. */
     val startingToHide: Flow<Unit> = interactor.startingToHide
@@ -61,16 +69,8 @@ constructor(
     /** Observe whether keyguard is authenticated already. */
     val keyguardAuthenticated: Flow<Boolean> = interactor.keyguardAuthenticated
 
-    /** Observe whether the side fps is showing. */
-    val sideFpsShowing: Flow<Boolean> = interactor.sideFpsShowing
-
-    /** Observe whether we should update fps is showing. */
-    val shouldUpdateSideFps: Flow<Unit> =
-        merge(
-            interactor.isShowing.map {},
-            interactor.startingToHide,
-            interactor.startingDisappearAnimation.filterNotNull().map {}
-        )
+    /** Observe whether screen is turned off. */
+    val screenTurnedOff: Flow<Unit> = interactor.screenTurnedOff
 
     /** Observe whether we want to update resources. */
     fun notifyUpdateResources() {
@@ -85,10 +85,6 @@ constructor(
     /** Notifies that the message was shown. */
     fun onMessageShown() {
         interactor.onMessageShown()
-    }
-
-    fun updateSideFpsVisibility() {
-        interactor.updateSideFpsVisibility()
     }
 
     /** Observe whether back button is enabled. */

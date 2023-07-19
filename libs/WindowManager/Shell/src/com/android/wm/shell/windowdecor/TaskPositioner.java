@@ -19,13 +19,11 @@ package com.android.wm.shell.windowdecor;
 import android.annotation.IntDef;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.util.DisplayMetrics;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.common.DisplayController;
 
-class TaskPositioner implements DragPositioningCallback {
+class TaskPositioner implements DragResizeCallback {
 
     @IntDef({CTRL_TYPE_UNDEFINED, CTRL_TYPE_LEFT, CTRL_TYPE_RIGHT, CTRL_TYPE_TOP, CTRL_TYPE_BOTTOM})
     @interface CtrlType {}
@@ -37,154 +35,92 @@ class TaskPositioner implements DragPositioningCallback {
     static final int CTRL_TYPE_BOTTOM = 8;
 
     private final ShellTaskOrganizer mTaskOrganizer;
-    private final DisplayController mDisplayController;
     private final WindowDecoration mWindowDecoration;
 
-    private final Rect mTempBounds = new Rect();
     private final Rect mTaskBoundsAtDragStart = new Rect();
-    private final PointF mRepositionStartPoint = new PointF();
-    private final Rect mRepositionTaskBounds = new Rect();
-    private boolean mHasMoved = false;
+    private final PointF mResizeStartPoint = new PointF();
+    private final Rect mResizeTaskBounds = new Rect();
+    // Whether the |dragResizing| hint should be sent with the next bounds change WCT.
+    // Used to optimized fluid resizing of freeform tasks.
+    private boolean mPendingDragResizeHint = false;
 
     private int mCtrlType;
     private DragStartListener mDragStartListener;
 
     TaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
-            DisplayController displayController) {
-        this(taskOrganizer, windowDecoration, displayController, dragStartListener -> {});
-    }
-
-    TaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
-            DisplayController displayController, DragStartListener dragStartListener) {
+            DragStartListener dragStartListener) {
         mTaskOrganizer = taskOrganizer;
         mWindowDecoration = windowDecoration;
-        mDisplayController = displayController;
         mDragStartListener = dragStartListener;
     }
 
     @Override
-    public void onDragPositioningStart(int ctrlType, float x, float y) {
-        mHasMoved = false;
+    public void onDragResizeStart(int ctrlType, float x, float y) {
+        if (ctrlType != CTRL_TYPE_UNDEFINED) {
+            // The task is being resized, send the |dragResizing| hint to core with the first
+            // bounds-change wct.
+            mPendingDragResizeHint = true;
+        }
 
         mDragStartListener.onDragStart(mWindowDecoration.mTaskInfo.taskId);
         mCtrlType = ctrlType;
 
         mTaskBoundsAtDragStart.set(
                 mWindowDecoration.mTaskInfo.configuration.windowConfiguration.getBounds());
-        mRepositionStartPoint.set(x, y);
+        mResizeStartPoint.set(x, y);
     }
 
     @Override
-    public void onDragPositioningMove(float x, float y) {
+    public void onDragResizeMove(float x, float y) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (changeBounds(wct, x, y)) {
-            // The task is being resized, send the |dragResizing| hint to core with the first
-            // bounds-change wct.
-            if (!mHasMoved && mCtrlType != CTRL_TYPE_UNDEFINED) {
+            if (mPendingDragResizeHint) {
                 // This is the first bounds change since drag resize operation started.
                 wct.setDragResizing(mWindowDecoration.mTaskInfo.token, true /* dragResizing */);
+                mPendingDragResizeHint = false;
             }
             mTaskOrganizer.applyTransaction(wct);
-            mHasMoved = true;
         }
     }
 
     @Override
-    public void onDragPositioningEnd(float x, float y) {
-        // |mHasMoved| being false means there is no real change to the task bounds in WM core, so
-        // we don't need a WCT to finish it.
-        if (mHasMoved) {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.setDragResizing(mWindowDecoration.mTaskInfo.token, false /* dragResizing */);
-            changeBounds(wct, x, y);
-            mTaskOrganizer.applyTransaction(wct);
-        }
+    public void onDragResizeEnd(float x, float y) {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setDragResizing(mWindowDecoration.mTaskInfo.token, false /* dragResizing */);
+        changeBounds(wct, x, y);
+        mTaskOrganizer.applyTransaction(wct);
 
-        mCtrlType = CTRL_TYPE_UNDEFINED;
+        mCtrlType = 0;
         mTaskBoundsAtDragStart.setEmpty();
-        mRepositionStartPoint.set(0, 0);
-        mHasMoved = false;
+        mResizeStartPoint.set(0, 0);
+        mPendingDragResizeHint = false;
     }
 
     private boolean changeBounds(WindowContainerTransaction wct, float x, float y) {
-        // |mRepositionTaskBounds| is the bounds last reported if |mHasMoved| is true. If it's not
-        // true, we can compare it against |mTaskBoundsAtDragStart|.
-        final int oldLeft = mHasMoved ? mRepositionTaskBounds.left : mTaskBoundsAtDragStart.left;
-        final int oldTop = mHasMoved ? mRepositionTaskBounds.top : mTaskBoundsAtDragStart.top;
-        final int oldRight = mHasMoved ? mRepositionTaskBounds.right : mTaskBoundsAtDragStart.right;
-        final int oldBottom =
-                mHasMoved ? mRepositionTaskBounds.bottom : mTaskBoundsAtDragStart.bottom;
-
-        final float deltaX = x - mRepositionStartPoint.x;
-        final float deltaY = y - mRepositionStartPoint.y;
-        mRepositionTaskBounds.set(mTaskBoundsAtDragStart);
-
-        final Rect stableBounds = mTempBounds;
-        // Make sure the new resizing destination in any direction falls within the stable bounds.
-        // If not, set the bounds back to the old location that was valid to avoid conflicts with
-        // some regions such as the gesture area.
-        mDisplayController.getDisplayLayout(mWindowDecoration.mDisplay.getDisplayId())
-                .getStableBounds(stableBounds);
+        float deltaX = x - mResizeStartPoint.x;
+        mResizeTaskBounds.set(mTaskBoundsAtDragStart);
         if ((mCtrlType & CTRL_TYPE_LEFT) != 0) {
-            final int candidateLeft = mRepositionTaskBounds.left + (int) deltaX;
-            mRepositionTaskBounds.left = (candidateLeft > stableBounds.left)
-                    ? candidateLeft : oldLeft;
+            mResizeTaskBounds.left += deltaX;
         }
         if ((mCtrlType & CTRL_TYPE_RIGHT) != 0) {
-            final int candidateRight = mRepositionTaskBounds.right + (int) deltaX;
-            mRepositionTaskBounds.right = (candidateRight < stableBounds.right)
-                    ? candidateRight : oldRight;
+            mResizeTaskBounds.right += deltaX;
         }
+        float deltaY = y - mResizeStartPoint.y;
         if ((mCtrlType & CTRL_TYPE_TOP) != 0) {
-            final int candidateTop = mRepositionTaskBounds.top + (int) deltaY;
-            mRepositionTaskBounds.top = (candidateTop > stableBounds.top)
-                    ? candidateTop : oldTop;
+            mResizeTaskBounds.top += deltaY;
         }
         if ((mCtrlType & CTRL_TYPE_BOTTOM) != 0) {
-            final int candidateBottom = mRepositionTaskBounds.bottom + (int) deltaY;
-            mRepositionTaskBounds.bottom = (candidateBottom < stableBounds.bottom)
-                    ? candidateBottom : oldBottom;
+            mResizeTaskBounds.bottom += deltaY;
         }
-        if (mCtrlType == CTRL_TYPE_UNDEFINED) {
-            mRepositionTaskBounds.offset((int) deltaX, (int) deltaY);
+        if (mCtrlType == 0) {
+            mResizeTaskBounds.offset((int) deltaX, (int) deltaY);
         }
 
-        // If width or height are negative or less than the minimum width or height, revert the
-        // respective bounds to use previous bound dimensions.
-        if (mRepositionTaskBounds.width() < getMinWidth()) {
-            mRepositionTaskBounds.right = oldRight;
-            mRepositionTaskBounds.left = oldLeft;
+        if (!mResizeTaskBounds.isEmpty()) {
+            wct.setBounds(mWindowDecoration.mTaskInfo.token, mResizeTaskBounds);
+            return true;
         }
-        if (mRepositionTaskBounds.height() < getMinHeight()) {
-            mRepositionTaskBounds.top = oldTop;
-            mRepositionTaskBounds.bottom = oldBottom;
-        }
-        // If there are no changes to the bounds after checking new bounds against minimum width
-        // and height, do not set bounds and return false
-        if (oldLeft == mRepositionTaskBounds.left && oldTop == mRepositionTaskBounds.top
-                && oldRight == mRepositionTaskBounds.right
-                && oldBottom == mRepositionTaskBounds.bottom) {
-            return false;
-        }
-
-        wct.setBounds(mWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
-        return true;
-    }
-
-    private float getMinWidth() {
-        return mWindowDecoration.mTaskInfo.minWidth < 0 ? getDefaultMinSize()
-                : mWindowDecoration.mTaskInfo.minWidth;
-    }
-
-    private float getMinHeight() {
-        return mWindowDecoration.mTaskInfo.minHeight < 0 ? getDefaultMinSize()
-                : mWindowDecoration.mTaskInfo.minHeight;
-    }
-
-    private float getDefaultMinSize() {
-        float density =  mDisplayController.getDisplayLayout(mWindowDecoration.mTaskInfo.displayId)
-                .densityDpi() * DisplayMetrics.DENSITY_DEFAULT_SCALE;
-        return mWindowDecoration.mTaskInfo.defaultMinSize * density;
+        return false;
     }
 
     interface DragStartListener {

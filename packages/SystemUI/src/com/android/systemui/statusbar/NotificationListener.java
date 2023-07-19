@@ -290,8 +290,7 @@ public class NotificationListener extends NotificationListenerWithPlugins implem
                     false,
                     null,
                     0,
-                    false,
-                    0
+                    false
             );
         }
         return ranking;

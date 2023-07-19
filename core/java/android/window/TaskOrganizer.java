@@ -152,31 +152,15 @@ public class TaskOrganizer extends WindowOrganizer {
      * @param windowingMode Windowing mode to put the root task in.
      * @param launchCookie Launch cookie to associate with the task so that is can be identified
      *                     when the {@link ITaskOrganizer#onTaskAppeared} callback is called.
-     * @param removeWithTaskOrganizer True if this task should be removed when organizer destroyed.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void createRootTask(int displayId, int windowingMode, @Nullable IBinder launchCookie,
-            boolean removeWithTaskOrganizer) {
-        try {
-            mTaskOrganizerController.createRootTask(displayId, windowingMode, launchCookie,
-                    removeWithTaskOrganizer);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Creates a persistent root task in WM for a particular windowing-mode.
-     * @param displayId The display to create the root task on.
-     * @param windowingMode Windowing mode to put the root task in.
-     * @param launchCookie Launch cookie to associate with the task so that is can be identified
-     *                     when the {@link ITaskOrganizer#onTaskAppeared} callback is called.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     @Nullable
     public void createRootTask(int displayId, int windowingMode, @Nullable IBinder launchCookie) {
-        createRootTask(displayId, windowingMode, launchCookie, false /* removeWithTaskOrganizer */);
+        try {
+            mTaskOrganizerController.createRootTask(displayId, windowingMode, launchCookie);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** Deletes a persistent root task in WM */
@@ -270,24 +254,17 @@ public class TaskOrganizer extends WindowOrganizer {
 
     /**
      * Controls whether ignore orientation request logic in {@link
-     * com.android.server.wm.DisplayArea} is disabled at runtime and how to optionally map some
-     * requested orientation to others.
+     * com.android.server.wm.DisplayArea} is disabled at runtime.
      *
-     * @param isIgnoreOrientationRequestDisabled when {@code true}, the system always ignores the
-     *           value of  {@link com.android.server.wm.DisplayArea#getIgnoreOrientationRequest}
-     *           and app requested orientation is respected.
-     * @param fromOrientations The orientations we want to map to the correspondent orientations
-     *                        in toOrientation.
-     * @param toOrientations The orientations we map to the ones in fromOrientations at the same
-     *                       index
+     * @param isDisabled when {@code true}, the system always ignores the value of {@link
+     *                   com.android.server.wm.DisplayArea#getIgnoreOrientationRequest} and app
+     *                   requested orientation is respected.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
-    public void setOrientationRequestPolicy(boolean isIgnoreOrientationRequestDisabled,
-            @Nullable int[] fromOrientations, @Nullable int[] toOrientations) {
+    public void setIsIgnoreOrientationRequestDisabled(boolean isDisabled) {
         try {
-            mTaskOrganizerController.setOrientationRequestPolicy(isIgnoreOrientationRequestDisabled,
-                    fromOrientations, toOrientations);
+            mTaskOrganizerController.setIsIgnoreOrientationRequestDisabled(isDisabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

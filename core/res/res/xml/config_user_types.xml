@@ -112,4 +112,47 @@ type, if the former 'user-type's version of device is less than or equal to 'whe
 
 -->
 <user-types>
+    <profile-type
+        name='android.os.usertype.profile.MANAGED'
+        max-allowed-per-parent='16'
+        icon-badge='@android:drawable/ic_corp_icon_badge_case'
+        badge-plain='@android:drawable/ic_corp_badge_case'
+        badge-no-background='@android:drawable/ic_corp_badge_no_background' >
+        <badge-labels>
+            <item res='@android:string/managed_profile_label_badge' />
+            <item res='@android:string/managed_profile_label_badge_2' />
+            <item res='@android:string/managed_profile_label_badge_3' />
+            <item res='@android:string/managed_profile_label_badge_4' />
+            <item res='@android:string/managed_profile_label_badge_5' />
+            <item res='@android:string/managed_profile_label_badge_6' />
+            <item res='@android:string/managed_profile_label_badge_7' />
+            <item res='@android:string/managed_profile_label_badge_8' />
+            <item res='@android:string/managed_profile_label_badge_9' />
+            <item res='@android:string/managed_profile_label_badge_10' />
+            <item res='@android:string/managed_profile_label_badge_11' />
+            <item res='@android:string/managed_profile_label_badge_12' />
+            <item res='@android:string/managed_profile_label_badge_13' />
+            <item res='@android:string/managed_profile_label_badge_14' />
+            <item res='@android:string/managed_profile_label_badge_15' />
+            <item res='@android:string/managed_profile_label_badge_16' />
+        </badge-labels>
+        <badge-colors>
+            <item res='@android:color/profile_badge_1' />
+            <item res='@android:color/profile_badge_2' />
+            <item res='@android:color/profile_badge_3' />
+            <item res='@android:color/profile_badge_4' />
+            <item res='@android:color/profile_badge_5' />
+            <item res='@android:color/profile_badge_6' />
+            <item res='@android:color/profile_badge_7' />
+            <item res='@android:color/profile_badge_8' />
+            <item res='@android:color/profile_badge_9' />
+            <item res='@android:color/profile_badge_10' />
+            <item res='@android:color/profile_badge_11' />
+            <item res='@android:color/profile_badge_12' />
+            <item res='@android:color/profile_badge_13' />
+            <item res='@android:color/profile_badge_14' />
+            <item res='@android:color/profile_badge_15' />
+            <item res='@android:color/profile_badge_16' />
+        </badge-colors>
+    </profile-type>
 </user-types>

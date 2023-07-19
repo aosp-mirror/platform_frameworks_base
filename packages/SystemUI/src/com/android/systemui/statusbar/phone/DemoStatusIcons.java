@@ -40,7 +40,6 @@ import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
-import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger;
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView;
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
 import com.android.systemui.statusbar.pipeline.wifi.ui.view.ModernStatusBarWifiView;
@@ -152,12 +151,6 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
             int iconId = bt.equals("connected")
                     ? R.drawable.stat_sys_data_bluetooth_connected : 0;
             updateSlot("bluetooth", null, iconId);
-        }
-        String location = args.getString("location");
-        if (location != null) {
-            int iconId = location.equals("show") ? PhoneStatusBarPolicy.LOCATION_STATUS_ICON_ID
-                    : 0;
-            updateSlot("location", null, iconId);
         }
         String alarm = args.getString("alarm");
         if (alarm != null) {
@@ -289,14 +282,10 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
      * @param mobileContext possibly mcc/mnc overridden mobile context
      * @param subId the subscriptionId for this mobile view
      */
-    public void addModernMobileView(
-            Context mobileContext,
-            MobileViewLogger mobileViewLogger,
-            int subId) {
+    public void addModernMobileView(Context mobileContext, int subId) {
         Log.d(TAG, "addModernMobileView (subId=" + subId + ")");
         ModernStatusBarMobileView view = ModernStatusBarMobileView.constructAndBind(
                 mobileContext,
-                mobileViewLogger,
                 "mobile",
                 mMobileIconsViewModel.viewModelForSub(subId, mLocation)
         );

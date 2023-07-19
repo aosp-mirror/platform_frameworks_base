@@ -497,10 +497,10 @@ public class IntervalStats {
             }
             packageStats.put(usageStats.mPackageName, usageStats);
         }
-        if (dataOmitted) {
+        /* if (dataOmitted) {
             Slog.d(TAG, "Unable to parse usage stats packages: "
                     + Arrays.toString(omittedTokens.toArray()));
-        }
+        } */
         return dataOmitted;
     }
 

@@ -315,7 +315,6 @@ interface Roundable {
 
 /**
  * State object for a `Roundable` class.
- *
  * @param targetView Will handle the [AnimatableProperty]
  * @param roundable Target of the radius animation
  * @param maxRadius Max corner radius in pixels
@@ -437,6 +436,7 @@ interface SourceType {
          * This is the most convenient way to define a new [SourceType].
          *
          * For example:
+         *
          * ```kotlin
          *     private val SECTION = SourceType.from("Section")
          * ```

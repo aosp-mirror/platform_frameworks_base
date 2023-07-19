@@ -340,7 +340,7 @@ public final class NfcFServiceInfo implements Parcelable {
      * @param proto the ProtoOutputStream to write to
      */
     public void dumpDebug(ProtoOutputStream proto) {
-        Utils.dumpDebugComponentName(getComponent(), proto, NfcFServiceInfoProto.COMPONENT_NAME);
+        getComponent().dumpDebug(proto, NfcFServiceInfoProto.COMPONENT_NAME);
         proto.write(NfcFServiceInfoProto.DESCRIPTION, getDescription());
         proto.write(NfcFServiceInfoProto.SYSTEM_CODE, getSystemCode());
         proto.write(NfcFServiceInfoProto.NFCID2, getNfcid2());

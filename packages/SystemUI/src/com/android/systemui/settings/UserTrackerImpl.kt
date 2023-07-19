@@ -16,8 +16,6 @@
 
 package com.android.systemui.settings
 
-import android.app.IActivityManager
-import android.app.UserSwitchObserver
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
@@ -25,7 +23,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.UserInfo
 import android.os.Handler
-import android.os.IRemoteCallback
 import android.os.UserHandle
 import android.os.UserManager
 import android.util.Log
@@ -34,10 +31,10 @@ import androidx.annotation.WorkerThread
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.Assert
+import ink.kaleidoscope.ParallelSpaceManager;
 import java.io.PrintWriter
 import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -60,7 +57,6 @@ import kotlin.reflect.KProperty
 class UserTrackerImpl internal constructor(
     private val context: Context,
     private val userManager: UserManager,
-    private val iActivityManager: IActivityManager,
     private val dumpManager: DumpManager,
     private val backgroundHandler: Handler
 ) : UserTracker, Dumpable, BroadcastReceiver() {
@@ -112,6 +108,7 @@ class UserTrackerImpl internal constructor(
         setUserIdInternal(startingUser)
 
         val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_USER_SWITCHED)
             addAction(Intent.ACTION_USER_INFO_CHANGED)
             // These get called when a managed profile goes in or out of quiet mode.
             addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
@@ -119,22 +116,25 @@ class UserTrackerImpl internal constructor(
             addAction(Intent.ACTION_MANAGED_PROFILE_ADDED)
             addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED)
             addAction(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)
+            addAction(Intent.ACTION_PARALLEL_SPACE_CHANGED)
         }
         context.registerReceiverForAllUsers(this, filter, null /* permission */, backgroundHandler)
-
-        registerUserSwitchObserver()
 
         dumpManager.registerDumpable(TAG, this)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
+            Intent.ACTION_USER_SWITCHED -> {
+                handleSwitchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL))
+            }
             Intent.ACTION_USER_INFO_CHANGED,
             Intent.ACTION_MANAGED_PROFILE_AVAILABLE,
             Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE,
             Intent.ACTION_MANAGED_PROFILE_ADDED,
             Intent.ACTION_MANAGED_PROFILE_REMOVED,
-            Intent.ACTION_MANAGED_PROFILE_UNLOCKED -> {
+            Intent.ACTION_MANAGED_PROFILE_UNLOCKED,
+            Intent.ACTION_PARALLEL_SPACE_CHANGED -> {
                 handleProfilesChanged()
             }
         }
@@ -148,6 +148,7 @@ class UserTrackerImpl internal constructor(
 
     private fun setUserIdInternal(user: Int): Pair<Context, List<UserInfo>> {
         val profiles = userManager.getProfiles(user)
+        profiles.addAll(ParallelSpaceManager.getInstance().getParallelUsers())
         val handle = UserHandle(user)
         val ctx = context.createContextAsUser(handle, 0)
 
@@ -160,56 +161,22 @@ class UserTrackerImpl internal constructor(
         return ctx to profiles
     }
 
-    private fun registerUserSwitchObserver() {
-        iActivityManager.registerUserSwitchObserver(object : UserSwitchObserver() {
-            override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
-                backgroundHandler.run {
-                    handleUserSwitching(newUserId)
-                    reply?.sendResult(null)
-                }
-            }
-
-            override fun onUserSwitchComplete(newUserId: Int) {
-                backgroundHandler.run {
-                    handleUserSwitchComplete(newUserId)
-                }
-            }
-        }, TAG)
-    }
-
     @WorkerThread
-    private fun handleUserSwitching(newUserId: Int) {
+    private fun handleSwitchUser(newUser: Int) {
         Assert.isNotMainThread()
-        Log.i(TAG, "Switching to user $newUserId")
-
-        setUserIdInternal(newUserId)
-
-        val list = synchronized(callbacks) {
-            callbacks.toList()
+        if (newUser == UserHandle.USER_NULL) {
+            Log.w(TAG, "handleSwitchUser - Couldn't get new id from intent")
+            return
         }
-        val latch = CountDownLatch(list.size)
-        list.forEach {
-            val callback = it.callback.get()
-            if (callback != null) {
-                it.executor.execute {
-                    callback.onUserChanging(userId, userContext, latch)
-                }
-            } else {
-                latch.countDown()
-            }
-        }
-        latch.await()
-    }
 
-    @WorkerThread
-    private fun handleUserSwitchComplete(newUserId: Int) {
-        Assert.isNotMainThread()
-        Log.i(TAG, "Switched to user $newUserId")
+        if (newUser == userId) return
+        Log.i(TAG, "Switching to user $newUser")
 
-        setUserIdInternal(newUserId)
+        val (ctx, profiles) = setUserIdInternal(newUser)
+
         notifySubscribers {
-            onUserChanged(newUserId, userContext)
-            onProfilesChanged(userProfiles)
+            onUserChanged(newUser, ctx)
+            onProfilesChanged(profiles)
         }
     }
 
@@ -218,6 +185,7 @@ class UserTrackerImpl internal constructor(
         Assert.isNotMainThread()
 
         val profiles = userManager.getProfiles(userId)
+        profiles.addAll(ParallelSpaceManager.getInstance().getParallelUsers())
         synchronized(mutex) {
             userProfiles = profiles.map { UserInfo(it) } // save a "deep" copy
         }
@@ -242,7 +210,6 @@ class UserTrackerImpl internal constructor(
         val list = synchronized(callbacks) {
             callbacks.toList()
         }
-
         list.forEach {
             if (it.callback.get() != null) {
                 it.executor.execute {

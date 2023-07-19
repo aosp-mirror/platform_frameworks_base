@@ -7,9 +7,6 @@
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },
         {
-          "exclude-annotation": "android.platform.test.annotations.LargeTest"
-        },
-        {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         },
         {

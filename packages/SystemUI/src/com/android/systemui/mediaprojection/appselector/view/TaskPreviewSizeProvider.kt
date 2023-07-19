@@ -19,11 +19,11 @@ package com.android.systemui.mediaprojection.appselector.view
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Rect
-import android.view.WindowInsets.Type
 import android.view.WindowManager
+import com.android.internal.R as AndroidR
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorScope
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider.TaskPreviewSizeListener
-import com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen
+import com.android.systemui.shared.recents.utilities.Utilities.isTablet
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
@@ -61,12 +61,10 @@ constructor(
         val width = windowMetrics.bounds.width()
         var height = maximumWindowHeight
 
-        val isLargeScreen = isLargeScreen(context)
-        if (isLargeScreen) {
+        val isTablet = isTablet(context)
+        if (isTablet) {
             val taskbarSize =
-                windowManager.currentWindowMetrics.windowInsets
-                    .getInsets(Type.tappableElement())
-                    .bottom
+                context.resources.getDimensionPixelSize(AndroidR.dimen.taskbar_frame_height)
             height -= taskbarSize
         }
 

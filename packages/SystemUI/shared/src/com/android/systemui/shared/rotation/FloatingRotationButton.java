@@ -35,7 +35,6 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 
-import androidx.annotation.BoolRes;
 import androidx.core.view.OneShotPreDrawListener;
 
 import com.android.systemui.shared.rotation.FloatingRotationButtonPositionCalculator.Position;
@@ -66,8 +65,6 @@ public class FloatingRotationButton implements RotationButton {
     private final int mTaskbarBottomMarginResource;
     @DimenRes
     private final int mButtonDiameterResource;
-    @BoolRes
-    private final int mFloatingRotationBtnPositionLeftResource;
 
     private AnimatedVectorDrawable mAnimatedDrawable;
     private boolean mIsShowing;
@@ -87,7 +84,7 @@ public class FloatingRotationButton implements RotationButton {
             @LayoutRes int layout, @IdRes int keyButtonId, @DimenRes int minMargin,
             @DimenRes int roundedContentPadding, @DimenRes int taskbarLeftMargin,
             @DimenRes int taskbarBottomMargin, @DimenRes int buttonDiameter,
-            @DimenRes int rippleMaxWidth, @BoolRes int floatingRotationBtnPositionLeftResource) {
+            @DimenRes int rippleMaxWidth) {
         mWindowManager = context.getSystemService(WindowManager.class);
         mKeyButtonContainer = (ViewGroup) LayoutInflater.from(context).inflate(layout, null);
         mKeyButtonView = mKeyButtonContainer.findViewById(keyButtonId);
@@ -103,7 +100,6 @@ public class FloatingRotationButton implements RotationButton {
         mTaskbarLeftMarginResource = taskbarLeftMargin;
         mTaskbarBottomMarginResource = taskbarBottomMargin;
         mButtonDiameterResource = buttonDiameter;
-        mFloatingRotationBtnPositionLeftResource = floatingRotationBtnPositionLeftResource;
 
         updateDimensionResources();
     }
@@ -120,11 +116,8 @@ public class FloatingRotationButton implements RotationButton {
         int taskbarMarginBottom =
                 res.getDimensionPixelSize(mTaskbarBottomMarginResource);
 
-        boolean floatingRotationButtonPositionLeft =
-                res.getBoolean(mFloatingRotationBtnPositionLeftResource);
-
         mPositionCalculator = new FloatingRotationButtonPositionCalculator(defaultMargin,
-                taskbarMarginLeft, taskbarMarginBottom, floatingRotationButtonPositionLeft);
+                taskbarMarginLeft, taskbarMarginBottom);
 
         final int diameter = res.getDimensionPixelSize(mButtonDiameterResource);
         mContainerSize = diameter + Math.max(defaultMargin, Math.max(taskbarMarginLeft,

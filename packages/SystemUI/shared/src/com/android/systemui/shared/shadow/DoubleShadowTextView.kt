@@ -25,7 +25,7 @@ import com.android.systemui.shared.shadow.DoubleShadowTextHelper.ShadowInfo
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper.applyShadows
 
 /** Extension of [TextView] which draws two shadows on the text (ambient and key shadows} */
-open class DoubleShadowTextView
+class DoubleShadowTextView
 @JvmOverloads
 constructor(
     context: Context,
@@ -48,28 +48,48 @@ constructor(
         val drawableInsetSize: Int
         try {
             val keyShadowBlur =
-                attributes.getDimension(R.styleable.DoubleShadowTextView_keyShadowBlur, 0f)
+                attributes.getDimensionPixelSize(R.styleable.DoubleShadowTextView_keyShadowBlur, 0)
             val keyShadowOffsetX =
-                attributes.getDimension(R.styleable.DoubleShadowTextView_keyShadowOffsetX, 0f)
+                attributes.getDimensionPixelSize(
+                    R.styleable.DoubleShadowTextView_keyShadowOffsetX,
+                    0
+                )
             val keyShadowOffsetY =
-                attributes.getDimension(R.styleable.DoubleShadowTextView_keyShadowOffsetY, 0f)
+                attributes.getDimensionPixelSize(
+                    R.styleable.DoubleShadowTextView_keyShadowOffsetY,
+                    0
+                )
             val keyShadowAlpha =
                 attributes.getFloat(R.styleable.DoubleShadowTextView_keyShadowAlpha, 0f)
             mKeyShadowInfo =
-                ShadowInfo(keyShadowBlur, keyShadowOffsetX, keyShadowOffsetY, keyShadowAlpha)
+                ShadowInfo(
+                    keyShadowBlur.toFloat(),
+                    keyShadowOffsetX.toFloat(),
+                    keyShadowOffsetY.toFloat(),
+                    keyShadowAlpha
+                )
             val ambientShadowBlur =
-                attributes.getDimension(R.styleable.DoubleShadowTextView_ambientShadowBlur, 0f)
+                attributes.getDimensionPixelSize(
+                    R.styleable.DoubleShadowTextView_ambientShadowBlur,
+                    0
+                )
             val ambientShadowOffsetX =
-                attributes.getDimension(R.styleable.DoubleShadowTextView_ambientShadowOffsetX, 0f)
+                attributes.getDimensionPixelSize(
+                    R.styleable.DoubleShadowTextView_ambientShadowOffsetX,
+                    0
+                )
             val ambientShadowOffsetY =
-                attributes.getDimension(R.styleable.DoubleShadowTextView_ambientShadowOffsetY, 0f)
+                attributes.getDimensionPixelSize(
+                    R.styleable.DoubleShadowTextView_ambientShadowOffsetY,
+                    0
+                )
             val ambientShadowAlpha =
                 attributes.getFloat(R.styleable.DoubleShadowTextView_ambientShadowAlpha, 0f)
             mAmbientShadowInfo =
                 ShadowInfo(
-                    ambientShadowBlur,
-                    ambientShadowOffsetX,
-                    ambientShadowOffsetY,
+                    ambientShadowBlur.toFloat(),
+                    ambientShadowOffsetX.toFloat(),
+                    ambientShadowOffsetY.toFloat(),
                     ambientShadowAlpha
                 )
             drawableSize =

@@ -35,7 +35,6 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
 import com.android.systemui.animation.Interpolators
-import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import java.util.concurrent.Executor
 
@@ -48,8 +47,7 @@ class FaceScanningOverlay(
     pos: Int,
     val statusBarStateController: StatusBarStateController,
     val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    val mainExecutor: Executor,
-    val logger: ScreenDecorationsLogger,
+    val mainExecutor: Executor
 ) : ScreenDecorations.DisplayCutoutView(context, pos) {
     private var showScanningAnim = false
     private val rimPaint = Paint()
@@ -57,7 +55,6 @@ class FaceScanningOverlay(
     private var rimAnimator: AnimatorSet? = null
     private val rimRect = RectF()
     private var cameraProtectionColor = Color.BLACK
-
     var faceScanningAnimColor = Utils.getColorAttrDefaultColor(context,
             R.attr.wallpaperTextColorAccent)
     private var cameraProtectionAnimator: ValueAnimator? = null
@@ -178,22 +175,15 @@ class FaceScanningOverlay(
         }
         if (showScanningAnim) {
             // Make sure that our measured height encompasses the extra space for the animation
-            mTotalBounds.set(mBoundingRect)
+            mTotalBounds.union(mBoundingRect)
             mTotalBounds.union(
                 rimRect.left.toInt(),
                 rimRect.top.toInt(),
                 rimRect.right.toInt(),
                 rimRect.bottom.toInt())
-            val measuredWidth = resolveSizeAndState(mTotalBounds.width(), widthMeasureSpec, 0)
-            val measuredHeight = resolveSizeAndState(mTotalBounds.height(), heightMeasureSpec, 0)
-            logger.boundingRect(rimRect, "onMeasure: Face scanning animation")
-            logger.boundingRect(mBoundingRect, "onMeasure: Display cutout view bounding rect")
-            logger.boundingRect(mTotalBounds, "onMeasure: TotalBounds")
-            logger.onMeasureDimensions(widthMeasureSpec,
-                    heightMeasureSpec,
-                    measuredWidth,
-                    measuredHeight)
-            setMeasuredDimension(measuredWidth, measuredHeight)
+            setMeasuredDimension(
+                resolveSizeAndState(mTotalBounds.width(), widthMeasureSpec, 0),
+                resolveSizeAndState(mTotalBounds.height(), heightMeasureSpec, 0))
         } else {
             setMeasuredDimension(
                 resolveSizeAndState(mBoundingRect.width(), widthMeasureSpec, 0),

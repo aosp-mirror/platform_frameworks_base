@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
@@ -64,7 +63,6 @@ public final class ContactsQueryHelperTest {
     private MatrixCursor mContactsLookupCursor;
     private MatrixCursor mPhoneCursor;
     private ContactsQueryHelper mHelper;
-    private ContactsContentProvider contentProvider;
 
     @Before
     public void setUp() {
@@ -75,7 +73,7 @@ public final class ContactsQueryHelperTest {
         mPhoneCursor = new MatrixCursor(PHONE_COLUMNS);
 
         MockContentResolver contentResolver = new MockContentResolver();
-        contentProvider = new ContactsContentProvider();
+        ContactsContentProvider contentProvider = new ContactsContentProvider();
         contentProvider.registerCursor(Contacts.CONTENT_URI, mContactsCursor);
         contentProvider.registerCursor(
                 ContactsContract.PhoneLookup.CONTENT_FILTER_URI, mContactsLookupCursor);
@@ -88,22 +86,6 @@ public final class ContactsQueryHelperTest {
         when(mContext.getContentResolver()).thenReturn(contentResolver);
 
         mHelper = new ContactsQueryHelper(mContext);
-    }
-
-    @Test
-    public void testQuerySQLiteException_returnsFalse() {
-        contentProvider.setThrowSQLiteException(true);
-
-        Uri contactUri = Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, CONTACT_LOOKUP_KEY);
-        assertFalse(mHelper.query(contactUri.toString()));
-    }
-
-    @Test
-    public void testQueryIllegalArgumentException_returnsFalse() {
-        contentProvider.setThrowIllegalArgumentException(true);
-
-        Uri contactUri = Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, CONTACT_LOOKUP_KEY);
-        assertFalse(mHelper.query(contactUri.toString()));
     }
 
     @Test
@@ -186,33 +168,16 @@ public final class ContactsQueryHelperTest {
     private class ContactsContentProvider extends MockContentProvider {
 
         private Map<Uri, Cursor> mUriPrefixToCursorMap = new ArrayMap<>();
-        private boolean mThrowSQLiteException = false;
-        private boolean mThrowIllegalArgumentException = false;
 
         @Override
         public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                 String sortOrder) {
-            if (mThrowSQLiteException) {
-                throw new SQLiteException();
-            }
-            if (mThrowIllegalArgumentException) {
-                throw new IllegalArgumentException();
-            }
-
             for (Uri prefixUri : mUriPrefixToCursorMap.keySet()) {
                 if (uri.isPathPrefixMatch(prefixUri)) {
                     return mUriPrefixToCursorMap.get(prefixUri);
                 }
             }
             return mUriPrefixToCursorMap.get(uri);
-        }
-
-        public void setThrowSQLiteException(boolean throwException) {
-            this.mThrowSQLiteException = throwException;
-        }
-
-        public void setThrowIllegalArgumentException(boolean throwException) {
-            this.mThrowIllegalArgumentException = throwException;
         }
 
         private void registerCursor(Uri uriPrefix, Cursor cursor) {

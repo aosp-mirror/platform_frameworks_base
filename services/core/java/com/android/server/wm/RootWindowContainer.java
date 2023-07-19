@@ -49,6 +49,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.FINISHING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -127,6 +128,7 @@ import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.BoostFramework;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -166,7 +168,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** Root {@link WindowContainer} for the device. */
-class RootWindowContainer extends WindowContainer<DisplayContent>
+public class RootWindowContainer extends WindowContainer<DisplayContent>
         implements DisplayManager.DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RootWindowContainer" : TAG_WM;
 
@@ -182,7 +184,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private boolean mUpdateRotation = false;
     // Only set while traversing the default display based on its content.
     // Affects the behavior of mirroring on secondary displays.
-    private boolean mObscureApplicationContentOnSecondaryDisplays = false;
+    private boolean mObscureApplicationContentOnSecondaryDisplaysDueToKeyguard = false;
+    private boolean mObscureApplicationContentOnSecondaryDisplaysDueToDream = false;
 
     private boolean mSustainedPerformanceModeEnabled = false;
     private boolean mSustainedPerformanceModeCurrent = false;
@@ -236,6 +239,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
     private DisplayManagerInternal mDisplayManagerInternal;
+
+    public static boolean mPerfSendTapHint = false;
+    public static boolean mIsPerfBoostAcquired = false;
+    public static int mPerfHandle = -1;
+    public BoostFramework mPerfBoost = null;
+    public BoostFramework mUxPerf = null;
 
     /** Reference to default display so we can quickly look it up. */
     private DisplayContent mDefaultDisplay;
@@ -798,7 +807,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         mScreenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mUserActivityTimeout = -1;
-        mObscureApplicationContentOnSecondaryDisplays = false;
+        mObscureApplicationContentOnSecondaryDisplaysDueToKeyguard = false;
+        mObscureApplicationContentOnSecondaryDisplaysDueToDream = false;
         mSustainedPerformanceModeCurrent = false;
         mWmService.mTransactionSequence++;
 
@@ -1008,9 +1018,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     defaultDc.getRotation(), t);
         }
 
+        defaultDc.applySurfaceChangesTransaction();
         final int count = mChildren.size();
         for (int j = 0; j < count; ++j) {
             final DisplayContent dc = mChildren.get(j);
+            if (dc == defaultDc) continue;
             dc.applySurfaceChangesTransaction();
         }
 
@@ -1046,28 +1058,31 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * manager may choose to mirror or blank the display.
      */
     boolean handleNotObscuredLocked(WindowState w, boolean obscured, boolean syswin) {
+        final WindowManager.LayoutParams attrs = w.mAttrs;
+        final int attrFlags = attrs.flags;
         final boolean onScreen = w.isOnScreen();
+        final boolean canBeSeen = w.isDisplayed();
+        final int privateflags = attrs.privateFlags;
         boolean displayHasContent = false;
 
         ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON,
                 "handleNotObscuredLocked w: %s, w.mHasSurface: %b, w.isOnScreen(): %b, w"
                         + ".isDisplayedLw(): %b, w.mAttrs.userActivityTimeout: %d",
                 w, w.mHasSurface, onScreen, w.isDisplayed(), w.mAttrs.userActivityTimeout);
-        if (!onScreen) {
-            return false;
+        if (w.mHasSurface && onScreen) {
+            if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
+                mUserActivityTimeout = w.mAttrs.userActivityTimeout;
+                ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON, "mUserActivityTimeout set to %d",
+                        mUserActivityTimeout);
+            }
         }
-        if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
-            mUserActivityTimeout = w.mAttrs.userActivityTimeout;
-            ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON, "mUserActivityTimeout set to %d",
-                    mUserActivityTimeout);
-        }
-        if (w.isDrawn() || (w.mActivityRecord != null && w.mActivityRecord.firstWindowDrawn
-                && w.mActivityRecord.isVisibleRequested())) {
+        if (w.mHasSurface && canBeSeen) {
             if (!syswin && w.mAttrs.screenBrightness >= 0
                     && Float.isNaN(mScreenBrightnessOverride)) {
                 mScreenBrightnessOverride = w.mAttrs.screenBrightness;
             }
 
+            final int type = attrs.type;
             // This function assumes that the contents of the default display are processed first
             // before secondary displays.
             final DisplayContent displayContent = w.getDisplayContent();
@@ -1075,17 +1090,21 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // While a dream or keyguard is showing, obscure ordinary application content on
                 // secondary displays (by forcibly enabling mirroring unless there is other content
                 // we want to show) but still allow opaque keyguard dialogs to be shown.
-                if (w.isDreamWindow() || mWmService.mPolicy.isKeyguardShowing()) {
-                    mObscureApplicationContentOnSecondaryDisplays = true;
+                if (mWmService.mPolicy.isKeyguardShowing()) {
+                    mObscureApplicationContentOnSecondaryDisplaysDueToKeyguard = true;
+                }
+                if (w.isDreamWindow()) {
+                    mObscureApplicationContentOnSecondaryDisplaysDueToDream = true;
                 }
                 displayHasContent = true;
             } else if (displayContent != null &&
-                    (!mObscureApplicationContentOnSecondaryDisplays
-                            || (obscured && w.mAttrs.type == TYPE_KEYGUARD_DIALOG))) {
+                    !mObscureApplicationContentOnSecondaryDisplaysDueToDream &&
+                    (!mObscureApplicationContentOnSecondaryDisplaysDueToKeyguard
+                            || (obscured && type == TYPE_KEYGUARD_DIALOG))) {
                 // Allow full screen keyguard presentation dialogs to be seen.
                 displayHasContent = true;
             }
-            if ((w.mAttrs.privateFlags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
+            if ((privateflags & PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE) != 0) {
                 mSustainedPerformanceModeCurrent = true;
             }
         }
@@ -1777,7 +1796,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     @Nullable
-    Task getTopDisplayFocusedRootTask() {
+    public Task getTopDisplayFocusedRootTask() {
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final Task focusedRootTask = getChildAt(i).getFocusedRootTask();
             if (focusedRootTask != null) {
@@ -1833,8 +1852,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // Don't do recursive work.
             return;
         }
-        mTaskSupervisor.beginActivityVisibilityUpdate();
+
         try {
+            mTaskSupervisor.beginActivityVisibilityUpdate();
             // First the front root tasks. In case any are not fullscreen and are in front of home.
             for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
                 final DisplayContent display = getChildAt(displayNdx);
@@ -2171,15 +2191,95 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
+    void acquireAppLaunchPerfLock(ActivityRecord r) {
+        /* Acquire perf lock during new app launch */
+        if (mPerfBoost == null) {
+            mPerfBoost = new BoostFramework();
+        }
+        if (mPerfBoost != null) {
+            int pkgType = mPerfBoost.perfGetFeedback(BoostFramework.VENDOR_FEEDBACK_WORKLOAD_TYPE,
+                                                     r.packageName);
+            int wpcPid = -1;
+            if (mService != null && r != null && r.info != null && r.info.applicationInfo !=null) {
+                final WindowProcessController wpc =
+                        mService.getProcessController(r.processName, r.info.applicationInfo.uid);
+                if (wpc != null && wpc.hasThread()) {
+                   //If target process didn't start yet,
+                   // this operation will be done when app call attach
+                   wpcPid = wpc.getPid();
+                }
+            }
+            if (mPerfBoost.getPerfHalVersion() >= BoostFramework.PERF_HAL_V23) {
+                mPerfBoost.perfHintAcqRel(-1, BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
+                    r.packageName, -1, BoostFramework.Launch.BOOST_V1, 2, pkgType, wpcPid);
+                mPerfSendTapHint = true;
+                mPerfBoost.perfHintAcqRel(-1, BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
+                    r.packageName, -1, BoostFramework.Launch.BOOST_V2, 2, pkgType, wpcPid);
+                if (wpcPid != -1) {
+                    mPerfBoost.perfHintAcqRel(-1,
+                        BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
+                            r.packageName, wpcPid,
+                            BoostFramework.Launch.TYPE_ATTACH_APPLICATION, 2, pkgType, wpcPid);
+                }
+
+                if (pkgType  == BoostFramework.WorkloadType.GAME)
+                {
+                    mPerfHandle = mPerfBoost.perfHintAcqRel(-1,
+                        BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
+                           r.packageName, -1, BoostFramework.Launch.BOOST_GAME, 2, pkgType, wpcPid);
+                } else {
+                    mPerfHandle = mPerfBoost.perfHintAcqRel(-1,
+                        BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
+                            r.packageName, -1, BoostFramework.Launch.BOOST_V3, 2, pkgType, wpcPid);
+                }
+            } else {
+                mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, r.packageName,
+                                    -1, BoostFramework.Launch.BOOST_V1);
+                mPerfSendTapHint = true;
+                mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
+                    r.packageName, -1, BoostFramework.Launch.BOOST_V2);
+                if (wpcPid != -1) {
+                    mPerfBoost.perfHint(
+                        BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
+                            r.packageName, wpcPid,
+                            BoostFramework.Launch.TYPE_ATTACH_APPLICATION);
+                }
+
+                if (pkgType  == BoostFramework.WorkloadType.GAME)
+                {
+                    mPerfHandle = mPerfBoost.perfHint(
+                        BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
+                            r.packageName, -1, BoostFramework.Launch.BOOST_GAME);
+                } else {
+                    mPerfHandle = mPerfBoost.perfHint(
+                        BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
+                            r.packageName, -1, BoostFramework.Launch.BOOST_V3);
+                }
+            }
+            if (mPerfHandle > 0)
+                mIsPerfBoostAcquired = true;
+            // Start IOP
+            if(r.info.applicationInfo != null &&
+                r.info.applicationInfo.sourceDir != null) {
+                  if (mPerfBoost.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                    mPerfBoost.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                      mPerfBoost.perfIOPrefetchStart(-1,r.packageName,
+                      r.info.applicationInfo.sourceDir.substring(
+                        0, r.info.applicationInfo.sourceDir.lastIndexOf('/')));
+                  }
+            }
+        }
+    }
+
     @Nullable
     ActivityRecord findTask(ActivityRecord r, TaskDisplayArea preferredTaskDisplayArea) {
         return findTask(r.getActivityType(), r.taskAffinity, r.intent, r.info,
-                preferredTaskDisplayArea);
+                preferredTaskDisplayArea, r);
     }
 
     @Nullable
     ActivityRecord findTask(int activityType, String taskAffinity, Intent intent, ActivityInfo info,
-            TaskDisplayArea preferredTaskDisplayArea) {
+            TaskDisplayArea preferredTaskDisplayArea, ActivityRecord r) {
         ProtoLog.d(WM_DEBUG_TASKS, "Looking for task of type=%s, taskAffinity=%s, intent=%s"
                         + ", info=%s, preferredTDA=%s", activityType, taskAffinity, intent, info,
                 preferredTaskDisplayArea);
@@ -2190,9 +2290,36 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (preferredTaskDisplayArea != null) {
             mTmpFindTaskResult.process(preferredTaskDisplayArea);
             if (mTmpFindTaskResult.mIdealRecord != null) {
+                if(mTmpFindTaskResult.mIdealRecord.getState() == DESTROYED) {
+                    /*It's a new app launch */
+                    acquireAppLaunchPerfLock(r);
+                }
+
+                if(mTmpFindTaskResult.mIdealRecord.getState() == STOPPED) {
+                     /*Warm launch */
+                     mUxPerf = new BoostFramework();
+                     if (mUxPerf != null) {
+                         if (mUxPerf.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                             mUxPerf.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                             mUxPerf.perfUXEngine_events(BoostFramework.UXE_EVENT_SUB_LAUNCH, 0, r.packageName, 0);
+                         } else {
+                             mUxPerf.perfEvent(BoostFramework.VENDOR_HINT_WARM_LAUNCH, r.packageName, 2, 0, 0);
+                         }
+                     }
+                }
                 return mTmpFindTaskResult.mIdealRecord;
             } else if (mTmpFindTaskResult.mCandidateRecord != null) {
                 candidateActivity = mTmpFindTaskResult.mCandidateRecord;
+            }
+        }
+
+        /* Acquire perf lock *only* during new app launch */
+        if ((mTmpFindTaskResult.mIdealRecord == null) ||
+            (mTmpFindTaskResult.mIdealRecord.getState() == DESTROYED)) {
+            if (r != null && r.isMainIntent(r.intent)) {
+                acquireAppLaunchPerfLock(r);
+            } else if (r == null) {
+                Slog.w(TAG, "Should not happen! Didn't apply launch boost");
             }
         }
 
@@ -2278,10 +2405,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     resumedOnDisplay[0] |= curResult;
                     return;
                 }
-                if (topRunningActivity.isState(RESUMED)
-                        && topRunningActivity == rootTask.getDisplayArea().topRunningActivity()) {
-                    // Kick off any lingering app transitions form the MoveTaskToFront operation,
-                    // but only consider the top activity on that display.
+                if (rootTask.getDisplayArea().isTopRootTask(rootTask)
+                        && topRunningActivity.isState(RESUMED)) {
+                    // Kick off any lingering app transitions form the MoveTaskToFront
+                    // operation, but only consider the top task and root-task on that
+                    // display.
                     rootTask.executeAppTransition(targetOptions);
                 } else {
                     resumedOnDisplay[0] |= topRunningActivity.makeActiveIfNeeded(target);

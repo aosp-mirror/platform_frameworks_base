@@ -152,12 +152,4 @@ class PanelTaskViewControllerTest : SysuiTestCase() {
         listenerCaptor.value.onTaskRemovalStarted(0)
         verify(taskView).release()
     }
-
-    @Test
-    fun testOnRefreshBounds() {
-        underTest.launchTaskView()
-
-        underTest.refreshBounds()
-        verify(taskView).onLocationChanged()
-    }
 }

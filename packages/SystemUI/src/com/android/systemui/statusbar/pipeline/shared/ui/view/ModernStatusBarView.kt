@@ -36,7 +36,7 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
     BaseStatusBarFrameLayout(context, attrs) {
 
     private lateinit var slot: String
-    internal lateinit var binding: ModernStatusBarViewBinding
+    private lateinit var binding: ModernStatusBarViewBinding
 
     @StatusBarIconView.VisibleState
     private var iconVisibleState: Int = STATE_HIDDEN
@@ -75,17 +75,6 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
 
     override fun isIconVisible(): Boolean {
         return binding.getShouldIconBeVisible()
-    }
-
-    /** See [StatusBarIconView.getDrawingRect]. */
-    override fun getDrawingRect(outRect: Rect) {
-        super.getDrawingRect(outRect)
-        val translationX = translationX.toInt()
-        val translationY = translationY.toInt()
-        outRect.left += translationX
-        outRect.right += translationX
-        outRect.top += translationY
-        outRect.bottom += translationY
     }
 
     /**

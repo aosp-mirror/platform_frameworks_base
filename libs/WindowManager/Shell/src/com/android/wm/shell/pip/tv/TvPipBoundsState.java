@@ -30,7 +30,6 @@ import android.view.Gravity;
 
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -65,9 +64,8 @@ public class TvPipBoundsState extends PipBoundsState {
     private @NonNull Insets mPipMenuPermanentDecorInsets = Insets.NONE;
     private @NonNull Insets mPipMenuTemporaryDecorInsets = Insets.NONE;
 
-    public TvPipBoundsState(@NonNull Context context,
-            @NonNull PipSizeSpecHandler pipSizeSpecHandler) {
-        super(context, pipSizeSpecHandler);
+    public TvPipBoundsState(@NonNull Context context) {
+        super(context);
         mIsTvExpandedPipSupported = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_EXPANDED_PICTURE_IN_PICTURE);
     }

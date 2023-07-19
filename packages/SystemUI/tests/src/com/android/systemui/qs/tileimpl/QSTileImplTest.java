@@ -69,6 +69,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSEvent;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.StatusBarState;
 
@@ -96,7 +97,7 @@ public class QSTileImplTest extends SysuiTestCase {
     private TestableLooper mTestableLooper;
     private TileImpl mTile;
     @Mock
-    private QSHost mHost;
+    private QSTileHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
     private final FalsingManagerFake mFalsingManager = new FalsingManagerFake();

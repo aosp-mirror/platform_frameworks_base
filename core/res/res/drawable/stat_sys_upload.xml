@@ -20,11 +20,11 @@
 <animation-list
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:oneshot="false">
-    <item android:drawable="@drawable/stat_sys_upload_anim0" android:duration="200" />
-    <item android:drawable="@drawable/stat_sys_upload_anim1" android:duration="200" />
-    <item android:drawable="@drawable/stat_sys_upload_anim2" android:duration="200" />
-    <item android:drawable="@drawable/stat_sys_upload_anim3" android:duration="200" />
-    <item android:drawable="@drawable/stat_sys_upload_anim4" android:duration="200" />
-    <item android:drawable="@drawable/stat_sys_upload_anim5" android:duration="200" />
+    <item android:drawable="@drawable/stat_sys_upload_anim0" android:duration="300" />
+    <item android:drawable="@drawable/stat_sys_upload_anim1" android:duration="300" />
+    <item android:drawable="@drawable/stat_sys_upload_anim2" android:duration="300" />
+    <item android:drawable="@drawable/stat_sys_upload_anim3" android:duration="300" />
+    <item android:drawable="@drawable/stat_sys_upload_anim4" android:duration="300" />
+    <item android:drawable="@drawable/stat_sys_upload_anim5" android:duration="300" />
 </animation-list>
 

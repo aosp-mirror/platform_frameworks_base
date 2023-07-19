@@ -130,10 +130,6 @@ public final class QosBearerFilter implements Parcelable {
         return precedence;
     }
 
-    public int getProtocol() {
-        return protocol;
-    }
-
     public static class PortRange implements Parcelable {
         int start;
         int end;

@@ -24,7 +24,6 @@ import android.security.KeyStoreException;
 import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyStoreCryptoOperation;
-import android.system.keystore2.Authorization;
 
 import libcore.util.EmptyArray;
 
@@ -70,7 +69,6 @@ import javax.crypto.spec.SecretKeySpec;
  */
 abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStoreCryptoOperation {
     private static final String TAG = "AndroidKeyStoreCipherSpiBase";
-    public static final String DEFAULT_MGF1_DIGEST = "SHA-1";
 
     // Fields below are populated by Cipher.init and KeyStore.begin and should be preserved after
     // doFinal finishes.
@@ -120,14 +118,6 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         mCipher = null;
     }
 
-    private Authorization[] getKeyCharacteristics(Key key) {
-        if (!(key instanceof AndroidKeyStoreKey)) {
-            return new Authorization[] {};
-        }
-
-        return ((AndroidKeyStoreKey) key).getAuthorizations();
-    }
-
     @Override
     protected final void engineInit(int opmode, Key key, SecureRandom random)
             throws InvalidKeyException {
@@ -143,28 +133,24 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
                 if ("RSA/ECB/OAEPWithSHA-224AndMGF1Padding".equals(transform)) {
                     OAEPParameterSpec spec =
                             new OAEPParameterSpec("SHA-224", "MGF1",
-                                    new MGF1ParameterSpec(DEFAULT_MGF1_DIGEST),
-                                    PSource.PSpecified.DEFAULT);
+                                    new MGF1ParameterSpec("SHA1"), PSource.PSpecified.DEFAULT);
                     mCipher.init(opmode, key, spec, random);
                 } else if ("RSA/ECB/OAEPWithSHA-256AndMGF1Padding".equals(transform)) {
                     OAEPParameterSpec spec =
                             new OAEPParameterSpec("SHA-256", "MGF1",
-                                    new MGF1ParameterSpec(DEFAULT_MGF1_DIGEST),
-                                    PSource.PSpecified.DEFAULT);
+                                    new MGF1ParameterSpec("SHA1"), PSource.PSpecified.DEFAULT);
                     mCipher.init(opmode, key, spec, random);
 
                 } else if ("RSA/ECB/OAEPWithSHA-384AndMGF1Padding".equals(transform)) {
                     OAEPParameterSpec spec =
                             new OAEPParameterSpec("SHA-384", "MGF1",
-                                    new MGF1ParameterSpec(DEFAULT_MGF1_DIGEST),
-                                    PSource.PSpecified.DEFAULT);
+                                    new MGF1ParameterSpec("SHA1"), PSource.PSpecified.DEFAULT);
                     mCipher.init(opmode, key, spec, random);
 
                 } else if ("RSA/ECB/OAEPWithSHA-512AndMGF1Padding".equals(transform)) {
                     OAEPParameterSpec spec =
                             new OAEPParameterSpec("SHA-512", "MGF1",
-                                    new MGF1ParameterSpec(DEFAULT_MGF1_DIGEST),
-                                    PSource.PSpecified.DEFAULT);
+                                    new MGF1ParameterSpec("SHA1"), PSource.PSpecified.DEFAULT);
                     mCipher.init(opmode, key, spec, random);
                 } else {
                     mCipher.init(opmode, key, random);
@@ -182,7 +168,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
             init(opmode, key, random);
             initAlgorithmSpecificParameters();
             try {
-                ensureKeystoreOperationInitialized(getKeyCharacteristics(key));
+                ensureKeystoreOperationInitialized();
             } catch (InvalidAlgorithmParameterException e) {
                 throw new InvalidKeyException(e);
             }
@@ -215,7 +201,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         try {
             init(opmode, key, random);
             initAlgorithmSpecificParameters(params);
-            ensureKeystoreOperationInitialized(getKeyCharacteristics(key));
+            ensureKeystoreOperationInitialized();
             success = true;
         } finally {
             if (!success) {
@@ -245,7 +231,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         try {
             init(opmode, key, random);
             initAlgorithmSpecificParameters(params);
-            ensureKeystoreOperationInitialized(getKeyCharacteristics(key));
+            ensureKeystoreOperationInitialized();
             success = true;
         } finally {
             if (!success) {
@@ -319,8 +305,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         mCachedException = null;
     }
 
-    private void ensureKeystoreOperationInitialized(Authorization[] keyCharacteristics)
-            throws InvalidKeyException,
+    private void ensureKeystoreOperationInitialized() throws InvalidKeyException,
             InvalidAlgorithmParameterException {
         if (mMainDataStreamer != null) {
             return;
@@ -333,7 +318,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         }
 
         List<KeyParameter> parameters = new ArrayList<>();
-        addAlgorithmSpecificParametersToBegin(parameters, keyCharacteristics);
+        addAlgorithmSpecificParametersToBegin(parameters);
 
         int purpose;
         if (mKeymasterPurposeOverride != -1) {
@@ -414,7 +399,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
             return null;
         }
         try {
-            ensureKeystoreOperationInitialized(getKeyCharacteristics(mKey));
+            ensureKeystoreOperationInitialized();
         } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
             mCachedException = e;
             return null;
@@ -530,7 +515,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         }
 
         try {
-            ensureKeystoreOperationInitialized(getKeyCharacteristics(mKey));
+            ensureKeystoreOperationInitialized();
         } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
             mCachedException = e;
             return;
@@ -607,7 +592,7 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
         }
 
         try {
-            ensureKeystoreOperationInitialized(getKeyCharacteristics(mKey));
+            ensureKeystoreOperationInitialized();
         } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
             throw (IllegalBlockSizeException) new IllegalBlockSizeException().initCause(e);
         }
@@ -1020,22 +1005,6 @@ abstract class AndroidKeyStoreCipherSpiBase extends CipherSpi implements KeyStor
      */
     protected abstract void addAlgorithmSpecificParametersToBegin(
             @NonNull List<KeyParameter> parameters);
-
-    /**
-     * Invoked to add algorithm-specific parameters for the KeyStore's {@code begin} operation,
-     * including the key characteristics. This is useful in case the parameters to {@code begin}
-     * depend on how the key was generated.
-     * The default implementation provided here simply ignores these key characteristics because
-     * they are not be needed for most engines.
-     *
-     * @param parameters keystore/keymaster arguments to be populated with algorithm-specific
-     *                   parameters.
-     * @param keyCharacteristics The key's characteristics.
-     */
-    protected void addAlgorithmSpecificParametersToBegin(
-            @NonNull List<KeyParameter> parameters, Authorization[] keyCharacteristics) {
-        addAlgorithmSpecificParametersToBegin(parameters);
-    }
 
     /**
      * Invoked to obtain algorithm-specific parameters from the result of the KeyStore's

@@ -47,11 +47,6 @@ class CredstoreCredentialDataResult extends CredentialDataResult {
     }
 
     @Override
-    public @Nullable byte[] getDeviceSignature() {
-        return mDeviceSignedResult.getSignature();
-    }
-
-    @Override
     public @NonNull byte[] getStaticAuthenticationData() {
         return mDeviceSignedResult.getStaticAuthenticationData();
     }

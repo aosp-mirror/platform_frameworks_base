@@ -18,29 +18,29 @@
 
     <style name="AuthCredentialPatternContainerStyle">
         <item name="android:gravity">center</item>
-        <item name="android:maxHeight">@dimen/biometric_auth_pattern_view_max_size</item>
-        <item name="android:maxWidth">@dimen/biometric_auth_pattern_view_max_size</item>
-        <item name="android:minHeight">@dimen/biometric_auth_pattern_view_size</item>
-        <item name="android:minWidth">@dimen/biometric_auth_pattern_view_size</item>
+        <item name="android:maxHeight">420dp</item>
+        <item name="android:maxWidth">420dp</item>
+        <item name="android:minHeight">200dp</item>
+        <item name="android:minWidth">200dp</item>
         <item name="android:paddingHorizontal">120dp</item>
         <item name="android:paddingVertical">40dp</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Title">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:layout_marginTop">16dp</item>
         <item name="android:textSize">36sp</item>
         <item name="android:focusable">true</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Subtitle">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:layout_marginTop">16dp</item>
         <item name="android:textSize">18sp</item>
     </style>
 
     <style name="TextAppearance.AuthNonBioCredential.Description">
-        <item name="android:fontFamily">google-sans</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:layout_marginTop">16dp</item>
         <item name="android:textSize">18sp</item>
     </style>

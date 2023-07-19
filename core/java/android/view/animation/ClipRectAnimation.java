@@ -137,6 +137,29 @@ public class ClipRectAnimation extends Animation {
         this(new Rect(fromL, fromT, fromR, fromB), new Rect(toL, toT, toR, toB));
     }
 
+    public ClipRectAnimation(float fromL, float fromT, float fromR, float fromB,
+            float toL, float toT, float toR, float toB) {
+        mFromLeftType = RELATIVE_TO_SELF;
+        mFromTopType = RELATIVE_TO_SELF;
+        mFromRightType = RELATIVE_TO_SELF;
+        mFromBottomType = RELATIVE_TO_SELF;
+
+        mToLeftType = RELATIVE_TO_SELF;
+        mToTopType = RELATIVE_TO_SELF;
+        mToRightType = RELATIVE_TO_SELF;
+        mToBottomType = RELATIVE_TO_SELF;
+
+        mFromLeftValue = fromL;
+        mFromTopValue = fromT;
+        mFromRightValue= fromR;
+        mFromBottomValue = fromB;
+
+        mToLeftValue = toL;
+        mToTopValue = toT;
+        mToRightValue= toR;
+        mToBottomValue = toB;
+    }
+
     @Override
     protected void applyTransformation(float it, Transformation tr) {
         int l = mFromRect.left + (int) ((mToRect.left - mFromRect.left) * it);

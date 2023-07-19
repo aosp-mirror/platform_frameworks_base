@@ -1,7 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "CtsAndroidTestBase29ApiSignatureTestCases"
+      "name": "CtsAndroidTestBase28ApiSignatureTestCases"
     }
   ]
 }

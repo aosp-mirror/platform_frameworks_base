@@ -35,8 +35,154 @@ aidl_interface {
         "aidl/android/media/soundtrigger_middleware/SoundTriggerModuleDescriptor.aidl",
     ],
     imports: [
-        "android.media.audio.common.types-V2",
+        "android.media.audio.common.types-V1",
         "android.media.soundtrigger.types-V1",
         "media_permission-aidl",
     ],
+}
+
+aidl_interface {
+    name: "android.media.audio.common.types",
+    vendor_available: true,
+    host_supported: true,
+    double_loadable: true,
+    flags: [
+        "-Werror",
+        "-Weverything",
+    ],
+    local_include_dir: "aidl",
+    srcs: [
+        "aidl/android/media/audio/common/AudioChannelLayout.aidl",
+        "aidl/android/media/audio/common/AudioConfig.aidl",
+        "aidl/android/media/audio/common/AudioConfigBase.aidl",
+        "aidl/android/media/audio/common/AudioContentType.aidl",
+        "aidl/android/media/audio/common/AudioDevice.aidl",
+        "aidl/android/media/audio/common/AudioDeviceAddress.aidl",
+        "aidl/android/media/audio/common/AudioDeviceDescription.aidl",
+        "aidl/android/media/audio/common/AudioDeviceType.aidl",
+        "aidl/android/media/audio/common/AudioEncapsulationMetadataType.aidl",
+        "aidl/android/media/audio/common/AudioEncapsulationMode.aidl",
+        "aidl/android/media/audio/common/AudioEncapsulationType.aidl",
+        "aidl/android/media/audio/common/AudioFormatDescription.aidl",
+        "aidl/android/media/audio/common/AudioFormatType.aidl",
+        "aidl/android/media/audio/common/AudioGain.aidl",
+        "aidl/android/media/audio/common/AudioGainConfig.aidl",
+        "aidl/android/media/audio/common/AudioGainMode.aidl",
+        "aidl/android/media/audio/common/AudioInputFlags.aidl",
+        "aidl/android/media/audio/common/AudioIoFlags.aidl",
+        "aidl/android/media/audio/common/AudioMMapPolicy.aidl",
+        "aidl/android/media/audio/common/AudioMMapPolicyInfo.aidl",
+        "aidl/android/media/audio/common/AudioMMapPolicyType.aidl",
+        "aidl/android/media/audio/common/AudioMode.aidl",
+        "aidl/android/media/audio/common/AudioOffloadInfo.aidl",
+        "aidl/android/media/audio/common/AudioOutputFlags.aidl",
+        "aidl/android/media/audio/common/AudioPort.aidl",
+        "aidl/android/media/audio/common/AudioPortConfig.aidl",
+        "aidl/android/media/audio/common/AudioPortDeviceExt.aidl",
+        "aidl/android/media/audio/common/AudioPortExt.aidl",
+        "aidl/android/media/audio/common/AudioPortMixExt.aidl",
+        "aidl/android/media/audio/common/AudioPortMixExtUseCase.aidl",
+        "aidl/android/media/audio/common/AudioProfile.aidl",
+        "aidl/android/media/audio/common/AudioSource.aidl",
+        "aidl/android/media/audio/common/AudioStandard.aidl",
+        "aidl/android/media/audio/common/AudioStreamType.aidl",
+        "aidl/android/media/audio/common/AudioUsage.aidl",
+        "aidl/android/media/audio/common/AudioUuid.aidl",
+        "aidl/android/media/audio/common/Boolean.aidl",
+        "aidl/android/media/audio/common/Byte.aidl",
+        "aidl/android/media/audio/common/ExtraAudioDescriptor.aidl",
+        "aidl/android/media/audio/common/Float.aidl",
+        "aidl/android/media/audio/common/Double.aidl",
+        "aidl/android/media/audio/common/Int.aidl",
+        "aidl/android/media/audio/common/Long.aidl",
+        "aidl/android/media/audio/common/PcmType.aidl",
+    ],
+    stability: "vintf",
+    backend: {
+        cpp: {
+            min_sdk_version: "29",
+            apex_available: [
+                "//apex_available:platform",
+                "com.android.media",
+            ],
+        },
+        java: {
+            sdk_version: "module_current",
+            min_sdk_version: "29",
+            apex_available: [
+                "//apex_available:platform",
+                "com.android.car.framework",
+            ],
+        },
+        ndk: {
+            vndk: {
+                enabled: true,
+            },
+            min_sdk_version: "29",
+            apex_available: [
+                "//apex_available:platform",
+                "com.android.bluetooth",
+            ],
+        },
+    },
+    versions_with_info: [
+        {
+            version: "1",
+            imports: [],
+        },
+    ],
+
+}
+
+aidl_interface {
+    name: "android.media.soundtrigger.types",
+    vendor_available: true,
+    host_supported: true,
+    flags: [
+        "-Werror",
+        "-Weverything",
+    ],
+    local_include_dir: "aidl",
+    srcs: [
+        "aidl/android/media/soundtrigger/AudioCapabilities.aidl",
+        "aidl/android/media/soundtrigger/ConfidenceLevel.aidl",
+        "aidl/android/media/soundtrigger/ModelParameter.aidl",
+        "aidl/android/media/soundtrigger/ModelParameterRange.aidl",
+        "aidl/android/media/soundtrigger/Phrase.aidl",
+        "aidl/android/media/soundtrigger/PhraseRecognitionEvent.aidl",
+        "aidl/android/media/soundtrigger/PhraseRecognitionExtra.aidl",
+        "aidl/android/media/soundtrigger/PhraseSoundModel.aidl",
+        "aidl/android/media/soundtrigger/Properties.aidl",
+        "aidl/android/media/soundtrigger/RecognitionConfig.aidl",
+        "aidl/android/media/soundtrigger/RecognitionEvent.aidl",
+        "aidl/android/media/soundtrigger/RecognitionMode.aidl",
+        "aidl/android/media/soundtrigger/RecognitionStatus.aidl",
+        "aidl/android/media/soundtrigger/SoundModel.aidl",
+        "aidl/android/media/soundtrigger/SoundModelType.aidl",
+        "aidl/android/media/soundtrigger/Status.aidl",
+    ],
+    stability: "vintf",
+    backend: {
+        cpp: {
+            enabled: true,
+        },
+        java: {
+            sdk_version: "module_current",
+        },
+        ndk: {
+            vndk: {
+                enabled: true,
+            },
+        },
+    },
+    imports: [
+        "android.media.audio.common.types",
+    ],
+    versions_with_info: [
+        {
+            version: "1",
+            imports: ["android.media.audio.common.types-V1"],
+        },
+    ],
+
 }

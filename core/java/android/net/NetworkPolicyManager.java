@@ -84,6 +84,25 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int POLICY_ALLOW_METERED_BACKGROUND = 0x4;
+    /** Reject network usage on cellular network
+     * @hide
+     */
+    public static final int POLICY_REJECT_CELLULAR = 0x10000;
+    /** Reject network usage on virtual private network
+     * @hide
+     */
+    public static final int POLICY_REJECT_VPN = 0x20000;
+    /** Reject network usage on wifi network
+     * @hide
+     */
+    public static final int POLICY_REJECT_WIFI = 0x8000;
+    /** Reject network usage on all networks
+     * Not used since 12, since we now use restricted-networking-mode
+     * However, since this was present in earlier builds, keep it around
+     * to help with migration, and as a reminder that this value should not be re-used.
+     * @hide
+     */
+    public static final int POLICY_REJECT_ALL = 0x40000;
 
     /*
      * Rules defining whether an uid has access to a network given its type (metered / non-metered).

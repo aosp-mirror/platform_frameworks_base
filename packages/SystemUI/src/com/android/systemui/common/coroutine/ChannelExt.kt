@@ -26,6 +26,7 @@ object ChannelExt {
     /**
      * Convenience wrapper around [SendChannel.trySend] that also logs on failure. This is the
      * equivalent of calling:
+     *
      * ```
      * sendChannel.trySend(element).onFailure {
      *     Log.e(

@@ -131,17 +131,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
 
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
-        mDecorWindowContext = mContext.createConfigurationContext(
-                getConfigurationWithOverrides(mTaskInfo));
-    }
-
-    /**
-     * Get {@link Configuration} from supplied {@link RunningTaskInfo}.
-     *
-     * Allows values to be overridden before returning the configuration.
-     */
-    protected Configuration getConfigurationWithOverrides(RunningTaskInfo taskInfo) {
-        return taskInfo.getConfiguration();
+        mDecorWindowContext = mContext.createConfigurationContext(mTaskInfo.getConfiguration());
     }
 
     /**
@@ -175,7 +165,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         outResult.mRootView = rootView;
         rootView = null; // Clear it just in case we use it accidentally
-        final Configuration taskConfig = getConfigurationWithOverrides(mTaskInfo);
+        final Configuration taskConfig = mTaskInfo.getConfiguration();
         if (oldTaskConfig.densityDpi != taskConfig.densityDpi
                 || mDisplay == null
                 || mDisplay.getDisplayId() != mTaskInfo.displayId) {
@@ -262,7 +252,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
 
         final int captionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
-        final int captionWidth = taskBounds.width();
+        final int captionWidth = params.mCaptionWidthId == Resources.ID_NULL
+                ? taskBounds.width()
+                : loadDimensionPixelSize(resources, params.mCaptionWidthId);
 
         startT.setPosition(
                         mCaptionContainerSurface,
@@ -401,12 +393,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * @param yPos y position of new window
      * @param width width of new window
      * @param height height of new window
-     * @param shadowRadius radius of the shadow of the new window
-     * @param cornerRadius radius of the corners of the new window
-     * @return the {@link AdditionalWindow} that was added.
+     * @return
      */
-    AdditionalWindow addWindow(int layoutId, String namePrefix, SurfaceControl.Transaction t,
-            int xPos, int yPos, int width, int height, int shadowRadius, int cornerRadius) {
+    AdditionalWindow addWindow(int layoutId, String namePrefix,
+            SurfaceControl.Transaction t, int xPos, int yPos, int width, int height) {
         final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
         SurfaceControl windowSurfaceControl = builder
                 .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
@@ -415,10 +405,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .build();
         View v = LayoutInflater.from(mDecorWindowContext).inflate(layoutId, null);
 
-        t.setPosition(windowSurfaceControl, xPos, yPos)
+        t.setPosition(
+                windowSurfaceControl, xPos, yPos)
                 .setWindowCrop(windowSurfaceControl, width, height)
-                .setShadowRadius(windowSurfaceControl, shadowRadius)
-                .setCornerRadius(windowSurfaceControl, cornerRadius)
                 .show(windowSurfaceControl);
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,

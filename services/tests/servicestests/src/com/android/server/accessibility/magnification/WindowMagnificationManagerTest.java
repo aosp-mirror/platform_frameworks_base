@@ -66,7 +66,6 @@ import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -295,7 +294,6 @@ public class WindowMagnificationManagerTest {
                 MagnificationScaleProvider.MAX_SCALE);
     }
 
-    @Ignore("b/278816260: We could refer to b/182561174#comment4 for solution.")
     @Test
     public void logTrackingTypingFocus_processScroll_logDuration() {
         WindowMagnificationManager spyWindowMagnificationManager = spy(mWindowMagnificationManager);

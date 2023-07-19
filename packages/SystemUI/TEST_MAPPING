@@ -16,9 +16,6 @@
         },
         {
             "exclude-annotation": "android.platform.test.annotations.Postsubmit"
-        },
-        {
-            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
         }
       ]
     }
@@ -43,9 +40,6 @@
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
     },
@@ -78,16 +72,16 @@
   // Curious where your @Scenario tests will run?
   //
   // @Ignore: nowhere
-  // @FlakyTest: in staged-postsubmit, but not blocking postsubmit or
-  // presubmit
+  // @Staging or @FlakyTest: in staged-postsubmit, but not postsubmit or
+  // 	presubmit
   // @Postsubmit: in postsubmit and staged-postsubmit, but not presubmit
   // none of the above: in presubmit, postsubmit, and staged-postsubmit
   //
-  // Ideally, please annotate new tests with @FlakyTest, then with @Postsubmit
-  // once they're ready for postsubmit as they will immediately block go/android-platinum,
-  // then with neither once they're ready for presubmit.
+  // Therefore, please annotate new tests with @Staging, then with @Postsubmit
+  // once they're ready for postsubmit, then with neither once they're ready
+  // for presubmit.
   //
-  // If you don't use @Postsubmit, your new test will immediately
+  // If you don't use @Staging or @Postsubmit, your new test will immediately
   // block presubmit, which is probably not what you want!
   "sysui-platinum-postsubmit": [
     {
@@ -104,9 +98,6 @@
         },
         {
             "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
         }
       ]
     }
@@ -139,9 +130,6 @@
         },
         {
             "include-filter": "android.platform.test.scenario.sysui"
-        },
-        {
-            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
         }
       ]
     }
@@ -160,22 +148,6 @@
       "options" : [
         {
           "include-filter": "android.platform.tests.NotificationTest"
-        }
-      ]
-    }
-  ],
-  "postsubmit": [
-    {
-      "name": "SystemUIGoogleScreenshotTests",
-      "options": [
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
     }

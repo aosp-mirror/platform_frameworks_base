@@ -31,7 +31,6 @@ public class Test extends ActivityInstrumentationTestCase2<MainActivity> {
         assertEquals(3366, getActivity().getValue());
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     public void testAnnotation() throws Exception {
         assertEquals(ReferencedByAnnotation.B,
                 ((AnnotationWithEnum) TestApplication.annotation).value());

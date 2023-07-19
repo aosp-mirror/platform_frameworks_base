@@ -305,10 +305,4 @@ public abstract class UserManagerInternal {
      * for users that already existed on-disk from an older version of Android.
      */
     public abstract boolean shouldIgnorePrepareStorageErrors(int userId);
-
-    /**
-     * Returns the user id of the main user, or {@link android.os.UserHandle#USER_NULL} if there is
-     * no main user.
-     */
-    public abstract @UserIdInt int getMainUserId();
 }

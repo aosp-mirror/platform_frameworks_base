@@ -110,4 +110,9 @@ public class FakeBluetoothController extends BaseLeakChecker<Callback> implement
     public List<CachedBluetoothDevice> getConnectedDevices() {
         return Collections.emptyList();
     }
+
+    @Override
+    public int getBatteryLevel() {
+        return 0;
+    }
 }

@@ -18,25 +18,29 @@
 
 #define LOG_TAG "AudioRecord-JNI"
 
-#include <android/content/AttributionSourceState.h>
-#include <android_os_Parcel.h>
 #include <inttypes.h>
 #include <jni.h>
-#include <media/AudioRecord.h>
 #include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedUtfChars.h>
-#include <utils/Log.h>
+#include "core_jni_helpers.h"
 
+#include <utils/Log.h>
+#include <media/AudioRecord.h>
+#include <media/MicrophoneInfo.h>
 #include <vector>
 
+#include <android/content/AttributionSourceState.h>
+#include <android_os_Parcel.h>
+
+#include <nativehelper/ScopedUtfChars.h>
+
 #include "android_media_AudioAttributes.h"
-#include "android_media_AudioErrors.h"
 #include "android_media_AudioFormat.h"
+#include "android_media_AudioErrors.h"
 #include "android_media_DeviceCallback.h"
 #include "android_media_JNIUtils.h"
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_MicrophoneInfo.h"
-#include "core_jni_helpers.h"
+
 
 // ----------------------------------------------------------------------------
 
@@ -717,7 +721,7 @@ static jint android_media_AudioRecord_get_active_microphones(JNIEnv *env,
     }
 
     jint jStatus = AUDIO_JAVA_SUCCESS;
-    std::vector<media::MicrophoneInfoFw> activeMicrophones;
+    std::vector<media::MicrophoneInfo> activeMicrophones;
     status_t status = lpRecorder->getActiveMicrophones(&activeMicrophones);
     if (status != NO_ERROR) {
         ALOGE_IF(status != NO_ERROR, "AudioRecord::getActiveMicrophones error %d", status);

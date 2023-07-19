@@ -1,0 +1,28 @@
+<!-- Copyright (C) 2020 Paranoid Android
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="17dp"
+    android:viewportWidth="20"
+    android:viewportHeight="17">
+  <path
+      android:pathData="M14.4583,1.4167C14.0671,1.4167 13.75,1.7338 13.75,2.125V14.875C13.75,15.2662 14.0671,15.5833 14.4583,15.5833H17.2917C17.6829,15.5833 18,15.2662 18,14.875V2.125C18,1.7338 17.6829,1.4167 17.2917,1.4167H14.4583ZM15.1667,2.8333H16.5833V6.2333H15.1667V2.8333Z"
+      android:fillColor="#000000"
+      android:fillType="evenOdd"/>
+  <path
+      android:pathData="M11.0046,5.4613L6.9601,1.4167H6.2517V6.7929L3.0005,3.5417L2.0017,4.5404L5.9613,8.5L2.0017,12.4596L3.0005,13.4583L6.2517,10.2071V15.5833H6.9601L11.0046,11.5388L7.9588,8.5L11.0046,5.4613ZM3.4184,7.7917C3.0272,7.4005 2.3929,7.4005 2.0017,7.7917C1.6105,8.1829 1.6105,8.8171 2.0017,9.2083C2.3929,9.5995 3.0272,9.5995 3.4184,9.2083C3.8096,8.8171 3.8096,8.1829 3.4184,7.7917ZM9.0001,5.4613L7.6684,4.1296V6.7929L9.0001,5.4613ZM9.0001,11.5388L7.6684,12.8704V10.2071L9.0001,11.5388ZM10.5017,7.7917C10.8929,7.4005 11.5272,7.4005 11.9184,7.7917C12.3096,8.1829 12.3096,8.8171 11.9184,9.2083C11.5272,9.5995 10.8929,9.5995 10.5017,9.2083C10.1105,8.8171 10.1105,8.1829 10.5017,7.7917Z"
+      android:fillColor="#000000"
+      android:fillType="evenOdd"/>
+</vector>

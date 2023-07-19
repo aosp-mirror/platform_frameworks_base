@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="UNIT">%2$s</xliff:g> <xliff:g id="NUMBER">%1$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Haina jina&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Hakuna nambari ya simu)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"PIN ulizoingiza haziambatani."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Chapisha PIN ambayo ina nambari 4 hadi 8."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Andika PUK ambayo ina urefu wa nambari 8 au zaidi."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM yako imefungwa kwa PUK. Andika msimbo wa PUK ili kuifungua."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Andika PUK2 ili uondoe kizuizi kwenye SIM."</string>
+    <string name="needPuk" msgid="7321876090152422918">"Kadi yako ya SIM imefungwa na PUK. Anika msimbo wa PUK ili kuifungua."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Chapisha PUK2 ili kufungua SIM kadi."</string>
     <string name="enablePin" msgid="2543771964137091212">"Imeshindwa, washa ufungaji wa SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Umebakisha majaribio <xliff:g id="NUMBER_1">%d</xliff:g> kabla SIM haijafungwa.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Huduma haitathminiwi."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Hauwezi kubadilisha mpangilio wa kitambulisho cha anayepiga."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Sasa unatumia data ya mtandao wa <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Unaweza kubadilisha hali hii wakati wowote kwenye Mipangilio"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Hakuna huduma ya data kwa vifaa vya mkononi"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Huduma ya kupiga simu za dharura haipatikani"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Hakuna huduma za simu za sauti"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Inaweza kurekodi ishara zinazotekelezwa kwenye kitambua alama ya kidole."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Piga picha ya skrini"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Inaweza kupiga picha ya skrini ya onyesho."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Onyesho la kukagua, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"zima au rekebisha mwambaa hali"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Inaruhusu programu kulemaza upau wa hali au kuongeza na kutoa aikoni za mfumo."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"kuwa sehemu ya arifa"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Huruhusu programu kupata maelezo ya huduma inayopendelewa ya malipo ya nfc kama vile huduma zilizosajiliwa na njia."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Muamala kupitia Kipengele Salama"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Huruhusu programu kupokea maelezo kuhusu miamala inayofanyika kupitia Kipengele Salama."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"zima kufuli la skrini yako"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Inaruhusu programu kulemaza ufunguo wa vitufe na usalama mwingine ambata wa nenosiri. Kwa mfano, simu inalemaza ufunguo wa viitufe inapopokea simu inayoingia, kisha inawezesha upya ufunguo wa vitufe wakati simu inapokamilika."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"iombe kiwango cha uchangamano wa kufunga skrini"</string>
@@ -647,7 +647,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Sogeza simu upande wako wa kushoto"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Sogeza simu upande wako wa kulia"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Tafadhali angalia kifaa chako moja kwa moja."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Imeshindwa kuona uso wako. Shikilia simu ikilingana na macho."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Imeshindwa kuona uso wako. Shikilia simu yako ikilingana na macho."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Inatikisika sana. Ishike simu iwe thabiti."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Tafadhali sajili uso wako tena."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Imeshindwa kutambua uso. Jaribu tena."</string>
@@ -663,9 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Imeshindwa kuunda muundo wa uso wako. Jaribu tena."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Vioo vyeusi vimetambuliwa. Ni lazima uso wako wote uonekane."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Uso umefunikwa. Lazima uso wako wote uonekane."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Kifuniko cha uso kimetambuliwa. Ni lazima uso wako wote uonekane."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imeshindwa kuthibitisha uso. Maunzi hayapatikani."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Jaribu Kufungua kwa Uso tena"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Imeshindwa kuhifadhi data ya uso mpya. Futa wa kale kwanza."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Tumia uso au mbinu ya kufunga skrini"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Tumia uso wako ili uendelee"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Tumia uso au mbinu yako ya kufunga skrini ili uendelee"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Hitilafu fulani imetokea. Jaribu tena."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Aikoni ya uso"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"kusoma mipangilio ya usawazishaji"</string>
@@ -796,7 +792,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Ya nyumbani"</item>
     <item msgid="7740243458912727194">"Simu ya mkononi"</item>
-    <item msgid="8526146065496663766">"Kazini"</item>
+    <item msgid="8526146065496663766">"Ya kazini"</item>
     <item msgid="8150904584178569699">"Pepesi ya Kazini"</item>
     <item msgid="4537253139152229577">"Pepesi ya Nyumbani"</item>
     <item msgid="6751245029698664340">"Kurasa anwani"</item>
@@ -839,7 +835,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"Maalum"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"Ya nyumbani"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"Simu ya mkononi"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"Kazini"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"Ya kazini"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"Pepesi ya Kazini"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Pepesi ya Nyumbani"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"Peja"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Jaribu tena"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Fungua kifaa ili upate data na vipengele vyote"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Umepitisha idadi ya juu ya mara ambazo unaweza kujaribu kufungua kwa uso"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Hakuna SIM"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Hakuna SIM kwenye kompyuta kibao."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Hakuna SIM kwenye kifaa chako cha Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Hakuna SIM kwenye simu."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Weka SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM haipo au haiwezi kusomwa. Weka SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"SIM haiwezi kutumika."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM kadi yako imefungwa kabisa.\n wasiliana na mtoa huduma wako wa pasi waya ili upate SIM nyingine."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Hakuna SIM kadi"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Hakuna SIM kadi katika kompyuta ndogo."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Hakuna SIM kadi kwenye kifaa chako cha Android TV."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Hakuna SIM kadi kwenye simu."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Weka SIM kadi."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM kadi haipatikani au haisomeki. Tafadhali weka SIM kadi."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM kadi isiyotumika."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM kadi yako imelemezwa kabisa.\n Wasiliana na mtoa huduma wako wa pasi waya ili upate SIM kadi nyingine."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Wimbo uliotangulia"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Wimbo unaofuata"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Sitisha"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Peleka mbele kwa kasi"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Simu za dharura pekee"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Mtandao umefungwa"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM imefungwa kwa PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM kadi imefungwa kwa PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Angalia Mwongozo wa Mtumiaji au wasiliana na Huduma ya Wateja."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM imefungwa."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Inafungua SIM…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM kadi imefungwa."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Inafungua SIM kadi..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Umekosea katika kuchora ruwaza yako ya kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena kwa sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Umekosea mara <xliff:g id="NUMBER_0">%1$d</xliff:g> katika kuingiza nenosiri lako. \n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Umekosea katika kuingiza PIN yako mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Unaweza kubadilisha hii baadaye kwenye Mipangilio &gt; Programu"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Ruhusu Kila Wakati"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Usiruhusu Kamwe"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"Umeondoa SIM"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Mtandao wa simu hautapatikana hadi utakapozima kisha uwashe tena kifaa kikiwa na SIM sahihi."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM kadi imeondolewa"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"mtandao wa simu hutapatika hadi uanzishe upya na SIM kadi halali iliyoingizwa."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Nimemaliza"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"Umeweka SIM"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM kadi imeongezwa"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Anzisha upya kifaa chako ili kufikia mtandao wa simu."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Washa upya"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Washa huduma ya simu za mkononi"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Runinga"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Simu"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Vipasa sauti vya kituo"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Kifaa cha Nje"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Vipokeasauti"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Mfumo"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM sasa imelemazwa. Ingiza msimbo wa PUK ili kuendelea. Wasiliana na mtoa huduma kwa maelezo."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Weka nambari yako ya PIN"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Thibitisha nambari ya PIN uliyoweka"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Inafungua SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Inafungua SIM kadi..."</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Nambari ya PIN uliyoweka si sahihi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Charaza PIN iliyo na tarakimu kati ya 4 na 8."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Msimbo wa PUK lazima uwe na tarakimu 8."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Unatazama skrini nzima"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ili kuondoka, telezesha kidole kutoka juu hadi chini."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Nimeelewa"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zungusha ili upate mwonekano bora"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Funga skrini iliyogawanywa ili upate mwonekano bora"</string>
     <string name="done_label" msgid="7283767013231718521">"Imekamilika"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kitelezi cha mviringo wa saa"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kitelezi cha mviringo wa dakika"</string>
@@ -1862,7 +1856,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Sawa"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Kiokoa Betri huwasha Mandhari meusi na kudhibiti au kuzima shughuli za chinichini, baadhi ya madoido yanayoonekana, vipengele fulani na baadhi ya miunganisho ya mtandao."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Kiokoa Betri huwasha Mandhari meusi na kudhibiti au kuzima shughuli za chinichini, baadhi ya madoido yanayoonekana, vipengele fulani na baadhi ya miunganisho ya mtandao."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozigusa."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Washa"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Kwa dakika moja (hadi {formattedTime})}other{Kwa dakika # (hadi {formattedTime})}}"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Haiwezi kufikia kamera ya kompyuta kibao kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Huwezi kufikia maudhui haya unapotiririsha. Badala yake jaribu kwenye simu yako."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Chaguomsingi la mfumo"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"SIM KADI <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

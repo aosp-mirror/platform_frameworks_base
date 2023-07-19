@@ -51,6 +51,7 @@
         <item name="android:textSize">32sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:fontFeatureSettings">cv03, cv04</item>
         <item name="android:paddingBottom">-16dp</item>
     </style>
     <style name="Widget.TextView.Password" parent="@android:style/Widget.TextView">
@@ -116,7 +117,7 @@
         <item name="android:gravity">start</item>
         <item name="android:ellipsize">end</item>
         <item name="android:maxLines">2</item>
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:fontFamily">@*android:string/config_clockFontFamily</item>
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
         <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
@@ -126,6 +127,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:lines">1</item>
         <item name="android:textSize">@dimen/widget_label_font_size</item>
+        <item name="android:fontFamily">@*android:string/config_clockFontFamily</item>
         <item name="android:lineHeight">@dimen/widget_label_line_height</item>
     </style>
 
@@ -135,6 +137,7 @@
         <item name="android:gravity">center</item>
         <item name="android:textColor">?attr/wallpaperTextColor</item>
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
+        <item name="android:fontFamily">@*android:string/config_clockFontFamily</item>
         <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 

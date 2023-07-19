@@ -27,6 +27,7 @@
     <!-- Do not translate. Defines the slots for the right-hand side icons.  That is to say, the
          icons in the status bar that are not notifications. -->
     <string-array name="config_statusBarIcons">
+        <item><xliff:g id="id">@string/status_bar_firewall</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_no_calling</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_call_strength</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_alarm_clock</xliff:g></item>
@@ -48,7 +49,6 @@
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_camera</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_microphone</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_location</xliff:g></item>
@@ -56,12 +56,16 @@
         <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_zen</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_ethernet</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_wifi</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_ims</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_center_clock</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_right_clock</xliff:g></item>
     </string-array>
 
     <string translatable="false" name="status_bar_rotate">rotate</string>
@@ -90,6 +94,7 @@
     <string translatable="false" name="status_bar_alarm_clock">alarm_clock</string>
     <string translatable="false" name="status_bar_secure">secure</string>
     <string translatable="false" name="status_bar_clock">clock</string>
+    <string translatable="false" name="status_bar_ims">ims</string>
     <string translatable="false" name="status_bar_mobile">mobile</string>
     <string translatable="false" name="status_bar_vpn">vpn</string>
     <string translatable="false" name="status_bar_ethernet">ethernet</string>
@@ -100,6 +105,9 @@
     <string translatable="false" name="status_bar_call_strength">call_strength</string>
     <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
     <string translatable="false" name="status_bar_screen_record">screen_record</string>
+    <string translatable="false" name="status_bar_firewall">firewall</string>
+    <string translatable="false" name="status_bar_center_clock">center_clock</string>
+    <string translatable="false" name="status_bar_right_clock">right_clock</string>
 
     <!-- Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window
@@ -138,17 +146,17 @@
     <bool name="config_disableTransitionAnimation">false</bool>
 
     <!-- The duration (in milliseconds) of a short animation. -->
-    <integer name="config_shortAnimTime">200</integer>
+    <integer name="config_shortAnimTime">100</integer>
 
     <!-- The duration (in milliseconds) of a medium-length animation. -->
-    <integer name="config_mediumAnimTime">400</integer>
+    <integer name="config_mediumAnimTime">200</integer>
 
     <!-- The duration (in milliseconds) of a long animation. -->
-    <integer name="config_longAnimTime">500</integer>
+    <integer name="config_longAnimTime">250</integer>
 
     <!-- The duration (in milliseconds) of the activity open/close and fragment open/close animations. -->
-    <integer name="config_activityShortDur">150</integer>
-    <integer name="config_activityDefaultDur">220</integer>
+    <integer name="config_activityShortDur">75</integer>
+    <integer name="config_activityDefaultDur">110</integer>
 
     <!-- Fade out time for screen rotation -->
     <integer name="config_screen_rotation_fade_out">116</integer>
@@ -169,7 +177,7 @@
     <integer name="config_screen_rotation_color_transition">200</integer>
 
     <!-- The duration (in milliseconds) of the tooltip show/hide animations. -->
-    <integer name="config_tooltipAnimTime">150</integer>
+    <integer name="config_tooltipAnimTime">140</integer>
 
     <!-- Duration for the dim animation behind a dialog.  This may be either
          a percentage, which is relative to the duration of the enter/open
@@ -342,6 +350,22 @@
     <!-- Mask to use when checking skb mark defined in config_networkWakeupPacketMark above. -->
     <integer name="config_networkWakeupPacketMask">0</integer>
 
+    <!-- Whether the APF Filter in the device should filter out IEEE 802.3 Frames
+         Those frames are identified by the field Eth-type having values
+         less than 0x600 -->
+    <bool translatable="false" name="config_apfDrop802_3Frames">true</bool>
+
+    <!-- An array of Denylisted EtherType, packets with EtherTypes within this array
+         will be dropped
+         TODO: need to put proper values, these are for testing purposes only -->
+    <integer-array translatable="false" name="config_apfEthTypeBlackList">
+        <item>0x88A2</item>
+        <item>0x88A4</item>
+        <item>0x88B8</item>
+        <item>0x88CD</item>
+        <item>0x88E3</item>
+    </integer-array>
+
     <!-- Default value for ConnectivityManager.getMultipathPreference() on metered networks. Actual
          device behaviour is controlled by Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE.
          This is the default value of that setting. -->
@@ -473,7 +497,7 @@
     <bool name="config_adaptive_sleep_available">false</bool>
 
     <!-- Flag indicating whether we should enable smart battery. -->
-    <bool name="config_smart_battery_available">false</bool>
+    <bool name="config_smart_battery_available">true</bool>
 
     <!-- Flag indicating whether we should enable camera-based autorotate -->
     <bool name="config_camera_autorotate">false</bool>
@@ -560,10 +584,6 @@
          rotations as the default behavior. -->
     <bool name="config_allowAllRotations">false</bool>
 
-    <!-- If false and config_allowAllRotations is false, the screen will rotate to the natural
-         orientation of the device when the auto-rotate policy is toggled. -->
-    <bool name="config_useCurrentRotationOnRotationLockChange">false</bool>
-
     <!-- If true, the direction rotation is applied to get to an application's requested
          orientation is reversed.  Normally, the model is that landscape is
          clockwise from portrait; thus on a portrait device an app requesting
@@ -636,16 +656,6 @@
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
 
-    <!-- The device states (supplied by DeviceStateManager) that should be treated as open by the
-         device fold controller. Default is empty. -->
-    <integer-array name="config_openDeviceStates">
-        <!-- Example:
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        -->
-    </integer-array>
-
     <!-- The device states (supplied by DeviceStateManager) that should be treated as folded by the
          display fold controller. Default is empty. -->
     <integer-array name="config_foldedDeviceStates">
@@ -666,33 +676,9 @@
         -->
     </integer-array>
 
-    <!-- The device states (supplied by DeviceStateManager) that should be treated as a rear display
-     state. Default is empty. -->
-    <integer-array name="config_rearDisplayDeviceStates">
-        <!-- Example:
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        -->
-    </integer-array>
-
     <!-- Indicates whether the window manager reacts to half-fold device states by overriding
      rotation. -->
     <bool name="config_windowManagerHalfFoldAutoRotateOverride">false</bool>
-
-    <!-- Indicates whether the window manager pauses autorotation when folding or unfolding
-     a foldable device based on hinge angle sensor events and physical display switch events. -->
-    <bool name="config_windowManagerPauseRotationWhenUnfolding">false</bool>
-
-    <!-- Amount of time during which autorotation will be disabled since last hinge angle event -->
-    <integer name="config_pauseRotationWhenUnfolding_maxHingeAngle">0</integer>
-
-    <!-- Maximum hinge angle event to be considered to disable autorotation when folding or
-     unfolding -->
-    <integer name="config_pauseRotationWhenUnfolding_hingeEventTimeout">0</integer>
-
-    <!-- Amount of time during which autorotation will be disabled since last display switch -->
-    <integer name="config_pauseRotationWhenUnfolding_displaySwitchTimeout">0</integer>
 
     <!-- When a device enters any of these states, it should be woken up. States are defined in
          device_state_configuration.xml. -->
@@ -725,22 +711,20 @@
          mode. -->
     <integer name="config_unfoldTransitionHalfFoldedTimeout">1000</integer>
 
-    <!-- Timeout for receiving the keyguard drawn event from System UI.  -->
-    <integer name="config_keyguardDrawnTimeout">1000</integer>
-
     <!-- Indicates that the device supports having more than one internal display on at the same
          time. Only applicable to devices with more than one internal display. If this option is
          set to false, DisplayManager will make additional effort to ensure no more than 1 internal
          display is powered on at the same time. -->
     <bool name="config_supportsConcurrentInternalDisplays">true</bool>
 
-    <!-- Map of device posture to rotation lock setting. Each entry must be in the format
-         "key:value", or "key:value:fallback_key" for example: "0:1" or "2:0:1". The keys are one of
-         Settings.Secure.DeviceStateRotationLockKey, and the values are one of
-         Settings.Secure.DeviceStateRotationLockSetting.
-         The fallback is a key to a device posture that can be specified when the value is
-         Settings.Secure.DEVICE_STATE_ROTATION_LOCK_IGNORED.
-     -->
+    <!-- Map of DeviceState to rotation lock setting. Each entry must be in the format
+         "key:value", for example: "0:1".
+          The keys are device states, and the values are one of
+          Settings.Secure.DeviceStateRotationLockSetting.
+          Any device state that doesn't have a default set here will be treated as
+          DEVICE_STATE_ROTATION_LOCK_IGNORED meaning it will not have its own rotation lock setting.
+          If this map is missing, the feature is disabled and only one global rotation lock setting
+           will apply, regardless of device state. -->
     <string-array name="config_perDeviceStateRotationLockDefaults" />
 
     <!-- Dock behavior -->
@@ -768,11 +752,6 @@
          apart and the docks cannot report their true orientation on their own,
          we rely on gravity to determine the effective orientation. -->
     <bool name="config_deskDockEnablesAccelerometer">true</bool>
-
-    <!-- Control whether nosensor and locked orientation requests are respected from the app when
-         config_deskDockEnablesAccelerometer is set to false.
-         TODO(b/274763533): Consider making true by default and removing this. -->
-    <bool name="config_deskRespectsNoSensorAndLockedWithoutAccelerometer">false</bool>
 
     <!-- Car dock behavior -->
 
@@ -885,11 +864,11 @@
     <integer name="config_defaultNightDisplayCustomEndTime">21600000</integer>
 
     <!-- Minimum color temperature, in Kelvin, supported by Night display. -->
-    <integer name="config_nightDisplayColorTemperatureMin">2596</integer>
+    <integer name="config_nightDisplayColorTemperatureMin">1600</integer>
 
     <!-- Default color temperature, in Kelvin, to tint the screen when Night display is
          activated. -->
-    <integer name="config_nightDisplayColorTemperatureDefault">2850</integer>
+    <integer name="config_nightDisplayColorTemperatureDefault">2650</integer>
 
     <!-- Maximum color temperature, in Kelvin, supported by Night display. -->
     <integer name="config_nightDisplayColorTemperatureMax">4082</integer>
@@ -989,15 +968,6 @@
     <!-- Boolean indicating whether light mode is allowed when DWB is turned on. -->
     <bool name="config_displayWhiteBalanceLightModeAllowed">true</bool>
 
-    <!-- Duration, in milliseconds, of the display white balance animated transitions. -->
-    <integer name="config_displayWhiteBalanceTransitionTime">3000</integer>
-
-    <!-- Device states where the sensor based rotation values should be reversed around the Z axis
-         for the default display.
-         TODO(b/265312193): Remove this workaround when this bug is fixed.-->
-    <integer-array name="config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis">
-    </integer-array>
-
     <!-- Indicate available ColorDisplayManager.COLOR_MODE_xxx. -->
     <integer-array name="config_availableColorModes">
         <!-- Example:
@@ -1065,8 +1035,9 @@
             3 - Power off (without confirmation)
             4 - Go to voice assist
             5 - Go to assistant (Settings.Secure.ASSISTANT)
+            6 - Toggle torch on / off (if screen is off)
     -->
-    <integer name="config_longPressOnPowerBehavior">5</integer>
+    <integer name="config_longPressOnPowerBehavior">1</integer>
 
     <!-- The time in milliseconds after which a press on power button is considered "long". -->
     <integer name="config_longPressOnPowerDurationMs">500</integer>
@@ -1098,7 +1069,7 @@
             1 - Mute toggle
             2 - Global actions menu
     -->
-    <integer name="config_keyChordPowerVolumeUp">2</integer>
+    <integer name="config_keyChordPowerVolumeUp">1</integer>
 
     <!-- Control the behavior when the user long presses the back button.  Non-zero values are only
          valid for watches as part of CDD/CTS.
@@ -1172,24 +1143,13 @@
     <integer name="config_triplePressOnStemPrimaryBehavior">0</integer>
 
     <!-- Control the behavior when the user short presses the stem primary button.
-         Stem primary button is only used on watch form factor. If a device is not
-         a watch, setting this config is no-op.
-            0 - Nothing
-            1 - Go to launch all apps
+        Stem primary button is only used on watch form factor. If a device is not
+        a watch, setting this config is no-op.
+           0 - Nothing
+           1 - Go to launch all apps
     -->
     <integer name="config_shortPressOnStemPrimaryBehavior">0</integer>
 
-
-    <!-- Control the behavior of the search key.
-            0 - Launch default search activity
-            1 - Launch target activity defined by config_searchKeyTargetActivity
-    -->
-    <integer name="config_searchKeyBehavior">0</integer>
-
-    <!-- Component name for the default target activity to be launched when user
-         presses the global search key. [DO NOT TRANSLATE]
-    -->
-    <string name="config_searchKeyTargetActivity" translatable="false"></string>
 
     <!-- Time to wait while a button is pressed before triggering a very long press. -->
     <integer name="config_veryLongPressTimeout">3500</integer>
@@ -1329,20 +1289,13 @@
     <!-- Default LED off time for notification LED in milliseconds. -->
     <integer name="config_defaultNotificationLedOff">2000</integer>
 
-    <!-- LED behavior when battery is low.
-         Color for solid is taken from config_notificationsBatteryLowARGB
-          0 - default, solid when charging, flashing when not charging
-          1 - always solid when battery is low
-          2 - always flashing when battery is low -->
-    <integer name="config_notificationsBatteryLowBehavior">0</integer>
-
     <!-- Default value for led color when battery is low on charge -->
     <integer name="config_notificationsBatteryLowARGB">0xFFFF0000</integer>
 
     <!-- Default value for led color when battery is medium charged -->
     <integer name="config_notificationsBatteryMediumARGB">0xFFFFFF00</integer>
 
-    <!-- Default value for led color when battery is fully or nearly fully charged -->
+    <!-- Default value for led color when battery is fully charged -->
     <integer name="config_notificationsBatteryFullARGB">0xFF00FF00</integer>
 
     <!-- Default value for LED on time when the battery is low on charge in miliseconds -->
@@ -1356,9 +1309,6 @@
 
     <!-- Default value for LED off time when the battery is low on charge in miliseconds -->
     <integer name="config_notificationsBatteryLedOff">2875</integer>
-
-    <!-- Battery level percent that is treated as nearly full. -->
-    <integer name="config_notificationsBatteryNearlyFullLevel">90</integer>
 
     <!-- If true, only colorized CallStyle notifications will apply custom colors -->
     <bool name="config_callNotificationActionColorsRequireColorized">true</bool>
@@ -1842,6 +1792,49 @@
          suggestions to TimeDetector service. See also config_autoTimeSourcesPriority. -->
     <bool name="config_enableGnssTimeUpdateService">false</bool>
 
+    <!-- Enables the TimeZoneRuleManager service. This is the global switch for the updateable time
+         zone update mechanism. -->
+    <bool name="config_enableUpdateableTimeZoneRules">false</bool>
+
+    <!-- Enables APK-based time zone update triggering. Set this to false when updates are triggered
+         via external events and not by APK updates. For example, if an updater checks with a server
+         on a regular schedule.
+         [This is only used if config_enableUpdateableTimeZoneRules is true.] -->
+    <bool name="config_timeZoneRulesUpdateTrackingEnabled">false</bool>
+
+    <!-- The package of the time zone rules updater application. Expected to be the same
+         for all Android devices that support APK-based time zone rule updates.
+         A package-targeted com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
+         will be sent to the updater app if the system server detects an update to the updater or
+         data app packages.
+         The package referenced here must have the android.permission.UPDATE_TIME_ZONE_RULES
+         permission.
+         [This is only used if config_enableUpdateableTimeZoneRules and
+         config_timeZoneRulesUpdateTrackingEnabled are true.] -->
+    <string name="config_timeZoneRulesUpdaterPackage" translatable="false">com.android.timezone.updater</string>
+
+    <!-- The package of the time zone rules data application. Expected to be configured
+         by OEMs to reference their own priv-app APK package.
+         A package-targeted com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
+         will be sent to the updater app if the system server detects an update to the updater or
+         data app packages.
+         [This is only used if config_enableUpdateableTimeZoneRules and
+         config_timeZoneRulesUpdateTrackingEnabled are true.] -->
+    <string name="config_timeZoneRulesDataPackage" translatable="false"></string>
+
+    <!-- The allowed time in milliseconds between an update check intent being broadcast and the
+         response being considered overdue. Reliability triggers will not fire in this time.
+         [This is only used if config_enableUpdateableTimeZoneRules and
+         config_timeZoneRulesUpdateTrackingEnabled are true.] -->
+    <!-- 5 minutes -->
+    <integer name="config_timeZoneRulesCheckTimeMillisAllowed">300000</integer>
+
+    <!-- The number of times a time zone update check is allowed to fail before the system will stop
+         reacting to reliability triggers.
+         [This is only used if config_enableUpdateableTimeZoneRules and
+         config_timeZoneRulesUpdateTrackingEnabled are true.] -->
+    <integer name="config_timeZoneRulesCheckRetryCount">5</integer>
+
     <!-- Whether the geolocation time zone detection feature is enabled. Setting this to false means
          the feature cannot be used. Setting this to true means system server components can be
          tested and location time zone detection may be used if other configuration allows (see
@@ -1972,6 +1965,8 @@
     <string-array name="config_locationProviderPackageNames" translatable="false">
         <!-- The standard AOSP fused location provider -->
         <item>com.android.location.fused</item>
+        <!-- Google Play Services or microG (free reimplementation) location provider -->
+        <item>com.google.android.gms</item>
     </string-array>
 
     <!-- Package name(s) of Advanced Driver Assistance applications. These packages have additional
@@ -2090,8 +2085,9 @@
          STREAM_MUSIC as if it's on TV platform. -->
     <bool name="config_single_volume">false</bool>
 
-    <!-- Volume policy -->
-    <bool name="config_volume_down_to_enter_silent">false</bool>
+    <!-- Flag indicating whether notification and ringtone volumes
+         are controlled together (aliasing is true) or not. -->
+    <bool name="config_alias_ring_notif_stream_types">true</bool>
 
     <!-- The number of volume steps for the notification stream -->
     <integer name="config_audio_notif_vol_steps">7</integer>
@@ -2261,7 +2257,7 @@
 
          The PERSIST mode results in data persisting in the journal beyond the life of
          a transaction, so it interacts poorly with SECURE_DELETE. -->
-    <string name="db_default_journal_mode" translatable="false">TRUNCATE</string>
+    <string name="db_default_journal_mode" translatable="false">MEMORY</string>
 
     <!-- Maximum size of the persistent journal file in bytes.
          If the journal file grows to be larger than this amount then SQLite will
@@ -2277,7 +2273,7 @@
          NORMAL also preserves durability in non-WAL modes and uses checksums to ensure
          integrity although there is a small chance that an error might go unnoticed.
          Choices are: FULL, NORMAL, OFF. -->
-    <string name="db_default_sync_mode" translatable="false">FULL</string>
+    <string name="db_default_sync_mode" translatable="false">OFF</string>
 
     <!-- The database synchronization mode when using Write-Ahead Logging.
          From https://www.sqlite.org/pragma.html#pragma_synchronous:
@@ -2289,7 +2285,7 @@
          or journal mode. The synchronous=NORMAL setting is a good choice for most applications
          running in WAL mode.
          Choices are: FULL, NORMAL, OFF. -->
-    <string name="db_wal_sync_mode" translatable="false">NORMAL</string>
+    <string name="db_wal_sync_mode" translatable="false">OFF</string>
 
     <!-- The Write-Ahead Log auto-checkpoint interval in database pages (typically 1 to 4KB).
          The log is checkpointed automatically whenever it exceeds this many pages.
@@ -3271,8 +3267,16 @@
         <item>power</item>
         <item>restart</item>
         <item>logout</item>
+        <!--<item>screenshot</item>-->
+        <item>users</item>
+        <item>silent</item>
         <item>screenshot</item>
-        <item>bugreport</item>
+        <item>airplane</item>
+        <item>settings</item>
+        <item>lockdown</item>
+        <item>torch</item>
+        <!--<item>bugreport</item>-->
+        <item>onthego</item>
     </string-array>
 
     <!-- Number of milliseconds to hold a wake lock to ensure that drawing is fully
@@ -3622,6 +3626,9 @@
     <!-- Whether device supports double tap to wake -->
     <bool name="config_supportDoubleTapWake">false</bool>
 
+    <!-- Whether device supports increased touch sensitvity -->
+    <bool name="config_supportGloveMode">false</bool>
+
     <!-- The RadioAccessFamilies supported by the device.
          Empty is viewed as "all".  Only used on devices which
          don't support RIL_REQUEST_GET_RADIO_CAPABILITY
@@ -3738,12 +3745,6 @@
          experience while the device is non-interactive. -->
     <bool name="config_emergencyGestureEnabled">true</bool>
 
-    <!-- Default value for Use Emergency SOS in Settings false = disabled, true = enabled -->
-    <bool name="config_defaultEmergencyGestureEnabled">true</bool>
-
-    <!-- Default value for Use Play countdown alarm in Settings false = disabled, true = enabled -->
-    <bool name="config_defaultEmergencyGestureSoundEnabled">false</bool>
-
     <!-- Allow the gesture power + volume up to change the ringer mode while the device
          is interactive. -->
     <bool name="config_volumeHushGestureEnabled">true</bool>
@@ -3857,7 +3858,7 @@
 
     <!-- List of comma separated package names for which we the system will not show crash, ANR,
          etc. dialogs. -->
-    <string translatable="false" name="config_appsNotReportingCrashes"></string>
+    <string translatable="false" name="config_appsNotReportingCrashes">com.android.statementservice,com.android.systemui</string>
 
     <!-- Inactivity threshold (in milliseconds) used in JobScheduler. JobScheduler will consider
          the device to be "idle" after being inactive for this long. -->
@@ -4478,11 +4479,11 @@
     <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
 
     <!-- Corner radius of system dialogs -->
-    <dimen name="config_dialogCornerRadius">28dp</dimen>
+    <dimen name="config_dialogCornerRadius">32dp</dimen>
     <!-- Corner radius of system buttons -->
-    <dimen name="config_buttonCornerRadius">4dp</dimen>
+    <dimen name="config_buttonCornerRadius">@dimen/config_dialogCornerRadius</dimen>
     <!-- Corner radius for bottom sheet system dialogs -->
-    <dimen name="config_bottomDialogCornerRadius">16dp</dimen>
+    <dimen name="config_bottomDialogCornerRadius">@dimen/config_dialogCornerRadius</dimen>
     <!-- Corner radius of system progress bars -->
     <dimen name="config_progressBarCornerRadius">1000dp</dimen>
     <!-- Controls whether system buttons use all caps for text -->
@@ -4495,7 +4496,7 @@
     <string name="config_bodyFontFamilyMedium" translatable="false">sans-serif-medium</string>
 
     <!-- Name of the font family to use in the default lockscreen clock -->
-    <string name="config_clockFontFamily" translatable="false">monospace</string>
+    <string name="config_clockFontFamily" translatable="false">sans-serif</string>
 
     <!-- Size of icon shown beside a preference locked by admin -->
     <dimen name="config_restrictedIconSize">@dimen/restricted_icon_size_material</dimen>
@@ -4526,10 +4527,7 @@
     <string-array name="config_disableApkUnlessMatchedSku_skus_list" translatable="false" />
 
     <!-- Whether or not we should show the option to show battery percentage -->
-    <bool name="config_battery_percentage_setting_available">true</bool>
-
-    <!-- Default value set for battery percentage in status bar false = disabled, true = enabled -->
-    <bool name="config_defaultBatteryPercentageSetting">false</bool>
+    <bool name="config_battery_percentage_setting_available">false</bool>
 
     <!-- Whether or not battery saver should be "sticky" when manually enabled. -->
     <bool name="config_batterySaverStickyBehaviourDisabled">false</bool>
@@ -4786,6 +4784,135 @@
     <string name="config_batterymeterPowersavePath" translatable="false">
         M9,10l-2,0l0,-2l-2,0l0,2l-2,0l0,2l2,0l0,2l2,0l0,-2l2,0z
     </string>
+    <!-- Landscape Battery -->
+    <string name="config_batterymeterLandPerimeterPath" translatable="false">
+	M3.77,0.80L21.85,0.80A1.97 1.97 0 0 1 23.82,2.77L23.82,9.31A1.97 1.97 0 0 1 21.85,11.27L3.77,11.27A1.97 1.97 0 0 1 1.81,9.31L1.81,2.77A1.97 1.97 0 0 1 3.77,0.80zM2.85,3.00L2.85,9.02A1.48 1.48 0 0 0 4.33,10.50L21.30,10.50A1.48 1.48 0 0 0 22.78,9.02L22.78,3.00A1.48 1.48 0 0 0 21.30,1.52L4.33,1.52A1.48 1.48 0 0 0 2.85,3.00zM1.26,7.97Q-1.14,5.86,1.29,3.81z
+    </string>
+    <string name="config_batterymeterLandFillMask" translatable="false">
+        M2.82,1.39L2.82,10.63A0.00 0.00 0 0 0 2.82,10.63L22.88,10.63A0.00 0.00 0 0 0 22.88,10.63L22.88,1.39A0.00 0.00 0 0 0 22.88,1.39L2.82,1.39A0.00 0.00 0 0 0 2.82,1.39z
+    </string>
+    <string name="config_batterymeterLandBoltPath" translatable="false">
+        M10.81,10.30L12.84,6.06L9.76,6.13L14.43,1.90L12.86,5.07L15.85,5.00z
+    </string>
+    <string name="config_batterymeterLandPowersavePath" translatable="false">
+        M8.90,5.05L12.19,5.21L11.90,2.95L13.67,3.07L13.48,5.16L16.28,5.01L16.51,6.68L13.53,6.60L13.64,9.13L11.73,9.00L12.05,6.68L8.92,6.76z
+    </string>
+    <string name="config_batterymeterLandErrorPerimeterPath" translatable="false">@string/config_batterymeterLandPerimeterPath</string>
+    <string name="config_batterymeterRLandPerimeterPath" translatable="false">
+	M2.44,0.64L19.70,0.64A2.21 2.21 0 0 1 21.91,2.85L21.91,9.21A2.21 2.21 0 0 1 19.70,11.42L2.44,11.42A2.21 2.21 0 0 1 0.23,9.21L0.23,2.85A2.21 2.21 0 0 1 2.44,0.64zM0.87,3.59L0.87,8.41A2.28 2.28 0 0 0 3.15,10.69L18.98,10.69A2.28 2.28 0 0 0 21.26,8.41L21.26,3.59A2.28 2.28 0 0 0 18.98,1.31L3.15,1.31A2.28 2.28 0 0 0 0.87,3.59zM22.45,8.32Q25.10,5.95,22.42,3.62
+    </string>
+    <string name="config_batterymeterRLandFillMask" translatable="false">
+        M0.87,1.30L0.87,10.69A0.00 0.00 0 0 0 0.87,10.69L21.26,10.69A0.00 0.00 0 0 0 21.26,10.69L21.26,1.30A0.00 0.00 0 0 0 21.26,1.30L0.87,1.30A0.00 0.00 0 0 0 0.87,1.30z
+    </string>
+    <string name="config_batterymeterRLandBoltPath" translatable="false">
+        M8.92,10.42L10.91,6.05L7.88,6.12L12.48,1.77L10.93,5.03L13.88,4.96z
+    </string>
+    <string name="config_batterymeterRLandPowersavePath" translatable="false">
+        M14.92,5.01L11.69,5.18L11.97,2.85L10.23,2.97L10.41,5.12L7.65,4.97L7.43,6.69L10.37,6.61L10.26,9.22L12.14,9.08L11.82,6.69L14.91,6.78z
+    </string>
+    <string name="config_batterymeterRLandErrorPerimeterPath" translatable="false">@string/config_batterymeterRLandPerimeterPath</string>
+    <!-- X path for SignalDrawable as defined on a 24x24 canvas. -->
+    <string name="config_signalXPath" translatable="false">
+        M22,16.41L20.59,15l-2.09,2.09L16.41,15L15,16.41l2.09,2.09L15,20.59L16.41,22l2.09-2.08L20.59,22L22,20.59l-2.08-2.09   L22,16.41z
+    </string>
+
+    <!-- More battery styles -->
+    <string name="config_batterymeterLandPerimeterPathSignal" translatable="false">
+	M2.85,4.00L9.15,4.00A2.85 2.85 0 0 1 12.00,6.85L12.00,13.15A2.85 2.85 0 0 1 9.15,16.00L2.85,16.00A2.85 2.85 0 0 1 -0.00,13.15L-0.00,6.85A2.85 2.85 0 0 1 2.85,4.00zM8.00,4.00L4.00,4.00C4.00,3.50,4.00,3.00,4.50,3.00L7.50,3.00C8.00,3.00,8.00,3.50,8.00,4.00zM2.49,12.25L2.49,12.91A0.66 0.66 0 0 0 3.15,13.57L6.24,13.57A0.66 0.66 0 0 0 6.90,12.91L6.90,12.25A0.66 0.66 0 0 0 6.24,11.59L3.15,11.59A0.66 0.66 0 0 0 2.49,12.25zM2.48,9.71L2.48,10.37A0.66 0.66 0 0 0 3.14,11.03L6.24,11.03A0.66 0.66 0 0 0 6.90,10.37L6.90,9.71A0.66 0.66 0 0 0 6.24,9.05L3.14,9.05A0.66 0.66 0 0 0 2.48,9.71zM1.80,6.85L1.80,13.15A1.05 1.05 0 0 0 2.85,14.20L9.15,14.20A1.05 1.05 0 0 0 10.20,13.15L10.20,6.85A1.05 1.05 0 0 0 9.15,5.80L2.85,5.80A1.05 1.05 0 0 0 1.80,6.85zM2.49,7.18L2.49,7.84A0.66 0.66 0 0 0 3.15,8.50L6.24,8.50A0.66 0.66 0 0 0 6.90,7.84L6.90,7.18A0.66 0.66 0 0 0 6.24,6.52L3.15,6.52A0.66 0.66 0 0 0 2.49,7.18z
+    </string>
+    <string name="config_batterymeterLandFillMaskSignal" translatable="false">
+	M8.28,6.53L8.89,6.53A0.61 0.61 0 0 1 9.50,7.14L9.50,12.96A0.61 0.61 0 0 1 8.89,13.57L8.28,13.57A0.61 0.61 0 0 1 7.67,12.96L7.67,7.14A0.61 0.61 0 0 1 8.28,6.53z
+    </string>
+    <string name="config_batterymeterLandBoltPathSignal" translatable="false">
+	M4.26,10.66L4.25,11.86C4.23,12.10,4.62,12.16,4.82,11.86L5.97,10.08C6.17,9.71,5.79,9.35,5.08,9.34L5.08,8.14C5.10,7.90,4.72,7.84,4.52,8.14L3.36,9.92C3.16,10.29,3.55,10.65,4.26,10.66
+    </string>
+    <string name="config_batterymeterLandPowersavePathSignal" translatable="false">@string/config_batterymeterLandPerimeterPathSignal</string>
+    <string name="config_batterymeterLandErrorPerimeterPathSignal" translatable="false">@string/config_batterymeterLandPerimeterPathSignal</string>
+    <string name="config_batterymeterLandPerimeterPathBuddy" translatable="false">
+	M3.61,5.65L8.39,5.65A3.59 3.59 0 0 1 11.98,9.24L11.98,10.76A3.59 3.59 0 0 1 8.39,14.35L3.61,14.35A3.59 3.59 0 0 1 0.02,10.76L0.02,9.24A3.59 3.59 0 0 1 3.61,5.65zM1.32,9.13L1.32,10.87A2.17 2.17 0 0 0 3.50,13.04L8.50,13.04A2.17 2.17 0 0 0 10.68,10.87L10.68,9.13A2.17 2.17 0 0 0 8.50,6.96L3.50,6.96A2.17 2.17 0 0 0 1.32,9.13z
+    </string>
+    <string name="config_batterymeterLandFillMaskBuddy" translatable="false">
+	M2.25,8.00L9.75,8.00A0.00 0.00 0 0 1 9.75,8.00L9.75,12.00A0.00 0.00 0 0 1 9.75,12.00L2.25,12.00A0.00 0.00 0 0 1 2.25,12.00L2.25,8.00A0.00 0.00 0 0 1 2.25,8.00z
+    </string>
+    <string name="config_batterymeterLandBoltPathBuddy" translatable="false">
+	M5.61,10.76L5.60,12.15C5.58,12.42,5.95,12.49,6.14,12.15L7.25,10.09C7.44,9.66,7.07,9.24,6.39,9.24L6.40,7.85C6.42,7.58,6.05,7.51,5.86,7.85L4.75,9.91C4.56,10.34,4.93,10.76,5.61,10.76
+    </string>
+    <string name="config_batterymeterLandPowersavePathBuddy" translatable="false">@string/config_batterymeterLandPerimeterPathBuddy</string>
+    <string name="config_batterymeterLandErrorPerimeterPathBuddy" translatable="false">@string/config_batterymeterLandPerimeterPathBuddy</string>
+    <string name="config_batterymeterLandPerimeterPathLine" translatable="false">
+	M3.61,5.65L8.39,5.65A3.59 3.59 0 0 1 11.98,9.24L11.98,10.76A3.59 3.59 0 0 1 8.39,14.35L3.61,14.35A3.59 3.59 0 0 1 0.02,10.76L0.02,9.24A3.59 3.59 0 0 1 3.61,5.65zM1.32,9.13L1.32,10.87A2.17 2.17 0 0 0 3.50,13.04L8.50,13.04A2.17 2.17 0 0 0 10.68,10.87L10.68,9.13A2.17 2.17 0 0 0 8.50,6.96L3.50,6.96A2.17 2.17 0 0 0 1.32,9.13z
+    </string>
+    <string name="config_batterymeterLandFillMaskLine" translatable="false">
+	M6.00,7.72L6.00,7.72A0.65 0.65 0 0 1 6.65,8.37L6.65,11.63A0.65 0.65 0 0 1 6.00,12.28L6.00,12.28A0.65 0.65 0 0 1 5.35,11.63L5.35,8.37A0.65 0.65 0 0 1 6.00,7.72z
+    </string>
+    <string name="config_batterymeterLandBoltPathLine" translatable="false">
+	M5.61,10.76L5.60,12.15C5.58,12.42,5.95,12.49,6.14,12.15L7.25,10.09C7.44,9.66,7.07,9.24,6.39,9.24L6.40,7.85C6.42,7.58,6.05,7.51,5.86,7.85L4.75,9.91C4.56,10.34,4.93,10.76,5.61,10.76
+    </string>
+    <string name="config_batterymeterLandPowersavePathLine" translatable="false">M1.71,6.00L8.79,6.00A1.71 1.71 0 0 1 10.50,7.71L10.50,12.29A1.71 1.71 0 0 1 8.79,14.00L1.71,14.00A1.71 1.71 0 0 1 0.00,12.29L0.00,7.71A1.71 1.71 0 0 1 1.71,6.00zM11.00,9.25L11.00,10.75A0.50 0.50 0 0 0 11.50,11.25L11.50,11.25A0.50 0.50 0 0 0 12.00,10.75L12.00,9.25A0.50 0.50 0 0 0 11.50,8.75L11.50,8.75A0.50 0.50 0 0 0 11.00,9.25zM1.00,8.00L1.00,12.00A1.00 1.00 0 0 0 2.00,13.00L8.50,13.00A1.00 1.00 0 0 0 9.50,12.00L9.50,8.00A1.00 1.00 0 0 0 8.50,7.00L2.00,7.00A1.00 1.00 0 0 0 1.00,8.00z
+    </string>
+    <string name="config_batterymeterLandErrorPerimeterPathLine" translatable="false">@string/config_batterymeterLandPerimeterPathLine</string>
+    <string name="config_batterymeterLandPerimeterPathPill" translatable="false">
+	M4.39,0.15C4.1,0.28,4.02,0.35,3.89,0.59C3.68,0.98,3.78,1.55,4.11,1.83C4.4,2.09,4.55,2.1,6.44,2.1C8.33,2.1,8.47,2.09,8.76,1.83C9.1,1.55,9.2,0.98,8.98,0.59C8.85,0.35,8.78,0.28,8.49,0.15C8.3,0.06,8.15,0.05,6.44,0.05C4.72,0.05,4.58,0.06,4.39,0.15ZM4.39,0.15M3.18,2.6C2.68,2.74,2.34,2.95,1.92,3.35C1.35,3.89,1.04,4.54,1.04,5.16L1.04,5.4L3.59,5.4L3.86,5.13C4.39,4.61,4.64,4.55,6.46,4.55C8.29,4.55,8.54,4.61,9.07,5.13L9.34,5.4L11.94,5.4L11.94,5.17C11.94,4.55,11.62,3.89,11.06,3.35C10.63,2.93,10.3,2.74,9.77,2.59C9.45,2.5,9.23,2.5,6.46,2.5C3.76,2.5,3.48,2.52,3.18,2.6ZM3.18,2.6M0.93,11L0.93,15.65L3.27,15.65L3.27,6.35L0.93,6.35ZM0.93,11M9.66,11L9.66,15.65L11.99,15.65L11.99,6.35L9.66,6.35ZM9.66,11M1.04,16.86C1.04,17.45,1.37,18.11,1.92,18.65C2.35,19.06,2.76,19.3,3.25,19.43C3.7,19.54,9.28,19.54,9.73,19.43C10.23,19.3,10.63,19.06,11.06,18.65C11.61,18.11,11.94,17.45,11.94,16.86L11.94,16.65L9.35,16.65L9.07,16.92C8.52,17.45,8.29,17.5,6.46,17.5C4.64,17.5,4.4,17.45,3.86,16.92L3.58,16.65L1.04,16.65ZM1.04,16.86
+    </string>
+    <string name="config_batterymeterLandFillMaskPill" translatable="false">
+	M5.32,6.04C5.09,6.15,4.98,6.25,4.88,6.46C4.78,6.64,4.78,6.82,4.78,11.08C4.78,15.32,4.78,15.52,4.88,15.69C5.11,16.14,5.32,16.2,6.46,16.2C7.61,16.2,7.82,16.14,8.05,15.69C8.14,15.52,8.15,15.32,8.15,11.08C8.15,6.82,8.15,6.64,8.05,6.46C7.94,6.25,7.84,6.14,7.59,6.03C7.36,5.91,5.55,5.91,5.32,6.04ZM5.32,6.04
+    </string>
+    <string name="config_batterymeterLandBoltPathPill" translatable="false">
+	M5,17.5 V12 H3 L7,4.5 V10 h2 L5,17.5 z
+    </string>
+    <string name="config_batterymeterLandPowersavePathPill" translatable="false">@string/config_batterymeterLandPerimeterPathPill</string>
+    <string name="config_batterymeterLandErrorPerimeterPathPill" translatable="false">@string/config_batterymeterLandPerimeterPathPill</string>
+    <string name="config_batterymeterLandPerimeterPathMusku" translatable="false">
+	M1.18,17.23L1.18,4.75A2.77 2.77 0 0 1 3.95,1.98L8.05,1.98A2.77 2.77 0 0 1 10.82,4.75L10.82,17.23A2.77 2.77 0 0 1 8.05,20.00L3.95,20.00A2.77 2.77 0 0 1 1.18,17.23zM4.25,19.07L7.75,19.07A2.14 2.14 0 0 0 9.88,16.93L9.88,5.05A2.14 2.14 0 0 0 7.75,2.91L4.25,2.91A2.14 2.14 0 0 0 2.12,5.05L2.12,16.93A2.14 2.14 0 0 0 4.25,19.07zM7.71,1.05C6.78,-0.35,5.22,-0.35,4.29,1.05L7.71,1.05z
+    </string>
+    <string name="config_batterymeterLandFillMaskMusku" translatable="false">
+	M2.88,16.88L2.88,5.20A1.33 1.33 0 0 1 4.20,3.88L7.80,3.88A1.33 1.33 0 0 1 9.13,5.20L9.13,16.88A1.33 1.33 0 0 1 7.80,18.21L4.20,18.21A1.33 1.33 0 0 1 2.88,16.88z
+    </string>
+    <string name="config_batterymeterLandBoltPathMusku" translatable="false">
+	M6.84,11.51L6.84,13.68Q6.77,14.26,6.26,13.90L1.79,10.09C1.47,9.77,1.69,9.11,2.45,9.44L5.16,10.49L5.16,8.32Q5.23,7.74,5.74,8.10L10.21,11.91C10.53,12.23,10.31,12.89,9.55,12.56L6.84,11.51z
+    </string>
+    <string name="config_batterymeterLandPowersavePathMusku" translatable="false">@string/config_batterymeterLandPerimeterPathMusku</string>
+    <string name="config_batterymeterLandErrorPerimeterPathMusku" translatable="false">@string/config_batterymeterLandPerimeterPathMusku</string>
+    <string name="config_batterymeterLandPerimeterPathStyleA" translatable="false">
+        M2.25,6L2.25,9.01L2.16,9C1.82,8.97,1.54,8.88,1.25,8.69C1.1,8.59,1.01,8.52,0.88,8.38C0.56,8.06,0.34,7.68,0.18,7.18C-0.22,5.94,0.06,4.47,0.86,3.64C1.24,3.25,1.67,3.04,2.15,3L2.25,3L2.25,6Z,M20.26,0.01C20.58,0.04,20.91,0.12,21.2,0.25C21.65,0.44,22.07,0.76,22.38,1.16C22.74,1.62,22.96,2.19,23,2.78C23.02,2.95,23.02,9.07,23,9.23C22.97,9.62,22.87,9.98,22.7,10.33C22.41,10.92,21.96,11.37,21.38,11.67C21.12,11.81,20.86,11.9,20.58,11.95C20.29,12,20.78,12,13,12C7.06,12,5.77,12,5.68,11.99C4.64,11.87,3.76,11.25,3.31,10.33C3.15,10,3.06,9.68,3.02,9.32C3,9.15,3,2.85,3.02,2.68C3.06,2.32,3.15,2,3.32,1.66C3.56,1.18,3.9,0.79,4.35,0.49C4.78,0.21,5.24,0.06,5.77,0.01C5.91,-0,20.12,-0,20.26,0.01ZM5.96,1.26C5.33,1.33,4.78,1.7,4.48,2.26C4.41,2.39,4.35,2.54,4.32,2.68C4.26,2.93,4.26,2.74,4.26,6C4.26,7.97,4.26,9,4.27,9.06C4.35,9.76,4.8,10.36,5.45,10.62C5.57,10.67,5.7,10.7,5.84,10.73L5.96,10.75L13.01,10.75L20.06,10.75L20.19,10.73C21.04,10.57,21.68,9.89,21.76,9.04C21.77,8.97,21.77,8.02,21.77,5.93L21.77,2.92L21.74,2.81C21.64,2.28,21.35,1.85,20.91,1.56C20.67,1.4,20.37,1.29,20.08,1.26C19.96,1.25,6.08,1.25,5.96,1.26Z
+    </string>
+    <string name="config_batterymeterLandFillMaskStyleA" translatable="false">
+        M19.67,1.75C19.84,1.77,19.98,1.8,20.13,1.85C20.73,2.07,21.15,2.58,21.24,3.21C21.26,3.35,21.26,8.67,21.24,8.79C21.13,9.49,20.64,10.04,19.96,10.2C19.77,10.25,20.15,10.25,13,10.25C7.45,10.25,6.29,10.25,6.21,10.24C5.7,10.16,5.26,9.87,4.99,9.42C4.89,9.26,4.8,9.02,4.77,8.82C4.75,8.72,4.75,8.52,4.75,6.01C4.75,3.8,4.76,3.29,4.77,3.21C4.86,2.58,5.28,2.07,5.88,1.85C5.98,1.81,6.06,1.79,6.18,1.77C6.26,1.76,6.79,1.75,12.95,1.75C16.63,1.75,19.65,1.75,19.67,1.75Z
+    </string>
+    <string name="config_batterymeterLandBoltPathStyleA" translatable="false">
+        M10.45,6.77L12.7,6.77L11.53,9.81C11.36,10.26,11.82,10.49,12.12,10.13L15.77,5.78C15.84,5.7,15.88,5.61,15.88,5.52C15.88,5.35,15.75,5.23,15.56,5.23L13.31,5.23L14.48,2.19C14.65,1.75,14.19,1.51,13.9,1.87L10.25,6.2C10.17,6.3,10.13,6.39,10.13,6.48C10.13,6.65,10.27,6.77,10.45,6.77Z
+    </string>
+    <string name="config_batterymeterLandPowersavePathStyleA" translatable="false">@string/config_batterymeterLandPerimeterPathStyleA</string>
+    <string name="config_batterymeterLandErrorPerimeterPathStyleA" translatable="false">@string/config_batterymeterLandPerimeterPathStyleA</string>
+    <string name="config_batterymeterRLandPerimeterPathStyleA" translatable="false">
+        M20.74,6L20.74,9.01L20.83,9C21.17,8.98,21.45,8.88,21.74,8.69C21.89,8.59,21.98,8.52,22.11,8.38C22.43,8.06,22.65,7.68,22.81,7.19C23.22,5.94,22.93,4.48,22.13,3.64C21.75,3.25,21.32,3.04,20.84,3L20.74,3L20.74,6Z,M2.74,0.01C2.41,0.04,2.08,0.12,1.79,0.25C1.34,0.44,0.92,0.76,0.61,1.16C0.26,1.62,0.03,2.19,-0.01,2.78C-0.02,2.95,-0.02,9.07,-0.01,9.23C0.02,9.62,0.12,9.98,0.29,10.33C0.59,10.92,1.03,11.38,1.61,11.67C1.87,11.81,2.13,11.9,2.42,11.95C2.7,12.01,2.21,12,9.99,12C15.93,12,17.22,12,17.31,11.9C18.35,11.87,19.23,11.25,19.68,10.33C19.84,10,19.93,9.68,19.98,9.33C19.99,9.16,19.99,2.85,19.98,2.68C19.93,2.32,19.84,2,19.67,1.66C19.44,1.18,19.09,0.79,18.64,0.49C18.21,0.21,17.75,0.06,17.22,0.01C17.08,-0,2.87,-0,2.74,0.01ZM17.03,1.26C17.67,1.33,18.21,1.7,18.51,2.26C18.58,2.39,18.64,2.54,18.67,2.68C18.74,2.93,18.73,2.74,18.73,6C18.73,7.97,18.73,9,18.72,9.06C18.64,9.76,18.19,10.36,17.54,10.62C17.42,10.67,17.3,10.7,17.15,10.73L17.03,10.75L9.98,10.75L2.93,10.75L2.8,10.73C1.95,10.58,1.32,9.9,1.23,9.05C1.22,8.97,1.22,8.02,1.22,5.93L1.22,2.93L1.25,2.82C1.35,2.28,1.64,1.85,2.09,1.56C2.32,1.4,2.63,1.29,2.91,1.26C3.03,1.25,16.91,1.25,17.03,1.26Z
+    </string>
+    <string name="config_batterymeterRLandFillMaskStyleA" translatable="false">
+        M3.32,1.76C3.15,1.77,3.01,1.8,2.86,1.85C2.26,2.07,1.84,2.59,1.75,3.22C1.73,3.35,1.73,8.67,1.75,8.8C1.86,9.49,2.35,10.04,3.03,10.21C3.22,10.25,2.84,10.25,9.99,10.25C15.54,10.25,16.7,10.25,16.78,10.24C17.29,10.16,17.73,9.87,18,9.43C18.1,9.26,18.19,9.02,18.22,8.82C18.24,8.72,18.24,8.52,18.24,6.01C18.24,3.8,18.24,3.29,18.22,3.22C18.13,2.59,17.71,2.07,17.11,1.85C17.01,1.82,16.93,1.8,16.81,1.77C16.73,1.76,16.2,1.75,10.04,1.75C6.36,1.75,3.34,1.75,3.32,1.76Z
+    </string>
+    <string name="config_batterymeterRLandBoltPathStyleA" translatable="false">
+        M7.43,6.77L9.68,6.77L8.51,9.81C8.34,10.26,8.8,10.49,9.1,10.13L12.75,5.78C12.82,5.7,12.86,5.61,12.86,5.52C12.86,5.35,12.73,5.23,12.54,5.23L10.29,5.23L11.46,2.19C11.63,1.75,11.17,1.52,10.88,1.87L7.23,6.21C7.15,6.3,7.11,6.39,7.11,6.48C7.11,6.65,7.25,6.77,7.43,6.77Z
+    </string>
+    <string name="config_batterymeterRLandPowersavePathStyleA" translatable="false">@string/config_batterymeterRLandPerimeterPathStyleA</string>
+    <string name="config_batterymeterRLandErrorPerimeterPathStyleA" translatable="false">@string/config_batterymeterRLandPerimeterPathStyleA</string>
+    <string name="config_batterymeterLandPerimeterPathStyleB" translatable="false">
+        M8.22,0.80L17.90,0.80A5.18 5.18 0 0 1 23.08,5.98L23.08,5.98A5.18 5.18 0 0 1 17.90,11.16L8.22,11.16A5.18 5.18 0 0 1 3.04,5.98L3.04,5.98A5.18 5.18 0 0 1 8.22,0.80zM0.46,5.05L0.46,7.02A0.92 0.92 0 0 0 1.38,7.94L1.38,7.94A0.92 0.92 0 0 0 2.30,7.02L2.30,5.05A0.92 0.92 0 0 0 1.38,4.13L1.38,4.13A0.92 0.92 0 0 0 0.46,5.05zM4.55,5.98L4.55,5.98A3.67 3.67 0 0 0 8.22,9.65L17.91,9.65A3.67 3.67 0 0 0 21.58,5.98L21.58,5.98A3.67 3.67 0 0 0 17.91,2.31L8.22,2.31A3.67 3.67 0 0 0 4.55,5.98z
+    </string>
+    <string name="config_batterymeterLandFillMaskStyleB" translatable="false">
+        M4.10,4.45L4.10,7.51A0.00 0.00 0 0 0 4.10,7.51L17.78,7.51A0.00 0.00 0 0 0 17.78,7.51L17.78,4.45A0.00 0.00 0 0 0 17.78,4.45L4.10,4.45A0.00 0.00 0 0 0 4.10,4.45z
+    </string>
+    <string name="config_batterymeterLandBoltPathStyleB" translatable="false">
+        M10.81,10.30L12.84,6.06L9.76,6.13L14.43,1.90L12.86,5.07L15.85,5.00z
+    </string>
+    <string name="config_batterymeterLandPowersavePathStyleB" translatable="false">@string/config_batterymeterLandPerimeterPathStyleB</string>
+    <string name="config_batterymeterLandErrorPerimeterPathStyleB" translatable="false">@string/config_batterymeterLandPerimeterPathStyleB</string>
+    <string name="config_batterymeterRLandPerimeterPathStyleB" translatable="false">
+        M6.10,0.80L15.78,0.80A5.18 5.18 0 0 1 20.96,5.98L20.96,5.98A5.18 5.18 0 0 1 15.78,11.16L6.10,11.16A5.18 5.18 0 0 1 0.92,5.98L0.92,5.98A5.18 5.18 0 0 1 6.10,0.80zM2.42,5.98L2.42,5.98A3.67 3.67 0 0 0 6.09,9.65L15.78,9.65A3.67 3.67 0 0 0 19.45,5.98L19.45,5.98A3.67 3.67 0 0 0 15.78,2.31L6.09,2.31A3.67 3.67 0 0 0 2.42,5.98zM21.70,5.05L21.70,7.02A0.92 0.92 0 0 0 22.62,7.94L22.62,7.94A0.92 0.92 0 0 0 23.54,7.02L23.54,5.05A0.92 0.92 0 0 0 22.62,4.13L22.62,4.13A0.92 0.92 0 0 0 21.70,5.05z
+    </string>
+    <string name="config_batterymeterRLandFillMaskStyleB" translatable="false">@string/config_batterymeterLandFillMaskStyleB</string>
+    <string name="config_batterymeterRLandBoltPathStyleB" translatable="false">@string/config_batterymeterLandBoltPathStyleB</string>
+    <string name="config_batterymeterRLandPowersavePathStyleB" translatable="false">@string/config_batterymeterRLandPerimeterPathStyleB</string>
+    <string name="config_batterymeterRLandErrorPerimeterPathStyleB" translatable="false">@string/config_batterymeterRLandPerimeterPathStyleB</string>
 
     <!-- Attribution path for SignalDrawable as defined on a 24x24 canvas. -->
     <string name="config_signalAttributionPath" translatable="false">
@@ -4879,7 +5006,7 @@
 
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
-    <string name="config_displayLightSensorType" translatable="false" />
+    <string name="config_displayLightSensorType" translatable="false">android.sensor.light</string>
 
     <!-- Whether or not to enable automatic heap dumps for the system server on debuggable builds. -->
     <bool name="config_debugEnableAutomaticSystemServerHeapDumps">false</bool>
@@ -5000,8 +5127,9 @@
     <!-- If face auth sends the user directly to home/last open app, or stays on keyguard -->
     <bool name="config_faceAuthDismissesKeyguard">true</bool>
 
-    <!-- Default value for performant auth feature. -->
-    <bool name="config_performantAuthDefault">false</bool>
+    <!-- Default value for whether a SFPS device is required to be interactive for fingerprint auth
+    to unlock the device.  -->
+    <bool name="config_requireScreenOnToAuthEnabled">false</bool>
 
     <!-- The component name for the default profile supervisor, which can be set as a profile owner
     even after user setup is complete. The defined component should be used for supervision purposes
@@ -5034,11 +5162,6 @@
     <!-- The list of packages to automatically opt out of refresh rates higher than 60hz because
          of known compatibility issues. -->
     <string-array name="config_highRefreshRateBlacklist"></string-array>
-
-    <!-- The list of packages to force slowJpegMode for Apps using Camera API1 -->
-    <string-array name="config_forceSlowJpegModeList" translatable="false">
-        <!-- Add packages here -->
-    </string-array>
 
     <!-- Whether or not to hide the navigation bar when the soft keyboard is visible in order to
          create additional screen real estate outside beyond the keyboard. Note that the user needs
@@ -5173,7 +5296,7 @@
     <item name="config_wallpaperMinScale" format="float" type="dimen">1</item>
 
     <!-- The max scale for the wallpaper when it's zoomed in -->
-    <item name="config_wallpaperMaxScale" format="float" type="dimen">1.10</item>
+    <item name="config_wallpaperMaxScale" format="float" type="dimen">1</item>
 
     <!-- If true, the wallpaper will scale regardless of the value of shouldZoomOutWallpaper() -->
     <bool name="config_alwaysScaleWallpaper">false</bool>
@@ -5328,10 +5451,6 @@
     <!-- Whether vertical reachability repositioning is allowed for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsVerticalReachabilityEnabled">false</bool>
 
-    <!-- Whether book mode automatic horizontal reachability positioning is allowed for letterboxed
-        fullscreen apps -->
-    <bool name="config_letterboxIsAutomaticReachabilityInBookModeEnabled">false</bool>
-
     <!-- Default horizontal position of the letterboxed app window when reachability is
         enabled and an app is fullscreen in landscape device orientation. When reachability is
         enabled, the position can change between left, center and right. This config defines the
@@ -5389,9 +5508,6 @@
     <!-- Whether using split screen aspect ratio as a default aspect ratio for unresizable apps. -->
     <bool name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled">false</bool>
 
-    <!-- Whether using display aspect ratio as a default aspect ratio for all letterboxed apps. -->
-    <bool name="config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled">false</bool>
-
     <!-- Whether the specific behaviour for translucent activities letterboxing is enabled.
          TODO(b/255532890) Enable when ignoreOrientationRequest is set -->
     <bool name="config_letterboxIsEnabledForTranslucentActivities">false</bool>
@@ -5407,19 +5523,9 @@
         split screen. -->
     <bool name="config_isWindowManagerCameraCompatTreatmentEnabled">false</bool>
 
-    <!-- Whether should use split screen aspect ratio for the activity when camera compat treatment
-        is enabled and activity is connected to the camera in fullscreen. -->
-    <bool name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled">false</bool>
-
     <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
          treatment for stretched issues in camera viewfinder. -->
     <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
-
-    <!-- Docking is a uiMode configuration change and will cause activities to relaunch if it's not
-         handled. If true, the configuration change will be sent but activities will not be
-         relaunched upon docking. Apps with desk resources will behave like normal, since they may
-         expect the relaunch upon the desk uiMode change. -->
-    <bool name="config_skipActivityRelaunchWhenDocking">false</bool>
 
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
@@ -6076,6 +6182,10 @@
          components, such as the telephony stack, which require access to the full ServiceState for
          tasks such as network registration. -->
     <string-array name="config_serviceStateLocationAllowedPackages">
+        <item>"com.android.providers.telephony"</item>
+        <item>"com.android.mms.service"</item>
+        <item>"com.android.ons"</item>
+        <item>"com.android.stk"</item>
         <item>"com.android.phone"</item>
     </string-array>
 
@@ -6094,21 +6204,4 @@
     <!-- Whether the lock screen is allowed to run its own live wallpaper,
          different from the home screen wallpaper. -->
     <bool name="config_independentLockscreenLiveWallpaper">false</bool>
-
-    <!-- List of certificate to be used for font fs-verity integrity verification -->
-    <string-array translatable="false" name="config_fontManagerServiceCerts">
-    </string-array>
-
-    <!-- Whether the vendor power press code need to be mapped. -->
-    <bool name="config_powerPressMapping">false</bool>
-
-    <!-- Power press vendor code. -->
-    <integer name="config_powerPressCode">-1</integer>
-
-    <!-- Whether to show weather on the lock screen by default. -->
-    <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
-
-    <!-- Whether we should persist the brightness value in nits for the default display even if
-         the underlying display device changes. -->
-    <bool name="config_persistBrightnessNitsForDefaultDisplay">false</bool>
 </resources>

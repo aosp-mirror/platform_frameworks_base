@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2017 The OmniROM Project
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 2 of the License, or
+  (at your option) any later version.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!-- Extends FrameLayout -->
+<com.android.systemui.statusbar.phone.NotificationLightsView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical"
+    android:layout_centerVertical="true">
+
+    <!-- Solid -->
+     <ImageView
+        android:layout_alignParentLeft="true"
+        android:gravity="left"
+        android:layout_gravity="left"
+        android:id="@+id/notification_animation_left_solid"
+        android:scaleType="fitXY"
+        android:layout_width="125px"
+        android:layout_height="match_parent"
+        android:src="@drawable/aod_notification_light_left_solid"/>
+    <ImageView
+        android:layout_alignParentTop="true"
+        android:gravity="top"
+        android:layout_gravity="top"
+        android:id="@+id/notification_animation_top_solid"
+        android:scaleType="fitXY"
+        android:layout_width="match_parent"
+        android:layout_height="125px"
+        android:src="@drawable/aod_notification_light_top_solid"/>
+    <ImageView
+        android:layout_alignParentRight="true"
+        android:gravity="right"
+        android:layout_gravity="right"
+        android:id="@+id/notification_animation_right_solid"
+        android:scaleType="fitXY"
+        android:layout_width="125px"
+        android:layout_height="match_parent"
+        android:src="@drawable/aod_notification_light_right_solid"/>
+     <ImageView
+        android:layout_alignParentBottom="true"
+        android:gravity="bottom"
+        android:layout_gravity="bottom"
+        android:id="@+id/notification_animation_bottom_solid"
+        android:scaleType="fitXY"
+        android:layout_width="match_parent"
+        android:layout_height="125px"
+        android:src="@drawable/aod_notification_light_bottom_solid"/>
+
+    <!-- Faded -->
+    <ImageView
+        android:layout_alignParentLeft="true"
+        android:gravity="left"
+        android:layout_gravity="left"
+        android:id="@+id/notification_animation_left_faded"
+        android:layout_width="125px"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/aod_notification_light_left_faded"/>
+    <ImageView
+        android:layout_alignParentTop="true"
+        android:gravity="top"
+        android:layout_gravity="top"
+        android:id="@+id/notification_animation_top_faded"
+        android:layout_width="match_parent"
+        android:layout_height="125px"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/aod_notification_light_top_faded"/>
+    <ImageView
+        android:layout_alignParentRight="true"
+        android:gravity="right"
+        android:layout_gravity="right"
+        android:id="@+id/notification_animation_right_faded"
+        android:layout_width="125px"
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/aod_notification_light_right_faded"/>
+    <ImageView
+        android:layout_alignParentBottom="true"
+        android:gravity="bottom"
+        android:layout_gravity="bottom"
+        android:id="@+id/notification_animation_bottom_faded"
+        android:layout_width="match_parent"
+        android:layout_height="125px"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/aod_notification_light_bottom_faded"/>
+
+</com.android.systemui.statusbar.phone.NotificationLightsView>

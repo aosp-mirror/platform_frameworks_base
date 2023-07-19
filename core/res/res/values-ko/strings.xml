@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;제목 없음&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(전화번호 없음)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"입력한 PIN이 일치하지 않습니다."</string>
     <string name="invalidPin" msgid="7542498253319440408">"4~ 8자리 숫자로 된 PIN을 입력하세요."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8자리 이상의 숫자 PUK를 입력합니다."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM이 PUK 잠김 상태입니다. 잠금 해제하려면 PUK 코드를 입력하세요."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"SIM을 차단 해제하려면 PUK2를 입력하세요."</string>
+    <string name="needPuk" msgid="7321876090152422918">"SIM 카드의 PUK가 잠겨 있습니다. 잠금해제하려면 PUK 코드를 입력하세요."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"SIM 카드 잠금을 해제하려면 PUK2를 입력하세요."</string>
     <string name="enablePin" msgid="2543771964137091212">"실패했습니다. SIM/RUIM 잠금을 사용 설정하세요."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패하면 SIM이 잠깁니다.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"서비스가 준비되지 않았습니다."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"발신자 번호 설정을 변경할 수 없습니다."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> 이동통신사로 데이터가 변경됨"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"언제든지 설정에서 변경할 수 있습니다."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"모바일 데이터 서비스가 차단됨"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"긴급 전화를 사용할 수 없음"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"음성 서비스를 이용할 수 없음"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"기기 지문 센서에서 동작을 캡처합니다."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"스크린샷 촬영"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"디스플레이 스크린샷을 촬영할 수 있습니다."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"미리보기, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"상태 표시줄에 위치"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"앱이 등록된 AID와 경로 목적지 같은 기본 NFC 결제 서비스 정보를 확인하도록 허용합니다."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC(Near Field Communication) 제어"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"앱이 NFC(근거리 무선 통신) 태그, 카드 및 리더와 통신할 수 있도록 허용합니다."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"보안 요소 트랜잭션 이벤트"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"앱이 보안 요소에서 발생하는 트랜잭션에 관한 정보를 받도록 허용합니다."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"화면 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"앱이 키 잠금 및 관련 비밀번호 보안을 사용중지할 수 있도록 허용합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"화면 잠금 복잡도 요청"</string>
@@ -586,17 +586,17 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"인증 오류"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"화면 잠금 사용"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"계속하려면 화면 잠금용 사용자 인증 정보를 입력하세요"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서 위에 손가락을 좀 더 오래 올려놓으세요"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"지문 센서를 닦은 후 다시 시도해 보세요."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"센서를 닦은 후 다시 시도해 보세요."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서 위에 손가락을 좀 더 오래 올려놓으세요"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"센서 위에 손가락을 좀 더 오래 올려놓으세요."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"손가락을 너무 느리게 움직였습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"전원 누름이 감지되었습니다."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"조정 시도"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문이 인식될 때마다 손가락을 조금씩 이동하세요"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않았습니다."</string>
@@ -639,23 +639,23 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"수리업체에 방문하세요."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"얼굴 모델을 만들 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"너무 밝습니다. 조명 밝기를 조금 낮춰보세요."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"조명이 부족합니다"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"조명이 부족합니다."</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"휴대전화를 얼굴에서 더 멀리 떨어뜨려 주세요."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"휴대전화를 얼굴에 더 가까이 가져와 주세요."</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"휴대전화를 위쪽으로 움직이세요"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"휴대전화를 아래쪽으로 움직이세요"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"휴대전화를 왼쪽으로 움직이세요"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"휴대전화를 오른쪽으로 움직이세요"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"휴대전화를 위로 이동하세요"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"휴대전화를 아래로 이동하세요"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"휴대전화를 왼쪽으로 이동하세요"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"휴대전화를 오른쪽으로 이동하세요"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"기기에서 더 똑바로 바라보세요."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"얼굴이 보이지 않습니다. 눈높이에 맞춰 휴대전화를 들어 주세요."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"너무 많이 움직였습니다. 휴대전화를 흔들리지 않게 잡으세요."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"얼굴을 다시 등록해 주세요."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"얼굴을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"얼굴의 위치를 조금 변경해 주세요."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"휴대전화를 좀 더 정면으로 바라보세요"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"휴대전화를 좀 더 정면으로 바라보세요"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더 정면으로 바라보세요"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"얼굴이 가려지지 않도록 해 주세요"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"휴대전화를 좀 더\\n똑바로 바라봐 주세요."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"얼굴이 가려지지 않도록 해 주세요."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"검은색 바를 포함한 화면 상단을 청소하세요."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -663,9 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"얼굴 모델을 만들 수 없습니다. 다시 시도해 주세요."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"선글라스가 감지되었습니다. 전체 얼굴이 보여야 합니다."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"마스크가 감지되었습니다. 얼굴 전체가 보여야 합니다"</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"마스크가 감지되었습니다. 전체 얼굴이 보여야 합니다."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"얼굴을 확인할 수 없습니다. 하드웨어를 사용할 수 없습니다."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"얼굴 인식 잠금 해제를 다시 시도해 주세요."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"새 얼굴 데이터를 저장할 수 없습니다. 먼저 기존 얼굴 데이터를 삭제하세요."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"얼굴 또는 화면 잠금 사용"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"계속하려면 얼굴로 인증하세요"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"계속하려면 얼굴 또는 화면 잠금을 사용하세요"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"문제가 발생했습니다. 다시 시도해 보세요."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"얼굴 아이콘"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"동기화 설정 읽기"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"다시 시도"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"모든 기능 및 데이터 잠금 해제"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"얼굴 인식 잠금 해제 최대 시도 횟수를 초과했습니다."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM 없음"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"태블릿에 SIM이 없습니다."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Android TV 기기에 SIM이 없습니다."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"휴대전화에 SIM이 없습니다."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"SIM을 추가하세요."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM이 없거나 SIM을 읽을 수 없습니다. SIM을 추가하세요."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"SIM을 사용할 수 없습니다."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM이 영구적으로 비활성화되었습니다.\n 다른 SIM을 사용하려면 무선 서비스 제공업체에 문의하시기 바랍니다."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM 카드가 없습니다."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"태블릿에 SIM 카드가 없습니다."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV 기기에 SIM 카드가 없습니다."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"휴대전화에 SIM 카드가 없습니다."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM 카드를 삽입하세요."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM 카드가 없거나 읽을 수 없습니다. SIM 카드를 삽입하세요."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"사용할 수 없는 SIM 카드입니다."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM 카드 사용이 영구적으로 사용중지되었습니다.\n다른 SIM 카드를 사용하려면 무선 서비스 제공업체에 문의하시기 바랍니다."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"이전 트랙"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"다음 트랙"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"일시중지"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"빨리 감기"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"긴급 통화만 허용"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"네트워크 잠김"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM이 PUK 잠김 상태입니다."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM 카드가 PUK 잠김 상태입니다."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"사용자 가이드를 참조하거나 고객지원팀에 문의하세요."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM이 잠김 상태입니다."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM 잠금 해제 중…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM 카드가 잠겨 있습니다."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM 카드 잠금해제 중..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 그렸습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"비밀번호를 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"PIN을 <xliff:g id="NUMBER_0">%1$d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>초 후에 다시 시도하세요."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"나중에 설정 &gt; 애플리케이션에서 변경할 수 있습니다."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"항상 허용"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"허용 안함"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM 제거됨"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"유효한 SIM을 삽입하여 다시 시작할 때까지 모바일 네트워크를 사용할 수 없습니다."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM 카드 제거됨"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"유효한 SIM 카드를 삽입하여 다시 시작할 때까지 모바일 네트워크를 사용할 수 없습니다."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"완료"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM 추가됨"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM 카드 추가됨"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"모바일 네트워크에 액세스하려면 기기를 다시 시작하세요."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"다시 시작"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"모바일 서비스 활성화"</string>
@@ -1353,7 +1349,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"권한 필요 없음"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"비용이 부과될 수 있습니다."</string>
     <string name="dlg_ok" msgid="5103447663504839312">"확인"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"이 기기를 USB로 충전 중."</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"이 기기를 USB로 충전 중"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB를 통해 연결된 기기 충전"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB 파일 전송 사용 설정됨"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB를 통해 PTP 사용 설정됨"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"휴대전화"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"도크 스피커"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"외부 기기"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"헤드폰"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"시스템"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"이제 SIM을 사용할 수 없습니다. 계속하려면 PUK 코드를 입력합니다. 자세한 내용은 이동통신사에 문의하세요."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"원하는 PIN 코드 입력"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"원하는 PIN 코드 확인"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM 잠금 해제 중…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM 카드 잠금해제 중..."</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN 코드가 잘못되었습니다."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4~8자리 숫자로 된 PIN을 입력하세요."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK 코드는 8자리 숫자여야 합니다."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"전체 화면 모드"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"종료하려면 위에서 아래로 스와이프합니다."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"확인"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"카메라 미리보기 화면이 잘 보이도록 회전하세요."</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"카메라 미리보기 화면이 잘 보이도록 화면 분할을 종료하세요."</string>
     <string name="done_label" msgid="7283767013231718521">"완료"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"시간 원형 슬라이더"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"분 원형 슬라이더"</string>
@@ -2050,10 +2044,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"제거"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"열기"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"유해한 앱 감지됨"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 전체 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 모든 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"일회성 액세스 허용"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"허용 안함"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"기기 로그에는 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 전체 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"기기 로그에 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다."</string>
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"기기 로그에는 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그에 민감한 정보가 포함될 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도, 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 기기 내 일부 로그 또는 정보에 액세스할 수도 있습니다.\n\ng.co/android/devicelogs에서 자세히 알아보세요."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"다시 표시 안함"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하려고 합니다"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"사용자의 <xliff:g id="DEVICE">%1$s</xliff:g>에서 태블릿 카메라에 액세스할 수 없습니다."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"스트리밍 중에는 액세스할 수 없습니다. 대신 휴대전화에서 시도해 보세요."</string>
     <string name="system_locale_title" msgid="711882686834677268">"시스템 기본값"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g> 카드"</string>
 </resources>

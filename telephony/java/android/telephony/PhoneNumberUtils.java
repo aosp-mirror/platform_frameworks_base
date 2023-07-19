@@ -26,6 +26,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.location.Country;
+import android.location.CountryDetector;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PersistableBundle;
@@ -112,6 +114,7 @@ public class PhoneNumberUtils {
     private static final String BCD_EF_ADN_EXTENDED = "*#,N;";
     private static final String BCD_CALLED_PARTY_EXTENDED = "*#abc";
 
+    private static Country sCountryDetector = null;
     /*
      * global-phone-number = ["+"] 1*( DIGIT / written-sep )
      * written-sep         = ("-"/".")
@@ -2197,7 +2200,37 @@ public class PhoneNumberUtils {
     private static boolean isLocalEmergencyNumberInternal(int subId, String number,
                                                           Context context,
                                                           boolean useExactMatch) {
+        String countryIso = getCountryIso(context);
+        Rlog.w(LOG_TAG, "isLocalEmergencyNumberInternal" + countryIso);
+        if (countryIso == null) {
+            Locale locale = context.getResources().getConfiguration().locale;
+            countryIso = locale.getCountry();
+            Rlog.w(LOG_TAG, "No CountryDetector; falling back to countryIso based on locale: "
+                    + countryIso);
+        }
         return isEmergencyNumberInternal(subId, number, null /* unused */, useExactMatch);
+    }
+
+    private static String getCountryIso(Context context) {
+        Rlog.w(LOG_TAG, "getCountryIso " + sCountryDetector);
+        if (sCountryDetector == null) {
+            CountryDetector detector = (CountryDetector) context.getSystemService(
+                Context.COUNTRY_DETECTOR);
+            if (detector != null) {
+                sCountryDetector = detector.detectCountry();
+            }
+        }
+
+        if (sCountryDetector == null) {
+            return null;
+        } else {
+            return sCountryDetector.getCountryIso();
+        }
+    }
+
+    /** @hide */
+    public static void resetCountryDetectorInfo() {
+        sCountryDetector = null;
     }
 
     /**

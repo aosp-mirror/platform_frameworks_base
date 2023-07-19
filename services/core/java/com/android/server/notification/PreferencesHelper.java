@@ -834,9 +834,7 @@ public class PreferencesHelper implements RankingConfig {
         Objects.requireNonNull(pkg);
         Objects.requireNonNull(group);
         Objects.requireNonNull(group.getId());
-        if (TextUtils.isEmpty(group.getName())) {
-            throw new IllegalArgumentException("group.getName() can't be empty");
-        }
+        Objects.requireNonNull(!TextUtils.isEmpty(group.getName()));
         boolean needsDndChange = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
@@ -989,7 +987,6 @@ public class PreferencesHelper implements RankingConfig {
                     channel.setAllowBubbles(existing != null
                             ? existing.getAllowBubbles()
                             : NotificationChannel.DEFAULT_ALLOW_BUBBLE);
-                    channel.setImportantConversation(false);
                 }
                 clearLockedFieldsLocked(channel);
 

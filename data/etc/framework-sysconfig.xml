@@ -56,4 +56,8 @@
 
     <!-- Whitelist of bundled applications which all handle URLs to their websites by default -->
     <app-link package="com.android.carrierdefaultapp" />
+
+    <!-- Whitelist of what components are permitted to run in the background -->
+    <allow-in-power-save package="com.android.deskclock" />
+
 </config>

@@ -46,10 +46,6 @@ android_app {
         "xz-java",
         "androidx.leanback_leanback",
     ],
-
-    lint: {
-        error_checks: ["Recycle"],
-    },
 }
 
 android_app {
@@ -68,10 +64,6 @@ android_app {
         "androidx.leanback_leanback",
     ],
     aaptflags: ["--product tablet"],
-
-    lint: {
-        error_checks: ["Recycle"],
-    },
 }
 
 android_app {
@@ -90,8 +82,4 @@ android_app {
         "androidx.leanback_leanback",
     ],
     aaptflags: ["--product tv"],
-
-    lint: {
-        error_checks: ["Recycle"],
-    },
 }

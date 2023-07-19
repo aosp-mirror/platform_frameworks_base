@@ -54,7 +54,6 @@ final class DisplayPowerState {
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private final DisplayBlanker mBlanker;
-    private final ColorFade mColorFade;
     private final PhotonicModulator mPhotonicModulator;
     private final int mDisplayId;
 
@@ -73,12 +72,14 @@ final class DisplayPowerState {
 
     private volatile boolean mStopped;
 
+    private ScreenStateAnimator mColorFade;
+
     DisplayPowerState(
-            DisplayBlanker blanker, ColorFade colorFade, int displayId, int displayState) {
+            DisplayBlanker blanker, int screenAnimatorMode, int displayId, int displayState) {
         mHandler = new Handler(true /*async*/);
         mChoreographer = Choreographer.getInstance();
         mBlanker = blanker;
-        mColorFade = colorFade;
+        setScreenStateAnimator(screenAnimatorMode);
         mPhotonicModulator = new PhotonicModulator();
         mPhotonicModulator.start();
         mDisplayId = displayId;
@@ -97,6 +98,17 @@ final class DisplayPowerState {
         mColorFadePrepared = false;
         mColorFadeLevel = 1.0f;
         mColorFadeReady = true;
+    }
+
+    public void setScreenStateAnimator(int mode) {
+        if (mColorFade != null) {
+            mColorFade.dismiss();
+        }
+        if (mode == DisplayPowerController.SCREEN_OFF_FADE) {
+            mColorFade = new ColorFade(Display.DEFAULT_DISPLAY);
+        } else {
+            mColorFade = new ElectronBeam(Display.DEFAULT_DISPLAY);
+        }
     }
 
     public static final FloatProperty<DisplayPowerState> COLOR_FADE_LEVEL =

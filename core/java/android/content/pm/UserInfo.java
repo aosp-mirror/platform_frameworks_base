@@ -159,6 +159,12 @@ public class UserInfo implements Parcelable {
     public static final int FLAG_EPHEMERAL_ON_CREATE = 0x00002000;
 
     /**
+     * Indicates that this user is a parallel space.
+     * Use the flag space in reverse order to make sure it won't be broke in future updates.
+     */
+    public static final int FLAG_PARALLEL = 0x80000000;
+
+    /**
      * @hide
      */
     @IntDef(flag = true, prefix = "FLAG_", value = {
@@ -175,7 +181,8 @@ public class UserInfo implements Parcelable {
             FLAG_FULL,
             FLAG_SYSTEM,
             FLAG_PROFILE,
-            FLAG_EPHEMERAL_ON_CREATE
+            FLAG_EPHEMERAL_ON_CREATE,
+            FLAG_PARALLEL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserInfoFlag {
@@ -213,6 +220,14 @@ public class UserInfo implements Parcelable {
     @UnsupportedAppUsage
     public int profileGroupId;
     public int restrictedProfileParentId;
+
+    /**
+     * If this user is a parallel space, then we should point to its parent user here.
+     * Some unwanted features are bound to the `profileGroupId` above, so it's better
+     * to save the parent here in a new variable.
+     * @hide
+     */
+    public int parallelParentId;
 
     /**
      * Index for distinguishing different profiles with the same parent and user type for the
@@ -274,6 +289,7 @@ public class UserInfo implements Parcelable {
         this.iconPath = iconPath;
         this.profileGroupId = NO_PROFILE_GROUP_ID;
         this.restrictedProfileParentId = NO_PROFILE_GROUP_ID;
+        this.parallelParentId = UserHandle.USER_NULL;
     }
 
     /**
@@ -343,6 +359,10 @@ public class UserInfo implements Parcelable {
         return UserManager.isUserTypeCloneProfile(userType);
     }
 
+    public boolean isParallel() {
+        return (flags & FLAG_PARALLEL) != 0;
+    }
+
     @UnsupportedAppUsage
     public boolean isEnabled() {
         return (flags & FLAG_DISABLED) != FLAG_DISABLED;
@@ -399,7 +419,7 @@ public class UserInfo implements Parcelable {
             // Don't support switching to pre-created users until they become "real" users.
             return false;
         }
-        return !isProfile();
+        return !isProfile() && !isParallel();
     }
 
     /**
@@ -449,6 +469,7 @@ public class UserInfo implements Parcelable {
         convertedFromPreCreated = orig.convertedFromPreCreated;
         profileGroupId = orig.profileGroupId;
         restrictedProfileParentId = orig.restrictedProfileParentId;
+        parallelParentId = orig.parallelParentId;
         guestToRemove = orig.guestToRemove;
         profileBadge = orig.profileBadge;
     }
@@ -506,6 +527,7 @@ public class UserInfo implements Parcelable {
         dest.writeBoolean(guestToRemove);
         dest.writeInt(restrictedProfileParentId);
         dest.writeInt(profileBadge);
+        dest.writeInt(parallelParentId);
     }
 
     @UnsupportedAppUsage
@@ -535,5 +557,6 @@ public class UserInfo implements Parcelable {
         guestToRemove = source.readBoolean();
         restrictedProfileParentId = source.readInt();
         profileBadge = source.readInt();
+        parallelParentId = source.readInt();
     }
 }

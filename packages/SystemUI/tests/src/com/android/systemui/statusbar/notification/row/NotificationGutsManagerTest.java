@@ -66,9 +66,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -117,6 +117,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationActivityStarter mNotificationActivityStarter;
     @Mock private NotificationListContainer mNotificationListContainer;
+    @Mock private NotificationInfo.CheckSaveListener mCheckSaveListener;
     @Mock private OnSettingsClickListener mOnSettingsClickListener;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private CentralSurfaces mCentralSurfaces;
@@ -132,13 +133,18 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private ShadeController mShadeController;
     @Mock private PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
     @Mock private AssistantFeedbackController mAssistantFeedbackController;
-    @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
-    @Mock private StatusBarStateController mStatusBarStateController;
 
     @Before
     public void setUp() {
         mTestableLooper = TestableLooper.get(this);
         allowTestableLooperAsMainThread();
+        mDependency.injectTestDependency(DeviceProvisionedController.class,
+                mDeviceProvisionedController);
+        mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
+        mDependency.injectTestDependency(
+                OnUserInteractionCallback.class,
+                mOnUserInteractionCallback);
+        mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mHandler = Handler.createAsync(mTestableLooper.getLooper());
         mHelper = new NotificationTestHelper(mContext, mDependency, TestableLooper.get(this));
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
@@ -149,11 +155,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mPeopleSpaceWidgetManager, mLauncherApps, mShortcutManager,
                 mChannelEditorDialogController, mContextTracker, mAssistantFeedbackController,
                 Optional.of(mBubblesManager), new UiEventLoggerFake(), mOnUserInteractionCallback,
-                mShadeController,
-                mNotificationLockscreenUserManager,
-                mStatusBarStateController,
-                mDeviceProvisionedController,
-                mMetricsLogger);
+                mShadeController);
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
                 mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
@@ -172,6 +174,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         // Test doesn't support animation since the guts view is not attached.
         doNothing().when(guts).openControls(
+                eq(true) /* shouldDoCircularReveal */,
                 anyInt(),
                 anyInt(),
                 anyBoolean(),
@@ -188,6 +191,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         assertEquals(View.INVISIBLE, guts.getVisibility());
         mTestableLooper.processAllMessages();
         verify(guts).openControls(
+                eq(true),
                 anyInt(),
                 anyInt(),
                 anyBoolean(),
@@ -210,6 +214,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         // Test doesn't support animation since the guts view is not attached.
         doNothing().when(guts).openControls(
+                eq(true) /* shouldDoCircularReveal */,
                 anyInt(),
                 anyInt(),
                 anyBoolean(),
@@ -233,6 +238,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         assertTrue(mGutsManager.openGutsInternal(row, 0, 0, menuItem));
         mTestableLooper.processAllMessages();
         verify(guts).openControls(
+                eq(true),
                 anyInt(),
                 anyInt(),
                 anyBoolean(),
@@ -366,14 +372,14 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(true), /* wasShownHighPriority */
-                eq(mAssistantFeedbackController),
-                any(MetricsLogger.class));
+                eq(mAssistantFeedbackController));
     }
 
     @Test
     public void testInitializeNotificationInfoView_PassesAlongProvisionedState() throws Exception {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
+        row.setBlockingHelperShowing(false);
         modifyRanking(row.getEntry())
                 .setUserSentiment(USER_SENTIMENT_NEGATIVE)
                 .build();
@@ -400,14 +406,14 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(true),
                 eq(false),
                 eq(false), /* wasShownHighPriority */
-                eq(mAssistantFeedbackController),
-                any(MetricsLogger.class));
+                eq(mAssistantFeedbackController));
     }
 
     @Test
     public void testInitializeNotificationInfoView_withInitialAction() throws Exception {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
         ExpandableNotificationRow row = spy(mHelper.createRow());
+        row.setBlockingHelperShowing(true);
         modifyRanking(row.getEntry())
                 .setUserSentiment(USER_SENTIMENT_NEGATIVE)
                 .build();
@@ -432,8 +438,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false),
                 eq(false), /* wasShownHighPriority */
-                eq(mAssistantFeedbackController),
-                any(MetricsLogger.class));
+                eq(mAssistantFeedbackController));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

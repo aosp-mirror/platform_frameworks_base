@@ -1,0 +1,478 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// How stubs are generated:
+//
+// raw source files --(metalava)--> stub source files --(javac)--> stub jar files
+//
+// - The metalava conversion is done by droidstub modules
+// - The javac compilation is done by java_library modules
+//
+// The metalava conversion is also responsible for creating API signature files
+// and comparing them against the checked in API signature, and also checking compatibility
+// with the latest frozen API signature.
+
+/////////////////////////////////////////////////////////////////////
+// These modules provide source files for the stub libraries
+/////////////////////////////////////////////////////////////////////
+
+droidstubs {
+    name: "api-stubs-docs-non-updatable",
+    defaults: [
+        "android-non-updatable-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
+    args: metalava_framework_docs_args,
+    check_api: {
+        current: {
+            api_file: "core/api/current.txt",
+            removed_api_file: "core/api/removed.txt",
+        },
+        last_released: {
+            api_file: ":android-non-updatable.api.public.latest",
+            removed_api_file: ":android-non-updatable-removed.api.public.latest",
+            baseline_file: ":android-non-updatable-incompatibilities.api.public.latest",
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":android.api.public.latest",
+        },
+    },
+    dists: [
+        {
+            targets: ["sdk"],
+            dir: "apistubs/android/public/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk"],
+            dir: "apistubs/android/public/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
+}
+
+priv_apps = " --show-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+    "\\)"
+
+priv_apps_in_stubs = " --show-for-stub-purposes-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+    "\\)"
+
+test = " --show-annotation android.annotation.TestApi"
+
+module_libs = " --show-annotation android.annotation.SystemApi\\(" +
+    "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
+    "\\)"
+
+droidstubs {
+    name: "system-api-stubs-docs-non-updatable",
+    defaults: [
+        "android-non-updatable-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
+    args: metalava_framework_docs_args + priv_apps,
+    check_api: {
+        current: {
+            api_file: "core/api/system-current.txt",
+            removed_api_file: "core/api/system-removed.txt",
+        },
+        last_released: {
+            api_file: ":android-non-updatable.api.system.latest",
+            removed_api_file: ":android-non-updatable-removed.api.system.latest",
+            baseline_file: ":android-non-updatable-incompatibilities.api.system.latest",
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":android.api.system.latest",
+            baseline_file: "core/api/system-lint-baseline.txt",
+        },
+    },
+    dists: [
+        {
+            targets: ["sdk"],
+            dir: "apistubs/android/system/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk"],
+            dir: "apistubs/android/system/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
+}
+
+droidstubs {
+    name: "test-api-stubs-docs-non-updatable",
+    defaults: [
+        "android-non-updatable-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
+    args: metalava_framework_docs_args + test + priv_apps_in_stubs,
+    check_api: {
+        current: {
+            api_file: "core/api/test-current.txt",
+            removed_api_file: "core/api/test-removed.txt",
+        },
+        api_lint: {
+            enabled: true,
+            baseline_file: "core/api/test-lint-baseline.txt",
+        },
+    },
+    dists: [
+        {
+            targets: ["sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "android.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "removed.txt",
+            tag: ".removed-api.txt",
+        },
+        {
+            targets: ["sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
+}
+
+droidstubs {
+    name: "module-lib-api-stubs-docs-non-updatable",
+    defaults: [
+        "android-non-updatable-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
+    args: metalava_framework_docs_args + priv_apps_in_stubs + module_libs,
+    check_api: {
+        current: {
+            api_file: "core/api/module-lib-current.txt",
+            removed_api_file: "core/api/module-lib-removed.txt",
+        },
+        last_released: {
+            api_file: ":android-non-updatable.api.module-lib.latest",
+            removed_api_file: ":android-non-updatable-removed.api.module-lib.latest",
+            baseline_file: ":android-non-updatable-incompatibilities.api.module-lib.latest",
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":android.api.module-lib.latest",
+            baseline_file: "core/api/module-lib-lint-baseline.txt",
+        },
+    },
+    dists: [
+        {
+            targets: ["sdk"],
+            dir: "apistubs/android/module-lib/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk"],
+            dir: "apistubs/android/module-lib/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
+}
+
+/////////////////////////////////////////////////////////////////////
+// android_*_stubs_current modules are the stubs libraries compiled
+// from stub sources
+/////////////////////////////////////////////////////////////////////
+
+java_defaults {
+    name: "android.jar_defaults",
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    compile_dex: true,
+    defaults_visibility: ["//visibility:private"],
+    visibility: ["//visibility:public"],
+}
+
+java_defaults {
+    name: "android-non-updatable_defaults_stubs_current",
+    libs: ["stub-annotations"],
+    static_libs: ["framework-res-package-jar"], // Export package of framework-res
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    compile_dex: true,
+    dist: {
+        targets: ["sdk"],
+        tag: ".jar",
+        dest: "android-non-updatable.jar",
+    },
+    defaults_visibility: ["//visibility:private"],
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "android-non-updatable.stubs",
+    defaults: ["android-non-updatable_defaults_stubs_current"],
+    srcs: [":api-stubs-docs-non-updatable"],
+    libs: ["all-modules-public-stubs"],
+    dist: {
+        dir: "apistubs/android/public",
+    },
+}
+
+java_library {
+    name: "android-non-updatable.stubs.system",
+    defaults: ["android-non-updatable_defaults_stubs_current"],
+    srcs: [":system-api-stubs-docs-non-updatable"],
+    libs: ["all-modules-system-stubs"],
+    dist: {
+        dir: "apistubs/android/system",
+    },
+}
+
+java_library {
+    name: "android-non-updatable.stubs.module_lib",
+    defaults: ["android-non-updatable_defaults_stubs_current"],
+    srcs: [":module-lib-api-stubs-docs-non-updatable"],
+    libs: [
+        "sdk_module-lib_current_framework-tethering",
+        "sdk_module-lib_current_framework-connectivity-t",
+        "sdk_public_current_framework-bluetooth",
+        // NOTE: The below can be removed once the prebuilt stub contains bluetooth.
+        "sdk_system_current_android",
+        // NOTE: The below can be removed once the prebuilt stub contains IKE.
+        "sdk_system_current_android.net.ipsec.ike",
+    ],
+    dist: {
+        dir: "apistubs/android/module-lib",
+    },
+}
+
+java_library {
+    name: "android-non-updatable.stubs.test",
+    defaults: ["android-non-updatable_defaults_stubs_current"],
+    srcs: [":test-api-stubs-docs-non-updatable"],
+    libs: ["all-modules-system-stubs"],
+    dist: {
+        dir: "apistubs/android/test",
+    },
+}
+
+java_defaults {
+    name: "android_stubs_dists_default",
+    dist: {
+        targets: ["sdk"],
+        tag: ".jar",
+        dest: "android.jar",
+    },
+    defaults_visibility: ["//frameworks/base/services"],
+}
+
+java_library {
+    name: "android_stubs_current",
+    static_libs: [
+        "all-modules-public-stubs",
+        "android-non-updatable.stubs",
+        "private-stub-annotations-jar",
+    ],
+    defaults: ["android.jar_defaults"],
+}
+
+java_library {
+    name: "android_system_stubs_current",
+    static_libs: [
+        "all-modules-system-stubs",
+        "android-non-updatable.stubs.system",
+        "private-stub-annotations-jar",
+    ],
+    defaults: [
+        "android.jar_defaults",
+        "android_stubs_dists_default",
+    ],
+    dist: {
+        dir: "apistubs/android/system",
+    },
+    dists: [
+        {
+            // Legacy dist path
+            targets: ["sdk"],
+            tag: ".jar",
+            dest: "android_system.jar",
+        },
+    ],
+}
+
+java_library {
+    name: "android_test_stubs_current",
+    // Modules do not have test APIs, but we want to include their SystemApis, like we include
+    // the SystemApi of framework-non-updatable-sources.
+    static_libs: [
+        "all-modules-system-stubs",
+        "android-non-updatable.stubs.test",
+        "private-stub-annotations-jar",
+    ],
+    defaults: [
+        "android.jar_defaults",
+        "android_stubs_dists_default",
+    ],
+    dist: {
+        dir: "apistubs/android/test",
+    },
+}
+
+java_library {
+    name: "android_module_lib_stubs_current",
+    defaults: [
+        "android.jar_defaults",
+        "android_stubs_dists_default",
+    ],
+    static_libs: [
+        "android-non-updatable.stubs.module_lib",
+        "art.module.public.api.stubs.module_lib",
+        "i18n.module.public.api.stubs",
+    ],
+    dist: {
+        dir: "apistubs/android/module-lib",
+    },
+}
+
+java_library {
+    name: "android_system_server_stubs_current",
+    defaults: ["android_stubs_dists_default"],
+    srcs: [":services-non-updatable-stubs"],
+    installable: false,
+    static_libs: [
+        "android_module_lib_stubs_current",
+    ],
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    dist: {
+        dir: "apistubs/android/system-server",
+    },
+}
+
+////////////////////////////////////////////////////////////////////////
+// api-versions.xml generation, for public and system. This API database
+// also contains the android.test.* APIs.
+////////////////////////////////////////////////////////////////////////
+
+java_library {
+    name: "android_stubs_current_with_test_libs",
+    static_libs: [
+        "android_stubs_current",
+        "android.test.base.stubs",
+        "android.test.mock.stubs",
+        "android.test.runner.stubs",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
+java_library {
+    name: "android_system_stubs_current_with_test_libs",
+    static_libs: [
+        "android_system_stubs_current",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
+    ],
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+}
+
+droidstubs {
+    name: "api_versions_public",
+    srcs: [":android_stubs_current_with_test_libs{.jar}"],
+    generate_stubs: false,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+}
+
+droidstubs {
+    name: "api_versions_system",
+    srcs: [":android_system_stubs_current_with_test_libs{.jar}"],
+    generate_stubs: false,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+    api_levels_sdk_type: "system",
+}
+
+/////////////////////////////////////////////////////////////////////
+// hwbinder.stubs provides APIs required for building HIDL Java
+// libraries.
+/////////////////////////////////////////////////////////////////////
+
+droidstubs {
+    name: "hwbinder-stubs-docs",
+    srcs: [
+        "core/java/android/os/HidlSupport.java",
+        "core/java/android/os/HidlMemory.java",
+        "core/java/android/os/HwBinder.java",
+        "core/java/android/os/HwBlob.java",
+        "core/java/android/os/HwParcel.java",
+        "core/java/android/os/IHwBinder.java",
+        "core/java/android/os/IHwInterface.java",
+        "core/java/android/os/DeadObjectException.java",
+        "core/java/android/os/DeadSystemException.java",
+        "core/java/android/os/NativeHandle.java",
+        "core/java/android/os/RemoteException.java",
+        "core/java/android/util/AndroidException.java",
+    ],
+    libs: ["framework-annotations-lib"],
+    installable: false,
+    sdk_version: "core_platform",
+    annotations_enabled: true,
+    previous_api: ":android.api.public.latest",
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
+    args: priv_apps,
+    visibility: ["//visibility:private"],
+}
+
+java_library {
+    name: "hwbinder.stubs",
+    sdk_version: "core_current",
+    libs: ["framework-annotations-lib"],
+    srcs: [
+        ":hwbinder-stubs-docs",
+    ],
+    visibility: ["//visibility:public"],
+}

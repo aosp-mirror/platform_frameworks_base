@@ -81,7 +81,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
-import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -96,7 +95,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 
@@ -204,10 +202,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @Mock
     private SinglePointerTouchProcessor mSinglePointerTouchProcessor;
-    @Mock
-    private AlternateBouncerInteractor mAlternateBouncerInteractor;
-    @Mock
-    private SecureSettings mSecureSettings;
 
     // Capture listeners so that they can be used to send events
     @Captor
@@ -298,8 +292,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mDisplayManager, mHandler, mConfigurationController, mSystemClock,
                 mUnlockedScreenOffAnimationController, mSystemUIDialogManager, mLatencyTracker,
                 mActivityLaunchAnimator, alternateTouchProvider, mBiometricExecutor,
-                mPrimaryBouncerInteractor, mSinglePointerTouchProcessor,
-                mAlternateBouncerInteractor, mSecureSettings);
+                mPrimaryBouncerInteractor, mSinglePointerTouchProcessor);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
@@ -413,7 +406,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // GIVEN overlay was showing and the udfps bouncer is showing
         mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
-        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateBouncer()).thenReturn(true);
 
         // WHEN the overlay is hidden
         mOverlayController.hideUdfpsOverlay(mOpticalProps.sensorId);

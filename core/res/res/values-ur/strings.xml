@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"بائٹس"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"‏‎&gt;‎بلا عنوان‎&lt;‎"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(کوئی فون نمبر نہیں ہے)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"‏آپ نے جو PINs ٹائپ کیے وہ مماثل نہیں ہیں۔"</string>
     <string name="invalidPin" msgid="7542498253319440408">"‏4 سے 8 نمبرز والا ایک PIN ٹائپ کریں۔"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"‏8 یا اس سے زیادہ نمبرز والا PUK ٹائپ کریں۔"</string>
-    <string name="needPuk" msgid="3503414069503752211">"‏آپ کا SIM PUK مقفل ہے۔ PUK کوڈ کو غیر مقفل کرنے کیلئے اسے ٹائپ کریں۔"</string>
-    <string name="needPuk2" msgid="3910763547447344963">"‏SIM کو غیر مسدود کرنے کے لیے PUK2 ٹائپ کریں۔"</string>
+    <string name="needPuk" msgid="7321876090152422918">"‏آپ کا SIM کارڈ PUK مقفل ہے۔ PUK کوڈ کو غیر مقفل کرنے کیلئے اسے ٹائپ کریں۔"</string>
+    <string name="needPuk2" msgid="7032612093451537186">"‏SIM کارڈ غیر مسدود کرنے کیلئے PUK2 ٹائپ کریں۔"</string>
     <string name="enablePin" msgid="2543771964137091212">"‏ناکام، SIM/RUIM لاک کو فعال کریں۔"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">‏آپ کے پاس <xliff:g id="NUMBER_1">%d</xliff:g> کوششیں بچی ہیں، اس کے بعد SIM مقفل ہو جائے گا۔</item>
@@ -73,21 +78,19 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"‏کالر ID کی ڈیفالٹ ترتیب غیر محدود کردہ ہے۔ اگلی کال: غیر محدود کردہ"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"سروس فراہم نہیں کی گئی۔"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"‏آپ کالر ID کی ترتیبات تبدیل نہیں کر سکتے ہیں۔"</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"ڈیٹا <xliff:g id="CARRIERDISPLAY">%s</xliff:g> پر سوئچ کیا گیا"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"آپ اسے ترتیبات میں کسی بھی وقت تبدیل کر سکتے ہیں"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"کوئی موبائل ڈیٹا سروس دستیاب نہیں ہے"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ہنگامی کالنگ دستیاب نہیں ہے"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"کوئی صوتی سروس نہیں"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"کوئی صوتی سروس یا ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"کوئی صوتی سروس یا ہنگامی کالنگ دستیاب نہیں ہے"</string>
     <string name="RestrictedStateContent" msgid="7693575344608618926">"آپ کے کیریئر نے عارضی طور پر آف کر دیا ہے"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> کے لئے آپ کے کیریئر نے عارضی طور پر آف کر دیا ہے"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"موبائل نیٹ ورک تک رسائی نہیں ہو سکتی"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ترجیحی نیٹ ورک تبدیل کر کے دیکھیں۔ تبدیل کرنے کے لیے تھپتھپائیں۔"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏Wi‑Fi کے ذریعے ایمرجنسی کالز نہیں کر سکتے"</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ہنگامی کالنگ دستیاب نہیں ہے"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏Wi‑Fi کے ذریعے ہنگامی کالز نہیں کر سکتے"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"الرٹس"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"کال فارورڈنگ"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ایمرجنسی کال بیک وضع"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ہنگامی کال بیک وضع"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"موبائل ڈیٹا کی صورت حال"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"‏SMS پیغامات"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"صوتی میل پیغامات"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"آلہ کے فنگر پرنٹ سینسر پر کیے گئے اشاروں کو کیپچر کر سکتا ہے۔"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"اسکرین شاٹ لیں"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ڈسپلے کا اسکرین شاٹ لیا جا سکتا ہے۔"</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"پیش منظر، <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"بطور اسٹیٹس بار کام لیں"</string>
@@ -361,11 +363,11 @@
     <string name="permlab_receiveMms" msgid="4000650116674380275">"‏متنی پیغامات (MMS) حاصل کریں"</string>
     <string name="permdesc_receiveMms" msgid="958102423732219710">"‏ایپ کو MMS پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس کا مطلب ہے کہ ایپ آپ کے آلے پر مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھ یا انہیں حذف کرسکتی ہے۔"</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"سیل کے نشریاتی پیغامات فارورڈ کریں"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"سیل کی نشریاتی پیغامات کے موصول ہوتے ہی فارورڈ کرنے کے لیے ایپ کو سیل کے نشریاتی ماڈیول میں پابندی لگانے کی اجازت دیں۔ سیل کی نشریاتی الرٹس آپ کو ایمرجنسی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ایمرجنسی سیل براڈ کاسٹ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں مداخلت کر سکتی ہیں۔"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"سیل کی نشریاتی پیغامات کے موصول ہوتے ہی فارورڈ کرنے کے لیے ایپ کو سیل کے نشریاتی ماڈیول میں پابندی لگانے کی اجازت دیں۔ سیل کی نشریاتی الرٹس آپ کو ہنگامی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ہنگامی سیل براڈ کاسٹ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں مداخلت کر سکتی ہیں۔"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"جاری کالز کا نظم کریں"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"اس سے ایپ کو آپ کے آلے پر جاری کالز کے بارے میں تفصیلات دیکھنے اور ان کالز کو کنٹرول کرنے کی اجازت ملتی ہے۔"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"سیل کے نشریاتی پیغامات پڑھیں"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ایپ کو آپ کے آلے کو موصولہ سیل کے نشریاتی پیغامات پڑھنے کی اجازت دیتا ہے۔ سیل کی نشریاتی الرٹس آپ کو ایمرجنسی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ایمرجنسی سیل کا نشریہ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں خلل ڈال سکتی ہیں۔"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ایپ کو آپ کے آلے کو موصولہ سیل کے نشریاتی پیغامات پڑھنے کی اجازت دیتا ہے۔ سیل کی نشریاتی الرٹس آپ کو ہنگامی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ہنگامی سیل کا نشریہ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں خلل ڈال سکتی ہیں۔"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"سبسکرائب کردہ فیڈز پڑھیں"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"ایپ کو فی الحال مطابقت پذیر کیے ہوئے فیڈز کے بارے میں تفصیلات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
@@ -466,7 +468,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ایپ کو وائبریٹر کنٹرول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ایپ کو وائبریٹر اسٹیٹ تک رسائی حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"براہ راست فون نمبرز پر کال کریں"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"ایپ کو آپ کی مداخلت کے بغیر فون نمبروں پر کال کرنے کی اجازت دیتا ہے۔ اس کے نتیجے میں غیر متوقع چارجز یا کالیں ہوسکتی ہیں۔ نوٹ کرلیں کہ یہ ایپ کو ایمرجنسی نمبروں پر کال کرنے کی اجازت نہیں دیتا ہے۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر کالیں کرکے آپ کی رقم صرف کروا سکتے ہیں۔"</string>
+    <string name="permdesc_callPhone" msgid="5439809516131609109">"ایپ کو آپ کی مداخلت کے بغیر فون نمبروں پر کال کرنے کی اجازت دیتا ہے۔ اس کے نتیجے میں غیر متوقع چارجز یا کالیں ہوسکتی ہیں۔ نوٹ کرلیں کہ یہ ایپ کو ہنگامی نمبروں پر کال کرنے کی اجازت نہیں دیتا ہے۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر کالیں کرکے آپ کی رقم صرف کروا سکتے ہیں۔"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"‏IMS کال سروس تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"‏آپ کی مداخلت کے بغیر کالیں کرنے کیلئے ایپ کو IMS سروس استعمال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"فون کے اسٹیٹس اور شناخت کو پڑھیں"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏ایپ کو رجسٹرشدہ ایڈز اور روٹ ڈسٹنیشن جیسی ترجیح شدہ nfc ادائیگی سروس کی معلومات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"‏Near Field کمیونیکیشن کنٹرول کریں"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏ایپ کو Near Field Communication (NFC)‎ ٹیگز، کارڈز اور ریڈرز کے ساتھ مواصلت کرنے کی اجازت دیٹا ہے۔"</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"محفوظ عنصر کے ٹرانزیکشن کا ایونٹ"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"ایپ کو ایک محفوظ عنصر پر ہونے والے ٹرانزیکشنز کے بارے میں معلومات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"اپنے اسکرین لاک کو غیر فعال کریں"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ایپ کو کلیدی لاک اور کسی بھی متعلقہ پاس ورڈ سیکیورٹی کو غیر فعال کرنے کی اجازت دیتا ہے۔ مثلاً، کوئی آنے والی فون کال موصول ہونے کے وقت فون کلیدی لاک کو غیر فعال کرتا ہے، پھر کال پوری ہوجانے پر کلیدی لاک کو دوبارہ فعال کردیتا ہے۔"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"اسکرین لاک کی پیچیدگی کی درخواست کریں"</string>
@@ -664,8 +664,6 @@
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"آپکے چہرے کا ماڈل تخلیق نہیں ہو سکا۔ پھر کوشش کریں۔"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"گہرے چشمے کا پتہ چلا۔ آپ کا چہرہ مکمل طور پر دکھائی دینا ضروری ہے۔"</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"چہرے کو ڈھانپنے کا پتہ چلا۔ آپ کا چہرہ مکمل طور پر دکھائی دینا ضروری ہے۔"</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"چہرے کی توثیق نہیں کی جا سکی۔ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"فیس اَنلاک کو دوبارہ آزمائیں"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"چہرے کا نیا ڈیٹا اسٹور نہیں کر سکتے۔ پہلے پرانا حذف کریں۔"</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"فیس یا اسکرین لاک استعمال کریں"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"جاری رکھنے کے لیے اپنے چہرے کا استعمال کریں"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"جاری رکھنے کے لیے اپنے چہرے یا اسکرین لاک کا استعمال کریں"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"چہرے کا آئیکن"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"مطابقت پذیری کی ترتیبات پڑھیں"</string>
@@ -915,28 +911,28 @@
     <string name="keyguard_password_enter_password_code" msgid="2751130557661643482">"غیر مقفل کرنے کیلئے پاس ورڈ ٹائپ کریں"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"‏غیر مقفل کرنے کیلئے PIN ٹائپ کریں"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"‏غلط PIN کوڈ۔"</string>
-    <string name="keyguard_label_text" msgid="3841953694564168384">"غیر مقفل کرنے کیلئے، مینیو پھر 0 دبائیں۔"</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"ایمرجنسی نمبر"</string>
+    <string name="keyguard_label_text" msgid="3841953694564168384">"غیر مقفل کرنے کیلئے، مینو پھر 0 دبائیں۔"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"ہنگامی نمبر"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"کوئی سروس نہیں ہے"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"اسکرین مقفل ہے۔"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"غیر مقفل کرنے کیلئے مینیو دبائیں یا ایمرجنسی کال کریں۔"</string>
-    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"غیر مقفل کرنے کیلئے مینیو دبائیں۔"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"غیر مقفل کرنے کیلئے مینو دبائیں یا ہنگامی کال کریں۔"</string>
+    <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"غیر مقفل کرنے کیلئے مینو دبائیں۔"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"غیر مقفل کرنے کیلئے پیٹرن کو ڈرا کریں"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ایمرجنسی"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ہنگامی"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"کال پر واپس جائیں"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحیح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوبارہ کوشش کریں"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"دوبارہ کوشش کریں"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"تمام خصوصیات اور ڈیٹا کیلئے غیر مقفل کریں"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"فیس اَنلاک کی زیادہ سے زیادہ کوششوں سے تجاوز کرگیا"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"‏کوئی SIM نہیں ہے"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"‏ٹیبلیٹ میں کوئی SIM نہیں ہے۔"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"‏آپ کے Android TV آلے میں SIM نہیں ہے۔"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"‏فون میں کوئی SIM نہيں ہے۔"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"‏ایک SIM شامل کریں۔"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"‏SIM غائب ہے یا پڑھنے لائق نہیں ہے۔ ایک SIM شامل کریں۔"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"‏ناقابل استعمال SIM۔"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"‏آپ کے SIM کو مستقل طور پر غیر فعال کر دیا گیا ہے۔\n کسی دوسرے SIM کیلئے اپنے وائرلیس سروس فراہم کنندہ سے رابطہ کریں۔"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"‏کوئی SIM کارڈ نہیں ہے"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"‏ٹیبلیٹ میں کوئی SIM کارڈ نہیں ہے۔"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"‏آپ کے Android TV آلہ میں SIM کارڈ نہیں ہے۔"</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"‏فون میں کوئی SIM کارڈ نہیں ہے۔"</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"‏ایک SIM کارڈ داخل کریں۔"</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"‏SIM کارڈ غائب ہے یا پڑھنے لائق نہیں ہے۔ ایک SIM کارڈ داخل کریں۔"</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"‏ناقابل استعمال SIM کارڈ۔"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"‏آپ کا SIM کارڈ مستقل طور پر غیر فعال کر دیا گیا ہے۔\n کسی دوسرے SIM کارڈ کیلئے اپنے وائرلیس سروس فراہم کنندہ سے رابطہ کریں۔"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"پچھلا ٹریک"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"اگلا ٹریک"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"موقوف کریں"</string>
@@ -944,12 +940,12 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"روکیں"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ریوائینڈ کریں"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"تیزی سے فارورڈ کریں"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"صرف ایمرجنسی کالز"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"صرف ہنگامی کالز"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"نیٹ ورک مقفل ہو گیا"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"‏آپ کا SIM ‏PUK مقفل ہے۔"</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"‏SIM کارڈ PUK مقفل ہے۔"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"رہنمائے صارف دیکھیں یا کسٹمر کیئر سے رابطہ کریں۔"</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"‏SIM مقفل ہے۔"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"‏SIM کو غیر مقفل کیا جا رہا ہے…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"‏SIM کارڈ مقفل ہے۔"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"‏SIM کارڈ غیر مقفل ہو رہا ہے…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"آپ نے اپنا پاس ورڈ <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"‏آپ نے <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اپنا PIN غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
@@ -1067,7 +1063,7 @@
     <string name="pasted_image" msgid="4729097394781491022">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نے آپ کی کاپی کردہ ایک تصویر پیسٹ کر دی"</string>
     <string name="pasted_content" msgid="646276353060777131">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> نے آپ کا کاپی کردہ مواد پیسٹ کر دیا"</string>
     <string name="more_item_label" msgid="7419249600215749115">"مزید"</string>
-    <string name="prepend_shortcut_label" msgid="1743716737502867951">"مینیو+"</string>
+    <string name="prepend_shortcut_label" msgid="1743716737502867951">"مینو+"</string>
     <string name="menu_meta_shortcut_label" msgid="1623390163674762478">"Meta+‎"</string>
     <string name="menu_ctrl_shortcut_label" msgid="131911133027196485">"Ctrl+‎"</string>
     <string name="menu_alt_shortcut_label" msgid="343761069945250991">"Alt+‎"</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"آپ اسے ترتیبات &gt; ایپس میں تبدیل کرسکتے ہیں"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"ہمیشہ اجازت دیں"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"کبھی بھی اجازت نہ دیں"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"‏SIM کو ہٹا دیا گیا"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"‏جب تک آپ ایک درست SIM کے ساتھ ری اسٹارٹ نہیں کر لیتے، تب تک موبائل نیٹ ورک غیر دستیاب ہوگا۔"</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"‏SIM کارڈ ہٹا دیا گیا"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"‏جب تک آپ داخل کردہ درست SIM کارڈ کے ساتھ دوبارہ شروع نہیں کر لیتے، موبائل نیٹ ورک غیر دستیاب رہے گا۔"</string>
     <string name="sim_done_button" msgid="6464250841528410598">"ہو گیا"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"‏SIM شامل کیا گیا"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"‏SIM شامل کیا گیا"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"موبائل نیٹ ورک تک رسائی کیلئے اپنا آلہ دوبارہ سٹارٹ کریں۔"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"ری سٹارٹ"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"موبائل سروس فعال کریں"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"فون"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ڈاک اسپیکرز"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"بیرونی آلہ"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ہیڈ فونز"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"سسٹم"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"‏SIM اب غیر فعال ہوگیا ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"‏پسندیدہ PIN کوڈ درج کریں"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"‏پسندیدہ PIN کوڈ کی توثیق کریں"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"‏SIM کو غیر مقفل کیا جا رہا ہے…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"‏SIM کارڈ غیر مقفل کیا جا رہا ہے…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"‏غلط PIN کوڈ۔"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"‏ایسا PIN ٹائپ کریں جو 4 تا 8 نمبرز کا ہو۔"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"‏PUK کوڈ 8 نمبرز کا ہونا چاہئے۔"</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"پوری اسکرین میں دیکھ رہے ہیں"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"خارج ہونے کیلئے اوپر سے نیچے سوائپ کریں۔"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"سمجھ آ گئی"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"بہتر منظر کے لیے گھمائیں"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"بہتر منظر کے لیے اسپلٹ اسکرین سے باہر نکلیں"</string>
     <string name="done_label" msgid="7283767013231718521">"ہو گیا"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"گھنٹوں کا سرکلر سلائیڈر"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"منٹس سرکلر سلائیڈر"</string>
@@ -2050,11 +2044,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"اَن انسٹال کریں"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"بہر صورت کھولیں"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ضرر رساں ایپ کا پتہ چلا"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"‫<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> کو آلے کے تمام لاگز تک رسائی کی اجازت دیں؟"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> کو آلے کے تمام لاگز تک رسائی کی اجازت دیں؟"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"یک وقتی رسائی کی اجازت دیں"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"اجازت نہ دیں"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنے بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔"</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"‏آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنی بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔\n\nمزید جاننے کیلئے g.co/android/devicelogs ملاحظہ کریں۔"</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"‏آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنی بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔\n\ng.co/android/devicelogs پر مزید جانیں۔"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"دوبارہ نہ دکھائیں"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> کے سلائسز دکھانا چاہتی ہے"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ترمیم کریں"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> سے ٹیبلیٹ کے کیمرا تک رسائی حاصل نہیں کی جا سکتی"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"سلسلہ بندی کے دوران اس تک رسائی حاصل نہیں کی جا سکتی۔ اس کے بجائے اپنے فون پر کوشش کریں۔"</string>
     <string name="system_locale_title" msgid="711882686834677268">"سسٹم ڈیفالٹ"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"کارڈ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

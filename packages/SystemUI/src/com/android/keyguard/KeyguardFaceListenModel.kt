@@ -27,7 +27,6 @@ data class KeyguardFaceListenModel(
     override var userId: Int = 0,
     override var listening: Boolean = false,
     // keep sorted
-    var alternateBouncerShowing: Boolean = false,
     var authInterruptActive: Boolean = false,
     var biometricSettingEnabledForUser: Boolean = false,
     var bouncerFullyShown: Boolean = false,
@@ -40,11 +39,11 @@ data class KeyguardFaceListenModel(
     var keyguardGoingAway: Boolean = false,
     var listeningForFaceAssistant: Boolean = false,
     var occludingAppRequestingFaceAuth: Boolean = false,
-    var postureAllowsListening: Boolean = false,
     var primaryUser: Boolean = false,
     var secureCameraLaunched: Boolean = false,
     var supportsDetect: Boolean = false,
     var switchingUser: Boolean = false,
+    var udfpsBouncerShowing: Boolean = false,
     var udfpsFingerDown: Boolean = false,
     var userNotTrustedOrDetectionIsNeeded: Boolean = false,
 ) : KeyguardListenModel() {
@@ -70,11 +69,10 @@ data class KeyguardFaceListenModel(
             listeningForFaceAssistant.toString(),
             occludingAppRequestingFaceAuth.toString(),
             primaryUser.toString(),
-            postureAllowsListening.toString(),
             secureCameraLaunched.toString(),
             supportsDetect.toString(),
             switchingUser.toString(),
-            alternateBouncerShowing.toString(),
+            udfpsBouncerShowing.toString(),
             udfpsFingerDown.toString(),
             userNotTrustedOrDetectionIsNeeded.toString(),
         )
@@ -96,7 +94,6 @@ data class KeyguardFaceListenModel(
                 userId = model.userId
                 listening = model.listening
                 // keep sorted
-                alternateBouncerShowing = model.alternateBouncerShowing
                 biometricSettingEnabledForUser = model.biometricSettingEnabledForUser
                 bouncerFullyShown = model.bouncerFullyShown
                 faceAndFpNotAuthenticated = model.faceAndFpNotAuthenticated
@@ -110,10 +107,10 @@ data class KeyguardFaceListenModel(
                 listeningForFaceAssistant = model.listeningForFaceAssistant
                 occludingAppRequestingFaceAuth = model.occludingAppRequestingFaceAuth
                 primaryUser = model.primaryUser
-                postureAllowsListening = model.postureAllowsListening
                 secureCameraLaunched = model.secureCameraLaunched
                 supportsDetect = model.supportsDetect
                 switchingUser = model.switchingUser
+                udfpsBouncerShowing = model.udfpsBouncerShowing
                 switchingUser = model.switchingUser
                 udfpsFingerDown = model.udfpsFingerDown
                 userNotTrustedOrDetectionIsNeeded = model.userNotTrustedOrDetectionIsNeeded
@@ -154,7 +151,6 @@ data class KeyguardFaceListenModel(
                 "listeningForFaceAssistant",
                 "occludingAppRequestingFaceAuth",
                 "primaryUser",
-                "postureAllowsListening",
                 "secureCameraLaunched",
                 "supportsDetect",
                 "switchingUser",

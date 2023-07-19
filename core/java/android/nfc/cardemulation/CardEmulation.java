@@ -22,9 +22,11 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
+import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.nfc.INfcCardEmulation;
 import android.nfc.NfcAdapter;
@@ -156,13 +158,18 @@ public final class CardEmulation {
             throw new UnsupportedOperationException();
         }
         if (!sIsInitialized) {
-            PackageManager pm = context.getPackageManager();
+            IPackageManager pm = ActivityThread.getPackageManager();
             if (pm == null) {
                 Log.e(TAG, "Cannot get PackageManager");
                 throw new UnsupportedOperationException();
             }
-            if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)) {
-                Log.e(TAG, "This device does not support card emulation");
+            try {
+                if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION, 0)) {
+                    Log.e(TAG, "This device does not support card emulation");
+                    throw new UnsupportedOperationException();
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "PackageManager query failed.");
                 throw new UnsupportedOperationException();
             }
             sIsInitialized = true;
@@ -265,16 +272,12 @@ public final class CardEmulation {
      * @return whether AIDs in the category can be handled by a service
      *         specified by the foreground app.
      */
-    @SuppressWarnings("NonUserGetterCalled")
     public boolean categoryAllowsForegroundPreference(String category) {
         if (CATEGORY_PAYMENT.equals(category)) {
             boolean preferForeground = false;
-            Context contextAsUser = mContext.createContextAsUser(
-                    UserHandle.of(UserHandle.myUserId()), 0);
             try {
-                preferForeground = Settings.Secure.getInt(
-                        contextAsUser.getContentResolver(),
-                        Settings.Secure.NFC_PAYMENT_FOREGROUND) != 0;
+                preferForeground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.NFC_PAYMENT_FOREGROUND, UserHandle.myUserId()) != 0;
             } catch (SettingNotFoundException e) {
             }
             return preferForeground;
@@ -594,6 +597,9 @@ public final class CardEmulation {
         if (activity == null || service == null) {
             throw new NullPointerException("activity or service or category is null");
         }
+        if (!activity.isResumed()) {
+            throw new IllegalArgumentException("Activity must be resumed.");
+        }
         try {
             return sService.setPreferredService(service);
         } catch (RemoteException e) {
@@ -625,6 +631,9 @@ public final class CardEmulation {
     public boolean unsetPreferredService(Activity activity) {
         if (activity == null) {
             throw new NullPointerException("activity is null");
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalArgumentException("Activity must be resumed.");
         }
         try {
             return sService.unsetPreferredService();

@@ -16,9 +16,6 @@
 
 package com.android.systemui.unfold.updates
 
-import android.content.Context
-import android.content.res.Configuration
-import android.content.res.Resources
 import android.os.Handler
 import android.testing.AndroidTestingRunner
 import androidx.core.util.Consumer
@@ -29,14 +26,12 @@ import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.system.ActivityManagerActivityTypeProvider
 import com.android.systemui.unfold.updates.FoldProvider.FoldCallback
 import com.android.systemui.unfold.updates.RotationChangeProvider.RotationListener
-import com.android.systemui.unfold.updates.hinge.FULLY_OPEN_DEGREES
 import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider.ScreenListener
 import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityProvider
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
 import org.junit.Before
@@ -53,19 +48,20 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class DeviceFoldStateProviderTest : SysuiTestCase() {
 
-    @Mock private lateinit var activityTypeProvider: ActivityManagerActivityTypeProvider
+    @Mock
+    private lateinit var activityTypeProvider: ActivityManagerActivityTypeProvider
 
-    @Mock private lateinit var handler: Handler
+    @Mock
+    private lateinit var handler: Handler
 
-    @Mock private lateinit var rotationChangeProvider: RotationChangeProvider
+    @Mock
+    private lateinit var rotationChangeProvider: RotationChangeProvider
 
-    @Mock private lateinit var unfoldKeyguardVisibilityProvider: UnfoldKeyguardVisibilityProvider
+    @Mock
+    private lateinit var unfoldKeyguardVisibilityProvider: UnfoldKeyguardVisibilityProvider
 
-    @Mock private lateinit var resources: Resources
-
-    @Mock private lateinit var context: Context
-
-    @Captor private lateinit var rotationListener: ArgumentCaptor<RotationListener>
+    @Captor
+    private lateinit var rotationListener: ArgumentCaptor<RotationListener>
 
     private val foldProvider = TestFoldProvider()
     private val screenOnStatusProvider = TestScreenOnStatusProvider()
@@ -75,7 +71,6 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     private val foldUpdates: MutableList<Int> = arrayListOf()
     private val hingeAngleUpdates: MutableList<Float> = arrayListOf()
-    private val unfoldedScreenAvailabilityUpdates: MutableList<Unit> = arrayListOf()
 
     private var scheduledRunnable: Runnable? = null
     private var scheduledRunnableDelay: Long? = null
@@ -84,13 +79,10 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        val config =
-            object : UnfoldTransitionConfig by ResourceUnfoldTransitionConfig() {
-                override val halfFoldedTimeoutMillis: Int
-                    get() = HALF_OPENED_TIMEOUT_MILLIS.toInt()
-            }
-        whenever(context.resources).thenReturn(resources)
-        whenever(context.mainExecutor).thenReturn(mContext.mainExecutor)
+        val config = object : UnfoldTransitionConfig by ResourceUnfoldTransitionConfig() {
+            override val halfFoldedTimeoutMillis: Int
+                get() = HALF_OPENED_TIMEOUT_MILLIS.toInt()
+        }
 
         foldStateProvider =
             DeviceFoldStateProvider(
@@ -101,7 +93,6 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
                 activityTypeProvider,
                 unfoldKeyguardVisibilityProvider,
                 rotationChangeProvider,
-                context,
                 context.mainExecutor,
                 handler
             )
@@ -115,12 +106,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
                 override fun onFoldUpdate(update: Int) {
                     foldUpdates.add(update)
                 }
-
-                override fun onUnfoldedScreenAvailable() {
-                    unfoldedScreenAvailabilityUpdates.add(Unit)
-                }
-            }
-        )
+            })
         foldStateProvider.start()
 
         verify(rotationChangeProvider).addCallback(capture(rotationListener))
@@ -142,7 +128,6 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
         // By default, we're on launcher.
         setupForegroundActivityType(isHomeActivity = true)
-        setIsLargeScreen(true)
     }
 
     @Test
@@ -171,8 +156,8 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         sendHingeAngleEvent(10)
         screenOnStatusProvider.notifyScreenTurnedOn()
 
-        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_OPENING)
-        assertThat(unfoldedScreenAvailabilityUpdates).hasSize(1)
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_OPENING,
+                FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE)
     }
 
     @Test
@@ -189,9 +174,8 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         sendHingeAngleEvent(40)
         sendHingeAngleEvent(10)
 
-        assertThat(foldUpdates)
-            .containsExactly(FOLD_UPDATE_START_OPENING, FOLD_UPDATE_START_CLOSING)
-        assertThat(unfoldedScreenAvailabilityUpdates).hasSize(1)
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_OPENING,
+                FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE, FOLD_UPDATE_START_CLOSING)
     }
 
     @Test
@@ -239,7 +223,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
         fireScreenOnEvent()
 
-        assertThat(unfoldedScreenAvailabilityUpdates).hasSize(1)
+        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE)
     }
 
     @Test
@@ -293,7 +277,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     @Test
     fun startClosingEvent_afterTimeout_finishHalfOpenEventEmitted() {
-        setInitialHingeAngle(90)
+        sendHingeAngleEvent(90)
         sendHingeAngleEvent(80)
 
         simulateTimeout(HALF_OPENED_TIMEOUT_MILLIS)
@@ -304,7 +288,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     @Test
     fun startClosingEvent_beforeTimeout_abortNotEmitted() {
-        setInitialHingeAngle(90)
+        sendHingeAngleEvent(90)
         sendHingeAngleEvent(80)
 
         simulateTimeout(HALF_OPENED_TIMEOUT_MILLIS - 1)
@@ -314,7 +298,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     @Test
     fun startClosingEvent_eventBeforeTimeout_oneEventEmitted() {
-        setInitialHingeAngle(180)
+        sendHingeAngleEvent(180)
         sendHingeAngleEvent(90)
 
         simulateTimeout(HALF_OPENED_TIMEOUT_MILLIS - 1)
@@ -325,7 +309,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     @Test
     fun startClosingEvent_timeoutAfterTimeoutRescheduled_finishHalfOpenStateEmitted() {
-        setInitialHingeAngle(180)
+        sendHingeAngleEvent(180)
         sendHingeAngleEvent(90)
 
         // The timeout should not trigger here.
@@ -339,7 +323,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     @Test
     fun startClosingEvent_shortTimeBetween_emitsOnlyOneEvents() {
-        setInitialHingeAngle(180)
+        sendHingeAngleEvent(180)
 
         sendHingeAngleEvent(90)
         sendHingeAngleEvent(80)
@@ -350,19 +334,20 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Test
     fun startClosingEvent_whileClosing_emittedDespiteInitialAngle() {
         val maxAngle = 180 - FULLY_OPEN_THRESHOLD_DEGREES.toInt()
-        val minAngle = Math.ceil(HINGE_ANGLE_CHANGE_THRESHOLD_DEGREES.toDouble()).toInt() + 1
-        for (startAngle in minAngle..maxAngle) {
-            setInitialHingeAngle(startAngle)
-            sendHingeAngleEvent(startAngle - HINGE_ANGLE_CHANGE_THRESHOLD_DEGREES.toInt() - 1)
+        for (i in 1..maxAngle) {
+            foldUpdates.clear()
+
+            simulateFolding(startAngle = i)
 
             assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
+            simulateTimeout() // Timeout to set the state to aborted.
         }
     }
 
     @Test
     fun startClosingEvent_whileNotOnLauncher_doesNotTriggerBeforeThreshold() {
         setupForegroundActivityType(isHomeActivity = false)
-        setInitialHingeAngle(180)
+        sendHingeAngleEvent(180)
 
         sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
 
@@ -372,7 +357,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Test
     fun startClosingEvent_whileActivityTypeNotAvailable_triggerBeforeThreshold() {
         setupForegroundActivityType(isHomeActivity = null)
-        setInitialHingeAngle(180)
+        sendHingeAngleEvent(180)
 
         sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
 
@@ -382,7 +367,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Test
     fun startClosingEvent_whileOnLauncher_doesTriggerBeforeThreshold() {
         setupForegroundActivityType(isHomeActivity = true)
-        setInitialHingeAngle(180)
+        sendHingeAngleEvent(180)
 
         sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
 
@@ -392,13 +377,9 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Test
     fun startClosingEvent_whileNotOnLauncher_triggersAfterThreshold() {
         setupForegroundActivityType(isHomeActivity = false)
-        setInitialHingeAngle(START_CLOSING_ON_APPS_THRESHOLD_DEGREES)
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES)
 
-        sendHingeAngleEvent(
-            START_CLOSING_ON_APPS_THRESHOLD_DEGREES -
-                HINGE_ANGLE_CHANGE_THRESHOLD_DEGREES.toInt() -
-                1
-        )
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES - 1)
 
         assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
     }
@@ -407,7 +388,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     fun startClosingEvent_whileNotOnKeyguardAndNotOnLauncher_doesNotTriggerBeforeThreshold() {
         setKeyguardVisibility(visible = false)
         setupForegroundActivityType(isHomeActivity = false)
-        setInitialHingeAngle(180)
+        sendHingeAngleEvent(180)
 
         sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
 
@@ -417,7 +398,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Test
     fun startClosingEvent_whileKeyguardStateNotAvailable_triggerBeforeThreshold() {
         setKeyguardVisibility(visible = null)
-        setInitialHingeAngle(180)
+        sendHingeAngleEvent(180)
 
         sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
 
@@ -427,7 +408,7 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Test
     fun startClosingEvent_whileonKeyguard_doesTriggerBeforeThreshold() {
         setKeyguardVisibility(visible = true)
-        setInitialHingeAngle(180)
+        sendHingeAngleEvent(180)
 
         sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES + 1)
 
@@ -437,61 +418,9 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     @Test
     fun startClosingEvent_whileNotOnKeyguard_triggersAfterThreshold() {
         setKeyguardVisibility(visible = false)
-        setInitialHingeAngle(START_CLOSING_ON_APPS_THRESHOLD_DEGREES)
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES)
 
-        sendHingeAngleEvent(
-            START_CLOSING_ON_APPS_THRESHOLD_DEGREES -
-                HINGE_ANGLE_CHANGE_THRESHOLD_DEGREES.toInt() -
-                1
-        )
-
-        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
-    }
-
-    @Test
-    fun startClosingEvent_doesNotTriggerBelowThreshold() {
-        val thresholdAngle = (FULLY_OPEN_DEGREES - FULLY_OPEN_THRESHOLD_DEGREES).toInt()
-        setInitialHingeAngle(180)
-        sendHingeAngleEvent(thresholdAngle + 1)
-
-        assertThat(foldUpdates).isEmpty()
-    }
-
-    @Test
-    fun startClosingEvent_triggersAfterThreshold() {
-        val thresholdAngle = (FULLY_OPEN_DEGREES - FULLY_OPEN_THRESHOLD_DEGREES).toInt()
-        setInitialHingeAngle(180)
-        sendHingeAngleEvent(thresholdAngle + 1)
-        sendHingeAngleEvent(thresholdAngle - 1)
-
-        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
-    }
-
-    @Test
-    fun startClosingEvent_triggersAfterThreshold_fromHalfOpen() {
-        setInitialHingeAngle(120)
-        sendHingeAngleEvent((120 - HINGE_ANGLE_CHANGE_THRESHOLD_DEGREES + 1).toInt())
-        assertThat(foldUpdates).isEmpty()
-        sendHingeAngleEvent((120 - HINGE_ANGLE_CHANGE_THRESHOLD_DEGREES - 1).toInt())
-
-        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
-    }
-
-    @Test
-    fun startOpeningAndClosingEvents_triggerWithOpenAndClose() {
-        setInitialHingeAngle(120)
-        sendHingeAngleEvent(130)
-        sendHingeAngleEvent(120)
-        assertThat(foldUpdates)
-            .containsExactly(FOLD_UPDATE_START_OPENING, FOLD_UPDATE_START_CLOSING)
-    }
-
-    @Test
-    fun startClosingEvent_notInterrupted_whenAngleIsSlightlyIncreased() {
-        setInitialHingeAngle(120)
-        sendHingeAngleEvent(110)
-        sendHingeAngleEvent(111)
-        sendHingeAngleEvent(100)
+        sendHingeAngleEvent(START_CLOSING_ON_APPS_THRESHOLD_DEGREES - 1)
 
         assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
     }
@@ -544,8 +473,8 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
         rotationListener.value.onRotationChanged(1)
 
-        assertThat(foldUpdates)
-            .containsExactly(FOLD_UPDATE_START_OPENING, FOLD_UPDATE_FINISH_HALF_OPEN)
+        assertThat(foldUpdates).containsExactly(
+            FOLD_UPDATE_START_OPENING, FOLD_UPDATE_FINISH_HALF_OPEN)
     }
 
     @Test
@@ -556,45 +485,6 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         rotationListener.value.onRotationChanged(1)
 
         assertThat(foldUpdates).containsExactly(FOLD_UPDATE_FINISH_CLOSED)
-    }
-
-    @Test
-    fun onFolding_onSmallScreen_tansitionDoesNotStart() {
-        setIsLargeScreen(false)
-
-        setInitialHingeAngle(120)
-        sendHingeAngleEvent(110)
-        sendHingeAngleEvent(100)
-
-        assertThat(foldUpdates).isEmpty()
-    }
-
-    @Test
-    fun onFolding_onLargeScreen_tansitionStarts() {
-        setIsLargeScreen(true)
-
-        setInitialHingeAngle(120)
-        sendHingeAngleEvent(110)
-        sendHingeAngleEvent(100)
-
-        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_CLOSING)
-    }
-
-    @Test
-    fun onUnfold_onSmallScreen_emitsStartOpening() {
-        // the new display state might arrive later, so it shouldn't be used to decide to send the
-        // start opening event, but only for the closing.
-        setFoldState(folded = true)
-        setIsLargeScreen(false)
-        foldUpdates.clear()
-
-        setFoldState(folded = false)
-        screenOnStatusProvider.notifyScreenTurningOn()
-        sendHingeAngleEvent(10)
-        sendHingeAngleEvent(20)
-        screenOnStatusProvider.notifyScreenTurnedOn()
-
-        assertThat(foldUpdates).containsExactly(FOLD_UPDATE_START_OPENING)
     }
 
     private fun setupForegroundActivityType(isHomeActivity: Boolean?) {
@@ -614,15 +504,13 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
         }
     }
 
-    private fun setFoldState(folded: Boolean) {
-        foldProvider.notifyFolded(folded)
+    private fun simulateFolding(startAngle: Int) {
+        sendHingeAngleEvent(startAngle)
+        sendHingeAngleEvent(startAngle - 1)
     }
 
-    private fun setIsLargeScreen(isLargeScreen: Boolean) {
-        val smallestScreenWidth = if (isLargeScreen) { 601 } else { 10 }
-        val configuration = Configuration()
-        configuration.smallestScreenWidthDp = smallestScreenWidth
-        whenever(resources.configuration).thenReturn(configuration)
+    private fun setFoldState(folded: Boolean) {
+        foldProvider.notifyFolded(folded)
     }
 
     private fun fireScreenOnEvent() {
@@ -631,17 +519,6 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
 
     private fun sendHingeAngleEvent(angle: Int) {
         testHingeAngleProvider.notifyAngle(angle.toFloat())
-    }
-
-    private fun setInitialHingeAngle(angle: Int) {
-        setFoldState(angle == 0)
-        sendHingeAngleEvent(angle)
-        if (scheduledRunnableDelay != null) {
-            simulateTimeout()
-        }
-        hingeAngleUpdates.clear()
-        foldUpdates.clear()
-        unfoldedScreenAvailabilityUpdates.clear()
     }
 
     private class TestFoldProvider : FoldProvider {

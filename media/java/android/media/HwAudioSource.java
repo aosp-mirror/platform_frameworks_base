@@ -19,6 +19,11 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.Context;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -34,8 +39,11 @@ import java.util.ArrayList;
  */
 @SystemApi
 public class HwAudioSource extends PlayerBase {
+    private static final String TAG = "AudioManager.HwAudioSource";
+
     private final AudioDeviceInfo mAudioDeviceInfo;
     private final AudioAttributes mAudioAttributes;
+    private static IAudioService sService; //lazy initialization, use getService()
 
     /**
      * The value of the native handle encodes the HwAudioSource state.
@@ -61,6 +69,23 @@ public class HwAudioSource extends PlayerBase {
         mAudioDeviceInfo = device;
         mAudioAttributes = attributes;
         baseRegisterPlayer(AudioSystem.AUDIO_SESSION_ALLOCATE);
+
+        final IAudioService service = getService();
+        try {
+            service.registerAudioServerStateDispatcher(mAudioServerStateDispatcher);
+        } catch (RemoteException e) {
+            Log.i(TAG, "failed to register");
+        }
+    }
+
+    private static IAudioService getService()
+    {
+        if (sService != null) {
+            return sService;
+        }
+        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+        sService = IAudioService.Stub.asInterface(b);
+        return sService;
     }
 
     /**
@@ -138,7 +163,7 @@ public class HwAudioSource extends PlayerBase {
      * Starts does not return any error code, caller must check {@link HwAudioSource#isPlaying} to
      * ensure the state of the HwAudioSource encoded in {@link mNativeHandle}.
      */
-    public void start() {
+    public synchronized void start() {
         Preconditions.checkState(!isPlaying(), "HwAudioSource is currently playing");
         mNativeHandle = AudioSystem.startAudioSource(
                 mAudioDeviceInfo.getPort().activeConfig(),
@@ -179,14 +204,14 @@ public class HwAudioSource extends PlayerBase {
      *
      * @return true if currently playing, false otherwise
      */
-    public boolean isPlaying() {
+    public synchronized boolean isPlaying() {
         return mNativeHandle > 0;
     }
 
     /**
      * Stops the playback from {@link AudioDeviceInfo}.
      */
-    public void stop() {
+    public synchronized void stop() {
         if (mNativeHandle > 0) {
             baseStop();
             AudioSystem.stopAudioSource(mNativeHandle);
@@ -263,4 +288,28 @@ public class HwAudioSource extends PlayerBase {
             return new HwAudioSource(mAudioDeviceInfo, mAudioAttributes);
         }
     }
+
+    private final IAudioServerStateDispatcher mAudioServerStateDispatcher =
+            new IAudioServerStateDispatcher.Stub() {
+        @Override
+        public void dispatchAudioServerStateChange(boolean state) {
+            if (state) {
+                Log.i(TAG, "onServiceDied");
+                synchronized (HwAudioSource.this) {
+                    final boolean wasPlaying = isPlaying();
+                    if (wasPlaying) {
+                        Log.i(TAG, "dispatchAudioServerStateChange restoring hw audio source...");
+                        // AudioServer has died, sources & patches have been lost...
+                        baseStop();
+                        mNativeHandle = 0;
+
+                        start();
+                        Log.i(TAG, "onServiceDied restoring hw audio source...done");
+                    }
+                }
+            } else {
+                Log.i(TAG, "dispatchAudioServerStateChange onAudioServerDown");
+            }
+        }
+    };
 }

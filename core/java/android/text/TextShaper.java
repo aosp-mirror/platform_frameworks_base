@@ -173,7 +173,7 @@ public class TextShaper {
     private TextShaper() {}
 
     /**
-     * A consumer interface for accepting text shape result.
+     * An consumer interface for accepting text shape result.
      */
     public interface GlyphsConsumer {
         /**

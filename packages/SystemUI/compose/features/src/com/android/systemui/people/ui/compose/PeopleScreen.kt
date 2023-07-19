@@ -51,7 +51,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.R
-import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 
@@ -60,7 +59,7 @@ import com.android.systemui.people.ui.viewmodel.PeopleViewModel
  *
  * @param viewModel the [PeopleViewModel] that should be composed.
  * @param onResult the callback called with the result of this screen. Callers should usually finish
- *   the Activity/Fragment/View hosting this Composable once a result is available.
+ * the Activity/Fragment/View hosting this Composable once a result is available.
  */
 @Composable
 fun PeopleScreen(
@@ -111,9 +110,7 @@ private fun PeopleScreenWithConversations(
     recentTiles: List<PeopleTileViewModel>,
     onTileClicked: (PeopleTileViewModel) -> Unit,
 ) {
-    Column(
-        Modifier.sysuiResTag("top_level_with_conversations"),
-    ) {
+    Column {
         Column(
             Modifier.fillMaxWidth().padding(PeopleSpacePadding),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -135,7 +132,7 @@ private fun PeopleScreenWithConversations(
         }
 
         LazyColumn(
-            Modifier.fillMaxWidth().sysuiResTag("scroll_view"),
+            Modifier.fillMaxWidth(),
             contentPadding =
                 PaddingValues(
                     top = 16.dp,

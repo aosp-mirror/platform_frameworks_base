@@ -28,12 +28,11 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.metrics.ConnectStats;
 import android.net.metrics.DnsEvent;
+import android.net.metrics.INetdEventListener;
 import android.net.metrics.NetworkMetrics;
 import android.net.metrics.WakeupEvent;
 import android.net.metrics.WakeupStats;
-import android.os.BatteryStatsInternal;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -41,13 +40,10 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.RingBuffer;
 import com.android.internal.util.TokenBucket;
-import com.android.net.module.util.BaseNetdEventListener;
-import com.android.server.LocalServices;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 
 import java.io.PrintWriter;
@@ -58,7 +54,7 @@ import java.util.StringJoiner;
 /**
  * Implementation of the INetdEventListener interface.
  */
-public class NetdEventListenerService extends BaseNetdEventListener {
+public class NetdEventListenerService extends INetdEventListener.Stub {
 
     public static final String SERVICE_NAME = "netd_listener";
 
@@ -78,7 +74,7 @@ public class NetdEventListenerService extends BaseNetdEventListener {
     // TODO: dedup this String constant with the one used in
     // ConnectivityService#wakeupModifyInterface().
     @VisibleForTesting
-    static final String WAKEUP_EVENT_PREFIX_DELIM = ":";
+    static final String WAKEUP_EVENT_IFACE_PREFIX = "iface:";
 
     // Array of aggregated DNS and connect events sent by netd, grouped by net id.
     @GuardedBy("this")
@@ -212,18 +208,15 @@ public class NetdEventListenerService extends BaseNetdEventListener {
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
     public synchronized void onDnsEvent(int netId, int eventType, int returnCode, int latencyMs,
-            String hostname, String[] ipAddresses, int ipAddressesCount, int uid) {
+            String hostname, String[] ipAddresses, int ipAddressesCount, int uid)
+            throws RemoteException {
         long timestamp = System.currentTimeMillis();
         getMetricsForNetwork(timestamp, netId).addDnsResult(eventType, returnCode, latencyMs);
 
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                try {
-                    callback.onDnsEvent(netId, eventType, returnCode, hostname, ipAddresses,
-                            ipAddressesCount, timestamp, uid);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+                callback.onDnsEvent(netId, eventType, returnCode, hostname, ipAddresses,
+                        ipAddressesCount, timestamp, uid);
             }
         }
     }
@@ -232,14 +225,11 @@ public class NetdEventListenerService extends BaseNetdEventListener {
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
     public synchronized void onNat64PrefixEvent(int netId,
-            boolean added, String prefixString, int prefixLength) {
+            boolean added, String prefixString, int prefixLength)
+            throws RemoteException {
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                try {
-                    callback.onNat64PrefixEvent(netId, added, prefixString, prefixLength);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+                callback.onNat64PrefixEvent(netId, added, prefixString, prefixLength);
             }
         }
     }
@@ -248,14 +238,11 @@ public class NetdEventListenerService extends BaseNetdEventListener {
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
     public synchronized void onPrivateDnsValidationEvent(int netId,
-            String ipAddress, String hostname, boolean validated) {
+            String ipAddress, String hostname, boolean validated)
+            throws RemoteException {
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                try {
-                    callback.onPrivateDnsValidationEvent(netId, ipAddress, hostname, validated);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+                callback.onPrivateDnsValidationEvent(netId, ipAddress, hostname, validated);
             }
         }
     }
@@ -264,71 +251,44 @@ public class NetdEventListenerService extends BaseNetdEventListener {
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
     public synchronized void onConnectEvent(int netId, int error, int latencyMs, String ipAddr,
-            int port, int uid) {
+            int port, int uid) throws RemoteException {
         long timestamp = System.currentTimeMillis();
         getMetricsForNetwork(timestamp, netId).addConnectResult(error, latencyMs, ipAddr);
 
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                try {
-                    callback.onConnectEvent(ipAddr, port, timestamp, uid);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+                callback.onConnectEvent(ipAddr, port, timestamp, uid);
             }
         }
-    }
-
-    private boolean hasWifiTransport(Network network) {
-        final NetworkCapabilities nc = mCm.getNetworkCapabilities(network);
-        return nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
     }
 
     @Override
     public synchronized void onWakeupEvent(String prefix, int uid, int ethertype, int ipNextHeader,
             byte[] dstHw, String srcIp, String dstIp, int srcPort, int dstPort, long timestampNs) {
-        final String[] prefixParts = prefix.split(WAKEUP_EVENT_PREFIX_DELIM);
-        if (prefixParts.length != 2) {
-            throw new IllegalArgumentException("Prefix " + prefix
-                    + " required in format <nethandle>:<interface>");
+        String iface = prefix.replaceFirst(WAKEUP_EVENT_IFACE_PREFIX, "");
+        final long timestampMs;
+        if (timestampNs > 0) {
+            timestampMs = timestampNs / NANOS_PER_MS;
+        } else {
+            timestampMs = System.currentTimeMillis();
         }
-        final long netHandle = Long.parseLong(prefixParts[0]);
-        final Network network = Network.fromNetworkHandle(netHandle);
 
-        final WakeupEvent event = new WakeupEvent();
-        event.iface = prefixParts[1];
+        WakeupEvent event = new WakeupEvent();
+        event.iface = iface;
+        event.timestampMs = timestampMs;
         event.uid = uid;
         event.ethertype = ethertype;
-        if (ArrayUtils.isEmpty(dstHw)) {
-            if (hasWifiTransport(network)) {
-                Log.e(TAG, "Empty mac address on WiFi transport, network: " + network);
-            }
-            event.dstHwAddr = null;
-        } else {
-            event.dstHwAddr = MacAddress.fromBytes(dstHw);
-        }
+        event.dstHwAddr = MacAddress.fromBytes(dstHw);
         event.srcIp = srcIp;
         event.dstIp = dstIp;
         event.ipNextHeader = ipNextHeader;
         event.srcPort = srcPort;
         event.dstPort = dstPort;
-        if (timestampNs > 0) {
-            event.timestampMs = timestampNs / NANOS_PER_MS;
-        } else {
-            event.timestampMs = System.currentTimeMillis();
-        }
         addWakeupEvent(event);
 
-        final BatteryStatsInternal bsi = LocalServices.getService(BatteryStatsInternal.class);
-        if (bsi != null) {
-            final long elapsedMs = SystemClock.elapsedRealtime() + event.timestampMs
-                    - System.currentTimeMillis();
-            bsi.noteCpuWakingNetworkPacket(network, elapsedMs, event.uid);
-        }
-
-        final String dstMac = String.valueOf(event.dstHwAddr);
+        String dstMac = event.dstHwAddr.toString();
         FrameworkStatsLog.write(FrameworkStatsLog.PACKET_WAKEUP_OCCURRED,
-                uid, event.iface, ethertype, dstMac, srcIp, dstIp, ipNextHeader, srcPort, dstPort);
+                uid, iface, ethertype, dstMac, srcIp, dstIp, ipNextHeader, srcPort, dstPort);
     }
 
     @Override
@@ -355,7 +315,7 @@ public class NetdEventListenerService extends BaseNetdEventListener {
     }
 
     @Override
-    public int getInterfaceVersion() {
+    public int getInterfaceVersion() throws RemoteException {
         return this.VERSION;
     }
 

@@ -57,7 +57,7 @@ private:
 
 public:
     WorkQueue(std::function<void()>&& wakeFunc, std::mutex& lock)
-            : mWakeFunc(std::move(wakeFunc)), mLock(lock) {}
+            : mWakeFunc(move(wakeFunc)), mLock(lock) {}
 
     void process() {
         auto now = clock::now();

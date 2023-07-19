@@ -37,13 +37,12 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,7 +56,7 @@ import org.mockito.MockitoAnnotations;
 public class ColorCorrectionTileTest extends SysuiTestCase {
 
     @Mock
-    private QSHost mHost;
+    private QSTileHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
@@ -99,12 +98,6 @@ public class ColorCorrectionTileTest extends SysuiTestCase {
         );
 
         mTile.initialize();
-        mTestableLooper.processAllMessages();
-    }
-
-    @After
-    public void tearDown() {
-        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 

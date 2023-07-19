@@ -333,9 +333,6 @@ public class PhonePipMenuController implements PipMenuController {
         mTmpDestinationRectF.set(destinationBounds);
         mMoveTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
         final SurfaceControl surfaceControl = getSurfaceControl();
-        if (surfaceControl == null) {
-            return;
-        }
         final SurfaceControl.Transaction menuTx =
                 mSurfaceControlTransactionFactory.getTransaction();
         menuTx.setMatrix(surfaceControl, mMoveTransform, mTmpTransform);
@@ -362,9 +359,6 @@ public class PhonePipMenuController implements PipMenuController {
         }
 
         final SurfaceControl surfaceControl = getSurfaceControl();
-        if (surfaceControl == null) {
-            return;
-        }
         final SurfaceControl.Transaction menuTx =
                 mSurfaceControlTransactionFactory.getTransaction();
         menuTx.setCrop(surfaceControl, destinationBounds);

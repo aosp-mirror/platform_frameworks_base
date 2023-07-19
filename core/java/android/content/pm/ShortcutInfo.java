@@ -50,7 +50,6 @@ import android.view.contentcapture.ContentCaptureContext;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
-import java.lang.IllegalArgumentException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -285,12 +284,6 @@ public final class ShortcutInfo implements Parcelable {
      */
     public static final int DISABLED_REASON_OTHER_RESTORE_ISSUE = 103;
 
-    /**
-     * The maximum length of Shortcut ID. IDs will be truncated at this limit.
-     * @hide
-     */
-    public static final int MAX_ID_LENGTH = 1000;
-
     /** @hide */
     @IntDef(prefix = { "DISABLED_REASON_" }, value = {
             DISABLED_REASON_NOT_DISABLED,
@@ -483,7 +476,8 @@ public final class ShortcutInfo implements Parcelable {
 
     private ShortcutInfo(Builder b) {
         mUserId = b.mContext.getUserId();
-        mId = getSafeId(Preconditions.checkStringNotEmpty(b.mId, "Shortcut ID must be provided"));
+
+        mId = Preconditions.checkStringNotEmpty(b.mId, "Shortcut ID must be provided");
 
         // Note we can't do other null checks here because SM.updateShortcuts() takes partial
         // information.
@@ -587,14 +581,6 @@ public final class ShortcutInfo implements Parcelable {
             }
         }
         return ret;
-    }
-
-    @NonNull
-    private static String getSafeId(@NonNull String id) {
-        if (id.length() > MAX_ID_LENGTH) {
-            return id.substring(0, MAX_ID_LENGTH);
-        }
-        return id;
     }
 
     /**
@@ -1374,9 +1360,7 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setIntents(@NonNull Intent[] intents) {
             Objects.requireNonNull(intents, "intents cannot be null");
-            if (intents.length == 0) {
-                throw new IllegalArgumentException("intents cannot be empty");
-            }
+            Objects.requireNonNull(intents.length, "intents cannot be empty");
             for (Intent intent : intents) {
                 Objects.requireNonNull(intent, "intents cannot contain null");
                 Objects.requireNonNull(intent.getAction(), "intent's action must be set");
@@ -1414,9 +1398,7 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setPersons(@NonNull Person[] persons) {
             Objects.requireNonNull(persons, "persons cannot be null");
-            if (persons.length == 0) {
-                throw new IllegalArgumentException("persons cannot be empty");
-            }
+            Objects.requireNonNull(persons.length, "persons cannot be empty");
             for (Person person : persons) {
                 Objects.requireNonNull(person, "persons cannot contain null");
             }
@@ -2355,8 +2337,7 @@ public final class ShortcutInfo implements Parcelable {
         final ClassLoader cl = getClass().getClassLoader();
 
         mUserId = source.readInt();
-        mId = getSafeId(Preconditions.checkStringNotEmpty(source.readString8(),
-                "Shortcut ID must be provided"));
+        mId = source.readString8();
         mPackageName = source.readString8();
         mActivity = source.readParcelable(cl, android.content.ComponentName.class);
         mFlags = source.readInt();

@@ -20,8 +20,6 @@ import android.animation.ValueAnimator
 import android.util.Log
 import android.util.Log.TerribleFailure
 import android.util.Log.TerribleFailureHandler
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Interpolators
@@ -45,10 +43,10 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-@FlakyTest(bugId = 270760395)
+@RunWith(JUnit4::class)
 class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: KeyguardTransitionRepository
@@ -106,7 +104,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
             val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.1))
             assertSteps(steps.subList(0, 4), firstTransitionSteps, AOD, LOCKSCREEN)
 
-            val secondTransitionSteps = listWithStep(step = BigDecimal(.1), start = BigDecimal(.1))
+            val secondTransitionSteps = listWithStep(step = BigDecimal(.1), start = BigDecimal(.9))
             assertSteps(steps.subList(4, steps.size), secondTransitionSteps, LOCKSCREEN, AOD)
 
             job.cancel()
@@ -170,25 +168,6 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         assertThat(wtfHandler.failed).isTrue()
     }
 
-    @Test
-    fun `Attempt to manually update transition after CANCELED state throws exception`() {
-        val uuid =
-            underTest.startTransition(
-                TransitionInfo(
-                    ownerName = OWNER_NAME,
-                    from = AOD,
-                    to = LOCKSCREEN,
-                    animator = null,
-                )
-            )
-
-        checkNotNull(uuid).let {
-            underTest.updateTransition(it, 0.2f, TransitionState.CANCELED)
-            underTest.updateTransition(it, 0.5f, TransitionState.RUNNING)
-        }
-        assertThat(wtfHandler.failed).isTrue()
-    }
-
     private fun listWithStep(
         step: BigDecimal,
         start: BigDecimal = BigDecimal.ZERO,
@@ -222,10 +201,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
                 )
             )
         fractions.forEachIndexed { index, fraction ->
-            val step = steps[index + 1]
-            val truncatedValue =
-                BigDecimal(step.value.toDouble()).setScale(2, RoundingMode.HALF_UP).toFloat()
-            assertThat(step.copy(value = truncatedValue))
+            assertThat(steps[index + 1])
                 .isEqualTo(
                     TransitionStep(
                         from,

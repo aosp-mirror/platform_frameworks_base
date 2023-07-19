@@ -111,7 +111,8 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
         // Throttle calls into user activity by event type.
         // We're a little conservative about argument checking here in case the caller
         // passes in bad data which could corrupt system state.
-        if (eventType >= 0 && eventType <= USER_ACTIVITY_EVENT_LAST) {
+        if (eventType >= 0 && eventType <= USER_ACTIVITY_EVENT_LAST &&
+                eventType != USER_ACTIVITY_EVENT_TOUCH) {
             nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
             if (eventTime > now) {
                 eventTime = now;

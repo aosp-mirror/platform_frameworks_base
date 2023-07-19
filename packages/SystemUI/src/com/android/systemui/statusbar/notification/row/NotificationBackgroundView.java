@@ -28,16 +28,12 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-
-import java.io.PrintWriter;
-import java.util.Arrays;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.
  */
-public class NotificationBackgroundView extends View implements Dumpable {
+public class NotificationBackgroundView extends View {
 
     private final boolean mDontModifyCorners;
     private Drawable mBackground;
@@ -46,6 +42,7 @@ public class NotificationBackgroundView extends View implements Dumpable {
     private int mTintColor;
     private final float[] mCornerRadii = new float[8];
     private boolean mBottomIsRounded;
+    private int mBackgroundTop;
     private boolean mBottomAmountClips = true;
     private int mActualHeight = -1;
     private int mActualWidth = -1;
@@ -63,7 +60,8 @@ public class NotificationBackgroundView extends View implements Dumpable {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mClipTopAmount + mClipBottomAmount < getActualHeight() || mExpandAnimationRunning) {
+        if (mClipTopAmount + mClipBottomAmount < getActualHeight() - mBackgroundTop
+                || mExpandAnimationRunning) {
             canvas.save();
             if (!mExpandAnimationRunning) {
                 canvas.clipRect(0, mClipTopAmount, getWidth(),
@@ -76,7 +74,7 @@ public class NotificationBackgroundView extends View implements Dumpable {
 
     private void draw(Canvas canvas, Drawable drawable) {
         if (drawable != null) {
-            int top = 0;
+            int top = mBackgroundTop;
             int bottom = getActualHeight();
             if (mBottomIsRounded
                     && mBottomAmountClips
@@ -263,6 +261,11 @@ public class NotificationBackgroundView extends View implements Dumpable {
         }
     }
 
+    public void setBackgroundTop(int backgroundTop) {
+        mBackgroundTop = backgroundTop;
+        invalidate();
+    }
+
     /** Set the current expand animation size. */
     public void setExpandAnimationSize(int width, int height) {
         mExpandAnimationHeight = height;
@@ -287,17 +290,5 @@ public class NotificationBackgroundView extends View implements Dumpable {
 
     public void setPressedAllowed(boolean allowed) {
         mIsPressedAllowed = allowed;
-    }
-
-    @Override
-    public void dump(PrintWriter pw, String[] args) {
-        pw.println("mDontModifyCorners: " + mDontModifyCorners);
-        pw.println("mClipTopAmount: " + mClipTopAmount);
-        pw.println("mClipBottomAmount: " + mClipBottomAmount);
-        pw.println("mCornerRadii: " + Arrays.toString(mCornerRadii));
-        pw.println("mBottomIsRounded: " + mBottomIsRounded);
-        pw.println("mBottomAmountClips: " + mBottomAmountClips);
-        pw.println("mActualWidth: " + mActualWidth);
-        pw.println("mActualHeight: " + mActualHeight);
     }
 }

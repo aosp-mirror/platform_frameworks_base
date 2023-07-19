@@ -20,8 +20,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.os.Bundle
 import android.os.RemoteException
 import android.service.dreams.IDreamManager
@@ -47,8 +45,7 @@ import javax.inject.Inject
  * destroyed on SCREEN_OFF events, due to issues with occluded activities over lockscreen as well as
  * user expectations for the activity to not continue running.
  */
-// Open for testing
-open class ControlsActivity @Inject constructor(
+class ControlsActivity @Inject constructor(
     private val uiController: ControlsUiController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val dreamManager: IDreamManager,
@@ -60,11 +57,9 @@ open class ControlsActivity @Inject constructor(
     private lateinit var parent: ViewGroup
     private lateinit var broadcastReceiver: BroadcastReceiver
     private var mExitToDream: Boolean = false
-    private lateinit var lastConfiguration: Configuration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lastConfiguration = resources.configuration
         if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
             window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
         }
@@ -73,7 +68,7 @@ open class ControlsActivity @Inject constructor(
 
         getLifecycle().addObserver(
             ControlsAnimations.observerForAnimations(
-                requireViewById(R.id.control_detail_root),
+                requireViewById<ViewGroup>(R.id.control_detail_root),
                 window,
                 intent,
                 !featureFlags.isEnabled(Flags.USE_APP_PANELS)
@@ -97,21 +92,10 @@ open class ControlsActivity @Inject constructor(
         initBroadcastReceiver()
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        val interestingFlags = ActivityInfo.CONFIG_ORIENTATION or
-                ActivityInfo.CONFIG_SCREEN_SIZE or
-                ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE
-        if (lastConfiguration.diff(newConfig) and interestingFlags != 0 ) {
-            uiController.onSizeChange()
-        }
-        lastConfiguration = newConfig
-    }
-
     override fun onStart() {
         super.onStart()
 
-        parent = requireViewById(R.id.control_detail_root)
+        parent = requireViewById<ViewGroup>(R.id.global_actions_controls)
         parent.alpha = 0f
         if (featureFlags.isEnabled(Flags.USE_APP_PANELS) && !keyguardStateController.isUnlocked) {
             controlsSettingsDialogManager.maybeShowDialog(this) {
@@ -150,8 +134,7 @@ open class ControlsActivity @Inject constructor(
         super.onStop()
         mExitToDream = false
 
-        // parent is set in onStart, so the field is initialized when we get here
-        uiController.hide(parent)
+        uiController.hide()
         controlsSettingsDialogManager.closeDialog()
     }
 

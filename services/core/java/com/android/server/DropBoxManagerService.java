@@ -86,6 +86,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public final class DropBoxManagerService extends SystemService {
     private static final String TAG = "DropBoxManagerService";
+    private static final boolean DBG = false;
     private static final int DEFAULT_AGE_SECONDS = 3 * 86400;
     private static final int DEFAULT_MAX_FILES = 1000;
     private static final int DEFAULT_MAX_FILES_LOWRAM = 300;
@@ -464,7 +465,7 @@ public final class DropBoxManagerService extends SystemService {
     public void addEntry(String tag, EntrySource entry, int flags) {
         File temp = null;
         try {
-            Slog.i(TAG, "add tag=" + tag + " isTagEnabled=" + isTagEnabled(tag)
+            if (DBG) Slog.i(TAG, "add tag=" + tag + " isTagEnabled=" + isTagEnabled(tag)
                     + " flags=0x" + Integer.toHexString(flags));
             if ((flags & DropBoxManager.IS_EMPTY) != 0) throw new IllegalArgumentException();
 
@@ -693,7 +694,7 @@ public final class DropBoxManagerService extends SystemService {
                 out.append(file.getPath()).append("\n");
             }
 
-            if ((entry.flags & DropBoxManager.IS_TEXT) != 0 && doPrint) {
+            if ((entry.flags & DropBoxManager.IS_TEXT) != 0 && (doPrint || !doFile)) {
                 DropBoxManager.Entry dbe = null;
                 InputStreamReader isr = null;
                 try {
@@ -717,6 +718,17 @@ public final class DropBoxManagerService extends SystemService {
                             }
                         }
                         if (!newline) out.append("\n");
+                    } else {
+                        String text = dbe.getText(70);
+                        out.append("    ");
+                        if (text == null) {
+                            out.append("[null]");
+                        } else {
+                            boolean truncated = (text.length() == 70);
+                            out.append(text.trim().replace('\n', '/'));
+                            if (truncated) out.append(" ...");
+                        }
+                        out.append("\n");
                     }
                 } catch (IOException e) {
                     out.append("*** ").append(e.toString()).append("\n");
@@ -1026,7 +1038,7 @@ public final class DropBoxManagerService extends SystemService {
             // Scan pre-existing files.
             for (File file : files) {
                 if (file.getName().endsWith(".tmp")) {
-                    Slog.i(TAG, "Cleaning temp file: " + file);
+                    if (DBG) Slog.i(TAG, "Cleaning temp file: " + file);
                     file.delete();
                     continue;
                 }

@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"ბაიტი"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"კბაიტი"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"მბაიტი"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"გბაიტი"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"ტბაიტი"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"უსათაურო"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(ტელეფონის ნომრის გარეშე)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"თქვენ მიერ შეყვანილი PIN კოდები არ შეესატყვისება."</string>
     <string name="invalidPin" msgid="7542498253319440408">"აკრიფეთ PIN, რომელიც შედგება 4-დან 8 ციფრამდე."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"აკრიფეთ PUK, რომელიც რვა ან მეტი ციფრისგან შედგება."</string>
-    <string name="needPuk" msgid="3503414069503752211">"თქვენი SIM ბარათი დაბლოკილია PUK კოდით. განბლოკვისთვის შეიყვანეთ PUK კოდი."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"აკრიფეთ PUK2 SIM-ის განბლოკვის მიზნით."</string>
+    <string name="needPuk" msgid="7321876090152422918">"თქვენი SIM ბარათი დაბლოკილია PUK კოდით. განბლოკვისთვის შეიყვანეთ PUK კოდი."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"SIM ბარათის განსაბლოკად აკრიფეთ PUK2."</string>
     <string name="enablePin" msgid="2543771964137091212">"წარუმატებელი მცდელობა. ჩართეთ SIM/RUIM ჩაკეტვა."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">თქვენ დაგრჩათ <xliff:g id="NUMBER_1">%d</xliff:g> მცდელობა, სანამ SIM დაიბლოკება.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ნაგულისხმებად დაყენებულია ნომრის დაფარვის გამორთვა. შემდეგი ზარი: არ არის დაფარული."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"სერვისი არ არის მიწოდებული."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"არ შეგიძლიათ აბონენტის ID პარამეტრების შეცვლა."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"მონაცემები გადართულია <xliff:g id="CARRIERDISPLAY">%s</xliff:g>-ზე"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"ამის შეცვლა ნებისმიერ დროს შეგიძლიათ პარამეტრებში"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"მობილური ინტერნეტის სერვისი არ არის"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"გადაუდებელი ზარი მიუწვდომელია"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ხმოვანი ზარების სერვისი არ არის"</string>
@@ -312,7 +315,7 @@
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"მიკროფონი"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"აუდიოს ჩაწერა"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ფიზიკური აქტივობა"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ფიზიკურ აქტივობაზე წვდომა"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ფიზიკური აქტივობაზე წვდომა"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"კამერა"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ფოტოებისა და ვიდეოების გადაღება"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"ახლომახლო მოწყობილობები"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"შეუძლია აღბეჭდოს მოწყობილობის თითის ანაბეჭდის სენსორზე განხორციელებული ჟესტები."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ეკრანის ანაბეჭდის გადაღება"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"შეუძლია ეკრანის ანაბეჭდის გადაღება."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"გადახედვა, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"სტატუსის ზოლის გათიშვა ან ცვლილება"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"აპს შეეძლება სტატუსების ზოლის გათიშვა და სისტემის ხატულების დამატება/წაშლა."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"სტატუსის ზოლის ჩანაცვლება"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"საშუალებას აძლევს აპს, მიიღოს უპირატესი NFC გადახდის სერვისის ინფორმაცია, მაგალითად, რეგისტრირებული დახმარება და დანიშნულება."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ახლო მოქმედების რადიოკავშირი (NFC) მართვა"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"აპს შეეძლება ახლო მოქმედების რადიოკავშირის (NFC) მეშვეობით ტეგების, ბარათებისა და წამკითხველების შემცველი მონაცემების მიმოცვლა."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"უსაფრთხო ელემენტის ტრანზაქციის ღონისძიება"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"საშუალებს აძლევს აპს, მიიღოს ინფორმაცია უსაფრთხო ელემენტზე განხორციელებული ტრანზაქციების შესახებ."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"თქვენი ეკრანის ბლოკის გათიშვა"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"შეეძლება კლავიატურის დაბლოკვისა და პაროლით უზრუნველყოფილი ნებისმიერი უსაფრთხოების ფუნქციის დეაქტივაცია. მაგალითად, ტელეფონი შემომავალი ზარის დროს აუქმებს კლავიატურის დაბლოკვას და კვლავ ააქტიურებს მას, როგორც კი ზარი დასრულდება."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ეკრანის დაბლოკვის მეთოდის სირთულის შესახებ ინფორმაციის მოთხოვნა"</string>
@@ -596,7 +596,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ზედმეტად ნათელია"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"აღმოჩენილია Ძლიერი დაჭერა"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ცადეთ დარეგულირება"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ოდნავ შეცვალეთ დაჭერის ადგილი ყოველ ჯერზე"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ოდნავ შეცვალეთ თითის დაჭერის ადგილი ყოველ ჯერზე"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"თითის ანაბეჭდის ამოცნობა ვერ მოხერხდა"</string>
@@ -647,7 +647,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"გაწიეთ ტელეფონი თქვენგან მარცხნივ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"გაწიეთ ტელეფონი თქვენგან მარჯვნივ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"გთხოვთ, უფრო პირდაპირ შეხედოთ თქვენს მოწყობილობას."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"სახე არ ჩანს. დაიჭირეთ ტელ. თვალის დონეზე."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"თქვენი სახე არ ჩანს. დაიჭირეთ ტელეფონი თვალის დონეზე."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"მეტისმეტად მოძრაობთ. მყარად დაიჭირეთ ტელეფონი."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"გთხოვთ, ხელახლა დაარეგისტრიროთ თქვენი სახე."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"სახის ამოცნობა ვერ ხერხდება. ცადეთ ხელახლა."</string>
@@ -663,9 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"თქვენი სახის მოდელი ვერ იქმნება. ცადეთ ხელახლა."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"აღმოჩენილია მუქი სათვალე. თქვენი სახე მთლიანად უნდა ჩანდეს."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"სახე დაფარულია. ის მთლიანად უნდა ჩანდეს."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"აღმოჩენილია სახის დაფარვა. თქვენი სახე მთლიანად უნდა ჩანდეს."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"სახე ვერ დასტურდება. აპარატი მიუწვდომელია."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"ხელახლა ცადეთ სახით განბლოკვა"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"სახის ახალი მონაცემები ვერ ინახება. ჯერ ძველი წაშალეთ."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"გამოიყენეთ სახით ან ეკრანის დაბლოკვა"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"გასაგრძელებლად გამოიყენეთ თქვენი სახე"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"გასაგრძელებლად გამოიყენეთ თქვენი სახე ან ეკრანის განბლოკვის ნიმუში"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"რაღაც შეცდომა მოხდა. ცადეთ ხელახლა."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"სახის ხატულა"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"სინქრონიზაციის პარამეტრების წაკითხვა"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"კიდევ სცადეთ"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ყველა ფუნქციისა და მონაცემის განბლოკვა"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"სახით განბლოკვის მცდელობამ დაშვებულ რაოდენობას გადააჭარბა"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM არ არის"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"ტაბლეტში SIM არ არის."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"თქვენს Android TV მოწყობილობაში SIM ბარათი არ არის."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"ტელეფონში SIM არ არის."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"SIM-ის დამატება."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM აკლია ან არ იკითხება. SIM-ის დამატება."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"გამოუყენებელი SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"თქვენი SIM სამუდამოდ გამორთულია.\n დაუკავშირდით თქვენს უკაბელო სერვისის პროვაიდერს სხვა SIM ბარათისთვის."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM ბარათი არ არის"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ტაბლეტში არ დევს SIM ბარათი."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"თქვენს Android TV მოწყობილობაში SIM ბარათი არ არის."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"არ არის SIM ბარათი ტელეფონში."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"ჩადეთ SIM ბარათი."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM ბარათი არ არის ან არ იკითხება. ჩადეთ SIM ბარათი."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"არამოხმარებადი SIM ბარათი."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"თქვენი SIM ბარათი გამუდმებით გამორთული იყო.\n დაუკავშირდით თქვენი უკაბელო სერვისის პროვაიდერს სხვა SIM ბარათისთვის."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"წინა ჩანაწერი"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"შემდეგი ჩანაწერი"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"პაუზა"</string>
@@ -944,12 +940,12 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"შეწყვეტა"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"უკან გადახვევა"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"წინ გადახვევა"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი ზარები"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი დახმარების ზარები"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ქსელი ჩაკეტილია"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM დაბლოკილია PUK-ით."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM ბარათი არის PUK-ით დაბლოკილი."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"იხილეთ მომხმარებლის სახელმძღვანელო ან დაუკავშირდით კლიენტების მომსახურებას."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM-ბარათი ჩაკეტილია."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM-ის განბლოკვა…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM ბარათი დაბლოკილია."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM ბარათის განბლოკვა…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"თქვენ <xliff:g id="NUMBER_0">%1$d</xliff:g>-ჯერ დახატეთ განბლოკვის ნიმუში. \n\nსცადეთ ხელახლა <xliff:g id="NUMBER_1">%2$d</xliff:g> წამში."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"თქვენ არასწორად დაბეჭდეთ თქვენი პაროლი <xliff:g id="NUMBER_0">%1$d</xliff:g> ჯერ. \n\nხელახლა სცადეთ <xliff:g id="NUMBER_1">%2$d</xliff:g> წამში."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"თქვენ <xliff:g id="NUMBER_0">%1$d</xliff:g>-ჯერ არასწორად შეიყვანეთ PIN კოდი. \n\nსცადეთ ხელახლა <xliff:g id="NUMBER_1">%2$d</xliff:g> წამში."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"ამის შეცვლა შეგიძლიათ მოგვიანებით აპების პარამეტრებიდან."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"ნებართვის მიცემა - ყოველთვის"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"არასოდეს მისცე უფლება"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM ამოღებულია"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"მობილური ქსელი მიუწვდომელი იქნება, სანამ არ გადატვირთავთ მოქმედი SIM ბარათით."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM ბარათი ამოღებულია"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"მობილური კავშირი არ იქნება ხელმისაწვდომი, ვიდრე არ ჩადებთ ქმედით SIM ბარათს და გადატვირთავთ."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"დასრულდა"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM დამატებულია"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM ბარათი დაემატა"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"გადატვირთეთ თქვენი მოწყობილობა მობილურ ქსელზე წვდომისთვის."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"გადატვირთვა"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"გაააქტიურეთ მობილური სერვისი"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"ტელევიზია"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ტელეფონი"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"სპიკერების მიმაგრება"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"გარე მოწყობილობა"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ყურსასმენები"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"სისტემა"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM ამჟამად დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK კოდი. დეტალებისთვის მიმართეთ მობილურ ოპერატორს."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"სასურველი PIN კოდის შეყვანა"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"სასურველი PIN კოდის დადასტურება"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM-ის განბლოკვა…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM ბარათის განბლოკვა…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"არასწორი PIN კოდი."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"აკრიფეთ PIN, რომელიც შედგება 4-დან 8 ციფრამდე."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-კოდი 8 ციფრისგან უნდა შედგებოდეს."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"სრულ ეკრანზე ნახვა"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"გამოსვლისათვის, გაასრიალეთ ზემოდან ქვემოთ."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"გასაგებია"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"შეატრიალეთ უკეთესი ხედისთვის"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"უკეთესი ხედვისთვის გამოდით გაყოფილი ეკრანიდან"</string>
     <string name="done_label" msgid="7283767013231718521">"დასრულდა"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"საათების წრიული სლაიდერი"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"წუთების წრიული სლაიდერი"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ტაბლეტის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"მასზე წვდომის მიᲦება შეუძლებელია სტრიმინგის დროს. ცადეთ ტელეფონიდან."</string>
     <string name="system_locale_title" msgid="711882686834677268">"სისტემის ნაგულისხმევი"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"ბარათი <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -20,10 +20,11 @@ import com.android.systemui.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.shared.model.AnimationParams
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * Breaks down OCCLUDED->LOCKSCREEN transition into discrete steps for corresponding views to
@@ -35,27 +36,28 @@ class OccludedToLockscreenTransitionViewModel
 constructor(
     private val interactor: KeyguardTransitionInteractor,
 ) {
-    private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = TO_LOCKSCREEN_DURATION,
-            transitionFlow = interactor.occludedToLockscreenTransition,
-        )
-
     /** Lockscreen views y-translation */
     fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
-        return transitionAnimation.createFlow(
-            duration = TO_LOCKSCREEN_DURATION,
-            onStep = { value -> -translatePx + value * translatePx },
-            interpolator = EMPHASIZED_DECELERATE,
-            onCancel = { 0f },
-        )
+        return flowForAnimation(LOCKSCREEN_TRANSLATION_Y).map { value ->
+            -translatePx + (EMPHASIZED_DECELERATE.getInterpolation(value) * translatePx)
+        }
     }
 
     /** Lockscreen views alpha */
-    val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
-            startTime = 233.milliseconds,
-            duration = 250.milliseconds,
-            onStep = { it },
+    val lockscreenAlpha: Flow<Float> = flowForAnimation(LOCKSCREEN_ALPHA)
+
+    private fun flowForAnimation(params: AnimationParams): Flow<Float> {
+        return interactor.transitionStepAnimation(
+            interactor.occludedToLockscreenTransition,
+            params,
+            totalDuration = TO_LOCKSCREEN_DURATION
         )
+    }
+
+    companion object {
+        @JvmField val LOCKSCREEN_ANIMATION_DURATION_MS = TO_LOCKSCREEN_DURATION.inWholeMilliseconds
+        val LOCKSCREEN_TRANSLATION_Y = AnimationParams(duration = TO_LOCKSCREEN_DURATION)
+        val LOCKSCREEN_ALPHA =
+            AnimationParams(startTime = 233.milliseconds, duration = 250.milliseconds)
+    }
 }

@@ -184,7 +184,9 @@ class BluetoothRouteProvider {
                 if (device.isConnected()) {
                     BluetoothRouteInfo newBtRoute = createBluetoothRoute(device);
                     if (newBtRoute.connectedProfiles.size() > 0) {
-                        mBluetoothRoutes.put(device.getAddress(), newBtRoute);
+                        synchronized (BluetoothRouteProvider.this) {
+                            mBluetoothRoutes.put(device.getAddress(), newBtRoute);
+                        }
                     }
                 }
             }
@@ -392,16 +394,20 @@ class BluetoothRouteProvider {
         // ACTION_CONNECTION_STATE_CHANGED is sent.
         if (activeBtRoute == null) {
             activeBtRoute = createBluetoothRoute(device);
-            mBluetoothRoutes.put(device.getAddress(), activeBtRoute);
+            synchronized (BluetoothRouteProvider.this) {
+                mBluetoothRoutes.put(device.getAddress(), activeBtRoute);
+            }
         }
         addActiveRoute(activeBtRoute);
-
-        // A bluetooth route with the same route ID should be added.
-        for (BluetoothRouteInfo btRoute : mBluetoothRoutes.values()) {
-            if (TextUtils.equals(btRoute.route.getId(), activeBtRoute.route.getId())
-                    && !TextUtils.equals(btRoute.btDevice.getAddress(),
-                    activeBtRoute.btDevice.getAddress())) {
-                addActiveRoute(btRoute);
+        synchronized (BluetoothRouteProvider.this) {
+            // A bluetooth route with the same route ID should be added.
+            for (BluetoothRouteInfo btRoute : mBluetoothRoutes.values()) {
+                if (btRoute != null 
+                        && TextUtils.equals(btRoute.route.getId(), activeBtRoute.route.getId())
+                        && !TextUtils.equals(btRoute.btDevice.getAddress(),
+                        activeBtRoute.btDevice.getAddress())) {
+                    addActiveRoute(btRoute);
+                }
             }
         }
     }
@@ -471,7 +477,9 @@ class BluetoothRouteProvider {
                 BluetoothRouteInfo btRoute = mBluetoothRoutes.get(device.getAddress());
                 if (btRoute == null) {
                     btRoute = createBluetoothRoute(device);
-                    mBluetoothRoutes.put(device.getAddress(), btRoute);
+                    synchronized (BluetoothRouteProvider.this) {
+                        mBluetoothRoutes.put(device.getAddress(), btRoute);
+                    }
                 }
                 if (activeDevices.contains(device)) {
                     addActiveRoute(btRoute);
@@ -574,7 +582,9 @@ class BluetoothRouteProvider {
                 if (btRoute == null) {
                     btRoute = createBluetoothRoute(device);
                     if (btRoute.connectedProfiles.size() > 0) {
-                        mBluetoothRoutes.put(device.getAddress(), btRoute);
+                        synchronized (BluetoothRouteProvider.this) {
+                            mBluetoothRoutes.put(device.getAddress(), btRoute);
+                        }
                         notifyBluetoothRoutesUpdated();
                     }
                 } else {
@@ -585,7 +595,9 @@ class BluetoothRouteProvider {
                 if (btRoute != null) {
                     btRoute.connectedProfiles.delete(profile);
                     if (btRoute.connectedProfiles.size() == 0) {
-                        removeActiveRoute(mBluetoothRoutes.remove(device.getAddress()));
+                        synchronized (BluetoothRouteProvider.this) {
+                            removeActiveRoute(mBluetoothRoutes.remove(device.getAddress()));
+                        }
                         notifyBluetoothRoutesUpdated();
                     }
                 }

@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -63,7 +62,7 @@ import javax.inject.Inject;
  * are not.
  */
 public class NotificationLogger implements StateListener {
-    static final String TAG = "NotificationLogger";
+    private static final String TAG = "NotificationLogger";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
 
     /** The minimum delay in ms between reports of notification visibility. */
@@ -535,7 +534,7 @@ public class NotificationLogger implements StateListener {
                 return;
             }
             if (loggedExpansionState != null
-                    && Objects.equals(state.mIsExpanded, loggedExpansionState)) {
+                    && state.mIsExpanded == loggedExpansionState) {
                 return;
             }
             mLoggedExpansionState.put(key, state.mIsExpanded);

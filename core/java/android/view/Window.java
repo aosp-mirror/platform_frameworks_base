@@ -20,6 +20,7 @@ import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.annotation.ColorInt;
@@ -50,6 +51,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionManager;
@@ -823,11 +825,6 @@ public abstract class Window {
     /** @hide */
     public final void destroy() {
         mDestroyed = true;
-        onDestroy();
-    }
-
-    /** @hide */
-    protected void onDestroy() {
     }
 
     /** @hide */
@@ -1279,6 +1276,10 @@ public abstract class Window {
      * @see #clearFlags
      */
     public void setFlags(int flags, int mask) {
+        if ((mask & FLAG_SECURE) != 0 && Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.WINDOW_IGNORE_SECURE, 0) == 1) {
+            mask &= ~FLAG_SECURE;
+        }
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.flags = (attrs.flags&~mask) | (flags&mask);
         mForcedWindowFlags |= mask;

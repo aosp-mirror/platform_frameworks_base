@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Nomsiz&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Telefon raqami yo‘q)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Siz kiritgan PIN-kodlar bir-biriga mos kelmadi."</string>
     <string name="invalidPin" msgid="7542498253319440408">"4 tadan 8 tagacha bo‘lgan PIN kodni kiriting."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8 ta yoki ko‘proq bo‘lgan PUK kodni kiriting."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM karta PUK kod bilan qulflangan. Uni qulfdan chiqarish uchun PUK kodni tering."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"SIM kartani blokdan chiqarish uchun PUK2 kodni tering."</string>
+    <string name="needPuk" msgid="7321876090152422918">"SIM kartangiz PUK kod bilan qulflangan. Uni qulfdan chiqarish uchun PUK kodni tering."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"SIM kartani blokdan chiqarish uchun PUK2 raqamini kiriting."</string>
     <string name="enablePin" msgid="2543771964137091212">"Ishlamadi, SIM/RUIM qulfni yoqish."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Yana <xliff:g id="NUMBER_1">%d</xliff:g> ta muvaffaqiyatsiz urinishdan so‘ng SIM karta qulflanadi.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Qo‘ng‘iroq qiluvchi ma’lumotlari cheklanmagan. Keyingi qo‘ng‘iroq: cheklanmagan"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Xizmat ishalamaydi."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Qo‘ng‘iroq qiluvchining ID raqami sozlamasini o‘zgartirib bo‘lmaydi."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Internet <xliff:g id="CARRIERDISPLAY">%s</xliff:g> operatoriga almashtirildi"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Buni istalgan vaqtda sozlamalardan o‘zgartirish mumkin"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Mobil internet ishlamayapti"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Favqulodda chaqiruv ishlamayapti"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ovozli chaqiruvlar ishlamaydi"</string>
@@ -140,7 +143,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi chaqiruv"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWi-Fi"</string>
-    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Oʻchiq"</string>
+    <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Yoqilmagan"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi orqali chaqiruv"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Mobil tarmoq orqali chaqiruv"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Faqat Wi-Fi"</string>
@@ -307,7 +310,7 @@
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"qurilmangizdagi fayllarga kirish"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musiqa va audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"qurilmadagi musiqa va audioga ruxsat"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Suratlar va videolar"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Video va suratlar"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"qurilmadagi rasm va videolarga ruxsat"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ovoz yozib olish"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Barmoq izi skanerida kiritilgan ishoralarni taniy oladi."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Skrinshot olish"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Ekrandan skrinshot olishi mumkin."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Razm solish, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"holat panelini o‘zgartirish yoki o‘chirish"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ilova holat panelini o‘chirib qo‘yishi hamda tizim ikonkalarini qo‘shishi yoki olib tashlashi mumkin."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"holat qatorida ko‘rinishi"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Bu ilovaga asosiy NFC toʻlov xizmati haqidagi axborotni olish imkonini beradi (masalan, qayd qilingan AID identifikatorlari va marshrutning yakuniy manzili)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC modulini boshqarish"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ilova qisqa masofali aloqa (NFC) texnologiyasi yordamida NFC yorliqlari, kartalar va o‘qish moslamalari bilan ma’lumot almashishi mumkin."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element tranzaksiya hodisasi"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Ilovaga Secure Element orqali amalga oshuvchi tranzaksiyalar axborotini olishga ruxsat beradi."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ekran qulfini o‘chirib qo‘yish"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ilovaga ekran qulfini va har qanday parol  yordamidagi xavfsizlik himoyalarini o‘chirishga ruxsat beradi. Masalan, kirish qo‘ng‘irog‘ida telefon ekran qulfini o‘chiradi va qo‘ng‘iroq tugashi bilan qulfni yoqadi."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekran qulfi qiyinligi darajasini talab qilish"</string>
@@ -647,7 +647,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Telefonni chaproq tuting"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Telefonni oʻngroq tuting"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Qurilmaga tik qarang."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Yuz koʻrinmayapti. Telefonni koʻz darajasida tuting."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Yuzingiz koʻrinmayapti. Telefonni koʻz balandligida tuting."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Ortiqcha harakatlanmoqda. Qimirlatmasdan ushlang."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Yuzingizni qaytadan qayd qildiring."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Yuz aniqlanmadi. Qayta urining."</string>
@@ -663,9 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Yuzingiz modeli yaratilmadi. Qayta urining."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Qora koʻzoynak aniqlandi. Yuzingiz toʻliq koʻrinishi kerak."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yuz qismi yopilib qolgan. Yuzingiz toʻliq koʻrinishi kerak."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yuzning bir qismi yopilib qolgan. Yuzingiz toʻliq koʻrinishi kerak."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yuzingiz tasdiqlanmadi. Qurilma ishlamayapti."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Yana yuz bilan ochishga urining"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Yuzga oid axborot saqlanmadi. Avval eskilari tozalansin."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Yuz bilan ochish yoki ekran qulfi"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Yuz tekshiruvi bilan davom eting"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Davom etish uchun yuz tekshiruvi yoki ekran qulfidan foydalaning"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Xatolik yuz berdi. Qayta urining."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Yuz belgisi"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"sinx-sh sozlamalarini o‘qish"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Qaytadan urining"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Barcha funksiya va ma’lumotlar uchun qulfdan chiqaring"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Yuz bilan ochishga urinish miqdoridan oshib ketdi"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM kartasiz"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Planshetda SIM karta topilmadi."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Android TV qurilmasida SIM karta topilmadi."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Telefonda SIM karta topilmadi."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"SIM karta qoʻshish."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM karta topilmadi yoki oʻqilmadi. SIM karta qoʻshish."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Ishlamaydigan SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM karta butunlay faolsizlantirildi.\n Boshqa SIM karta olish uchun simsiz aloqa operatoriga murojaat qiling."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM karta solinmagan"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Planshetingizda SIM karta yo‘q."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV qurilmangizda SIM karta topilmadi."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Telefoningizda SIM karta yo‘q."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM kartani soling."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM karta solinmagan yoki u yaroqsiz. SIM kartani soling."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Foydalanib bo‘lmaydigan SIM karta."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM kartangiz butunlay bloklab qo‘yilgan.\n Yangi SIM karta olish uchun aloqa operatoringiz bilan bog‘laning."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Avvalgi musiqa"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Keyingi musiqa"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"To‘xtatib turish"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Oldinga o‘tkazish"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Faqat favqulodda chaqiruvlar"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Tarmoq qulflangan"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM karta PUK kod bilan qulflangan."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM karta PUK kod bilan qulflangan."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Foydalanuvchi qo‘llanmasiga qarang yoki Abonentlarni qo‘llab-quvvatlash markaziga murojaat qiling."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM karta qulflandi."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM karta qulfdan chiqarilmoqda…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM karta qulflangan."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM karta qulfdan chiqarilmoqda…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urining."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Siz parolni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urining."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Siz PIN-kodni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urining."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Buni keyinroq Sozlamalar &gt; Ilovalar menyusidan o‘zgartirishingiz mumkin"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Doim ruxsat"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Ruxsat berilmasin"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM karta olindi"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Yaroqli SIM karta joylanib, qurilma qayta ishga tushmasa, mobil tarmoq ishlamaydi."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM karta olib tashlandi"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Ishlaydigan SIM kartani qo‘yib, qurilmangizni qaytadan ishga tushirmasangiz, mobayl tarmoq mavjud bo‘lmaydi."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Tayyor"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM karta qoʻshildi"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM karta qo‘shildi"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Uyali tarmoqqa ulanish uchun qurilmangizni o‘chirib-yoqing."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Qayta ishga tushirish"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Mobil xizmatni faollashtirish"</string>
@@ -1483,7 +1479,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Siz ushbu ilovadan ishchi profilingizda foydalanmoqdasiz"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Kiritish uslubi"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Sinx"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Qulayliklar"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Maxsus imkoniyatlar"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Fon rasmi"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Fon rasmini almashtirish"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Bildirishnoma tinglovchisi"</string>
@@ -1613,8 +1609,8 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Planshet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Dok karnaylar"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Tashqi qurilma"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Taglik karnaylar"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Quloq karnaychalari"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Tizim"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM karta hozir o‘chirilgan. Davom etish uchun PUK kodni kiriting. To‘liqroq ma’lumot olish uchun tarmoq operatori bilan bog‘laning."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"So‘ralgan PIN kodni kiriting"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"So‘ralgan PIN kodni tasdiqlang"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM karta qulfdan chiqarilmoqda…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM karta qulfi ochilmoqda…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Xato PIN kodi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4 tadan 8 ta raqamgacha bo‘lgan PIN kodni kiriting."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK kod 8 ta raqam bo‘lishi shart."</string>
@@ -1677,12 +1673,12 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Olib tashlash"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Tovush balandligi tavsiya etilgan darajadan ham yuqori qilinsinmi?\n\nUzoq vaqt davomida baland ovozda tinglash eshitish qobiliyatingizga salbiy ta’sir ko‘rsatishi mumkin."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Tezkor ishga tushirishdan foydalanilsinmi?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Qulayliklar funksiyasidan foydalanish uchun u yoniqligida ikkala tovush tugmasini 3 soniya bosib turing."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Qulayliklar uchun tezkor tugma yoqilsinmi?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Qulayliklarni yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nJoriy funksiyalar:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nTanlangan funksiyalarni Sozlamalar ichidagi Qulayliklar ustiga bosib oʻzgartirishingiz mumkin."</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Maxsus imkoniyatlar funksiyasidan foydalanish uchun u yoniqligida ikkala tovush tugmasini 3 soniya bosib turing."</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Maxsus imkoniyatlar uchun tezkor tugma yoqilsinmi?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Maxsus imkoniyatlarni yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nJoriy funksiyalar:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nTanlangan funksiyalarni Sozlamalar ichidagi Maxsus imkoniyatlar ustiga bosib oʻzgartirishingiz mumkin."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> tezkor tugmasi yoqilsinmi?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> funksiyasini yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nBu tezkor tugmalarni boshqa funksiyaga Sozlamalar ichidagi Qulayliklar orqali tayinlash mumkin."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> funksiyasini yoqish uchun ikkala tovush tugmalarini bir necha soniya bosib turing. Qurilmangiz ishlashida oʻzgarish yuz berishi mumkin.\n\nBu tezkor tugmalarni boshqa funksiyaga Sozlamalar ichidagi Maxsus imkoniyatlar orqali tayinlash mumkin."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Yoqilsin"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Yoqilmasin"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"YONIQ"</string>
@@ -1696,7 +1692,7 @@
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Ruxsat"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rad etish"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Kerakli funksiyani tanlang"</string>
-    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Qulayliklar tugmasi bilan foydalanish uchun funksiyalarni tanlang"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Maxsus imkoniyatlar tugmasi bilan foydalanish uchun funksiyalarni tanlang"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Tovush tugmasi bilan ishga tushiriladigan funksiyalarni tanlang"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> faolsizlantirildi"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Tezkor tugmalarni tahrirlash"</string>
@@ -1710,9 +1706,9 @@
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> yoqildi."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tovush tugmalari bosib turildi. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> faolsizlantirildi."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> xizmatidan foydalanish uchun ikkala ovoz balandligi tugmalarini uzoq bosib turing"</string>
-    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Qulayliklar tugmasi bosilganda ishga tushadigan funksiyani tanlang:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Qulayliklar ishorasi bilan ishga tushadigan funksiyani tanlang (ikkita barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Qulayliklar ishorasi bilan ishga tushadigan funksiyani tanlang (uchta barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
+    <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Maxsus imkoniyatlar tugmasi bosilganda ishga tushadigan funksiyani tanlang:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Maxsus imkoniyatlar ishorasi bilan ishga tushadigan funksiyani tanlang (ikkita barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Maxsus imkoniyatlar ishorasi bilan ishga tushadigan funksiyani tanlang (uchta barmoq bilan ekranning pastidan tepaga surib tortilganda):"</string>
     <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Funksiyalarni almashtirish uchun maxsus imkoniyatlar tugmasini bosib turing."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Funksiyalarni almashtirish uchun ikkita barmoq bilan tepaga suring va ushlab turing."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Funksiyalarni almashtirish uchun uchta barmoq bilan tepaga suring va ushlab turing."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Butun ekranli rejim"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Chiqish uchun tepadan pastga torting."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Yaxshiroq koʻrish uchun kamerani buring"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Yaxshiroq koʻrish uchun ajratilgan ekran rejimidan chiqing"</string>
     <string name="done_label" msgid="7283767013231718521">"Tayyor"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Doiradan soatni tanlang"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Doiradan daqiqani tanlang"</string>
@@ -1989,7 +1983,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Yangiliklar va jurnallar"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Xaritalar va navigatsiya"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Ish va unumdorlik"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Qulayliklar"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Maxsus imkoniyatlar"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Qurilma xotirasi"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB orqali nosozliklarni aniqlash"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"soat"</string>
@@ -2050,8 +2044,8 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"O‘CHIRIB TASHLASH"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BARIBIR OCHILSIN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zararli ilova aniqlandi"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> uchun qurilmadagi barcha jurnallarga kirish ruxsati berilsinmi?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Bir martalik ruxsat berish"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ilovasining qurilmadagi barcha jurnallarga kirishiga ruxsat berilsinmi?"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Bir matalik foydalanishga ruxsat berish"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Rad etish"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi."</string>
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi.\n\nBatafsil: g.co/android/devicelogs."</string>
@@ -2120,7 +2114,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Bu ilovaga yozib olish ruxsati berilmagan, lekin shu USB orqali ovozlarni yozib olishi mumkin."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Bosh sahifa"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Orqaga"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Oxirgi ilovalar"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Yaqinda ishlatilgan ilovalar"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Bildirishnomalar"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Tezkor sozlamalar"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Quvvat muloqot oynasi"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> qurilmasidan planshetning kamerasiga kirish imkonsiz"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Bu kontent striming vaqtida ochilmaydi. Telefon orqali urininb koʻring."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Tizim standarti"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"SIM KARTA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

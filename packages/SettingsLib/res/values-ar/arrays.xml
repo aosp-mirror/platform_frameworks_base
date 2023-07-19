@@ -60,19 +60,8 @@
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"غير مفعّل"</item>
-    <item msgid="6336372935919715515">"تمّ تفعيل الفلترة"</item>
+    <item msgid="6336372935919715515">"تمّ تفعيل التصفية"</item>
     <item msgid="2779123106632690576">"مفعّل"</item>
-  </string-array>
-  <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="195768089203590086">"‏ترك رؤوس ACL فقط"</item>
-    <item msgid="2776218217644557831">"‏فلترة حُزم وسائط A2DP"</item>
-    <item msgid="8163235976612675092">"‏فلترة قناة بروتوكول RFCOMM"</item>
-  </string-array>
-  <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="3961868665260627524">"إيقاف"</item>
-    <item msgid="2505973306504851132">"الملء بسلسلة من الأحرف"</item>
-    <item msgid="5883011000629613855">"ترك الرأس فقط"</item>
-    <item msgid="1051534112762023603">"الإزالة بالكامل"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"‏AVRCP 1.5 (تلقائي)"</item>
@@ -283,11 +272,5 @@
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
   <string-array name="avatar_image_descriptions">
-  </string-array>
-  <string-array name="entries_font_size">
-    <item msgid="9181293769180886675">"صغير"</item>
-    <item msgid="1484561228522634915">"تلقائي"</item>
-    <item msgid="4014311587094503943">"كبير"</item>
-    <item msgid="2904569270831156685">"أكبر حجمًا"</item>
   </string-array>
 </resources>

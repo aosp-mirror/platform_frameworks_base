@@ -58,6 +58,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.AndroidException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -170,6 +171,18 @@ public class UserManager {
      */
     @SystemApi
     public static final String USER_TYPE_SYSTEM_HEADLESS = "android.os.usertype.system.HEADLESS";
+
+    /**
+     * User type representing a parallel space without the ability of sharing media.
+     * @hide
+     */
+    public static final String USER_TYPE_PARALLEL_DEFAULT = "android.os.usertype.parallel.DEFAULT";
+
+    /**
+     * User type representing a parallel space with the ability of sharing media.
+     * @hide
+     */
+    public static final String USER_TYPE_PARALLEL_SHARE = "android.os.usertype.parallel.SHARE";
 
     /**
      * Flag passed to {@link #requestQuietModeEnabled} to request disabling quiet mode only if
@@ -594,11 +607,8 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from transferring files over USB.
      *
-     * <p>This restriction can only be set by a <a href="https://developers.google.com/android/work/terminology#device_owner_do">
-     * device owner</a> or a <a href="https://developers.google.com/android/work/terminology#profile_owner_po">
-     * profile owner</a> on the primary user's profile or a profile owner of an organization-owned
-     * <a href="https://developers.google.com/android/work/terminology#managed_profile">
-     * managed profile</a> on the parent profile.
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
      * When it is set by a device owner, it applies globally. When it is set by a profile owner
      * on the primary user or by a profile owner of an organization-owned managed profile on
      * the parent profile, it disables the primary user from transferring files over USB. No other
@@ -1487,46 +1497,6 @@ public class UserManager {
     public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
 
     /**
-     * Specifies if a user is not allowed to use 2g networks.
-     *
-     * <p>This restriction can only be set by a device owner or a profile owner of an
-     * organization-owned managed profile on the parent profile.
-     * In all cases, the setting applies globally on the device and will prevent the device from
-     * scanning for or connecting to 2g networks, except in the case of an emergency.
-     *
-     * <p>The default value is <code>false</code>.
-     *
-     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
-     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
-     * @see #getUserRestrictions()
-     */
-    public static final String DISALLOW_CELLULAR_2G = "no_cellular_2g";
-
-    /**
-     * This user restriction specifies if Ultra-wideband is disallowed on the device. If
-     * Ultra-wideband is disallowed it cannot be turned on via Settings.
-     *
-     * <p>This restriction can only be set by a device owner or a profile owner of an
-     * organization-owned managed profile on the parent profile.
-     * In both cases, the restriction applies globally on the device and will turn off the
-     * ultra-wideband radio if it's currently on and prevent the radio from being turned on in
-     * the future.
-     *
-     * <p>
-     * Ultra-wideband (UWB) is a radio technology that can use a very low energy level
-     * for short-range, high-bandwidth communications over a large portion of the radio spectrum.
-     *
-     * <p>Default is <code>false</code>.
-     *
-     * <p>Key for user restrictions.
-     * <p>Type: Boolean
-     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
-     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
-     * @see #getUserRestrictions()
-     */
-    public static final String DISALLOW_ULTRA_WIDEBAND_RADIO = "no_ultra_wideband_radio";
-
-    /**
      * List of key values that can be passed into the various user restriction related methods
      * in {@link UserManager} & {@link DevicePolicyManager}.
      * Note: This is slightly different from the real set of user restrictions listed in {@link
@@ -1607,8 +1577,6 @@ public class UserManager {
             DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI,
             DISALLOW_WIFI_DIRECT,
             DISALLOW_ADD_WIFI_CONFIG,
-            DISALLOW_CELLULAR_2G,
-            DISALLOW_ULTRA_WIDEBAND_RADIO,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}
@@ -1714,7 +1682,7 @@ public class UserManager {
     public static final int SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED = 1 << 2;
 
     /**
-     * Result returned in {@link #getUserSwitchability()} indicating user switchability.
+     * Result returned in {@link #getUserSwitchability()} indicating user swichability.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -2081,16 +2049,25 @@ public class UserManager {
      * @hide
      */
     @Deprecated
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @RequiresPermission(allOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.MANAGE_USERS}, // Can be INTERACT_ACROSS_USERS instead.
+            conditional = true)
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @UserHandleAware
     public boolean canSwitchUsers() {
-        try {
-            return mService.getUserSwitchability(mUserId) == SWITCHABILITY_STATUS_OK;
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+        boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
+        boolean isSystemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
+        boolean inCall = false;
+        TelephonyManager telephonyManager = mContext.getSystemService(TelephonyManager.class);
+        if (telephonyManager != null) {
+            inCall = telephonyManager.getCallState() != TelephonyManager.CALL_STATE_IDLE;
         }
+        boolean isUserSwitchDisallowed = hasUserRestrictionForUser(DISALLOW_USER_SWITCH, mUserId);
+        return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall
+                && !isUserSwitchDisallowed;
     }
 
     /**
@@ -2124,14 +2101,34 @@ public class UserManager {
      * @return A {@link UserSwitchabilityResult} flag indicating if the user is switchable.
      * @hide
      */
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @RequiresPermission(allOf = {Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public @UserSwitchabilityResult int getUserSwitchability(UserHandle userHandle) {
-        try {
-            return mService.getUserSwitchability(userHandle.getIdentifier());
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+        final TelephonyManager tm =
+                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+
+        int flags = SWITCHABILITY_STATUS_OK;
+        if (tm.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
+            flags |= SWITCHABILITY_STATUS_USER_IN_CALL;
         }
+        if (hasUserRestrictionForUser(DISALLOW_USER_SWITCH, userHandle)) {
+            flags |= SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED;
+        }
+
+        // System User is always unlocked in Headless System User Mode, so ignore this flag
+        if (!isHeadlessSystemUserMode()) {
+            final boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
+                    mContext.getContentResolver(),
+                    Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
+            final boolean systemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
+
+            if (!allowUserSwitchingWhenSystemUserLocked && !systemUserUnlocked) {
+                flags |= SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED;
+            }
+        }
+
+        return flags;
     }
 
     /**
@@ -4099,7 +4096,7 @@ public class UserManager {
         int aliveUserCount = 0;
         for (int i = 0; i < totalUserCount; i++) {
             UserInfo user = users.get(i);
-            if (!user.isGuest()) {
+            if (!user.isGuest() && !user.isParallel()) {
                 aliveUserCount++;
             }
         }
@@ -4618,10 +4615,6 @@ public class UserManager {
      * @hide
      */
     public boolean hasBadge(@UserIdInt int userId) {
-        if (!isProfile(userId)) {
-            // Since currently only profiles actually have badges, we can do this optimization.
-            return false;
-        }
         try {
             return mService.hasBadge(userId);
         } catch (RemoteException re) {

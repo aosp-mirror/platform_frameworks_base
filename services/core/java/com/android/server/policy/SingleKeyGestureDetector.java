@@ -21,6 +21,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.ViewConfiguration;
@@ -55,6 +57,10 @@ public final class SingleKeyGestureDetector {
     private volatile boolean mHandledByLongPress = false;
     private final Handler mHandler;
     private long mLastDownTime = 0;
+
+    static final int TORCH_DOUBLE_TAP_DELAY = 170;
+
+    private Context mContext;
 
     /** Supported gesture flags */
     public static final int KEY_LONGPRESS = 1 << 1;
@@ -171,7 +177,7 @@ public final class SingleKeyGestureDetector {
     }
 
     static SingleKeyGestureDetector get(Context context) {
-        SingleKeyGestureDetector detector = new SingleKeyGestureDetector();
+        SingleKeyGestureDetector detector = new SingleKeyGestureDetector(context);
         sDefaultLongPressTimeout = context.getResources().getInteger(
                 com.android.internal.R.integer.config_globalActionsKeyTimeout);
         sDefaultVeryLongPressTimeout = context.getResources().getInteger(
@@ -179,7 +185,8 @@ public final class SingleKeyGestureDetector {
         return detector;
     }
 
-    private SingleKeyGestureDetector() {
+    public SingleKeyGestureDetector(Context context) {
+        mContext = context;
         mHandler = new KeyHandler();
     }
 
@@ -324,7 +331,11 @@ public final class SingleKeyGestureDetector {
                 Message msg = mHandler.obtainMessage(MSG_KEY_DELAYED_PRESS, mActiveRule.mKeyCode,
                         mKeyPressCounter, mActiveRule);
                 msg.setAsynchronous(true);
-                mHandler.sendMessageDelayed(msg, MULTI_PRESS_TIMEOUT);
+                mHandler.sendMessageDelayed(msg, Settings.System.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.System.TORCH_POWER_BUTTON_GESTURE,
+                        0, UserHandle.USER_CURRENT) == 1 ? TORCH_DOUBLE_TAP_DELAY
+                        : MULTI_PRESS_TIMEOUT);
             }
             return true;
         }

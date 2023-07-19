@@ -27,7 +27,10 @@ import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.navigationbar.buttons.ButtonInterface;
 
@@ -38,7 +41,34 @@ public class NavigationHandle extends View implements ButtonInterface {
     private @ColorInt final int mDarkColor;
     protected final float mRadius;
     protected final float mBottom;
+    private boolean mIsDreaming = false;
+    private boolean mIsKeyguard = false;
     private boolean mRequiresInvalidate;
+
+    private KeyguardUpdateMonitor mUpdateMonitor;
+    private KeyguardUpdateMonitorCallback mMonitorCallback = new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onDreamingStateChanged(boolean dreaming) {
+            mIsDreaming = dreaming;
+            if (dreaming) {
+                setVisibility(View.GONE);
+            } else if (!mIsKeyguard) {
+                setVisibility(View.VISIBLE);
+                if (mRequiresInvalidate) invalidate();
+            }
+        }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            mIsKeyguard = showing;
+            if (showing) {
+                setVisibility(View.GONE);
+            } else if (!mIsDreaming) {
+                setVisibility(View.VISIBLE);
+                if (mRequiresInvalidate) invalidate();
+            }
+        }
+    };
 
     public NavigationHandle(Context context) {
         this(context, null);
@@ -58,6 +88,8 @@ public class NavigationHandle extends View implements ButtonInterface {
         mDarkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.homeHandleColor);
         mPaint.setAntiAlias(true);
         setFocusable(false);
+
+        mUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
     }
 
     @Override
@@ -109,5 +141,17 @@ public class NavigationHandle extends View implements ButtonInterface {
 
     @Override
     public void setDelayTouchFeedback(boolean shouldDelay) {
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        mUpdateMonitor.registerCallback(mMonitorCallback);
+        super.onAttachedToWindow();
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        mUpdateMonitor.removeCallback(mMonitorCallback);
+        super.onDetachedFromWindow();
     }
 }

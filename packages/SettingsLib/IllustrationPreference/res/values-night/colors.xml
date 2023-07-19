@@ -16,5 +16,5 @@
   -->
 
 <resources>
-    <color name="settingslib_protection_color">@android:color/black</color>
+
 </resources>

@@ -23,7 +23,7 @@
             <size
                 android:height="@dimen/settingslib_switch_thumb_size"
                 android:width="@dimen/settingslib_switch_thumb_size"/>
-            <solid android:color="@color/settingslib_state_on_color"/>
+            <solid android:color="@color/settingslib_thumb_on_color"/>
         </shape>
     </item>
 </layer-list>

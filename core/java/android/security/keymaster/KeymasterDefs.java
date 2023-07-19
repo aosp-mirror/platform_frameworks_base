@@ -65,12 +65,9 @@ public final class KeymasterDefs {
     public static final int KM_TAG_PADDING = Tag.PADDING; // KM_ENUM_REP | 6;
     public static final int KM_TAG_CALLER_NONCE = Tag.CALLER_NONCE; // KM_BOOL | 7;
     public static final int KM_TAG_MIN_MAC_LENGTH = Tag.MIN_MAC_LENGTH; // KM_UINT | 8;
-    public static final int KM_TAG_EC_CURVE = Tag.EC_CURVE; // KM_ENUM | 10;
 
     public static final int KM_TAG_RSA_PUBLIC_EXPONENT = Tag.RSA_PUBLIC_EXPONENT; // KM_ULONG | 200;
     public static final int KM_TAG_INCLUDE_UNIQUE_ID = Tag.INCLUDE_UNIQUE_ID; // KM_BOOL | 202;
-    public static final int KM_TAG_RSA_OAEP_MGF_DIGEST = Tag.RSA_OAEP_MGF_DIGEST;
-            // KM_ENUM_REP | 203;
 
     public static final int KM_TAG_ACTIVE_DATETIME = Tag.ACTIVE_DATETIME; // KM_DATE | 400;
     public static final int KM_TAG_ORIGINATION_EXPIRE_DATETIME =
@@ -126,8 +123,6 @@ public final class KeymasterDefs {
             Tag.BOOT_PATCHLEVEL; // KM_UINT | 719;
     public static final int KM_TAG_DEVICE_UNIQUE_ATTESTATION =
             Tag.DEVICE_UNIQUE_ATTESTATION; // KM_BOOL | 720;
-    public static final int KM_TAG_ATTESTATION_ID_SECOND_IMEI =
-            Tag.ATTESTATION_ID_SECOND_IMEI; // KM_BYTES | 723;
 
     public static final int KM_TAG_NONCE = Tag.NONCE; // KM_BYTES | 1001;
     public static final int KM_TAG_MAC_LENGTH = Tag.MAC_LENGTH; // KM_UINT | 1003;
@@ -337,22 +332,8 @@ public final class KeymasterDefs {
             ErrorCode.ROLLBACK_RESISTANCE_UNAVAILABLE; // -67;
     public static final int KM_ERROR_HARDWARE_TYPE_UNAVAILABLE =
             ErrorCode.HARDWARE_TYPE_UNAVAILABLE; // -68;
-    public static final int KM_ERROR_PROOF_OF_PRESENCE_REQUIRED =
-            ErrorCode.PROOF_OF_PRESENCE_REQUIRED; // -69;
-    public static final int KM_ERROR_CONCURRENT_PROOF_OF_PRESENCE_REQUESTED =
-            ErrorCode.CONCURRENT_PROOF_OF_PRESENCE_REQUESTED; // -70;
-    public static final int KM_ERROR_NO_USER_CONFIRMATION =
-            ErrorCode.NO_USER_CONFIRMATION; // -71;
     public static final int KM_ERROR_DEVICE_LOCKED =
             ErrorCode.DEVICE_LOCKED; // -72;
-    public static final int KM_ERROR_EARLY_BOOT_ENDED =
-            ErrorCode.EARLY_BOOT_ENDED; // -73;
-    public static final int KM_ERROR_ATTESTATION_KEYS_NOT_PROVISIONED =
-            ErrorCode.ATTESTATION_KEYS_NOT_PROVISIONED; // -74;
-    public static final int KM_ERROR_ATTESTATION_IDS_NOT_PROVISIONED =
-            ErrorCode.ATTESTATION_IDS_NOT_PROVISIONED; // -75;
-    public static final int KM_ERROR_INVALID_OPERATION =
-            ErrorCode.INVALID_OPERATION; // -76;
     public static final int KM_ERROR_STORAGE_KEY_UNSUPPORTED =
             ErrorCode.STORAGE_KEY_UNSUPPORTED; // -77,
     public static final int KM_ERROR_INCOMPATIBLE_MGF_DIGEST =
@@ -362,13 +343,7 @@ public final class KeymasterDefs {
     public static final int KM_ERROR_MISSING_NOT_BEFORE =
             ErrorCode.MISSING_NOT_BEFORE; // -80;
     public static final int KM_ERROR_MISSING_NOT_AFTER =
-            ErrorCode.MISSING_NOT_AFTER; // -81;
-    public static final int KM_ERROR_MISSING_ISSUER_SUBJECT =
-            ErrorCode.MISSING_ISSUER_SUBJECT; // -82;
-    public static final int KM_ERROR_INVALID_ISSUER_SUBJECT =
-            ErrorCode.INVALID_ISSUER_SUBJECT; // -83;
-    public static final int KM_ERROR_BOOT_LEVEL_EXCEEDED =
-            ErrorCode.BOOT_LEVEL_EXCEEDED; // -84;
+            ErrorCode.MISSING_NOT_AFTER; // -80;
     public static final int KM_ERROR_HARDWARE_NOT_YET_AVAILABLE =
             ErrorCode.HARDWARE_NOT_YET_AVAILABLE; // -85
     public static final int KM_ERROR_UNIMPLEMENTED =

@@ -43,14 +43,13 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,7 +65,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     @Mock
     private RecordingController mController;
     @Mock
-    private QSHost mHost;
+    private QSTileHost mHost;
     @Mock
     private KeyguardDismissUtil mKeyguardDismissUtil;
     @Mock
@@ -112,12 +111,6 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         );
 
         mTile.initialize();
-        mTestableLooper.processAllMessages();
-    }
-
-    @After
-    public void tearDown() {
-        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 

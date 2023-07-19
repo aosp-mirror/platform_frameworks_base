@@ -107,17 +107,6 @@ constructor(@MediaTimeoutListenerLog private val buffer: LogBuffer) {
                 str1 = key
                 str2 = reason
             },
-            { "timeout cancelled for $str1, reason: $str2" }
-        )
-
-    fun logRecommendationTimeoutScheduled(key: String, timeout: Long) =
-        buffer.log(
-            TAG,
-            LogLevel.VERBOSE,
-            {
-                str1 = key
-                long1 = timeout
-            },
-            { "recommendation timeout scheduled for $str1 in $long1 ms" }
+            { "media timeout cancelled for $str1, reason: $str2" }
         )
 }

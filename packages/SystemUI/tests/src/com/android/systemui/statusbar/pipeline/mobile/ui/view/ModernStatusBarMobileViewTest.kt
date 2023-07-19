@@ -29,15 +29,12 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
-import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
-import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
-import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.QsMobileIconViewModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -61,48 +58,35 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
-    @Mock private lateinit var viewLogger: MobileViewLogger
+    @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var constants: ConnectivityConstants
-    private lateinit var interactor: FakeMobileIconInteractor
-    private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
-    private lateinit var airplaneModeInteractor: AirplaneModeInteractor
 
-    private lateinit var viewModelCommon: MobileIconViewModel
     private lateinit var viewModel: LocationBasedMobileViewModel
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        // This line was necessary to make the onDarkChanged and setStaticDrawableColor tests pass.
-        // But, it maybe *shouldn't* be necessary.
-        whenever(constants.hasDataCapabilities).thenReturn(true)
-
         testableLooper = TestableLooper.get(this)
 
-        airplaneModeRepository = FakeAirplaneModeRepository()
-        airplaneModeInteractor =
-            AirplaneModeInteractor(
-                airplaneModeRepository,
-                FakeConnectivityRepository(),
-            )
+        val interactor = FakeMobileIconInteractor(tableLogBuffer)
 
-        interactor = FakeMobileIconInteractor(tableLogBuffer)
-        createViewModel()
+        val viewModelCommon =
+            MobileIconViewModel(
+                subscriptionId = 1,
+                interactor,
+                logger,
+                constants,
+                testScope.backgroundScope,
+            )
+        viewModel = QsMobileIconViewModel(viewModelCommon, statusBarPipelineFlags)
     }
 
     // Note: The following tests are more like integration tests, since they stand up a full
-    // [MobileIconViewModel] and test the interactions between the view, view-binder, and
-    // view-model.
+    // [WifiViewModel] and test the interactions between the view, view-binder, and view-model.
 
     @Test
     fun setVisibleState_icon_iconShownDotHidden() {
-        val view =
-            ModernStatusBarMobileView.constructAndBind(
-                context,
-                viewLogger,
-                SLOT_NAME,
-                viewModel,
-            )
+        val view = ModernStatusBarMobileView.constructAndBind(context, SLOT_NAME, viewModel)
 
         view.setVisibleState(StatusBarIconView.STATE_ICON, /* animate= */ false)
 
@@ -117,13 +101,8 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
 
     @Test
     fun setVisibleState_dot_iconHiddenDotShown() {
-        val view =
-            ModernStatusBarMobileView.constructAndBind(
-                context,
-                viewLogger,
-                SLOT_NAME,
-                viewModel,
-            )
+        val view = ModernStatusBarMobileView.constructAndBind(context, SLOT_NAME, viewModel)
+
         view.setVisibleState(StatusBarIconView.STATE_DOT, /* animate= */ false)
 
         ViewUtils.attachView(view)
@@ -137,13 +116,8 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
 
     @Test
     fun setVisibleState_hidden_iconAndDotHidden() {
-        val view =
-            ModernStatusBarMobileView.constructAndBind(
-                context,
-                viewLogger,
-                SLOT_NAME,
-                viewModel,
-            )
+        val view = ModernStatusBarMobileView.constructAndBind(context, SLOT_NAME, viewModel)
+
         view.setVisibleState(StatusBarIconView.STATE_HIDDEN, /* animate= */ false)
 
         ViewUtils.attachView(view)
@@ -156,79 +130,13 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun isIconVisible_noData_outputsFalse() {
-        whenever(constants.hasDataCapabilities).thenReturn(false)
-        createViewModel()
+    fun isIconVisible_alwaysTrue() {
+        val view = ModernStatusBarMobileView.constructAndBind(context, SLOT_NAME, viewModel)
 
-        val view =
-            ModernStatusBarMobileView.constructAndBind(
-                context,
-                viewLogger,
-                SLOT_NAME,
-                viewModel,
-            )
-        ViewUtils.attachView(view)
-        testableLooper.processAllMessages()
-
-        assertThat(view.isIconVisible).isFalse()
-
-        ViewUtils.detachView(view)
-    }
-
-    @Test
-    fun isIconVisible_hasData_outputsTrue() {
-        whenever(constants.hasDataCapabilities).thenReturn(true)
-        createViewModel()
-
-        val view =
-            ModernStatusBarMobileView.constructAndBind(
-                context,
-                viewLogger,
-                SLOT_NAME,
-                viewModel,
-            )
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
 
         assertThat(view.isIconVisible).isTrue()
-
-        ViewUtils.detachView(view)
-    }
-
-    @Test
-    fun isIconVisible_notAirplaneMode_outputsTrue() {
-        airplaneModeRepository.setIsAirplaneMode(false)
-
-        val view =
-            ModernStatusBarMobileView.constructAndBind(
-                context,
-                viewLogger,
-                SLOT_NAME,
-                viewModel,
-            )
-        ViewUtils.attachView(view)
-        testableLooper.processAllMessages()
-
-        assertThat(view.isIconVisible).isTrue()
-
-        ViewUtils.detachView(view)
-    }
-
-    @Test
-    fun isIconVisible_airplaneMode_outputsTrue() {
-        airplaneModeRepository.setIsAirplaneMode(true)
-
-        val view =
-            ModernStatusBarMobileView.constructAndBind(
-                context,
-                viewLogger,
-                SLOT_NAME,
-                viewModel,
-            )
-        ViewUtils.attachView(view)
-        testableLooper.processAllMessages()
-
-        assertThat(view.isIconVisible).isFalse()
 
         ViewUtils.detachView(view)
     }
@@ -236,13 +144,7 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
     @Test
     fun onDarkChanged_iconHasNewColor() {
         whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
-        val view =
-            ModernStatusBarMobileView.constructAndBind(
-                context,
-                viewLogger,
-                SLOT_NAME,
-                viewModel,
-            )
+        val view = ModernStatusBarMobileView.constructAndBind(context, SLOT_NAME, viewModel)
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
 
@@ -258,13 +160,7 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
     @Test
     fun setStaticDrawableColor_iconHasNewColor() {
         whenever(statusBarPipelineFlags.useDebugColoring()).thenReturn(false)
-        val view =
-            ModernStatusBarMobileView.constructAndBind(
-                context,
-                viewLogger,
-                SLOT_NAME,
-                viewModel,
-            )
+        val view = ModernStatusBarMobileView.constructAndBind(context, SLOT_NAME, viewModel)
         ViewUtils.attachView(view)
         testableLooper.processAllMessages()
 
@@ -287,18 +183,6 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
 
     private fun View.getDotView(): View {
         return this.requireViewById(R.id.status_bar_dot)
-    }
-
-    private fun createViewModel() {
-        viewModelCommon =
-            MobileIconViewModel(
-                subscriptionId = 1,
-                interactor,
-                airplaneModeInteractor,
-                constants,
-                testScope.backgroundScope,
-            )
-        viewModel = QsMobileIconViewModel(viewModelCommon, statusBarPipelineFlags)
     }
 }
 

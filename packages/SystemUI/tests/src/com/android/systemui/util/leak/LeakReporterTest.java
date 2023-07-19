@@ -22,17 +22,13 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
 import android.app.NotificationManager;
-import android.os.UserHandle;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.settings.UserTracker;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +48,6 @@ public class LeakReporterTest extends SysuiTestCase {
     private File mLeakDir;
     private File mLeakDump;
     private File mLeakHprof;
-    private UserTracker mUserTracker;
     private NotificationManager mNotificationManager;
 
     @Before
@@ -61,9 +56,6 @@ public class LeakReporterTest extends SysuiTestCase {
         mLeakDump = new File(mLeakDir, LeakReporter.LEAK_DUMP);
         mLeakHprof = new File(mLeakDir, LeakReporter.LEAK_HPROF);
 
-        mUserTracker = mock(UserTracker.class);
-        when(mUserTracker.getUserHandle()).thenReturn(
-                UserHandle.of(ActivityManager.getCurrentUser()));
         mNotificationManager = mock(NotificationManager.class);
         mContext.addMockSystemService(NotificationManager.class, mNotificationManager);
 
@@ -73,7 +65,7 @@ public class LeakReporterTest extends SysuiTestCase {
             return null;
         }).when(mLeakDetector).dump(any(), any());
 
-        mLeakReporter = new LeakReporter(mContext, mUserTracker, mLeakDetector, "test@example.com");
+        mLeakReporter = new LeakReporter(mContext, mLeakDetector, "test@example.com");
     }
 
     @After

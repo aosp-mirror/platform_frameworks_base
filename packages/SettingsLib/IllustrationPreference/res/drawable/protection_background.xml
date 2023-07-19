@@ -18,7 +18,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/settingslib_protection_color"/>
+            <solid android:color="@android:color/transparent"/>
             <corners android:radius="28dp"/>
             <size android:width="@dimen/settingslib_illustration_width"
                   android:height="@dimen/settingslib_illustration_height"/>

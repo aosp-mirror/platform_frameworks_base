@@ -88,8 +88,8 @@ public final class DisconnectCause implements Parcelable {
     public static final String REASON_WIFI_ON_BUT_WFC_OFF = "REASON_WIFI_ON_BUT_WFC_OFF";
 
     /**
-     * Reason code (returned via {@link #getReason()}), which indicates that the call was
-     * disconnected because IMS access is blocked.
+     * Reason code (returned via {@link #getReason()}), which indicates that the video telephony
+     * call was disconnected because IMS access is blocked.
      */
     public static final String REASON_IMS_ACCESS_BLOCKED = "REASON_IMS_ACCESS_BLOCKED";
 

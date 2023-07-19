@@ -26,10 +26,6 @@ class TestUnfoldTransitionProvider : UnfoldTransitionProgressProvider, Transitio
         listeners.forEach { it.onTransitionFinished() }
     }
 
-    override fun onTransitionFinishing() {
-        listeners.forEach { it.onTransitionFinishing() }
-    }
-
     override fun onTransitionProgress(progress: Float) {
         listeners.forEach { it.onTransitionProgress(progress) }
     }

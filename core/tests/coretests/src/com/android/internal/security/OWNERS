@@ -1,3 +1,0 @@
-# Bug component: 36824
-
-per-file VerityUtilsTest.java = file:platform/system/security:/fsverity/OWNERS

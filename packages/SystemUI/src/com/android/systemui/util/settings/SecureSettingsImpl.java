@@ -20,28 +20,19 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
-import com.android.systemui.settings.UserTracker;
-
 import javax.inject.Inject;
 
 class SecureSettingsImpl implements SecureSettings {
     private final ContentResolver mContentResolver;
-    private final UserTracker mUserTracker;
 
     @Inject
-    SecureSettingsImpl(ContentResolver contentResolver, UserTracker userTracker) {
+    SecureSettingsImpl(ContentResolver contentResolver) {
         mContentResolver = contentResolver;
-        mUserTracker = userTracker;
     }
 
     @Override
     public ContentResolver getContentResolver() {
         return mContentResolver;
-    }
-
-    @Override
-    public UserTracker getUserTracker() {
-        return mUserTracker;
     }
 
     @Override
@@ -51,8 +42,7 @@ class SecureSettingsImpl implements SecureSettings {
 
     @Override
     public String getStringForUser(String name, int userHandle) {
-        return Settings.Secure.getStringForUser(mContentResolver, name,
-                getRealUserHandle(userHandle));
+        return Settings.Secure.getStringForUser(mContentResolver, name, userHandle);
     }
 
     @Override
@@ -62,16 +52,14 @@ class SecureSettingsImpl implements SecureSettings {
 
     @Override
     public boolean putStringForUser(String name, String value, int userHandle) {
-        return Settings.Secure.putStringForUser(mContentResolver, name, value,
-                getRealUserHandle(userHandle));
+        return Settings.Secure.putStringForUser(mContentResolver, name, value, userHandle);
     }
 
     @Override
     public boolean putStringForUser(String name, String value, String tag, boolean makeDefault,
             int userHandle, boolean overrideableByRestore) {
         return Settings.Secure.putStringForUser(
-                mContentResolver, name, value, tag, makeDefault, getRealUserHandle(userHandle),
-                overrideableByRestore);
+                mContentResolver, name, value, tag, makeDefault, userHandle, overrideableByRestore);
     }
 
     @Override

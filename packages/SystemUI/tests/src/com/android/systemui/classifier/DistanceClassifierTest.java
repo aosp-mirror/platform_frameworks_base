@@ -94,9 +94,7 @@ public class DistanceClassifierTest extends ClassifierTest {
         mClassifier.onTouchEvent(appendMoveEvent(1, 16, 3));
         mClassifier.onTouchEvent(appendMoveEvent(1, 17, 300));
         mClassifier.onTouchEvent(appendMoveEvent(1, 18, 301));
-        mClassifier.onTouchEvent(appendMoveEvent(1, 19, 501));
-        mClassifier.onTouchEvent(appendUpEvent(1, 19, 501)); //event will be dropped
-
+        mClassifier.onTouchEvent(appendUpEvent(1, 19, 501));
         assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isTrue();
     }
 

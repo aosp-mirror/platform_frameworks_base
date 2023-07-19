@@ -45,7 +45,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -105,9 +104,7 @@ class ControlsSettingsDialogManagerImplTest : SysuiTestCase() {
                 controlsSettingsRepository,
                 userTracker,
                 activityStarter
-            ) { context, _ ->
-                TestableAlertDialog(context).also { dialog = it }
-            }
+            ) { context, _ -> TestableAlertDialog(context).also { dialog = it } }
     }
 
     @After
@@ -224,36 +221,6 @@ class ControlsSettingsDialogManagerImplTest : SysuiTestCase() {
 
     @Test
     fun dialogPositiveButtonCallsOnComplete() {
-        sharedPreferences.putAttempts(0)
-        secureSettings.putBool(SETTING_SHOW, true)
-        secureSettings.putBool(SETTING_ACTION, false)
-
-        underTest.maybeShowDialog(context, completedRunnable)
-        clickButton(DialogInterface.BUTTON_POSITIVE)
-
-        verify(completedRunnable).invoke()
-    }
-
-    @Test
-    fun dialogPositiveButtonWhenCalledOnCompleteSettingIsTrue() {
-        sharedPreferences.putAttempts(0)
-        secureSettings.putBool(SETTING_SHOW, true)
-        secureSettings.putBool(SETTING_ACTION, false)
-
-        doAnswer { assertThat(secureSettings.getBool(SETTING_ACTION, false)).isTrue() }
-            .`when`(completedRunnable)
-            .invoke()
-
-        underTest.maybeShowDialog(context, completedRunnable)
-        clickButton(DialogInterface.BUTTON_POSITIVE)
-
-        verify(completedRunnable).invoke()
-    }
-
-    @Test
-    fun dialogPositiveCancelKeyguardStillCallsOnComplete() {
-        `when`(activityStarter.dismissKeyguardThenExecute(any(), nullable(), anyBoolean()))
-            .thenAnswer { (it.arguments[1] as Runnable).run() }
         sharedPreferences.putAttempts(0)
         secureSettings.putBool(SETTING_SHOW, true)
         secureSettings.putBool(SETTING_ACTION, false)

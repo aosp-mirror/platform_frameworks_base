@@ -314,14 +314,17 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
      */
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (obj instanceof ComponentName) {
-            ComponentName other = (ComponentName) obj;
-            // mPackage and mClass can never be null.
-            return mPackage.equals(other.mPackage)
-                    && mClass.equals(other.mClass);
-        } else {
-            return false;
+        try {
+            if (obj != null) {
+                ComponentName other = (ComponentName)obj;
+                // Note: no null checks, because mPackage and mClass can
+                // never be null.
+                return mPackage.equals(other.mPackage)
+                        && mClass.equals(other.mClass);
+            }
+        } catch (ClassCastException e) {
         }
+        return false;
     }
 
     @Override

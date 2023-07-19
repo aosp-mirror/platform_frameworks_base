@@ -42,6 +42,19 @@
 -keep,allowoptimization,allowaccessmodification class * extends android.os.IInterface
 -keep,allowoptimization,allowaccessmodification class * extends android.os.IHwInterface
 
+# Global entities normally kept through explicit Manifest entries
+# TODO(b/210510433): Revisit and consider generating from frameworks/base/core/res/AndroidManifest.xml,
+# by including that manifest with the library rule that triggers optimization.
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.Activity
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.Service
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.app.backup.BackupAgent
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.content.BroadcastReceiver
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.content.ContentProvider
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.preference.Preference
+-keep,allowoptimization,allowaccessmodification class com.android.server.** extends android.view.View {
+  public <init>(...);
+}
+
 # Various classes subclassed in or referenced via JNI in ethernet-service
 -keep public class android.net.** { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.net.module.util.* { *; }
@@ -59,13 +72,6 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.wm.** implements com.android.server.wm.DisplayAreaPolicy$Provider
 
 # JNI keep rules
-# The global keep rule for native methods allows stripping of such methods if they're unreferenced
-# in Java. However, because system_server explicitly registers these methods from native code,
-# stripping them in Java can cause runtime issues. As such, conservatively keep all such methods in
-# system_server subpackages as long as the containing class is also kept or referenced.
--keepclassmembers class com.android.server.** {
-  native <methods>;
-}
 # TODO(b/210510433): Revisit and fix with @Keep, or consider auto-generating from
 # frameworks/base/services/core/jni/onload.cpp.
 -keep,allowoptimization,allowaccessmodification class com.android.server.broadcastradio.hal1.BroadcastRadioService { *; }
@@ -112,7 +118,3 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.usage.StorageStatsManagerLocal { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.internal.util.** { *; }
 -keep,allowoptimization,allowaccessmodification class android.os.** { *; }
-
-# CoverageService guards optional jacoco class references with a runtime guard, so we can safely
-# suppress build-time warnings.
--dontwarn org.jacoco.agent.rt.*

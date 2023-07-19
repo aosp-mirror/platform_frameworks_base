@@ -332,6 +332,7 @@ public abstract class AugmentedAutofillService extends Service {
     }
 
     @Override
+    /** @hide */
     protected final void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("Service component: "); pw.println(
                 ComponentName.flattenToShortString(mServiceComponentName));

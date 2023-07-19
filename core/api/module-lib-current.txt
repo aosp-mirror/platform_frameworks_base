@@ -17,17 +17,8 @@ package android.app {
 
   public class ActivityManager {
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void addHomeVisibilityListener(@NonNull java.util.concurrent.Executor, @NonNull android.app.HomeVisibilityListener);
-    method @NonNull @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int[] getUidFrozenState(@NonNull int[]);
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void registerUidFrozenStateChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.app.ActivityManager.UidFrozenStateChangedCallback);
     method @RequiresPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER) public void removeHomeVisibilityListener(@NonNull android.app.HomeVisibilityListener);
-    method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void unregisterUidFrozenStateChangedCallback(@NonNull android.app.ActivityManager.UidFrozenStateChangedCallback);
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
-  }
-
-  public static interface ActivityManager.UidFrozenStateChangedCallback {
-    method public void onUidFrozenStateChanged(@NonNull int[], @NonNull int[]);
-    field public static final int UID_FROZEN_STATE_FROZEN = 1; // 0x1
-    field public static final int UID_FROZEN_STATE_UNFROZEN = 2; // 0x2
   }
 
   public class AppOpsManager {
@@ -129,7 +120,6 @@ package android.hardware.usb {
     field public static final int GADGET_HAL_V1_0 = 10; // 0xa
     field public static final int GADGET_HAL_V1_1 = 11; // 0xb
     field public static final int GADGET_HAL_V1_2 = 12; // 0xc
-    field public static final int GADGET_HAL_V2_0 = 20; // 0x14
     field public static final int USB_DATA_TRANSFER_RATE_10G = 10240; // 0x2800
     field public static final int USB_DATA_TRANSFER_RATE_20G = 20480; // 0x5000
     field public static final int USB_DATA_TRANSFER_RATE_40G = 40960; // 0xa000
@@ -166,14 +156,12 @@ package android.media {
     method public void adjustSuggestedStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     method @NonNull public java.util.List<android.bluetooth.BluetoothCodecConfig> getHwOffloadFormatsSupportedForA2dp();
     method @NonNull public java.util.List<android.bluetooth.BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio();
-    method @NonNull public java.util.List<android.bluetooth.BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeBroadcast();
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void handleBluetoothActiveDeviceChanged(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothDevice, @NonNull android.media.BluetoothProfileConnectionInfo);
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setA2dpSuspended(boolean);
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setBluetoothHeadsetProperties(@NonNull String, boolean, boolean);
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpEnabled(boolean);
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpSamplingRate(int);
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpVolume(int);
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setLeAudioSuspended(boolean);
     method public void setStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     field public static final int FLAG_FROM_KEY = 4096; // 0x1000
   }
@@ -183,7 +171,6 @@ package android.media {
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createA2dpSinkInfo(int);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createHearingAidInfo(boolean);
     method @NonNull public static android.media.BluetoothProfileConnectionInfo createLeAudioInfo(boolean, boolean);
-    method @NonNull public static android.media.BluetoothProfileConnectionInfo createLeAudioOutputInfo(boolean, int);
     method public int describeContents();
     method public int getProfile();
     method public int getVolume();
@@ -306,34 +293,14 @@ package android.net.netstats {
 
 }
 
-package android.nfc {
-
-  public class NfcFrameworkInitializer {
-    method public static void registerServiceWrappers();
-    method public static void setNfcServiceManager(@NonNull android.nfc.NfcServiceManager);
-  }
-
-  public class NfcServiceManager {
-    method @NonNull public android.nfc.NfcServiceManager.ServiceRegisterer getNfcManagerServiceRegisterer();
-  }
-
-  public static class NfcServiceManager.ServiceNotFoundException extends java.lang.Exception {
-    ctor public NfcServiceManager.ServiceNotFoundException(@NonNull String);
-  }
-
-  public static final class NfcServiceManager.ServiceRegisterer {
-    method @Nullable public android.os.IBinder get();
-    method @NonNull public android.os.IBinder getOrThrow() throws android.nfc.NfcServiceManager.ServiceNotFoundException;
-    method public void register(@NonNull android.os.IBinder);
-    method @Nullable public android.os.IBinder tryGet();
-  }
-
-}
-
 package android.os {
 
   public final class BatteryStatsManager {
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void reportNetworkInterfaceForTransports(@NonNull String, @NonNull int[]) throws java.lang.RuntimeException;
+  }
+
+  public class Binder implements android.os.IBinder {
+    method public final void markVintfStability();
   }
 
   public class BluetoothServiceManager {
@@ -375,6 +342,10 @@ package android.os {
     method public boolean shouldBypassCache(@NonNull Q);
   }
 
+  public interface Parcelable {
+    method public default int getStability();
+  }
+
   public class Process {
     method public static final int getAppUidForSdkSandboxUid(int);
     method public static final boolean isSdkSandboxUid(int);
@@ -384,7 +355,6 @@ package android.os {
   }
 
   public final class ServiceManager {
-    method @NonNull public static String[] getDeclaredInstances(@NonNull String);
     method public static boolean isDeclared(@NonNull String);
     method @Nullable public static android.os.IBinder waitForDeclaredService(@NonNull String);
   }
@@ -481,10 +451,6 @@ package android.telecom {
 }
 
 package android.telephony {
-
-  public class CarrierConfigManager {
-    field public static final String KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT = "min_udp_port_4500_nat_timeout_sec_int";
-  }
 
   public abstract class CellSignalStrength {
     method public static int getNumSignalStrengthLevels();

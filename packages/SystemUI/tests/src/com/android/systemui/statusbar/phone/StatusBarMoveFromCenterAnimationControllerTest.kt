@@ -8,14 +8,13 @@ import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.TestUnfoldTransitionProvider
-import com.android.systemui.unfold.util.CurrentActivityTypeProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -27,9 +26,6 @@ class StatusBarMoveFromCenterAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var display: Display
 
-    @Mock
-    private lateinit var currentActivityTypeProvider: CurrentActivityTypeProvider
-
     private val view: View = View(context)
     private val progressProvider = TestUnfoldTransitionProvider()
     private val scopedProvider = ScopedUnfoldTransitionProgressProvider(progressProvider)
@@ -40,9 +36,9 @@ class StatusBarMoveFromCenterAnimationControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        whenever(windowManager.defaultDisplay).thenReturn(display)
-        whenever(display.rotation).thenReturn(Surface.ROTATION_0)
-        whenever(display.getSize(any())).thenAnswer {
+        `when`(windowManager.defaultDisplay).thenReturn(display)
+        `when`(display.rotation).thenReturn(Surface.ROTATION_0)
+        `when`(display.getSize(any())).thenAnswer {
             val point = it.arguments[0] as Point
             point.x = 100
             point.y = 100
@@ -51,12 +47,7 @@ class StatusBarMoveFromCenterAnimationControllerTest : SysuiTestCase() {
 
         scopedProvider.setReadyToHandleTransition(true)
 
-        controller =
-            StatusBarMoveFromCenterAnimationController(
-                scopedProvider,
-                currentActivityTypeProvider,
-                windowManager
-            )
+        controller = StatusBarMoveFromCenterAnimationController(scopedProvider, windowManager)
     }
 
     @Test
@@ -105,31 +96,6 @@ class StatusBarMoveFromCenterAnimationControllerTest : SysuiTestCase() {
         controller.onViewDetached()
 
         assertThat(view.translationX).isZero()
-    }
-
-    @Test
-    fun alpha_onLauncher_alphaDoesNotChange() {
-        whenever(currentActivityTypeProvider.isHomeActivity).thenReturn(true)
-        controller.onViewsReady(arrayOf(view))
-        progressProvider.onTransitionStarted()
-        progressProvider.onTransitionProgress(0.0f)
-        assertThat(view.alpha).isEqualTo(1.0f)
-
-        progressProvider.onTransitionProgress(1.0f)
-
-        assertThat(view.alpha).isEqualTo(1.0f)
-    }
-
-    @Test
-    fun alpha_NotOnLauncher_alphaChanges() {
-        whenever(currentActivityTypeProvider.isHomeActivity).thenReturn(false)
-        controller.onViewsReady(arrayOf(view))
-        progressProvider.onTransitionStarted()
-        assertThat(view.alpha).isEqualTo(1.0f)
-
-        progressProvider.onTransitionProgress(0.5f)
-
-        assertThat(view.alpha).isNotEqualTo(1.0f)
     }
 
     @Test

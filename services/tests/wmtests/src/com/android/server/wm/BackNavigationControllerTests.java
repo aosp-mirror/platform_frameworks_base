@@ -40,7 +40,7 @@ import android.hardware.HardwareBuffer;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager;
-import android.window.BackMotionEvent;
+import android.window.BackEvent;
 import android.window.BackNavigationInfo;
 import android.window.IOnBackInvokedCallback;
 import android.window.OnBackInvokedCallback;
@@ -242,11 +242,11 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     private IOnBackInvokedCallback createOnBackInvokedCallback() {
         return new IOnBackInvokedCallback.Stub() {
             @Override
-            public void onBackStarted(BackMotionEvent backEvent) {
+            public void onBackStarted(BackEvent backEvent) {
             }
 
             @Override
-            public void onBackProgressed(BackMotionEvent backEvent) {
+            public void onBackProgressed(BackEvent backEvent) {
             }
 
             @Override

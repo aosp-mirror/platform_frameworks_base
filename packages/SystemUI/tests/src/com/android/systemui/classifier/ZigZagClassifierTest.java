@@ -68,15 +68,6 @@ public class ZigZagClassifierTest extends ClassifierTest {
     }
 
     @Test
-    public void testPass_dropClosingUpEvent() {
-        appendMoveEvent(0, 0);
-        appendMoveEvent(0, 100);
-        appendMoveEvent(0, 200);
-        appendUpEvent(0, 180); // this event would push us over the maxDevianceY
-        assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isFalse();
-    }
-
-    @Test
     public void testPass_fewTouchesHorizontal() {
         assertThat(mClassifier.classifyGesture(0, 0.5, 1).isFalse()).isFalse();
         appendMoveEvent(0, 0);

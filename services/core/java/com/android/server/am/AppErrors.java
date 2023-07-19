@@ -553,15 +553,6 @@ class AppErrors {
         }
     }
 
-    void sendRecoverableCrashToAppExitInfo(
-            ProcessRecord r, ApplicationErrorReport.CrashInfo crashInfo) {
-        if (r == null || crashInfo == null
-                || !"Native crash".equals(crashInfo.exceptionClassName)) return;
-        synchronized (mService) {
-            mService.mProcessList.noteAppRecoverableCrash(r);
-        }
-    }
-
     /**
      * Bring up the "unexpected error" dialog box for a crashing app.
      * Deal with edge cases (intercepts from instrumented applications,
@@ -650,6 +641,11 @@ class AppErrors {
             if (r == null || !makeAppCrashingLocked(r, shortMsg, longMsg, stackTrace, data)) {
                 return;
             }
+
+            // Add paste content for stagbin option
+            data.paste = "time: " + timeMillis + "\n" +
+            "msg: " + longMsg + "\n" +
+            "stacktrace: " + stackTrace;
 
             final Message msg = Message.obtain();
             msg.what = ActivityManagerService.SHOW_ERROR_UI_MSG;
@@ -1104,7 +1100,10 @@ class AppErrors {
             boolean showBackground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                     Settings.Secure.ANR_SHOW_BACKGROUND, 0,
                     mService.mUserController.getCurrentUserId()) != 0;
-            if (mService.mAtmInternal.canShowErrorDialogs() || showBackground) {
+            final boolean anrSilenced = mAppsNotReportingCrashes != null
+                    && mAppsNotReportingCrashes.contains(proc.info.packageName);
+            if (!anrSilenced &&
+                    (mService.mAtmInternal.canShowErrorDialogs() || showBackground)) {
                 AnrController anrController = errState.getDialogController().getAnrController();
                 if (anrController == null) {
                     errState.getDialogController().showAnrDialogs(data);
@@ -1129,7 +1128,7 @@ class AppErrors {
                 MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_ANR,
                         AppNotRespondingDialog.CANT_SHOW);
                 // Just kill the app if there is no dialog to be shown.
-                doKill = true;
+                doKill = !anrSilenced;
             }
         }
         if (doKill) {

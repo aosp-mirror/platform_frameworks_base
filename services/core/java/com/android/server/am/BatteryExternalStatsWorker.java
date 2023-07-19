@@ -891,7 +891,6 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     break;
                 case EnergyConsumerType.MOBILE_RADIO:
                     buckets[MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO] = true;
-                    buckets[MeasuredEnergyStats.POWER_BUCKET_PHONE] = true;
                     break;
                 case EnergyConsumerType.DISPLAY:
                     buckets[MeasuredEnergyStats.POWER_BUCKET_SCREEN_ON] = true;

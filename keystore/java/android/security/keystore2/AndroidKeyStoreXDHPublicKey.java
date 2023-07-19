@@ -88,7 +88,7 @@ public class AndroidKeyStoreXDHPublicKey extends AndroidKeyStorePublicKey implem
                 getUserKeyDescriptor(),
                 getKeyIdDescriptor().nspace,
                 getAuthorizations(),
-                "XDH",
+                "x25519",
                 getSecurityLevel());
     }
 

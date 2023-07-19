@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Akunasihloko&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Ayikho inombolo yefoni)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Ama-PIN owafakile awafani."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Thayipha i-PIN enezinombolo ezingu-4 kuya kwezingu-8."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Thayipha i-PUK enezinombolo ezingu-8 noma ngaphezu."</string>
-    <string name="needPuk" msgid="3503414069503752211">"Ikhadi lakho le-SIM livalwe nge-PUK. Thayipha ikhodi ye-PUK ukulivula."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Thayipha i-PUK2 ukuze uvule i-SIM."</string>
+    <string name="needPuk" msgid="7321876090152422918">"Ikhadi lakho le-SIM livalwe nge-PUK. Thayipha ikhodi ye-PUK ukulivula."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Thayipha i-PUK2 ukuze uvule ikhadi le-SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Akuphumelelanga, nika amandla ukhiye we-SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Unemizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g> esele ngaphambi kokuthi i-SIM ikhiywe.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"I-ID Yomshayeli ishintshela kokungavinjelwe. Ucingo olulandelayo: Aluvinjelwe"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Isevisi ayilungiselelwe."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ngeke ukwazi ukuguqul izilungiselelo zemininingwane yoshayayo."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Ushintshele idatha ku-<xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Ungashintsha lokhu noma nini kumasethingi"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ayikho isevisi yedatha yeselula"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Ukushaya okuphuthumayo akutholakali"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ayikho isevisi yezwi"</string>
@@ -313,9 +316,9 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"rekhoda ividiyo"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Umsebenzi womzimba"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"finyelela kumsebenzi wakho womzimba"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Ikhamera"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Ikhamela"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"thatha izithombe uphinde urekhode ividiyo"</string>
-    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"kumadivayisi aseduze"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Amadivayisi aseduze"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"thola futhi uxhume kumadivayisi aseduze"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Amarekhodi wamakholi"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"funda futhi ubhale irekhodi lamakholi efoni"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Ingathatha ukuthinta okwenziwe kunzwa yezigxivizo zeminwe zedivayisi."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Thatha isithombe-skrini"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Ingathatha isithombe-skrini sesiboniso"</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Hlola kuqala, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"khubaza noma guqula ibha yomumo"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ivumela uhlelo lokusebenza ukuthi yenze umudwa ochaza ngesimo ukuthi ungasebenzi noma ukufaka noma ukukhipha izithonjana zohlelo."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"yiba yibha yesimo"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ivuemela uhlelo lokusebenza ukuthola ulwazi lesevisi yenkokhelo ye-nfc njengezinsiza zokubhalisa nezindawo zomzila."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lawula Uxhumano Lwenkambu Eseduze"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ivuela uhlelo lokusebenza ukuthi ixhumane ne-Near Field Communication (NFC) amathegi, amakhadi kanye nezinhlelo zokufunda."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Umcimbi wokwenziwe Ku-elementi Evikelekile"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Ivumela i-app ukuthi ithole ulwazi mayelana nemisebenzi eyenzekayo Ku-elementi Evikelekile."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"khubaza ukukhiya kwakho iskrini"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ivumela uhlelo lokusebenza ukukhubaza ukuvala ukhiye nanoma yikuphi ukuphepha kwephasiwedi okuhlobene. Isibonelo, ifoni ikhubaza ukuvala ukhiye lapho ithola ikholi yefoni engenayo, bese inike amandla kabusha ukuvala ukhiye lapho ikholi isiqedile."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"cela ubunkimbinkimbi kokukhiya isikrini"</string>
@@ -586,11 +586,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Iphutha lokufakazela ubuqiniso"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Sebenzisa isikhiya sesikrini"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Faka ukukhiya isikrini kwakho ukuze uqhubeke"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Cindezela inzwa uqinise"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Cindezela ngokuqinile kunzwa"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Ayisazi isigxivizo somunwe. Zama futhi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Hlanza inzwa yesigxivizo somunwe bese uzame futhi"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Hlanza inzwa bese uzame futhi"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Cindezela inzwa uqinise"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Cindezela ngokuqinile kunzwa"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Umnwe uhanjiswe kancane kakhulu. Sicela uzame futhi."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Zama ezinye izigxivizo zeminwe"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Kukhanya kakhulu"</string>
@@ -642,8 +642,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Ukukhanya okunganele"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Yisa ifoni kude"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Sondeza ifoni eduze"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Nyusa ifoni"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Yehlisa ifoni"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Yisa ifoni phezulu"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Yisa ifoni phansi"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Yisa ifoni ngakwesokunxele sakho"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Yisa ifoni ngakwesokudla sakho"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Sicela ubheke ngokuqondile kakhulu kudivayisi yakho."</string>
@@ -664,8 +664,6 @@
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Ayikwazi ukusungula imodeli yobuso bakho. Zama futhi."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Kutholwe izibuko ezimnyama. Ubuso bakho kufanele bubonakale ngokugcwele."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Kutholwe ukumbozwa kobuso. Ubuso bakho kufanele bubonakale ngokugcwele."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ayikwazi ukuqinisekisa ubuso. Izingxenyekazi zekhompyutha azitholakali."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Zama Ukuvula ngobuso futhi."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Ayikwazi ukulondoloza idatha yobuso. Susa endala."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Sebenzisa i-face lock noma ukukhiya isikrini"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Sebenzisa ubuso bakho ukuze uqhubeke"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Sebenzisa ubuso bakho noma ukukhiya isikrini ukuze uqhubeke"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Kunento engahambanga kahle. Zama futhi."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Isithonjana sobuso"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"funda izilungiselelo zokuvumelanisa"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Zama futhi"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Vulela zonke izici nedatha"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Ukuzama Kokuvula ngobuso sekweqe umkhawulo"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Ayikho i-SIM"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Ayikho i-SIM kuthebhulethi."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Alikho ikhadi le-SIM card kudivayisi yakho ye-Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Ayikho i-SIM efonini."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"engeza i-SIM"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"I-SIM ayitholakali noma ayifundeki. engeza i-SIM"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"I-SIM engasebenziseki."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"I-SIM yakho iyekiswe ukusebenza unomphela.\n Xhumana nomhlinzeki wakho wesevisi ngokungenazintambo ukuze uthole enye i-SIM."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Alikho ikhadi le-SIM."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Alikho ikhadi le-SIM efonini."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Ayikho i-SIM card kudivayisi yakho ye-Android TV."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Alikho ikhadi le-SIM efonini."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Faka ikhadi le-SIM."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Ikhadi le-SIM alitholakali noma alifundeki. Sicela ufake ikhadi le-SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Ikhadi le-SIM elingasetshenzisiwe."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"I-SIM khadi ykho isiyenziwe ukuthi ingasebenzi unomphela.\n Xhumana nomhlinzeki wakho wokuxhumana okungenazintambo ukuze uthole enye i-SIM khadi."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Ithrekhi yangaphambilini"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Ithrekhi elandelayo"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Misa isikhashana"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Ukudlulisa ngokushesha"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Amakholi aphuthumayo kuphela"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Inethiwekhi ivaliwe"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"I-SIM ikhiyiwe nge-PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"Ikhadi le-SIM livalwe nge-PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Sicela ubone Isiqondisi Somsebenzisi noma xhumana Nokunakekela Ikhasimende"</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"I-SIM ikhiyiwe."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Ivula i-SIM…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"Ikhadi le-SIM livaliwe."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Ivula ikhadi le-SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Udwebe iphathini yakho yokuvula ngendlela engafanele izinkathi ezingu-<xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Zama futhi emuva kwamasekhondi angu-<xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Ubhale iphasiwedi yakho ngendlela engafanele <xliff:g id="NUMBER_0">%1$d</xliff:g> izikhathi. \n\nZama futhi <xliff:g id="NUMBER_1">%2$d</xliff:g> imizuzwna."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Ubhale i-PIN ykho ngendlela engafanele <xliff:g id="NUMBER_0">%1$d</xliff:g> izikhathi. \n\nZama futhi emuva kwamasekhondi angu-<xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Ungashintsha lokhu kamuva kuzilungiselelo &gt; izinhlelo zokusebenza"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Vumela njalo?"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Ungavumeli"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"I-SIM isusiwe"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"The mobile network will be unavailable until you restart with a valid SIM.-"</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"Ikhadi le-SIM likhishiwe"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Inethiwekhi yeselula ngeke itholakale kuwena kuze kube uqala kabusha ufake ikhadi le-SIM elifanele."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Kwenziwe"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"I-SIM yengeziwe"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"Ikhadi le-SIM lengeziwe"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Kufanele uqalise kabusha idivaysi yakho ukuze ungene kuhleloxhumano yeselula."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Qala phansi"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Yenza kusebenze isevisi yeselula"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"I-TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Ifoni"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Izipikha ze-Dock"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Idivayisi Yangaphandle"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Ama-headphone"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"I-USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Isistimu"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Xhumana nenkampani yenethiwekhi ngemininingwane."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Faka iphinikhodi oyithandayo"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Qiniseka iphinikhodi oyithandayo"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Ivula i-SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Ivula ikhadi le-SIM..."</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Iphinikhodi engalungile."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Thayipha iphinikhodi enezinombolo ezingu-4 kuya kwezingu-8."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Ikhodi ye-PUK kumele ibe yizinombolo ezingu-8."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Ukubuka isikrini esigcwele"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ukuze uphume, swayiphela phansi kusuka phezulu."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ngiyitholile"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zungezisa ukuze uthole ukubuka okungcono"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Phuma ekuhlukaniseni isikrini ukuze ubuke kangcono"</string>
     <string name="done_label" msgid="7283767013231718521">"Kwenziwe"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Amahora weslayidi esiyindingilizi"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Amaminithi weslayidi esiyindingilizi"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ayikwazi ukufinyelela ikhamera yethebulethi kusuka ku-<xliff:g id="DEVICE">%1$s</xliff:g> yakho"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Lokhu akukwazi ukufinyelelwa ngenkathi usakaza. Zama efonini yakho kunalokho."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Okuzenzakalelayo kwesistimu"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"IKHADI <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

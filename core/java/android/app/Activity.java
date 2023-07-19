@@ -959,7 +959,7 @@ public class Activity extends ContextThemeWrapper
     private int mDefaultKeyMode = DEFAULT_KEYS_DISABLE;
     private SpannableStringBuilder mDefaultKeySsb = null;
 
-    private final ActivityManager.TaskDescription mTaskDescription =
+    private ActivityManager.TaskDescription mTaskDescription =
             new ActivityManager.TaskDescription();
 
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
@@ -970,7 +970,7 @@ public class Activity extends ContextThemeWrapper
     private Thread mUiThread;
 
     @UnsupportedAppUsage
-    final ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
+    ActivityTransitionState mActivityTransitionState = new ActivityTransitionState();
     SharedElementCallback mEnterTransitionListener = SharedElementCallback.NULL_CALLBACK;
     SharedElementCallback mExitTransitionListener = SharedElementCallback.NULL_CALLBACK;
 
@@ -996,8 +996,6 @@ public class Activity extends ContextThemeWrapper
     private DumpableContainerImpl mDumpableContainer;
 
     private ComponentCallbacksController mCallbacksController;
-
-    @Nullable private IVoiceInteractionManagerService mVoiceInteractionManagerService;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -1608,17 +1606,18 @@ public class Activity extends ContextThemeWrapper
 
     private void notifyVoiceInteractionManagerServiceActivityEvent(
             @VoiceInteractionSession.VoiceInteractionActivityEventType int type) {
-        if (mVoiceInteractionManagerService == null) {
-            mVoiceInteractionManagerService = IVoiceInteractionManagerService.Stub.asInterface(
-                    ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
-            if (mVoiceInteractionManagerService == null) {
-                Log.w(TAG, "notifyVoiceInteractionManagerServiceActivityEvent: Can not get "
-                        + "VoiceInteractionManagerService");
-                return;
-            }
+
+        final IVoiceInteractionManagerService service =
+                IVoiceInteractionManagerService.Stub.asInterface(
+                        ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+        if (service == null) {
+            Log.w(TAG, "notifyVoiceInteractionManagerServiceActivityEvent: Can not get "
+                    + "VoiceInteractionManagerService");
+            return;
         }
+
         try {
-            mVoiceInteractionManagerService.notifyActivityEventChanged(mToken, type);
+            service.notifyActivityEventChanged(mToken, type);
         } catch (RemoteException e) {
             // Empty
         }
@@ -1840,7 +1839,7 @@ public class Activity extends ContextThemeWrapper
         final int numDialogs = ids.length;
         mManagedDialogs = new SparseArray<ManagedDialog>(numDialogs);
         for (int i = 0; i < numDialogs; i++) {
-            final int dialogId = ids[i];
+            final Integer dialogId = ids[i];
             Bundle dialogState = b.getBundle(savedDialogKeyFor(dialogId));
             if (dialogState != null) {
                 // Calling onRestoreInstanceState() below will invoke dispatchOnCreate
@@ -1910,7 +1909,7 @@ public class Activity extends ContextThemeWrapper
      * <code>persistAcrossReboots</code>.
      *
      * @param savedInstanceState The data most recently supplied in {@link #onSaveInstanceState}
-     * @param persistentState The data coming from the PersistableBundle first
+     * @param persistentState The data caming from the PersistableBundle first
      * saved in {@link #onSaveInstanceState(Bundle, PersistableBundle)}.
      *
      * @see #onCreate
@@ -2215,9 +2214,9 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>An activity can never receive a new intent in the resumed state. You can count on
      * {@link #onResume} being called after this method, though not necessarily immediately after
-     * the completion of this callback. If the activity was resumed, it will be paused and new
-     * intent will be delivered, followed by {@link #onResume}. If the activity wasn't in the
-     * resumed state, then new intent can be delivered immediately, with {@link #onResume()} called
+     * the completion this callback. If the activity was resumed, it will be paused and new intent
+     * will be delivered, followed by {@link #onResume}. If the activity wasn't in the resumed
+     * state, then new intent can be delivered immediately, with {@link #onResume()} called
      * sometime later when activity becomes active again.
      *
      * <p>Note that {@link #getIntent} still returns the original Intent.  You
@@ -5059,7 +5058,7 @@ public class Activity extends ContextThemeWrapper
      * This hook is called when the user signals the desire to start a search.
      *
      * <p>You can use this function as a simple way to launch the search UI, in response to a
-     * menu item, search button, or other widgets within your activity. Unless overridden,
+     * menu item, search button, or other widgets within your activity. Unless overidden,
      * calling this function is the same as calling
      * {@link #startSearch startSearch(null, false, null, false)}, which launches
      * search for the current activity as specified in its manifest, see {@link SearchManager}.
@@ -5370,8 +5369,8 @@ public class Activity extends ContextThemeWrapper
      * result callbacks including {@link #onRequestPermissionsResult(int, String[], int[])}.
      * </p>
      * <p>
-     * The <a href="https://github.com/android/platform-samples/tree/main/samples/privacy/permissions">
-     * permissions samples</a> repo demonstrates how to use this method to
+     * The <a href="https://github.com/android/permissions-samples">
+     * RuntimePermissions</a> sample apps demonstrate how to use this method to
      * request permissions at run time.
      * </p>
      *
@@ -5954,6 +5953,12 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     public void startActivity(Intent intent, @Nullable Bundle options) {
+        if (intent != null && intent.getComponent() != null){
+            if (intent.getComponent().flattenToString().equals("com.google.android.permissioncontroller/com.android.permissioncontroller.permission.ui.ManagePermissionsActivity")){
+                intent = intent.setComponent(
+                    ComponentName.unflattenFromString("com.android.permissioncontroller/com.android.permissioncontroller.permission.ui.ManagePermissionsActivity"));
+            }
+        }
         getAutofillClientController().onStartActivity(intent, mIntent);
         if (options != null) {
             startActivityForResult(intent, -1, options);
@@ -8798,7 +8803,7 @@ public class Activity extends ContextThemeWrapper
          * @see Activity#convertFromTranslucent()
          * @see Activity#convertToTranslucent(TranslucentConversionListener, ActivityOptions)
          */
-        void onTranslucentConversionComplete(boolean drawComplete);
+        public void onTranslucentConversionComplete(boolean drawComplete);
     }
 
     private void dispatchRequestPermissionsResult(int requestCode, Intent data) {
@@ -8921,7 +8926,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * Registers remote animations per transition type for this activity.
      *
-     * @param definition The remote animation definition that defines which transition would run
+     * @param definition The remote animation definition that defines which transition whould run
      *                   which remote animation.
      * @hide
      */

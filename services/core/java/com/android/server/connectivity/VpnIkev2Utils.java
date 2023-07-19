@@ -99,7 +99,7 @@ import java.util.concurrent.Executor;
 public class VpnIkev2Utils {
     private static final String TAG = VpnIkev2Utils.class.getSimpleName();
 
-    static IkeSessionParams.Builder makeIkeSessionParamsBuilder(
+    static IkeSessionParams buildIkeSessionParams(
             @NonNull Context context, @NonNull Ikev2VpnProfile profile, @NonNull Network network) {
         final IkeIdentification localId = parseIkeIdentification(profile.getUserIdentity());
         final IkeIdentification remoteId = parseIkeIdentification(profile.getServerAddr());
@@ -117,7 +117,7 @@ public class VpnIkev2Utils {
             ikeOptionsBuilder.addSaProposal(ikeProposal);
         }
 
-        return ikeOptionsBuilder;
+        return ikeOptionsBuilder.build();
     }
 
     static ChildSessionParams buildChildSessionParams(List<String> allowedAlgorithms) {

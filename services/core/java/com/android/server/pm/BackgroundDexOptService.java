@@ -149,6 +149,8 @@ public final class BackgroundDexOptService {
 
     @GuardedBy("mLock") @Status private int mLastExecutionStatus = STATUS_OK;
 
+    @GuardedBy("mLock") private long mLastExecutionStartTimeMs;
+    @GuardedBy("mLock") private long mLastExecutionDurationIncludingSleepMs;
     @GuardedBy("mLock") private long mLastExecutionStartUptimeMs;
     @GuardedBy("mLock") private long mLastExecutionDurationMs;
 
@@ -227,6 +229,10 @@ public final class BackgroundDexOptService {
             writer.println(mFinishedPostBootUpdate);
             writer.print("mLastExecutionStatus:");
             writer.println(mLastExecutionStatus);
+            writer.print("mLastExecutionStartTimeMs:");
+            writer.println(mLastExecutionStartTimeMs);
+            writer.print("mLastExecutionDurationIncludingSleepMs:");
+            writer.println(mLastExecutionDurationIncludingSleepMs);
             writer.print("mLastExecutionStartUptimeMs:");
             writer.println(mLastExecutionStartUptimeMs);
             writer.print("mLastExecutionDurationMs:");
@@ -533,6 +539,8 @@ public final class BackgroundDexOptService {
     private boolean runIdleOptimization(
             PackageManagerService pm, List<String> pkgs, boolean isPostBootUpdate) {
         synchronized (mLock) {
+            mLastExecutionStartTimeMs = SystemClock.elapsedRealtime();
+            mLastExecutionDurationIncludingSleepMs = -1;
             mLastExecutionStartUptimeMs = SystemClock.uptimeMillis();
             mLastExecutionDurationMs = -1;
         }
@@ -541,6 +549,8 @@ public final class BackgroundDexOptService {
         logStatus(status);
         synchronized (mLock) {
             mLastExecutionStatus = status;
+            mLastExecutionDurationIncludingSleepMs =
+                    SystemClock.elapsedRealtime() - mLastExecutionStartTimeMs;
             mLastExecutionDurationMs = SystemClock.uptimeMillis() - mLastExecutionStartUptimeMs;
         }
 
@@ -947,9 +957,10 @@ public final class BackgroundDexOptService {
         synchronized (mLock) {
             status = mLastExecutionStatus;
             durationMs = mLastExecutionDurationMs;
+            durationIncludingSleepMs = mLastExecutionDurationIncludingSleepMs;
         }
 
-        mStatsLogger.write(status, params.getStopReason(), durationMs);
+        mStatsLogger.write(status, params.getStopReason(), durationMs, durationIncludingSleepMs);
     }
 
     /** Injector pattern for testing purpose */

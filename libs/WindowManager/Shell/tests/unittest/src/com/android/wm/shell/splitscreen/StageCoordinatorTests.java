@@ -29,13 +29,11 @@ import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
-import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -47,8 +45,6 @@ import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -61,7 +57,6 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
-import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -70,8 +65,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
-import com.android.wm.shell.sysui.ShellController;
-import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -105,7 +98,11 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock
     private DisplayInsetsController mDisplayInsetsController;
     @Mock
+    private Transitions mTransitions;
+    @Mock
     private TransactionPool mTransactionPool;
+    @Mock
+    private ShellExecutor mMainExecutor;
 
     private final Rect mBounds1 = new Rect(10, 20, 30, 40);
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
@@ -115,16 +112,11 @@ public class StageCoordinatorTests extends ShellTestCase {
     private SurfaceControl mRootLeash;
     private ActivityManager.RunningTaskInfo mRootTask;
     private StageCoordinator mStageCoordinator;
-    private Transitions mTransitions;
-    private final TestShellExecutor mMainExecutor = new TestShellExecutor();
-    private final ShellExecutor mAnimExecutor = new TestShellExecutor();
-    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     @Before
     @UiThreadTest
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mTransitions = createTestTransitions();
         mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
@@ -144,48 +136,39 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testMoveToStage_splitActiveBackground() {
-        when(mStageCoordinator.isSplitActive()).thenReturn(true);
-
+    public void testMoveToStage() {
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
-        verify(mSideStage).addTask(eq(task), eq(wct));
+        mStageCoordinator.moveToStage(task, STAGE_TYPE_MAIN, SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                new WindowContainerTransaction());
+        verify(mMainStage).addTask(eq(task), any(WindowContainerTransaction.class));
+        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
+
+        mStageCoordinator.moveToStage(task, STAGE_TYPE_SIDE, SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                new WindowContainerTransaction());
+        verify(mSideStage).addTask(eq(task), any(WindowContainerTransaction.class));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
-        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
     }
 
     @Test
-    public void testMoveToStage_splitActiveForeground() {
-        when(mStageCoordinator.isSplitActive()).thenReturn(true);
-        when(mStageCoordinator.isSplitScreenVisible()).thenReturn(true);
-        // Assume current side stage is top or left.
+    public void testMoveToUndefinedStage() {
+        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
+
+        // Verify move to undefined stage while split screen not activated moves task to side stage.
+        when(mStageCoordinator.isSplitScreenVisible()).thenReturn(false);
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null);
-
-        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-
-        mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
-        verify(mMainStage).addTask(eq(task), eq(wct));
-        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
-        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getSideStagePosition());
-
-        mStageCoordinator.moveToStage(task, SPLIT_POSITION_TOP_OR_LEFT, wct);
-        verify(mSideStage).addTask(eq(task), eq(wct));
-        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getSideStagePosition());
-        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
-    }
-
-    @Test
-    public void testMoveToStage_splitInctive() {
-        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-
-        mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
-        verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
-                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+        mStageCoordinator.moveToStage(task, STAGE_TYPE_UNDEFINED, SPLIT_POSITION_BOTTOM_OR_RIGHT,
+                new WindowContainerTransaction());
+        verify(mSideStage).addTask(eq(task), any(WindowContainerTransaction.class));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
+
+        // Verify move to undefined stage after split screen activated moves task based on position.
+        when(mStageCoordinator.isSplitScreenVisible()).thenReturn(true);
+        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
+        mStageCoordinator.moveToStage(task, STAGE_TYPE_UNDEFINED, SPLIT_POSITION_TOP_OR_LEFT,
+                new WindowContainerTransaction());
+        verify(mMainStage).addTask(eq(task), any(WindowContainerTransaction.class));
+        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
     }
 
     @Test
@@ -346,20 +329,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
         mStageCoordinator.onFoldedStateChanged(true);
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            verify(mTaskOrganizer).startNewTransition(eq(TRANSIT_SPLIT_DISMISS), notNull());
-        } else {
-            verify(mStageCoordinator).onSplitScreenExit();
-            verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
-        }
-    }
-
-    private Transitions createTestTransitions() {
-        ShellInit shellInit = new ShellInit(mMainExecutor);
-        final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
-                mTaskOrganizer, mTransactionPool, mock(DisplayController.class), mMainExecutor,
-                mMainHandler, mAnimExecutor);
-        shellInit.init();
-        return t;
+        verify(mStageCoordinator).onSplitScreenExit();
+        verify(mMainStage).deactivate(any(WindowContainerTransaction.class), eq(false));
     }
 }

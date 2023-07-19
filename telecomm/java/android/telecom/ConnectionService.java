@@ -2330,7 +2330,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void playDtmfTone(String callId, char digit) {
-        Log.i(this, "playDtmfTone %s %s", callId, Log.pii(digit));
+        Log.i(this, "playDtmfTone %s %c", callId, digit);
         if (mConnectionById.containsKey(callId)) {
             findConnectionForAction(callId, "playDtmfTone").onPlayDtmfTone(digit);
         } else {

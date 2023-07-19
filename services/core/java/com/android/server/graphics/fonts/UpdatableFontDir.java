@@ -40,8 +40,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,8 +59,6 @@ final class UpdatableFontDir {
     private static final String TAG = "UpdatableFontDir";
     private static final String RANDOM_DIR_PREFIX = "~~";
 
-    private static final String FONT_SIGNATURE_FILE = "font.fsv_sig";
-
     /** Interface to mock font file access in tests. */
     interface FontFileParser {
         String getPostScriptName(File file) throws IOException;
@@ -76,9 +72,9 @@ final class UpdatableFontDir {
 
     /** Interface to mock fs-verity in tests. */
     interface FsverityUtil {
-        boolean isFromTrustedProvider(String path, byte[] pkcs7Signature);
+        boolean hasFsverity(String path);
 
-        void setUpFsverity(String path) throws IOException;
+        void setUpFsverity(String path, byte[] pkcs7Signature) throws IOException;
 
         boolean rename(File src, File dest);
     }
@@ -192,35 +188,12 @@ final class UpdatableFontDir {
                     FileUtils.deleteContentsAndDir(dir);
                     continue;
                 }
-
-                File signatureFile = new File(dir, FONT_SIGNATURE_FILE);
-                if (!signatureFile.exists()) {
-                    Slog.i(TAG, "The signature file is missing.");
-                    FileUtils.deleteContentsAndDir(dir);
-                    continue;
-                }
-                byte[] signature;
-                try {
-                    signature = Files.readAllBytes(Paths.get(signatureFile.getAbsolutePath()));
-                } catch (IOException e) {
-                    Slog.e(TAG, "Failed to read signature file.");
-                    return;
-                }
-
                 File[] files = dir.listFiles();
-                if (files == null || files.length != 2) {
+                if (files == null || files.length != 1) {
                     Slog.e(TAG, "Unexpected files in dir: " + dir);
                     return;
                 }
-
-                File fontFile;
-                if (files[0].equals(signatureFile)) {
-                    fontFile = files[1];
-                } else {
-                    fontFile = files[0];
-                }
-
-                FontFileInfo fontFileInfo = validateFontFile(fontFile, signature);
+                FontFileInfo fontFileInfo = validateFontFile(files[0]);
                 if (fontConfig == null) {
                     fontConfig = getSystemFontConfig();
                 }
@@ -354,7 +327,8 @@ final class UpdatableFontDir {
             try {
                 // Do not parse font file before setting up fs-verity.
                 // setUpFsverity throws IOException if failed.
-                mFsverityUtil.setUpFsverity(tempNewFontFile.getAbsolutePath());
+                mFsverityUtil.setUpFsverity(tempNewFontFile.getAbsolutePath(),
+                        pkcs7Signature);
             } catch (IOException e) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_VERIFICATION_FAILURE,
@@ -385,25 +359,9 @@ final class UpdatableFontDir {
             } catch (ErrnoException e) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE,
-                        "Failed to change font file mode to 644", e);
+                        "Failed to change mode to 711", e);
             }
-            File signatureFile = new File(newDir, FONT_SIGNATURE_FILE);
-            try (FileOutputStream out = new FileOutputStream(signatureFile)) {
-                out.write(pkcs7Signature);
-            } catch (IOException e) {
-                // TODO: Do we need new error code for signature write failure?
-                throw new SystemFontException(
-                        FontManager.RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE,
-                        "Failed to write font signature file to storage.", e);
-            }
-            try {
-                Os.chmod(signatureFile.getAbsolutePath(), 0600);
-            } catch (ErrnoException e) {
-                throw new SystemFontException(
-                        FontManager.RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE,
-                        "Failed to change the signature file mode to 600", e);
-            }
-            FontFileInfo fontFileInfo = validateFontFile(newFontFile, pkcs7Signature);
+            FontFileInfo fontFileInfo = validateFontFile(newFontFile);
 
             // Try to create Typeface and treat as failure something goes wrong.
             try {
@@ -520,9 +478,8 @@ final class UpdatableFontDir {
      * is higher than the currently used font.
      */
     @NonNull
-    private FontFileInfo validateFontFile(File file, byte[] pkcs7Signature)
-            throws SystemFontException {
-        if (!mFsverityUtil.isFromTrustedProvider(file.getAbsolutePath(), pkcs7Signature)) {
+    private FontFileInfo validateFontFile(File file) throws SystemFontException {
+        if (!mFsverityUtil.hasFsverity(file.getAbsolutePath())) {
             throw new SystemFontException(
                     FontManager.RESULT_ERROR_VERIFICATION_FAILURE,
                     "Font validation failed. Fs-verity is not enabled: " + file);

@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Без имена&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Нема броја телефона)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"PIN кодови које сте унели се не подударају."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Откуцајте PIN који има од 4 до 8 бројева."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Унесите PUK који се састоји од 8 цифара или више."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM је закључан PUK-ом. Унесите PUK да бисте га откључали."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Унесите PUK2 да бисте одблокирали SIM."</string>
+    <string name="needPuk" msgid="7321876090152422918">"SIM картица је закључана PUK кодом. Унесите PUK кôд да бисте је откључали."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Унесите PUK2 да бисте одблокирали SIM картицу."</string>
     <string name="enablePin" msgid="2543771964137091212">"Није успело. Омогућите закључавање SIM/RUIM картице."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушај пре него што се SIM картица закључа.</item>
@@ -74,8 +79,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ИД позиваоца подразумевано није ограничен. Следећи позив: Није ограничен."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услуга није добављена."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Не можете да промените подешавање ИД-а корисника."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Мобилни подаци су пребачени на оператера <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Ово можете у сваком тренутку да промените у Подешавањима"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Нема услуге мобилних података"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Хитни позиви нису доступни"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Нема гласовне услуге"</string>
@@ -86,7 +89,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Пробајте да промените жељену мрежу. Додирните да бисте променили."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Хитни позиви нису доступни"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Не можете да упућујете хитне позиве преко Wi‑Fi-ја"</string>
-    <string name="notification_channel_network_alert" msgid="4788053066033851841">"Упозорења"</string>
+    <string name="notification_channel_network_alert" msgid="4788053066033851841">"Обавештења"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Преусмеравање позива"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим за хитан повратни позив"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Статус мобилних података"</string>
@@ -244,10 +247,10 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"Напајање"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Рестартуј"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Хитан позив"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Јави грешку"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Извештај о грешци"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Заврши сесију"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Снимак екрана"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Јави грешку"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Извештај о грешци"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Овим ће се прикупити информације о тренутном стању уређаја како би биле послате у поруци е-поште. Од започињања извештаја о грешци до тренутка за његово слање проћи ће неко време; будите стрпљиви."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Интерактив. извештај"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Користите ово у већини случајева. То вам омогућава да пратите напредак извештаја, да уносите додатне детаље о проблему и да снимате снимке екрана. Вероватно ће изоставити неке мање коришћене одељке за које прављење извештаја дуго траје."</string>
@@ -281,7 +284,7 @@
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Мрежа је доступна"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Статус VPN-а"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Обавештења од ИТ администратора"</string>
-    <string name="notification_channel_alerts" msgid="5070241039583668427">"Упозорења"</string>
+    <string name="notification_channel_alerts" msgid="5070241039583668427">"Обавештења"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Режим демонстрације за малопродајне објекте"</string>
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB веза"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Активна апликација"</string>
@@ -340,7 +343,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може да региструје покрете на сензору за отисак прста на уређају."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Направи снимак екрана"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може да направи снимак екрана."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Преглед, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"онемогућавање или измена статусне траке"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозвољава апликацији да онемогући статусну траку или да додаје и уклања системске иконе."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"функционисање као статусна трака"</string>
@@ -552,8 +554,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозвољава апликацији да преузима информације о жељеној NFC услузи за плаћање, попут регистрованих идентификатора апликација и одредишта преусмеравања."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрола комуникације у ужем пољу (Near Field Communication)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозвољава апликацији да комуницира са ознакама, картицама и читачима комуникације кратког домета (NFC)."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Трансакција у оквиру безбедносног елемента"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Омогућава апликацији да добија информације о транскацијама које се извршавају у оквиру безбедносног елемента."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"онемогућавање закључавања екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дозвољава апликацији да онемогући закључавање тастатуре и све повезане безбедносне мере са лозинкама. На пример, телефон онемогућава закључавање тастатуре при пријему долазног телефонског позива, а затим га поново омогућава по завршетку позива."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"тражење сложености закључавања екрана"</string>
@@ -664,9 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Прављење модела лица није успело. Пробајте поново."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Откривене су тамне наочари. Лице мора да буде потпуно видљиво."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Лице је прекривено. Мора да буде сасвим видљиво."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Откривено је прекривање лица. Лице мора да буде потпуно видљиво."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Провера лица није успела. Хардвер није доступан."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Пробајте поново откључавање лицем"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Нови подаци о лицу нису сачувани. Прво избришете претходне."</string>
@@ -684,8 +682,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Користите закључавање лицем или закључавање екрана"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Потврдите идентитет лицем да бисте наставили"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Користите лице или закључавање екрана да бисте наставили"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Дошло је до проблема. Пробајте поново."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Икона лица"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"читање подешавања синхронизације"</string>
@@ -930,14 +926,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Пробајте поново"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Откључај за све функције и податке"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Премашен је највећи дозвољени број покушаја Откључавања лицем"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Нема SIM-а"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Нема SIM-а у таблету."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Нема SIM-а у Android TV уређају."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Нема SIM-а у телефону."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Додајте SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM недостаје или не може да се прочита. Додајте SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Неупотребљив SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM је трајно деактивиран.\n Обратите се добављачу услуге бежичне телефоније да бисте добили други SIM."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Нема SIM картице"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"У таблету нема SIM картице."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Нема SIM картице у Android TV уређају."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"У телефон није уметнута SIM картица."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Уметните SIM картицу."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM недостаје или не може да се прочита. Уметните SIM картицу."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM картица је неупотребљива."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM картица је трајно онемогућена.\n Обратите се добављачу услуге бежичне мреже да бисте добили другу SIM картицу."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Претходна песма"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Следећа песма"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Пауза"</string>
@@ -947,10 +943,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Премотај унапред"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Само хитни позиви"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Мрежа је закључана"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM је закључан PUK-ом."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM картица је закључана PUK кодом."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Погледајте Кориснички водич или контактирајте Корисничку подршку."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM је закључан."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Откључава се SIM…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM картица је закључана."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Откључавање SIM картице…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"<xliff:g id="NUMBER_0">%1$d</xliff:g> пута сте неправилно нацртали шаблон за откључавање. \n\nПробајте поново за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунде/и."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"<xliff:g id="NUMBER_0">%1$d</xliff:g> пута сте погрешно унели лозинку. \n\nПробајте поново за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунде/и."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"<xliff:g id="NUMBER_0">%1$d</xliff:g> пута сте погрешно унели PIN. \n\nПробајте поново за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунде/и."</string>
@@ -1253,7 +1249,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Покретање апликација."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Завршавање покретања."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Притиснули сте дугме за укључивање – тиме обично искључујете екран.\n\nПробајте лагано да додирнете док подешавате отисак прста."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Искључите екран и напустите подешавање"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Завршите подешавање искључивањем екрана"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Искључи"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Настављате верификацију отиска прста?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Притиснули сте дугме за укључивање – тиме обично искључујете екран.\n\nПробајте лагано да додирнете да бисте верификовали отисак прста."</string>
@@ -1333,10 +1329,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Ово можете да промените касније у Подешавања &gt; Апликације"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Увек дозволи"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Никада не дозволи"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM је уклоњен"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Мобилна мрежа неће бити доступна док не рестартујете уз важећи SIM."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM картица је уклоњена"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Мобилна мрежа неће бити доступна док не покренете систем поново уз уметање важеће SIM картице."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Готово"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM је додат"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM картица је додата"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Рестартујте уређај да бисте могли да приступите мобилној мрежи."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Рестартуј"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Активирајте мобилну услугу"</string>
@@ -1615,7 +1611,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"ТВ"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Звучници базне станице"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Спољни уређај"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Слушалице"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Систем"</string>
@@ -1648,7 +1644,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM картица је сада онемогућена. Унесите PUK кôд да бисте наставили. За детаље контактирајте оператера."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Унесите жељени PIN кôд"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Потврдите жељени PIN кôд"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Откључава се SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Откључавање SIM картице…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN кôд је нетачан."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Унесите PIN који има од 4 до 8 бројева."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK кôд треба да има 8 бројева."</string>
@@ -1707,7 +1703,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија боја"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Корекција боја"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим једном руком"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Додатно затамни"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Додатно затамњено"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Држали сте тастере за јачину звука. Услуга <xliff:g id="SERVICE_NAME">%1$s</xliff:g> је укључена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Држали сте тастере за јачину звука. Услуга <xliff:g id="SERVICE_NAME">%1$s</xliff:g> је искључена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Притисните и задржите оба тастера за јачину звука три секунде да бисте користили <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1836,13 +1832,11 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Потврдите нови PIN"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Направите PIN за измену ограничења"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-ови се не подударају. Пробајте поново."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN је прекратак. Мора да има бар 4 цифре."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN је прекратак. Мора да садржи најмање 4 цифре."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Пробајте поново касније"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Приказује се цео екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Да бисте изашли, превуците надоле одозго."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Важи"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ротирајте ради бољег приказа"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Изађите из подељеног екрана ради бољег приказа"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Кружни клизач за сате"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Кружни клизач за минуте"</string>
@@ -2298,5 +2292,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не може да се приступи камери таблета са <xliff:g id="DEVICE">%1$s</xliff:g> уређаја"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Овом не можете да приступате током стримовања. Пробајте на телефону."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Подразумевани системски"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"КАРТИЦА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

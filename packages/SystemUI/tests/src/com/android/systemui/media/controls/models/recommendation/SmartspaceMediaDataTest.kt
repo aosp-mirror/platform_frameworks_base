@@ -113,6 +113,5 @@ private val DEFAULT_DATA =
         recommendations = emptyList(),
         dismissIntent = null,
         headphoneConnectionTimeMillis = 0,
-        instanceId = InstanceId.fakeInstanceId(-1),
-        expiryTimeMs = 0,
+        instanceId = InstanceId.fakeInstanceId(-1)
     )

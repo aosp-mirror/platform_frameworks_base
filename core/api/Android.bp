@@ -13,10 +13,7 @@
 // limitations under the License.
 
 package {
-    default_visibility: [
-        "//frameworks/base",
-        "//frameworks/base/api",
-    ],
+    default_visibility: ["//visibility:private"],
     // See: http://go/android-license-faq
     // A large-scale-change added 'default_applicable_licenses' to import
     // all of the 'license_kinds' from "frameworks_base_license"
@@ -30,33 +27,31 @@ package {
 filegroup {
     name: "non-updatable-current.txt",
     srcs: ["current.txt"],
+    visibility: ["//frameworks/base/api"],
 }
 
 filegroup {
     name: "non-updatable-removed.txt",
     srcs: ["removed.txt"],
+    visibility: ["//frameworks/base/api"],
 }
 
 filegroup {
     name: "non-updatable-system-current.txt",
     srcs: ["system-current.txt"],
+    visibility: ["//frameworks/base/api"],
 }
 
 filegroup {
     name: "non-updatable-system-removed.txt",
     srcs: ["system-removed.txt"],
-}
-
-filegroup {
-    name: "non-updatable-system-lint-baseline.txt",
-    srcs: ["system-lint-baseline.txt"],
+    visibility: ["//frameworks/base/api"],
 }
 
 filegroup {
     name: "non-updatable-module-lib-current.txt",
     srcs: ["module-lib-current.txt"],
     visibility: [
-        "//frameworks/base",
         "//frameworks/base/api",
         "//cts/tests/signature/api",
     ],
@@ -66,46 +61,7 @@ filegroup {
     name: "non-updatable-module-lib-removed.txt",
     srcs: ["module-lib-removed.txt"],
     visibility: [
-        "//frameworks/base",
         "//frameworks/base/api",
         "//cts/tests/signature/api",
-    ],
-}
-
-filegroup {
-    name: "non-updatable-module-lib-lint-baseline.txt",
-    srcs: ["module-lib-lint-baseline.txt"],
-}
-
-filegroup {
-    name: "non-updatable-test-current.txt",
-    srcs: ["test-current.txt"],
-}
-
-filegroup {
-    name: "non-updatable-test-removed.txt",
-    srcs: ["test-removed.txt"],
-}
-
-filegroup {
-    name: "non-updatable-test-lint-baseline.txt",
-    srcs: ["test-lint-baseline.txt"],
-}
-
-java_api_contribution {
-    name: "api-stubs-docs-non-updatable-public-stubs",
-    api_surface: "public",
-    api_file: "current.txt",
-    visibility: [
-        "//build/orchestrator/apis",
-    ],
-}
-
-java_api_contribution {
-    name: "frameworks-base-core-api-module-lib-stubs",
-    api_surface: "module-lib",
-    api_file: "module-lib-current.txt",
-    visibility: [
-        "//build/orchestrator/apis",
     ],
 }

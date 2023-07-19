@@ -21,9 +21,7 @@ import android.content.Intent
 import javax.inject.Inject
 
 /** Injectable wrapper around [CameraIntents]. */
-class CameraIntentsWrapper
-@Inject
-constructor(
+class CameraIntentsWrapper @Inject constructor(
     private val context: Context,
 ) {
 
@@ -41,10 +39,5 @@ constructor(
      */
     fun getInsecureCameraIntent(): Intent {
         return CameraIntents.getInsecureCameraIntent(context)
-    }
-
-    /** Returns an [Intent] that can be used to start the camera in video mode. */
-    fun getVideoCameraIntent(): Intent {
-        return CameraIntents.getVideoCameraIntent()
     }
 }

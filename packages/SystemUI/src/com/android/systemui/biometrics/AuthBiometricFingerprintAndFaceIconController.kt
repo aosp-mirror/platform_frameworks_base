@@ -35,13 +35,13 @@ class AuthBiometricFingerprintAndFaceIconController(
 
     override val actsAsConfirmButton: Boolean = true
 
-    override fun shouldAnimateIconViewForTransition(
+    override fun shouldAnimateForTransition(
             @BiometricState oldState: Int,
             @BiometricState newState: Int
     ): Boolean = when (newState) {
         STATE_PENDING_CONFIRMATION -> true
         STATE_AUTHENTICATED -> false
-        else -> super.shouldAnimateIconViewForTransition(oldState, newState)
+        else -> super.shouldAnimateForTransition(oldState, newState)
     }
 
     @RawRes

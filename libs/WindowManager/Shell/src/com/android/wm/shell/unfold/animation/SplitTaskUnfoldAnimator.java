@@ -28,10 +28,8 @@ import android.animation.RectEvaluator;
 import android.animation.TypeEvaluator;
 import android.app.TaskInfo;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.os.Trace;
 import android.util.SparseArray;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -44,8 +42,6 @@ import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.splitscreen.SplitScreenController;
-import com.android.wm.shell.sysui.ConfigurationChangeListener;
-import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldBackgroundController;
 
@@ -66,18 +62,16 @@ import dagger.Lazy;
  * They use independent instances of SplitTaskUnfoldAnimator.
  */
 public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
-        DisplayInsetsController.OnInsetsChangedListener, SplitScreenListener,
-        ConfigurationChangeListener {
+        DisplayInsetsController.OnInsetsChangedListener, SplitScreenListener {
 
     private static final TypeEvaluator<Rect> RECT_EVALUATOR = new RectEvaluator(new Rect());
     private static final float CROPPING_START_MARGIN_FRACTION = 0.05f;
 
-    private final Context mContext;
     private final Executor mExecutor;
     private final DisplayInsetsController mDisplayInsetsController;
     private final SparseArray<AnimationContext> mAnimationContextByTaskId = new SparseArray<>();
     private final int mExpandedTaskBarHeight;
-    private final ShellController mShellController;
+    private final float mWindowCornerRadiusPx;
     private final Lazy<Optional<SplitScreenController>> mSplitScreenController;
     private final UnfoldBackgroundController mUnfoldBackgroundController;
 
@@ -85,7 +79,6 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
     private final Rect mSideStageBounds = new Rect();
     private final Rect mRootStageBounds = new Rect();
 
-    private float mWindowCornerRadiusPx;
     private InsetsSource mTaskbarInsetsSource;
 
     @SplitPosition
@@ -95,12 +88,10 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
 
     public SplitTaskUnfoldAnimator(Context context, Executor executor,
             Lazy<Optional<SplitScreenController>> splitScreenController,
-            ShellController shellController, UnfoldBackgroundController unfoldBackgroundController,
+            UnfoldBackgroundController unfoldBackgroundController,
             DisplayInsetsController displayInsetsController) {
         mDisplayInsetsController = displayInsetsController;
         mExecutor = executor;
-        mContext = context;
-        mShellController = shellController;
         mUnfoldBackgroundController = unfoldBackgroundController;
         mSplitScreenController = splitScreenController;
         mExpandedTaskBarHeight = context.getResources().getDimensionPixelSize(
@@ -112,14 +103,6 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
     @Override
     public void init() {
         mDisplayInsetsController.addInsetsChangedListener(DEFAULT_DISPLAY, this);
-        mShellController.addConfigurationChangeListener(this);
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfiguration) {
-        Trace.beginSection("SplitTaskUnfoldAnimator#onConfigurationChanged");
-        mWindowCornerRadiusPx = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
-        Trace.endSection();
     }
 
     /**

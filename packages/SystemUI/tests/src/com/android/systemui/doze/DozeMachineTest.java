@@ -45,7 +45,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
@@ -58,7 +57,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
@@ -87,8 +85,6 @@ public class DozeMachineTest extends SysuiTestCase {
     private DozeMachine.Part mPartMock;
     @Mock
     private DozeMachine.Part mAnotherPartMock;
-    @Mock
-    private UserTracker mUserTracker;
     private DozeServiceFake mServiceFake;
     private WakeLockFake mWakeLockFake;
     private AmbientDisplayConfiguration mAmbientDisplayConfigMock;
@@ -101,7 +97,6 @@ public class DozeMachineTest extends SysuiTestCase {
         mAmbientDisplayConfigMock = mock(AmbientDisplayConfiguration.class);
         when(mDockManager.isDocked()).thenReturn(false);
         when(mDockManager.isHidden()).thenReturn(false);
-        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
         mMachine = new DozeMachine(mServiceFake,
                 mAmbientDisplayConfigMock,
@@ -110,8 +105,7 @@ public class DozeMachineTest extends SysuiTestCase {
                 mDozeLog,
                 mDockManager,
                 mHost,
-                new DozeMachine.Part[]{mPartMock, mAnotherPartMock},
-                mUserTracker);
+                new DozeMachine.Part[]{mPartMock, mAnotherPartMock});
     }
 
     @Test
@@ -404,17 +398,6 @@ public class DozeMachineTest extends SysuiTestCase {
         mMachine.requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
         mMachine.requestState(DOZE_PULSING);
         mMachine.requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
-        mMachine.requestState(DOZE_PULSE_DONE);
-    }
-
-    @Test
-    public void testPulsing_dozeSuspendTriggers_pulseDone_doesntCrash() {
-        mMachine.requestState(INITIALIZED);
-
-        mMachine.requestState(DOZE);
-        mMachine.requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
-        mMachine.requestState(DOZE_PULSING);
-        mMachine.requestState(DOZE_SUSPEND_TRIGGERS);
         mMachine.requestState(DOZE_PULSE_DONE);
     }
 

@@ -19,7 +19,6 @@ package android.view;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
 import android.annotation.Nullable;
-import android.annotation.NonNull;
 import android.app.WindowConfiguration.ActivityType;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.IBinder;
@@ -158,7 +157,7 @@ public class RemoteAnimationDefinition implements Parcelable {
         }
     }
 
-    public static final @NonNull Creator<RemoteAnimationDefinition> CREATOR =
+    public static final @android.annotation.NonNull Creator<RemoteAnimationDefinition> CREATOR =
             new Creator<RemoteAnimationDefinition>() {
         public RemoteAnimationDefinition createFromParcel(Parcel in) {
             return new RemoteAnimationDefinition(in);
@@ -200,17 +199,18 @@ public class RemoteAnimationDefinition implements Parcelable {
             return 0;
         }
 
-        public static final @NonNull Parcelable.Creator<RemoteAnimationAdapterEntry> CREATOR =
-                new Parcelable.Creator<RemoteAnimationAdapterEntry>() {
-                    @Override
-                    public RemoteAnimationAdapterEntry createFromParcel(Parcel in) {
-                        return new RemoteAnimationAdapterEntry(in);
-                    }
+        private static final @android.annotation.NonNull Creator<RemoteAnimationAdapterEntry> CREATOR
+                = new Creator<RemoteAnimationAdapterEntry>() {
 
-                    @Override
-                    public RemoteAnimationAdapterEntry[] newArray(int size) {
-                        return new RemoteAnimationAdapterEntry[size];
-                    }
-                };
+            @Override
+            public RemoteAnimationAdapterEntry createFromParcel(Parcel in) {
+                return new RemoteAnimationAdapterEntry(in);
+            }
+
+            @Override
+            public RemoteAnimationAdapterEntry[] newArray(int size) {
+                return new RemoteAnimationAdapterEntry[size];
+            }
+        };
     }
 }

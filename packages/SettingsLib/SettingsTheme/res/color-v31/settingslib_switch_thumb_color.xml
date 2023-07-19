@@ -22,5 +22,5 @@
     <item android:state_checked="false"
           android:color="@color/settingslib_thumb_off_color" />
     <!-- Enabled or toggle on status of thumb -->
-    <item android:color="@color/settingslib_state_on_color" />
+    <item android:color="@color/settingslib_thumb_on_color" />
 </selector>

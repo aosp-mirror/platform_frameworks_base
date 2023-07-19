@@ -60,11 +60,9 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     }
 
     private val deviceProvisionedUri = globalSettings.getUriFor(Settings.Global.DEVICE_PROVISIONED)
-    private val frpActiveUri = secureSettings.getUriFor(Settings.Secure.SECURE_FRP_MODE)
     private val userSetupUri = secureSettings.getUriFor(Settings.Secure.USER_SETUP_COMPLETE)
 
     private val deviceProvisioned = AtomicBoolean(false)
-    private val frpActive = AtomicBoolean(false)
     @GuardedBy("lock")
     private val userSetupComplete = SparseBooleanArray()
     @GuardedBy("lock")
@@ -91,14 +89,10 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
             userId: Int
         ) {
             val updateDeviceProvisioned = deviceProvisionedUri in uris
-            val updateFrp = frpActiveUri in uris
             val updateUser = if (userSetupUri in uris) userId else NO_USERS
-            updateValues(updateDeviceProvisioned, updateFrp, updateUser)
+            updateValues(updateDeviceProvisioned, updateUser)
             if (updateDeviceProvisioned) {
                 onDeviceProvisionedChanged()
-            }
-            if (updateFrp) {
-                onFrpActiveChanged()
             }
             if (updateUser != NO_USERS) {
                 onUserSetupChanged()
@@ -109,7 +103,7 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
     private val userChangedCallback = object : UserTracker.Callback {
         @WorkerThread
         override fun onUserChanged(newUser: Int, userContext: Context) {
-            updateValues(updateDeviceProvisioned = false, updateFrp = false, updateUser = newUser)
+            updateValues(updateDeviceProvisioned = false, updateUser = newUser)
             onUserSwitched()
         }
 
@@ -131,27 +125,19 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
         updateValues()
         userTracker.addCallback(userChangedCallback, backgroundExecutor)
         globalSettings.registerContentObserver(deviceProvisionedUri, observer)
-        globalSettings.registerContentObserver(frpActiveUri, observer)
         secureSettings.registerContentObserverForUser(userSetupUri, observer, UserHandle.USER_ALL)
     }
 
     @WorkerThread
-    private fun updateValues(
-        updateDeviceProvisioned: Boolean = true,
-        updateFrp: Boolean = true,
-        updateUser: Int = ALL_USERS
-    ) {
+    private fun updateValues(updateDeviceProvisioned: Boolean = true, updateUser: Int = ALL_USERS) {
         if (updateDeviceProvisioned) {
             deviceProvisioned
                     .set(globalSettings.getInt(Settings.Global.DEVICE_PROVISIONED, 0) != 0)
         }
-        if (updateFrp) {
-            frpActive.set(globalSettings.getInt(Settings.Secure.SECURE_FRP_MODE, 0) != 0)
-        }
         synchronized(lock) {
             if (updateUser == ALL_USERS) {
-                val n = userSetupComplete.size()
-                for (i in 0 until n) {
+                val N = userSetupComplete.size()
+                for (i in 0 until N) {
                     val user = userSetupComplete.keyAt(i)
                     val value = secureSettings
                             .getIntForUser(Settings.Secure.USER_SETUP_COMPLETE, 0, user) != 0
@@ -186,10 +172,6 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
         return deviceProvisioned.get()
     }
 
-    override fun isFrpActive(): Boolean {
-        return frpActive.get()
-    }
-
     override fun isUserSetup(user: Int): Boolean {
         val index = synchronized(lock) {
             userSetupComplete.indexOfKey(user)
@@ -214,13 +196,7 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
 
     override fun onDeviceProvisionedChanged() {
         dispatchChange(
-            DeviceProvisionedController.DeviceProvisionedListener::onDeviceProvisionedChanged
-        )
-    }
-
-    override fun onFrpActiveChanged() {
-        dispatchChange(
-            DeviceProvisionedController.DeviceProvisionedListener::onFrpActiveChanged
+                DeviceProvisionedController.DeviceProvisionedListener::onDeviceProvisionedChanged
         )
     }
 
@@ -245,7 +221,6 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Device provisioned: ${deviceProvisioned.get()}")
-        pw.println("Factory Reset Protection active: ${frpActive.get()}")
         synchronized(lock) {
             pw.println("User setup complete: $userSetupComplete")
             pw.println("Listeners: $listeners")

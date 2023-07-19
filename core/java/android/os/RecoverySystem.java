@@ -672,6 +672,10 @@ public class RecoverySystem {
             if (!rs.setupBcb(command)) {
                 throw new IOException("Setup BCB failed");
             }
+            Log.i(TAG, "Setting packageFile's read permission.");
+            if (!packageFile.setReadable(true, false)) {
+                Log.w(TAG, "Error making packageFile readable.");
+            }
             try {
                 if (!rs.allocateSpaceForUpdate(packageFile)) {
                     rs.clearBcb();

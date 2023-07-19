@@ -442,11 +442,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
 
         @Override
-        public void noteCpuWakingNetworkPacket(Network network, long elapsedMillis, int uid) {
-            Slog.d(TAG, "Wakeup due to incoming packet on network " + network + " to uid " + uid);
-        }
-
-        @Override
         public void noteBinderCallStats(int workSourceUid, long incrementatCallCount,
                 Collection<BinderCallsStats.CallStat> callStats) {
             synchronized (BatteryStatsService.this.mLock) {
@@ -827,10 +822,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
                     final long sessionStart = mBatteryUsageStatsStore
                             .getLastBatteryUsageStatsBeforeResetAtomPullTimestamp();
-                    final long sessionEnd;
-                    synchronized (mStats) {
-                        sessionEnd = mStats.getStartClockTime();
-                    }
+                    final long sessionEnd = mStats.getStartClockTime();
                     final BatteryUsageStatsQuery queryBeforeReset =
                             new BatteryUsageStatsQuery.Builder()
                                     .setMaxStatsAgeMs(0)
@@ -1985,6 +1977,32 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    /**
+     * Bluetooth on stat logging
+     */
+    public void noteBluetoothOn(int uid, int reason, String packageName) {
+        if (Binder.getCallingPid() != Process.myPid()) {
+            mContext.enforcePermission(android.Manifest.permission.BLUETOOTH_CONNECT,
+                    Binder.getCallingPid(), uid, null);
+        }
+        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
+                uid, null, FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__ENABLED,
+                reason, packageName);
+    }
+
+    /**
+     * Bluetooth off stat logging
+     */
+    public void noteBluetoothOff(int uid, int reason, String packageName) {
+        if (Binder.getCallingPid() != Process.myPid()) {
+            mContext.enforcePermission(android.Manifest.permission.BLUETOOTH_CONNECT,
+                    Binder.getCallingPid(), uid, null);
+        }
+        FrameworkStatsLog.write_non_chained(FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
+                uid, null, FrameworkStatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__DISABLED,
+                reason, packageName);
+    }
+
     @Override
     public void noteBleScanStarted(final WorkSource ws, final boolean isUnoptimized) {
         enforceCallingPermission();
@@ -3020,5 +3038,18 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     @Override
     public void suspendBatteryInput() {
         mBatteryManagerInternal.suspendBatteryInput();
+    }
+
+    /**
+     * Battery stats and history reset
+     */
+    @Override
+    public void resetStatistics() {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.RESET_BATTERY_STATS, null);
+        synchronized (mStats) {
+            mStats.resetAllStatsCmdLocked();
+            mBatteryUsageStatsStore.removeAllSnapshots();
+        }
     }
 }

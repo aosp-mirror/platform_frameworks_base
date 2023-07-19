@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.graphics.Color;
-import android.os.Trace;
 
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.scrim.ScrimView;
@@ -82,7 +81,7 @@ public enum ScrimState {
             mBehindAlpha = mClipQsScrim ? 1 : mScrimBehindAlphaKeyguard;
             mNotifAlpha = mClipQsScrim ? mScrimBehindAlphaKeyguard : 0;
             if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.TRANSPARENT);
             }
         }
     },
@@ -122,7 +121,7 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
-            mBehindTint = mClipQsScrim ? Color.BLACK : Color.TRANSPARENT;
+            mBehindTint = Color.TRANSPARENT;
             mNotifAlpha = mClipQsScrim ? mDefaultScrimAlpha : 0;
             mNotifTint = Color.TRANSPARENT;
             mFrontAlpha = 0f;
@@ -146,10 +145,10 @@ public enum ScrimState {
             mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
             mNotifAlpha = 1f;
             mFrontAlpha = 0f;
-            mBehindTint = mClipQsScrim ? Color.TRANSPARENT : Color.BLACK;
+            mBehindTint = Color.TRANSPARENT;
 
             if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.TRANSPARENT);
             }
         }
     },
@@ -243,30 +242,25 @@ public enum ScrimState {
                     : CentralSurfaces.FADE_KEYGUARD_DURATION;
 
             boolean fromAod = previousState == AOD || previousState == PULSING;
-            // If launch/occlude animations were playing, they already animated the scrim
-            // alpha to 0f as part of the animation. If we animate it now, we'll set it back
-            // to 1f and animate it back to 0f, causing an unwanted scrim flash.
-            mAnimateChange = !mLaunchingAffordanceWithPreview
-                    && !mOccludeAnimationPlaying
-                    && !fromAod;
+            mAnimateChange = !mLaunchingAffordanceWithPreview && !fromAod;
 
             mFrontTint = Color.TRANSPARENT;
-            mBehindTint = Color.BLACK;
+            mBehindTint = Color.TRANSPARENT;
             mBlankScreen = false;
 
             if (mDisplayRequiresBlanking && previousState == ScrimState.AOD) {
                 // Set all scrims black, before they fade transparent.
                 updateScrimColor(mScrimInFront, 1f /* alpha */, Color.BLACK /* tint */);
-                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK /* tint */);
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.TRANSPARENT /* tint */);
 
                 // Scrims should still be black at the end of the transition.
                 mFrontTint = Color.BLACK;
-                mBehindTint = Color.BLACK;
+                mBehindTint = Color.TRANSPARENT;
                 mBlankScreen = true;
             }
 
             if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.TRANSPARENT);
             }
         }
     },
@@ -313,7 +307,6 @@ public enum ScrimState {
     boolean mWallpaperSupportsAmbientMode;
     boolean mHasBackdrop;
     boolean mLaunchingAffordanceWithPreview;
-    boolean mOccludeAnimationPlaying;
     boolean mWakeLockScreenSensorActive;
     boolean mKeyguardFadingAway;
     long mKeyguardFadingAwayDuration;
@@ -381,14 +374,6 @@ public enum ScrimState {
             tint = scrim == mScrimInFront ? ScrimController.DEBUG_FRONT_TINT
                     : ScrimController.DEBUG_BEHIND_TINT;
         }
-        Trace.traceCounter(Trace.TRACE_TAG_APP,
-                scrim == mScrimInFront ? "front_scrim_alpha" : "back_scrim_alpha",
-                (int) (alpha * 255));
-
-        Trace.traceCounter(Trace.TRACE_TAG_APP,
-                scrim == mScrimInFront ? "front_scrim_tint" : "back_scrim_tint",
-                Color.alpha(tint));
-
         scrim.setTint(tint);
         scrim.setViewAlpha(alpha);
     }
@@ -415,10 +400,6 @@ public enum ScrimState {
 
     public void setLaunchingAffordanceWithPreview(boolean launchingAffordanceWithPreview) {
         mLaunchingAffordanceWithPreview = launchingAffordanceWithPreview;
-    }
-
-    public void setOccludeAnimationPlaying(boolean occludeAnimationPlaying) {
-        mOccludeAnimationPlaying = occludeAnimationPlaying;
     }
 
     public boolean isLowPowerState() {

@@ -29,7 +29,6 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.notetask.NoteTaskInitializer;
-import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -64,7 +63,6 @@ import java.util.concurrent.Executor;
 @RunWith(AndroidJUnit4.class)
 public class WMShellTest extends SysuiTestCase {
     WMShell mWMShell;
-    FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Mock ShellInterface mShellInterface;
     @Mock CommandQueue mCommandQueue;
@@ -102,7 +100,6 @@ public class WMShellTest extends SysuiTestCase {
                 mProtoTracer,
                 mWakefulnessLifecycle,
                 mUserTracker,
-                mDisplayTracker,
                 mNoteTaskInitializer,
                 mSysUiMainExecutor
         );

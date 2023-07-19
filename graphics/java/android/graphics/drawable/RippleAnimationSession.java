@@ -39,13 +39,13 @@ import java.util.function.Consumer;
  */
 public final class RippleAnimationSession {
     private static final String TAG = "RippleAnimationSession";
-    private static final int ENTER_ANIM_DURATION = 450;
-    private static final int EXIT_ANIM_DURATION = 375;
+    private static final int ENTER_ANIM_DURATION = 350;
+    private static final int EXIT_ANIM_DURATION = 450;
     private static final long NOISE_ANIMATION_DURATION = 7000;
     private static final long MAX_NOISE_PHASE = NOISE_ANIMATION_DURATION / 214;
+    // Input progress that results in 0.5 after the ease-out sine curve
+    private static final float MID_PROGRESS = 1.0f / 3.0f;
     private static final TimeInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
-    private static final Interpolator FAST_OUT_SLOW_IN =
-            new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     private Consumer<RippleAnimationSession> mOnSessionEnd;
     private final AnimationProperties<Float, Paint> mProperties;
     private AnimationProperties<CanvasProperty<Float>, CanvasProperty<Paint>> mCanvasProperties;
@@ -111,7 +111,7 @@ public final class RippleAnimationSession {
     }
 
     private void exitSoftware() {
-        ValueAnimator expand = ValueAnimator.ofFloat(.5f, 1f);
+        ValueAnimator expand = ValueAnimator.ofFloat(MID_PROGRESS, 1f);
         expand.setDuration(EXIT_ANIM_DURATION);
         expand.setStartDelay(computeDelay());
         expand.addUpdateListener(updatedAnimation -> {
@@ -165,9 +165,6 @@ public final class RippleAnimationSession {
         });
         exit.setTarget(canvas);
         exit.setInterpolator(LINEAR_INTERPOLATOR);
-
-        long delay = computeDelay();
-        exit.setStartDelay(delay);
         exit.start();
         mCurrentAnimation = exit;
     }
@@ -176,7 +173,7 @@ public final class RippleAnimationSession {
         AnimationProperties<CanvasProperty<Float>, CanvasProperty<Paint>>
                 props = getCanvasProperties();
         RenderNodeAnimator expand =
-                new RenderNodeAnimator(props.getProgress(), .5f);
+                new RenderNodeAnimator(props.getProgress(), MID_PROGRESS);
         expand.setTarget(canvas);
         RenderNodeAnimator loop = new RenderNodeAnimator(props.getNoisePhase(),
                 mStartTime + MAX_NOISE_PHASE);
@@ -188,7 +185,7 @@ public final class RippleAnimationSession {
     private void startAnimation(Animator expand, Animator loop) {
         expand.setDuration(ENTER_ANIM_DURATION);
         expand.addListener(new AnimatorListener(this));
-        expand.setInterpolator(FAST_OUT_SLOW_IN);
+        expand.setInterpolator(LINEAR_INTERPOLATOR);
         expand.start();
         loop.setDuration(NOISE_ANIMATION_DURATION);
         loop.addListener(new AnimatorListener(this) {
@@ -205,7 +202,7 @@ public final class RippleAnimationSession {
     }
 
     private void enterSoftware() {
-        ValueAnimator expand = ValueAnimator.ofFloat(0f, 0.5f);
+        ValueAnimator expand = ValueAnimator.ofFloat(0f, MID_PROGRESS);
         expand.addUpdateListener(updatedAnimation -> {
             notifyUpdate();
             mProperties.getShader().setProgress((float) expand.getAnimatedValue());

@@ -15,6 +15,8 @@
  */
 package com.android.keyguard;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.app.Presentation;
 import android.content.Context;
 import android.graphics.Color;
@@ -35,11 +37,9 @@ import android.view.WindowManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.R;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
-import com.android.systemui.settings.DisplayTracker;
 
 import java.util.concurrent.Executor;
 
@@ -53,7 +53,6 @@ public class KeyguardDisplayManager {
 
     private MediaRouter mMediaRouter = null;
     private final DisplayManager mDisplayService;
-    private final DisplayTracker mDisplayTracker;
     private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     private final Context mContext;
@@ -63,43 +62,46 @@ public class KeyguardDisplayManager {
 
     private final SparseArray<Presentation> mPresentations = new SparseArray<>();
 
-    private final DisplayTracker.Callback mDisplayCallback =
-            new DisplayTracker.Callback() {
-                @Override
-                public void onDisplayAdded(int displayId) {
-                    Trace.beginSection(
-                            "KeyguardDisplayManager#onDisplayAdded(displayId=" + displayId + ")");
-                    final Display display = mDisplayService.getDisplay(displayId);
-                    if (mShowing) {
-                        updateNavigationBarVisibility(displayId, false /* navBarVisible */);
-                        showPresentation(display);
-                    }
-                    Trace.endSection();
-                }
+    private final DisplayManager.DisplayListener mDisplayListener =
+            new DisplayManager.DisplayListener() {
 
-                @Override
-                public void onDisplayRemoved(int displayId) {
-                    Trace.beginSection(
-                            "KeyguardDisplayManager#onDisplayRemoved(displayId=" + displayId + ")");
-                    hidePresentation(displayId);
-                    Trace.endSection();
-                }
-            };
+        @Override
+        public void onDisplayAdded(int displayId) {
+            Trace.beginSection(
+                    "KeyguardDisplayManager#onDisplayAdded(displayId=" + displayId + ")");
+            final Display display = mDisplayService.getDisplay(displayId);
+            if (mShowing) {
+                updateNavigationBarVisibility(displayId, false /* navBarVisible */);
+                showPresentation(display);
+            }
+            Trace.endSection();
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            Trace.beginSection(
+                    "KeyguardDisplayManager#onDisplayRemoved(displayId=" + displayId + ")");
+            hidePresentation(displayId);
+            Trace.endSection();
+        }
+    };
 
     @Inject
     public KeyguardDisplayManager(Context context,
             Lazy<NavigationBarController> navigationBarControllerLazy,
             KeyguardStatusViewComponent.Factory keyguardStatusViewComponentFactory,
-            DisplayTracker displayTracker,
-            @Main Executor mainExecutor,
             @UiBackground Executor uiBgExecutor) {
         mContext = context;
         mNavigationBarControllerLazy = navigationBarControllerLazy;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         uiBgExecutor.execute(() -> mMediaRouter = mContext.getSystemService(MediaRouter.class));
         mDisplayService = mContext.getSystemService(DisplayManager.class);
-        mDisplayTracker = displayTracker;
-        mDisplayTracker.addDisplayChangeCallback(mDisplayCallback, mainExecutor);
+        mDisplayService.registerDisplayListener(mDisplayListener, null /* handler */);
     }
 
     private boolean isKeyguardShowable(Display display) {
@@ -107,7 +109,7 @@ public class KeyguardDisplayManager {
             if (DEBUG) Log.i(TAG, "Cannot show Keyguard on null display");
             return false;
         }
-        if (display.getDisplayId() == mDisplayTracker.getDefaultDisplayId()) {
+        if (display.getDisplayId() == DEFAULT_DISPLAY) {
             if (DEBUG) Log.i(TAG, "Do not show KeyguardPresentation on the default display");
             return false;
         }
@@ -222,7 +224,7 @@ public class KeyguardDisplayManager {
     protected boolean updateDisplays(boolean showing) {
         boolean changed = false;
         if (showing) {
-            final Display[] displays = mDisplayTracker.getAllDisplays();
+            final Display[] displays = mDisplayService.getDisplays();
             for (Display display : displays) {
                 int displayId = display.getDisplayId();
                 updateNavigationBarVisibility(displayId, false /* navBarVisible */);
@@ -245,7 +247,7 @@ public class KeyguardDisplayManager {
     //  term solution in R.
     private void updateNavigationBarVisibility(int displayId, boolean navBarVisible) {
         // Leave this task to {@link StatusBarKeyguardViewManager}
-        if (displayId == mDisplayTracker.getDefaultDisplayId()) return;
+        if (displayId == DEFAULT_DISPLAY) return;
 
         NavigationBarView navBarView = mNavigationBarControllerLazy.get()
                 .getNavigationBarView(displayId);

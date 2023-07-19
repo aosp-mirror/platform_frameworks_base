@@ -98,7 +98,7 @@ public class BinderLatencyObserverTest {
         assertEquals(1, latencyHistograms.size());
         LatencyDims dims = latencyHistograms.keySet().iterator().next();
         assertEquals(binder.getClass(), dims.getBinderClass());
-        assertEquals(2, dims.getTransactionCode()); // the first nextInt() is in the constructor
+        assertEquals(1, dims.getTransactionCode());
         assertThat(latencyHistograms.get(dims)).asList().containsExactly(1, 0, 0, 0, 0).inOrder();
     }
 
@@ -313,11 +313,11 @@ public class BinderLatencyObserverTest {
                                 int mCallCount = 0;
 
                                 public int nextInt() {
-                                    throw new IllegalStateException("Should not use nextInt()");
+                                    return mCallCount++;
                                 }
 
                                 public int nextInt(int x) {
-                                    return (mCallCount++) % x;
+                                    return 1;
                                 }
                             };
                         }

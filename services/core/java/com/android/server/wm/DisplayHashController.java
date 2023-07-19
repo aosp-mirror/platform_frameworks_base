@@ -369,6 +369,9 @@ public class DisplayHashController {
             if (mServiceConnection == null) {
                 if (DEBUG) Slog.v(TAG, "creating connection");
 
+                // Create the connection
+                mServiceConnection = new DisplayHashingServiceConnection();
+
                 final ComponentName component = getServiceComponentName();
                 if (DEBUG) Slog.v(TAG, "binding to: " + component);
                 if (component != null) {
@@ -376,8 +379,6 @@ public class DisplayHashController {
                     intent.setComponent(component);
                     final long token = Binder.clearCallingIdentity();
                     try {
-                        // Create the connection
-                        mServiceConnection = new DisplayHashingServiceConnection();
                         mContext.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
                         if (DEBUG) Slog.v(TAG, "bound");
                     } finally {
@@ -386,9 +387,7 @@ public class DisplayHashController {
                 }
             }
 
-            if (mServiceConnection != null) {
-                mServiceConnection.runCommandLocked(command);
-            }
+            mServiceConnection.runCommandLocked(command);
         }
     }
 

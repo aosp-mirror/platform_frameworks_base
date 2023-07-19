@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.xtended.qs.portrait.layout_4x3"
+    android:versionCode="1"
+    android:versionName="1.0">
+    <overlay android:targetPackage="com.android.systemui" android:category="android.qs.portrait" android:priority="999" />
+    <application android:label="QS tile portrait 4x3" android:hasCode="false" />
+</manifest>

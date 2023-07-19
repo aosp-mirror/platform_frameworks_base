@@ -155,85 +155,85 @@ public class ZenModeFiltering {
 
         if (isCritical(record)) {
             // Zen mode is ignored for critical notifications.
-            maybeLogInterceptDecision(record, false, "criticalNotification");
+            ZenLog.traceNotIntercepted(record, "criticalNotification");
             return false;
         }
         // Make an exception to policy for the notification saying that policy has changed
         if (NotificationManager.Policy.areAllVisualEffectsSuppressed(policy.suppressedVisualEffects)
                 && "android".equals(record.getSbn().getPackageName())
                 && SystemMessageProto.SystemMessage.NOTE_ZEN_UPGRADE == record.getSbn().getId()) {
-            maybeLogInterceptDecision(record, false, "systemDndChangedNotification");
+            ZenLog.traceNotIntercepted(record, "systemDndChangedNotification");
             return false;
         }
         switch (zen) {
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 // #notevenalarms
-                maybeLogInterceptDecision(record, true, "none");
+                ZenLog.traceIntercepted(record, "none");
                 return true;
             case Global.ZEN_MODE_ALARMS:
                 if (isAlarm(record)) {
                     // Alarms only
-                    maybeLogInterceptDecision(record, false, "alarm");
+                    ZenLog.traceNotIntercepted(record, "alarm");
                     return false;
                 }
-                maybeLogInterceptDecision(record, true, "alarmsOnly");
+                ZenLog.traceIntercepted(record, "alarmsOnly");
                 return true;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 // allow user-prioritized packages through in priority mode
                 if (record.getPackagePriority() == Notification.PRIORITY_MAX) {
-                    maybeLogInterceptDecision(record, false, "priorityApp");
+                    ZenLog.traceNotIntercepted(record, "priorityApp");
                     return false;
                 }
 
                 if (isAlarm(record)) {
                     if (!policy.allowAlarms()) {
-                        maybeLogInterceptDecision(record, true, "!allowAlarms");
+                        ZenLog.traceIntercepted(record, "!allowAlarms");
                         return true;
                     }
-                    maybeLogInterceptDecision(record, false, "allowedAlarm");
+                    ZenLog.traceNotIntercepted(record, "allowedAlarm");
                     return false;
                 }
                 if (isEvent(record)) {
                     if (!policy.allowEvents()) {
-                        maybeLogInterceptDecision(record, true, "!allowEvents");
+                        ZenLog.traceIntercepted(record, "!allowEvents");
                         return true;
                     }
-                    maybeLogInterceptDecision(record, false, "allowedEvent");
+                    ZenLog.traceNotIntercepted(record, "allowedEvent");
                     return false;
                 }
                 if (isReminder(record)) {
                     if (!policy.allowReminders()) {
-                        maybeLogInterceptDecision(record, true, "!allowReminders");
+                        ZenLog.traceIntercepted(record, "!allowReminders");
                         return true;
                     }
-                    maybeLogInterceptDecision(record, false, "allowedReminder");
+                    ZenLog.traceNotIntercepted(record, "allowedReminder");
                     return false;
                 }
                 if (isMedia(record)) {
                     if (!policy.allowMedia()) {
-                        maybeLogInterceptDecision(record, true, "!allowMedia");
+                        ZenLog.traceIntercepted(record, "!allowMedia");
                         return true;
                     }
-                    maybeLogInterceptDecision(record, false, "allowedMedia");
+                    ZenLog.traceNotIntercepted(record, "allowedMedia");
                     return false;
                 }
                 if (isSystem(record)) {
                     if (!policy.allowSystem()) {
-                        maybeLogInterceptDecision(record, true, "!allowSystem");
+                        ZenLog.traceIntercepted(record, "!allowSystem");
                         return true;
                     }
-                    maybeLogInterceptDecision(record, false, "allowedSystem");
+                    ZenLog.traceNotIntercepted(record, "allowedSystem");
                     return false;
                 }
                 if (isConversation(record)) {
                     if (policy.allowConversations()) {
                         if (policy.priorityConversationSenders == CONVERSATION_SENDERS_ANYONE) {
-                            maybeLogInterceptDecision(record, false, "conversationAnyone");
+                            ZenLog.traceNotIntercepted(record, "conversationAnyone");
                             return false;
                         } else if (policy.priorityConversationSenders
                                 == NotificationManager.Policy.CONVERSATION_SENDERS_IMPORTANT
                                 && record.getChannel().isImportantConversation()) {
-                            maybeLogInterceptDecision(record, false, "conversationMatches");
+                            ZenLog.traceNotIntercepted(record, "conversationMatches");
                             return false;
                         }
                     }
@@ -244,56 +244,28 @@ public class ZenModeFiltering {
                     if (policy.allowRepeatCallers()
                             && REPEAT_CALLERS.isRepeat(
                                     mContext, extras(record), record.getPhoneNumbers())) {
-                        maybeLogInterceptDecision(record, false, "repeatCaller");
+                        ZenLog.traceNotIntercepted(record, "repeatCaller");
                         return false;
                     }
                     if (!policy.allowCalls()) {
-                        maybeLogInterceptDecision(record, true, "!allowCalls");
+                        ZenLog.traceIntercepted(record, "!allowCalls");
                         return true;
                     }
                     return shouldInterceptAudience(policy.allowCallsFrom(), record);
                 }
                 if (isMessage(record)) {
                     if (!policy.allowMessages()) {
-                        maybeLogInterceptDecision(record, true, "!allowMessages");
+                        ZenLog.traceIntercepted(record, "!allowMessages");
                         return true;
                     }
                     return shouldInterceptAudience(policy.allowMessagesFrom(), record);
                 }
 
-                maybeLogInterceptDecision(record, true, "!priority");
+                ZenLog.traceIntercepted(record, "!priority");
                 return true;
             default:
-                maybeLogInterceptDecision(record, false, "unknownZenMode");
+                ZenLog.traceNotIntercepted(record, "unknownZenMode");
                 return false;
-        }
-    }
-
-    // Consider logging the decision of shouldIntercept for the given record.
-    // This will log the outcome if one of the following is true:
-    //   - it's the first time the intercept decision is set for the record
-    //   - OR it's not the first time, but the intercept decision changed
-    private static void maybeLogInterceptDecision(NotificationRecord record, boolean intercept,
-            String reason) {
-        boolean interceptBefore = record.isIntercepted();
-        if (record.hasInterceptBeenSet() && (interceptBefore == intercept)) {
-            // this record has already been evaluated for whether it should be intercepted, and
-            // the decision has not changed.
-            return;
-        }
-
-        // add a note to the reason indicating whether it's new or updated
-        String annotatedReason = reason;
-        if (!record.hasInterceptBeenSet()) {
-            annotatedReason = "new:" + reason;
-        } else if (interceptBefore != intercept) {
-            annotatedReason = "updated:" + reason;
-        }
-
-        if (intercept) {
-            ZenLog.traceIntercepted(record, annotatedReason);
-        } else {
-            ZenLog.traceNotIntercepted(record, annotatedReason);
         }
     }
 
@@ -313,10 +285,10 @@ public class ZenModeFiltering {
     private static boolean shouldInterceptAudience(int source, NotificationRecord record) {
         float affinity = record.getContactAffinity();
         if (!audienceMatches(source, affinity)) {
-            maybeLogInterceptDecision(record, true, "!audienceMatches,affinity=" + affinity);
+            ZenLog.traceIntercepted(record, "!audienceMatches,affinity=" + affinity);
             return true;
         }
-        maybeLogInterceptDecision(record, false, "affinity=" + affinity);
+        ZenLog.traceNotIntercepted(record, "affinity=" + affinity);
         return false;
     }
 

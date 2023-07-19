@@ -1839,15 +1839,8 @@ public final class Call {
 
     /**
      * Instructs this {@code Call} to play a dual-tone multi-frequency signaling (DTMF) tone.
-     * <p>
-     * Tones are both played locally for the user to hear and sent to the network to be relayed
-     * to the remote device.
-     * <p>
-     * You must ensure that any call to {@link #playDtmfTone(char}) is followed by a matching
-     * call to {@link #stopDtmfTone()} and that each tone is stopped before a new one is started.
-     * The play and stop commands are relayed to the underlying
-     * {@link android.telecom.ConnectionService} as executed; implementations may not correctly
-     * handle out of order commands.
+     *
+     * Any other currently playing DTMF tone in the specified call is immediately stopped.
      *
      * @param digit A character representing the DTMF digit for which to play the tone. This
      *         value must be one of {@code '0'} through {@code '9'}, {@code '*'} or {@code '#'}.

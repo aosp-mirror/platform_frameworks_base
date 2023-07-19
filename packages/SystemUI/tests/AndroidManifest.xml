@@ -108,11 +108,6 @@
             android:excludeFromRecents="true"
             />
 
-        <activity android:name="com.android.systemui.controls.ui.TestableControlsActivity"
-            android:exported="false"
-            android:excludeFromRecents="true"
-            />
-
         <activity android:name="com.android.systemui.screenshot.ScrollViewActivity"
                   android:exported="false" />
 

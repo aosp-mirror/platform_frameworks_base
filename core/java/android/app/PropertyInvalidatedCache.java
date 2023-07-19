@@ -29,10 +29,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.FastPrintWriter;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -1406,17 +1403,6 @@ public class PropertyInvalidatedCache<Query, Result> {
     }
 
     /**
-     * Return the number of entries in the cache.  This is used for testing and has package-only
-     * visibility.
-     * @hide
-     */
-    public int size() {
-        synchronized (mLock) {
-            return mCache.size();
-        }
-    }
-
-    /**
      * Returns a list of caches alive at the current time.
      */
     @GuardedBy("sGlobalLock")
@@ -1603,15 +1589,13 @@ public class PropertyInvalidatedCache<Query, Result> {
         // to the caller after all the data has been collected and all locks have been
         // released.
         ByteArrayOutputStream barray = new ByteArrayOutputStream();
-        PrintWriter bout = new PrintWriter(barray);
-        dumpCacheInfo(bout, args);
-        bout.close();
+        try (PrintWriter bout = new PrintWriter(barray)) {
+            dumpCacheInfo(bout, args);
+        }
 
-        try {
+        try (var out = new FileOutputStream(pfd.getFileDescriptor())) {
             // Send the final byte array to the output.  This happens outside of all locks.
-            var out = new FileOutputStream(pfd.getFileDescriptor());
             barray.writeTo(out);
-            out.close();
             barray.close();
         } catch (IOException e) {
             Log.e(TAG, "Failed to dump PropertyInvalidatedCache instances");
@@ -1623,12 +1607,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @hide
      */
     public static void onTrimMemory() {
-        ArrayList<PropertyInvalidatedCache> activeCaches;
-        synchronized (sGlobalLock) {
-            activeCaches = getActiveCaches();
-        }
-        for (int i = 0; i < activeCaches.size(); i++) {
-            activeCaches.get(i).clear();
+        for (PropertyInvalidatedCache pic : getActiveCaches()) {
+            pic.clear();
         }
     }
 }

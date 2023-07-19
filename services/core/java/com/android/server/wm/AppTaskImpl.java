@@ -119,20 +119,10 @@ class AppTaskImpl extends IAppTask.Stub {
                 if (appThread != null) {
                     callerApp = mService.getProcessController(appThread);
                 }
-                final BackgroundActivityStartController balController =
-                        mService.getActivityStartController()
-                                .getBackgroundActivityLaunchController();
-                if (balController.shouldAbortBackgroundActivityStart(
-                        callingUid,
-                        callingPid,
-                        callingPackage,
-                        -1,
-                        -1,
-                        callerApp,
-                        null,
-                        false,
-                        null,
-                        null)) {
+                final ActivityStarter starter = mService.getActivityStartController().obtainStarter(
+                        null /* intent */, "moveToFront");
+                if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid,
+                        callingPackage, -1, -1, callerApp, null, false, null, null)) {
                     if (!mService.isBackgroundActivityStartsEnabled()) {
                         return;
                     }

@@ -65,7 +65,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     private boolean mCanDismissLockScreen;
     private boolean mShowing;
-    private boolean mPrimaryBouncerShowing;
+    private boolean mBouncerShowing;
     private boolean mSecure;
     private boolean mOccluded;
 
@@ -157,8 +157,8 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
-    public boolean isPrimaryBouncerShowing() {
-        return mPrimaryBouncerShowing;
+    public boolean isBouncerShowing() {
+        return mBouncerShowing;
     }
 
     @Override
@@ -264,8 +264,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     @Override
     public boolean isKeyguardScreenRotationAllowed() {
-        return SystemProperties.getBoolean("lockscreen.rot_override", false)
-                || mContext.getResources().getBoolean(R.bool.config_enableLockScreenRotation);
+        return false;
     }
 
     @Override
@@ -339,11 +338,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
-    public void notifyPrimaryBouncerShowing(boolean showing) {
-        if (mPrimaryBouncerShowing != showing) {
-            mPrimaryBouncerShowing = showing;
+    public void notifyBouncerShowing(boolean showing) {
+        if (mBouncerShowing != showing) {
+            mBouncerShowing = showing;
 
-            new ArrayList<>(mCallbacks).forEach(Callback::onPrimaryBouncerShowingChanged);
+            new ArrayList<>(mCallbacks).forEach(Callback::onBouncerShowingChanged);
         }
     }
 
@@ -398,7 +397,6 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         pw.println("  mFaceAuthEnabled: " + mFaceAuthEnabled);
         pw.println("  isKeyguardFadingAway: " + isKeyguardFadingAway());
         pw.println("  isKeyguardGoingAway: " + isKeyguardGoingAway());
-        pw.println("  isLaunchTransitionFadingAway: " + isLaunchTransitionFadingAway());
     }
 
     private class UpdateMonitorCallback extends KeyguardUpdateMonitorCallback {
@@ -435,11 +433,6 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
         @Override
         public void onStrongAuthStateChanged(int userId) {
-            update(false /* updateAlways */);
-        }
-
-        @Override
-        public void onLockedOutStateChanged(BiometricSourceType biometricSourceType) {
             update(false /* updateAlways */);
         }
 

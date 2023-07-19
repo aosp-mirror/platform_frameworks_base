@@ -36,6 +36,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -324,6 +325,14 @@ public final class MediaExtractor {
         }
     }
 
+    private ArrayList<Byte> toByteArray(@NonNull byte[] data) {
+        ArrayList<Byte> byteArray = new ArrayList<Byte>(data.length);
+        for (int i = 0; i < data.length; i++) {
+            byteArray.add(i, Byte.valueOf(data[i]));
+        }
+        return byteArray;
+    }
+
     /**
      * Retrieves the information about the conditional access system used to scramble
      * a track.
@@ -348,7 +357,7 @@ public final class MediaExtractor {
                 buf.rewind();
                 final byte[] sessionId = new byte[buf.remaining()];
                 buf.get(sessionId);
-                session = mMediaCas.createFromSessionId(sessionId);
+                session = mMediaCas.createFromSessionId(toByteArray(sessionId));
             }
             return new CasInfo(systemId, session, privateData);
         }

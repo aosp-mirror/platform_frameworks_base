@@ -214,7 +214,7 @@ class ActiveAdmin {
     boolean requireAutoTime = false;
     boolean forceEphemeralUsers = false;
     boolean isNetworkLoggingEnabled = false;
-    boolean isLogoutEnabled = false;
+    boolean isLogoutEnabled = true;
 
     // one notification after enabling + one more after reboots
     static final int DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN = 2;

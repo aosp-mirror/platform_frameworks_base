@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.server.wm.LetterboxConfiguration.DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT;
@@ -25,6 +26,8 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_RE
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -34,6 +37,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 
 import androidx.test.filters.SmallTest;
 
@@ -47,7 +51,7 @@ import java.util.function.BiConsumer;
  * Tests for the {@link LetterboxConfiguration} class.
  *
  * Build/Install/Run:
- *  atest WmTests:LetterboxConfigurationTest
+ *  atest WmTests:LetterboxConfigurationTests
  */
 @SmallTest
 @Presubmit
@@ -227,6 +231,34 @@ public class LetterboxConfigurationTest {
                 /* expectedTime */ 2,
                 /* halfFoldPose */ true,
                 LetterboxConfiguration::movePositionForVerticalReachabilityToNextBottomStop);
+    }
+
+    @Test
+    public void testIsCompatFakeFocusEnabledOnDevice() {
+        boolean wasFakeFocusEnabled = DeviceConfig
+                .getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, false);
+
+        // Set runtime flag to true and build time flag to false
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, "true", false);
+        mLetterboxConfiguration.setIsCompatFakeFocusEnabled(false);
+        assertFalse(mLetterboxConfiguration.isCompatFakeFocusEnabledOnDevice());
+
+        // Set runtime flag to false and build time flag to true
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, "false", false);
+        mLetterboxConfiguration.setIsCompatFakeFocusEnabled(true);
+        assertFalse(mLetterboxConfiguration.isCompatFakeFocusEnabledOnDevice());
+
+        // Set runtime flag to true so that both are enabled
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, "true", false);
+        assertTrue(mLetterboxConfiguration.isCompatFakeFocusEnabledOnDevice());
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, Boolean.toString(wasFakeFocusEnabled),
+                false);
     }
 
     private void assertForHorizontalMove(int from, int expected, int expectedTime,

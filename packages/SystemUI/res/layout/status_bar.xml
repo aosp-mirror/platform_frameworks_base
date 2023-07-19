@@ -64,7 +64,8 @@
             <FrameLayout
                 android:id="@+id/status_bar_start_side_content"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
                 android:clipChildren="false">
 
                 <include layout="@layout/heads_up_status_bar_layout" />
@@ -74,8 +75,9 @@
                      and DISABLE_NOTIFICATION_ICONS, respectively -->
                 <LinearLayout
                     android:id="@+id/status_bar_start_side_except_heads_up"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:gravity="center_vertical"
                     android:clipChildren="false">
                     <ViewStub
                         android:id="@+id/operator_name_stub"
@@ -83,25 +85,36 @@
                         android:layout_height="match_parent"
                         android:layout="@layout/operator_name" />
 
+                    <ImageView
+                        android:id="@+id/status_bar_logo"
+                        android:layout_width="@dimen/status_bar_icon_size"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerInside"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="start|center_vertical"
+                        android:paddingStart="2dp"
+                        android:paddingEnd="2dp"
+                        android:visibility="gone" />
+
                     <com.android.systemui.statusbar.policy.Clock
                         android:id="@+id/clock"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+                        android:layout_height="wrap_content"
                         android:singleLine="true"
                         android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
                         android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
                         android:gravity="center_vertical|start"
+                        android:visibility="gone"
                     />
-
-                    <include layout="@layout/ongoing_call_chip" />
 
                     <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
                         android:id="@+id/notification_icon_area"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:orientation="horizontal"
+                        android:layout_gravity="center_vertical"
                         android:clipChildren="false"/>
+
+                    <include layout="@layout/ongoing_call_chip" />
 
                 </LinearLayout>
             </FrameLayout>
@@ -148,5 +161,46 @@
             </com.android.keyguard.AlphaOptimizedLinearLayout>
         </FrameLayout>
     </LinearLayout>
+
+    <com.android.keyguard.AlphaOptimizedLinearLayout
+        android:id="@+id/center_clock_layout"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/status_bar_padding_top"
+        >
+        <com.android.systemui.statusbar.policy.ClockCenter
+            android:id="@+id/center_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:visibility="gone"
+            android:paddingStart="@dimen/status_bar_center_clock_padding_start"
+            android:paddingEnd="@dimen/status_bar_center_clock_padding_end"
+            android:singleLine="true"
+            />
+    </com.android.keyguard.AlphaOptimizedLinearLayout>
+
+    <ViewStub
+        android:id="@+id/emergency_cryptkeeper_text"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout="@layout/emergency_cryptkeeper_text"
+    />
+
+    <com.android.systemui.statusbar.policy.BatteryBarController
+        android:id="@+id/battery_bar"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="top"
+        systemui:viewLocation="1" />
+
+    <com.android.systemui.statusbar.policy.BatteryBarController
+        android:id="@+id/battery_bar_1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom"
+        systemui:viewLocation="2" />
 
 </com.android.systemui.statusbar.phone.PhoneStatusBarView>

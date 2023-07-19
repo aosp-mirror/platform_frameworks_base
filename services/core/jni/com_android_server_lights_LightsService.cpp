@@ -111,7 +111,7 @@ static void processReturn(
         case Status::SUCCESS:
             break;
         case Status::LIGHT_NOT_SUPPORTED:
-            ALOGE("Light requested not available on this device. %d", type);
+            ALOGV("Light requested not available on this device. %d", type);
             break;
         case Status::BRIGHTNESS_NOT_SUPPORTED:
             ALOGE("Brightness parameter not supported on this device: %d",

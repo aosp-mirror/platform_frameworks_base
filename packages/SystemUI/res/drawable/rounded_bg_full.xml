@@ -4,9 +4,9 @@
        android:shape="rectangle">
     <solid android:color="?androidprv:attr/colorSurface" />
     <corners
-        android:bottomLeftRadius="?android:attr/dialogCornerRadius"
-        android:topLeftRadius="?android:attr/dialogCornerRadius"
-        android:bottomRightRadius="?android:attr/dialogCornerRadius"
-        android:topRightRadius="?android:attr/dialogCornerRadius"
+        android:bottomLeftRadius="@dimen/volume_dialog_panel_width_half"
+        android:topLeftRadius="@dimen/volume_dialog_panel_width_half"
+        android:bottomRightRadius="@dimen/volume_dialog_panel_width_half"
+        android:topRightRadius="@dimen/volume_dialog_panel_width_half"
         />
 </shape>

@@ -685,7 +685,7 @@ public class WallpaperManager {
                                 cmProxy.doColorManagement(decoder, info);
                             }
                         }));
-                    } catch (OutOfMemoryError | IOException e) {
+                    } catch (OutOfMemoryError | IOException | ArrayIndexOutOfBoundsException e) {
                         Log.w(TAG, "Can't decode file", e);
                     }
                 }
@@ -1629,6 +1629,7 @@ public class WallpaperManager {
                     mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
+                boolean ok = false;
                 try {
                     fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
                     copyStreamToWallpaperFile(resources.openRawResource(resid), fos);

@@ -23,6 +23,7 @@ import android.util.Log;
 import com.android.printservice.recommendation.util.MDNSFilteredDiscovery;
 import com.android.printservice.recommendation.util.MDNSUtils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -31,7 +32,10 @@ import java.util.Set;
 class PrinterFilterMopria implements MDNSFilteredDiscovery.PrinterFilter {
     private static final String TAG = "PrinterFilterMopria";
 
-    static final Set<String> MOPRIA_MDNS_SERVICES = Set.of("_ipp._tcp", "_ipps._tcp");
+    static final Set<String> MOPRIA_MDNS_SERVICES = new HashSet<String>() {{
+        add("_ipp._tcp");
+        add("_ipps._tcp");
+    }};
 
     private static final String PDL__PDF = "application/pdf";
     private static final String PDL__PCLM = "application/PCLm";

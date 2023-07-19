@@ -2535,6 +2535,9 @@ android.hardware.input.IInputSensorEventListener
 android.hardware.input.ITabletModeChangedListener$Stub$Proxy
 android.hardware.input.ITabletModeChangedListener$Stub
 android.hardware.input.ITabletModeChangedListener
+android.hardware.input.ISmartSwitchChangedListener$Stub$Proxy
+android.hardware.input.ISmartSwitchChangedListener$Stub
+android.hardware.input.ISmartSwitchChangedListener
 android.hardware.input.InputDeviceIdentifier$1
 android.hardware.input.InputDeviceIdentifier
 android.hardware.input.InputManager$InputDeviceListener
@@ -14414,7 +14417,6 @@ java.util.ImmutableCollections$Set0
 java.util.ImmutableCollections$Set1
 java.util.ImmutableCollections$Set2
 java.util.ImmutableCollections$SetN
-java.util.ImmutableCollections
 java.util.InputMismatchException
 java.util.Iterator
 java.util.JumboEnumSet$EnumSetIterator

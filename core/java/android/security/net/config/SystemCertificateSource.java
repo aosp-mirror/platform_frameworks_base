@@ -18,7 +18,6 @@ package android.security.net.config;
 
 import android.os.Environment;
 import android.os.UserHandle;
-
 import java.io.File;
 
 /**
@@ -33,22 +32,9 @@ public final class SystemCertificateSource extends DirectoryCertificateSource {
     private final File mUserRemovedCaDir;
 
     private SystemCertificateSource() {
-        super(getDirectory());
+        super(new File(System.getenv("ANDROID_ROOT") + "/etc/security/cacerts"));
         File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
         mUserRemovedCaDir = new File(configDir, "cacerts-removed");
-    }
-
-    private static File getDirectory() {
-        if ((System.getProperty("system.certs.enabled") != null)
-                && (System.getProperty("system.certs.enabled")).equals("true")) {
-            return new File(System.getenv("ANDROID_ROOT") + "/etc/security/cacerts");
-        }
-        File updatable_dir = new File("/apex/com.android.conscrypt/cacerts");
-        if (updatable_dir.exists()
-                && !(updatable_dir.list().length == 0)) {
-            return updatable_dir;
-        }
-        return new File(System.getenv("ANDROID_ROOT") + "/etc/security/cacerts");
     }
 
     public static SystemCertificateSource getInstance() {

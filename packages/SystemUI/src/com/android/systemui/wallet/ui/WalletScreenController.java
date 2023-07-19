@@ -77,11 +77,8 @@ public class WalletScreenController implements
     private final FalsingManager mFalsingManager;
     private final UiEventLogger mUiEventLogger;
 
-
-    @VisibleForTesting
-    String mSelectedCardId;
-    @VisibleForTesting
-    boolean mIsDismissed;
+    @VisibleForTesting String mSelectedCardId;
+    @VisibleForTesting boolean mIsDismissed;
 
     public WalletScreenController(
             Context context,
@@ -127,20 +124,9 @@ public class WalletScreenController implements
         }
         Log.i(TAG, "Successfully retrieved wallet cards.");
         List<WalletCard> walletCards = response.getWalletCards();
-
-        boolean allUnknown = true;
+        List<WalletCardViewInfo> data = new ArrayList<>(walletCards.size());
         for (WalletCard card : walletCards) {
-            if (card.getCardType() != WalletCard.CARD_TYPE_UNKNOWN) {
-                allUnknown = false;
-                break;
-            }
-        }
-
-        List<WalletCardViewInfo> paymentCardData = new ArrayList<>();
-        for (WalletCard card : walletCards) {
-            if (allUnknown || card.getCardType() == WalletCard.CARD_TYPE_PAYMENT) {
-                paymentCardData.add(new QAWalletCardViewInfo(mContext, card));
-            }
+            data.add(new QAWalletCardViewInfo(mContext, card));
         }
 
         // Get on main thread for UI updates.
@@ -148,18 +134,18 @@ public class WalletScreenController implements
             if (mIsDismissed) {
                 return;
             }
-            if (paymentCardData.isEmpty()) {
+            if (data.isEmpty()) {
                 showEmptyStateView();
             } else {
                 int selectedIndex = response.getSelectedIndex();
-                if (selectedIndex >= paymentCardData.size()) {
+                if (selectedIndex >= data.size()) {
                     Log.w(TAG, "Invalid selected card index, showing empty state.");
                     showEmptyStateView();
                 } else {
                     boolean isUdfpsEnabled = mKeyguardUpdateMonitor.isUdfpsEnrolled()
                             && mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
                     mWalletView.showCardCarousel(
-                            paymentCardData,
+                            data,
                             selectedIndex,
                             !mKeyguardStateController.isUnlocked(),
                             isUdfpsEnabled);
@@ -225,6 +211,7 @@ public class WalletScreenController implements
         // even if the user keeps it open for a long time.
         mHandler.postDelayed(mSelectionRunnable, SELECTION_DELAY_MILLIS);
     }
+
 
 
     @Override

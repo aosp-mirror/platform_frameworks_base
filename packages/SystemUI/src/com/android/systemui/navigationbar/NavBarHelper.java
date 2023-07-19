@@ -41,17 +41,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
-import android.util.Log;
-import android.view.IRotationWatcher;
-import android.view.IWallpaperVisibilityListener;
-import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowInsets;
-import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
@@ -63,9 +57,7 @@ import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
@@ -98,9 +90,6 @@ public final class NavBarHelper implements
         AccessibilityButtonTargetsObserver.TargetsChangedListener,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
         Dumpable, CommandQueue.Callbacks {
-    private static final String TAG = NavBarHelper.class.getSimpleName();
-
-    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -109,57 +98,25 @@ public final class NavBarHelper implements
     private final SystemActions mSystemActions;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
-    private final List<NavbarTaskbarStateUpdater> mStateListeners = new ArrayList<>();
+    private final List<NavbarTaskbarStateUpdater> mA11yEventListeners = new ArrayList<>();
     private final Context mContext;
     private final CommandQueue mCommandQueue;
     private final ContentResolver mContentResolver;
-    private final EdgeBackGestureHandler mEdgeBackGestureHandler;
-    private final IWindowManager mWm;
-    private final int mDefaultDisplayId;
     private boolean mAssistantAvailable;
     private boolean mLongPressHomeEnabled;
     private boolean mAssistantTouchGestureEnabled;
     private int mNavBarMode;
     private int mA11yButtonState;
-    private int mRotationWatcherRotation;
-    private boolean mTogglingNavbarTaskbar;
-    private boolean mWallpaperVisible;
 
     // Attributes used in NavBarHelper.CurrentSysuiState
     private int mWindowStateDisplayId;
     private @WindowVisibleState int mWindowState;
 
-    // Listens for changes to the assistant
-    private final ContentObserver mAssistContentObserver = new ContentObserver(mHandler) {
+    private final ContentObserver mAssistContentObserver = new ContentObserver(
+            new Handler(Looper.getMainLooper())) {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             updateAssistantAvailability();
-        }
-    };
-
-    // Listens for changes to the wallpaper visibility
-    private final IWallpaperVisibilityListener mWallpaperVisibilityListener =
-            new IWallpaperVisibilityListener.Stub() {
-                @Override
-                public void onWallpaperVisibilityChanged(boolean visible,
-                        int displayId) throws RemoteException {
-                    mHandler.post(() -> {
-                        mWallpaperVisible = visible;
-                        dispatchWallpaperVisibilityChanged(visible, displayId);
-                    });
-                }
-            };
-
-    // Listens for changes to display rotation
-    private final IRotationWatcher mRotationWatcher = new IRotationWatcher.Stub() {
-        @Override
-        public void onRotationChanged(final int rotation) {
-            // We need this to be scheduled as early as possible to beat the redrawing of
-            // window in response to the orientation change.
-            mHandler.postAtFrontOfQueue(() -> {
-                mRotationWatcherRotation = rotation;
-                dispatchRotationChanged(rotation);
-            });
         }
     };
 
@@ -178,10 +135,7 @@ public final class NavBarHelper implements
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             KeyguardStateController keyguardStateController,
             NavigationModeController navigationModeController,
-            EdgeBackGestureHandler.Factory edgeBackGestureHandlerFactory,
-            IWindowManager wm,
             UserTracker userTracker,
-            DisplayTracker displayTracker,
             DumpManager dumpManager,
             CommandQueue commandQueue) {
         mContext = context;
@@ -193,36 +147,18 @@ public final class NavBarHelper implements
         mKeyguardStateController = keyguardStateController;
         mUserTracker = userTracker;
         mSystemActions = systemActions;
+        accessibilityManager.addAccessibilityServicesStateChangeListener(this);
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
-        mWm = wm;
-        mDefaultDisplayId = displayTracker.getDefaultDisplayId();
-        mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
 
+        mAccessibilityButtonModeObserver.addListener(this);
+        mAccessibilityButtonTargetsObserver.addListener(this);
         mNavBarMode = navigationModeController.addListener(this);
-        mCommandQueue.addCallback(this);
         overviewProxyService.addCallback(this);
         dumpManager.registerDumpable(this);
     }
 
-    /**
-     * Hints to the helper that bars are being replaced, which is a signal to potentially suppress
-     * normal setup/cleanup when no bars are present.
-     */
-    public void setTogglingNavbarTaskbar(boolean togglingNavbarTaskbar) {
-        mTogglingNavbarTaskbar = togglingNavbarTaskbar;
-    }
-
-    /**
-     * Called when the first (non-replacing) bar is registered.
-     */
-    private void setupOnFirstBar() {
-        // Setup accessibility listeners
-        mAccessibilityManager.addAccessibilityServicesStateChangeListener(this);
-        mAccessibilityButtonModeObserver.addListener(this);
-        mAccessibilityButtonTargetsObserver.addListener(this);
-
-        // Setup assistant listener
+    public void init() {
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSISTANT),
                 false /* notifyForDescendants */, mAssistContentObserver, UserHandle.USER_ALL);
@@ -232,114 +168,59 @@ public final class NavBarHelper implements
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
+        updateAssistantAvailability();
+        updateA11yState();
+        mCommandQueue.addCallback(this);
 
-        // Setup display rotation watcher
-        try {
-            mWm.watchRotation(mRotationWatcher, mDefaultDisplayId);
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to register rotation watcher", e);
-        }
-
-        // Setup wallpaper visibility listener
-        try {
-            mWallpaperVisible = mWm.registerWallpaperVisibilityListener(
-                    mWallpaperVisibilityListener, mDefaultDisplayId);
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to register wallpaper visibility listener", e);
-        }
-
-        // Attach the back handler only when the first bar is registered
-        mEdgeBackGestureHandler.onNavBarAttached();
     }
 
-    /**
-     * Called after the last (non-replacing) bar is unregistered.
-     */
-    private void cleanupAfterLastBar() {
-        // Clean up accessibility listeners
-        mAccessibilityManager.removeAccessibilityServicesStateChangeListener(this);
-        mAccessibilityButtonModeObserver.removeListener(this);
-        mAccessibilityButtonTargetsObserver.removeListener(this);
-
-        // Clean up assistant listeners
+    public void destroy() {
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
-
-        // Clean up display rotation watcher
-        try {
-            mWm.removeRotationWatcher(mRotationWatcher);
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to unregister rotation watcher", e);
-        }
-
-        // Clean up wallpaper visibility listener
-        try {
-            mWm.unregisterWallpaperVisibilityListener(mWallpaperVisibilityListener,
-                    mDefaultDisplayId);
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to register wallpaper visibility listener", e);
-        }
-
-        // No more bars, detach the back handler for now
-        mEdgeBackGestureHandler.onNavBarDetached();
+        mCommandQueue.removeCallback(this);
     }
 
     /**
-     * Registers a listener for future updates to the shared navbar/taskbar state.
      * @param listener Will immediately get callbacks based on current state
      */
     public void registerNavTaskStateUpdater(NavbarTaskbarStateUpdater listener) {
-        mStateListeners.add(listener);
-        if (!mTogglingNavbarTaskbar && mStateListeners.size() == 1) {
-            setupOnFirstBar();
-
-            // Update the state once the first bar is registered
-            updateAssistantAvailability();
-            updateA11yState();
-            mCommandQueue.recomputeDisableFlags(mContext.getDisplayId(), false /* animate */);
-        } else {
-            listener.updateAccessibilityServicesState();
-            listener.updateAssistantAvailable(mAssistantAvailable, mLongPressHomeEnabled);
-        }
-        listener.updateWallpaperVisibility(mWallpaperVisible, mDefaultDisplayId);
-        listener.updateRotationWatcherState(mRotationWatcherRotation);
+        mA11yEventListeners.add(listener);
+        listener.updateAccessibilityServicesState();
+        listener.updateAssistantAvailable(mAssistantAvailable, mLongPressHomeEnabled);
     }
 
-    /**
-     * Removes a previously registered listener.
-     */
     public void removeNavTaskStateUpdater(NavbarTaskbarStateUpdater listener) {
-        mStateListeners.remove(listener);
-        if (!mTogglingNavbarTaskbar && mStateListeners.isEmpty()) {
-            cleanupAfterLastBar();
-        }
+        mA11yEventListeners.remove(listener);
     }
 
     private void dispatchA11yEventUpdate() {
-        for (NavbarTaskbarStateUpdater listener : mStateListeners) {
+        for (NavbarTaskbarStateUpdater listener : mA11yEventListeners) {
             listener.updateAccessibilityServicesState();
         }
     }
 
     private void dispatchAssistantEventUpdate(boolean assistantAvailable,
             boolean longPressHomeEnabled) {
-        for (NavbarTaskbarStateUpdater listener : mStateListeners) {
+        for (NavbarTaskbarStateUpdater listener : mA11yEventListeners) {
             listener.updateAssistantAvailable(assistantAvailable, longPressHomeEnabled);
         }
     }
 
     @Override
     public void onAccessibilityServicesStateChanged(AccessibilityManager manager) {
+        dispatchA11yEventUpdate();
         updateA11yState();
     }
 
     @Override
     public void onAccessibilityButtonModeChanged(int mode) {
         updateA11yState();
+        dispatchA11yEventUpdate();
     }
 
     @Override
     public void onAccessibilityButtonTargetsChanged(String targets) {
         updateA11yState();
+        dispatchA11yEventUpdate();
     }
 
     /**
@@ -381,8 +262,6 @@ public final class NavBarHelper implements
             updateSystemAction(clickable, SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON);
             updateSystemAction(longClickable, SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON_CHOOSER);
         }
-
-        dispatchA11yEventUpdate();
     }
 
     /**
@@ -418,7 +297,7 @@ public final class NavBarHelper implements
 
     private void updateAssistantAvailability() {
         boolean assistantAvailableForUser = mAssistManagerLazy.get()
-                .getAssistInfoForUser(mUserTracker.getUserId()) != null;
+                .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
         boolean longPressDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistLongPressHomeEnabledDefault);
         mLongPressHomeEnabled = Settings.Secure.getIntForUser(mContentResolver,
@@ -438,10 +317,6 @@ public final class NavBarHelper implements
 
     public boolean getLongPressHomeEnabled() {
         return mLongPressHomeEnabled;
-    }
-
-    public EdgeBackGestureHandler getEdgeBackGestureHandler() {
-        return mEdgeBackGestureHandler;
     }
 
     @Override
@@ -482,18 +357,6 @@ public final class NavBarHelper implements
         mWindowState = state;
     }
 
-    private void dispatchWallpaperVisibilityChanged(boolean visible, int displayId) {
-        for (NavbarTaskbarStateUpdater listener : mStateListeners) {
-            listener.updateWallpaperVisibility(visible, displayId);
-        }
-    }
-
-    private void dispatchRotationChanged(int rotation) {
-        for (NavbarTaskbarStateUpdater listener : mStateListeners) {
-            listener.updateRotationWatcherState(rotation);
-        }
-    }
-
     public CurrentSysuiState getCurrentSysuiState() {
         return new CurrentSysuiState();
     }
@@ -505,8 +368,6 @@ public final class NavBarHelper implements
     public interface NavbarTaskbarStateUpdater {
         void updateAccessibilityServicesState();
         void updateAssistantAvailable(boolean available, boolean longPressHomeEnabled);
-        default void updateWallpaperVisibility(boolean visible, int displayId) {}
-        default void updateRotationWatcherState(int rotation) {}
     }
 
     /** Data class to help Taskbar/Navbar initiate state correctly when switching between the two.*/

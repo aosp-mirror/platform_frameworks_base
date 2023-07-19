@@ -47,7 +47,7 @@ import javax.tools.Diagnostic.Kind;
  * Annotation processor for {@link SearchIndexable} that generates {@link SearchIndexableResources}
  * subclasses.
  */
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedSourceVersion(SourceVersion.RELEASE_9)
 @SupportedAnnotationTypes({"com.android.settingslib.search.SearchIndexable"})
 public class IndexableProcessor extends AbstractProcessor {
 

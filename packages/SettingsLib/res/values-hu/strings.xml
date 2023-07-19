@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Mégse"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"A párosítás hozzáférést biztosít a névjegyekhez és híváselőzményekhez összekapcsolt állapotban."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nem lehet párosítani a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközzel."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Sikertelen párosítás a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközzel – hibás PIN vagy jelszó"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"A párosítás sikertelen volt a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközzel hibás PIN-kód vagy jelszó miatt."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nem lehet kommunikálni a(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszközzel."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"A(z) <xliff:g id="DEVICE_NAME">%1$s</xliff:g> eszköz elutasította a párosítást."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Számítógép"</string>
@@ -351,7 +351,7 @@
     <string name="debug_app_set" msgid="6599535090477753651">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás hibakeresése"</string>
     <string name="select_application" msgid="2543228890535466325">"Alkalmazás kiválasztása"</string>
     <string name="no_application" msgid="9038334538870247690">"Semmi"</string>
-    <string name="wait_for_debugger" msgid="7461199843335409809">"Várakozás a hibakeresőre"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"Várjon a hibakeresőre."</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"A javított alkalmazás a hibakeresőre vár."</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Bevitel"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Rajz"</string>
@@ -364,7 +364,7 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"A fedvény mutatja az aktuális érintési adatokat"</string>
     <string name="show_touches" msgid="8437666942161289025">"Koppintások megjelenítése"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Koppintások vizuális visszajelzésének megjelenítése"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"Felületfrissítések megj."</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Képernyőfrissítések megj."</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"A teljes ablakfelület villogjon frissítéskor."</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Frissítések megjelenítése"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Ablakos Flash-nézetek megjelenítéskor"</string>

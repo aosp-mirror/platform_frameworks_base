@@ -174,20 +174,11 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_MPEGH_MHA1 = "audio/mha1";
     /** MIME type for MPEG-H Audio single stream, encapsulated in MHAS */
     public static final String MIMETYPE_AUDIO_MPEGH_MHM1 = "audio/mhm1";
-    /** MIME type for DTS Digital Surround (up to 5.1 channels) audio stream, aka DTS-CA. */
+    /** MIME type for DTS (up to 5.1 channels) audio stream. */
     public static final String MIMETYPE_AUDIO_DTS = "audio/vnd.dts";
-    /**
-     * MIME type for DTS HD (up to 7.1 channels) audio stream.
-     * With codec profile DTS_HDProfileHRA represents DTS HD High Resolution Audio.
-     * With codec profile DTS_HDProfileMA represents DTS HD Master Audio.
-     * With codec profile DTS_HDProfileLBR represents DTS Express.
-     */
+    /** MIME type for DTS HD (up to 7.1 channels) audio stream. */
     public static final String MIMETYPE_AUDIO_DTS_HD = "audio/vnd.dts.hd";
-    /**
-     * MIME type for DTS UHD (object-based) audio stream, aka DTS:X.
-     * With codec profile DTS_UHDProfileP1 represents DTS-UHD P1.
-     * With codec profile DTS_UHDProfileP2 represents DTS-UHD P2.
-     */
+    /** MIME type for DTS UHD (object-based) audio stream. */
     public static final String MIMETYPE_AUDIO_DTS_UHD = "audio/vnd.dts.uhd";
     /** MIME type for Dynamic Resolution Adaptation (DRA) audio stream. */
     public static final String MIMETYPE_AUDIO_DRA = "audio/vnd.dra";
@@ -300,10 +291,9 @@ public final class MediaFormat {
     /**
      * A key describing the log session ID for MediaCodec. The log session ID is a random 32-byte
      * hexadecimal string that is used to associate metrics from multiple media codec instances
-     * to the same playback or recording session. The value is created as
-     * {@link android.media.metrics.LogSessionId LogSessionId}. Sessions are created in
-     * {@link android.media.metrics.MediaMetricsManager MediaMetricsManager}.
+     * to the same playback or recording session.
      * The associated value is a string.
+     * @hide
      */
     public static final String LOG_SESSION_ID = "log-session-id";
 
@@ -1097,14 +1087,11 @@ public final class MediaFormat {
      * may fail if other parameters are not compatible with the desired
      * profile or if the desired profile is not supported, but it may also
      * fail silently (where the encoder ends up using a different, compatible profile.)
-     * <p>
-     * It is recommended that the profile is set for all encoders. For more information, see
-     * the <i>Encoder Profiles</i> section of the {@link MediaCodec} API reference.
      * <p class="note">
      * <strong>Note:</strong> Codecs are free to use all the available
      * coding tools at the specified profile, but may ultimately choose to not do so.
      * <p class="note">
-     * <strong>Note:</strong> When configuring video encoders, profile (if set) must be
+     * <strong>Note:</strong> When configuring video encoders, profile must be
      * set together with {@link #KEY_LEVEL level}.
      *
      * @see MediaCodecInfo.CodecCapabilities#profileLevels
@@ -1174,7 +1161,7 @@ public final class MediaFormat {
 
     /**
      * A key describing the desired bitrate mode to be used by an encoder.
-     * Constants are declared in {@link MediaCodecInfo.EncoderCapabilities}.
+     * Constants are declared in {@link MediaCodecInfo.CodecCapabilities}.
      *
      * @see MediaCodecInfo.EncoderCapabilities#isBitrateModeSupported(int)
      */

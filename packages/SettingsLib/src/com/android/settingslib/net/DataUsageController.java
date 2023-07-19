@@ -27,6 +27,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkTemplate;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
@@ -53,6 +55,7 @@ public class DataUsageController {
     private final Context mContext;
     private final NetworkPolicyManager mPolicyManager;
     private final NetworkStatsManager mNetworkStatsManager;
+    private final WifiManager mWifiManager;
 
     private Callback mCallback;
     private NetworkNameProvider mNetworkController;
@@ -62,6 +65,7 @@ public class DataUsageController {
         mContext = context;
         mPolicyManager = NetworkPolicyManager.from(mContext);
         mNetworkStatsManager = context.getSystemService(NetworkStatsManager.class);
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     }
 
@@ -101,9 +105,22 @@ public class DataUsageController {
         return getDataUsageInfo(template);
     }
 
+    public DataUsageInfo getDailyDataUsageInfo() {
+        NetworkTemplate template = DataUsageUtils.getMobileTemplate(mContext, mSubscriptionId);
+
+        return getDailyDataUsageInfo(template);
+    }
+
     public DataUsageInfo getWifiDataUsageInfo() {
         NetworkTemplate template = new NetworkTemplate.Builder(NetworkTemplate.MATCH_WIFI).build();
+
         return getDataUsageInfo(template);
+    }
+
+    public DataUsageInfo getWifiDailyDataUsageInfo() {
+        NetworkTemplate template = new NetworkTemplate.Builder(NetworkTemplate.MATCH_WIFI).build();
+
+        return getDailyDataUsageInfo(template);
     }
 
     public DataUsageInfo getDataUsageInfo(NetworkTemplate template) {
@@ -120,6 +137,34 @@ public class DataUsageController {
             end = now;
             start = now - DateUtils.WEEK_IN_MILLIS * 4;
         }
+        final long totalBytes = getUsageLevel(template, start, end);
+        if (totalBytes < 0L) {
+            return warn("no entry data");
+        }
+        final DataUsageInfo usage = new DataUsageInfo();
+        usage.startDate = start;
+        usage.usageLevel = totalBytes;
+        usage.period = formatDateRange(start, end);
+        usage.cycleStart = start;
+        usage.cycleEnd = end;
+
+        if (policy != null) {
+            usage.limitLevel = policy.limitBytes > 0 ? policy.limitBytes : 0;
+            usage.warningLevel = policy.warningBytes > 0 ? policy.warningBytes : 0;
+        } else {
+            usage.warningLevel = getDefaultWarningLevel();
+        }
+        if (usage != null && mNetworkController != null) {
+            usage.carrier = mNetworkController.getMobileDataNetworkName();
+        }
+        return usage;
+    }
+
+    public DataUsageInfo getDailyDataUsageInfo(NetworkTemplate template) {
+        final NetworkPolicy policy = findNetworkPolicy(template);
+        final long end = System.currentTimeMillis();
+        long start = end - DataUsageUtils.getTodayMillis();
+
         final long totalBytes = getUsageLevel(template, start, end);
         if (totalBytes < 0L) {
             return warn("no entry data");

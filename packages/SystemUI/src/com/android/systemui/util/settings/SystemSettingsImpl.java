@@ -20,28 +20,19 @@ import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.Settings;
 
-import com.android.systemui.settings.UserTracker;
-
 import javax.inject.Inject;
 
 class SystemSettingsImpl implements SystemSettings {
     private final ContentResolver mContentResolver;
-    private final UserTracker mUserTracker;
 
     @Inject
-    SystemSettingsImpl(ContentResolver contentResolver, UserTracker userTracker) {
+    SystemSettingsImpl(ContentResolver contentResolver) {
         mContentResolver = contentResolver;
-        mUserTracker = userTracker;
     }
 
     @Override
     public ContentResolver getContentResolver() {
         return mContentResolver;
-    }
-
-    @Override
-    public UserTracker getUserTracker() {
-        return mUserTracker;
     }
 
     @Override
@@ -51,8 +42,7 @@ class SystemSettingsImpl implements SystemSettings {
 
     @Override
     public String getStringForUser(String name, int userHandle) {
-        return Settings.System.getStringForUser(mContentResolver, name,
-                getRealUserHandle(userHandle));
+        return Settings.System.getStringForUser(mContentResolver, name, userHandle);
     }
 
     @Override
@@ -62,8 +52,7 @@ class SystemSettingsImpl implements SystemSettings {
 
     @Override
     public boolean putStringForUser(String name, String value, int userHandle) {
-        return Settings.System.putStringForUser(mContentResolver, name, value,
-                getRealUserHandle(userHandle));
+        return Settings.System.putStringForUser(mContentResolver, name, value, userHandle);
     }
 
     @Override

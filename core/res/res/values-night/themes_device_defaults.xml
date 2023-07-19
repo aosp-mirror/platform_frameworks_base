@@ -87,7 +87,7 @@ easier.
 
     <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">
         <item name="windowLightNavigationBar">false</item>
-        <item name="colorBackgroundFloating">@android:color/GM2_grey_800</item>
+        <item name="colorBackgroundFloating">?android:attr/colorPrimary</item>
         <item name="textColorSecondary">@android:color/resolver_text_color_secondary_dark</item>
     </style>
 

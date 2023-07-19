@@ -109,7 +109,7 @@ open class BlurUtils @Inject constructor(
      * @return {@code true} when supported.
      */
     open fun supportsBlursOnWindows(): Boolean {
-        return CROSS_WINDOW_BLUR_SUPPORTED && ActivityManager.isHighEndGfx() &&
+        return CROSS_WINDOW_BLUR_SUPPORTED && !ActivityManager.isLowRamDeviceStatic() &&
                 crossWindowBlurListeners.isCrossWindowBlurEnabled() &&
                 !SystemProperties.getBoolean("persist.sysui.disableBlur", false)
     }

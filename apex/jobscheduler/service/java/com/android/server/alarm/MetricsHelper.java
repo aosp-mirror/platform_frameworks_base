@@ -111,14 +111,10 @@ class MetricsHelper {
                 ActivityManager.processStateAmToProto(callerProcState));
     }
 
-    static void pushAlarmBatchDelivered(
-            int numAlarms, int wakeups, int[] uids, int[] alarmsPerUid, int[] wakeupAlarmsPerUid) {
+    static void pushAlarmBatchDelivered(int numAlarms, int wakeups) {
         FrameworkStatsLog.write(
                 FrameworkStatsLog.ALARM_BATCH_DELIVERED,
                 numAlarms,
-                wakeups,
-                uids,
-                alarmsPerUid,
-                wakeupAlarmsPerUid);
+                wakeups);
     }
 }

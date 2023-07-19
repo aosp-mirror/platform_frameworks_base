@@ -31,9 +31,6 @@ import android.view.WindowManager;
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-
-import javax.inject.Inject;
 
 /**
  * If the attached USB accessory has a URL associated with it, and that URL is valid,
@@ -49,27 +46,13 @@ public class UsbAccessoryUriActivity extends AlertActivity
     private UsbAccessory mAccessory;
     private Uri mUri;
 
-    private final DeviceProvisionedController mDeviceProvisionedController;
-
-    @Inject
-    UsbAccessoryUriActivity(DeviceProvisionedController deviceProvisionedController) {
-        mDeviceProvisionedController = deviceProvisionedController;
-    }
-
     @Override
     public void onCreate(Bundle icicle) {
-        getWindow().addSystemFlags(
+       getWindow().addSystemFlags(
                 WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
-        super.onCreate(icicle);
+       super.onCreate(icicle);
 
-        // Don't show this dialog during Setup Wizard
-        if (!mDeviceProvisionedController.isDeviceProvisioned()) {
-            Log.e(TAG, "device not provisioned");
-            finish();
-            return;
-        }
-
-        Intent intent = getIntent();
+       Intent intent = getIntent();
         mAccessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
         String uriString = intent.getStringExtra("uri");
         mUri = (uriString == null ? null : Uri.parse(uriString));

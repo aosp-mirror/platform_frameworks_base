@@ -28,9 +28,8 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
 import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.fragments.FragmentHostManager;
 
 import java.util.Objects;
 
@@ -75,7 +74,7 @@ public class RadioListPreference extends CustomListPreference {
 
         RadioFragment f = new RadioFragment();
         f.setPreference(this);
-        Dependency.get(FragmentService.class).getFragmentHostManager(v).getFragmentManager()
+        FragmentHostManager.get(v).getFragmentManager()
                 .beginTransaction()
                 .add(android.R.id.content, f)
                 .commit();
@@ -87,10 +86,8 @@ public class RadioListPreference extends CustomListPreference {
             Bundle savedInstanceState) {
         super.onDialogStateRestored(fragment, dialog, savedInstanceState);
         View view = dialog.findViewById(R.id.content);
-        RadioFragment radioFragment = (RadioFragment) Dependency.get(FragmentService.class)
-                .getFragmentHostManager(view)
-                .getFragmentManager()
-                .findFragmentById(R.id.content);
+        RadioFragment radioFragment = (RadioFragment) FragmentHostManager.get(view)
+                .getFragmentManager().findFragmentById(R.id.content);
         if (radioFragment != null) {
             radioFragment.setPreference(this);
         }

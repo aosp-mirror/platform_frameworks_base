@@ -789,8 +789,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         // Attempt to write the file, delete the backup and return true as atomically as
         // possible.  If any exception occurs, delete the new file; next time we will restore
         // from the backup.
-        try {
-            FileOutputStream str = createFileOutputStream(mFile);
+        try (FileOutputStream str = createFileOutputStream(mFile)) {
 
             if (DEBUG) {
                 outputStreamCreateTime = System.currentTimeMillis();
@@ -808,7 +807,6 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
             fsyncTime = System.currentTimeMillis();
 
-            str.close();
             ContextImpl.setFilePermissionsFromMode(mFile.getPath(), mMode, 0);
 
             if (DEBUG) {

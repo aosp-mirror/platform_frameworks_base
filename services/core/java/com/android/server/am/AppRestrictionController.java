@@ -2325,11 +2325,11 @@ public final class AppRestrictionController {
                 });
             });
         }
+        mRestrictionListeners.forEach(
+                l -> l.onAutoRestrictedBucketFeatureFlagChanged(newValue));
         for (int i = 0; i < pendingTasks.size(); i++) {
             pendingTasks.get(i).run();
         }
-        mRestrictionListeners.forEach(
-                l -> l.onAutoRestrictedBucketFeatureFlagChanged(newValue));
     }
 
     private void handleAppStandbyBucketChanged(int bucket, String packageName,

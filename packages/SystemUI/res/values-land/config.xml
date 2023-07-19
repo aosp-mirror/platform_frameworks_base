@@ -20,10 +20,16 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
+    <!-- The maximum number of tiles in the QuickQSPanel -->
+    <integer name="quick_qs_panel_max_tiles">4</integer>
+
+    <!-- The maximum number of rows in the QuickQSPanel -->
+    <integer name="quick_qs_panel_max_rows">2</integer>
+
     <!-- The maximum number of rows in the QuickSettings -->
     <integer name="quick_settings_max_rows">2</integer>
 
-    <integer name="quick_settings_num_columns">4</integer>
+    <integer name="quick_settings_num_columns">2</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">2</integer>
@@ -41,5 +47,11 @@
 
     <!-- Whether we use large screen shade header which takes only one row compared to QS header -->
     <bool name="config_use_large_screen_shade_header">true</bool>
+
+    <bool name="can_use_one_handed_bouncer">true</bool>
+
+    <bool name="config_use_split_notification_shade">true</bool>
+
+    <bool name="config_skinnyNotifsInLandscape">false</bool>
 
 </resources>

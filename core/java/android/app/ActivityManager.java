@@ -29,7 +29,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -229,114 +228,6 @@ public class ActivityManager {
     }
 
     final ArrayMap<OnUidImportanceListener, UidObserver> mImportanceListeners = new ArrayMap<>();
-
-    /**
-     * Callback object for {@link #registerUidFrozenStateChangedCallback}
-     *
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
-    public interface UidFrozenStateChangedCallback {
-        /**
-         * Indicates that the UID was frozen.
-         *
-         * @hide
-         */
-        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-        @TestApi
-        int UID_FROZEN_STATE_FROZEN = 1;
-
-        /**
-         * Indicates that the UID was unfrozen.
-         *
-         * @hide
-         */
-        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-        @TestApi
-        int UID_FROZEN_STATE_UNFROZEN = 2;
-
-        /**
-         * @hide
-         */
-        @Retention(RetentionPolicy.SOURCE)
-        @IntDef(flag = false, prefix = {"UID_FROZEN_STATE_"}, value = {
-                UID_FROZEN_STATE_FROZEN,
-                UID_FROZEN_STATE_UNFROZEN,
-        })
-        public @interface UidFrozenState {}
-
-        /**
-         * Notify the client that the frozen states of an array of UIDs have changed.
-         *
-         * @param uids The UIDs for which the frozen state has changed
-         * @param frozenStates Frozen state for each UID index, Will be set to
-         *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_FROZEN}
-         *               when the UID is frozen. When the UID is unfrozen,
-         *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_UNFROZEN}
-         *               will be set.
-         *
-         * @hide
-         */
-        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-        @TestApi
-        void onUidFrozenStateChanged(@NonNull int[] uids,
-                @NonNull @UidFrozenState int[] frozenStates);
-    }
-
-    /**
-     * Register a {@link UidFrozenStateChangedCallback} object to receive notification
-     * when a UID is frozen or unfrozen. Will throw an exception if the same
-     * callback object is registered more than once.
-     *
-     * @param executor The executor that the callback will be run from.
-     * @param callback The callback to be registered. Callbacks for previous frozen/unfrozen
-     *                 UID changes will not be delivered. Only changes in state from the point of
-     *                 registration onward will be reported.
-     * @throws IllegalStateException if the {@code callback} is already registered.
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
-    public void registerUidFrozenStateChangedCallback(
-            @NonNull Executor executor,
-            @NonNull UidFrozenStateChangedCallback callback) {
-    }
-
-    /**
-     * Unregister a {@link UidFrozenStateChangedCallback} callback.
-     * @param callback The callback to be unregistered.
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
-    public void unregisterUidFrozenStateChangedCallback(
-            @NonNull UidFrozenStateChangedCallback callback) {
-    }
-
-    /**
-     * Query the frozen state of a list of UIDs.
-     *
-     * @param uids the array of UIDs which the client would like to know the frozen state of.
-     * @return An array containing the frozen state for each requested UID, by index. Will be set
-     *               to {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_FROZEN}
-     *               if the UID is frozen. If the UID is not frozen or not found,
-     *               {@link UidFrozenStateChangedCallback#UID_FROZEN_STATE_UNFROZEN}
-     *               will be set.
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.PACKAGE_USAGE_STATS)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
-    public @NonNull @UidFrozenStateChangedCallback.UidFrozenState
-            int[] getUidFrozenState(@NonNull int[] uids) {
-        return new int[uids.length];
-    }
 
     /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
@@ -751,17 +642,9 @@ public class ActivityManager {
     @TestApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 2;
 
-    /** @hide Process can access network despite any power saving restrictions */
+    /** @hide Process can access network despite any power saving resrictions */
     @TestApi
-    public static final int PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK = 1 << 3;
-    /**
-     * @hide
-     * @deprecated Use {@link #PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK} instead.
-     */
-    @TestApi
-    @Deprecated
-    public static final int PROCESS_CAPABILITY_NETWORK =
-            PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
+    public static final int PROCESS_CAPABILITY_NETWORK = 1 << 3;
 
     /** @hide all capabilities, the ORing of all flags in {@link ProcessCapability}*/
     @TestApi
@@ -2929,15 +2812,6 @@ public class ActivityManager {
      */
     public static class MemoryInfo implements Parcelable {
         /**
-         * The advertised memory of the system, as the end user would encounter in a retail display
-         * environment. This value might be different from {@code totalMem}. This could be due to
-         * many reasons. For example, the ODM could reserve part of the memory for the Trusted
-         * Execution Environment (TEE) which the kernel doesn't have access or knowledge about it.
-         */
-        @SuppressLint("MutableBareField")
-        public long advertisedMem;
-
-        /**
          * The available memory on the system.  This number should not
          * be considered absolute: due to the nature of the kernel, a significant
          * portion of this memory is actually in use and needed for the overall
@@ -2986,7 +2860,6 @@ public class ActivityManager {
         }
 
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeLong(advertisedMem);
             dest.writeLong(availMem);
             dest.writeLong(totalMem);
             dest.writeLong(threshold);
@@ -2998,7 +2871,6 @@ public class ActivityManager {
         }
 
         public void readFromParcel(Parcel source) {
-            advertisedMem = source.readLong();
             availMem = source.readLong();
             totalMem = source.readLong();
             threshold = source.readLong();
@@ -4060,9 +3932,6 @@ public class ActivityManager {
      * with the given package.  This is the same as the kernel killing those
      * processes to reclaim memory; the system will take care of restarting
      * these processes in the future as needed.
-     *
-     * <p class="note">Third party applications can only use this API to kill their own processes.
-     * </p>
      *
      * @param packageName The name of the package whose processes are to
      * be killed.

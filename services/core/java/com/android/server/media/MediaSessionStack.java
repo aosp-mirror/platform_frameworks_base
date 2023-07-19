@@ -21,9 +21,7 @@ import static com.android.server.media.MediaSessionPolicyProvider.SESSION_POLICY
 import android.media.Session2Token;
 import android.media.session.MediaSession;
 import android.os.UserHandle;
-import android.text.TextUtils;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import java.io.PrintWriter;
@@ -84,10 +82,6 @@ class MediaSessionStack {
      * @param record The record to add.
      */
     public void addSession(MediaSessionRecordImpl record) {
-        Slog.i(TAG, TextUtils.formatSimple(
-                "addSession to bottom of stack | record: %s",
-                record
-        ));
         mSessions.add(record);
         clearCache(record.getUserId());
 
@@ -103,10 +97,6 @@ class MediaSessionStack {
      * @param record The record to remove.
      */
     public void removeSession(MediaSessionRecordImpl record) {
-        Slog.i(TAG, TextUtils.formatSimple(
-                "removeSession | record: %s",
-                record
-        ));
         mSessions.remove(record);
         if (mMediaButtonSession == record) {
             // When the media button session is removed, nullify the media button session and do not
@@ -114,6 +104,7 @@ class MediaSessionStack {
             // media session might be a fake which isn't able to handle the media key events.
             // TODO(b/154456172): Make this decision unaltered by non-media app's playback.
             updateMediaButtonSession(null);
+            updateMediaButtonSessionIfNeeded();
         }
         clearCache(record.getUserId());
     }
@@ -152,10 +143,6 @@ class MediaSessionStack {
     public void onPlaybackStateChanged(
             MediaSessionRecordImpl record, boolean shouldUpdatePriority) {
         if (shouldUpdatePriority) {
-            Slog.i(TAG, TextUtils.formatSimple(
-                    "onPlaybackStateChanged - Pushing session to top | record: %s",
-                    record
-            ));
             mSessions.remove(record);
             mSessions.add(0, record);
             clearCache(record.getUserId());
@@ -229,6 +216,14 @@ class MediaSessionStack {
                     updateMediaButtonSession(mediaButtonSession);
                 }
                 return;
+            }
+        }
+
+        // If the media button session is null, update it with the session last added in list
+        if (mMediaButtonSession == null) {
+            int size = mSessions.size();
+            if (size > 0) {
+                updateMediaButtonSession(mSessions.get(size - 1));
             }
         }
     }

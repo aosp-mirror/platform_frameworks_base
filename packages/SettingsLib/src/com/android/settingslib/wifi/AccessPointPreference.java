@@ -87,13 +87,7 @@ public class AccessPointPreference extends Preference {
             // Fallback for platforms that do not need friction icon resources.
             frictionSld = null;
         }
-        if (frictionSld != null) {
-            StateListDrawable val = (StateListDrawable) frictionSld.getDrawable(0);
-            frictionSld.recycle();
-            return val;
-        } else {
-            return null;
-        }
+        return frictionSld != null ? (StateListDrawable) frictionSld.getDrawable(0) : null;
     }
 
     // Used for fake pref.

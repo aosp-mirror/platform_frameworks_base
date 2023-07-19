@@ -58,13 +58,7 @@ system_optimized_java_defaults {
                 // retracing infra.
                 optimize: false,
                 shrink: true,
-                ignore_warnings: false,
-                proguard_flags_files: [
-                    "proguard.flags",
-                    // Ensure classes referenced in the framework-res manifest
-                    // and implemented in system_server are kept.
-                    ":framework-res{.aapt.proguardOptionsFile}",
-                ],
+                proguard_flags_files: ["proguard.flags"],
             },
             // Note: Optimizations are disabled by default if unspecified in
             // the java_library rule.
@@ -108,6 +102,7 @@ filegroup {
         ":services.restrictions-sources",
         ":services.searchui-sources",
         ":services.smartspace-sources",
+        ":services.speech-sources",
         ":services.systemcaptions-sources",
         ":services.translation-sources",
         ":services.texttospeech-sources",
@@ -161,6 +156,7 @@ java_library {
         "services.restrictions",
         "services.searchui",
         "services.smartspace",
+        "services.speech",
         "services.systemcaptions",
         "services.translation",
         "services.texttospeech",
@@ -178,13 +174,6 @@ java_library {
         "android.hidl.manager-V1.0-java",
         "framework-tethering.stubs.module_lib",
         "service-art.stubs.system_server",
-        "service-permission.stubs.system_server",
-        "service-rkp.stubs.system_server",
-        "service-sdksandbox.stubs.system_server",
-    ],
-
-    vintf_fragments: [
-        "manifest_services.xml",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)

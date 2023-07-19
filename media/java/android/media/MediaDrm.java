@@ -3049,13 +3049,7 @@ public final class MediaDrm implements AutoCloseable {
 
 
         /**
-         * Sets the {@link LogSessionId}.
-         *
-         * <p>The implementation of this method varies by DRM provider; Please refer
-         * to your DRM provider documentation for more details on this method.
-         *
-         * @throws UnsupportedOperationException when the vendor plugin does not
-         * implement this method
+         * Gets the {@link LogSessionId}.
          */
         public void setLogSessionId(@NonNull LogSessionId logSessionId) {
             Objects.requireNonNull(logSessionId);

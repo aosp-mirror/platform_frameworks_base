@@ -36,7 +36,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
@@ -44,7 +43,6 @@ import android.testing.UiThreadTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 
 import org.junit.After;
@@ -75,8 +73,6 @@ public class DozeSuppressorTest extends SysuiTestCase {
     private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     @Mock
     private BiometricUnlockController mBiometricUnlockController;
-    @Mock
-    private UserTracker mUserTracker;
 
     @Mock
     private DozeMachine mDozeMachine;
@@ -93,14 +89,12 @@ public class DozeSuppressorTest extends SysuiTestCase {
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
         when(mBiometricUnlockController.hasPendingAuthentication()).thenReturn(false);
         when(mDozeHost.isProvisioned()).thenReturn(true);
-        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
         mDozeSuppressor = new DozeSuppressor(
                 mDozeHost,
                 mConfig,
                 mDozeLog,
-                mBiometricUnlockControllerLazy,
-                mUserTracker);
+                mBiometricUnlockControllerLazy);
 
         mDozeSuppressor.setDozeMachine(mDozeMachine);
     }

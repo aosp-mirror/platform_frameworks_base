@@ -24,6 +24,20 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
+    <style name="Theme.SystemUI.QuickSettings" parent="@style/Theme.DeviceDefault.SystemUI">
+        <item name="lightIconTheme">@style/QSIconTheme</item>
+        <item name="darkIconTheme">@style/QSIconTheme</item>
+        <item name="android:colorError">@*android:color/error_color_material_dark</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
+        <item name="offStateColor">@android:color/system_neutral1_800</item>
+        <item name="underSurfaceColor">@android:color/system_neutral1_900</item>
+        <item name="android:colorBackground">@android:color/system_neutral1_900</item>
+        <item name="android:itemTextAppearance">@style/Control.MenuItem</item>
+        <item name="android:colorPrimary">@*android:color/system_neutral1_0</item>
+        <item name="android:colorSecondary">@*android:color/system_neutral1_50</item>
+    </style>
+
     <!-- Screenshots -->
     <style name="LongScreenshotActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
         <item name="android:windowNoTitle">true</item>

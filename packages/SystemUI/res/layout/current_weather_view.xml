@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2017 The OmniROM Project
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!-- Extends FrameLayout -->
+<com.android.systemui.omni.CurrentWeatherView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/current"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp" >
+
+        <TextView
+            android:id="@+id/left_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?attr/wallpaperTextColor"
+            android:gravity="center"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:paddingEnd="8dp"
+            style="@style/TextAppearance.Keyguard.Secondary" />
+
+        <ImageView
+            android:id="@+id/current_image"
+            android:layout_width="@dimen/current_weather_image_size"
+            android:layout_height="@dimen/current_weather_image_size"
+            android:scaleType="centerInside"/>
+
+        <TextView
+            android:id="@+id/right_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?attr/wallpaperTextColor"
+            android:gravity="center"
+            android:singleLine="true"
+            android:paddingStart="8dp"
+            style="@style/TextAppearance.Keyguard.Secondary" />
+    </LinearLayout>
+
+</com.android.systemui.omni.CurrentWeatherView>
+

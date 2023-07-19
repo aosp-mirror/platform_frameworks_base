@@ -907,7 +907,7 @@ public class TrustManagerService extends SystemService {
             boolean secure = mLockPatternUtils.isSecure(id);
 
             if (!info.supportsSwitchToByUser()) {
-                if (info.isManagedProfile() && !secure) {
+                if (info.isManagedProfile() && !secure || info.isParallel()) {
                     setDeviceLockedForUser(id, false);
                 }
                 continue;

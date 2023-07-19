@@ -53,7 +53,6 @@ interface IPowerManager
     float getBrightnessConstraint(int constraint);
     @UnsupportedAppUsage
     boolean isInteractive();
-    boolean areAutoPowerSaveModesEnabled();
     boolean isPowerSaveMode();
     PowerSaveState getPowerSaveState(int serviceType);
     boolean setPowerSaveModeEnabled(boolean mode);
@@ -77,6 +76,7 @@ interface IPowerManager
     @UnsupportedAppUsage
     void reboot(boolean confirm, String reason, boolean wait);
     void rebootSafeMode(boolean confirm, boolean wait);
+    void advancedReboot(boolean confirm, String reason, boolean wait);
     void shutdown(boolean confirm, String reason, boolean wait);
     void crash(String message);
     int getLastShutdownReason();
@@ -135,4 +135,6 @@ interface IPowerManager
     const int GO_TO_SLEEP_REASON_MAX = 10;
     const int GO_TO_SLEEP_FLAG_NO_DOZE = 1 << 0;
 
+    // Lineage custom API
+    void wakeUpWithProximityCheck(long time, int reason, String details, String opPackageName);
 }

@@ -44,7 +44,7 @@ class ListOfFadedTextAnimation : public TestListViewSceneBase {
 
         SkColor colors[2] = {Color::Black, Color::Transparent};
         sk_sp<SkShader> s(
-                SkGradientShader::MakeLinear(pts, colors, NULL, 2, SkTileMode::kClamp));
+                SkGradientShader::MakeLinear(pts, colors, NULL, 2, SkTileMode::kMirror));
 
         SkMatrix matrix;
         matrix.setScale(1, length);

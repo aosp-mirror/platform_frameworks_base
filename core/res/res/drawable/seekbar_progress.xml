@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The AospExtended Project
+  ~ Copyright (C) 2022-2023 The LibreMobileOS Foundation
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:priv-android="http://schemas.android.com/apk/prv/res/android"
+    android:autoMirrored="true">
+    <item android:height="20dp">
+        <selector>
+            <item android:state_enabled="false">
+                <shape android:tint="?android:attr/colorAccent" android:shape="rectangle">
+                    <size android:height="20dp" />
+                    <solid android:color="#80ffffff" />
+                    <corners android:radius="10dp" />
+                </shape>
+            </item>
+            <item android:state_enabled="true">
+                <shape android:tint="?android:attr/colorAccent" android:shape="rectangle">
+                    <size android:height="20dp" />
+                    <solid android:color="#ffffffff" />
+                    <corners android:radius="10dp" />
+                </shape>
+            </item>
+        </selector>
+    </item>
+    <item android:gravity="end|center" android:end="4dp" android:height="12dp">
+        <selector>
+            <item android:state_enabled="false">
+                <shape android:tint="@color/seekbar_progress_thumb" android:shape="oval">
+                    <size android:width="12dp" android:height="12dp" />
+                    <solid android:color="#40626161" />
+                </shape>
+            </item>
+            <item android:state_enabled="true">
+                <shape android:tint="@color/seekbar_progress_thumb" android:shape="oval">
+                    <size android:width="12dp" android:height="12dp" />
+                    <solid android:color="#80626161" />
+                </shape>
+            </item>
+        </selector>
+    </item>
+</layer-list>

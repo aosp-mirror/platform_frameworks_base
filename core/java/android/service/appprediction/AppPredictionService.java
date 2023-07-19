@@ -328,7 +328,7 @@ public abstract class AppPredictionService extends Service {
                 Slog.e(TAG, "Callback is null, likely the binder has died.");
                 return false;
             }
-            return mCallback.asBinder().equals(callback.asBinder());
+            return mCallback.equals(callback);
         }
 
         public void destroy() {

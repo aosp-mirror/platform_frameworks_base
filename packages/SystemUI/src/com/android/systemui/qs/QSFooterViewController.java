@@ -40,7 +40,6 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
 
     private final UserTracker mUserTracker;
     private final QSPanelController mQsPanelController;
-    private final TextView mBuildText;
     private final PageIndicator mPageIndicator;
     private final View mEditButton;
     private final FalsingManager mFalsingManager;
@@ -58,27 +57,12 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
         mFalsingManager = falsingManager;
         mActivityStarter = activityStarter;
 
-        mBuildText = mView.findViewById(R.id.build);
         mPageIndicator = mView.findViewById(R.id.footer_page_indicator);
         mEditButton = mView.findViewById(android.R.id.edit);
     }
 
     @Override
     protected void onViewAttached() {
-        mBuildText.setOnLongClickListener(view -> {
-            CharSequence buildText = mBuildText.getText();
-            if (!TextUtils.isEmpty(buildText)) {
-                ClipboardManager service =
-                        mUserTracker.getUserContext().getSystemService(ClipboardManager.class);
-                String label = getResources().getString(R.string.build_number_clip_data_label);
-                service.setPrimaryClip(ClipData.newPlainText(label, buildText));
-                Toast.makeText(getContext(), R.string.build_number_copy_toast, Toast.LENGTH_SHORT)
-                        .show();
-                return true;
-            }
-            return false;
-        });
-
         mEditButton.setOnClickListener(view -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                 return;

@@ -135,7 +135,8 @@ class DismissView(context: Context) : FrameLayout(context) {
     }
 
     private fun createGradient(): GradientDrawable {
-        val gradientColor = context.resources.getColor(android.R.color.system_neutral1_900)
+        val gradientColor = context.resources.getColor(
+                android.R.color.system_neutral1_900, /* theme= */ null)
         val alpha = 0.7f * 255
         val gradientColorWithAlpha = Color.argb(alpha.toInt(),
                 Color.red(gradientColor),

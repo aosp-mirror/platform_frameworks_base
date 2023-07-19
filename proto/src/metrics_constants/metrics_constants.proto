@@ -7437,5 +7437,18 @@ message MetricsEvent {
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
+
+    // Beginning of Custom Constants
+    //Xtended Metrics
+    XTENDED = 1800;
+
+    XTENSIONS = 2000;
+
+    // Panel for Mobile Data
+    PANEL_MOBILE_DATA = 4002;
+
+    // Panel for Bluetooth
+    PANEL_BLUETOOTH = 4003;
+
   }
 }

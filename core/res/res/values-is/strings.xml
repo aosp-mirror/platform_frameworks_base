@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Ónefnt&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Ekkert símanúmer)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"PIN-númerin sem þú slóst inn stemma ekki."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Sláðu in PIN-númer sem er 4 til 8 tölustafir."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Sláðu inn PUK-númer sem er 8 tölustafir eða lengra."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM-kortið er læst með PUK-númeri. Sláðu inn PUK-númerið til að opna kortið."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Sláðu inn PUK2-númer til að opna fyrir SIM-kort."</string>
+    <string name="needPuk" msgid="7321876090152422918">"SIM-kortið er PUK-læst. Sláðu inn PUK-númerið til að taka það úr lás."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Sláðu inn PUK2-númer að taka SIM-kortið úr lás."</string>
     <string name="enablePin" msgid="2543771964137091212">"Tókst ekki. Kveiktu á SIM-/RUIM-lás."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraun eftir áður en SIM-kortinu verður læst.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Númerabirting er sjálfgefið án takmarkana. Næsta símtal: Án takmarkana"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Þjónustu ekki útdeilt."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Þú getur ekki breytt stillingu númerabirtingar."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Skipt yfir í farsímagögn hjá <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Þú getur breytt þessu hvenær sem er í stillingum"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Engin gagnaþjónusta fyrir farsíma"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Neyðarsímtöl eru ekki í boði"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Símtöl eru ekki í boði"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Getur fangað bendingar sem eru gerðar á fingrafaralesara tækisins."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Taka skjámynd"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Getur tekið skjámynd af skjánum."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Forskoðun, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"slökkva á eða breyta stöðustiku"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Leyfir forriti að slökkva á stöðustikunni eða bæta við og fjarlægja kerfistákn."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"vera stöðustikan"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Gerir forritinu kleift að fá valda NFC-greiðsluþjónustu, svo sem skráða aðstoð og áfangastað leiðar."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"stjórna nándarsamskiptum (NFC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Leyfir forriti að eiga samskipti við NFC-merki, -spjöld og -lesara (nándarsamskipti)."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Færslutilvik í öryggiseiningu"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Gerir forritinu kleift að móttaka upplýsingar um færslur sem fara fram í öryggiseiningu."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"slökkva á skjálásnum"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Leyfir forriti að slökkva á símalásnum og öðrum öryggisaðgerðum tengdum aðgangsorði. Til dæmis gerir síminn lásinn óvirkan þegar símtal berst og læsist svo aftur að símtali loknu."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"biðja um flókinn skjálás"</string>
@@ -599,7 +599,7 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Breyttu stöðu fingursins örlítið í hvert skipti"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Fingrafar þekkist ekki"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Ekki þekkt fingrafar"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Fingrafar þekkist ekki"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingrafar staðfest"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Andlit staðfest"</string>
@@ -639,7 +639,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Þú verður að fara á verkstæði."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Ekki tekst að búa til andlitslíkan. Reyndu aftur."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Of bjart. Prófaðu mýkri lýsingu."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Ekki næg birta"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Of lítið ljós"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Færðu símann lengra frá"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Færðu símann nær"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Færðu símann hærra"</string>
@@ -664,8 +664,6 @@
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Ekki tekst að búa til andlitslíkan. Reyndu aftur."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Dökk gleraugu greindust. Allt andlitið á þér þarf að sjást."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Eitthvað er fyrir andlitinu. Allt andlitið á þér þarf að sjást."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Andlit ekki staðfest. Vélbúnaður er ekki tiltækur."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Prófaðu andlitskenni aftur."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Ekki er hægt að vista ný andlitsgögn. Eyddu gömlu fyrst."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Nota andlit eða skjálás"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Notaðu andlitið þitt til að halda áfram"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Notaðu andlitið eða skjálás til að halda áfram"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Eitthvað fór úrskeiðis. Reyndu aftur."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Andlitstákn"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"lesa samstillingar"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Reyndu aftur"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Taktu úr lás til að sjá alla eiginleika og gögn"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Hámarksfjölda tilrauna til andlitsopnunar náð"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Ekkert SIM-kort"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Það er ekkert SIM-kort í spjaldtölvunni."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Það er ekkert SIM-kort í Android TV-tækinu."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Það er ekkert SIM-kort í símanum."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Bæta við SIM-korti."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM-kort vantar eða er ekki læsilegt. Bæta við SIM-korti."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Ónothæft SIM-kort."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM-kortið þitt var gert varanlega óvirkt.\n Hafðu samband við símafyrirtækið þitt til að fá nýtt SIM-kort."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Ekkert SIM-kort"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Ekkert SIM-kort í spjaldtölvunni."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Ekkert SIM-kort er í Android TV tækinu."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Ekkert SIM-kort í símanum."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Settu SIM-kort í."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-kort vantar eða það er ekki læsilegt. Settu SIM-kort í."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Ónothæft SIM-kort."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM-kortið hefur verið gert varanlega óvirkt.\n Hafðu samband við símafyrirtækið þitt til að fá annað SIM-kort."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Fyrra lag"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Næsta lag"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Hlé"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Spóla áfram"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Aðeins neyðarsímtöl"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Net læst"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM-kort er læst með PUK-númeri."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM-kortið er PUK-læst."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Skoðaðu notendahandbókina eða hafðu samband við þjónustudeild."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM-kort er læst."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Opnar SIM-kort…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM-kortið er læst."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Tekur SIM-kort úr lás…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Þú hefur slegið inn rangt aðgangsorð <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Þú hefur slegið inn rangt PIN-númer <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Þú getur breytt þessu seinna undir Stillingar &gt; Forrit"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Leyfa alltaf"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Leyfa aldrei"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM-kort var fjarlægt"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Farsímakerfið verður ekki í boði fyrr en þú endurræsir með gildu SIM-korti."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM-kort fjarlægt"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Farsímakerfið verður ekki í boði fyrr en þú endurræsir með gildu SIM-korti í."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Lokið"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM-korti var bætt við"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM-korti bætt við"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Endurræstu tækið að fá aðgang að farsímakerfinu."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Endurræsa"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Virkja farsímaþjónustu"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Sjónvarp"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Sími"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Dokkuhátalarar"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Ytra tæki"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Heyrnartól"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Kerfi"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM-kortið hefur verið gert óvirkt. Sláðu inn PUK-númerið til að halda áfram. Hafðu samband við símafyrirtækið til að fá frekari upplýsingar."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Sláðu inn nýtt PIN-númer"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Staðfestu nýja PIN-númerið"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Opnar SIM-kort…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Opnar SIM-kort…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Rangt PIN-númer."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Sláðu in PIN-númer sem er 4 til 8 tölustafir."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-númerið á að vera 8 tölustafir."</string>
@@ -1687,7 +1683,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ekki kveikja"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"KVEIKT"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"SLÖKKT"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Viltu leyfa „<xliff:g id="SERVICE">%1$s</xliff:g>“ að hafa fulla stjórn yfir tækinu þínu?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Viltu leyfa <xliff:g id="SERVICE">%1$s</xliff:g> að hafa fulla stjórn yfir tækinu þínu?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Full stjórnun er viðeigandi fyrir forrit sem hjálpa þér ef þú hefur ekki aðgang, en ekki fyrir flest forrit."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Skoða og stjórna skjá"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Það getur lesið allt efni á skjánum og birt efni yfir öðrum forritum."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Notar allan skjáinn"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Strjúktu niður frá efri brún til að hætta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ég skil"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Snúðu til að sjá betur"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Lokaðu skjáskiptingu til að sjá betur"</string>
     <string name="done_label" msgid="7283767013231718521">"Lokið"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Valskífa fyrir klukkustundir"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Valskífa fyrir mínútur"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Ekki er hægt að opna myndavél spjaldtölvunnar úr <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Ekki er hægt að opna þetta á meðan streymi stendur yfir. Prófaðu það í símanum í staðinn."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Sjálfgildi kerfis"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"KORT <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

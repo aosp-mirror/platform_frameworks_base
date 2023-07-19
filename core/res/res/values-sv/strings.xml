@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Okänd&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Inget telefonnummer)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"PIN-koderna som du angav matchar inte."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Ange en PIN-kod som är 4 till 8 siffror."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Ange en PUK-kod med minst 8 siffror."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM-kortet har låsts med PUK-kod. Ange PUK-koden för att låsa upp det."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Ange PUK2-koden för att återaktivera SIM-kortet."</string>
+    <string name="needPuk" msgid="7321876090152422918">"Ditt SIM-kort är PUK-låst. Ange PUK-koden om du vill låsa upp det."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Ange PUK2-koden för att häva spärren av SIM-kortet."</string>
     <string name="enablePin" msgid="2543771964137091212">"Försöket misslyckades. Aktivera SIM-/RUIM-lås."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Du har <xliff:g id="NUMBER_1">%d</xliff:g> försök kvar innan SIM-kortet låses.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Nummerpresentatörens standardinställning är inte blockerad. Nästa samtal: Inte blockerad"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Tjänsten är inte etablerad."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Det går inte att ändra inställningen för nummerpresentatör."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Du har bytt mobildata till <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Du kan ändra det här när som helst i inställningarna"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ingen mobildatatjänst"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Det går inte att ringa nödsamtal"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Tjänsten för röstsamtal har blockerats"</string>
@@ -338,8 +341,7 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Fingeravtrycksrörelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan registrera rörelser som utförs med hjälp av enhetens fingeravtryckssensor."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skärmbild"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan ta en skärmbild av skärmen."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Förhandsgranskar <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Du kan ta en skärmbild av skärmen."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tillåter att appen inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"visas i statusfältet"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillåter att appen hämtar information kopplad till standardtjänsten för NFC-betalning, till exempel registrerade hjälpmedel och ruttdestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollera närfältskommunikationen"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Tillåter att appen kommunicerar med etiketter, kort och läsare för närfältskommunikation (NFC)."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Transaktionshändelse i ett säkert element"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Tillåter att appen tar emot information om transaktioner som sker i ett säkert element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"inaktivera skärmlåset"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Tillåter att appen inaktiverar tangentlåset och tillhörande lösenordsskydd. Ett exempel kan vara att tangentlåset inaktiveras vid inkommande samtal och aktiveras igen när samtalet är avslutat."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"begär komplexitetsnivå för skärmlåset"</string>
@@ -663,9 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Ansiktsmodellen kunde inte skapas. Försök igen."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mörka glasögon identifierades. Hela ansiktet måste synas."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något täcker ansiktet. Hela ansiktet måste synas."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något som täcker ansiktet identifierades. Hela ansiktet måste synas."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansiktsverifiering går ej. Otillgänglig maskinvara."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Försök att använda ansiktslåset igen"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Kan inte lagra ny ansiktsdata. Radera först gammal data."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Använd ansiktslåset eller skärmlåset"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Fortsätt med hjälp av ditt ansikte"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Fortsätt med hjälp av ditt ansikte eller skärmlåset"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Något gick fel. Försök igen."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ansikte"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"läsa synkroniseringsinställningar"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Försök igen"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Lås upp för alla funktioner och all data"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Du har försökt låsa upp med ansiktslås för många gånger"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Inget SIM-kort"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Inget SIM-kort i surfplattan."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Inget SIM-kort i Android TV-enheten."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Inget SIM-kort i telefonen."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Lägg till ett SIM-kort."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM-kort saknas eller går inte att läsa. Lägg till ett SIM-kort."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"SIM-kortet går inte att använda."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Ditt SIM-kort har inaktiverats permanent.\n Kontakta din operatör och be om ett nytt SIM-kort."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Inget SIM-kort"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Inget SIM-kort i surfplattan."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Inget SIM-kort i Android TV-enheten."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Inget SIM-kort i telefonen."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Sätt i ett SIM-kort."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-kort saknas eller kan inte läsas. Sätt i ett SIM-kort."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Oanvändbart SIM-kort."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM-kortet har inaktiverats permanent.\n Beställ ett nytt SIM-kort från din operatör."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Föregående spår"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Nästa spår"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausa"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Snabbspola framåt"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Endast nödsamtal"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Nätverk låst"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM-kortet har låsts med PUK-kod."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM-kortet är PUK-låst."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Se användarhandboken eller kontakta kundtjänst."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM-kortet är låst."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM-kortet låses upp …"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM-kortet är låst."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Låser upp SIM-kort…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Du har ritat ditt grafiska lösenord fel <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Du har angett fel lösenord <xliff:g id="NUMBER_0">%1$d</xliff:g> gånger. \n\nFörsök igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Du kan ändra detta senare i Inställningar &gt; Appar"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Tillåt alltid"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Tillåt aldrig"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM-kort har tagits bort"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Mobilnätverket är inte tillgängligt förrän du startar om med ett giltigt SIM-kort."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM-kortet togs bort"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Det mobila nätverket kommer inte att vara tillgängligt förrän du startar om med ett giltigt SIM-kort."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Klar"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM-kort har lagts till"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM-kort lades till"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Du måste starta om enheten för att ansluta till det mobila nätverket."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Starta om"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktivera mobiltjänst"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Mobil"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Dockningsstationens högtalare"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Extern enhet"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Hörlurar"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"System"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM-kortet är nu inaktiverat. Ange PUK-koden för att fortsätta. Kontakta operatören om du vill ha mer information."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Ange önskad PIN-kod"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Bekräfta önskad PIN-kod"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM-kortet låses upp …"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Låser upp SIM-kort …"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Fel PIN-kod."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Ange en PIN-kod med 4 till 8 siffror."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-koden ska vara åtta siffror."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visar på fullskärm"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Svep nedåt från skärmens överkant för att avsluta."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rotera för att få en bättre vy"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Stäng delad skärm för att få en bättre vy"</string>
     <string name="done_label" msgid="7283767013231718521">"Klart"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Cirkelreglage för timmar"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Cirkelreglage för minuter"</string>
@@ -2279,7 +2273,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Återaktivera enhetens mikrofon"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Återaktivera enhetens kamera"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"För &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; och alla appar och tjänster"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Återaktivera"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Avblockera"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorintegritet"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Appikon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Appens varumärkesbild"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Surfplattans kamera kan inte användas från <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Det går inte att komma åt innehållet när du streamar. Testa med telefonen i stället."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systemets standardinställning"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"KORT <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

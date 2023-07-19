@@ -22,6 +22,7 @@ import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.ITabletModeChangedListener;
+import android.hardware.input.ISmartSwitchChangedListener;
 import android.hardware.input.TouchCalibration;
 import android.os.CombinedVibration;
 import android.hardware.input.IInputSensorEventListener;
@@ -95,6 +96,8 @@ interface IInputManager {
     int isInTabletMode();
     // Registers a tablet mode change listener
     void registerTabletModeChangedListener(ITabletModeChangedListener listener);
+
+    void registerSmartSwitchChangedListener(ISmartSwitchChangedListener listener);
 
     // Queries whether the device's microphone is muted by switch
     int isMicMuted();

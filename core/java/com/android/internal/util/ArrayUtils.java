@@ -39,7 +39,8 @@ import java.util.Set;
 import java.util.function.IntFunction;
 
 /**
- * Static utility methods for arrays that aren't already included in {@link java.util.Arrays}.
+ * ArrayUtils contains some methods that you can call to find out
+ * the most efficient increments by which to grow arrays.
  */
 public class ArrayUtils {
     private static final int CACHE_SIZE = 73;
@@ -340,16 +341,15 @@ public class ArrayUtils {
     }
 
     /**
-     * Returns the concatenation of the given arrays.  Only works for object arrays, not for
-     * primitive arrays.  See {@link #concat(byte[]...)} for a variant that works on byte arrays.
+     * Combine multiple arrays into a single array.
      *
      * @param kind The class of the array elements
-     * @param arrays The arrays to concatenate.  Null arrays are treated as empty.
+     * @param arrays The arrays to combine
      * @param <T> The class of the array elements (inferred from kind).
      * @return A single array containing all the elements of the parameter arrays.
      */
     @SuppressWarnings("unchecked")
-    public static @NonNull <T> T[] concat(Class<T> kind, @Nullable T[]... arrays) {
+    public static @NonNull <T> T[] concatElements(Class<T> kind, @Nullable T[]... arrays) {
         if (arrays == null || arrays.length == 0) {
             return createEmptyArray(kind);
         }
@@ -390,29 +390,6 @@ public class ArrayUtils {
         return (T[]) Array.newInstance(kind, 0);
     }
 
-    /**
-     * Returns the concatenation of the given byte arrays.  Null arrays are treated as empty.
-     */
-    public static @NonNull byte[] concat(@Nullable byte[]... arrays) {
-        if (arrays == null) {
-            return new byte[0];
-        }
-        int totalLength = 0;
-        for (byte[] a : arrays) {
-            if (a != null) {
-                totalLength += a.length;
-            }
-        }
-        final byte[] result = new byte[totalLength];
-        int pos = 0;
-        for (byte[] a : arrays) {
-            if (a != null) {
-                System.arraycopy(a, 0, result, pos, a.length);
-                pos += a.length;
-            }
-        }
-        return result;
-    }
 
     /**
      * Adds value to given array if not already present, providing set-like

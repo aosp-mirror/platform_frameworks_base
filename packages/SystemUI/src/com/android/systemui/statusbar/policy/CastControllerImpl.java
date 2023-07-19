@@ -167,7 +167,8 @@ public class CastControllerImpl implements CastController {
                 int statusCode = route.getStatusCode();
                 if (statusCode == RouteInfo.STATUS_CONNECTING) {
                     device.state = CastDevice.STATE_CONNECTING;
-                } else if (route.isSelected() || statusCode == RouteInfo.STATUS_CONNECTED) {
+                } else if (route.isSelected() && statusCode != RouteInfo.STATUS_NOT_AVAILABLE
+                        || statusCode == RouteInfo.STATUS_CONNECTED) {
                     device.state = CastDevice.STATE_CONNECTED;
                 } else {
                     device.state = CastDevice.STATE_DISCONNECTED;

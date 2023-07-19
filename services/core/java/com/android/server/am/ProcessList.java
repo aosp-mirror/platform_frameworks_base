@@ -27,7 +27,6 @@ import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
-import static android.os.Process.getAdvertisedMem;
 import static android.os.Process.getFreeMemory;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.killProcessQuiet;
@@ -109,6 +108,7 @@ import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.BoostFramework;
 import android.util.DebugUtils;
 import android.util.EventLog;
 import android.util.LongSparseArray;
@@ -143,6 +143,8 @@ import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowProcessController;
 
 import dalvik.system.VMRuntime;
+
+import ink.kaleidoscope.server.ParallelSpaceManagerService;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -527,6 +529,11 @@ public final class ProcessList {
     private final int[] mZygoteSigChldMessage = new int[3];
 
     ActivityManagerGlobalLock mProcLock;
+
+    /**
+     * BoostFramework Object
+     */
+    public static BoostFramework mPerfServiceStartHint = new BoostFramework();
 
     final class IsolatedUidRange {
         @VisibleForTesting
@@ -1533,7 +1540,6 @@ public final class ProcessList {
     void getMemoryInfo(ActivityManager.MemoryInfo outInfo) {
         final long homeAppMem = getMemLevel(HOME_APP_ADJ);
         final long cachedAppMem = getMemLevel(CACHED_APP_MIN_ADJ);
-        outInfo.advertisedMem = getAdvertisedMem();
         outInfo.availMem = getFreeMemory();
         outInfo.totalMem = getTotalMemory();
         outInfo.threshold = homeAppMem;
@@ -1619,6 +1625,22 @@ public final class ProcessList {
             // EmulatedVolumes: /data/media and /mnt/expand/<volume>/data/media
             // PublicVolumes: /mnt/media_rw/<volume>
             gidList.add(Process.MEDIA_RW_GID);
+
+            // HACK: For legacy devices running fuse above sdcardfs. We have to grant it
+            // gids of other users to make the cross-user file management possible.
+            // This is dirty. But I can't come up with a better idea which doesn't need
+            // to hack the kernel.
+            for (int userId : ParallelSpaceManagerService.getCurrentParallelUserIds()) {
+                gidList.add(UserHandle.getUserGid(userId));
+                // Not needed in theory. Add it just in case. This could happened when
+                // dropping sdcardfs without wiping data and things get broken.
+                gidList.add(UserHandle.getUid(userId, Process.MEDIA_RW_GID));
+            }
+            // Make sure parallel spaces are ready to visit the owner too.
+            if (ParallelSpaceManagerService.isCurrentParallelUser(UserHandle.getUserId(uid))) {
+                int ownerId = ParallelSpaceManagerService.getCurrentParallelOwnerId();
+                gidList.add(UserHandle.getUserGid(ownerId));
+            }
         }
         if (externalStorageAccess) {
             // Apps with MANAGE_EXTERNAL_STORAGE PERMISSION need the external_storage gid to access
@@ -1741,7 +1763,6 @@ public final class ProcessList {
 
             if (debuggableFlag) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
-                runtimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
                 runtimeFlags |= Zygote.DEBUG_JAVA_DEBUGGABLE;
                 // Also turn on CheckJNI for debuggable apps. It's quite
                 // awkward to turn on otherwise.
@@ -2349,6 +2370,16 @@ public final class ProcessList {
                 storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
                         app.processName);
             }
+            if (mPerfServiceStartHint != null) {
+                if ((hostingRecord.getType() != null)
+                       && (hostingRecord.getType().equals(HostingRecord.HOSTING_TYPE_NEXT_ACTIVITY)
+                               || hostingRecord.getType().equals(HostingRecord.HOSTING_TYPE_NEXT_TOP_ACTIVITY))) {
+                                   //TODO: not acting on pre-activity
+                    if (startResult != null) {
+                        mPerfServiceStartHint.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, app.processName, startResult.pid, BoostFramework.Launch.TYPE_START_PROC);
+                    }
+                }
+            }
             checkSlow(startTime, "startProcess: returned from zygote!");
             return startResult;
         } finally {
@@ -2476,6 +2507,11 @@ public final class ProcessList {
             }
         }
 
+        if (!info.baseCodePathExists()) {
+            Slog.w(TAG, "APK " + info.getBaseCodePath() + " does not exist for " + processName);
+            return null;
+        }
+
         if (app == null) {
             checkSlow(startTime, "startProcess: creating new process record");
             app = newProcessRecordLocked(info, processName, isolated, isolatedUid, isSdkSandbox,
@@ -2491,6 +2527,10 @@ public final class ProcessList {
             if (predecessor != null) {
                 app.mPredecessor = predecessor;
                 predecessor.mSuccessor = app;
+            }
+            if ((info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
+                app.setPersistent(true);
+                app.mState.setMaxAdj(ProcessList.PERSISTENT_PROC_ADJ);
             }
             checkSlow(startTime, "startProcess: done creating new process record");
         } else {
@@ -3018,10 +3058,9 @@ public final class ProcessList {
                 hostingRecord.getDefiningUid(), hostingRecord.getDefiningProcessName());
         final ProcessStateRecord state = r.mState;
 
-        if (!isolated && !isSdkSandbox
+        if (!mService.mBooted && !mService.mBooting
                 && userId == UserHandle.USER_SYSTEM
-                && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK
-                && (TextUtils.equals(proc, info.processName))) {
+                && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
             // The system process is initialized to SCHED_GROUP_DEFAULT in init.rc.
             state.setCurrentSchedulingGroup(ProcessList.SCHED_GROUP_DEFAULT);
             state.setSetSchedGroup(ProcessList.SCHED_GROUP_DEFAULT);
@@ -5092,17 +5131,6 @@ public final class ProcessList {
             app.setDyingPid(0);
         }
         mAppExitInfoTracker.scheduleNoteProcessDied(app);
-    }
-
-    /**
-     * Called by ActivityManagerService when a recoverable native crash occurs.
-     */
-    @GuardedBy("mService")
-    void noteAppRecoverableCrash(final ProcessRecord app) {
-        if (DEBUG_PROCESSES) {
-            Slog.i(TAG, "note: " + app + " has a recoverable native crash");
-        }
-        mAppExitInfoTracker.scheduleNoteAppRecoverableCrash(app);
     }
 
     /**

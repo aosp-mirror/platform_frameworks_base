@@ -19,13 +19,18 @@ package com.android.systemui.statusbar.phone;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -35,23 +40,41 @@ import android.widget.LinearLayout;
 
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.Dependency;
-import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
+import com.android.systemui.statusbar.policy.Offset;
 import com.android.systemui.user.ui.binder.StatusBarUserChipViewBinder;
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.leak.RotationUtils;
+import android.util.TypedValue;
+import com.android.systemui.tuner.TunerService;
+import android.provider.Settings;
 
 import java.util.Objects;
 
-public class PhoneStatusBarView extends FrameLayout {
+public class PhoneStatusBarView extends FrameLayout implements TunerService.Tunable {
     private static final String TAG = "PhoneStatusBarView";
+
+    private static final String LEFT_PADDING =
+            "system:" + Settings.System.LEFT_PADDING;
+    private static final String RIGHT_PADDING =
+            "system:" + Settings.System.RIGHT_PADDING;
+
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
+
+    private int mBasePaddingBottom;
+    private int mLeftPad;
+    private int mRightPad;
+    private int sbPaddingStartRes;
+    private int sbPaddingEndRes;
+    private int mBasePaddingTop;
 
     private DarkReceiver mBattery;
     private DarkReceiver mClock;
+    private DarkReceiver mClockCentre;
+    private DarkReceiver mClockRight;
     private int mRotationOrientation = -1;
     @Nullable
     private View mCutoutSpace;
@@ -61,7 +84,9 @@ public class PhoneStatusBarView extends FrameLayout {
     private Rect mDisplaySize;
     private int mStatusBarHeight;
     @Nullable
-    private Gefingerpoken mTouchEventHandler;
+    private TouchEventHandler mTouchEventHandler;
+    @Nullable
+    private ViewGroup mStatusBarContents = null;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -73,7 +98,7 @@ public class PhoneStatusBarView extends FrameLayout {
         mContentInsetsProvider = Dependency.get(StatusBarContentInsetsProvider.class);
     }
 
-    void setTouchEventHandler(Gefingerpoken handler) {
+    void setTouchEventHandler(TouchEventHandler handler) {
         mTouchEventHandler = handler;
     }
 
@@ -82,12 +107,27 @@ public class PhoneStatusBarView extends FrameLayout {
         StatusBarUserChipViewBinder.bind(container, viewModel);
     }
 
+    public void offsetStatusBar(Offset offset) {
+        if (mStatusBarContents == null) {
+            return;
+        }
+        mStatusBarContents.setTranslationX(offset.getX());
+        mStatusBarContents.setTranslationY(offset.getY());
+        invalidate();
+    }
+
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
         mBattery = findViewById(R.id.battery);
         mClock = findViewById(R.id.clock);
+        mClockCentre = findViewById(R.id.center_clock);
+        mClockRight = findViewById(R.id.right_clock);
         mCutoutSpace = findViewById(R.id.cutout_space_view);
+        mStatusBarContents = (ViewGroup) findViewById(R.id.status_bar_contents);
+
+	Dependency.get(TunerService.class).addTunable(this,
+                LEFT_PADDING, RIGHT_PADDING);
 
         updateResources();
     }
@@ -98,6 +138,8 @@ public class PhoneStatusBarView extends FrameLayout {
         // Always have Battery meters in the status bar observe the dark/light modes.
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mBattery);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mClock);
+        Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mClockCentre);
+        Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mClockRight);
         if (updateDisplayParameters()) {
             updateLayoutForCutout();
         }
@@ -108,6 +150,8 @@ public class PhoneStatusBarView extends FrameLayout {
         super.onDetachedFromWindow();
         Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mBattery);
         Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mClock);
+        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mClockCentre);
+        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mClockRight);
         mDisplayCutout = null;
     }
 
@@ -186,7 +230,7 @@ public class PhoneStatusBarView extends FrameLayout {
             );
             return true;
         }
-        return mTouchEventHandler.onTouchEvent(event);
+        return mTouchEventHandler.handleTouchEvent(event);
     }
 
     @Override
@@ -209,22 +253,31 @@ public class PhoneStatusBarView extends FrameLayout {
         mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         layoutParams.height = mStatusBarHeight - waterfallTopInset;
 
+        float density = Resources.getSystem().getDisplayMetrics().density;
+        Resources res = null;
+        try {
+            res = mContext.getPackageManager().getResourcesForApplication("com.android.systemui");
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
         int statusBarPaddingTop = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_padding_top);
         int statusBarPaddingStart = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_padding_start);
         int statusBarPaddingEnd = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_padding_end);
+        sbPaddingStartRes = (int) (statusBarPaddingStart / density);
+        sbPaddingEndRes = (int) (statusBarPaddingEnd / density);
 
-        View sbContents = findViewById(R.id.status_bar_contents);
-        sbContents.setPaddingRelative(
-                statusBarPaddingStart,
+        mStatusBarContents.setPaddingRelative(
+                (int) mLeftPad,
                 statusBarPaddingTop,
-                statusBarPaddingEnd,
+                (int) mRightPad,
                 0);
 
         findViewById(R.id.notification_lights_out)
-                .setPaddingRelative(0, statusBarPaddingStart, 0, 0);
+                .setPaddingRelative(0, (int) mLeftPad, 0, 0);
 
         setLayoutParams(layoutParams);
     }
@@ -267,5 +320,55 @@ public class PhoneStatusBarView extends FrameLayout {
                 getPaddingTop(),
                 insets.second,
                 getPaddingBottom());
+
+        // Apply negative paddings to centered area layout so that we'll actually be on the center.
+        final int winRotation = getDisplay().getRotation();
+        LayoutParams centeredAreaParams =
+                (LayoutParams) findViewById(R.id.center_clock_layout).getLayoutParams();
+        centeredAreaParams.leftMargin =
+                winRotation == Surface.ROTATION_0 ? -insets.first : 0;
+        centeredAreaParams.rightMargin =
+                winRotation == Surface.ROTATION_0 ? -insets.second : 0;
+    }
+
+    /**
+     * A handler responsible for all touch event handling on the status bar.
+     *
+     * Touches that occur on the status bar view may have ramifications for the notification
+     * panel (e.g. a touch that pulls down the shade could start on the status bar), so this
+     * interface provides a way to notify the panel controller when these touches occur.
+     *
+     * The handler will be notified each time {@link PhoneStatusBarView#onTouchEvent} and
+     * {@link PhoneStatusBarView#onInterceptTouchEvent} are called.
+     **/
+    public interface TouchEventHandler {
+        /** Called each time {@link PhoneStatusBarView#onInterceptTouchEvent} is called. */
+        void onInterceptTouchEvent(MotionEvent event);
+
+        /**
+         * Called each time {@link PhoneStatusBarView#onTouchEvent} is called.
+         *
+         * Should return true if the touch was handled by this handler and false otherwise. The
+         * return value from the handler will be returned from
+         * {@link PhoneStatusBarView#onTouchEvent}.
+         */
+        boolean handleTouchEvent(MotionEvent event);
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (LEFT_PADDING.equals(key)) {
+            int mLPadding = TunerService.parseInteger(newValue, sbPaddingStartRes);
+            mLeftPad = Math.round(TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, mLPadding,
+                getResources().getDisplayMetrics()));
+            updateStatusBarHeight();
+        } else if (RIGHT_PADDING.equals(key)) {
+            int mRPadding = TunerService.parseInteger(newValue, sbPaddingEndRes);
+            mRightPad = Math.round(TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, mRPadding,
+                getResources().getDisplayMetrics()));
+            updateStatusBarHeight();
+        }
     }
 }

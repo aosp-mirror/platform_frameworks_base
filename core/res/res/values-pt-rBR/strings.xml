@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Sem título&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Nenhum número de telefone)"</string>
@@ -43,12 +48,12 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Os PINs digitados não correspondem."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Digite um PIN com 4 a 8 números."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Digite um PUK com oito números ou mais."</string>
-    <string name="needPuk" msgid="3503414069503752211">"O chip está bloqueado por uma PUK. Digite o código PUK para desbloquear."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Digite a PUK2 para desbloquear o chip."</string>
+    <string name="needPuk" msgid="7321876090152422918">"O seu chip está bloqueado por um PUK. Digite o código PUK para desbloqueá-lo."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Digite o PUK2 para desbloquear o chip."</string>
     <string name="enablePin" msgid="2543771964137091212">"Falha. Ative o bloqueio do chip/R-UIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
-      <item quantity="many">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
+      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
       <item quantity="other">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
@@ -74,8 +79,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"O identificador de chamadas assume o padrão de não restrito. Próxima chamada: Não restrita"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"O serviço não foi habilitado."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Não é possível alterar a configuração do identificador de chamadas."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Dados da <xliff:g id="CARRIERDISPLAY">%s</xliff:g> ativados"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"É possível mudar essa opção a qualquer momento nas Configurações"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nenhum serviço móvel de dados"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Chamadas de emergência indisponíveis"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Sem serviço de voz"</string>
@@ -340,7 +343,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pode captar gestos realizados no sensor de impressão digital do dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fazer uma captura de tela"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pode fazer uma captura de tela."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Visualização, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desativar ou modificar a barra de status"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite que o app desative a barra de status ou adicione e remova ícones do sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ser a barra de status"</string>
@@ -552,8 +554,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que o app acesse as informações preferidas de serviço de pagamento por NFC, como auxílios registrados ou destinos de trajetos."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar a comunicação a curta distância"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite que o app se comunique com leitores, cartões e etiqueta NFC (comunicação a curta distância)."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Evento de transação do Elemento de segurança"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Permite que o app receba informações sobre transações que ocorrem em um Elemento de segurança."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desativar o bloqueio de tela"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite que o app desative o bloqueio de teclas e qualquer segurança por senha associada. Por exemplo, o telefone desativa o bloqueio de telas ao receber uma ligação e o reativa quando a chamada é finalizada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Solicitar complexidade do bloqueio de tela"</string>
@@ -597,7 +597,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Claro demais"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"O botão liga/desliga foi pressionado"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ajuste a posição do dedo"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mude ligeiramente a posição do dedo em cada registro"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mude a posição do dedo ligeiramente a cada momento"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Impressão digital não reconhecida"</string>
@@ -656,7 +656,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Olhe diretamente para o smartphone"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Olhe diretamente para o smartphone"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Olhe diretamente para o smartphone"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Tire tudo que possa esconder seu rosto."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Remova tudo que esteja ocultando seu rosto."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpe a parte superior da tela, inclusive a barra preta"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -664,9 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Falha ao criar o modelo de rosto. Tente de novo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Óculos escuros detectados. Seu rosto precisa estar completamente visível."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máscara detectada. Seu rosto precisa estar visível."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máscara detectada. Seu rosto precisa estar completamente visível."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Impossível verificar rosto. Hardware indisponível."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Tente usar o Desbloqueio facial novamente"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Não é possível salvar dados faciais. Exclua dados antigos."</string>
@@ -684,8 +682,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar reconhecimento facial ou bloqueio de tela"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Use seu rosto para continuar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Use seu rosto ou o bloqueio de tela para continuar"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Algo deu errado. Tente de novo."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ícone facial"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ler as configurações de sincronização"</string>
@@ -930,14 +926,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Tente novamente"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloqueio para todos os recursos e dados"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"O número máximo de tentativas de desbloqueio por reconhecimento facial foi excedido"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Sem chip"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Nenhum chip no tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Nenhum chip no seu dispositivo Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Nenhum chip no smartphone."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Adicione um chip."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"O chip não foi inserido ou não pode ser lido. Adicione um chip."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Chip inutilizável."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Seu chip foi desativado permanentemente.\n Entre em contato com seu provedor de serviços sem fio para receber outro chip."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Sem chip"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Não há um chip no tablet."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Nenhum chip no seu dispositivo Android TV."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Não há um chip no telefone."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Insera um chip."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"O chip não foi inserido ou não é possível lê-lo. Insira um chip."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Chip inutilizável."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"O chip foi desativado permanentemente.\nEntre em contato com seu provedor de serviços sem fio para obter outro chip."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Faixa anterior"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Próxima faixa"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausar"</string>
@@ -947,10 +943,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Avançar"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Só chamadas de emergência"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Rede bloqueada"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"O chip está bloqueado pela PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"O chip está bloqueado pelo PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulte o Guia do usuário ou entre em contato com o Serviço de atendimento ao cliente."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"O chip está bloqueado."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Desbloqueando chip…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"O chip está bloqueado."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Desbloqueando o chip…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Você desenhou seu padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Você digitou sua senha incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Você digitou seu PIN incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes.\n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
@@ -1253,7 +1249,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Concluindo a inicialização."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Você pressionou o botão liga/desliga. Normalmente, essa ação desliga a tela.\n\nToque levemente na tela durante a configuração da impressão digital."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Desligue a tela para encerrar a configuração."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Desligue a tela para encerrar a configuração"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Desativar"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continuar a verificação da digital?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Você pressionou o botão liga/desliga. Normalmente, essa ação desliga a tela.\n\nToque levemente na tela para verificar sua impressão digital."</string>
@@ -1333,10 +1329,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"P/ alterar: Configurações &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Sempre permitir"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Nunca permitir"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"Chip removido"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"A rede móvel ficará indisponível até que você reinicie com um chip válido."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"Chip removido"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"A rede móvel ficará indisponível até que você reinicie com um chip válido inserido."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Concluído"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"Chip adicionado"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"Chip adicionado"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Reinicie o dispositivo para acessar a rede móvel."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Reiniciar"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Ativar serviço móvel"</string>
@@ -1534,7 +1530,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Adicionar conta"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Aumentar"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Diminuir"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e pressione."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e mantenha pressionado."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Deslize para cima para aumentar e para baixo para diminuir."</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Aumentar minuto"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Diminuir minuto"</string>
@@ -1615,7 +1611,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefone"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Alto-falantes na base"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Dispositivo externo"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Fones de ouvido"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistema"</string>
@@ -1648,7 +1644,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"O chip foi desativado. Insira o código PUK para continuar. Entre em contato com a operadora para obter mais detalhes."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Digite o código PIN desejado"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Confirme o código PIN desejado"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Desbloqueando chip…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Desbloqueando o chip…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Código PIN incorreto."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Digite um PIN com quatro a oito números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"O código PUK deve ter oito números."</string>
@@ -1719,7 +1715,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Para alternar entre recursos, deslize de baixo para cima na tela com três dedos, sem soltar."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ampliação"</string>
     <string name="user_switched" msgid="7249833311585228097">"Usuário atual <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Mudando para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Alternando para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Desconectando <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Proprietário"</string>
     <string name="guest_name" msgid="8502103277839834324">"Visitante"</string>
@@ -1841,8 +1837,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização em tela cheia"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para sair, deslize de cima para baixo."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendi"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gire a tela para ter uma visualização melhor"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Saia da tela dividida para ter uma visualização melhor"</string>
     <string name="done_label" msgid="7283767013231718521">"Concluído"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Controle deslizante circular das horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Controle deslizante circular dos minutos"</string>
@@ -2298,5 +2292,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Não é possível acessar a câmera do tablet pelo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Não é possível acessar esse conteúdo durante o streaming. Tente pelo smartphone."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Padrão do sistema"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"CHIP <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

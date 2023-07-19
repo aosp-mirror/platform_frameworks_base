@@ -194,7 +194,7 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.Title">
         <item name="textSize">@dimen/text_size_title_material</item>
-        <item name="fontFamily">@string/font_family_title_material</item>
+        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
@@ -429,7 +429,7 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Material.TimePicker.InputHeader" parent="TextAppearance.Material">
         <item name="textSize">@dimen/text_size_display_1_material</item>
         <item name="textColor">@color/white</item>
-        <item name="fontFamily">sans-serif-medium</item>
+        <item name="fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
     </style>
 
     <style name="TextAppearance.Material.TimePicker.InputField" parent="TextAppearance.Material">
@@ -438,31 +438,31 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.TimePicker.PromptLabel" parent="TextAppearance.Material">
         <item name="textSize">@dimen/timepicker_text_size_normal</item>
-        <item name="fontFamily">sans-serif-medium</item>
+        <item name="fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.YearLabel" parent="TextAppearance.Material">
         <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
         <item name="textSize">@dimen/date_picker_year_label_size</item>
-        <item name="fontFamily">sans-serif-medium</item>
+        <item name="fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.DateLabel" parent="TextAppearance.Material">
         <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
         <item name="textSize">@dimen/date_picker_date_label_size</item>
-        <item name="fontFamily">sans-serif-medium</item>
+        <item name="fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.List.YearLabel" parent="TextAppearance.Material">
         <item name="textColor">?attr/textColorPrimary</item>
         <item name="textSize">@dimen/datepicker_list_year_label_size</item>
-        <item name="fontFamily">sans-serif</item>
+        <item name="fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.List.YearLabel.Activated">
         <item name="textColor">?attr/colorControlActivated</item>
         <item name="textSize">@dimen/datepicker_list_year_activated_label_size</item>
-        <item name="fontFamily">sans-serif-medium</item>
+        <item name="fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
     </style>
 
     <style name="TextAppearance.Material.Notification">
@@ -474,13 +474,13 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.Notification.Title">
         <item name="textColor">@color/notification_primary_text_color_current</item>
-        <item name="fontFamily">sans-serif-medium</item>
+        <item name="fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="textSize">@dimen/notification_title_text_size</item>
     </style>
 
     <style name="TextAppearance.Material.Notification.BigTitle">
         <item name="textColor">@color/notification_primary_text_color_current</item>
-        <item name="fontFamily">sans-serif-medium</item>
+        <item name="fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="textSize">@dimen/notification_big_title_text_size</item>
     </style>
 
@@ -807,21 +807,20 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.SeekBar">
         <item name="indeterminateOnly">false</item>
-        <item name="progressDrawable">@drawable/seekbar_track_material</item>
-        <item name="indeterminateDrawable">@drawable/seekbar_track_material</item>
-        <item name="thumb">@drawable/seekbar_thumb_material_anim</item>
+        <item name="progressDrawable">@drawable/seekbar_progress_drawable</item>
+        <item name="indeterminateDrawable">@drawable/seekbar_progress_drawable</item>
+        <item name="thumb">@color/transparent</item>
         <item name="splitTrack">true</item>
         <item name="useDisabledAlpha">false</item>
         <item name="focusable">true</item>
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>
         <item name="mirrorForRtl">true</item>
-        <item name="background">@drawable/control_background_32dp_material</item>
+        <item name="background">@null</item>
     </style>
 
     <!-- A seek bar with tick marks at each progress value. -->
     <style name="Widget.Material.SeekBar.Discrete">
-        <item name="tickMark">@drawable/seekbar_tick_mark_material</item>
     </style>
 
     <style name="Widget.Material.RatingBar" parent="Widget.RatingBar">

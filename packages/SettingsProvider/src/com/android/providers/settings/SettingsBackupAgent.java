@@ -37,7 +37,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.settings.backup.DeviceSpecificSettings;
 import android.provider.settings.backup.GlobalSettings;
-import android.provider.settings.backup.LargeScreenSettings;
 import android.provider.settings.backup.SecureSettings;
 import android.provider.settings.backup.SystemSettings;
 import android.provider.settings.validators.GlobalSettingsValidators;
@@ -182,8 +181,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             "visible_pattern_enabled";
     private static final String KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS =
             "power_button_instantly_locks";
-    private static final String KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY =
-            "pin_enhanced_privacy";
 
     // Name of the temporary file we use during full backup/restore.  This is
     // stored in the full-backup tarfile as well, so should not be changed.
@@ -711,10 +708,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 out.writeUTF(KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS);
                 out.writeUTF(powerButtonInstantlyLocks ? "1" : "0");
             }
-            if (lockPatternUtils.isPinEnhancedPrivacyEverChosen(userId)) {
-                out.writeUTF(KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY);
-                out.writeUTF(lockPatternUtils.isPinEnhancedPrivacyEnabled(userId) ? "1" : "0");
-            }
             // End marker
             out.writeUTF("");
             out.flush();
@@ -819,12 +812,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 continue;
             }
 
-            if (LargeScreenSettings.doNotRestoreIfLargeScreenSetting(key, getBaseContext())) {
-                Log.i(TAG, "Skipping restore for setting " + key + " as the target device "
-                        + "is a large screen (i.e tablet or foldable in unfolded state)");
-                continue;
-            }
-
             String value = null;
             boolean hasValueToRestore = false;
             if (cachedEntries.indexOfKey(key) >= 0) {
@@ -888,16 +875,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         String[] whitelist;
         Map<String, Validator> validators = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
-            whitelist = ArrayUtils.concat(String.class, SecureSettings.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concatElements(String.class, SecureSettings.SETTINGS_TO_BACKUP,
                     Settings.Secure.LEGACY_RESTORE_SETTINGS,
                     DeviceSpecificSettings.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
             validators = SecureSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
-            whitelist = ArrayUtils.concat(String.class, SystemSettings.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concatElements(String.class, SystemSettings.SETTINGS_TO_BACKUP,
                     Settings.System.LEGACY_RESTORE_SETTINGS);
             validators = SystemSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.Global.CONTENT_URI)) {
-            whitelist = ArrayUtils.concat(String.class, GlobalSettings.SETTINGS_TO_BACKUP,
+            whitelist = ArrayUtils.concatElements(String.class, GlobalSettings.SETTINGS_TO_BACKUP,
                     Settings.Global.LEGACY_RESTORE_SETTINGS);
             validators = GlobalSettingsValidators.VALIDATORS;
         } else {
@@ -966,9 +953,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                         break;
                     case KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS:
                         lockPatternUtils.setPowerButtonInstantlyLocks("1".equals(value), userId);
-                        break;
-                    case KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY:
-                        lockPatternUtils.setPinEnhancedPrivacyEnabled("1".equals(value), userId);
                         break;
                 }
             }

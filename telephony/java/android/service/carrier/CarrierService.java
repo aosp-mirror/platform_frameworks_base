@@ -28,6 +28,8 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyRegistryManager;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -235,7 +237,12 @@ public abstract class CarrierService extends Service {
         @Override
         public void getCarrierConfig(int phoneId, CarrierIdentifier id, ResultReceiver result) {
             try {
-                int subId = SubscriptionManager.getSubscriptionId(phoneId);
+                int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+                int[] subIds = SubscriptionManager.getSubId(phoneId);
+                if (!ArrayUtils.isEmpty(subIds)) {
+                    // There should be at most one active subscription mapping to the phoneId.
+                    subId = subIds[0];
+                }
                 Bundle data = new Bundle();
                 data.putParcelable(KEY_CONFIG_BUNDLE, CarrierService.this.onLoadConfig(subId, id));
                 result.send(RESULT_OK, data);

@@ -43,7 +43,6 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 
 private const val TAG = "AutoAddTracker"
-private const val DELIMITER = ","
 
 /**
  * Class to track tiles that have been auto-added
@@ -68,7 +67,7 @@ class AutoAddTracker @VisibleForTesting constructor(
 
     @GuardedBy("autoAdded")
     private val autoAdded = ArraySet<String>()
-    private var restoredTiles: Map<String, AutoTile>? = null
+    private var restoredTiles: Set<String>? = null
 
     override val currentUserId: Int
         get() = userId
@@ -99,26 +98,25 @@ class AutoAddTracker @VisibleForTesting constructor(
         when (intent.getStringExtra(Intent.EXTRA_SETTING_NAME)) {
             Settings.Secure.QS_TILES -> {
                 restoredTiles = intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE)
-                        ?.split(DELIMITER)
-                        ?.mapIndexed(::AutoTile)
-                        ?.associateBy(AutoTile::tileType)
+                        ?.split(",")
+                        ?.toSet()
                         ?: run {
                             Log.w(TAG, "Null restored tiles for user $userId")
-                            emptyMap()
+                            emptySet()
                         }
             }
             Settings.Secure.QS_AUTO_ADDED_TILES -> {
-                restoredTiles?.let { restoredTiles ->
+                restoredTiles?.let { tiles ->
                     val restoredAutoAdded = intent
                             .getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE)
-                            ?.split(DELIMITER)
+                            ?.split(",")
                             ?: emptyList()
                     val autoAddedBeforeRestore = intent
                             .getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE)
-                            ?.split(DELIMITER)
+                            ?.split(",")
                             ?: emptyList()
 
-                    val tilesToRemove = restoredAutoAdded.filter { it !in restoredTiles }
+                    val tilesToRemove = restoredAutoAdded.filter { it !in tiles }
                     if (tilesToRemove.isNotEmpty()) {
                         qsHost.removeTiles(tilesToRemove)
                     }
@@ -182,9 +180,6 @@ class AutoAddTracker @VisibleForTesting constructor(
         registerBroadcastReceiver()
     }
 
-    fun getRestoredTilePosition(tile: String): Int =
-        restoredTiles?.get(tile)?.index ?: QSHost.POSITION_AT_END
-
     /**
      * Returns `true` if the tile has been auto-added before
      */
@@ -201,12 +196,12 @@ class AutoAddTracker @VisibleForTesting constructor(
      */
     fun setTileAdded(tile: String) {
         val tiles = synchronized(autoAdded) {
-            if (autoAdded.add(tile)) {
-                getTilesFromListLocked()
-            } else {
-                null
+                if (autoAdded.add(tile)) {
+                    getTilesFromListLocked()
+                } else {
+                    null
+                }
             }
-        }
         tiles?.let { saveTiles(it) }
     }
 
@@ -227,7 +222,7 @@ class AutoAddTracker @VisibleForTesting constructor(
     }
 
     private fun getTilesFromListLocked(): String {
-        return TextUtils.join(DELIMITER, autoAdded)
+        return TextUtils.join(",", autoAdded)
     }
 
     private fun saveTiles(tiles: String) {
@@ -250,7 +245,7 @@ class AutoAddTracker @VisibleForTesting constructor(
 
     private fun getAdded(): Collection<String> {
         val current = secureSettings.getStringForUser(Settings.Secure.QS_AUTO_ADDED_TILES, userId)
-        return current?.split(DELIMITER) ?: emptySet()
+        return current?.split(",") ?: emptySet()
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
@@ -286,6 +281,4 @@ class AutoAddTracker @VisibleForTesting constructor(
             )
         }
     }
-
-    private data class AutoTile(val index: Int, val tileType: String)
 }

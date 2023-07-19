@@ -31,6 +31,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -47,18 +48,16 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSPanelController;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
-import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DisableFlagsLogger;
@@ -66,9 +65,12 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
+import com.android.systemui.statusbar.policy.SecureLockscreenQSDisabler;
+import com.android.systemui.statusbar.policy.TaskHelper;
 
 import java.util.Optional;
 
@@ -101,13 +103,13 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final Optional<Vibrator> mVibratorOptional;
     private final DisableFlagsLogger mDisableFlagsLogger;
     private final int mDisplayId;
-    private final UserTracker mUserTracker;
     private final boolean mVibrateOnOpening;
     private final VibrationEffect mCameraLaunchGestureVibrationEffect;
     private final SystemBarAttributesListener mSystemBarAttributesListener;
+    private FlashlightController mFlashlightController;
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
-    private final QuickSettingsController mQsController;
-    private final QSHost mQSHost;
+    private final SecureLockscreenQSDisabler mSecureLockscreenQSDisabler;
+    private final TaskHelper mTaskHelper;
 
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
@@ -115,7 +117,6 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     @Inject
     CentralSurfacesCommandQueueCallbacks(
             CentralSurfaces centralSurfaces,
-            QuickSettingsController quickSettingsController,
             Context context,
             @Main Resources resources,
             ShadeController shadeController,
@@ -140,10 +141,10 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             @DisplayId int displayId,
             SystemBarAttributesListener systemBarAttributesListener,
             Lazy<CameraLauncher> cameraLauncherLazy,
-            UserTracker userTracker,
-            QSHost qsHost) {
+            SecureLockscreenQSDisabler secureLockscreenQSDisabler,
+            TaskHelper taskHelper) {
+
         mCentralSurfaces = centralSurfaces;
-        mQsController = quickSettingsController;
         mContext = context;
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
@@ -166,13 +167,14 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mDisableFlagsLogger = disableFlagsLogger;
         mDisplayId = displayId;
         mCameraLauncherLazy = cameraLauncherLazy;
-        mUserTracker = userTracker;
-        mQSHost = qsHost;
+        mSecureLockscreenQSDisabler = secureLockscreenQSDisabler;
+        mTaskHelper = taskHelper;
 
         mVibrateOnOpening = resources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
                 mVibratorOptional, resources);
         mSystemBarAttributesListener = systemBarAttributesListener;
+        mFlashlightController = Dependency.get(FlashlightController.class);
     }
 
     @Override
@@ -188,17 +190,22 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void addQsTile(ComponentName tile) {
-        mQSHost.addTile(tile);
+        QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
+        if (qsPanelController != null && qsPanelController.getHost() != null) {
+            qsPanelController.getHost().addTile(tile);
+        }
     }
 
     @Override
     public void remQsTile(ComponentName tile) {
-        mQSHost.removeTileByUser(tile);
+        QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
+        if (qsPanelController != null && qsPanelController.getHost() != null) {
+            qsPanelController.getHost().removeTileByUser(tile);
+        }
     }
 
     @Override
     public void clickTile(ComponentName tile) {
-        // Can't inject this because it changes with the QS fragment
         QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
         if (qsPanelController != null) {
             qsPanelController.clickTile(tile);
@@ -221,7 +228,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             return;
         }
 
-        mNotificationPanelViewController.expandShadeToNotifications();
+        mNotificationPanelViewController.expandWithoutQs();
     }
 
     @Override
@@ -263,6 +270,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
         int state2BeforeAdjustment = state2;
         state2 = mRemoteInputQuickSettingsDisabler.adjustDisableFlags(state2);
+        state2 = mSecureLockscreenQSDisabler.adjustDisableFlags(state2);
         Log.d(CentralSurfaces.TAG,
                 mDisableFlagsLogger.getDisableFlagsString(
                         /* old= */ new DisableFlagsLogger.DisableState(
@@ -337,9 +345,9 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mNotificationStackScrollLayoutController.setWillExpand(true);
                 mHeadsUpManager.unpinAll(true /* userUnpinned */);
                 mMetricsLogger.count("panel_open", 1);
-            } else if (!mQsController.getExpanded()
+            } else if (!mNotificationPanelViewController.isInSettings()
                     && !mNotificationPanelViewController.isExpanding()) {
-                mQsController.flingQs(0 /* velocity */,
+                mNotificationPanelViewController.flingSettings(0 /* velocity */,
                         NotificationPanelViewController.FLING_EXPAND);
                 mMetricsLogger.count("panel_open_qs", 1);
             }
@@ -368,7 +376,10 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_CAMERA_LAUNCH,
                     "com.android.systemui:CAMERA_GESTURE");
         }
-        vibrateForCameraGesture();
+
+        if (source != StatusBarManager.CAMERA_LAUNCH_SOURCE_SCREEN_GESTURE) {
+            vibrateForCameraGesture();
+        }
 
         if (source == StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP) {
             Log.v(CentralSurfaces.TAG, "Camera launch");
@@ -381,7 +392,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mCentralSurfaces.startActivityDismissingKeyguard(cameraIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
-                    null /* animationController */, mUserTracker.getUserHandle());
+                    null /* animationController */, UserHandle.CURRENT);
         } else {
             if (!mCentralSurfaces.isDeviceInteractive()) {
                 // Avoid flickering of the scrim when we instant launch the camera and the bouncer
@@ -438,7 +449,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             mCentralSurfaces.startActivityDismissingKeyguard(emergencyIntent,
                     false /* onlyProvisioned */, true /* dismissShade */,
                     true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0,
-                    null /* animationController */, mUserTracker.getUserHandle());
+                    null /* animationController */, UserHandle.CURRENT);
             return;
         }
 
@@ -453,7 +464,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.reset(true /* hide */);
             }
-            mContext.startActivityAsUser(emergencyIntent, mUserTracker.getUserHandle());
+            mContext.startActivityAsUser(emergencyIntent, UserHandle.CURRENT);
             return;
         }
         // We need to defer the emergency action launch until the screen comes on, since otherwise
@@ -563,6 +574,20 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         }
     }
 
+    @Override
+    public void toggleSettingsPanel() {
+        if (mCentralSurfaces.isPanelExpanded()) {
+            mShadeController.animateCollapseShade();
+        } else {
+            animateExpandSettingsPanel(null);
+        }
+    }
+
+    @Override
+    public void setBlockedGesturalNavigation(boolean blocked) {
+        mCentralSurfaces.setBlockedGesturalNavigation(blocked);
+    }
+
     private boolean isGoingToSleep() {
         return mWakefulnessLifecycle.getWakefulness()
                 == WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP;
@@ -604,5 +629,12 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             timings[i] = pattern[i];
         }
         return VibrationEffect.createWaveform(timings, /* repeat= */ -1);
+    }
+
+    @Override
+    public void toggleCameraFlash() {
+        if (mFlashlightController.isAvailable()) {
+            mFlashlightController.setFlashlight(!mFlashlightController.isEnabled());
+        }
     }
 }

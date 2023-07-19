@@ -729,10 +729,10 @@ final class ContentCapturePerUserService
             }
 
             EventLog.writeEvent(EventLogTags.CC_UPDATE_OPTIONS, mUserId, addingCount);
-            for (int i = 0; i < addingCount; i++) {
+            for (int i = 0; i < addingCount && i < adding.size(); i++) {
                 String packageName = adding.valueAt(i);
                 ContentCaptureOptions options = mMaster.mGlobalContentCaptureOptions
-                        .getOptions(mUserId, packageName);
+                             .getOptions(mUserId, packageName);
                 mMaster.updateOptions(packageName, options);
             }
         }

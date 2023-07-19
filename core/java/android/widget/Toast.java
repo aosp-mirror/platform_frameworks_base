@@ -154,7 +154,8 @@ public class Toast {
      * Construct an empty Toast object.  You must call {@link #setView} before you
      * can call {@link #show}.
      *
-     * @param context  The context to use.  Usually your {@link android.app.Activity} object.
+     * @param context  The context to use.  Usually your {@link android.app.Application}
+     *                 or {@link android.app.Activity} object.
      */
     public Toast(Context context) {
         this(context, null);
@@ -188,9 +189,6 @@ public class Toast {
 
     /**
      * Show the view for the specified duration.
-     *
-     * <p>Note that toasts being sent from the background are rate limited, so avoid sending such
-     * toasts in quick succession.
      */
     public void show() {
         if (Compatibility.isChangeEnabled(CHANGE_TEXT_TOASTS_IN_THE_SYSTEM)) {
@@ -478,7 +476,8 @@ public class Toast {
     /**
      * Make a standard toast that just contains text.
      *
-     * @param context  The context to use.  Usually your {@link android.app.Activity} object.
+     * @param context  The context to use.  Usually your {@link android.app.Application}
+     *                 or {@link android.app.Activity} object.
      * @param text     The text to show.  Can be formatted text.
      * @param duration How long to display the message.  Either {@link #LENGTH_SHORT} or
      *                 {@link #LENGTH_LONG}
@@ -534,7 +533,8 @@ public class Toast {
     /**
      * Make a standard toast that just contains text from a resource.
      *
-     * @param context  The context to use.  Usually your {@link android.app.Activity} object.
+     * @param context  The context to use.  Usually your {@link android.app.Application}
+     *                 or {@link android.app.Activity} object.
      * @param resId    The resource id of the string resource to use.  Can be formatted text.
      * @param duration How long to display the message.  Either {@link #LENGTH_SHORT} or
      *                 {@link #LENGTH_LONG}

@@ -147,6 +147,7 @@ import android.security.metrics.Keystore2AtomWithOverflow;
 import android.security.metrics.KeystoreAtom;
 import android.security.metrics.KeystoreAtomPayload;
 import android.security.metrics.RkpErrorStats;
+import android.security.metrics.RkpPoolStats;
 import android.security.metrics.StorageStats;
 import android.stats.storage.StorageEnums;
 import android.telephony.ModemActivityInfo;
@@ -168,7 +169,6 @@ import android.view.Display;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.IProcessStats;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.app.procstats.StatsEventOutput;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelAllocationStats;
@@ -612,19 +612,12 @@ public class StatsPullAtomService extends SystemService {
                         }
                     case FrameworkStatsLog.PROC_STATS:
                         synchronized (mProcStatsLock) {
-                            return pullProcStatsLocked(atomTag, data);
+                            return pullProcStatsLocked(ProcessStats.REPORT_ALL, atomTag, data);
                         }
                     case FrameworkStatsLog.PROC_STATS_PKG_PROC:
                         synchronized (mProcStatsLock) {
-                            return pullProcStatsLocked(atomTag, data);
-                        }
-                    case FrameworkStatsLog.PROCESS_STATE:
-                        synchronized (mProcStatsLock) {
-                            return pullProcessStateLocked(atomTag, data);
-                        }
-                    case FrameworkStatsLog.PROCESS_ASSOCIATION:
-                        synchronized (mProcStatsLock) {
-                            return pullProcessAssociationLocked(atomTag, data);
+                            return pullProcStatsLocked(ProcessStats.REPORT_PKG_PROC_STATS, atomTag,
+                                    data);
                         }
                     case FrameworkStatsLog.DISK_IO:
                         synchronized (mDiskIoLock) {
@@ -721,6 +714,7 @@ public class StatsPullAtomService extends SystemService {
                             return pullInstalledIncrementalPackagesLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.KEYSTORE2_STORAGE_STATS:
+                    case FrameworkStatsLog.RKP_POOL_STATS:
                     case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO:
                     case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_AUTH_INFO:
                     case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_PURPOSE_AND_MODES_INFO:
@@ -896,8 +890,6 @@ public class StatsPullAtomService extends SystemService {
         registerNumFacesEnrolled();
         registerProcStats();
         registerProcStatsPkgProc();
-        registerProcessState();
-        registerProcessAssociation();
         registerDiskIO();
         registerPowerProfile();
         registerProcessCpuTime();
@@ -926,6 +918,7 @@ public class StatsPullAtomService extends SystemService {
         registerSettingsStats();
         registerInstalledIncrementalPackages();
         registerKeystoreStorageStats();
+        registerRkpPoolStats();
         registerKeystoreKeyCreationWithGeneralInfo();
         registerKeystoreKeyCreationWithAuthInfo();
         registerKeystoreKeyCreationWithPurposeModesInfo();
@@ -2877,138 +2870,59 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
-    private void registerProcessState() {
-        int tagId = FrameworkStatsLog.PROCESS_STATE;
-        mStatsManager.setPullAtomCallback(
-                tagId,
-                null, // use default PullAtomMetadata values
-                DIRECT_EXECUTOR,
-                mStatsCallbackImpl);
-    }
-
-    private void registerProcessAssociation() {
-        int tagId = FrameworkStatsLog.PROCESS_ASSOCIATION;
-        mStatsManager.setPullAtomCallback(
-                tagId,
-                null, // use default PullAtomMetadata values
-                DIRECT_EXECUTOR,
-                mStatsCallbackImpl);
-    }
-
-    @GuardedBy("mProcStatsLock")
-    private ProcessStats getStatsFromProcessStatsService(int atomTag) {
+    private int pullProcStatsLocked(int section, int atomTag, List<StatsEvent> pulledData) {
         IProcessStats processStatsService = getIProcessStatsService();
         if (processStatsService == null) {
-            return null;
+            return StatsManager.PULL_SKIP;
         }
+
         final long token = Binder.clearCallingIdentity();
         try {
             // force procstats to flush & combine old files into one store
-            long lastHighWaterMark = readProcStatsHighWaterMark(atomTag);
+            long lastHighWaterMark = readProcStatsHighWaterMark(section);
+
+            ProtoOutputStream[] protoStreams = new ProtoOutputStream[MAX_PROCSTATS_SHARDS];
+            for (int i = 0; i < protoStreams.length; i++) {
+                protoStreams[i] = new ProtoOutputStream();
+            }
+
             ProcessStats procStats = new ProcessStats(false);
             // Force processStatsService to aggregate all in-storage and in-memory data.
-            long highWaterMark =
-                    processStatsService.getCommittedStatsMerged(
-                            lastHighWaterMark,
-                            ProcessStats.REPORT_ALL, // ignored since committedStats below is null.
-                            true,
-                            null, // committedStats
-                            procStats);
-            new File(
-                            mBaseDir.getAbsolutePath()
-                                    + "/"
-                                    + highWaterMarkFilePrefix(atomTag)
-                                    + "_"
-                                    + lastHighWaterMark)
+            long highWaterMark = processStatsService.getCommittedStatsMerged(
+                    lastHighWaterMark, section, true, null, procStats);
+            procStats.dumpAggregatedProtoForStatsd(protoStreams, MAX_PROCSTATS_RAW_SHARD_SIZE);
+
+            for (int i = 0; i < protoStreams.length; i++) {
+                byte[] bytes = protoStreams[i].getBytes(); // cache the value
+                if (bytes.length > 0) {
+                    pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, bytes,
+                            // This is a shard ID, and is specified in the metric definition to be
+                            // a dimension. This will result in statsd using RANDOM_ONE_SAMPLE to
+                            // keep all the shards, as it thinks each shard is a different dimension
+                            // of data.
+                            i));
+                }
+            }
+
+            new File(mBaseDir.getAbsolutePath() + "/" + section + "_" + lastHighWaterMark)
                     .delete();
-            new File(
-                            mBaseDir.getAbsolutePath()
-                                    + "/"
-                                    + highWaterMarkFilePrefix(atomTag)
-                                    + "_"
-                                    + highWaterMark)
+            new File(mBaseDir.getAbsolutePath() + "/" + section + "_" + highWaterMark)
                     .createNewFile();
-            return procStats;
         } catch (RemoteException | IOException e) {
             Slog.e(TAG, "Getting procstats failed: ", e);
-            return null;
+            return StatsManager.PULL_SKIP;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    @GuardedBy("mProcStatsLock")
-    private int pullProcStatsLocked(int atomTag, List<StatsEvent> pulledData) {
-        ProcessStats procStats = getStatsFromProcessStatsService(atomTag);
-        if (procStats == null) {
-            return StatsManager.PULL_SKIP;
-        }
-        ProtoOutputStream[] protoStreams = new ProtoOutputStream[MAX_PROCSTATS_SHARDS];
-        for (int i = 0; i < protoStreams.length; i++) {
-            protoStreams[i] = new ProtoOutputStream();
-        }
-        procStats.dumpAggregatedProtoForStatsd(protoStreams, MAX_PROCSTATS_RAW_SHARD_SIZE);
-        for (int i = 0; i < protoStreams.length; i++) {
-            byte[] bytes = protoStreams[i].getBytes(); // cache the value
-            if (bytes.length > 0) {
-                pulledData.add(
-                        FrameworkStatsLog.buildStatsEvent(
-                                atomTag,
-                                bytes,
-                                // This is a shard ID, and is specified in the metric definition to
-                                // be
-                                // a dimension. This will result in statsd using RANDOM_ONE_SAMPLE
-                                // to
-                                // keep all the shards, as it thinks each shard is a different
-                                // dimension
-                                // of data.
-                                i));
-            }
-        }
         return StatsManager.PULL_SUCCESS;
-    }
-
-    @GuardedBy("mProcStatsLock")
-    private int pullProcessStateLocked(int atomTag, List<StatsEvent> pulledData) {
-        ProcessStats procStats = getStatsFromProcessStatsService(atomTag);
-        if (procStats == null) {
-            return StatsManager.PULL_SKIP;
-        }
-        procStats.dumpProcessState(atomTag, new StatsEventOutput(pulledData));
-        return StatsManager.PULL_SUCCESS;
-    }
-
-    @GuardedBy("mProcStatsLock")
-    private int pullProcessAssociationLocked(int atomTag, List<StatsEvent> pulledData) {
-        ProcessStats procStats = getStatsFromProcessStatsService(atomTag);
-        if (procStats == null) {
-            return StatsManager.PULL_SKIP;
-        }
-        procStats.dumpProcessAssociation(atomTag, new StatsEventOutput(pulledData));
-        return StatsManager.PULL_SUCCESS;
-    }
-
-    private String highWaterMarkFilePrefix(int atomTag) {
-        // For backward compatibility, use the legacy ProcessStats enum value as the prefix for
-        // PROC_STATS and PROC_STATS_PKG_PROC.
-        if (atomTag == FrameworkStatsLog.PROC_STATS) {
-            return String.valueOf(ProcessStats.REPORT_ALL);
-        }
-        if (atomTag == FrameworkStatsLog.PROC_STATS_PKG_PROC) {
-            return String.valueOf(ProcessStats.REPORT_PKG_PROC_STATS);
-        }
-        return "atom-" + atomTag;
     }
 
     // read high watermark for section
-    private long readProcStatsHighWaterMark(int atomTag) {
+    private long readProcStatsHighWaterMark(int section) {
         try {
-            File[] files =
-                    mBaseDir.listFiles(
-                            (d, name) -> {
-                                return name.toLowerCase()
-                                        .startsWith(highWaterMarkFilePrefix(atomTag) + '_');
-                            });
+            File[] files = mBaseDir.listFiles((d, name) -> {
+                return name.toLowerCase().startsWith(String.valueOf(section) + '_');
+            });
             if (files == null || files.length == 0) {
                 return 0;
             }
@@ -4223,6 +4137,14 @@ public class StatsPullAtomService extends SystemService {
                 mStatsCallbackImpl);
     }
 
+    private void registerRkpPoolStats() {
+        mStatsManager.setPullAtomCallback(
+                FrameworkStatsLog.RKP_POOL_STATS,
+                null, // use default PullAtomMetadata values,
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl);
+    }
+
     private void registerKeystoreKeyCreationWithGeneralInfo() {
         mStatsManager.setPullAtomCallback(
                 FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO,
@@ -4326,6 +4248,19 @@ public class StatsPullAtomService extends SystemService {
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
                     FrameworkStatsLog.KEYSTORE2_STORAGE_STATS, atom.storage_type,
                     atom.size, atom.unused_size));
+        }
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    int parseRkpPoolStats(KeystoreAtom[] atoms, List<StatsEvent> pulledData) {
+        for (KeystoreAtom atomWrapper : atoms) {
+            if (atomWrapper.payload.getTag() != KeystoreAtomPayload.rkpPoolStats) {
+                return StatsManager.PULL_SKIP;
+            }
+            RkpPoolStats atom = atomWrapper.payload.getRkpPoolStats();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    FrameworkStatsLog.RKP_POOL_STATS, atom.security_level, atom.expiring,
+                    atom.unassigned, atom.attested, atom.total));
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -4462,6 +4397,8 @@ public class StatsPullAtomService extends SystemService {
             switch (atomTag) {
                 case FrameworkStatsLog.KEYSTORE2_STORAGE_STATS:
                     return parseKeystoreStorageStats(atoms, pulledData);
+                case FrameworkStatsLog.RKP_POOL_STATS:
+                    return parseRkpPoolStats(atoms, pulledData);
                 case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_GENERAL_INFO:
                     return parseKeystoreKeyCreationWithGeneralInfo(atoms, pulledData);
                 case FrameworkStatsLog.KEYSTORE2_KEY_CREATION_WITH_AUTH_INFO:
@@ -4602,7 +4539,7 @@ public class StatsPullAtomService extends SystemService {
         List<Integer> disabledSurroundEncodingsList = new ArrayList<>();
         List<Integer> enabledSurroundEncodingsList = new ArrayList<>();
         for (int surroundEncoding : surroundEncodingsMap.keySet()) {
-            if (!audioManager.isSurroundFormatEnabled(surroundEncoding)) {
+            if (!surroundEncodingsMap.get(surroundEncoding)) {
                 disabledSurroundEncodingsList.add(surroundEncoding);
             } else {
                 enabledSurroundEncodingsList.add(surroundEncoding);

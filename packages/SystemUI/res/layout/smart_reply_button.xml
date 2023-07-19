@@ -34,4 +34,5 @@
         android:paddingLeft="@dimen/smart_reply_button_padding_horizontal"
         android:paddingRight="@dimen/smart_reply_button_padding_horizontal"
         android:textStyle="normal"
+        android:textAllCaps="false"
         android:ellipsize="none"/>

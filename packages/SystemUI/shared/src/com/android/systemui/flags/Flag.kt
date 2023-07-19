@@ -47,6 +47,10 @@ interface ResourceFlag<T> : Flag<T> {
     val resourceId: Int
 }
 
+interface DeviceConfigFlag<T> : Flag<T> {
+    val default: T
+}
+
 interface SysPropFlag<T> : Flag<T> {
     val default: T
 }
@@ -76,8 +80,8 @@ abstract class BooleanFlag constructor(
 
     private constructor(parcel: Parcel) : this(
         id = parcel.readInt(),
-        name = parcel.readString() ?: "",
-        namespace = parcel.readString() ?: "",
+        name = parcel.readString(),
+        namespace = parcel.readString(),
         default = parcel.readBoolean(),
         teamfood = parcel.readBoolean(),
         overridden = parcel.readBoolean()
@@ -133,6 +137,21 @@ data class ResourceBooleanFlag constructor(
 ) : ResourceFlag<Boolean>
 
 /**
+ * A Flag that can reads its overrides from DeviceConfig.
+ *
+ * This is generally useful for flags that come from or are used _outside_ of SystemUI.
+ *
+ * Prefer [UnreleasedFlag] and [ReleasedFlag].
+ */
+data class DeviceConfigBooleanFlag constructor(
+    override val id: Int,
+    override val name: String,
+    override val namespace: String,
+    override val default: Boolean = false,
+    override val teamfood: Boolean = false
+) : DeviceConfigFlag<Boolean>
+
+/**
  * A Flag that can reads its overrides from System Properties.
  *
  * This is generally useful for flags that come from or are used _outside_ of SystemUI.
@@ -145,7 +164,7 @@ data class SysPropBooleanFlag constructor(
     override val namespace: String,
     override val default: Boolean = false,
 ) : SysPropFlag<Boolean> {
-    // TODO(b/268520433): Teamfood not supported for sysprop flags yet.
+    // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
     override val teamfood: Boolean = false
 }
 
@@ -167,8 +186,8 @@ data class StringFlag constructor(
 
     private constructor(parcel: Parcel) : this(
         id = parcel.readInt(),
-        name = parcel.readString() ?: "",
-        namespace = parcel.readString() ?: "",
+        name = parcel.readString(),
+        namespace = parcel.readString(),
         default = parcel.readString() ?: ""
     )
 
@@ -207,8 +226,8 @@ data class IntFlag constructor(
 
     private constructor(parcel: Parcel) : this(
         id = parcel.readInt(),
-        name = parcel.readString() ?: "",
-        namespace = parcel.readString() ?: "",
+        name = parcel.readString(),
+        namespace = parcel.readString(),
         default = parcel.readInt()
     )
 
@@ -247,8 +266,8 @@ data class LongFlag constructor(
 
     private constructor(parcel: Parcel) : this(
         id = parcel.readInt(),
-        name = parcel.readString() ?: "",
-        namespace = parcel.readString() ?: "",
+        name = parcel.readString(),
+        namespace = parcel.readString(),
         default = parcel.readLong()
     )
 
@@ -279,8 +298,8 @@ data class FloatFlag constructor(
 
     private constructor(parcel: Parcel) : this(
         id = parcel.readInt(),
-        name = parcel.readString() ?: "",
-        namespace = parcel.readString() ?: "",
+        name = parcel.readString(),
+        namespace = parcel.readString(),
         default = parcel.readFloat()
     )
 
@@ -319,8 +338,8 @@ data class DoubleFlag constructor(
 
     private constructor(parcel: Parcel) : this(
         id = parcel.readInt(),
-        name = parcel.readString() ?: "",
-        namespace = parcel.readString() ?: "",
+        name = parcel.readString(),
+        namespace = parcel.readString(),
         default = parcel.readDouble()
     )
 

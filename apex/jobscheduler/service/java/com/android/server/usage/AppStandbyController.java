@@ -1565,10 +1565,8 @@ public class AppStandbyController
     @Override
     @StandbyBuckets public int getAppStandbyBucket(String packageName, int userId,
             long elapsedRealtime, boolean shouldObfuscateInstantApps) {
-        if (!mAppIdleEnabled) {
-            return STANDBY_BUCKET_EXEMPTED;
-        }
-        if (shouldObfuscateInstantApps && mInjector.isPackageEphemeral(userId, packageName)) {
+        if (!mAppIdleEnabled || (shouldObfuscateInstantApps
+                && mInjector.isPackageEphemeral(userId, packageName))) {
             return STANDBY_BUCKET_ACTIVE;
         }
 

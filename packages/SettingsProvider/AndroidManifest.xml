@@ -4,6 +4,13 @@
         android:sharedUserId="android.uid.system">
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- ActivityManager -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <!-- DeviceConfig -->
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
+
+    <!-- ActivityManager -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
     <application android:allowClearUserData="false"
                  android:label="@string/app_label"

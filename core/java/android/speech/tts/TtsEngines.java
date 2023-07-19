@@ -498,7 +498,7 @@ public class TtsEngines {
      * specific preference in the list.
      */
     private static String parseEnginePrefFromList(String prefValue, String engineName) {
-        if (TextUtils.isEmpty(prefValue)) {
+        if (TextUtils.isEmpty(prefValue) || TextUtils.isEmpty(engineName)) {
             return null;
         }
 
@@ -507,7 +507,7 @@ public class TtsEngines {
         for (String value : prefValues) {
             final int delimiter = value.indexOf(':');
             if (delimiter > 0) {
-                if (engineName.equals(value.substring(0, delimiter))) {
+                if ((value.substring(0, delimiter)).equals(engineName)) {
                     return value.substring(delimiter + 1);
                 }
             }
@@ -560,7 +560,7 @@ public class TtsEngines {
             for (String value : prefValues) {
                 final int delimiter = value.indexOf(':');
                 if (delimiter > 0) {
-                    if (key.equals(value.substring(0, delimiter))) {
+                    if (value.substring(0, delimiter).equals(key)) {
                         if (first) {
                             first = false;
                         } else {

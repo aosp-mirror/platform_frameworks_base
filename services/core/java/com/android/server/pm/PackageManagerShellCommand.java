@@ -1772,7 +1772,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runCompile() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        boolean checkProfiles = true;
+        boolean checkProfiles = SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
         boolean forceCompilation = false;
         boolean allPackages = false;
         boolean clearProfileData = false;
@@ -3039,7 +3039,9 @@ class PackageManagerShellCommand extends ShellCommand {
     private static class InstallParams {
         SessionParams sessionParams;
         String installerPackageName;
-        int userId = UserHandle.USER_ALL;
+        // Make sure it won't be installed into parallel users
+        // via `adb install` command by default.
+        int userId = UserHandle.USER_CURRENT;
         long stagedReadyTimeoutMs = DEFAULT_STAGED_READY_TIMEOUT_MS;
     }
 
@@ -3183,10 +3185,6 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--skip-verification":
                     sessionParams.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
-                    break;
-                case "--bypass-low-target-sdk-block":
-                    sessionParams.installFlags |=
-                            PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
@@ -3634,7 +3632,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 fd = ParcelFileDescriptor.dup(getInFileDescriptor());
             }
             if (sizeBytes <= 0) {
-                getErrPrintWriter().println("Error: must specify an APK size");
+                getErrPrintWriter().println("Error: must specify a APK size");
                 return 1;
             }
 
@@ -3978,7 +3976,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--preload] [--instant] [--full] [--dont-kill]");
         pw.println("       [--enable-rollback]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
-        pw.println("       [--apex] [--force-non-staged] [--staged-ready-timeout TIMEOUT]");
+        pw.println("       [--apex] [--staged-ready-timeout TIMEOUT]");
         pw.println("       [PATH [SPLIT...]|-]");
         pw.println("    Install an application.  Must provide the apk data to install, either as");
         pw.println("    file path(s) or '-' to read from stdin.  Options are:");
@@ -4006,8 +4004,6 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("          3=device setup, 4=user request");
         pw.println("      --force-uuid: force install on to disk volume with given UUID");
         pw.println("      --apex: install an .apex file, not an .apk");
-        pw.println("      --force-non-staged: force the installation to run under a non-staged");
-        pw.println("          session, which may complete without requiring a reboot");
         pw.println("      --staged-ready-timeout: By default, staged sessions wait "
                 + DEFAULT_STAGED_READY_TIMEOUT_MS);
         pw.println("          milliseconds for pre-reboot verification to complete when");

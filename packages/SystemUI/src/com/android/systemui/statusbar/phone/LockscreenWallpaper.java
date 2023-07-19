@@ -259,25 +259,19 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
     /**
      * Drawable that aligns left horizontally and center vertically (like ImageWallpaper).
-     *
-     * <p>Aligns to the center when showing on the smaller internal display of a multi display
-     * device.
      */
     public static class WallpaperDrawable extends DrawableWrapper {
 
         private final ConstantState mState;
         private final Rect mTmpRect = new Rect();
-        private boolean mIsOnSmallerInternalDisplays;
 
-        public WallpaperDrawable(Resources r, Bitmap b, boolean isOnSmallerInternalDisplays) {
-            this(r, new ConstantState(b), isOnSmallerInternalDisplays);
+        public WallpaperDrawable(Resources r, Bitmap b) {
+            this(r, new ConstantState(b));
         }
 
-        private WallpaperDrawable(Resources r, ConstantState state,
-                boolean isOnSmallerInternalDisplays) {
+        private WallpaperDrawable(Resources r, ConstantState state) {
             super(new BitmapDrawable(r, state.mBackground));
             mState = state;
-            mIsOnSmallerInternalDisplays = isOnSmallerInternalDisplays;
         }
 
         @Override
@@ -316,17 +310,10 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
             }
             dy = (vheight - dheight * scale) * 0.5f;
 
-            int offsetX = 0;
-            // Offset to show the center area of the wallpaper on a smaller display for multi
-            // display device
-            if (mIsOnSmallerInternalDisplays) {
-                offsetX = bounds.centerX() - (Math.round(dwidth * scale) / 2);
-            }
-
             mTmpRect.set(
-                    bounds.left + offsetX,
+                    bounds.left,
                     bounds.top + Math.round(dy),
-                    bounds.left + Math.round(dwidth * scale) + offsetX,
+                    bounds.left + Math.round(dwidth * scale),
                     bounds.top + Math.round(dheight * scale + dy));
 
             super.onBoundsChange(mTmpRect);
@@ -335,17 +322,6 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
         @Override
         public ConstantState getConstantState() {
             return mState;
-        }
-
-        /**
-         * Update bounds when the hosting display or the display size has changed.
-         *
-         * @param isOnSmallerInternalDisplays tru if the drawable is on one of the internal displays
-         *                                    with the smaller area.
-         */
-        public void onDisplayUpdated(boolean isOnSmallerInternalDisplays) {
-            mIsOnSmallerInternalDisplays = isOnSmallerInternalDisplays;
-            onBoundsChange(getBounds());
         }
 
         static class ConstantState extends Drawable.ConstantState {
@@ -363,7 +339,7 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
 
             @Override
             public Drawable newDrawable(@Nullable Resources res) {
-                return new WallpaperDrawable(res, this, /* isOnSmallerInternalDisplays= */ false);
+                return new WallpaperDrawable(res, this);
             }
 
             @Override

@@ -21,7 +21,6 @@ import android.view.GestureDetector
 import android.view.InputEvent
 import android.view.MotionEvent
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.settings.DisplayTracker
 import javax.inject.Inject
 
 /**
@@ -30,9 +29,8 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class TapGestureDetector @Inject constructor(
-    private val context: Context,
-    displayTracker: DisplayTracker
-) : GenericGestureDetector(TapGestureDetector::class.simpleName!!, displayTracker) {
+    private val context: Context
+) : GenericGestureDetector(TapGestureDetector::class.simpleName!!) {
 
     private val gestureListener = object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {

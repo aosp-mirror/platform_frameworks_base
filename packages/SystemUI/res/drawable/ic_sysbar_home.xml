@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
      Copyright (C) 2018 The Android Open Source Project
-
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-
           http://www.apache.org/licenses/LICENSE-2.0
-
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,12 +12,15 @@
      limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="20dp"
-    android:height="20dp"
-    android:viewportWidth="20"
-    android:viewportHeight="20">
+    android:width="26dp"
+    android:height="26dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
 
     <path
         android:fillColor="?attr/singleToneColor"
-        android:pathData="M10.0001 18.3334C5.40008 18.3334 1.66675 14.6 1.66675 10C1.66675 5.40002 5.40008 1.66669 10.0001 1.66669C14.6001 1.66669 18.3334 5.40002 18.3334 10C18.3334 14.6 14.6001 18.3334 10.0001 18.3334Z" />
+        android:pathData="M48 83.6c-19.6 0 -35.6 -16 -35.6 -35.6 0 -19.6 16 -35.6 35.6 -35.6 19.6 0 35.6 16 35.6 35.6l0 0.2C83.4 67.8 67.6 83.4 48 83.6ZM77.8 48.2C77.6 32 64.8 18.8 48.4 18.2c-16.2 0 -29.6 12.8 -30.2 29 0 16.6 13.2 30 29.6 30.4 16.4 -0.2 29.6 -13.2 30 -29.4z" />
+    <path
+        android:fillColor="?attr/singleToneColor"
+        android:pathData="M72 48.2C72 61.4 61.2 72.2 47.8 72 34.4 71.8 23.8 61.2 24 47.8 24.2 34.4 34.8 24 48 24l0.2 0C61.4 24.2 72 34.8 72 48.2c0 -0.2 0 0 0 0z" />
 </vector>

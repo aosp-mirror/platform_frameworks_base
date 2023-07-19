@@ -196,6 +196,11 @@ class TaskPositioningController {
             synchronized (mService.mGlobalLock) {
                 cleanUpTaskPositioner();
                 mPositioningDisplay = null;
+                // Clear the internal variables.
+                if (mInputSurface != null) {
+                    mTransaction.remove(mInputSurface).apply();
+                    mInputSurface = null;
+                }
             }
         });
     }

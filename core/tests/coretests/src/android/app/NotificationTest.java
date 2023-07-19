@@ -265,6 +265,36 @@ public class NotificationTest {
     }
 
     @Test
+    public void allPendingIntents_checkCountAfterMarshaling() {
+        PendingIntent intent1 = PendingIntent.getActivity(mContext, 0, new Intent("test1"),
+                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        PendingIntent intent2 = PendingIntent.getActivity(mContext, 0, new Intent("test2"),
+                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+        PendingIntent intent3 = PendingIntent.getActivity(mContext, 0, new Intent("test3"),
+                PendingIntent.FLAG_MUTABLE_UNAUDITED);
+
+        Notification.Action action1 =
+                new Notification.Action.Builder(null, "text1", intent2).build();
+        Notification.Action action2 =
+                new Notification.Action.Builder(null, "text2", intent3).build();
+        Notification n = new Notification.Builder(mContext).build();
+        Bundle b = new Bundle();
+        b.putParcelable(null, n);
+
+        Notification.Builder builder = new Notification.Builder(mContext, "channel")
+                .setContentIntent(intent1)
+                .setActions(action1, action2)
+                .setExtras(b);
+
+        Parcel p = Parcel.obtain();
+
+        Notification n1 = builder.build();
+        n1.writeToParcel(p, 0);
+
+        assertEquals("size must be three", 3, n1.allPendingIntents.size());
+    }
+
+    @Test
     public void messagingStyle_isGroupConversation() {
         mContext.getApplicationInfo().targetSdkVersion = Build.VERSION_CODES.P;
         Notification.MessagingStyle messagingStyle = new Notification.MessagingStyle("self name")

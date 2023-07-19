@@ -24,6 +24,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.Log;
@@ -85,6 +88,9 @@ public class QRCodeScannerController implements
     public static final int QR_CODE_SCANNER_PREFERENCE_CHANGE = 1;
 
     private static final String TAG = "QRCodeScannerController";
+
+    public static final String GSA_PACKAGE = "com.google.android.googlequicksearchbox";
+    public static final String LENS_ACTIVITY = "com.google.android.apps.lens.MainActivity";
 
     private final Context mContext;
     private final Executor mExecutor;
@@ -265,6 +271,21 @@ public class QRCodeScannerController implements
             com.android.internal.R.string.config_defaultQrCodeComponent);
     }
 
+    private Intent getLensIntent() {
+        Intent intent = new Intent();
+        Bundle bundle = new Bundle();
+
+        bundle.putString("caller_package", GSA_PACKAGE);
+        bundle.putLong("start_activity_time_nanos", SystemClock.elapsedRealtimeNanos());
+        intent.setComponent(new ComponentName(GSA_PACKAGE, LENS_ACTIVITY))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .setPackage(GSA_PACKAGE)
+                .setData(Uri.parse("google://lens"))
+                .putExtra("lens_activity_params", bundle);
+
+        return intent;
+    }
+
     private void updateQRCodeScannerActivityDetails() {
         String qrCodeScannerActivity = mDeviceConfigProxy.getString(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -285,10 +306,15 @@ public class QRCodeScannerController implements
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         }
 
+        Intent lensIntent = getLensIntent();
         if (isActivityAvailable(intent)) {
             mQRCodeScannerActivity = qrCodeScannerActivity;
             mComponentName = componentName;
             mIntent = intent;
+        } else if (isActivityCallable(lensIntent)) {
+            mQRCodeScannerActivity = LENS_ACTIVITY;
+            mComponentName = lensIntent.getComponent();
+            mIntent = lensIntent;
         } else {
             mQRCodeScannerActivity = null;
             mComponentName = null;
@@ -345,8 +371,6 @@ public class QRCodeScannerController implements
 
         // Reset cached values to default as we are no longer listening
         mQRCodeScannerPreferenceObserver = new HashMap<>();
-        mSecureSettings.putStringForUser(Settings.Secure.SHOW_QR_CODE_SCANNER_SETTING, null,
-                mUserTracker.getUserId());
     }
 
     private void unregisterDefaultQRCodeScannerObserver() {
@@ -358,6 +382,8 @@ public class QRCodeScannerController implements
         mQRCodeScannerActivity = null;
         mIntent = null;
         mComponentName = null;
+        mSecureSettings.putStringForUser(Settings.Secure.SHOW_QR_CODE_SCANNER_SETTING, null,
+                mUserTracker.getUserId());
     }
 
     private void notifyQRCodeScannerActivityChanged() {
@@ -385,7 +411,10 @@ public class QRCodeScannerController implements
 
         // While registering the observers for the first time update the default values in the
         // background
-        mExecutor.execute(() -> updateQRCodeScannerActivityDetails());
+        mExecutor.execute(() -> {
+                updateQRCodeScannerActivityDetails();
+                updateQRCodeScannerPreferenceDetails(/* updateSettings = */true);
+                });
         mOnDefaultQRCodeScannerChangedListener =
                 properties -> {
                     if (DeviceConfig.NAMESPACE_SYSTEMUI.equals(properties.getNamespace())

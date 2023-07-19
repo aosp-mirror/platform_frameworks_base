@@ -34,7 +34,7 @@ interface FlagListenable {
     /** An event representing the change */
     interface FlagEvent {
         /** the id of the flag which changed */
-        val flagName: String
+        val flagId: Int
         /** if all listeners alerted invoke this method, the restart will be skipped */
         fun requestNoRestart()
     }

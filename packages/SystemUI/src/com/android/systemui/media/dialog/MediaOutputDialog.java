@@ -18,7 +18,6 @@ package com.android.systemui.media.dialog;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.FeatureFlagUtils;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -100,24 +99,16 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     @Override
     public boolean isBroadcastSupported() {
         boolean isBluetoothLeDevice = false;
-        if (FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST)) {
-            if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
-                isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
+        if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
+            isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
                     mMediaOutputController.getCurrentConnectedMediaDevice());
-            }
-        } else {
-            // To decouple LE Audio Broadcast and Unicast, it always displays the button when there
-            // is no LE Audio device connected to the phone
-            isBluetoothLeDevice = true;
         }
-
         return mMediaOutputController.isBroadcastSupported() && isBluetoothLeDevice;
     }
 
     @Override
     public CharSequence getStopButtonText() {
-        int resId = R.string.media_output_dialog_button_stop_casting;
+        int resId = R.string.keyboard_key_media_stop;
         if (isBroadcastSupported() && mMediaOutputController.isPlaying()
                 && !mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
             resId = R.string.media_output_broadcast;

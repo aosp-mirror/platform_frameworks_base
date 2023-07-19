@@ -1155,7 +1155,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
     public static final int OPTION_CLOSEST          = 0x03;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "OPTION_" }, value = {
+    @IntDef(flag = false, prefix = { "OPTION_" }, value = {
             OPTION_PREVIOUS_SYNC,
             OPTION_NEXT_SYNC,
             OPTION_CLOSEST_SYNC,

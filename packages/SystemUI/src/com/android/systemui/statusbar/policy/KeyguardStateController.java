@@ -56,7 +56,7 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     /**
      * Whether the bouncer (PIN/password entry) is currently visible.
      */
-    boolean isPrimaryBouncerShowing();
+    boolean isBouncerShowing();
 
     /**
      * If swiping up will unlock without asking for a password.
@@ -196,7 +196,7 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     /** **/
     default void notifyKeyguardState(boolean showing, boolean occluded) {}
     /** **/
-    default void notifyPrimaryBouncerShowing(boolean showing) {}
+    default void notifyBouncerShowing(boolean showing) {}
 
     /**
      * Updates the keyguard state to reflect that it's in the process of being dismissed, either by
@@ -244,7 +244,7 @@ public interface KeyguardStateController extends CallbackController<Callback> {
         /**
          * Called when the bouncer (PIN/password entry) is shown or hidden.
          */
-        default void onPrimaryBouncerShowingChanged() {}
+        default void onBouncerShowingChanged() {}
 
         /**
          * Triggered when the device was just unlocked and the lock screen is being dismissed.

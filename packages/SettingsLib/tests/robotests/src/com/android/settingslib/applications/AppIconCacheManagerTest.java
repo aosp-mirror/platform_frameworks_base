@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 
 import android.graphics.drawable.Drawable;
+import android.util.LruCache;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,22 +35,25 @@ import org.robolectric.RobolectricTestRunner;
 public class AppIconCacheManagerTest {
 
     private static final String APP_PACKAGE_NAME = "com.test.app";
-    private static final String APP_PACKAGE_NAME1 = "com.test.app1";
     private static final String APP_PACKAGE_NAME2 = "com.test.app2";
     private static final String APP_PACKAGE_NAME3 = "com.test.app3";
     private static final int APP_UID = 9999;
 
     @Mock
     private Drawable mIcon;
-
-    @Mock
-    private Drawable mIcon1;
     @Mock
     private Drawable mIcon2;
     @Mock
     private Drawable mIcon3;
 
     private AppIconCacheManager mAppIconCacheManager;
+
+    private LruCache<String, Drawable> mMockLruCache = new LruCache<String, Drawable>(3) {
+        @Override
+        protected int sizeOf(String key, Drawable drawable) {
+            return 1;
+        }
+    };
 
     @Before
     public void setUp() {
@@ -59,27 +63,12 @@ public class AppIconCacheManagerTest {
         doReturn(10).when(mIcon).getIntrinsicWidth();
         doReturn(mIcon).when(mIcon).mutate();
 
-        // Algorithm for trim memory test:
-        // The real maxsize is defined by AppIconCacheManager.MAX_CACHE_SIZE_IN_KB, and the size
-        // of each element is calculated as following:
-        // n * n * 4 / 1024
-        // In the testcase, we want to mock the maxsize of LruCache is 3, so the formula calculating
-        // the size of each element will be like:
-        // n * n * 4 / 1024 = maxsize / 3
-        // Thus, n = square_root(maxsize / 3 * 1024 / 4), which can be used as an icon size.
-        final int iconSize =
-                (int) Math.sqrt(AppIconCacheManager.MAX_CACHE_SIZE_IN_KB / 3f * 1024f / 4f);
-
-        doReturn(iconSize).when(mIcon1).getIntrinsicHeight();
-        doReturn(iconSize).when(mIcon1).getIntrinsicWidth();
-        doReturn(mIcon1).when(mIcon1).mutate();
-
-        doReturn(iconSize).when(mIcon2).getIntrinsicHeight();
-        doReturn(iconSize).when(mIcon2).getIntrinsicWidth();
+        doReturn(10).when(mIcon2).getIntrinsicHeight();
+        doReturn(10).when(mIcon2).getIntrinsicWidth();
         doReturn(mIcon2).when(mIcon2).mutate();
 
-        doReturn(iconSize).when(mIcon3).getIntrinsicHeight();
-        doReturn(iconSize).when(mIcon3).getIntrinsicWidth();
+        doReturn(10).when(mIcon3).getIntrinsicHeight();
+        doReturn(10).when(mIcon3).getIntrinsicWidth();
         doReturn(mIcon3).when(mIcon3).mutate();
     }
 
@@ -142,38 +131,41 @@ public class AppIconCacheManagerTest {
 
     @Test
     public void trimMemory_levelSatisfied_shouldNotCacheIcon() {
+        // We mock the maxSize is 3, and the size of each element is 1
+        mAppIconCacheManager.mockLruCache(mMockLruCache);
 
-        mAppIconCacheManager.put(APP_PACKAGE_NAME1, APP_UID, mIcon1);
+        mAppIconCacheManager.put(APP_PACKAGE_NAME, APP_UID, mIcon);
         mAppIconCacheManager.put(APP_PACKAGE_NAME2, APP_UID, mIcon2);
         mAppIconCacheManager.put(APP_PACKAGE_NAME3, APP_UID, mIcon3);
 
-        // Expected to trim size to 0
+        // Trim size to 0
         final int level = android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
         mAppIconCacheManager.trimMemory(level);
 
-        // None of the elements should be cached
-        assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME1, APP_UID)).isNull();
+        assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME, APP_UID)).isNull();
         assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME2, APP_UID)).isNull();
         assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME3, APP_UID)).isNull();
     }
 
     @Test
     public void trimMemory_levelSatisfied_shouldCacheAtLeastHalf() {
+        // We mock the maxSize is 3, and the size of each element is 1
+        mAppIconCacheManager.mockLruCache(mMockLruCache);
 
-        mAppIconCacheManager.put(APP_PACKAGE_NAME1, APP_UID, mIcon1);
+        mAppIconCacheManager.put(APP_PACKAGE_NAME, APP_UID, mIcon);
         mAppIconCacheManager.put(APP_PACKAGE_NAME2, APP_UID, mIcon2);
         mAppIconCacheManager.put(APP_PACKAGE_NAME3, APP_UID, mIcon3);
 
-        // Get the last element
-        mAppIconCacheManager.get(APP_PACKAGE_NAME1, APP_UID);
+        // Get the last item
+        mAppIconCacheManager.get(APP_PACKAGE_NAME, APP_UID);
 
-        // Expected to trim size to half of it, which is int( 3 / 2 ) = 1
+        // Trim size to int( 3 / 2 ) = 1
         final int level = android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
         mAppIconCacheManager.trimMemory(level);
 
-        // There should be only one cached element, which is the last recently used one
-        assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME1, APP_UID)).isNotNull();
+        assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME, APP_UID)).isNotNull();
         assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME2, APP_UID)).isNull();
         assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME3, APP_UID)).isNull();
     }
+
 }

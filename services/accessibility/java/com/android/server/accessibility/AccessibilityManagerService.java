@@ -730,6 +730,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+        intentFilter.addAction(Intent.ACTION_USER_PRESENT);
         intentFilter.addAction(Intent.ACTION_SETTING_RESTORED);
 
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
@@ -747,6 +748,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     unlockUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+                } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
+                    // We will update when the automation service dies.
+                    synchronized (mLock) {
+                        AccessibilityUserState userState = getCurrentUserStateLocked();
+                        if (readConfigurationForUserStateLocked(userState)) {
+                            onUserStateChangedLocked(userState);
+                        }
+                    }
                 } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
                     final String which = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
                     if (Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(which)) {
@@ -1724,34 +1733,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private boolean scheduleNotifyMotionEvent(MotionEvent event) {
-        boolean result = false;
-        int displayId = event.getDisplayId();
         synchronized (mLock) {
             AccessibilityUserState state = getCurrentUserStateLocked();
             for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
                 AccessibilityServiceConnection service = state.mBoundServices.get(i);
-                if (service.isServiceDetectsGesturesEnabled(displayId)) {
+                if (service.mRequestTouchExplorationMode) {
                     service.notifyMotionEvent(event);
-                    result = true;
+                    return true;
                 }
             }
         }
-        return result;
+        return false;
     }
 
     private boolean scheduleNotifyTouchState(int displayId, int touchState) {
-        boolean result = false;
         synchronized (mLock) {
             AccessibilityUserState state = getCurrentUserStateLocked();
             for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
                 AccessibilityServiceConnection service = state.mBoundServices.get(i);
-                if (service.isServiceDetectsGesturesEnabled(displayId)) {
+                if (service.mRequestTouchExplorationMode) {
                     service.notifyTouchState(displayId, touchState);
-                    result = true;
+                    return true;
                 }
             }
         }
-        return result;
+        return false;
     }
 
     private void notifyClearAccessibilityCacheLocked() {
@@ -2326,14 +2332,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (userState.isPerformGesturesEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_INJECT_MOTION_EVENTS;
             }
-
             if (flags != 0) {
                 if (!mHasInputFilter) {
                     mHasInputFilter = true;
                     if (mInputFilter == null) {
-                        mInputFilter =
-                                new AccessibilityInputFilter(
-                                        mContext, AccessibilityManagerService.this);
+                        mInputFilter = new AccessibilityInputFilter(mContext,
+                                AccessibilityManagerService.this);
                     }
                     inputFilter = mInputFilter;
                     setInputFilter = true;
@@ -2343,17 +2347,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (mHasInputFilter) {
                     mHasInputFilter = false;
                     mInputFilter.setUserAndEnabledFeatures(userState.mUserId, 0);
-                    mInputFilter.resetServiceDetectsGestures();
-                    if (userState.isTouchExplorationEnabledLocked()) {
-                        //  Service gesture detection is turned on and off on a per-display
-                        // basis.
-                        final ArrayList<Display> displays = getValidDisplayList();
-                        for (Display display : displays) {
-                            int displayId = display.getDisplayId();
-                            boolean mode = userState.isServiceDetectsGesturesEnabled(displayId);
-                            mInputFilter.setServiceDetectsGesturesEnabled(displayId, mode);
-                        }
-                    }
                     inputFilter = null;
                     setInputFilter = true;
                 }
@@ -2667,18 +2660,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         userState.mUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
-            }
-        }
-        // Service gesture detection is turned on and off on a per-display
-        // basis.
-        userState.resetServiceDetectsGestures();
-        final ArrayList<Display> displays = getValidDisplayList();
-        for (AccessibilityServiceConnection service: userState.mBoundServices) {
-            for (Display display : displays) {
-                int displayId = display.getDisplayId();
-                if (service.isServiceDetectsGesturesEnabled(displayId)) {
-                    userState.setServiceDetectsGesturesEnabled(displayId, true);
-                }
             }
         }
         userState.setServiceHandlesDoubleTapLocked(serviceHandlesDoubleTapEnabled);
@@ -4341,7 +4322,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private void setServiceDetectsGesturesInternal(int displayId, boolean mode) {
         synchronized (mLock) {
-            getCurrentUserStateLocked().setServiceDetectsGesturesEnabled(displayId, mode);
             if (mHasInputFilter && mInputFilter != null) {
                 mInputFilter.setServiceDetectsGesturesEnabled(displayId, mode);
             }

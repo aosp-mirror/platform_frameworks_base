@@ -26,8 +26,4 @@ java_test_host {
     srcs: ["src/**/*.java"],
     libs: ["tradefed"],
     test_suites: ["device-tests"],
-    data: [
-        ":TestOdmApp",
-        ":TestOdmPrivApp",
-    ],
 }

@@ -23,7 +23,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.fuelgauge.BatteryStatus;
-import com.android.systemui.plugins.WeatherData;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 
 import java.util.TimeZone;
@@ -57,11 +56,6 @@ public class KeyguardUpdateMonitorCallback {
      * Called when time format changes.
      */
     public void onTimeFormatChanged(String timeFormat) { }
-
-    /**
-     * Called when receive new weather data.
-     */
-    public void onWeatherDataChanged(WeatherData data) { }
 
     /**
      * Called when the carrier PLMN or SPN changes.
@@ -214,19 +208,11 @@ public class KeyguardUpdateMonitorCallback {
     public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) { }
 
     /**
-     * Called when a biometric is authenticated.
+     * Called when a biometric is recognized.
      * @param userId the user id for which the biometric sample was authenticated
      * @param biometricSourceType
      */
     public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
-            boolean isStrongBiometric) { }
-
-    /**
-     * Called when a biometric is detected but not successfully authenticated.
-     * @param userId the user id for which the biometric sample was detected
-     * @param biometricSourceType
-     */
-    public void onBiometricDetected(int userId, BiometricSourceType biometricSourceType,
             boolean isStrongBiometric) { }
 
     /**
@@ -317,9 +303,4 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the non-strong biometric state changed.
      */
     public void onNonStrongBiometricAllowedChanged(int userId) { }
-
-    /**
-     * Called when keyguard is going away or not going away.
-     */
-    public void onKeyguardGoingAway() { }
 }

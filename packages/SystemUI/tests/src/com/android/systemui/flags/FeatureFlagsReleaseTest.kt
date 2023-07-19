@@ -19,13 +19,12 @@ import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
 import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.DeviceConfigProxyFake
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.never
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
@@ -35,29 +34,25 @@ import org.mockito.Mockito.`when` as whenever
  */
 @SmallTest
 class FeatureFlagsReleaseTest : SysuiTestCase() {
-    private lateinit var featureFlagsRelease: FeatureFlagsRelease
+    private lateinit var mFeatureFlagsRelease: FeatureFlagsRelease
 
     @Mock private lateinit var mResources: Resources
     @Mock private lateinit var mSystemProperties: SystemPropertiesHelper
     @Mock private lateinit var restarter: Restarter
-    private val flagMap = mutableMapOf<String, Flag<*>>()
+    private val flagMap = mutableMapOf<Int, Flag<*>>()
     private val serverFlagReader = ServerFlagReaderFake()
-
-
-    private val flagA = ReleasedFlag(501, name = "a", namespace = "test")
+    private val deviceConfig = DeviceConfigProxyFake()
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        flagMap.put(flagA.name, flagA)
-        featureFlagsRelease = FeatureFlagsRelease(
+        mFeatureFlagsRelease = FeatureFlagsRelease(
             mResources,
             mSystemProperties,
+            deviceConfig,
             serverFlagReader,
             flagMap,
             restarter)
-
-        featureFlagsRelease.init()
     }
 
     @Test
@@ -68,7 +63,7 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
         val flagNamespace = "test"
         val flag = ResourceBooleanFlag(flagId, flagName, flagNamespace, flagResourceId)
         whenever(mResources.getBoolean(flagResourceId)).thenReturn(true)
-        assertThat(featureFlagsRelease.isEnabled(flag)).isTrue()
+        assertThat(mFeatureFlagsRelease.isEnabled(flag)).isTrue()
     }
 
     @Test
@@ -78,16 +73,16 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
         whenever(mResources.getString(1003)).thenReturn(null)
         whenever(mResources.getString(1004)).thenAnswer { throw NameNotFoundException() }
 
-        assertThat(featureFlagsRelease.getString(
+        assertThat(mFeatureFlagsRelease.getString(
             ResourceStringFlag(1, "1", "test", 1001))).isEqualTo("")
-        assertThat(featureFlagsRelease.getString(
+        assertThat(mFeatureFlagsRelease.getString(
             ResourceStringFlag(2, "2", "test", 1002))).isEqualTo("res2")
 
         assertThrows(NullPointerException::class.java) {
-            featureFlagsRelease.getString(ResourceStringFlag(3, "3", "test", 1003))
+            mFeatureFlagsRelease.getString(ResourceStringFlag(3, "3", "test", 1003))
         }
         assertThrows(NameNotFoundException::class.java) {
-            featureFlagsRelease.getString(ResourceStringFlag(4, "4", "test", 1004))
+            mFeatureFlagsRelease.getString(ResourceStringFlag(4, "4", "test", 1004))
         }
     }
 
@@ -100,7 +95,7 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
 
         val flag = SysPropBooleanFlag(flagId, flagName, flagNamespace, flagDefault)
         whenever(mSystemProperties.getBoolean(flagName, flagDefault)).thenReturn(flagDefault)
-        assertThat(featureFlagsRelease.isEnabled(flag)).isEqualTo(flagDefault)
+        assertThat(mFeatureFlagsRelease.isEnabled(flag)).isEqualTo(flagDefault)
     }
 
     @Test
@@ -109,7 +104,7 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
 
         serverFlagReader.setFlagValue(flag.namespace, flag.name, false)
 
-        assertThat(featureFlagsRelease.isEnabled(flag)).isFalse()
+        assertThat(mFeatureFlagsRelease.isEnabled(flag)).isFalse()
     }
 
     @Test
@@ -118,32 +113,6 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
 
         serverFlagReader.setFlagValue(flag.namespace, flag.name, true)
 
-        assertThat(featureFlagsRelease.isEnabled(flag)).isFalse()
-    }
-
-    @Test
-    fun serverSide_OverrideUncached_NoRestart() {
-        // No one has read the flag, so it's not in the cache.
-        serverFlagReader.setFlagValue(
-            flagA.namespace, flagA.name, !flagA.default)
-        Mockito.verify(restarter, never()).restartSystemUI(Mockito.anyString())
-    }
-
-    @Test
-    fun serverSide_Override_Restarts() {
-        // Read it to put it in the cache.
-        featureFlagsRelease.isEnabled(flagA)
-        serverFlagReader.setFlagValue(
-            flagA.namespace, flagA.name, !flagA.default)
-        Mockito.verify(restarter).restartSystemUI(Mockito.anyString())
-    }
-
-    @Test
-    fun serverSide_RedundantOverride_NoRestart() {
-        // Read it to put it in the cache.
-        featureFlagsRelease.isEnabled(flagA)
-        serverFlagReader.setFlagValue(
-            flagA.namespace, flagA.name, flagA.default)
-        Mockito.verify(restarter, never()).restartSystemUI(Mockito.anyString())
+        assertThat(mFeatureFlagsRelease.isEnabled(flag)).isFalse()
     }
 }

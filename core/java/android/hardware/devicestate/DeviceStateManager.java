@@ -251,10 +251,6 @@ public final class DeviceStateManager {
         @Nullable
         private Boolean lastResult;
 
-        public FoldStateListener(Context context) {
-            this(context, folded -> {});
-        }
-
         public FoldStateListener(Context context, Consumer<Boolean> listener) {
             mFoldedDeviceStates = context.getResources().getIntArray(
                     com.android.internal.R.array.config_foldedDeviceStates);
@@ -269,11 +265,6 @@ public final class DeviceStateManager {
                 lastResult = folded;
                 mDelegate.accept(folded);
             }
-        }
-
-        @Nullable
-        public Boolean getFolded() {
-            return lastResult;
         }
     }
 }

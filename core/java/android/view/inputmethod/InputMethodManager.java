@@ -73,6 +73,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.style.SuggestionSpan;
+import android.util.BoostFramework;
 import android.util.Log;
 import android.util.Pools.Pool;
 import android.util.Pools.SimplePool;
@@ -281,6 +282,11 @@ public final class InputMethodManager {
      * @see InputMethodSubtype#getMode()
      */
     private static final String SUBTYPE_MODE_VOICE = "voice";
+
+    //Perf
+    static BoostFramework mPerfBoost = null;
+    static boolean IME_BOOST_ENABLED = false;
+    static boolean isImeBoostPropertyRead = false;
 
     /**
      * Provide this to {@link IInputMethodManager#startInputOrWindowGainedFocus(
@@ -657,6 +663,20 @@ public final class InputMethodManager {
             ImeTracing.getInstance().triggerClientDump(
                     "InputMethodManager.DelegateImpl#startInput", InputMethodManager.this,
                     null /* icProto */);
+
+            if (isImeBoostPropertyRead == false) {
+                mPerfBoost = new BoostFramework();
+
+                if (mPerfBoost != null) {
+                    IME_BOOST_ENABLED = Boolean.parseBoolean(mPerfBoost.perfGetProp("ro.vendor.qti.sys.fw.use_ime_boost", "false"));
+                }
+                isImeBoostPropertyRead = true;
+            }
+
+            if (IME_BOOST_ENABLED == true && mPerfBoost != null) {
+                mPerfBoost.perfEvent(BoostFramework.VENDOR_HINT_IME_LAUNCH_EVENT, null);
+            }
+
             synchronized (mH) {
                 mCurrentTextBoxAttribute = null;
                 mCompletions = null;
@@ -2248,15 +2268,18 @@ public final class InputMethodManager {
             @Nullable IBinder windowGainingFocus, @StartInputFlags int startInputFlags,
             @SoftInputModeFlags int softInputMode, int windowFlags) {
         final View view;
+        final ViewRootImpl viewRoot;
         synchronized (mH) {
             view = getServedViewLocked();
+            viewRoot = view.getViewRootImpl();
 
             // Make sure we have a window token for the served view.
             if (DEBUG) {
                 Log.v(TAG, "Starting input: view=" + dumpViewInfo(view) +
                         " reason=" + InputMethodDebug.startInputReasonToString(startInputReason));
             }
-            if (view == null) {
+            // view and view root will be used by input checks, if one of them is missing return false
+            if (view == null && viewRoot == null) {
                 if (DEBUG) Log.v(TAG, "ABORT input: no served view!");
                 return false;
             }

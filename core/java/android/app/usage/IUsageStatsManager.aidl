@@ -44,7 +44,6 @@ interface IUsageStatsManager {
     UsageEvents queryEventsForPackageForUser(long beginTime, long endTime, int userId, String pkg, String callingPackage);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setAppInactive(String packageName, boolean inactive, int userId);
-    boolean isAppStandbyEnabled();
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isAppInactive(String packageName, int userId, String callingPackage);
     void onCarrierPrivilegedAppsChanged();

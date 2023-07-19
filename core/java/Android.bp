@@ -31,14 +31,9 @@ filegroup {
     srcs: ["android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl"],
 }
 
-aidl_library {
-    name: "IDropBoxManagerService_aidl",
-    srcs: [
-        "com/android/internal/os/IDropBoxManagerService.aidl",
-    ],
-    hdrs: [
-        "android/os/DropBoxManager.aidl",
-    ],
+filegroup {
+    name: "IDropBoxManagerService.aidl",
+    srcs: ["com/android/internal/os/IDropBoxManagerService.aidl"],
 }
 
 filegroup {
@@ -151,7 +146,7 @@ filegroup {
     ],
 }
 
-aidl_library {
+filegroup {
     name: "ILogcatManagerService_aidl",
     srcs: ["android/os/logcat/ILogcatManagerService.aidl"],
 }
@@ -176,17 +171,11 @@ java_library {
     static_libs: ["modules-utils-uieventlogger-interface"],
 }
 
-java_library {
-    name: "modules-utils-locallog",
-    srcs: ["android/util/LocalLog.java"],
-    libs: ["unsupportedappusage"],
-    sdk_version: "module_current",
-    min_sdk_version: "30",
-    apex_available: [
-        "//apex_available:anyapex",
-        "//apex_available:platform",
+filegroup {
+    name: "framework-services-net-module-wifi-shared-srcs",
+    srcs: [
+        "android/util/LocalLog.java",
     ],
-    visibility: ["//visibility:public"],
 }
 
 // keep these files in sync with the package/Tethering/jarjar-rules.txt and
@@ -200,6 +189,8 @@ filegroup {
         "com/android/internal/util/IndentingPrintWriter.java",
         "com/android/internal/util/MessageUtils.java",
         "com/android/internal/util/WakeupMessage.java",
+        // TODO: delete as soon as NetworkStatsFactory stops using
+        "com/android/internal/util/ProcFileReader.java",
     ],
 }
 
@@ -298,28 +289,6 @@ filegroup {
     ],
 }
 
-filegroup {
-    name: "hwbinder-stubs-srcs",
-    srcs: [
-        "android/os/HidlSupport.java",
-        "android/os/HidlMemory.java",
-        "android/os/HwBinder.java",
-        "android/os/HwBlob.java",
-        "android/os/HwParcel.java",
-        "android/os/IHwBinder.java",
-        "android/os/IHwInterface.java",
-        "android/os/DeadObjectException.java",
-        "android/os/DeadSystemException.java",
-        "android/os/NativeHandle.java",
-        "android/os/RemoteException.java",
-        "android/util/AndroidException.java",
-    ],
-    visibility: [
-        "//frameworks/base",
-        "//frameworks/base/api",
-    ],
-}
-
 cc_defaults {
     name: "incremental_default",
     cflags: [
@@ -403,20 +372,6 @@ aidl_interface {
     },
 }
 
-// Build Rust bindings for remote provisioning. Needed by keystore2.
-aidl_interface {
-    name: "android.security.rkp_aidl",
-    unstable: true,
-    srcs: [
-        "android/security/rkp/*.aidl",
-    ],
-    backend: {
-        rust: {
-            enabled: true,
-        },
-    },
-}
-
 aidl_interface {
     name: "android.debug_aidl",
     unstable: true,
@@ -432,11 +387,6 @@ aidl_interface {
             enabled: true,
         },
     },
-}
-
-filegroup {
-    name: "frameworks-base-java-overview",
-    srcs: ["overview.html"],
 }
 
 // Avoid including Parcelable classes as we don't want to have two copies of
@@ -461,6 +411,36 @@ filegroup {
     ],
 }
 
+// Avoid including Parcelable classes as we don't want to have two copies of
+// Parcelable cross the process.
+filegroup {
+    name: "framework-cellbroadcast-shared-srcs",
+    srcs: [
+        "android/util/LocalLog.java",
+    ],
+}
+
+java_library {
+    name: "modules-utils-statemachine",
+    srcs: [
+        "com/android/internal/util/IState.java",
+        "com/android/internal/util/State.java",
+        "com/android/internal/util/StateMachine.java",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "unsupportedappusage",
+    ],
+    sdk_version: "module_current",
+    min_sdk_version: "29",
+
+    visibility: ["//visibility:public"],
+    apex_available: [
+        "//apex_available:anyapex",
+        "//apex_available:platform",
+    ],
+}
+
 filegroup {
     name: "framework-ims-common-shared-srcs",
     srcs: [
@@ -468,17 +448,6 @@ filegroup {
         "android/os/RegistrantList.java",
         "android/os/Registrant.java",
         "com/android/internal/os/SomeArgs.java",
-    ],
-}
-
-// This file group is used by service fuzzer
-filegroup {
-    name: "framework-core-sources-for-fuzzers",
-    srcs: [
-        "android/os/IInterface.java",
-        "android/os/Binder.java",
-        "android/os/IBinder.java",
-        "android/os/Parcelable.java",
     ],
 }
 
@@ -542,14 +511,3 @@ java_library {
 }
 
 // protolog end
-
-// temporary placeholder until the real module is available
-java_library {
-    name: "framework-configinfrastructure",
-    sdk_version: "module_current",
-}
-
-java_library {
-    name: "framework-configinfrastructure.stubs.module_lib",
-    sdk_version: "module_current",
-}

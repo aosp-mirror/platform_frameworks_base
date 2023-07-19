@@ -24,15 +24,12 @@ import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPOR
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_SHOWN;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_SELECTION_TOOLBAR;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_VOICE_INTERACTION;
-import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SMARTSPACE_DOORBELL;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_START_RECENTS_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SWITCH_DISPLAY_UNFOLD;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TOGGLE_RECENTS;
@@ -190,25 +187,6 @@ public class LatencyTracker {
      */
     public static final int ACTION_SHOW_VOICE_INTERACTION = 19;
 
-    /**
-     * Time it takes to request IME shown animation.
-     */
-    public static final int ACTION_REQUEST_IME_SHOWN = 20;
-
-    /**
-     * Time it takes to request IME hidden animation.
-     */
-    public static final int ACTION_REQUEST_IME_HIDDEN = 21;
-
-    /**
-     * Time it takes to load the animation frames in smart space doorbell card.
-     * It measures the duration from the images uris are passed into the view
-     * to all the frames are loaded.
-     * <p/>
-     * A long latency makes the doorbell animation looks janky until all the frames are loaded.
-     */
-    public static final int ACTION_SMARTSPACE_DOORBELL = 22;
-
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -230,9 +208,6 @@ public class LatencyTracker {
         ACTION_SHOW_SELECTION_TOOLBAR,
         ACTION_FOLD_TO_AOD,
         ACTION_SHOW_VOICE_INTERACTION,
-        ACTION_REQUEST_IME_SHOWN,
-        ACTION_REQUEST_IME_HIDDEN,
-        ACTION_SMARTSPACE_DOORBELL,
     };
 
     /** @hide */
@@ -257,9 +232,6 @@ public class LatencyTracker {
         ACTION_SHOW_SELECTION_TOOLBAR,
         ACTION_FOLD_TO_AOD,
         ACTION_SHOW_VOICE_INTERACTION,
-        ACTION_REQUEST_IME_SHOWN,
-        ACTION_REQUEST_IME_HIDDEN,
-        ACTION_SMARTSPACE_DOORBELL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -287,9 +259,6 @@ public class LatencyTracker {
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_SELECTION_TOOLBAR,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_VOICE_INTERACTION,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_SHOWN,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN,
-            UIACTION_LATENCY_REPORTED__ACTION__ACTION_SMARTSPACE_DOORBELL,
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -399,12 +368,6 @@ public class LatencyTracker {
                 return "ACTION_FOLD_TO_AOD";
             case UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_VOICE_INTERACTION:
                 return "ACTION_SHOW_VOICE_INTERACTION";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_SHOWN:
-                return "ACTION_REQUEST_IME_SHOWN";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN:
-                return "ACTION_REQUEST_IME_HIDDEN";
-            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_SMARTSPACE_DOORBELL:
-                return "ACTION_SMARTSPACE_DOORBELL";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }
@@ -471,7 +434,7 @@ public class LatencyTracker {
      */
     public void onActionStart(@Action int action, String tag) {
         synchronized (mLock) {
-            if (!isEnabled(action)) {
+            if (!isEnabled()) {
                 return;
             }
             // skip if the action is already instrumenting.
@@ -495,7 +458,7 @@ public class LatencyTracker {
      */
     public void onActionEnd(@Action int action) {
         synchronized (mLock) {
-            if (!isEnabled(action)) {
+            if (!isEnabled()) {
                 return;
             }
             Session session = mSessions.get(action);
@@ -605,27 +568,23 @@ public class LatencyTracker {
 
         void begin(@NonNull Runnable timeoutAction) {
             mStartRtc = SystemClock.elapsedRealtime();
-            Trace.asyncTraceForTrackBegin(TRACE_TAG_APP, traceName(), traceName(), 0);
+            Trace.asyncTraceBegin(TRACE_TAG_APP, traceName(), 0);
 
             // start counting timeout.
-            mTimeoutRunnable = () -> {
-                Trace.instantForTrack(TRACE_TAG_APP, traceName(), "timeout");
-                timeoutAction.run();
-            };
+            mTimeoutRunnable = timeoutAction;
             BackgroundThread.getHandler()
                     .postDelayed(mTimeoutRunnable, TimeUnit.SECONDS.toMillis(15));
         }
 
         void end() {
             mEndRtc = SystemClock.elapsedRealtime();
-            Trace.asyncTraceForTrackEnd(TRACE_TAG_APP, traceName(), "end", 0);
+            Trace.asyncTraceEnd(TRACE_TAG_APP, traceName(), 0);
             BackgroundThread.getHandler().removeCallbacks(mTimeoutRunnable);
             mTimeoutRunnable = null;
         }
 
         void cancel() {
-            Trace.instantForTrack(TRACE_TAG_APP, traceName(), "cancel");
-            Trace.asyncTraceForTrackEnd(TRACE_TAG_APP, traceName(), "cancel", 0);
+            Trace.asyncTraceEnd(TRACE_TAG_APP, traceName(), 0);
             BackgroundThread.getHandler().removeCallbacks(mTimeoutRunnable);
             mTimeoutRunnable = null;
         }

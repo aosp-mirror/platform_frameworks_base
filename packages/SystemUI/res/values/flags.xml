@@ -21,14 +21,19 @@
     <bool name="flag_monet">true</bool>
 
     <!-- People Tile flag -->
-    <bool name="flag_conversations">false</bool>
+    <bool name="flag_conversations">true</bool>
 
     <!-- Whether the multi-user icon on the lockscreen opens the QS user detail. If false, clicking
          the multi-user icon will display a list of users directly on the lockscreen. The multi-user
          icon is only shown if config_keyguardUserSwitcher=false in the frameworks config. -->
     <bool name="flag_lockscreen_qs_user_detail_shortcut">false</bool>
 
-    <bool name="flag_charging_ripple">false</bool>
+    <bool name="flag_charging_ripple">true</bool>
+
+    <!-- Whether to show chipbar UI whenever the device is unlocked by ActiveUnlock. -->
+    <bool name="flag_active_unlock_chipbar">true</bool>
+
+    <bool name="flag_smartspace">false</bool>
 
     <!--  Whether the user switcher chip shows in the status bar. When true, the multi user
       avatar will no longer show on the lockscreen -->
@@ -38,4 +43,7 @@
          protected. -->
     <bool name="flag_battery_shield_icon">false</bool>
 
+    <!-- Whether the combined qs shows in status bar when true, the combined qs will not be available
+         if set it to false  -->
+    <bool name="flag_combined_qs_headers">true</bool>
 </resources>

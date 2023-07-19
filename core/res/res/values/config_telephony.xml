@@ -17,6 +17,12 @@
 <resources>
     <!-- This file defines Android telephony related resources -->
 
+    <!-- Whether force disabling telephony new data stack or not.
+         This flag and the old data stack code will be deleted in Android 14.
+    -->
+    <bool name="config_force_disable_telephony_new_data_stack">false</bool>
+    <java-symbol type="bool" name="config_force_disable_telephony_new_data_stack" />
+
     <!-- Configure tcp buffer sizes per network type in the form:
          network-type:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
 
@@ -113,19 +119,4 @@
          new network. -->
     <bool name="config_enhanced_iwlan_handover_check">true</bool>
     <java-symbol type="bool" name="config_enhanced_iwlan_handover_check" />
-
-    <!-- Whether using the new SubscriptionManagerService or the old SubscriptionController -->
-    <bool name="config_using_subscription_manager_service">false</bool>
-    <java-symbol type="bool" name="config_using_subscription_manager_service" />
-
-    <!-- Whether asynchronously update the subscription database or not. Async mode increases
-         the performance, but sync mode reduces the chance of database/cache out-of-sync. -->
-    <bool name="config_subscription_database_async_update">true</bool>
-    <java-symbol type="bool" name="config_subscription_database_async_update" />
-
-    <!--  Whether to enable getSubscriptionUserHandle() api.
-          If the value is true, return user handle associated with the subscription.
-          If the value is set to false, return null. -->
-    <bool name="config_enable_get_subscription_user_handle">true</bool>
-    <java-symbol type="bool" name="config_enable_get_subscription_user_handle" />
 </resources>

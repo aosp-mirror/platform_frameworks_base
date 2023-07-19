@@ -16,11 +16,8 @@
 
 package com.android.systemui.controls.management
 
-import android.annotation.WorkerThread
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
 import android.util.Log
@@ -68,7 +65,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     private val serviceListingBuilder: (Context) -> ServiceListing,
     private val userTracker: UserTracker,
     dumpManager: DumpManager,
-    private val featureFlags: FeatureFlags
+    featureFlags: FeatureFlags
 ) : ControlsListingController, Dumpable {
 
     @Inject
@@ -100,7 +97,18 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
         // After here, `list` is not captured, so we don't risk modifying it outside of the callback
         backgroundExecutor.execute {
             if (userChangeInProgress.get() > 0) return@execute
-            updateServices(newServices)
+            if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
+                val allowAllApps = featureFlags.isEnabled(Flags.APP_PANELS_ALL_APPS_ALLOWED)
+                newServices.forEach {
+                    it.resolvePanelActivity(allowAllApps) }
+            }
+
+            if (newServices != availableServices) {
+                availableServices = newServices
+                callbacks.forEach {
+                    it.onServicesUpdated(getCurrentServices())
+                }
+            }
         }
     }
 
@@ -110,21 +118,6 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
         serviceListing.addCallback(serviceListingCallback)
         serviceListing.setListening(true)
         serviceListing.reload()
-    }
-
-    private fun updateServices(newServices: List<ControlsServiceInfo>) {
-        if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
-            val allowAllApps = featureFlags.isEnabled(Flags.APP_PANELS_ALL_APPS_ALLOWED)
-            newServices.forEach {
-                it.resolvePanelActivity(allowAllApps) }
-        }
-
-        if (newServices != availableServices) {
-            availableServices = newServices
-            callbacks.forEach {
-                it.onServicesUpdated(getCurrentServices())
-            }
-        }
     }
 
     override fun changeUser(newUser: UserHandle) {
@@ -184,23 +177,6 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
      */
     override fun getCurrentServices(): List<ControlsServiceInfo> =
             availableServices.map(ControlsServiceInfo::copy)
-
-    @WorkerThread
-    override fun forceReload() {
-        val packageManager = context.packageManager
-        val intent = Intent(ControlsProviderService.SERVICE_CONTROLS)
-        val user = userTracker.userHandle
-        val flags = PackageManager.GET_SERVICES or
-                PackageManager.GET_META_DATA or
-                PackageManager.MATCH_DIRECT_BOOT_UNAWARE or
-                PackageManager.MATCH_DIRECT_BOOT_AWARE
-        val services = packageManager.queryIntentServicesAsUser(
-                intent,
-                PackageManager.ResolveInfoFlags.of(flags.toLong()),
-                user
-        ).map { ControlsServiceInfo(userTracker.userContext, it.serviceInfo) }
-        updateServices(services)
-    }
 
     /**
      * Get the localized label for the component.

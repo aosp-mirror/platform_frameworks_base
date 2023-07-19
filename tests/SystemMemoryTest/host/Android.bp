@@ -26,7 +26,4 @@ java_test_host {
     srcs: ["src/**/*.java"],
     libs: ["tradefed"],
     test_suites: ["general-tests"],
-    data: [
-        ":SystemMemoryTestDevice",
-    ],
 }

@@ -17,7 +17,7 @@
 <resources>
     <!-- Determines whether the shell features all run on another thread. This is to be overrided
          by the resources of the app using the Shell library. -->
-    <bool name="config_enableShellMainThread">false</bool>
+    <bool name="config_enableShellMainThread">true</bool>
 
     <!-- Determines whether to register the shell task organizer on init.
          TODO(b/238217847): This config is temporary until we refactor the base WMComponent. -->
@@ -104,10 +104,6 @@
     <item name="config_pictureInPictureAspectRatioLimitForMinSize" format="float" type="dimen">
         1.777778
     </item>
-
-    <!-- The aspect ratio that by which optimizations to large screen sizes are made.
-         Needs to be less that or equal to 1. -->
-    <item name="config_pipLargeScreenOptimizedAspectRatio" format="float" type="dimen">0.5625</item>
 
     <!-- The default gravity for the picture-in-picture window.
          Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->

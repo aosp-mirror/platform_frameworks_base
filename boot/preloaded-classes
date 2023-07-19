@@ -5419,8 +5419,6 @@ android.nfc.NfcAdapter$CreateNdefMessageCallback
 android.nfc.NfcAdapter
 android.nfc.NfcControllerAlwaysOnListener
 android.nfc.NfcManager
-android.nfc.NfcServiceManager$ServiceRegisterer
-android.nfc.NfcServiceManager
 android.nfc.Tag$1
 android.nfc.Tag
 android.nfc.TechListParcel$1

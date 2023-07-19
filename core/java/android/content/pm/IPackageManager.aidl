@@ -278,6 +278,9 @@ interface IPackageManager {
     void addCrossProfileIntentFilter(in IntentFilter intentFilter, String ownerPackage,
             int sourceUserId, int targetUserId, int flags);
 
+    void removeCrossProfileIntentFilter(in IntentFilter intentFilter, String ownerPackage,
+            int sourceUserId, int targetUserId, int flags);
+
     void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage);
 
     String[] setDistractingPackageRestrictionsAsUser(in String[] packageNames, int restrictionFlags,
