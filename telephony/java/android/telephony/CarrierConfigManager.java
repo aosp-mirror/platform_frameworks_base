@@ -9407,10 +9407,11 @@ public class CarrierConfigManager {
             "missed_incoming_call_sms_pattern_string_array";
 
     /**
-     * Indicate the satellite services supported per provider by a carrier.
-     *
-     * Key is the PLMN of a satellite provider. Value should be an integer array of supported
-     * services with the following value:
+     * A PersistableBundle that contains a list of key-value pairs, where the values are integer
+     * arrays.
+     * <p>
+     * Keys are the PLMNs of satellite providers as strings and values are integer arrays of
+     * supported services with the following value:
      * <ul>
      * <li>1 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VOICE}</li>
      * <li>2 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_DATA}</li>
@@ -9419,19 +9420,35 @@ public class CarrierConfigManager {
      * <li>5 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_EMERGENCY}</li>
      * </ul>
      * <p>
-     * If this carrier config is not present, the overlay config
+     * An example config for two PLMNs "123411" and "123412":
+     * <pre>{@code
+     * <carrier_config>
+     *   <pbundle_as_map name="carrier_supported_satellite_services_per_provider_bundle">
+     *     <int-array name = "123411" num = "2">
+     *       <item value = "3"/>
+     *       <item value = "5"/>
+     *     </int-array>
+     *     <int-array name = "123412" num = "1">
+     *       <item value = "3"/>
+     *     </int-array>
+     *   </pbundle_as_map>
+     * </carrier_config>
+     * }</pre>
+     * <p>
+     * If this carrier config is not present, the device overlay config
      * {@code config_satellite_services_supported_by_providers} will be used. If the carrier config
-     * is present, the supported satellite services will be identified as follows:
+     * is present, the supported services associated with the PLMNs listed in the carrier config
+     * will override that of the device overlay config. The supported satellite services will be
+     * identified as follows:
      * <ul>
-     * <li>For the PLMN that exists in both provider supported satellite services and carrier
-     * supported satellite services, the supported services will be the intersection of the two
-     * sets.</li>
-     * <li>For the PLMN that is present in provider supported satellite services but not in carrier
-     * supported satellite services, the provider supported satellite services will be used.</li>
-     * <li>For the PLMN that is present in carrier supported satellite services but not in provider
-     * supported satellite services, the PLMN will be ignored.</li>
+     * <li>For each PLMN that exists only in the carrier provided satellite services, use the
+     * carrier provided services as the supported services.</li>
+     * <li>For each PLMN that is present only in the device provided satellite services, use the
+     * device provided services as the supported services.</li>
+     * <li>For each PLMN that is present in both the carrier provided and device provided satellite
+     * services, use the carrier provided services as the supported services.</li>
      * </ul>
-     *
+     * <p>
      * This config is empty by default.
      */
     public static final String KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE =
