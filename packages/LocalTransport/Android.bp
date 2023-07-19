@@ -27,9 +27,7 @@ android_app {
     name: "LocalTransport",
     defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
-    optimize: {
-        proguard_flags_files: ["proguard.flags"],
-    },
+    libs: ["keepanno-annotations"],
     platform_apis: true,
     certificate: "platform",
     privileged: true,
