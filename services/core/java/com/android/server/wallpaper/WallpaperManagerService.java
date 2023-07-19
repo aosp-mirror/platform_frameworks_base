@@ -1016,8 +1016,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         && mWallpaper.userId == mCurrentUserId) {
                     Slog.w(TAG, "Wallpaper reconnect timed out for " + mWallpaper.wallpaperComponent
                             + ", reverting to built-in wallpaper!");
-                    clearWallpaperLocked(true, FLAG_SYSTEM, mWallpaper.userId,
-                            null);
+                    clearWallpaperLocked(FLAG_SYSTEM, mWallpaper.userId, null);
                 }
             }
         };
@@ -1197,7 +1196,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 } else {
                     // Timeout
                     Slog.w(TAG, "Reverting to built-in wallpaper!");
-                    clearWallpaperLocked(true, FLAG_SYSTEM, mWallpaper.userId, null);
+                    clearWallpaperLocked(FLAG_SYSTEM, mWallpaper.userId, null);
                     final String flattened = wpService.flattenToString();
                     EventLog.writeEvent(EventLogTags.WP_WALLPAPER_CRASHED,
                             flattened.substring(0, Math.min(flattened.length(),
@@ -1236,8 +1235,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             } else {
                                 if (mLmkLimitRebindRetries <= 0) {
                                     Slog.w(TAG, "Reverting to built-in wallpaper due to lmk!");
-                                    clearWallpaperLocked(true, FLAG_SYSTEM, mWallpaper.userId,
-                                            null);
+                                    clearWallpaperLocked(FLAG_SYSTEM, mWallpaper.userId, null);
                                     mLmkLimitRebindRetries = LMK_RECONNECT_REBIND_RETRIES;
                                     return;
                                 }
@@ -1256,7 +1254,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                     && mWallpaper.lastDiedTime + MIN_WALLPAPER_CRASH_TIME
                                     > SystemClock.uptimeMillis()) {
                                 Slog.w(TAG, "Reverting to built-in wallpaper!");
-                                clearWallpaperLocked(true, FLAG_SYSTEM, mWallpaper.userId, null);
+                                clearWallpaperLocked(FLAG_SYSTEM, mWallpaper.userId, null);
                             } else {
                                 mWallpaper.lastDiedTime = SystemClock.uptimeMillis();
                                 tryToRebind();
@@ -1497,7 +1495,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                 wallpaper, null)) {
                             Slog.w(TAG, "Wallpaper " + wpService
                                     + " no longer available; reverting to default");
-                            clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, null);
+                            clearWallpaperLocked(FLAG_SYSTEM, wallpaper.userId, null);
                         }
                     }
                 }
@@ -1585,7 +1583,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     if (doit) {
                         Slog.w(TAG, "Wallpaper uninstalled, removing: "
                                 + wallpaper.wallpaperComponent);
-                        clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, null);
+                        clearWallpaperLocked(FLAG_SYSTEM, wallpaper.userId, null);
                     }
                 }
             }
@@ -1606,7 +1604,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 } catch (NameNotFoundException e) {
                     Slog.w(TAG, "Wallpaper component gone, removing: "
                             + wallpaper.wallpaperComponent);
-                    clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, null);
+                    clearWallpaperLocked(FLAG_SYSTEM, wallpaper.userId, null);
                 }
             }
             if (wallpaper.nextWallpaperComponent != null
@@ -1638,7 +1636,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mShuttingDown = false;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
-        mDefaultWallpaperComponent = WallpaperManager.getCmfDefaultWallpaperComponent(context);
+        ComponentName defaultComponent = WallpaperManager.getCmfDefaultWallpaperComponent(context);
+        mDefaultWallpaperComponent = defaultComponent == null ? mImageWallpaper : defaultComponent;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mIPackageManager = AppGlobals.getPackageManager();
@@ -1721,7 +1720,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 if (DEBUG) {
                     Slog.i(TAG, "Unable to regenerate crop; resetting");
                 }
-                clearWallpaperLocked(false, FLAG_SYSTEM, UserHandle.USER_SYSTEM, null);
+                clearWallpaperLocked(FLAG_SYSTEM, UserHandle.USER_SYSTEM, null);
             }
         } else {
             if (DEBUG) {
@@ -1978,7 +1977,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
 
                 if (si == null) {
-                    clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, reply);
+                    clearWallpaperLocked(FLAG_SYSTEM, wallpaper.userId, reply);
                 } else {
                     Slog.w(TAG, "Wallpaper isn't direct boot aware; using fallback until unlocked");
                     // We might end up persisting the current wallpaper data
@@ -2002,10 +2001,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         if (serviceInfo == null) {
             if (wallpaper.mWhich == (FLAG_LOCK | FLAG_SYSTEM)) {
-                clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, null);
-                clearWallpaperLocked(false, FLAG_LOCK, wallpaper.userId, reply);
+                clearWallpaperLocked(FLAG_SYSTEM, wallpaper.userId, null);
+                clearWallpaperLocked(FLAG_LOCK, wallpaper.userId, reply);
             } else {
-                clearWallpaperLocked(false, wallpaper.mWhich, wallpaper.userId, reply);
+                clearWallpaperLocked(wallpaper.mWhich, wallpaper.userId, reply);
             }
             return;
         }
@@ -2038,9 +2037,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData data = null;
         synchronized (mLock) {
             if (mIsLockscreenLiveWallpaperEnabled) {
-                clearWallpaperLocked(callingPackage, false, which, userId);
+                clearWallpaperLocked(callingPackage, which, userId);
             } else {
-                clearWallpaperLocked(false, which, userId, null);
+                clearWallpaperLocked(which, userId, null);
             }
 
             if (which == FLAG_LOCK) {
@@ -2058,8 +2057,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void clearWallpaperLocked(String callingPackage, boolean defaultFailed,
-            int which, int userId) {
+    private void clearWallpaperLocked(String callingPackage, int which, int userId) {
 
         // Might need to bring it in the first time to establish our rewrite
         if (!mWallpaperMap.contains(userId)) {
@@ -2094,7 +2092,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 component = wallpaper.wallpaperComponent;
                 finalWhich = FLAG_LOCK | FLAG_SYSTEM;
             } else {
-                component = defaultFailed ? mImageWallpaper : null;
+                component = null;
                 finalWhich = which;
             }
 
@@ -2114,8 +2112,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     // TODO(b/266818039) remove this version of the method
-    private void clearWallpaperLocked(boolean defaultFailed, int which, int userId,
-            IRemoteCallback reply) {
+    private void clearWallpaperLocked(int which, int userId, IRemoteCallback reply) {
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
             throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to clear");
         }
@@ -2168,9 +2165,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 wallpaper.primaryColors = null;
                 wallpaper.imageWallpaperPending = false;
                 if (userId != mCurrentUserId) return;
-                if (bindWallpaperComponentLocked(defaultFailed
-                        ? mImageWallpaper
-                                : null, true, false, wallpaper, reply)) {
+                if (bindWallpaperComponentLocked(null, true, false, wallpaper, reply)) {
                     return;
                 }
             } catch (IllegalArgumentException e1) {
@@ -3523,11 +3518,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         try {
             if (componentName == null) {
                 componentName = mDefaultWallpaperComponent;
-                if (componentName == null) {
-                    // Fall back to static image wallpaper
-                    componentName = mImageWallpaper;
-                    if (DEBUG_LIVE) Slog.v(TAG, "No default component; using image wallpaper");
-                }
             }
             int serviceUserId = wallpaper.userId;
             ServiceInfo si = mIPackageManager.getServiceInfo(componentName,
@@ -3997,7 +3987,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mFallbackWallpaper = new WallpaperData(systemUserId, FLAG_SYSTEM);
             mFallbackWallpaper.allowBackup = false;
             mFallbackWallpaper.wallpaperId = makeWallpaperIdLocked();
-            bindWallpaperComponentLocked(mImageWallpaper, true, false, mFallbackWallpaper, null);
+            bindWallpaperComponentLocked(mDefaultWallpaperComponent, true, false,
+                    mFallbackWallpaper, null);
         }
     }
 
