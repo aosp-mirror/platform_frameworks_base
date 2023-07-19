@@ -28,6 +28,7 @@ import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
+import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
@@ -70,6 +71,7 @@ import android.provider.Settings;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -2632,12 +2634,16 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
 
         if (!mStatusBarStateController.isDozing()) {
-            mVibratorHelper.vibrate(
-                    Process.myUid(),
-                    mView.getContext().getPackageName(),
-                    ADDITIONAL_TAP_REQUIRED_VIBRATION_EFFECT,
-                    "falsing-additional-tap-required",
-                    TOUCH_VIBRATION_ATTRIBUTES);
+            if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+                mVibratorHelper.performHapticFeedback(mView, HapticFeedbackConstants.REJECT);
+            } else {
+                mVibratorHelper.vibrate(
+                        Process.myUid(),
+                        mView.getContext().getPackageName(),
+                        ADDITIONAL_TAP_REQUIRED_VIBRATION_EFFECT,
+                        "falsing-additional-tap-required",
+                        TOUCH_VIBRATION_ATTRIBUTES);
+            }
         }
     }
 
@@ -3504,7 +3510,14 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void maybeVibrateOnOpening(boolean openingWithTouch) {
         if (mVibrateOnOpening && mBarState != KEYGUARD && mBarState != SHADE_LOCKED) {
             if (!openingWithTouch || !mHasVibratedOnOpen) {
-                mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
+                if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+                    mVibratorHelper.performHapticFeedback(
+                            mView,
+                            HapticFeedbackConstants.GESTURE_START
+                    );
+                } else {
+                    mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
+                }
                 mHasVibratedOnOpen = true;
                 mShadeLog.v("Vibrating on opening, mHasVibratedOnOpen=true");
             }
