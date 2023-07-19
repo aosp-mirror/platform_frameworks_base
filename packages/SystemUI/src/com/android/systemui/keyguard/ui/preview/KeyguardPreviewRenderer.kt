@@ -44,11 +44,13 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
-import com.android.systemui.keyguard.ui.view.layout.KeyguardLayoutManager
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardPreviewSmartspaceViewModel
@@ -90,12 +92,13 @@ constructor(
     private val lockscreenSmartspaceController: LockscreenSmartspaceController,
     private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
     private val featureFlags: FeatureFlags,
-    private val keyguardLayoutManager: KeyguardLayoutManager,
     private val falsingManager: FalsingManager,
     private val vibratorHelper: VibratorHelper,
     private val indicationController: KeyguardIndicationController,
     private val keyguardRootViewModel: KeyguardRootViewModel,
     @Assisted bundle: Bundle,
+    private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
+    private val keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
 ) {
 
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
@@ -129,17 +132,17 @@ constructor(
         if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
             keyguardRootViewModel.enablePreviewMode(
                 initiallySelectedSlotId =
-                bundle.getString(
-                    KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
-                ),
+                    bundle.getString(
+                        KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
+                    ),
                 shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
             )
         } else {
             bottomAreaViewModel.enablePreviewMode(
                 initiallySelectedSlotId =
-                bundle.getString(
-                    KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
-                ),
+                    bundle.getString(
+                        KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
+                    ),
                 shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
             )
         }
@@ -169,7 +172,8 @@ constructor(
                     ),
                 )
                 setupShortcuts(keyguardRootView)
-                keyguardLayoutManager.layoutViews(keyguardRootView)
+                KeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel)
+                keyguardBlueprintInteractor.refreshBlueprint()
             } else {
                 setUpBottomArea(rootView)
             }
@@ -309,7 +313,7 @@ constructor(
                     false,
                 ) as KeyguardBottomAreaView
         bottomAreaView.init(
-                viewModel = bottomAreaViewModel,
+            viewModel = bottomAreaViewModel,
         )
         parentView.addView(
             bottomAreaView,

@@ -16,17 +16,20 @@
 
 package com.android.systemui.keyguard.ui.view.layout
 
+import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import java.io.PrintWriter
 import javax.inject.Inject
 
-/** Uses $ adb shell cmd statusbar layout <LayoutId> */
-class KeyguardLayoutManagerCommandListener
+/** Uses $ adb shell cmd statusbar blueprint <BlueprintId> */
+class KeyguardBlueprintCommandListener
 @Inject
 constructor(
     private val commandRegistry: CommandRegistry,
-    private val keyguardLayoutManager: KeyguardLayoutManager
+    private val keyguardBlueprintRepository: KeyguardBlueprintRepository,
+    private val keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
 ) {
     private val layoutCommand = KeyguardLayoutManagerCommand()
 
@@ -42,22 +45,22 @@ constructor(
                 return
             }
 
-            if (keyguardLayoutManager.transitionToLayout(arg)) {
+            if (keyguardBlueprintInteractor.transitionToBlueprint(arg)) {
                 pw.println("Transition succeeded!")
             } else {
-                pw.println("Invalid argument! To see available layout ids, run:")
-                pw.println("$ adb shell cmd statusbar layout help")
+                pw.println("Invalid argument! To see available blueprint ids, run:")
+                pw.println("$ adb shell cmd statusbar blueprint help")
             }
         }
 
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: $ adb shell cmd statusbar layout <layoutId>")
-            pw.println("Existing Layout Ids: ")
-            keyguardLayoutManager.layoutIdMap.forEach { entry -> pw.println("${entry.key}") }
+            pw.println("Usage: $ adb shell cmd statusbar blueprint <blueprintId>")
+            pw.println("Existing Blueprint Ids: ")
+            keyguardBlueprintRepository.printBlueprints(pw)
         }
     }
 
     companion object {
-        internal const val COMMAND = "layout"
+        internal const val COMMAND = "blueprint"
     }
 }
