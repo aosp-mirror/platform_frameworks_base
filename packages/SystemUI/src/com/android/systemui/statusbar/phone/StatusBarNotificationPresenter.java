@@ -79,7 +79,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final AboveShelfObserver mAboveShelfObserver;
     private final DozeScrimController mDozeScrimController;
-    private final CentralSurfaces mCentralSurfaces;
     private final NotificationsInteractor mNotificationsInteractor;
     private final NotificationStackScrollLayoutController mNsslController;
     private final LockscreenShadeTransitionController mShadeTransitionController;
@@ -107,7 +106,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
             NotificationShadeWindowController notificationShadeWindowController,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardStateController keyguardStateController,
-            CentralSurfaces centralSurfaces,
             NotificationsInteractor notificationsInteractor,
             LockscreenShadeTransitionController shadeTransitionController,
             PowerInteractor powerInteractor,
@@ -128,8 +126,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         mQsController = quickSettingsController;
         mHeadsUpManager = headsUp;
         mDynamicPrivacyController = dynamicPrivacyController;
-        // TODO: use KeyguardStateController#isOccluded to remove this dependency
-        mCentralSurfaces = centralSurfaces;
         mNotificationsInteractor = notificationsInteractor;
         mNsslController = stackScrollerController;
         mShadeTransitionController = shadeTransitionController;
@@ -283,7 +279,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         @Override
         public boolean suppressAwakeHeadsUp(NotificationEntry entry) {
             final StatusBarNotification sbn = entry.getSbn();
-            if (mCentralSurfaces.isOccluded()) {
+            if (mKeyguardStateController.isOccluded()) {
                 boolean devicePublic = mLockscreenUserManager
                         .isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
                 boolean userPublic = devicePublic
