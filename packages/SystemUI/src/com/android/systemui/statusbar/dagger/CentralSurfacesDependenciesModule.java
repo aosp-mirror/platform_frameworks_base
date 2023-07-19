@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.dagger;
 import android.app.IActivityManager;
 import android.app.WallpaperManager;
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
@@ -146,7 +147,8 @@ public interface CentralSurfacesDependenciesModule {
             SysuiColorExtractor colorExtractor,
             KeyguardStateController keyguardStateController,
             DumpManager dumpManager,
-            WallpaperManager wallpaperManager) {
+            WallpaperManager wallpaperManager,
+            DisplayManager displayManager) {
         return new NotificationMediaManager(
                 context,
                 centralSurfacesOptionalLazy,
@@ -162,7 +164,8 @@ public interface CentralSurfacesDependenciesModule {
                 colorExtractor,
                 keyguardStateController,
                 dumpManager,
-                wallpaperManager);
+                wallpaperManager,
+                displayManager);
     }
 
     /** */
