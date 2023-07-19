@@ -164,10 +164,10 @@ public final class DisplayBrightnessController {
     /**
      * Sets the brightness to follow
      */
-    public void setBrightnessToFollow(Float brightnessToFollow) {
+    public void setBrightnessToFollow(float brightnessToFollow, boolean slowChange) {
         synchronized (mLock) {
             mDisplayBrightnessStrategySelector.getFollowerDisplayBrightnessStrategy()
-                    .setBrightnessToFollow(brightnessToFollow);
+                    .setBrightnessToFollow(brightnessToFollow, slowChange);
         }
     }
 
