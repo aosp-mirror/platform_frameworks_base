@@ -54,7 +54,6 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
@@ -119,6 +118,7 @@ import java.util.Optional;
 @RunWith(AndroidTestingRunner.class)
 public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
 
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private NotificationsController mNotificationsController;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
@@ -157,7 +157,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private StackStateLogger mStackLogger;
     @Mock private NotificationStackScrollLogger mLogger;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
-    private FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     @Mock private NotificationTargetsHelper mNotificationTargetsHelper;
     @Mock private SecureSettings mSecureSettings;
     @Mock private NotificationIconAreaController mIconAreaController;

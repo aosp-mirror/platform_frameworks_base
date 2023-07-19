@@ -62,6 +62,32 @@ class FakeFeatureFlags : FeatureFlags {
         }
     }
 
+    /**
+     * Set the given flag's default value if no other value has been set.
+     *
+     * REMINDER: You should always test your code with your flag in both configurations, so
+     *  generally you should be setting a particular value.  This method should be reserved for
+     *  situations where the flag needs to be read (e.g. in the class constructor), but its
+     *  value shouldn't affect the actual test cases. In those cases, it's mildly safer to use
+     *  this method than to hard-code `false` or `true` because then at least if you're wrong,
+     *  and the flag value *does* matter, you'll notice when the flag is flipped and tests
+     *  start failing.
+     */
+    fun setDefault(flag: BooleanFlag) = booleanFlags.putIfAbsent(flag.id, flag.default)
+
+    /**
+     * Set the given flag's default value if no other value has been set.
+     *
+     * REMINDER: You should always test your code with your flag in both configurations, so
+     *  generally you should be setting a particular value.  This method should be reserved for
+     *  situations where the flag needs to be read (e.g. in the class constructor), but its
+     *  value shouldn't affect the actual test cases. In those cases, it's mildly safer to use
+     *  this method than to hard-code `false` or `true` because then at least if you're wrong,
+     *  and the flag value *does* matter, you'll notice when the flag is flipped and tests
+     *  start failing.
+     */
+    fun setDefault(flag: SysPropBooleanFlag) = booleanFlags.putIfAbsent(flag.id, flag.default)
+
     private fun notifyFlagChanged(flag: Flag<*>) {
         flagListeners[flag.id]?.let { listeners ->
             listeners.forEach { listener ->
