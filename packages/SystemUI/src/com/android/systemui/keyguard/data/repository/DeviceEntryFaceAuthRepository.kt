@@ -545,11 +545,11 @@ constructor(
             faceAuthLogger.detectionNotSupported(faceManager, faceManager?.sensorPropertiesInternal)
             return
         }
-        if (_isAuthRunning.value || detectCancellationSignal != null) {
+        if (_isAuthRunning.value) {
             faceAuthLogger.skippingDetection(_isAuthRunning.value, detectCancellationSignal != null)
             return
         }
-
+        detectCancellationSignal?.cancel()
         detectCancellationSignal = CancellationSignal()
         withContext(mainDispatcher) {
             // We always want to invoke face detect in the main thread.
@@ -574,6 +574,7 @@ constructor(
         if (authCancellationSignal == null) return
 
         authCancellationSignal?.cancel()
+        cancelNotReceivedHandlerJob?.cancel()
         cancelNotReceivedHandlerJob =
             applicationScope.launch {
                 delay(DEFAULT_CANCEL_SIGNAL_TIMEOUT)
@@ -583,6 +584,7 @@ constructor(
                     cancellationInProgress,
                     faceAuthRequestedWhileCancellation
                 )
+                _authenticationStatus.value = ErrorFaceAuthenticationStatus.cancelNotReceivedError()
                 onFaceAuthRequestCompleted()
             }
         cancellationInProgress = true
