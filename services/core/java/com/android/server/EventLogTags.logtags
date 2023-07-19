@@ -87,7 +87,7 @@ option java_package com.android.server
 # replaces 27510 with a row per notification
 27531 notification_visibility (key|3),(visibile|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1)
 # a notification emited noise, vibration, or light
-27532 notification_alert (key|3),(buzz|1),(beep|1),(blink|1)
+27532 notification_alert (key|3),(buzz|1),(beep|1),(blink|1),(politeness|1)
 # a notification was added to a autogroup
 27533 notification_autogrouped (key|3)
 # notification was removed from an autogroup

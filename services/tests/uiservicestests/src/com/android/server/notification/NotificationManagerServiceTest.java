@@ -687,7 +687,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mPackageIntentReceiver = broadcastReceivers.get(i);
             }
             if (filter.hasAction(Intent.ACTION_USER_SWITCHED)) {
-                mUserSwitchIntentReceiver = broadcastReceivers.get(i);
+                // There may be multiple receivers, get the NMS one
+                if (broadcastReceivers.get(i).toString().contains(
+                        NotificationManagerService.class.getName())) {
+                    mUserSwitchIntentReceiver = broadcastReceivers.get(i);
+                }
             }
         }
         assertNotNull("package intent receiver should exist", mPackageIntentReceiver);
