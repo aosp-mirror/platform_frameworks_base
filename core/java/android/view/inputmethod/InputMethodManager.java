@@ -1571,7 +1571,7 @@ public final class InputMethodManager {
      * @see #startStylusHandwriting(View)
      */
     public boolean isStylusHandwritingAvailable() {
-        return isStylusHandwritingAvailableAsUser(UserHandle.myUserId());
+        return isStylusHandwritingAvailableAsUser(UserHandle.of(UserHandle.myUserId()));
     }
 
     /**
@@ -1582,14 +1582,17 @@ public final class InputMethodManager {
      * called and Stylus touch should continue as normal touch input.</p>
      *
      * <p>{@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required when and only when
-     * {@code userId} is different from the user id of the current process.</p>
+     * {@code user} is different from the user of the current process.</p>
      *
      * @see #startStylusHandwriting(View)
-     * @param userId user ID to query.
+     * @param user UserHandle to query.
      * @hide
      */
+    @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
-    public boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
+    @TestApi
+    @SuppressLint("UserHandle")
+    public boolean isStylusHandwritingAvailableAsUser(@NonNull UserHandle user) {
         final Context fallbackContext = ActivityThread.currentApplication();
         if (fallbackContext == null) {
             return false;
@@ -1606,7 +1609,7 @@ public final class InputMethodManager {
                     }
                 };
             }
-            isAvailable = mStylusHandwritingAvailableCache.query(userId);
+            isAvailable = mStylusHandwritingAvailableCache.query(user.getIdentifier());
         }
         return isAvailable;
     }
@@ -1698,16 +1701,19 @@ public final class InputMethodManager {
      * Returns the list of enabled input methods for the specified user.
      *
      * <p>{@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required when and only when
-     * {@code userId} is different from the user id of the current process.</p>
+     * {@code user} is different from the user of the current process.</p>
      *
-     * @param userId user ID to query
+     * @param user UserHandle to query
      * @return {@link List} of {@link InputMethodInfo}.
-     * @see #getEnabledInputMethodSubtypeListAsUser(String, boolean, int)
+     * @see #getEnabledInputMethodSubtypeListAsUser(String, boolean, UserHandle)
      * @hide
      */
+    @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
-    public List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
-        return IInputMethodManagerGlobalInvoker.getEnabledInputMethodList(userId);
+    @TestApi
+    @SuppressLint("UserHandle")
+    public List<InputMethodInfo> getEnabledInputMethodListAsUser(@NonNull UserHandle user) {
+        return IInputMethodManagerGlobalInvoker.getEnabledInputMethodList(user.getIdentifier());
     }
 
     /**
@@ -1736,7 +1742,7 @@ public final class InputMethodManager {
      *
      * @param imeId IME ID to be queried about.
      * @param allowsImplicitlyEnabledSubtypes {@code true} to include implicitly enabled subtypes.
-     * @param userId user ID to be queried about.
+     * @param user UserHandle to be queried about.
      *               {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} is required if this is
      *               different from the calling process user ID.
      * @return {@link List} of {@link InputMethodSubtype}.
@@ -1745,10 +1751,14 @@ public final class InputMethodManager {
      */
     @NonNull
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
+    @TestApi
+    @SuppressLint("UserHandle")
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeListAsUser(
-            @NonNull String imeId, boolean allowsImplicitlyEnabledSubtypes, @UserIdInt int userId) {
+            @NonNull String imeId, boolean allowsImplicitlyEnabledSubtypes,
+            @NonNull UserHandle user) {
         return IInputMethodManagerGlobalInvoker.getEnabledInputMethodSubtypeList(
-                Objects.requireNonNull(imeId), allowsImplicitlyEnabledSubtypes, userId);
+                Objects.requireNonNull(imeId), allowsImplicitlyEnabledSubtypes,
+                user.getIdentifier());
     }
 
     /**
