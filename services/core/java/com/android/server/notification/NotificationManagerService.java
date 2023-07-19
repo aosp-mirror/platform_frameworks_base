@@ -2491,16 +2491,6 @@ public class NotificationManagerService extends SystemService {
         getContext().registerReceiver(mReviewNotificationPermissionsReceiver,
                 ReviewNotificationPermissionsReceiver.getFilter(),
                 Context.RECEIVER_NOT_EXPORTED);
-
-        mAppOps.startWatchingMode(AppOpsManager.OP_POST_NOTIFICATION, null,
-                new AppOpsManager.OnOpChangedInternalListener() {
-                    @Override
-                    public void onOpChanged(@NonNull String op, @NonNull String packageName,
-                            int userId) {
-                        mHandler.post(
-                                () -> handleNotificationPermissionChange(packageName, userId));
-                    }
-                });
     }
 
     /**
@@ -3560,16 +3550,20 @@ public class NotificationManagerService extends SystemService {
             }
             mPermissionHelper.setNotificationPermission(
                     pkg, UserHandle.getUserId(uid), enabled, true);
+            sendAppBlockStateChangedBroadcast(pkg, uid, !enabled);
 
             mMetricsLogger.write(new LogMaker(MetricsEvent.ACTION_BAN_APP_NOTES)
                     .setType(MetricsEvent.TYPE_ACTION)
                     .setPackageName(pkg)
                     .setSubtype(enabled ? 1 : 0));
             mNotificationChannelLogger.logAppNotificationsAllowed(uid, pkg, enabled);
+            // Now, cancel any outstanding notifications that are part of a just-disabled app
+            if (!enabled) {
+                cancelAllNotificationsInt(MY_UID, MY_PID, pkg, null, 0, 0,
+                        UserHandle.getUserId(uid), REASON_PACKAGE_BANNED);
+            }
 
-            // Outstanding notifications from this package will be cancelled, and the package will
-            // be sent the ACTION_APP_BLOCK_STATE_CHANGED broadcast, as soon as we get the
-            // callback from AppOpsManager.
+            handleSavePolicyFile();
         }
 
         /**
@@ -5888,21 +5882,6 @@ public class NotificationManagerService extends SystemService {
             return 0;
         }
     };
-
-    private void handleNotificationPermissionChange(String pkg, @UserIdInt int userId) {
-        int uid = mPackageManagerInternal.getPackageUid(pkg, 0, userId);
-        if (uid == INVALID_UID) {
-            Log.e(TAG, String.format("No uid found for %s, %s!", pkg, userId));
-            return;
-        }
-        boolean hasPermission = mPermissionHelper.hasPermission(uid);
-        sendAppBlockStateChangedBroadcast(pkg, uid, !hasPermission);
-        if (!hasPermission) {
-            cancelAllNotificationsInt(MY_UID, MY_PID, pkg, /* channelId= */ null,
-                    /* mustHaveFlags= */ 0, /* mustNotHaveFlags= */ 0, userId,
-                    REASON_PACKAGE_BANNED);
-        }
-    }
 
     protected void checkNotificationListenerAccess() {
         if (!isCallerSystemOrPhone()) {
