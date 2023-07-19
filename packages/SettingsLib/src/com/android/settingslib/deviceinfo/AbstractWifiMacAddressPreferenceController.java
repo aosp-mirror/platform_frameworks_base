@@ -59,7 +59,7 @@ public abstract class AbstractWifiMacAddressPreferenceController
 
     @Override
     public boolean isAvailable() {
-        return true;
+        return mWifiManager != null;
     }
 
     @Override
