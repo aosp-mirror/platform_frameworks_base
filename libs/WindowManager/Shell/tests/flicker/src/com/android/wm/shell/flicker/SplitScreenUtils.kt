@@ -42,7 +42,7 @@ import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.flicker.testapp.ActivityOptions.SplitScreen.Primary
 import org.junit.Assert.assertNotNull
 
-internal object SplitScreenUtils {
+object SplitScreenUtils {
     private const val TIMEOUT_MS = 3_000L
     private const val DRAG_DURATION_MS = 1_000L
     private const val NOTIFICATION_SCROLLER = "notification_stack_scroller"

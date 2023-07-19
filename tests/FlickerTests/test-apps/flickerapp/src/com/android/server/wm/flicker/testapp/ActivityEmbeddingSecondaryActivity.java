@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.testapp;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.app.PictureInPictureParams;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -40,6 +41,16 @@ public class ActivityEmbeddingSecondaryActivity extends Activity {
                         finish();
                     }
             });
+        findViewById(R.id.secondary_enter_pip_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        PictureInPictureParams.Builder picInPicParamsBuilder =
+                                new PictureInPictureParams.Builder();
+                        enterPictureInPictureMode(picInPicParamsBuilder.build());
+                    }
+                }
+        );
     }
 
     public void launchThirdActivity(View view) {
