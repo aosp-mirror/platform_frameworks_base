@@ -1087,6 +1087,17 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         broadcast.unregisterServiceCallBack(callback);
     }
 
+    List<BluetoothDevice> getConnectedBroadcastSinkDevices() {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "The broadcast assistant profile is null");
+            return null;
+        }
+
+        return assistant.getConnectedDevices();
+    }
+
     boolean isThereAnyBroadcastSourceIntoSinkDevice(BluetoothDevice sink) {
         LocalBluetoothLeBroadcastAssistant assistant =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
