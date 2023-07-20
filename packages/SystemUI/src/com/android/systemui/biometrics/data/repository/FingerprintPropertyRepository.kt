@@ -22,6 +22,7 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
+import com.android.systemui.biometrics.shared.model.toSensorStrength
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -106,7 +107,7 @@ constructor(
 
     private fun setProperties(prop: FingerprintSensorPropertiesInternal) {
         _sensorId.value = prop.sensorId
-        _strength.value = sensorStrengthIntToObject(prop.sensorStrength)
+        _strength.value = prop.sensorStrength.toSensorStrength()
         _sensorType.value = sensorTypeIntToObject(prop.sensorType)
         _sensorLocations.value =
             prop.allLocations.associateBy { sensorLocationInternal ->
@@ -116,15 +117,6 @@ constructor(
 
     companion object {
         private const val TAG = "FingerprintPropertyRepositoryImpl"
-    }
-}
-
-private fun sensorStrengthIntToObject(value: Int): SensorStrength {
-    return when (value) {
-        0 -> SensorStrength.CONVENIENCE
-        1 -> SensorStrength.WEAK
-        2 -> SensorStrength.STRONG
-        else -> throw IllegalArgumentException("Invalid SensorStrength value: $value")
     }
 }
 
