@@ -1126,13 +1126,13 @@
 
     <style name="Widget.Dialog.Button.BorderButton">
         <item name="android:background">@drawable/qs_dialog_btn_outline</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:textColor">@color/qs_dialog_btn_outline_text</item>
     </style>
 
     <style name="Widget.Dialog.Button.Large">
         <item name="android:background">@drawable/qs_dialog_btn_filled_large</item>
         <item name="android:minHeight">56dp</item>
-        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryFixed</item>
+        <item name="android:textColor">@color/qs_dialog_btn_filled_large_text</item>
     </style>
 
     <style name="Widget.Dialog.Button.QuickSettings">
