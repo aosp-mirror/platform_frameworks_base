@@ -24,6 +24,7 @@ import static android.window.DisplayAreaOrganizer.KEY_ROOT_DISPLAY_AREA_ID;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -40,7 +41,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -48,7 +48,6 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,7 +55,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
-import android.view.WindowManagerGlobal;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.Button;
@@ -95,6 +93,10 @@ public class ImmersiveModeConfirmation {
      */
     @Nullable
     private Context mWindowContext;
+    /**
+     * The root display area feature id that the {@link #mWindowContext} is attaching to.
+     */
+    private int mWindowContextRootDisplayAreaId = FEATURE_UNDEFINED;
     // Local copy of vr mode enabled state, to avoid calling into VrManager with
     // the lock held.
     private boolean mVrModeEnabled;
@@ -206,12 +208,15 @@ public class ImmersiveModeConfirmation {
     private void handleHide() {
         if (mClingWindow != null) {
             if (DEBUG) Slog.d(TAG, "Hiding immersive mode confirmation");
-            // We don't care which root display area the window manager is specifying for removal.
-            try {
-                getWindowManager(FEATURE_UNDEFINED).removeView(mClingWindow);
-            } catch (WindowManager.InvalidDisplayException e) {
-                Slog.w(TAG, "Fail to hide the immersive confirmation window because of " + e);
-                return;
+            if (mWindowManager != null) {
+                try {
+                    mWindowManager.removeView(mClingWindow);
+                } catch (WindowManager.InvalidDisplayException e) {
+                    Slog.w(TAG, "Fail to hide the immersive confirmation window because of "
+                            + e);
+                }
+                mWindowManager = null;
+                mWindowContext = null;
             }
             mClingWindow = null;
         }
@@ -394,26 +399,18 @@ public class ImmersiveModeConfirmation {
      * @return the WindowManager specifying with the {@code rootDisplayAreaId} to attach the
      *         confirmation window.
      */
-    private WindowManager getWindowManager(int rootDisplayAreaId) {
-        if (mWindowManager == null || mWindowContext == null) {
-            // Create window context to specify the RootDisplayArea
-            final Bundle options = getOptionsForWindowContext(rootDisplayAreaId);
-            mWindowContext = mContext.createWindowContext(
-                    IMMERSIVE_MODE_CONFIRMATION_WINDOW_TYPE, options);
-            mWindowManager = mWindowContext.getSystemService(WindowManager.class);
-            return mWindowManager;
+    @NonNull
+    private WindowManager createWindowManager(int rootDisplayAreaId) {
+        if (mWindowManager != null) {
+            throw new IllegalStateException(
+                    "Must not create a new WindowManager while there is an existing one");
         }
-
-        // Update the window context and window manager to specify the RootDisplayArea
+        // Create window context to specify the RootDisplayArea
         final Bundle options = getOptionsForWindowContext(rootDisplayAreaId);
-        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
-        try {
-            wms.attachWindowContextToDisplayArea(mWindowContext.getWindowContextToken(),
-                    IMMERSIVE_MODE_CONFIRMATION_WINDOW_TYPE, mContext.getDisplayId(), options);
-        }  catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
-
+        mWindowContextRootDisplayAreaId = rootDisplayAreaId;
+        mWindowContext = mContext.createWindowContext(
+                IMMERSIVE_MODE_CONFIRMATION_WINDOW_TYPE, options);
+        mWindowManager = mWindowContext.getSystemService(WindowManager.class);
         return mWindowManager;
     }
 
@@ -434,14 +431,23 @@ public class ImmersiveModeConfirmation {
     }
 
     private void handleShow(int rootDisplayAreaId) {
+        if (mClingWindow != null) {
+            if (rootDisplayAreaId == mWindowContextRootDisplayAreaId) {
+                if (DEBUG) Slog.d(TAG, "Immersive mode confirmation has already been shown");
+                return;
+            } else {
+                // Hide the existing confirmation before show a new one in the new root.
+                if (DEBUG) Slog.d(TAG, "Immersive mode confirmation was shown in a different root");
+                handleHide();
+            }
+        }
+
         if (DEBUG) Slog.d(TAG, "Showing immersive mode confirmation");
-
         mClingWindow = new ClingWindowView(mContext, mConfirm);
-
         // show the confirmation
-        WindowManager.LayoutParams lp = getClingWindowLayoutParams();
+        final WindowManager.LayoutParams lp = getClingWindowLayoutParams();
         try {
-            getWindowManager(rootDisplayAreaId).addView(mClingWindow, lp);
+            createWindowManager(rootDisplayAreaId).addView(mClingWindow, lp);
         } catch (WindowManager.InvalidDisplayException e) {
             Slog.w(TAG, "Fail to show the immersive confirmation window because of " + e);
         }
