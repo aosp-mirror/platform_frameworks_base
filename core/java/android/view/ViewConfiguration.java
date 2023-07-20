@@ -181,7 +181,7 @@ public class ViewConfiguration {
     private static final int TOUCH_SLOP = 8;
 
     /** Distance a stylus touch can wander before we think the user is handwriting in dips. */
-    private static final int HANDWRITING_SLOP = 4;
+    private static final int HANDWRITING_SLOP = 2;
 
     /**
      * Defines the minimum size of the touch target for a scrollbar in dips
