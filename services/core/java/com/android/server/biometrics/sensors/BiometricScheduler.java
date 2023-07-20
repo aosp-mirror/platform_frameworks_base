@@ -580,7 +580,7 @@ public class BiometricScheduler {
         }
         final BiometricSchedulerOperation operation = mCurrentOperation;
         mHandler.postDelayed(() -> {
-            if (operation == mCurrentOperation) {
+            if (operation == mCurrentOperation && !operation.isFinished()) {
                 Counter.logIncrement("biometric.value_scheduler_watchdog_triggered_count");
                 clearScheduler();
             }
