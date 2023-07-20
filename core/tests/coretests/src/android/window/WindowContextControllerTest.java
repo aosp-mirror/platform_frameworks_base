@@ -24,17 +24,20 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import android.app.servertransaction.WindowTokenClientController;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,14 +59,26 @@ import org.mockito.MockitoAnnotations;
 public class WindowContextControllerTest {
     private WindowContextController mController;
     @Mock
+    private WindowTokenClientController mWindowTokenClientController;
+    @Mock
     private WindowTokenClient mMockToken;
+
+    private WindowTokenClientController mOriginalController;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mController = new WindowContextController(mMockToken);
         doNothing().when(mMockToken).onConfigurationChanged(any(), anyInt(), anyBoolean());
-        doReturn(true).when(mMockToken).attachToDisplayArea(anyInt(), anyInt(), any());
+        mOriginalController = WindowTokenClientController.getInstance();
+        WindowTokenClientController.overrideInstance(mWindowTokenClientController);
+        doReturn(true).when(mWindowTokenClientController).attachToDisplayArea(
+                eq(mMockToken), anyInt(), anyInt(), any());
+    }
+
+    @After
+    public void tearDown() {
+        WindowTokenClientController.overrideInstance(mOriginalController);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -78,7 +93,7 @@ public class WindowContextControllerTest {
     public void testDetachIfNeeded_NotAttachedYet_DoNothing() {
         mController.detachIfNeeded();
 
-        verify(mMockToken, never()).detachFromWindowContainerIfNeeded();
+        verify(mWindowTokenClientController, never()).detachIfNeeded(any());
     }
 
     @Test
