@@ -60,6 +60,7 @@ interface KeyguardFaceAuthInteractor {
     fun onNotificationPanelClicked()
     fun onSwipeUpOnBouncer()
     fun onPrimaryBouncerUserInput()
+    fun onAccessibilityAction()
 }
 
 /**
