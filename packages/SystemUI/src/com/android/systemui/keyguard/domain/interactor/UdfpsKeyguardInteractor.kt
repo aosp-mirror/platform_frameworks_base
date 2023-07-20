@@ -21,10 +21,16 @@ import android.animation.FloatEvaluator
 import android.animation.IntEvaluator
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.statusbar.phone.SystemUIDialogManager
+import com.android.systemui.statusbar.phone.hideAffordancesRequest
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /** Encapsulates business logic for transitions between UDFPS states on the keyguard. */
 @ExperimentalCoroutinesApi
@@ -35,6 +41,8 @@ constructor(
     configRepo: ConfigurationRepository,
     burnInInteractor: BurnInInteractor,
     keyguardInteractor: KeyguardInteractor,
+    shadeRepository: ShadeRepository,
+    dialogManager: SystemUIDialogManager,
 ) {
     private val intEvaluator = IntEvaluator()
     private val floatEvaluator = FloatEvaluator()
@@ -56,6 +64,26 @@ constructor(
                 floatEvaluator.evaluate(dozeAmount, 0, fullyDozingBurnInProgress),
             )
         }
+
+    val dialogHideAffordancesRequest: Flow<Boolean> = dialogManager.hideAffordancesRequest
+
+    val qsProgress: Flow<Float> =
+        shadeRepository.qsExpansion // swipe from top of LS
+            .map { (it * 2).coerceIn(0f, 1f) }
+            .onStart { emit(0f) }
+
+    val shadeExpansion: Flow<Float> =
+        combine(
+                shadeRepository.udfpsTransitionToFullShadeProgress, // swipe from middle of LS
+                keyguardInteractor.statusBarState, // quick swipe from middle of LS
+            ) { shadeProgress, statusBarState ->
+                if (statusBarState == StatusBarState.SHADE_LOCKED) {
+                    1f
+                } else {
+                    shadeProgress
+                }
+            }
+            .onStart { emit(0f) }
 }
 
 data class BurnInOffsets(
