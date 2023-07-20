@@ -308,6 +308,7 @@ filegroup {
         "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/DisabledWifiRepositoryTest.kt",
         "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/prod/WifiRepositoryImplTest.kt",
         "tests/src/com/android/systemui/statusbar/pipeline/wifi/domain/interactor/WifiInteractorImplTest.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/wifi/ui/viewmodel/WifiViewModelTest.kt",
     ],
     path: "tests/src",
 }
