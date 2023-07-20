@@ -23,16 +23,14 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-/**
- * JUnit Rule to handle letterboxStyles and states
- */
+/** JUnit Rule to handle letterboxStyles and states */
 class LetterboxRule(
-        private val withLetterboxEducationEnabled: Boolean = false,
-        private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
-        private val cmdHelper: CommandsHelper = CommandsHelper.getInstance(instrumentation)
+    private val withLetterboxEducationEnabled: Boolean = false,
+    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation(),
+    private val cmdHelper: CommandsHelper = CommandsHelper.getInstance(instrumentation)
 ) : TestRule {
 
-    private val execAdb: (String) -> String = {cmd -> cmdHelper.executeShellCommand(cmd)}
+    private val execAdb: (String) -> String = { cmd -> cmdHelper.executeShellCommand(cmd) }
     private lateinit var _letterboxStyle: MutableMap<String, String>
 
     val letterboxStyle: Map<String, String>
@@ -62,8 +60,7 @@ class LetterboxRule(
         var hasLetterboxEducationStateChanged = false
         if ("$withLetterboxEducationEnabled" != isLetterboxEducationEnabled) {
             hasLetterboxEducationStateChanged = true
-            execAdb("wm set-letterbox-style --isEducationEnabled " +
-                    withLetterboxEducationEnabled)
+            execAdb("wm set-letterbox-style --isEducationEnabled " + withLetterboxEducationEnabled)
         }
         return try {
             object : Statement() {
@@ -74,8 +71,8 @@ class LetterboxRule(
             }
         } finally {
             if (hasLetterboxEducationStateChanged) {
-                execAdb("wm set-letterbox-style --isEducationEnabled " +
-                        isLetterboxEducationEnabled
+                execAdb(
+                    "wm set-letterbox-style --isEducationEnabled " + isLetterboxEducationEnabled
                 )
             }
             resetLetterboxStyle()
@@ -100,9 +97,10 @@ class LetterboxRule(
         execAdb("wm reset-letterbox-style")
     }
 
-    private fun asInt(str: String?): Int? = try {
-        str?.toInt()
-    } catch (e: NumberFormatException) {
-        null
-    }
+    private fun asInt(str: String?): Int? =
+        try {
+            str?.toInt()
+        } catch (e: NumberFormatException) {
+            null
+        }
 }

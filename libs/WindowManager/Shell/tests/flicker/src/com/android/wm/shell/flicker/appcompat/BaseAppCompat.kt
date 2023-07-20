@@ -28,7 +28,6 @@ import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
 import com.android.wm.shell.flicker.appWindowKeepVisible
 import com.android.wm.shell.flicker.layerKeepVisible
-
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
@@ -37,9 +36,7 @@ abstract class BaseAppCompat(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     protected val context: Context = instrumentation.context
     protected val letterboxApp = LetterboxAppHelper(instrumentation)
 
-    @JvmField
-    @Rule
-    val letterboxRule: LetterboxRule = LetterboxRule()
+    @JvmField @Rule val letterboxRule: LetterboxRule = LetterboxRule()
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit

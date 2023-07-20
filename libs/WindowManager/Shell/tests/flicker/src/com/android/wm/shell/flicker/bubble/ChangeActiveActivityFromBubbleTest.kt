@@ -42,8 +42,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FlakyTest(bugId = 217777115)
-class ChangeActiveActivityFromBubbleTest(flicker: LegacyFlickerTest) :
-    BaseBubbleScreen(flicker) {
+class ChangeActiveActivityFromBubbleTest(flicker: LegacyFlickerTest) : BaseBubbleScreen(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition {

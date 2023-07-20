@@ -54,9 +54,7 @@ class OpenTransparentActivityTest(flicker: LegacyFlickerTest) : TransparentBaseA
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            setup {
-                letterboxTranslucentLauncherApp.launchViaIntent(wmHelper)
-            }
+            setup { letterboxTranslucentLauncherApp.launchViaIntent(wmHelper) }
             transitions {
                 waitAndGetLaunchTransparent()?.click() ?: error("Launch Transparent not found")
             }
@@ -66,9 +64,7 @@ class OpenTransparentActivityTest(flicker: LegacyFlickerTest) : TransparentBaseA
             }
         }
 
-    /**
-     * Checks the transparent activity is launched on top of the opaque one
-     */
+    /** Checks the transparent activity is launched on top of the opaque one */
     @Postsubmit
     @Test
     fun translucentActivityIsLaunchedOnTopOfOpaqueActivity() {
@@ -79,18 +75,14 @@ class OpenTransparentActivityTest(flicker: LegacyFlickerTest) : TransparentBaseA
         }
     }
 
-    /**
-     * Checks that the activity is letterboxed
-     */
+    /** Checks that the activity is letterboxed */
     @Postsubmit
     @Test
     fun translucentActivityIsLetterboxed() {
         flicker.assertLayers { isVisible(ComponentNameMatcher.LETTERBOX) }
     }
 
-    /**
-     * Checks that the translucent activity inherits bounds from the opaque one.
-     */
+    /** Checks that the translucent activity inherits bounds from the opaque one. */
     @Postsubmit
     @Test
     fun translucentActivityInheritsBoundsFromOpaqueActivity() {
@@ -100,29 +92,26 @@ class OpenTransparentActivityTest(flicker: LegacyFlickerTest) : TransparentBaseA
         }
     }
 
-    /**
-     * Checks that the translucent activity has rounded corners
-     */
+    /** Checks that the translucent activity has rounded corners */
     @Postsubmit
     @Test
     fun translucentActivityHasRoundedCorners() {
-        flicker.assertLayersEnd {
-            this.hasRoundedCorners(letterboxTranslucentApp)
-        }
+        flicker.assertLayersEnd { this.hasRoundedCorners(letterboxTranslucentApp) }
     }
 
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.rotationTests] for configuring screen orientation and
-         * navigation modes.
+         * See [FlickerTestFactory.rotationTests] for configuring screen orientation and navigation
+         * modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            return LegacyFlickerTestFactory
-                .nonRotationTests(supportedRotations = listOf(Rotation.ROTATION_90))
+            return LegacyFlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(Rotation.ROTATION_90)
+            )
         }
     }
 }
