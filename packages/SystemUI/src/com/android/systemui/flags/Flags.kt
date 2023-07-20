@@ -771,6 +771,11 @@ object Flags {
     val BIGPICTURE_NOTIFICATION_LAZY_LOADING =
             unreleasedFlag(283447257, "bigpicture_notification_lazy_loading")
 
+    // TODO(b/292062937): Tracking bug
+    @JvmField
+    val NOTIFICATION_CLEARABLE_REFACTOR =
+            unreleasedFlag(292062937, "notification_clearable_refactor")
+
     // TODO(b/283740863): Tracking Bug
     @JvmField
     val ENABLE_NEW_PRIVACY_DIALOG =
