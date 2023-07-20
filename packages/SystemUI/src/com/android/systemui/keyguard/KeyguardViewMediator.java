@@ -444,6 +444,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final LockPatternUtils mLockPatternUtils;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private boolean mKeyguardDonePending = false;
+    private boolean mUnlockingAndWakingFromDream = false;
     private boolean mHideAnimationRun = false;
     private boolean mHideAnimationRunning = false;
 
@@ -802,6 +803,25 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             mKeyguardViewControllerLazy.get().setKeyguardGoingAwayState(false);
             mKeyguardDisplayManager.hide();
             mUpdateMonitor.startBiometricWatchdog();
+
+            // It's possible that the device was unlocked (via BOUNCER or Fingerprint) while
+            // dreaming. It's time to wake up.
+            if (mUnlockingAndWakingFromDream) {
+                Log.d(TAG, "waking from dream after unlock");
+                mUnlockingAndWakingFromDream = false;
+
+                if (mKeyguardStateController.isShowing()) {
+                    Log.d(TAG, "keyguard showing after keyguardGone, dismiss");
+                    mKeyguardViewControllerLazy.get()
+                            .notifyKeyguardAuthenticated(!mWakeAndUnlocking);
+                } else {
+                    Log.d(TAG, "keyguard gone, waking up from dream");
+                    mPM.wakeUp(mSystemClock.uptimeMillis(),
+                            mWakeAndUnlocking ? PowerManager.WAKE_REASON_BIOMETRIC
+                            : PowerManager.WAKE_REASON_GESTURE,
+                            "com.android.systemui:UNLOCK_DREAMING");
+                }
+            }
             Trace.endSection();
         }
 
@@ -2673,6 +2693,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
             mKeyguardExitAnimationRunner = null;
             mWakeAndUnlocking = false;
+            mUnlockingAndWakingFromDream = false;
             setPendingLock(false);
 
             // Force if we we're showing in the middle of hiding, to ensure we end up in the correct
@@ -2795,7 +2816,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
 
-            if (mShowing && !mOccluded) {
+            mUnlockingAndWakingFromDream = mStatusBarStateController.isDreaming()
+                && !mStatusBarStateController.isDozing();
+
+            if ((mShowing && !mOccluded) || mUnlockingAndWakingFromDream) {
+                if (mUnlockingAndWakingFromDream) {
+                    Log.d(TAG, "hiding keyguard before waking from dream");
+                }
                 mHiding = true;
                 mKeyguardGoingAwayRunnable.run();
             } else {
@@ -2805,13 +2832,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         mSystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
                         mHideAnimation.getDuration());
                 onKeyguardExitFinished();
-            }
-
-            // It's possible that the device was unlocked (via BOUNCER or Fingerprint) while
-            // dreaming. It's time to wake up.
-            if (mDreamOverlayShowing || mUpdateMonitor.isDreaming()) {
-                mPM.wakeUp(mSystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
-                        "com.android.systemui:UNLOCK_DREAMING");
             }
         }
         Trace.endSection();
