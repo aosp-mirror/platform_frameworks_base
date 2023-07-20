@@ -1020,7 +1020,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         final WindowContainer<?> parent = getParent();
         final Task thisTask = asTask();
         if (thisTask != null && parent.asTask() == null
-                && mTransitionController.isTransientHide(thisTask)) {
+                && mTransitionController.isTransientVisible(thisTask)) {
             // Keep transient-hide root tasks visible. Non-root tasks still follow standard rule.
             return TASK_FRAGMENT_VISIBILITY_VISIBLE;
         }

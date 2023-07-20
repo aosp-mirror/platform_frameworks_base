@@ -36,6 +36,8 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider.StatusBarItem;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.dagger.DreamLog;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
@@ -161,7 +163,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             DreamOverlayStatusBarItemsProvider statusBarItemsProvider,
             DreamOverlayStateController dreamOverlayStateController,
             UserTracker userTracker,
-            DreamLogger dreamLogger) {
+            @DreamLog LogBuffer logBuffer) {
         super(view);
         mResources = resources;
         mMainExecutor = mainExecutor;
@@ -177,7 +179,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mZenModeController = zenModeController;
         mDreamOverlayStateController = dreamOverlayStateController;
         mUserTracker = userTracker;
-        mLogger = dreamLogger;
+        mLogger = new DreamLogger(logBuffer, TAG);
 
         // Register to receive show/hide updates for the system status bar. Our custom status bar
         // needs to hide when the system status bar is showing to ovoid overlapping status bars.
@@ -346,8 +348,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             @Nullable String contentDescription) {
         mMainExecutor.execute(() -> {
             if (mIsAttached) {
-                mLogger.d(TAG, (show ? "Showing" : "Hiding") + " dream status bar item: "
-                        + DreamOverlayStatusBarView.getLoggableStatusIconType(iconType));
+                mLogger.logShowOrHideStatusBarItem(
+                        show, DreamOverlayStatusBarView.getLoggableStatusIconType(iconType));
                 mView.showIcon(iconType, show, contentDescription);
             }
         });

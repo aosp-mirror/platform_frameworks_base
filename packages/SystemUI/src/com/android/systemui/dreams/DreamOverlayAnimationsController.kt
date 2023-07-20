@@ -36,6 +36,9 @@ import com.android.systemui.complication.ComplicationLayoutParams.Position
 import com.android.systemui.dreams.dagger.DreamOverlayModule
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.Logger
+import com.android.systemui.log.dagger.DreamLog
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -65,11 +68,13 @@ constructor(
     private val mDreamInTranslationYDistance: Int,
     @Named(DreamOverlayModule.DREAM_IN_TRANSLATION_Y_DURATION)
     private val mDreamInTranslationYDurationMs: Long,
-    private val mLogger: DreamLogger,
+    @DreamLog logBuffer: LogBuffer,
 ) {
     companion object {
         private const val TAG = "DreamOverlayAnimationsController"
     }
+
+    private val logger = Logger(logBuffer, TAG)
 
     private var mAnimator: Animator? = null
     private lateinit var view: View
@@ -179,11 +184,11 @@ constructor(
                 doOnEnd {
                     mAnimator = null
                     mOverlayStateController.setEntryAnimationsFinished(true)
-                    mLogger.d(TAG, "Dream overlay entry animations finished.")
+                    logger.d("Dream overlay entry animations finished.")
                 }
-                doOnCancel { mLogger.d(TAG, "Dream overlay entry animations canceled.") }
+                doOnCancel { logger.d("Dream overlay entry animations canceled.") }
                 start()
-                mLogger.d(TAG, "Dream overlay entry animations started.")
+                logger.d("Dream overlay entry animations started.")
             }
     }
 
@@ -242,11 +247,11 @@ constructor(
                 doOnEnd {
                     mAnimator = null
                     mOverlayStateController.setExitAnimationsRunning(false)
-                    mLogger.d(TAG, "Dream overlay exit animations finished.")
+                    logger.d("Dream overlay exit animations finished.")
                 }
-                doOnCancel { mLogger.d(TAG, "Dream overlay exit animations canceled.") }
+                doOnCancel { logger.d("Dream overlay exit animations canceled.") }
                 start()
-                mLogger.d(TAG, "Dream overlay exit animations started.")
+                logger.d("Dream overlay exit animations started.")
             }
         mOverlayStateController.setExitAnimationsRunning(true)
         return mAnimator as AnimatorSet

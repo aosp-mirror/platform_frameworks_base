@@ -1282,7 +1282,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         }
         String sims = args.getString("sims");
-        if (sims != null && !mStatusBarPipelineFlags.useNewMobileIcons()) {
+        if (sims != null) {
             int num = MathUtils.constrain(Integer.parseInt(sims), 1, 8);
             List<SubscriptionInfo> subs = new ArrayList<>();
             if (num != mMobileSignalControllers.size()) {
@@ -1305,7 +1305,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mCallbackHandler.setNoSims(mHasNoSubs, mSimDetected);
         }
         String mobile = args.getString("mobile");
-        if (mobile != null && !mStatusBarPipelineFlags.useNewMobileIcons()) {
+        if (mobile != null) {
             boolean show = mobile.equals("show");
             String datatype = args.getString("datatype");
             String slotString = args.getString("slot");
@@ -1390,7 +1390,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             controller.notifyListeners();
         }
         String carrierNetworkChange = args.getString("carriernetworkchange");
-        if (carrierNetworkChange != null && !mStatusBarPipelineFlags.useNewMobileIcons()) {
+        if (carrierNetworkChange != null) {
             boolean show = carrierNetworkChange.equals("show");
             for (int i = 0; i < mMobileSignalControllers.size(); i++) {
                 MobileSignalController controller = mMobileSignalControllers.valueAt(i);

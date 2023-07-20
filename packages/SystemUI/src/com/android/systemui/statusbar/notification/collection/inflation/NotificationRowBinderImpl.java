@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
-import static com.android.systemui.flags.Flags.NOTIFICATION_INLINE_REPLY_ANIMATION;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC;
@@ -176,8 +175,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         entry.setRow(row);
         mNotifBindPipeline.manageRow(entry, row);
         mPresenter.onBindRow(row);
-        row.setInlineReplyAnimationFlagEnabled(
-                mFeatureFlags.isEnabled(NOTIFICATION_INLINE_REPLY_ANIMATION));
     }
 
     /**

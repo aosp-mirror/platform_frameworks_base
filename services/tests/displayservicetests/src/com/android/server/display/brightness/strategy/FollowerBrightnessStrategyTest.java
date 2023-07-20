@@ -21,8 +21,8 @@ import static org.junit.Assert.assertEquals;
 import android.hardware.display.DisplayManagerInternal;
 import android.view.Display;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.BrightnessReason;
@@ -46,7 +46,8 @@ public class FollowerBrightnessStrategyTest {
         DisplayManagerInternal.DisplayPowerRequest
                 displayPowerRequest = new DisplayManagerInternal.DisplayPowerRequest();
         float brightnessToFollow = 0.2f;
-        mFollowerBrightnessStrategy.setBrightnessToFollow(brightnessToFollow);
+        boolean slowChange = true;
+        mFollowerBrightnessStrategy.setBrightnessToFollow(brightnessToFollow, slowChange);
         BrightnessReason brightnessReason = new BrightnessReason();
         brightnessReason.setReason(BrightnessReason.REASON_FOLLOWER);
         DisplayBrightnessState expectedDisplayBrightnessState =
@@ -55,6 +56,7 @@ public class FollowerBrightnessStrategyTest {
                         .setBrightnessReason(brightnessReason)
                         .setSdrBrightness(brightnessToFollow)
                         .setDisplayBrightnessStrategyName(mFollowerBrightnessStrategy.getName())
+                        .setIsSlowChange(slowChange)
                         .build();
         DisplayBrightnessState updatedDisplayBrightnessState =
                 mFollowerBrightnessStrategy.updateBrightness(displayPowerRequest);

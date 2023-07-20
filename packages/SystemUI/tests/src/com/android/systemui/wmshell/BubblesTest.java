@@ -92,7 +92,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -305,6 +305,7 @@ public class BubblesTest extends SysuiTestCase {
     private TestableLooper mTestableLooper;
 
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     private UserHandle mUser0;
 
@@ -423,7 +424,7 @@ public class BubblesTest extends SysuiTestCase {
                 mCommonNotifCollection,
                 mNotifPipeline,
                 mSysUiState,
-                mock(FeatureFlags.class),
+                mFeatureFlags,
                 mNotifPipelineFlags,
                 syncExecutor);
         mBubblesManager.addNotifCallback(mNotifCallback);
@@ -432,7 +433,8 @@ public class BubblesTest extends SysuiTestCase {
         mNotificationTestHelper = new NotificationTestHelper(
                 mContext,
                 mDependency,
-                TestableLooper.get(this));
+                TestableLooper.get(this),
+                mFeatureFlags);
         mRow = mNotificationTestHelper.createBubble(mDeleteIntent);
         mRow2 = mNotificationTestHelper.createBubble(mDeleteIntent);
         mNonBubbleNotifRow = mNotificationTestHelper.createRow();

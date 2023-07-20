@@ -42,6 +42,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.assist.ActivityId;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
@@ -94,10 +95,12 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.GlobalWhitelistState;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.contentprotection.ContentProtectionBlocklistManager;
+import com.android.server.contentprotection.ContentProtectionConsentManager;
 import com.android.server.contentprotection.ContentProtectionPackageManager;
 import com.android.server.contentprotection.RemoteContentProtectionService;
 import com.android.server.infra.AbstractMasterSystemService;
@@ -216,6 +219,8 @@ public class ContentCaptureManagerService extends
 
     @Nullable private final ContentProtectionBlocklistManager mContentProtectionBlocklistManager;
 
+    @Nullable private final ContentProtectionConsentManager mContentProtectionConsentManager;
+
     public ContentCaptureManagerService(@NonNull Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
                 com.android.internal.R.string.config_defaultContentCaptureService),
@@ -260,12 +265,15 @@ public class ContentCaptureManagerService extends
                 mContentProtectionBlocklistManager = createContentProtectionBlocklistManager();
                 mContentProtectionBlocklistManager.updateBlocklist(
                         mDevCfgContentProtectionAppsBlocklistSize);
+                mContentProtectionConsentManager = createContentProtectionConsentManager();
             } else {
                 mContentProtectionBlocklistManager = null;
+                mContentProtectionConsentManager = null;
             }
         } else {
             mContentProtectionServiceComponentName = null;
             mContentProtectionBlocklistManager = null;
+            mContentProtectionConsentManager = null;
         }
     }
 
@@ -802,6 +810,17 @@ public class ContentCaptureManagerService extends
                 new ContentProtectionPackageManager(getContext()));
     }
 
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    @NonNull
+    protected ContentProtectionConsentManager createContentProtectionConsentManager() {
+        // Same handler as used by AbstractMasterSystemService
+        return new ContentProtectionConsentManager(
+                BackgroundThread.getHandler(),
+                getContext().getContentResolver(),
+                LocalServices.getService(DevicePolicyManagerInternal.class));
+    }
+
     @Nullable
     private ComponentName getContentProtectionServiceComponentName() {
         String flatComponentName = getContentProtectionServiceFlatComponentName();
@@ -1213,7 +1232,7 @@ public class ContentCaptureManagerService extends
                 isContentCaptureReceiverEnabled =
                         isContentCaptureReceiverEnabled(userId, packageName);
                 isContentProtectionReceiverEnabled =
-                        isContentProtectionReceiverEnabled(packageName);
+                        isContentProtectionReceiverEnabled(userId, packageName);
 
                 if (!isContentCaptureReceiverEnabled) {
                     // Full package is not allowlisted: check individual components next
@@ -1284,13 +1303,13 @@ public class ContentCaptureManagerService extends
         @Override // from GlobalWhitelistState
         public boolean isWhitelisted(@UserIdInt int userId, @NonNull String packageName) {
             return isContentCaptureReceiverEnabled(userId, packageName)
-                    || isContentProtectionReceiverEnabled(packageName);
+                    || isContentProtectionReceiverEnabled(userId, packageName);
         }
 
         @Override // from GlobalWhitelistState
         public boolean isWhitelisted(@UserIdInt int userId, @NonNull ComponentName componentName) {
             return super.isWhitelisted(userId, componentName)
-                    || isContentProtectionReceiverEnabled(componentName.getPackageName());
+                    || isContentProtectionReceiverEnabled(userId, componentName.getPackageName());
         }
 
         private boolean isContentCaptureReceiverEnabled(
@@ -1298,9 +1317,11 @@ public class ContentCaptureManagerService extends
             return super.isWhitelisted(userId, packageName);
         }
 
-        private boolean isContentProtectionReceiverEnabled(@NonNull String packageName) {
+        private boolean isContentProtectionReceiverEnabled(
+                @UserIdInt int userId, @NonNull String packageName) {
             if (mContentProtectionServiceComponentName == null
-                    || mContentProtectionBlocklistManager == null) {
+                    || mContentProtectionBlocklistManager == null
+                    || mContentProtectionConsentManager == null) {
                 return false;
             }
             synchronized (mLock) {
@@ -1308,7 +1329,8 @@ public class ContentCaptureManagerService extends
                     return false;
                 }
             }
-            return mContentProtectionBlocklistManager.isAllowed(packageName);
+            return mContentProtectionConsentManager.isConsentGranted(userId)
+                    && mContentProtectionBlocklistManager.isAllowed(packageName);
         }
     }
 

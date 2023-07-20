@@ -21,7 +21,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.LegacyNotificationShelfControllerImpl
@@ -66,7 +65,7 @@ class NotificationShelfViewBinderWrapperControllerImpl @Inject constructor() :
     override fun setOnClickListener(listener: View.OnClickListener) = unsupported
 
     private val unsupported: Nothing
-        get() = NotificationShelfController.throwIllegalFlagStateError(expected = true)
+        get() = error("Code path not supported when NOTIFICATION_SHELF_REFACTOR is disabled")
 }
 
 /** Binds a [NotificationShelf] to its [view model][NotificationShelfViewModel]. */
@@ -80,8 +79,6 @@ object NotificationShelfViewBinder {
     ) {
         ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
         shelf.apply {
-            setRefactorFlagEnabled(true)
-            setSensitiveRevealAnimEnabled(featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM))
             // TODO(278765923): Replace with eventual NotificationIconContainerViewBinder#bind()
             notificationIconAreaController.setShelfIcons(shelfIcons)
             repeatWhenAttached {

@@ -77,6 +77,7 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.flags.ViewRefactorFlag;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -275,7 +276,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private OnExpandClickListener mOnExpandClickListener;
     private View.OnClickListener mOnFeedbackClickListener;
     private Path mExpandingClipPath;
-    private boolean mIsInlineReplyAnimationFlagEnabled = false;
+    private final ViewRefactorFlag mInlineReplyAnimation =
+            new ViewRefactorFlag(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION);
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -3121,10 +3123,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return showingLayout != null && showingLayout.requireRowToHaveOverlappingRendering();
     }
 
-    public void setInlineReplyAnimationFlagEnabled(boolean isEnabled) {
-        mIsInlineReplyAnimationFlagEnabled = isEnabled;
-    }
-
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
         boolean changed = height != getActualHeight();
@@ -3144,7 +3142,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         int contentHeight = Math.max(getMinHeight(), height);
         for (NotificationContentView l : mLayouts) {
-            if (mIsInlineReplyAnimationFlagEnabled) {
+            if (mInlineReplyAnimation.isEnabled()) {
                 l.setContentHeight(height);
             } else {
                 l.setContentHeight(contentHeight);

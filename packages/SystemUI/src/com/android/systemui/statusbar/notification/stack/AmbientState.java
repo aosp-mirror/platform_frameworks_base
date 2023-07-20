@@ -29,7 +29,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
@@ -57,7 +56,6 @@ public class AmbientState implements Dumpable {
     private final SectionProvider mSectionProvider;
     private final BypassController mBypassController;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
-    private final FeatureFlags mFeatureFlags;
     /**
      *  Used to read bouncer states.
      */
@@ -261,13 +259,12 @@ public class AmbientState implements Dumpable {
             @NonNull SectionProvider sectionProvider,
             @NonNull BypassController bypassController,
             @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            @NonNull LargeScreenShadeInterpolator largeScreenShadeInterpolator,
-            @NonNull FeatureFlags featureFlags) {
+            @NonNull LargeScreenShadeInterpolator largeScreenShadeInterpolator
+    ) {
         mSectionProvider = sectionProvider;
         mBypassController = bypassController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
-        mFeatureFlags = featureFlags;
         reload(context);
         dumpManager.registerDumpable(this);
     }
@@ -751,10 +748,6 @@ public class AmbientState implements Dumpable {
 
     public LargeScreenShadeInterpolator getLargeScreenShadeInterpolator() {
         return mLargeScreenShadeInterpolator;
-    }
-
-    public FeatureFlags getFeatureFlags() {
-        return mFeatureFlags;
     }
 
     @Override

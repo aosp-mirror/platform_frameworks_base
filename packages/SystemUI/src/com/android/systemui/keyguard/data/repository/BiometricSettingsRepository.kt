@@ -325,6 +325,9 @@ constructor(
 private class StrongAuthTracker(private val userRepository: UserRepository, context: Context?) :
     LockPatternUtils.StrongAuthTracker(context) {
 
+    private val selectedUserId =
+        userRepository.selectedUserInfo.map { it.id }.distinctUntilChanged()
+
     // Backing field for onStrongAuthRequiredChanged
     private val _authFlags =
         MutableStateFlow(AuthenticationFlags(currentUserId, getStrongAuthForUser(currentUserId)))
@@ -336,15 +339,12 @@ private class StrongAuthTracker(private val userRepository: UserRepository, cont
         )
 
     val currentUserAuthFlags: Flow<AuthenticationFlags> =
-        userRepository.selectedUserInfo
-            .map { it.id }
-            .distinctUntilChanged()
-            .flatMapLatest { userId ->
-                _authFlags
-                    .map { AuthenticationFlags(userId, getStrongAuthForUser(userId)) }
-                    .onEach { Log.d(TAG, "currentUser authFlags changed, new value: $it") }
-                    .onStart { emit(AuthenticationFlags(userId, getStrongAuthForUser(userId))) }
-            }
+        selectedUserId.flatMapLatest { userId ->
+            _authFlags
+                .map { AuthenticationFlags(userId, getStrongAuthForUser(userId)) }
+                .onEach { Log.d(TAG, "currentUser authFlags changed, new value: $it") }
+                .onStart { emit(AuthenticationFlags(userId, getStrongAuthForUser(userId))) }
+        }
 
     /** isStrongBiometricAllowed for the current user. */
     val isStrongBiometricAllowed: Flow<Boolean> =
@@ -352,16 +352,17 @@ private class StrongAuthTracker(private val userRepository: UserRepository, cont
 
     /** isNonStrongBiometricAllowed for the current user. */
     val isNonStrongBiometricAllowed: Flow<Boolean> =
-        userRepository.selectedUserInfo
-            .map { it.id }
-            .distinctUntilChanged()
+        selectedUserId
             .flatMapLatest { userId ->
                 _nonStrongBiometricAllowed
                     .filter { it.first == userId }
                     .map { it.second }
-                    .onEach { Log.d(TAG, "isNonStrongBiometricAllowed changed for current user") }
+                    .onEach {
+                        Log.d(TAG, "isNonStrongBiometricAllowed changed for current user: $it")
+                    }
                     .onStart { emit(isNonStrongBiometricAllowedAfterIdleTimeout(userId)) }
             }
+            .and(isStrongBiometricAllowed)
 
     private val currentUserId
         get() = userRepository.getSelectedUserInfo().id
@@ -387,3 +388,6 @@ private fun DevicePolicyManager.isFingerprintDisabled(userId: Int): Boolean =
 
 private fun DevicePolicyManager.isNotActive(userId: Int, policy: Int): Boolean =
     (getKeyguardDisabledFeatures(null, userId) and policy) == 0
+
+private fun Flow<Boolean>.and(anotherFlow: Flow<Boolean>): Flow<Boolean> =
+    this.combine(anotherFlow) { a, b -> a && b }

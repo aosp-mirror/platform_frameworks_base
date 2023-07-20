@@ -442,9 +442,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     @Nullable
     private BrightnessMappingStrategy mIdleModeBrightnessMapper;
 
-    // Indicates whether we should ramp slowly to the brightness value to follow.
-    private boolean mBrightnessToFollowSlowChange;
-
     private boolean mIsRbcActive;
 
     // Animators.
@@ -1289,7 +1286,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // actual state instead of the desired one.
         animateScreenStateChange(state, mDisplayStateController.shouldPerformScreenOffTransition());
         state = mPowerState.getScreenState();
-        boolean slowChange = false;
+
         final boolean userSetBrightnessChanged = mDisplayBrightnessController
                 .updateUserSetScreenBrightness();
 
@@ -1298,11 +1295,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         float brightnessState = displayBrightnessState.getBrightness();
         float rawBrightnessState = displayBrightnessState.getBrightness();
         mBrightnessReasonTemp.set(displayBrightnessState.getBrightnessReason());
-
-        if (displayBrightnessState.getBrightnessReason().getReason()
-                == BrightnessReason.REASON_FOLLOWER) {
-            slowChange = mBrightnessToFollowSlowChange;
-        }
+        boolean slowChange = displayBrightnessState.isSlowChange();
 
         // Set up the ScreenOff controller used when coming out of SCREEN_OFF and the ALS sensor
         // doesn't yet have a valid lux value to use with auto-brightness.
@@ -1352,6 +1345,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                             .getRawAutomaticScreenBrightness();
                     brightnessState = clampScreenBrightness(brightnessState);
                     // slowly adapt to auto-brightness
+                    // TODO(b/253226419): slowChange should be decided by strategy.updateBrightness
                     slowChange = mAutomaticBrightnessStrategy.hasAppliedAutoBrightness()
                             && !mAutomaticBrightnessStrategy.getAutoBrightnessAdjustmentChanged();
                     brightnessAdjustmentFlags =
@@ -2256,17 +2250,17 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             boolean slowChange) {
         mBrightnessRangeController.onAmbientLuxChange(ambientLux);
         if (nits < 0) {
-            mDisplayBrightnessController.setBrightnessToFollow(leadDisplayBrightness);
+            mDisplayBrightnessController.setBrightnessToFollow(leadDisplayBrightness, slowChange);
         } else {
             float brightness = mDisplayBrightnessController.convertToFloatScale(nits);
             if (BrightnessUtils.isValidBrightnessValue(brightness)) {
-                mDisplayBrightnessController.setBrightnessToFollow(brightness);
+                mDisplayBrightnessController.setBrightnessToFollow(brightness, slowChange);
             } else {
                 // The device does not support nits
-                mDisplayBrightnessController.setBrightnessToFollow(leadDisplayBrightness);
+                mDisplayBrightnessController.setBrightnessToFollow(leadDisplayBrightness,
+                        slowChange);
             }
         }
-        mBrightnessToFollowSlowChange = slowChange;
         sendUpdatePowerState();
     }
 
@@ -2406,7 +2400,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         pw.println("  mReportedToPolicy="
                 + reportedToPolicyToString(mReportedScreenStateToPolicy));
         pw.println("  mIsRbcActive=" + mIsRbcActive);
-        pw.println("  mBrightnessToFollowSlowChange=" + mBrightnessToFollowSlowChange);
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
         mAutomaticBrightnessStrategy.dump(ipw);
 

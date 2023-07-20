@@ -35,4 +35,10 @@
       android:onClick="launchThirdActivity"
       android:text="Launch a third activity" />
 
+  <Button
+      android:id="@+id/secondary_enter_pip_button"
+      android:layout_width="wrap_content"
+      android:layout_height="48dp"
+      android:text="Enter pip" />
+
 </LinearLayout>
