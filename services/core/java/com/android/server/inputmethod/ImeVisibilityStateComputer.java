@@ -221,17 +221,21 @@ public final class ImeVisibilityStateComputer {
 
     /**
      * Called when {@link InputMethodManagerService} is processing the show IME request.
-     * @param statsToken The token for tracking this show request
-     * @param showFlags The additional operation flags to indicate whether this show request mode is
-     *                  implicit or explicit.
-     * @return {@code true} when the computer has proceed this show request operation.
+     *
+     * @param statsToken The token for tracking this show request.
+     * @return {@code true} when the show request can proceed.
      */
-    boolean onImeShowFlags(@NonNull ImeTracker.Token statsToken, int showFlags) {
+    boolean onImeShowFlags(@NonNull ImeTracker.Token statsToken,
+            @InputMethodManager.ShowFlags int showFlags) {
         if (mPolicy.mA11yRequestingNoSoftKeyboard || mPolicy.mImeHiddenByDisplayPolicy) {
             ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_SERVER_ACCESSIBILITY);
             return false;
         }
         ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_SERVER_ACCESSIBILITY);
+        // We only "set" the state corresponding to the flags, as this will be reset
+        // in clearImeShowFlags during a hide request.
+        // Thus, we keep the strongest values set (e.g. an implicit show right after
+        // an explicit show will still be considered explicit, likewise for forced).
         if ((showFlags & InputMethodManager.SHOW_FORCED) != 0) {
             mRequestedShowExplicitly = true;
             mShowForced = true;
@@ -243,12 +247,12 @@ public final class ImeVisibilityStateComputer {
 
     /**
      * Called when {@link InputMethodManagerService} is processing the hide IME request.
-     * @param statsToken The token for tracking this hide request
-     * @param hideFlags The additional operation flags to indicate whether this hide request mode is
-     *                  implicit or explicit.
-     * @return {@code true} when the computer has proceed this hide request operations.
+     *
+     * @param statsToken The token for tracking this hide request.
+     * @return {@code true} when the hide request can proceed.
      */
-    boolean canHideIme(@NonNull ImeTracker.Token statsToken, int hideFlags) {
+    boolean canHideIme(@NonNull ImeTracker.Token statsToken,
+            @InputMethodManager.HideFlags int hideFlags) {
         if ((hideFlags & InputMethodManager.HIDE_IMPLICIT_ONLY) != 0
                 && (mRequestedShowExplicitly || mShowForced)) {
             if (DEBUG) Slog.v(TAG, "Not hiding: explicit show not cancelled by non-explicit hide");
@@ -264,13 +268,31 @@ public final class ImeVisibilityStateComputer {
         return true;
     }
 
-    int getImeShowFlags() {
+    /**
+     * Returns the show flags for IME. This translates from {@link InputMethodManager.ShowFlags}
+     * to {@link InputMethod.ShowFlags}.
+     */
+    @InputMethod.ShowFlags
+    int getShowFlagsForInputMethodServiceOnly() {
         int flags = 0;
         if (mShowForced) {
             flags |= InputMethod.SHOW_FORCED | InputMethod.SHOW_EXPLICIT;
         } else if (mRequestedShowExplicitly) {
             flags |= InputMethod.SHOW_EXPLICIT;
-        } else {
+        }
+        return flags;
+    }
+
+    /**
+     * Returns the show flags for IMM. This translates from {@link InputMethod.ShowFlags}
+     * to {@link InputMethodManager.ShowFlags}.
+     */
+    @InputMethodManager.ShowFlags
+    int getShowFlags() {
+        int flags = 0;
+        if (mShowForced) {
+            flags |= InputMethodManager.SHOW_FORCED;
+        } else if (!mRequestedShowExplicitly) {
             flags |= InputMethodManager.SHOW_IMPLICIT;
         }
         return flags;
