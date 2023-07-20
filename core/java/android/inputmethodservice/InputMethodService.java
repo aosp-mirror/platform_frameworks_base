@@ -606,6 +606,7 @@ public class InputMethodService extends AbstractInputMethodService {
     InputConnection mStartedInputConnection;
     EditorInfo mInputEditorInfo;
 
+    @InputMethod.ShowFlags
     int mShowInputFlags;
     boolean mShowInputRequested;
     boolean mLastShowInputRequested;
@@ -930,8 +931,9 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public void showSoftInputWithToken(int flags, ResultReceiver resultReceiver,
-                IBinder showInputToken, @Nullable ImeTracker.Token statsToken) {
+        public void showSoftInputWithToken(@InputMethod.ShowFlags int flags,
+                ResultReceiver resultReceiver, IBinder showInputToken,
+                @Nullable ImeTracker.Token statsToken) {
             mSystemCallingShowSoftInput = true;
             mCurShowInputToken = showInputToken;
             mCurStatsToken = statsToken;
@@ -949,7 +951,7 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public void showSoftInput(int flags, ResultReceiver resultReceiver) {
+        public void showSoftInput(@InputMethod.ShowFlags int flags, ResultReceiver resultReceiver) {
             ImeTracker.forLogging().onProgress(
                     mCurStatsToken, ImeTracker.PHASE_IME_SHOW_SOFT_INPUT);
             if (DEBUG) Log.v(TAG, "showSoftInput()");
@@ -1325,7 +1327,8 @@ public class InputMethodService extends AbstractInputMethodService {
          * InputMethodService#requestShowSelf} or {@link InputMethodService#requestHideSelf}
          */
         @Deprecated
-        public void toggleSoftInput(int showFlags, int hideFlags) {
+        public void toggleSoftInput(@InputMethodManager.ShowFlags int showFlags,
+                @InputMethodManager.HideFlags int hideFlags) {
             InputMethodService.this.onToggleSoftInput(showFlags, hideFlags);
         }
 
@@ -2797,18 +2800,16 @@ public class InputMethodService extends AbstractInputMethodService {
      * {@link #onEvaluateInputViewShown()}, {@link #onEvaluateFullscreenMode()},
      * and the current configuration to decide whether the input view should
      * be shown at this point.
-     * 
-     * @param flags Provides additional information about the show request,
-     * as per {@link InputMethod#showSoftInput InputMethod.showSoftInput()}.
+     *
      * @param configChange This is true if we are re-showing due to a
      * configuration change.
      * @return Returns true to indicate that the window should be shown.
      */
-    public boolean onShowInputRequested(int flags, boolean configChange) {
+    public boolean onShowInputRequested(@InputMethod.ShowFlags int flags, boolean configChange) {
         if (!onEvaluateInputViewShown()) {
             return false;
         }
-        if ((flags&InputMethod.SHOW_EXPLICIT) == 0) {
+        if ((flags & InputMethod.SHOW_EXPLICIT) == 0) {
             if (!configChange && onEvaluateFullscreenMode() && !isInputViewShown()) {
                 // Don't show if this is not explicitly requested by the user and
                 // the input method is fullscreen unless it is already shown. That
@@ -2834,14 +2835,14 @@ public class InputMethodService extends AbstractInputMethodService {
      * exposed to IME authors as an overridable public method without {@code @CallSuper}, we have
      * to have this method to ensure that those internal states are always updated no matter how
      * {@link #onShowInputRequested(int, boolean)} is overridden by the IME author.
-     * @param flags Provides additional information about the show request,
-     * as per {@link InputMethod#showSoftInput InputMethod.showSoftInput()}.
+     *
      * @param configChange This is true if we are re-showing due to a
      * configuration change.
      * @return Returns true to indicate that the window should be shown.
      * @see #onShowInputRequested(int, boolean)
      */
-    private boolean dispatchOnShowInputRequested(int flags, boolean configChange) {
+    private boolean dispatchOnShowInputRequested(@InputMethod.ShowFlags int flags,
+            boolean configChange) {
         final boolean result = onShowInputRequested(flags, configChange);
         mInlineSuggestionSessionController.notifyOnShowInputRequested(result);
         if (result) {
@@ -3274,16 +3275,13 @@ public class InputMethodService extends AbstractInputMethodService {
      *
      * The input method will continue running, but the user can no longer use it to generate input
      * by touching the screen.
-     *
-     * @see InputMethodManager#HIDE_IMPLICIT_ONLY
-     * @see InputMethodManager#HIDE_NOT_ALWAYS
-     * @param flags Provides additional operating flags.
      */
-    public void requestHideSelf(int flags) {
+    public void requestHideSelf(@InputMethodManager.HideFlags int flags) {
         requestHideSelf(flags, SoftInputShowHideReason.HIDE_SOFT_INPUT_FROM_IME);
     }
 
-    private void requestHideSelf(int flags, @SoftInputShowHideReason int reason) {
+    private void requestHideSelf(@InputMethodManager.HideFlags int flags,
+            @SoftInputShowHideReason int reason) {
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestHideSelf", mDumper,
                 null /* icProto */);
         mPrivOps.hideMySoftInput(flags, reason);
@@ -3292,12 +3290,8 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * Show the input method's soft input area, so the user sees the input method window and can
      * interact with it.
-     *
-     * @see InputMethodManager#SHOW_IMPLICIT
-     * @see InputMethodManager#SHOW_FORCED
-     * @param flags Provides additional operating flags.
      */
-    public final void requestShowSelf(int flags) {
+    public final void requestShowSelf(@InputMethodManager.ShowFlags int flags) {
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#requestShowSelf", mDumper,
                 null /* icProto */);
         mPrivOps.showMySoftInput(flags);
@@ -3457,7 +3451,8 @@ public class InputMethodService extends AbstractInputMethodService {
     /**
      * Handle a request by the system to toggle the soft input area.
      */
-    private void onToggleSoftInput(int showFlags, int hideFlags) {
+    private void onToggleSoftInput(@InputMethodManager.ShowFlags int showFlags,
+            @InputMethodManager.HideFlags int hideFlags) {
         if (DEBUG) Log.v(TAG, "toggleSoftInput()");
         if (isInputViewShown()) {
             requestHideSelf(
