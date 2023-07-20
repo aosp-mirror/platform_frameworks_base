@@ -2750,6 +2750,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void onAppTransitionDone() {
         super.onAppTransitionDone();
         mWmService.mWindowsChanged = true;
+        onTransitionFinished();
+    }
+
+    void onTransitionFinished() {
         // If the transition finished callback cannot match the token for some reason, make sure the
         // rotated state is cleared if it is already invisible.
         if (mFixedRotationLaunchingApp != null && !mFixedRotationLaunchingApp.isVisibleRequested()
