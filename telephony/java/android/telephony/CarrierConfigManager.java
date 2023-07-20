@@ -9417,6 +9417,7 @@ public class CarrierConfigManager {
      * <li>3 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_SMS}</li>
      * <li>4 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VIDEO}</li>
      * <li>5 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_EMERGENCY}</li>
+     * <li>6 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_MMS}</li>
      * </ul>
      * <p>
      * If this carrier config is not present, the overlay config

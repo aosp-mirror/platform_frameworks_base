@@ -160,6 +160,7 @@
             3 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_SMS}
             4 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VIDEO}
             5 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_EMERGENCY}
+            6 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_MMS}
          Example of a config string: "10011:2,3"
 
          The PLMNs not configured in this array will be ignored and will not be used for satellite
