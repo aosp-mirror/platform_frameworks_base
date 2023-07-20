@@ -59,7 +59,6 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
     private val _authFlags = MutableStateFlow(AuthenticationFlags(0, 0))
     override val authenticationFlags: Flow<AuthenticationFlags>
         get() = _authFlags
-
     fun setFingerprintEnrolled(isFingerprintEnrolled: Boolean) {
         _isFingerprintEnrolled.value = isFingerprintEnrolled
     }
@@ -109,5 +108,9 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
 
     fun setIsNonStrongBiometricAllowed(value: Boolean) {
         _isNonStrongBiometricAllowed.value = value
+    }
+
+    fun setIsStrongBiometricAllowed(value: Boolean) {
+        _isStrongBiometricAllowed.value = value
     }
 }
