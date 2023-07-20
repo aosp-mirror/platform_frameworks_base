@@ -36,6 +36,7 @@
 #include "SkImageFilter.h"
 #include "SkImageInfo.h"
 #include "SkLatticeIter.h"
+#include "SkMesh.h"
 #include "SkPaint.h"
 #include "SkPicture.h"
 #include "SkRRect.h"
@@ -49,6 +50,7 @@
 #include "effects/GainmapRenderer.h"
 #include "include/gpu/GpuTypes.h"  // from Skia
 #include "include/gpu/GrDirectContext.h"
+#include "include/gpu/ganesh/SkMeshGanesh.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/FunctorDrawable.h"
 #ifdef __ANDROID__
@@ -527,12 +529,13 @@ struct DrawSkMesh final : Op {
     mutable bool isGpuBased;
     mutable GrDirectContext::DirectContextID contextId;
     void draw(SkCanvas* c, const SkMatrix&) const {
+#ifdef __ANDROID__
         GrDirectContext* directContext = c->recordingContext()->asDirectContext();
 
         GrDirectContext::DirectContextID id = directContext->directContextID();
         if (!isGpuBased || contextId != id) {
             sk_sp<SkMesh::VertexBuffer> vb =
-                    SkMesh::CopyVertexBuffer(directContext, cpuMesh.refVertexBuffer());
+                    SkMeshes::CopyVertexBuffer(directContext, cpuMesh.refVertexBuffer());
             if (!cpuMesh.indexBuffer()) {
                 gpuMesh = SkMesh::Make(cpuMesh.refSpec(), cpuMesh.mode(), vb, cpuMesh.vertexCount(),
                                        cpuMesh.vertexOffset(), cpuMesh.refUniforms(),
@@ -540,7 +543,7 @@ struct DrawSkMesh final : Op {
                                   .mesh;
             } else {
                 sk_sp<SkMesh::IndexBuffer> ib =
-                        SkMesh::CopyIndexBuffer(directContext, cpuMesh.refIndexBuffer());
+                        SkMeshes::CopyIndexBuffer(directContext, cpuMesh.refIndexBuffer());
                 gpuMesh = SkMesh::MakeIndexed(cpuMesh.refSpec(), cpuMesh.mode(), vb,
                                               cpuMesh.vertexCount(), cpuMesh.vertexOffset(), ib,
                                               cpuMesh.indexCount(), cpuMesh.indexOffset(),
@@ -553,6 +556,9 @@ struct DrawSkMesh final : Op {
         }
 
         c->drawMesh(gpuMesh, blender, paint);
+#else
+        c->drawMesh(cpuMesh, blender, paint);
+#endif
     }
 };
 
