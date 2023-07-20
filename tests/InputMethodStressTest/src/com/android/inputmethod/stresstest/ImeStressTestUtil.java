@@ -392,7 +392,7 @@ public final class ImeStressTestUtil {
         public boolean showImeWithInputMethodManager() {
             boolean showResult =
                     getInputMethodManager()
-                            .showSoftInput(mEditText, InputMethodManager.SHOW_IMPLICIT);
+                            .showSoftInput(mEditText, 0 /* flags */);
             if (showResult) {
                 Log.i(TAG, "IMM#showSoftInput successfully");
             } else {
@@ -404,7 +404,8 @@ public final class ImeStressTestUtil {
         /** Hide IME with InputMethodManager. */
         public boolean hideImeWithInputMethodManager() {
             boolean hideResult =
-                    getInputMethodManager().hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+                    getInputMethodManager()
+                            .hideSoftInputFromWindow(mEditText.getWindowToken(), 0 /* flags */);
             if (hideResult) {
                 Log.i(TAG, "IMM#hideSoftInput successfully");
             } else {
