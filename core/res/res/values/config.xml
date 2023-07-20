@@ -5594,7 +5594,7 @@
         the Option 3 is selected for R.integer.config_letterboxBackgroundType.
         Values < 0 or >= 1 are ignored and 0.0 (transparent) is used instead. -->
     <item name="config_letterboxBackgroundWallaperDarkScrimAlpha" format="float" type="dimen">
-        0.68
+        0.75
     </item>
 
     <!-- Corners appearance of the letterbox background.
@@ -5619,7 +5619,7 @@
             but isn't supported on the device or both dark scrim alpha and blur radius aren't
             provided.
      -->
-    <color name="config_letterboxBackgroundColor">@color/system_on_secondary_fixed</color>
+    <color name="config_letterboxBackgroundColor">@color/system_neutral1_1000</color>
 
     <!-- Horizontal position of a center of the letterboxed app window.
         0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
