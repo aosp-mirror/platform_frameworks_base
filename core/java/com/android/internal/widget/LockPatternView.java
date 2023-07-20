@@ -1565,6 +1565,13 @@ public class LockPatternView extends View {
         mInStealthMode = ss.isInStealthMode();
     }
 
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        setSystemGestureExclusionRects(List.of(new Rect(left, top, right, bottom)));
+    }
+
     /**
      * The parecelable for saving and restoring a lock pattern view.
      */
