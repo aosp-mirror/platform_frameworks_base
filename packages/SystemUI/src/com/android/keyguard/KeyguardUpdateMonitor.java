@@ -1496,7 +1496,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
                 @Override
                 public void onDetectionStatusChanged(@NonNull FaceDetectionStatus status) {
-                    handleFaceAuthenticated(status.getUserId(), status.isStrongBiometric());
+                    handleBiometricDetected(status.getUserId(), FACE, status.isStrongBiometric());
                 }
             };
 
