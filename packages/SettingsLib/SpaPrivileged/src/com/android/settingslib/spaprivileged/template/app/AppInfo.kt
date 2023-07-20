@@ -122,5 +122,5 @@ internal fun AppIcon(app: ApplicationInfo, size: Dp) {
 @Composable
 internal fun AppLabel(app: ApplicationInfo, isClonedAppPage: Boolean = false) {
     val appRepository = rememberAppRepository()
-    SettingsTitle(title = appRepository.produceLabel(app, isClonedAppPage), useMediumWeight = true)
+    SettingsTitle(appRepository.produceLabel(app, isClonedAppPage).value, useMediumWeight = true)
 }

@@ -45,11 +45,10 @@ internal fun BasePreference(
     BaseLayout(
         title = title,
         subTitle = {
-            if (singleLineSummary) {
-                SettingsBody(body = summary, maxLines = 1)
-            } else {
-                SettingsBody(body = summary)
-            }
+            SettingsBody(
+                body = summary.value,
+                maxLines = if (singleLineSummary) 1 else Int.MAX_VALUE,
+            )
         },
         modifier = modifier,
         icon = icon,
