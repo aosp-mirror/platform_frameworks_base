@@ -32,6 +32,7 @@ import android.view.View;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
@@ -59,12 +60,11 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 class StatusBarNotificationPresenter implements NotificationPresenter, CommandQueue.Callbacks {
     private static final String TAG = "StatusBarNotificationPresenter";
 
