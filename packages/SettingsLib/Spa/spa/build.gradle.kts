@@ -52,11 +52,11 @@ android {
 }
 
 dependencies {
-    api("androidx.appcompat:appcompat:1.7.0-alpha02")
+    api("androidx.appcompat:appcompat:1.7.0-alpha03")
     api("androidx.slice:slice-builders:1.1.0-alpha02")
     api("androidx.slice:slice-core:1.1.0-alpha02")
     api("androidx.slice:slice-view:1.1.0-alpha02")
-    api("androidx.compose.material3:material3:1.2.0-alpha03")
+    api("androidx.compose.material3:material3:1.2.0-alpha04")
     api("androidx.compose.material:material-icons-extended:$jetpackComposeVersion")
     api("androidx.compose.runtime:runtime-livedata:$jetpackComposeVersion")
     api("androidx.compose.ui:ui-tooling-preview:$jetpackComposeVersion")
