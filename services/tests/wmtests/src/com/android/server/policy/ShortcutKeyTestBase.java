@@ -63,7 +63,7 @@ class ShortcutKeyTestBase {
     final Context mContext = spy(getInstrumentation().getTargetContext());
 
     /** Modifier key to meta state */
-    private static final Map<Integer, Integer> MODIFIER;
+    protected static final Map<Integer, Integer> MODIFIER;
     static {
         final Map<Integer, Integer> map = new ArrayMap<>();
         map.put(KEYCODE_CTRL_LEFT, META_CTRL_LEFT_ON | META_CTRL_ON);
