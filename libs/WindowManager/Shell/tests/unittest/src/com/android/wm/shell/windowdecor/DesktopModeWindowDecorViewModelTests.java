@@ -18,12 +18,15 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,6 +56,8 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -91,6 +96,10 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
     @Mock private Supplier<SurfaceControl.Transaction> mTransactionFactory;
     @Mock private SurfaceControl.Transaction mTransaction;
     @Mock private Display mDisplay;
+    @Mock private ShellController mShellController;
+    @Mock private ShellInit mShellInit;
+    @Mock private DesktopModeWindowDecorViewModel.DesktopModeKeyguardChangeListener
+            mDesktopModeKeyguardChangeListener;
     private final List<InputManager> mMockInputManagers = new ArrayList<>();
 
     private DesktopModeWindowDecorViewModel mDesktopModeWindowDecorViewModel;
@@ -104,15 +113,18 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
                 mContext,
                 mMainHandler,
                 mMainChoreographer,
+                mShellInit,
                 mTaskOrganizer,
                 mDisplayController,
+                mShellController,
                 mSyncQueue,
                 mTransitions,
                 Optional.of(mDesktopModeController),
                 Optional.of(mDesktopTasksController),
                 mDesktopModeWindowDecorFactory,
                 mMockInputMonitorFactory,
-                mTransactionFactory
+                mTransactionFactory,
+                mDesktopModeKeyguardChangeListener
             );
 
         doReturn(mDesktopModeWindowDecoration)
@@ -121,6 +133,7 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
         doReturn(mTransaction).when(mTransactionFactory).get();
         doReturn(mDisplayLayout).when(mDisplayController).getDisplayLayout(anyInt());
         doReturn(STABLE_INSETS).when(mDisplayLayout).stableInsets();
+        doNothing().when(mShellController).addKeyguardChangeListener(any());
 
         when(mMockInputMonitorFactory.create(any(), any())).thenReturn(mInputMonitor);
         // InputChannel cannot be mocked because it passes to InputEventReceiver.
@@ -253,6 +266,32 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
         });
         verify(mMockInputMonitorFactory, times(2)).create(any(), any());
         verify(mInputMonitor, times(1)).dispose();
+    }
+
+    @Test
+    public void testCaptionIsNotCreatedWhenKeyguardIsVisible() throws Exception {
+        doReturn(true).when(
+                mDesktopModeKeyguardChangeListener).isKeyguardVisibleAndOccluded();
+
+        final int taskId = 1;
+        final ActivityManager.RunningTaskInfo taskInfo =
+                createTaskInfo(taskId, Display.DEFAULT_DISPLAY, WINDOWING_MODE_FULLSCREEN);
+        taskInfo.isFocused = true;
+        SurfaceControl surfaceControl = mock(SurfaceControl.class);
+        runOnMainThread(() -> {
+            final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+            final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+
+            mDesktopModeWindowDecorViewModel.onTaskOpening(
+                    taskInfo, surfaceControl, startT, finishT);
+
+            taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+            taskInfo.configuration.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+            mDesktopModeWindowDecorViewModel.onTaskChanging(
+                    taskInfo, surfaceControl, startT, finishT);
+        });
+        verify(mDesktopModeWindowDecorFactory, never())
+                .create(any(), any(), any(), any(), any(), any(), any(), any());
     }
 
     private void runOnMainThread(Runnable r) throws Exception {
