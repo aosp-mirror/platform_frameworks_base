@@ -16,7 +16,7 @@
 
 @file:JvmName("CommonConstants")
 
-package com.android.wm.shell.flicker
+package com.android.wm.shell.flicker.utils
 
 import android.tools.common.traces.component.ComponentNameMatcher
 

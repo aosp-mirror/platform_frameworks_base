@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker
+package com.android.wm.shell.flicker.utils
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher

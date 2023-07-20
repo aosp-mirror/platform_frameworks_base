@@ -22,7 +22,7 @@ import android.tools.common.flicker.subject.region.RegionSubject
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
-import com.android.wm.shell.flicker.Direction
+import com.android.wm.shell.flicker.utils.Direction
 import org.junit.Test
 import org.junit.runners.Parameterized
 
