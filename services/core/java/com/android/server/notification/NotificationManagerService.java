@@ -118,7 +118,6 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
-import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ALLOW_DISMISS_ONGOING;
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.WAKE_LOCK_FOR_POSTING_NOTIFICATION;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
@@ -1221,8 +1220,7 @@ public class NotificationManagerService extends SystemService {
                 }
             }
 
-            int mustNotHaveFlags = mFlagResolver.isEnabled(ALLOW_DISMISS_ONGOING)
-                    ? FLAG_NO_DISMISS : FLAG_ONGOING_EVENT;
+            int mustNotHaveFlags = FLAG_NO_DISMISS;
             cancelNotification(callingUid, callingPid, pkg, tag, id,
                     /* mustHaveFlags= */ 0,
                     /* mustNotHaveFlags= */ mustNotHaveFlags,
@@ -6862,13 +6860,11 @@ public class NotificationManagerService extends SystemService {
         }
 
         // Only notifications that can be non-dismissible can have the flag FLAG_NO_DISMISS
-        if (mFlagResolver.isEnabled(ALLOW_DISMISS_ONGOING)) {
-            if (((notification.flags & FLAG_ONGOING_EVENT) > 0)
-                    && canBeNonDismissible(ai, notification)) {
-                notification.flags |= FLAG_NO_DISMISS;
-            } else {
-                notification.flags &= ~FLAG_NO_DISMISS;
-            }
+        if (((notification.flags & FLAG_ONGOING_EVENT) > 0)
+                && canBeNonDismissible(ai, notification)) {
+            notification.flags |= FLAG_NO_DISMISS;
+        } else {
+            notification.flags &= ~FLAG_NO_DISMISS;
         }
 
         int canColorize = getContext().checkPermission(
