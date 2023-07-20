@@ -70,21 +70,63 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/install_confirm_question"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/updating_app_view"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_confirm_question"
-        android:visibility="invisible" />
+        android:orientation="vertical"
+        android:visibility="invisible">
 
-    <TextView
-        android:id="@+id/install_confirm_question_update"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@android:style/TextAppearance.Material.Subhead"
-        android:text="@string/install_confirm_question_update"
-        android:visibility="invisible" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="?android:attr/alertDialogTheme"
+            android:paddingTop="4dp"
+            android:paddingLeft="?android:attr/dialogPreferredPadding"
+            android:paddingRight="?android:attr/dialogPreferredPadding">
+
+            <TextView
+                android:id="@+id/install_confirm_question"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/TextAppearance.Material.Subhead"
+                android:text="@string/install_confirm_question"
+                android:visibility="invisible" />
+
+            <TextView
+                android:id="@+id/install_confirm_question_update"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/TextAppearance.Material.Subhead"
+                android:text="@string/install_confirm_question_update"
+                android:visibility="invisible" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/version_view"
+            android:paddingTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="?android:attr/dialogPreferredPadding"
+            android:paddingRight="?android:attr/dialogPreferredPadding">
+            <TextView
+                android:id="@+id/installed_app_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/TextAppearance.Material.Small"
+                android:text="@string/old_version_number"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/updating_app_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/TextAppearance.Material.Small"
+                android:text="@string/new_version_number"
+                android:visibility="invisible" />
+        </LinearLayout>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/install_success"

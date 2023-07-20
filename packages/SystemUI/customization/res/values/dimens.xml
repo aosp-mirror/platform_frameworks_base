@@ -19,9 +19,12 @@
     <!-- Clock maximum font size (dp is intentional, to prevent any further scaling) -->
     <dimen name="large_clock_text_size">150dp</dimen>
     <dimen name="small_clock_text_size">86dp</dimen>
+    <dimen name="clock_text_size_base">1sp</dimen>
 
     <!-- Default line spacing multiplier between hours and minutes of the keyguard clock -->
     <item name="keyguard_clock_line_spacing_scale" type="dimen" format="float">.7</item>
     <!-- Burmese line spacing multiplier between hours and minutes of the keyguard clock -->
     <item name="keyguard_clock_line_spacing_scale_burmese" type="dimen" format="float">1</item>
+    <!-- Custom line spacing multiplier between hours and minutes of the keyguard clock -->
+    <item name="keyguard_clock_line_spacing_scale_custom" type="dimen" format="float">.9</item>
 </resources>

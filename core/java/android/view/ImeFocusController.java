@@ -233,7 +233,7 @@ public final class ImeFocusController {
         if (!immDelegate.isCurrentRootView(mViewRootImpl)) {
             return;
         }
-        if (interactive) {
+        if (interactive && mViewRootImpl != null && mViewRootImpl.mView != null) {
             final View focusedView = mViewRootImpl.mView.findFocus();
             onViewFocusChanged(focusedView, focusedView != null);
         } else {

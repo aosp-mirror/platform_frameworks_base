@@ -205,8 +205,6 @@ class RebootEscrowManager {
 
     private final RebootEscrowKeyStoreManager mKeyStoreManager;
 
-    private final Handler mHandler;
-
     PowerManager.WakeLock mWakeLock;
 
     private ConnectivityManager.NetworkCallback mNetworkCallback;
@@ -401,21 +399,19 @@ class RebootEscrowManager {
         }
     }
 
-    RebootEscrowManager(Context context, Callbacks callbacks, LockSettingsStorage storage,
-            Handler handler) {
-        this(new Injector(context, storage), callbacks, storage, handler);
+    RebootEscrowManager(Context context, Callbacks callbacks, LockSettingsStorage storage) {
+        this(new Injector(context, storage), callbacks, storage);
     }
 
     @VisibleForTesting
     RebootEscrowManager(Injector injector, Callbacks callbacks,
-            LockSettingsStorage storage, Handler handler) {
+            LockSettingsStorage storage) {
         mInjector = injector;
         mCallbacks = callbacks;
         mStorage = storage;
         mUserManager = injector.getUserManager();
         mEventLog = injector.getEventLog();
         mKeyStoreManager = injector.getKeyStoreManager();
-        mHandler = handler;
     }
 
     /** Wrapper function to set error code serialized through handler, */
@@ -941,7 +937,7 @@ class RebootEscrowManager {
 
     private void setRebootEscrowReady(boolean ready) {
         if (mRebootEscrowReady != ready) {
-            mHandler.post(() -> mRebootEscrowListener.onPreparedForReboot(ready));
+            mRebootEscrowListener.onPreparedForReboot(ready);
         }
         mRebootEscrowReady = ready;
     }

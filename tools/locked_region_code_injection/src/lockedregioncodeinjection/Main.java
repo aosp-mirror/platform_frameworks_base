@@ -21,7 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -36,7 +36,6 @@ public class Main {
         String legacyTargets = null;
         String legacyPreMethods = null;
         String legacyPostMethods = null;
-        List<LockTarget> targets = new ArrayList<>();
         for (int i = 0; i < args.length; i++) {
             if ("-i".equals(args[i].trim())) {
                 i++;
@@ -53,25 +52,23 @@ public class Main {
             } else if ("--post".equals(args[i].trim())) {
                 i++;
                 legacyPostMethods = args[i].trim();
-            } else if ("--scoped".equals(args[i].trim())) {
-                i++;
-                targets.add(Utils.getScopedTarget(args[i].trim()));
             }
+
         }
 
-        if (inJar == null) {
-            throw new RuntimeException("missing input jar path");
-        }
-        if (outJar == null) {
-            throw new RuntimeException("missing output jar path");
-        }
+        // TODO(acleung): Better help message than asserts.
+        assert inJar != null;
+        assert outJar != null;
         assert legacyTargets == null || (legacyPreMethods != null && legacyPostMethods != null);
 
         ZipFile zipSrc = new ZipFile(inJar);
         ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(outJar));
+        List<LockTarget> targets = null;
         if (legacyTargets != null) {
-            targets.addAll(Utils.getTargetsFromLegacyJackConfig(legacyTargets, legacyPreMethods,
-                                                                legacyPostMethods));
+            targets = Utils.getTargetsFromLegacyJackConfig(legacyTargets, legacyPreMethods,
+                    legacyPostMethods);
+        } else {
+            targets = Collections.emptyList();
         }
 
         Enumeration<? extends ZipEntry> srcEntries = zipSrc.entries();

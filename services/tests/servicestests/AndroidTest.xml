@@ -40,6 +40,11 @@
         <option name="teardown-command" value="rm -rf /data/local/tmp/servicestests"/>
     </target_preparer>
 
+    <!-- Load additional APKs onto device -->
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
+        <option name="push" value="StubTestApp.apk->/data/local/tmp/servicestests/StubTestApp.apk"/>
+    </target_preparer>
+
     <option name="test-tag" value="FrameworksServicesTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.servicestests" />

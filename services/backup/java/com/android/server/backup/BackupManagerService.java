@@ -289,17 +289,10 @@ public class BackupManagerService extends IBackupManager.Stub {
     }
 
     /**
-     * Backup is activated for the system user if the suppress file does not exist. Backup is
-     * activated for non-system users if the suppress file does not exist AND the user's activated
-     * file exists.
+     * Backup is activated for all users if the suppress file does not exist.
      */
-    private boolean isBackupActivatedForUser(int userId) {
-        if (getSuppressFileForSystemUser().exists()) {
-            return false;
-        }
-
-        return userId == UserHandle.USER_SYSTEM
-                || getActivatedFileForNonSystemUser(userId).exists();
+    private boolean isBackupActivatedForUser() {
+        return !getSuppressFileForSystemUser().exists();
     }
 
     protected Context getContext() {
@@ -336,7 +329,7 @@ public class BackupManagerService extends IBackupManager.Stub {
             Slog.i(TAG, "Backup service not supported");
             return;
         }
-        if (!isBackupActivatedForUser(userId)) {
+        if (!isBackupActivatedForUser()) {
             Slog.i(TAG, "Backup not activated for user " + userId);
             return;
         }
@@ -516,7 +509,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     "isBackupServiceActive");
         }
         synchronized (mStateLock) {
-            return !mGlobalDisable && isBackupActivatedForUser(userId);
+            return !mGlobalDisable && isBackupActivatedForUser();
         }
     }
 

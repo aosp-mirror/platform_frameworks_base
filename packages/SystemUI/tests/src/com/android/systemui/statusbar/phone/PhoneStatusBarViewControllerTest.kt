@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone
 
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnPreDrawListener
 import android.widget.FrameLayout
@@ -25,8 +26,6 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.shade.NotificationPanelViewController
 import com.android.systemui.shade.ShadeControllerImpl
 import com.android.systemui.shade.ShadeLogger
@@ -36,7 +35,6 @@ import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -57,7 +55,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock
-    private lateinit var featureFlags: FeatureFlags
+    private lateinit var panelView: ViewGroup
     @Mock
     private lateinit var moveFromCenterAnimation: StatusBarMoveFromCenterAnimationController
     @Mock
@@ -98,8 +96,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     @Test
     fun onViewAttachedAndDrawn_moveFromCenterAnimationEnabled_moveFromCenterAnimationInitialized() {
-        whenever(featureFlags.isEnabled(Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS))
-                .thenReturn(true)
         val view = createViewMock()
         val argumentCaptor = ArgumentCaptor.forClass(OnPreDrawListener::class.java)
         unfoldConfig.isEnabled = true
@@ -115,26 +111,12 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onViewAttachedAndDrawn_statusBarAnimationDisabled_animationNotInitialized() {
-        whenever(featureFlags.isEnabled(Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS))
-                .thenReturn(false)
-        val view = createViewMock()
-        unfoldConfig.isEnabled = true
-        // create the controller on main thread as it requires main looper
-        InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            controller = createAndInitController(view)
-        }
-
-        verify(moveFromCenterAnimation, never()).onViewsReady(any())
-    }
-
-    @Test
     fun handleTouchEventFromStatusBar_panelsNotEnabled_returnsFalseAndNoViewEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(false)
         val returnVal = view.onTouchEvent(
                         MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
         assertThat(returnVal).isFalse()
-        verify(notificationPanelViewController, never()).handleExternalTouch(any())
+        verify(notificationPanelViewController, never()).sendTouchEventToView(any())
     }
 
     @Test
@@ -146,7 +128,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         val returnVal = view.onTouchEvent(
                 MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
         assertThat(returnVal).isTrue()
-        verify(notificationPanelViewController, never()).handleExternalTouch(any())
+        verify(notificationPanelViewController, never()).sendTouchEventToView(any())
     }
 
     @Test
@@ -159,7 +141,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
         view.onTouchEvent(event)
 
-        verify(notificationPanelViewController).handleExternalTouch(event)
+        verify(notificationPanelViewController).sendTouchEventToView(event)
     }
 
     @Test
@@ -172,7 +154,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
         view.onTouchEvent(event)
 
-        verify(notificationPanelViewController).handleExternalTouch(event)
+        verify(notificationPanelViewController).sendTouchEventToView(event)
     }
 
     @Test
@@ -185,7 +167,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
         view.onTouchEvent(event)
 
-        verify(notificationPanelViewController, never()).handleExternalTouch(any())
+        verify(notificationPanelViewController, never()).sendTouchEventToView(any())
     }
 
     private fun createViewMock(): PhoneStatusBarView {
@@ -200,7 +182,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         return PhoneStatusBarViewController.Factory(
             Optional.of(sysuiUnfoldComponent),
             Optional.of(progressProvider),
-            featureFlags,
             userChipViewModel,
             centralSurfacesImpl,
             shadeControllerImpl,

@@ -475,7 +475,7 @@ class SurfaceAnimationRunner {
         surface.release();
 
         synchronized (mEdgeExtensionLock) {
-            if (!mEdgeExtensions.containsKey(leash)) {
+            if (!mEdgeExtensions.containsKey(leash) && !leash.isValid()) {
                 // The animation leash has already been removed, so we don't want to attach the
                 // edgeExtension layer and should immediately remove it instead.
                 startTransaction.remove(edgeExtensionLayer);

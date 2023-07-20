@@ -33,14 +33,10 @@ import android.provider.Settings;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 
-import androidx.annotation.Nullable;
-
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-
-import java.util.ArrayList;
 
 /**
  * A ContextWrapper with utilities specifically designed to make Testing easier.
@@ -65,7 +61,6 @@ public class TestableContext extends ContextWrapper implements TestRule {
     private final TestableContentResolver mTestableContentResolver;
     private final TestableSettingsProvider mSettingsProvider;
 
-    private ArrayList<MockServiceResolver> mMockServiceResolvers;
     private ArrayMap<String, Object> mMockSystemServices;
     private ArrayMap<ComponentName, IBinder> mMockServices;
     private ArrayMap<ServiceConnection, ComponentName> mActiveServices;
@@ -219,45 +214,16 @@ public class TestableContext extends ContextWrapper implements TestRule {
     /**
      * Adds a mock service to be connected to by a bindService call.
      * <p>
-     * Normally a TestableContext will pass through all bind requests to the base context
-     * but when addMockService has been called for a ComponentName being bound, then
-     * TestableContext will immediately trigger a {@link ServiceConnection#onServiceConnected}
-     * with the specified service, and will call {@link ServiceConnection#onServiceDisconnected}
-     * when the service is unbound.
+     *     Normally a TestableContext will pass through all bind requests to the base context
+     *     but when addMockService has been called for a ComponentName being bound, then
+     *     TestableContext will immediately trigger a {@link ServiceConnection#onServiceConnected}
+     *     with the specified service, and will call {@link ServiceConnection#onServiceDisconnected}
+     *     when the service is unbound.
      * </p>
-     *
-     * @see #addMockServiceResolver(MockServiceResolver) for custom resolution of service Intents to
-     * ComponentNames
      */
     public void addMockService(ComponentName component, IBinder service) {
         if (mMockServices == null) mMockServices = new ArrayMap<>();
         mMockServices.put(component, service);
-    }
-
-    /**
-     * Strategy to resolve a service {@link Intent} to a mock service {@link ComponentName}.
-     */
-    public interface MockServiceResolver {
-        @Nullable
-        ComponentName resolve(Intent service);
-    }
-
-    /**
-     * Registers a strategy to resolve service intents to registered mock services.
-     * <p>
-     * The result of the first {@link MockServiceResolver} to return a non-null
-     * {@link ComponentName} is used to look up a mock service. The mock service must be registered
-     * via {@link #addMockService(ComponentName, IBinder)} separately, using the same component
-     * name.
-     *
-     * If none of the resolvers return a non-null value, or the first returned component name
-     * does not link to a registered mock service, the bind requests are passed to the base context
-     *
-     * The resolvers are queried in order of registration.
-     */
-    public void addMockServiceResolver(MockServiceResolver resolver) {
-        if (mMockServiceResolvers == null) mMockServiceResolvers = new ArrayList<>();
-        mMockServiceResolvers.add(resolver);
     }
 
     /**
@@ -266,7 +232,7 @@ public class TestableContext extends ContextWrapper implements TestRule {
     @Override
     public boolean bindService(Intent service, ServiceConnection conn, int flags) {
         if (mService != null) mService.getLeakInfo(conn).addAllocation(new Throwable());
-        if (checkMocks(service, conn)) return true;
+        if (checkMocks(service.getComponent(), conn)) return true;
         return super.bindService(service, conn, flags);
     }
 
@@ -277,7 +243,7 @@ public class TestableContext extends ContextWrapper implements TestRule {
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
         if (mService != null) mService.getLeakInfo(conn).addAllocation(new Throwable());
-        if (checkMocks(service, conn)) return true;
+        if (checkMocks(service.getComponent(), conn)) return true;
         return super.bindServiceAsUser(service, conn, flags, handler, user);
     }
 
@@ -288,36 +254,18 @@ public class TestableContext extends ContextWrapper implements TestRule {
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             UserHandle user) {
         if (mService != null) mService.getLeakInfo(conn).addAllocation(new Throwable());
-        if (checkMocks(service, conn)) return true;
+        if (checkMocks(service.getComponent(), conn)) return true;
         return super.bindServiceAsUser(service, conn, flags, user);
     }
 
-    private boolean checkMocks(Intent service, ServiceConnection conn) {
-        if (mMockServices == null) return false;
-
-        ComponentName serviceComponent = resolveMockServiceComponent(service);
-        if (serviceComponent == null) return false;
-
-        IBinder serviceImpl = mMockServices.get(serviceComponent);
-        if (serviceImpl == null) return false;
-
-        if (mActiveServices == null) mActiveServices = new ArrayMap<>();
-        mActiveServices.put(conn, serviceComponent);
-        conn.onServiceConnected(serviceComponent, serviceImpl);
-        return true;
-    }
-
-    private ComponentName resolveMockServiceComponent(Intent service) {
-        ComponentName specifiedComponentName = service.getComponent();
-        if (specifiedComponentName != null) return specifiedComponentName;
-
-        if (mMockServiceResolvers == null) return null;
-
-        for (MockServiceResolver resolver : mMockServiceResolvers) {
-            ComponentName resolvedComponent = resolver.resolve(service);
-            if (resolvedComponent != null) return resolvedComponent;
+    private boolean checkMocks(ComponentName component, ServiceConnection conn) {
+        if (mMockServices != null && component != null && mMockServices.containsKey(component)) {
+            if (mActiveServices == null) mActiveServices = new ArrayMap<>();
+            mActiveServices.put(conn, component);
+            conn.onServiceConnected(component, mMockServices.get(component));
+            return true;
         }
-        return null;
+        return false;
     }
 
     /**

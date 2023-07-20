@@ -53,7 +53,6 @@ import com.android.internal.telephony.SmsApplication;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -4312,23 +4311,11 @@ public final class Telephony {
          * subscription and while is in voice call.
          *
          * Default value is empty string.
-         * @deprecated This column is no longer supported. Use
-         * {@link #COLUMN_ENABLED_MOBILE_DATA_POLICIES} instead.
+         *
          * @hide
          */
-        @Deprecated
         public static final String COLUMN_DATA_ENABLED_OVERRIDE_RULES =
                 "data_enabled_override_rules";
-
-        /**
-         * TelephonyProvider column name enabled_mobile_data_policies.
-         * A list of mobile data policies, each of which represented by an integer and joint by ",".
-         *
-         * Default value is empty string.
-         * @hide
-         */
-        public static final String COLUMN_ENABLED_MOBILE_DATA_POLICIES =
-                "enabled_mobile_data_policies";
 
         /**
          * TelephonyProvider column name for user displayed name.
@@ -4353,12 +4340,6 @@ public final class Telephony {
          * @hide
          */
         public static final String COLUMN_NAME_SOURCE = "name_source";
-
-        /**
-         * The name source is unknown.
-         * @hide
-         */
-        public static final int NAME_SOURCE_UNKNOWN = -1;
 
         /** The name_source is from the carrier id. {@hide} */
         public static final int NAME_SOURCE_CARRIER_ID = 0;
@@ -4822,114 +4803,10 @@ public final class Telephony {
                 "phone_number_source_ims";
 
         /**
-         * TelephonyProvider column name for last used TP - message Reference
-         *
-         * @hide
-         */
-        public static final String COLUMN_TP_MESSAGE_REF = "tp_message_ref";
-
-        /**
          * TelephonyProvider column name for the device's preferred usage setting.
          *
          * @hide
          */
         public static final String COLUMN_USAGE_SETTING = "usage_setting";
-
-        /**
-         * TelephonyProvider column name for user handle associated with this sim.
-         *
-         * @hide
-         */
-        public static final String COLUMN_USER_HANDLE = "user_handle";
-
-        /**
-         * TelephonyProvider column name for satellite enabled.
-         * By default, it's disabled.
-         *
-         * @hide
-         */
-        public static final String COLUMN_SATELLITE_ENABLED = "satellite_enabled";
-
-        /** All columns in {@link SimInfo} table. */
-        private static final List<String> ALL_COLUMNS = List.of(
-                COLUMN_UNIQUE_KEY_SUBSCRIPTION_ID,
-                COLUMN_ICC_ID,
-                COLUMN_SIM_SLOT_INDEX,
-                COLUMN_DISPLAY_NAME,
-                COLUMN_CARRIER_NAME,
-                COLUMN_NAME_SOURCE,
-                COLUMN_COLOR,
-                COLUMN_NUMBER,
-                COLUMN_DISPLAY_NUMBER_FORMAT,
-                COLUMN_DATA_ROAMING,
-                COLUMN_MCC,
-                COLUMN_MNC,
-                COLUMN_MCC_STRING,
-                COLUMN_MNC_STRING,
-                COLUMN_EHPLMNS,
-                COLUMN_HPLMNS,
-                COLUMN_SIM_PROVISIONING_STATUS,
-                COLUMN_IS_EMBEDDED,
-                COLUMN_CARD_ID,
-                COLUMN_ACCESS_RULES,
-                COLUMN_ACCESS_RULES_FROM_CARRIER_CONFIGS,
-                COLUMN_IS_REMOVABLE,
-                COLUMN_CB_EXTREME_THREAT_ALERT,
-                COLUMN_CB_SEVERE_THREAT_ALERT,
-                COLUMN_CB_AMBER_ALERT,
-                COLUMN_CB_EMERGENCY_ALERT,
-                COLUMN_CB_ALERT_SOUND_DURATION,
-                COLUMN_CB_ALERT_REMINDER_INTERVAL,
-                COLUMN_CB_ALERT_VIBRATE,
-                COLUMN_CB_ALERT_SPEECH,
-                COLUMN_CB_ETWS_TEST_ALERT,
-                COLUMN_CB_CHANNEL_50_ALERT,
-                COLUMN_CB_CMAS_TEST_ALERT,
-                COLUMN_CB_OPT_OUT_DIALOG,
-                COLUMN_ENHANCED_4G_MODE_ENABLED,
-                COLUMN_VT_IMS_ENABLED,
-                COLUMN_WFC_IMS_ENABLED,
-                COLUMN_WFC_IMS_MODE,
-                COLUMN_WFC_IMS_ROAMING_MODE,
-                COLUMN_WFC_IMS_ROAMING_ENABLED,
-                COLUMN_IS_OPPORTUNISTIC,
-                COLUMN_GROUP_UUID,
-                COLUMN_IS_METERED,
-                COLUMN_ISO_COUNTRY_CODE,
-                COLUMN_CARRIER_ID,
-                COLUMN_PROFILE_CLASS,
-                COLUMN_SUBSCRIPTION_TYPE,
-                COLUMN_GROUP_OWNER,
-                COLUMN_DATA_ENABLED_OVERRIDE_RULES,
-                COLUMN_ENABLED_MOBILE_DATA_POLICIES,
-                COLUMN_IMSI,
-                COLUMN_UICC_APPLICATIONS_ENABLED,
-                COLUMN_ALLOWED_NETWORK_TYPES,
-                COLUMN_IMS_RCS_UCE_ENABLED,
-                COLUMN_CROSS_SIM_CALLING_ENABLED,
-                COLUMN_RCS_CONFIG,
-                COLUMN_ALLOWED_NETWORK_TYPES_FOR_REASONS,
-                COLUMN_D2D_STATUS_SHARING,
-                COLUMN_VOIMS_OPT_IN_STATUS,
-                COLUMN_D2D_STATUS_SHARING_SELECTED_CONTACTS,
-                COLUMN_NR_ADVANCED_CALLING_ENABLED,
-                COLUMN_PHONE_NUMBER_SOURCE_CARRIER,
-                COLUMN_PHONE_NUMBER_SOURCE_IMS,
-                COLUMN_PORT_INDEX,
-                COLUMN_USAGE_SETTING,
-                COLUMN_TP_MESSAGE_REF,
-                COLUMN_USER_HANDLE,
-                COLUMN_SATELLITE_ENABLED
-        );
-
-        /**
-         * @return All columns in {@link SimInfo} table.
-         *
-         * @hide
-         */
-        @NonNull
-        public static List<String> getAllColumns() {
-            return ALL_COLUMNS;
-        }
     }
 }

@@ -35,6 +35,7 @@ android_library {
     ],
 
     static_libs: [
+        "PluginCoreLib",
         "androidx.core_core-animation-nodeps",
         "androidx.core_core-ktx",
         "androidx.annotation_annotation",

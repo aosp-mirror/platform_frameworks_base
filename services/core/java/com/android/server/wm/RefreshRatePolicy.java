@@ -53,8 +53,6 @@ class RefreshRatePolicy {
         }
     }
 
-    private final DisplayInfo mDisplayInfo;
-    private final Mode mDefaultMode;
     private final Mode mLowRefreshRateMode;
     private final PackageRefreshRate mNonHighRefreshRatePackages = new PackageRefreshRate();
     private final HighRefreshRateDenylist mHighRefreshRateDenylist;
@@ -85,9 +83,7 @@ class RefreshRatePolicy {
 
     RefreshRatePolicy(WindowManagerService wmService, DisplayInfo displayInfo,
             HighRefreshRateDenylist denylist) {
-        mDisplayInfo = displayInfo;
-        mDefaultMode = displayInfo.getDefaultMode();
-        mLowRefreshRateMode = findLowRefreshRateMode(displayInfo, mDefaultMode);
+        mLowRefreshRateMode = findLowRefreshRateMode(displayInfo);
         mHighRefreshRateDenylist = denylist;
         mWmService = wmService;
     }
@@ -96,9 +92,10 @@ class RefreshRatePolicy {
      * Finds the mode id with the lowest refresh rate which is >= 60hz and same resolution as the
      * default mode.
      */
-    private Mode findLowRefreshRateMode(DisplayInfo displayInfo, Mode defaultMode) {
+    private Mode findLowRefreshRateMode(DisplayInfo displayInfo) {
+        Mode mode = displayInfo.getDefaultMode();
         float[] refreshRates = displayInfo.getDefaultRefreshRates();
-        float bestRefreshRate = defaultMode.getRefreshRate();
+        float bestRefreshRate = mode.getRefreshRate();
         mMinSupportedRefreshRate = bestRefreshRate;
         mMaxSupportedRefreshRate = bestRefreshRate;
         for (int i = refreshRates.length - 1; i >= 0; i--) {
@@ -124,39 +121,13 @@ class RefreshRatePolicy {
     }
 
     int getPreferredModeId(WindowState w) {
-        final int preferredDisplayModeId = w.mAttrs.preferredDisplayModeId;
-        if (preferredDisplayModeId <= 0) {
-            // Unspecified, use default mode.
-            return 0;
-        }
-
         // If app is animating, it's not able to control refresh rate because we want the animation
-        // to run in default refresh rate. But if the display size of default mode is different
-        // from the using preferred mode, then still keep the preferred mode to avoid disturbing
-        // the animation.
+        // to run in default refresh rate.
         if (w.isAnimating(TRANSITION | PARENTS)) {
-            Display.Mode preferredMode = null;
-            for (Display.Mode mode : mDisplayInfo.supportedModes) {
-                if (preferredDisplayModeId == mode.getModeId()) {
-                    preferredMode = mode;
-                    break;
-                }
-            }
-            if (preferredMode != null) {
-                final int pW = preferredMode.getPhysicalWidth();
-                final int pH = preferredMode.getPhysicalHeight();
-                if ((pW != mDefaultMode.getPhysicalWidth()
-                        || pH != mDefaultMode.getPhysicalHeight())
-                        && pW == mDisplayInfo.getNaturalWidth()
-                        && pH == mDisplayInfo.getNaturalHeight()) {
-                    // Prefer not to change display size when animating.
-                    return preferredDisplayModeId;
-                }
-            }
             return 0;
         }
 
-        return preferredDisplayModeId;
+        return w.mAttrs.preferredDisplayModeId;
     }
 
     /**
@@ -194,9 +165,12 @@ class RefreshRatePolicy {
         // of that mode id.
         final int preferredModeId = w.mAttrs.preferredDisplayModeId;
         if (preferredModeId > 0) {
-            for (Display.Mode mode : mDisplayInfo.supportedModes) {
-                if (preferredModeId == mode.getModeId()) {
-                    return mode.getRefreshRate();
+            DisplayInfo info = w.getDisplayInfo();
+            if (info != null) {
+                for (Display.Mode mode : info.supportedModes) {
+                    if (preferredModeId == mode.getModeId()) {
+                        return mode.getRefreshRate();
+                    }
                 }
             }
         }

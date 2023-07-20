@@ -31,6 +31,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 
@@ -93,6 +94,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScrollCaptureCallback;
 import android.view.SearchEvent;
+import android.view.Surface;
 import android.view.SurfaceHolder.Callback2;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -295,7 +297,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean mClosingActionMenu;
 
     private int mVolumeControlStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
-    private int mAudioMode = AudioManager.MODE_NORMAL;
     private MediaController mMediaController;
 
     private AudioManager mAudioManager;
@@ -317,8 +318,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mInvalidatePanelMenuFeatures = 0;
         }
     };
-
-    private AudioManager.OnModeChangedListener mOnModeChangedListener;
 
     private Transition mEnterTransition = null;
     private Transition mReturnTransition = USE_DEFAULT_TRANSITION;
@@ -382,17 +381,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // window, as we'll be skipping the addView in handleResumeActivity(), and
             // the token will not be updated as for a new window.
             getAttributes().token = preservedWindow.getAttributes().token;
-            final ViewRootImpl viewRoot = mDecor.getViewRootImpl();
-            if (viewRoot != null) {
-                // Clear the old callbacks and attach to the new window.
-                viewRoot.getOnBackInvokedDispatcher().clear();
-                onViewRootImplSet(viewRoot);
-            }
+            mProxyOnBackInvokedDispatcher.setActualDispatcher(
+                    preservedWindow.getOnBackInvokedDispatcher());
         }
         // Even though the device doesn't support picture-in-picture mode,
         // an user can force using it through developer options.
         boolean forceResizable = Settings.Global.getInt(context.getContentResolver(),
-                DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
+                DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 1) != 0;
         mSupportsPictureInPicture = forceResizable || context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_PICTURE_IN_PICTURE);
         mActivityConfigCallback = activityConfigCallback;
@@ -877,6 +872,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             // This will populate st.shownPanelView
             if (!initializePanelContent(st) || !st.hasPanelItems()) {
+                closePanel(st, true);
                 return;
             }
 
@@ -922,9 +918,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        if (!st.hasPanelItems()) {
+        // This will populate st.shownPanelView if needed
+        if ((st.shownPanelView == null && !initializePanelContent(st)) || !st.hasPanelItems()) {
             // Ensure that |st.decorView| has its actual content. Otherwise, an empty window can be
             // created and cause ANR.
+            closePanel(st, true);
             return;
         }
 
@@ -1953,9 +1951,33 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                // If we have a session and no active phone call send it the volume command,
-                // otherwise use the suggested stream.
-                if (mMediaController != null && !isActivePhoneCallOngoing()) {
+                // If we have a session send it the volume command, otherwise
+                // use the suggested stream.
+                if (mMediaController != null) {
+                    int direction = 0;
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_VOLUME_UP:
+                            direction = AudioManager.ADJUST_RAISE;
+                            break;
+                        case KeyEvent.KEYCODE_VOLUME_DOWN:
+                            direction = AudioManager.ADJUST_LOWER;
+                            break;
+                        case KeyEvent.KEYCODE_VOLUME_MUTE:
+                            direction = AudioManager.ADJUST_TOGGLE_MUTE;
+                            break;
+                    }
+                    final int rotation = getWindowManager().getDefaultDisplay().getRotation();
+                    final Configuration config = getContext().getResources().getConfiguration();
+                    final boolean swapKeys = Settings.System.getInt(getContext().getContentResolver(),
+                            Settings.System.SWAP_VOLUME_BUTTONS, 0) == 1;
+
+                    if (swapKeys
+                            && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_180)
+                            && config.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
+                        direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                                ? AudioManager.ADJUST_LOWER
+                                : AudioManager.ADJUST_RAISE;
+                    }
                     getMediaSessionManager().dispatchVolumeKeyEventToSessionAsSystemService(event,
                             mMediaController.getSessionToken());
                 } else {
@@ -2004,11 +2026,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         return false;
-    }
-
-    private boolean isActivePhoneCallOngoing() {
-        return mAudioMode == AudioManager.MODE_IN_CALL
-                || mAudioMode == AudioManager.MODE_IN_COMMUNICATION;
     }
 
     private KeyguardManager getKeyguardManager() {
@@ -2334,14 +2351,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        if (mOnModeChangedListener != null) {
-            getAudioManager().removeOnModeChangedListener(mOnModeChangedListener);
-            mOnModeChangedListener = null;
-        }
-    }
-
     private class PanelMenuPresenterCallback implements MenuPresenter.Callback {
         @Override
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
@@ -2565,6 +2574,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         + a.getString(R.styleable.Window_windowLayoutInDisplayCutoutMode));
             }
             params.layoutInDisplayCutoutMode = mode;
+        }
+
+        if (ActivityManager.isSystemReady()) {
+            try {
+                String packageName = context.getBasePackageName();
+                if (ActivityManager.getService().shouldForceCutoutFullscreen(packageName)){
+                    params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                }
+            } catch (RemoteException e) {
+            }
         }
 
         if (mAlwaysReadCloseOnTouchAttr || getContext().getApplicationInfo().targetSdkVersion
@@ -3224,15 +3243,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public void setMediaController(MediaController controller) {
         mMediaController = controller;
-        if (controller != null && mOnModeChangedListener == null) {
-            mAudioMode = getAudioManager().getMode();
-            mOnModeChangedListener = mode -> mAudioMode = mode;
-            getAudioManager().addOnModeChangedListener(getContext().getMainExecutor(),
-                    mOnModeChangedListener);
-        } else if (mOnModeChangedListener != null) {
-            getAudioManager().removeOnModeChangedListener(mOnModeChangedListener);
-            mOnModeChangedListener = null;
-        }
     }
 
     @Override

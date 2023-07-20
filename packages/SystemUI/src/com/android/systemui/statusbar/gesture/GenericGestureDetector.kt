@@ -20,9 +20,9 @@ package com.android.systemui.statusbar.gesture
 import android.annotation.CallSuper
 import android.os.Looper
 import android.view.Choreographer
+import android.view.Display
 import android.view.InputEvent
 import android.view.MotionEvent
-import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.InputChannelCompat
 import com.android.systemui.shared.system.InputMonitorCompat
 
@@ -38,8 +38,7 @@ import com.android.systemui.shared.system.InputMonitorCompat
  * gesture is detected, they should call [onGestureDetected] (which will notify the callbacks).
  */
 abstract class GenericGestureDetector(
-    private val tag: String,
-    private val displayTracker: DisplayTracker
+    private val tag: String
 ) {
     /**
      * Active callbacks, each associated with a tag. Gestures will only be monitored if
@@ -87,7 +86,7 @@ abstract class GenericGestureDetector(
     internal open fun startGestureListening() {
         stopGestureListening()
 
-        inputMonitor = InputMonitorCompat(tag, displayTracker.defaultDisplayId).also {
+        inputMonitor = InputMonitorCompat(tag, Display.DEFAULT_DISPLAY).also {
             inputReceiver = it.getInputReceiver(
                 Looper.getMainLooper(),
                 Choreographer.getInstance(),

@@ -43,7 +43,6 @@ import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Prefs;
 import com.android.systemui.shared.system.SysUiStatsLog;
-import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.List;
 
@@ -61,7 +60,6 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
     private static final float DEFAULT_POSITION_Y_PERCENT = 0.9f;
 
     private final Context mContext;
-    private final SecureSettings mSecureSettings;
     private final AccessibilityFloatingMenuView mMenuView;
     private final MigrationTooltipView mMigrationTooltipView;
     private final DockTooltipView mDockTooltipView;
@@ -79,7 +77,7 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
             new ContentObserver(mHandler) {
                 @Override
                 public void onChange(boolean selfChange) {
-                    mMenuView.setSizeType(getSizeType());
+                    mMenuView.setSizeType(getSizeType(mContext));
                 }
             };
 
@@ -87,8 +85,8 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
             new ContentObserver(mHandler) {
                 @Override
                 public void onChange(boolean selfChange) {
-                    mMenuView.updateOpacityWith(isFadeEffectEnabled(),
-                            getOpacityValue());
+                    mMenuView.updateOpacityWith(isFadeEffectEnabled(mContext),
+                            getOpacityValue(mContext));
                 }
             };
 
@@ -100,19 +98,16 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
                 }
             };
 
-    public AccessibilityFloatingMenu(Context context, SecureSettings secureSettings) {
+    public AccessibilityFloatingMenu(Context context) {
         mContext = context;
-        mSecureSettings = secureSettings;
         mMenuView = new AccessibilityFloatingMenuView(context, getPosition(context));
         mMigrationTooltipView = new MigrationTooltipView(mContext, mMenuView);
         mDockTooltipView = new DockTooltipView(mContext, mMenuView);
     }
 
     @VisibleForTesting
-    AccessibilityFloatingMenu(Context context, SecureSettings secureSettings,
-            AccessibilityFloatingMenuView menuView) {
+    AccessibilityFloatingMenu(Context context, AccessibilityFloatingMenuView menuView) {
         mContext = context;
-        mSecureSettings = secureSettings;
         mMenuView = menuView;
         mMigrationTooltipView = new MigrationTooltipView(mContext, mMenuView);
         mDockTooltipView = new DockTooltipView(mContext, mMenuView);
@@ -135,10 +130,10 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
 
         mMenuView.show();
         mMenuView.onTargetsChanged(targetList);
-        mMenuView.updateOpacityWith(isFadeEffectEnabled(),
-                getOpacityValue());
-        mMenuView.setSizeType(getSizeType());
-        mMenuView.setShapeType(getShapeType());
+        mMenuView.updateOpacityWith(isFadeEffectEnabled(mContext),
+                getOpacityValue(mContext));
+        mMenuView.setSizeType(getSizeType(mContext));
+        mMenuView.setShapeType(getShapeType(mContext));
         mMenuView.setOnDragEndListener(this::onDragEnd);
 
         showMigrationTooltipIfNecessary();
@@ -175,17 +170,17 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
     // Migration tooltip was the android S feature. It's just used on the Android version from R
     // to S. In addition, it only shows once.
     private void showMigrationTooltipIfNecessary() {
-        if (isMigrationTooltipPromptEnabled()) {
+        if (isMigrationTooltipPromptEnabled(mContext)) {
             mMigrationTooltipView.show();
 
-            mSecureSettings.putInt(
+            Settings.Secure.putInt(mContext.getContentResolver(),
                     ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT, /* disabled */ 0);
         }
     }
 
-    private boolean isMigrationTooltipPromptEnabled() {
-        return mSecureSettings.getInt(
-                ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
+    private static boolean isMigrationTooltipPromptEnabled(Context context) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                 DEFAULT_MIGRATION_TOOLTIP_PROMPT_IS_DISABLED) == /* enabled */ 1;
     }
 
@@ -217,61 +212,57 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
         }
     }
 
-    private boolean isFadeEffectEnabled() {
-        return mSecureSettings.getInt(
-                ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
+    private static boolean isFadeEffectEnabled(Context context) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
                 DEFAULT_FADE_EFFECT_IS_ENABLED) == /* enabled */ 1;
     }
 
-    private float getOpacityValue() {
-        return mSecureSettings.getFloat(
-                ACCESSIBILITY_FLOATING_MENU_OPACITY,
+    private static float getOpacityValue(Context context) {
+        return Settings.Secure.getFloat(
+                context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_OPACITY,
                 DEFAULT_OPACITY_VALUE);
     }
 
-    private int getSizeType() {
-        return mSecureSettings.getInt(
-                ACCESSIBILITY_FLOATING_MENU_SIZE, SizeType.SMALL);
+    private static int getSizeType(Context context) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_SIZE, SizeType.SMALL);
     }
 
-    private int getShapeType() {
-        return mSecureSettings.getInt(
-                ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
+    private static int getShapeType(Context context) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_ICON_TYPE,
                 ShapeType.OVAL);
     }
 
     private void registerContentObservers() {
-        mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
                 /* notifyForDescendants */ false, mContentObserver,
                 UserHandle.USER_CURRENT);
-        mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
-                /* notifyForDescendants */ false, mContentObserver,
-                UserHandle.USER_CURRENT);
-        mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE,
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE),
                 /* notifyForDescendants */ false, mSizeContentObserver,
                 UserHandle.USER_CURRENT);
-        mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED),
                 /* notifyForDescendants */ false, mFadeOutContentObserver,
                 UserHandle.USER_CURRENT);
-        mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY,
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY),
                 /* notifyForDescendants */ false, mFadeOutContentObserver,
                 UserHandle.USER_CURRENT);
-        mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES),
                 /* notifyForDescendants */ false,
                 mEnabledA11yServicesContentObserver, UserHandle.USER_CURRENT);
     }
 
     private void unregisterContentObservers() {
-        mSecureSettings.unregisterContentObserver(mContentObserver);
-        mSecureSettings.unregisterContentObserver(mSizeContentObserver);
-        mSecureSettings.unregisterContentObserver(mFadeOutContentObserver);
-        mSecureSettings.unregisterContentObserver(
+        mContext.getContentResolver().unregisterContentObserver(mContentObserver);
+        mContext.getContentResolver().unregisterContentObserver(mSizeContentObserver);
+        mContext.getContentResolver().unregisterContentObserver(mFadeOutContentObserver);
+        mContext.getContentResolver().unregisterContentObserver(
                 mEnabledA11yServicesContentObserver);
     }
 }

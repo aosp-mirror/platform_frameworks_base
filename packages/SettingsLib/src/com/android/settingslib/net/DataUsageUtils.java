@@ -22,6 +22,7 @@ import android.net.NetworkTemplate;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.format.Time;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
@@ -63,14 +64,14 @@ public class DataUsageUtils {
     private static NetworkTemplate getNormalizedMobileTemplate(
             TelephonyManager telephonyManager, int subId) {
         final NetworkTemplate mobileTemplate = getMobileTemplateForSubId(telephonyManager, subId);
-        final Set<String> mergedSubscriberIds = Set.of(telephonyManager
-                .createForSubscriptionId(subId).getMergedImsisFromGroup());
+        final String[] mergedSubscriberIds = telephonyManager
+                .createForSubscriptionId(subId).getMergedImsisFromGroup();
         if (ArrayUtils.isEmpty(mergedSubscriberIds)) {
             Log.i(TAG, "mergedSubscriberIds is null.");
             return mobileTemplate;
         }
 
-        return normalizeMobileTemplate(mobileTemplate, mergedSubscriberIds);
+        return normalizeMobileTemplate(mobileTemplate, Set.of(mergedSubscriberIds));
     }
 
     private static NetworkTemplate normalizeMobileTemplate(
@@ -103,5 +104,16 @@ public class DataUsageUtils {
                 : new NetworkTemplate.Builder(NetworkTemplate.MATCH_MOBILE)
                         .setMeteredness(NetworkStats.METERED_YES)
                         .build();
+    }
+
+    /**
+     * Returns today's passed time in Millisecond
+     */
+    public static long getTodayMillis() {
+        final long passedMillis;
+        Time time = new Time();
+        time.set(System.currentTimeMillis());
+        passedMillis = ((time.hour * 60 * 60) + (time.minute * 60) + time.second) * 1000;
+        return passedMillis;
     }
 }

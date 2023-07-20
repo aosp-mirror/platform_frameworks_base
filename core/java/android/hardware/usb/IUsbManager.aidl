@@ -111,10 +111,10 @@ interface IUsbManager
     boolean isFunctionEnabled(String function);
 
     /* Sets the current USB function. */
-    void setCurrentFunctions(long functions, int operationId);
+    void setCurrentFunctions(long functions);
 
     /* Compatibility version of setCurrentFunctions(long). */
-    void setCurrentFunction(String function, boolean usbDataUnlocked, int operationId);
+    void setCurrentFunction(String function, boolean usbDataUnlocked);
 
     /* Gets the current USB functions. */
     long getCurrentFunctions();

@@ -27,7 +27,6 @@ import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
 
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -222,26 +221,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     @NonNull
     private static final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
 
-    /**
-     * Dump information about this WindowOnBackInvokedDispatcher
-     * @param prefix the prefix that will be prepended to each line of the produced output
-     * @param writer the writer that will receive the resulting text
-     */
-    public void dump(String prefix, PrintWriter writer) {
-        String innerPrefix = prefix + "    ";
-        writer.println(prefix + "WindowOnBackDispatcher:");
-        if (mAllCallbacks.isEmpty()) {
-            writer.println(prefix + "<None>");
-            return;
-        }
-
-        writer.println(innerPrefix + "Top Callback: " + getTopCallback());
-        writer.println(innerPrefix + "Callbacks: ");
-        mAllCallbacks.forEach((callback, priority) -> {
-            writer.println(innerPrefix + "  Callback: " + callback + " Priority=" + priority);
-        });
-    }
-
     static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
         private final WeakReference<OnBackInvokedCallback> mCallback;
 
@@ -250,21 +229,19 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
 
         @Override
-        public void onBackStarted(BackMotionEvent backEvent) {
+        public void onBackStarted(BackEvent backEvent) {
             Handler.getMain().post(() -> {
                 final OnBackAnimationCallback callback = getBackAnimationCallback();
                 if (callback != null) {
                     mProgressAnimator.onBackStarted(backEvent, event ->
                             callback.onBackProgressed(event));
-                    callback.onBackStarted(new BackEvent(
-                            backEvent.getTouchX(), backEvent.getTouchY(),
-                            backEvent.getProgress(), backEvent.getSwipeEdge()));
+                    callback.onBackStarted(backEvent);
                 }
             });
         }
 
         @Override
-        public void onBackProgressed(BackMotionEvent backEvent) {
+        public void onBackProgressed(BackEvent backEvent) {
             Handler.getMain().post(() -> {
                 final OnBackAnimationCallback callback = getBackAnimationCallback();
                 if (callback != null) {
@@ -276,12 +253,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         @Override
         public void onBackCancelled() {
             Handler.getMain().post(() -> {
-                mProgressAnimator.onBackCancelled(() -> {
-                    final OnBackAnimationCallback callback = getBackAnimationCallback();
-                    if (callback != null) {
-                        callback.onBackCancelled();
-                    }
-                });
+                mProgressAnimator.reset();
+                final OnBackAnimationCallback callback = getBackAnimationCallback();
+                if (callback != null) {
+                    callback.onBackCancelled();
+                }
             });
         }
 
@@ -291,7 +267,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 mProgressAnimator.reset();
                 final OnBackInvokedCallback callback = mCallback.get();
                 if (callback == null) {
-                    Log.d(TAG, "Trying to call onBackInvoked() on a null callback reference.");
                     return;
                 }
                 callback.onBackInvoked();

@@ -35,6 +35,7 @@ import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.Pair;
@@ -226,17 +227,11 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                     case BluetoothProfile.STATE_DISCONNECTED:
                         if (mHandler.hasMessages(profile.getProfileId())) {
                             mHandler.removeMessages(profile.getProfileId());
-                            if (profile.getConnectionPolicy(mDevice) >
-                                BluetoothProfile.CONNECTION_POLICY_FORBIDDEN) {
-                                /*
-                                 * If we received state DISCONNECTED and previous state was
-                                 * CONNECTING and connection policy is FORBIDDEN or UNKNOWN
-                                 * then it's not really a failure to connect.
-                                 *
-                                 * Connection profile is considered as failed when connection
-                                 * policy indicates that profile should be connected
-                                 * but it got disconnected.
-                                 */
+                            if (profile.getConnectionPolicy(mDevice) > BluetoothProfile.CONNECTION_POLICY_FORBIDDEN) {
+                                /* If we received state DISCONNECTED and previous state was CONNECTING
+                                * and connection policy is FORBIDDEN or UNKNOWN then it's not really
+                                * a failure to connect.
+                                */
                                 Log.w(TAG, "onProfileStateChanged(): Failed to connect profile");
                                 setProfileConnectedStatus(profile.getProfileId(), true);
                             }
@@ -576,14 +571,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public void setName(String name) {
         // Prevent getName() to be set to null if setName(null) is called
-        if (name == null || TextUtils.equals(name, getName())) {
-            return;
-        }
-        mDevice.setAlias(name);
-        dispatchAttributesChanged();
-
-        for (CachedBluetoothDevice cbd : mMemberDevices) {
-            cbd.setName(name);
+        if (name != null && !TextUtils.equals(name, getName())) {
+            mDevice.setAlias(name);
+            dispatchAttributesChanged();
         }
     }
 
@@ -1043,7 +1033,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (BluetoothUuid.containsAnyUuid(uuids, PbapServerProfile.PBAB_CLIENT_UUIDS)) {
             // The pairing dialog now warns of phone-book access for paired devices.
             // No separate prompt is displayed after pairing.
-            mDevice.getPhonebookAccessPermission();
+            if (mDevice.getPhonebookAccessPermission() == BluetoothDevice.ACCESS_UNKNOWN) {
+                if (BluetoothUtils.isDeviceClassMatched(mDevice,
+                        BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE)
+                        || BluetoothUtils.isDeviceClassMatched(mDevice,
+                        BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET)) {
+                    EventLog.writeEvent(0x534e4554, "138529441", -1, "");
+                }
+            }
         }
     }
 
@@ -1212,13 +1209,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     private boolean isProfileConnectedFail() {
-        Log.d(TAG, "anonymizedAddress=" + mDevice.getAnonymizedAddress()
-                + " mIsA2dpProfileConnectedFail=" + mIsA2dpProfileConnectedFail
-                + " mIsHearingAidProfileConnectedFail=" + mIsHearingAidProfileConnectedFail
-                + " mIsLeAudioProfileConnectedFail=" + mIsLeAudioProfileConnectedFail
-                + " mIsHeadsetProfileConnectedFail=" + mIsHeadsetProfileConnectedFail
-                + " isConnectedSapDevice()=" + isConnectedSapDevice());
-
         return mIsA2dpProfileConnectedFail || mIsHearingAidProfileConnectedFail
                 || (!isConnectedSapDevice() && mIsHeadsetProfileConnectedFail)
                 || mIsLeAudioProfileConnectedFail;
@@ -1502,7 +1492,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             refresh();
         }
 
-        return BluetoothUtils.getBtRainbowDrawableWithDescription(mContext, this);
+        return new Pair<>(BluetoothUtils.buildBtRainbowDrawable(
+                        mContext, pair.first, getAddress().hashCode()), pair.second);
     }
 
     void releaseLruCache() {

@@ -28,7 +28,6 @@ import androidx.test.rule.ActivityTestRule
 import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
@@ -52,7 +51,6 @@ class BrightnessDialogTest : SysuiTestCase() {
     @Mock private lateinit var mainExecutor: Executor
     @Mock private lateinit var backgroundHandler: Handler
     @Mock private lateinit var brightnessSliderController: BrightnessSliderController
-    private val displayTracker = FakeDisplayTracker(mContext)
 
     @Rule
     @JvmField
@@ -62,7 +60,6 @@ class BrightnessDialogTest : SysuiTestCase() {
                 override fun create(intent: Intent?): TestDialog {
                     return TestDialog(
                         userTracker,
-                        displayTracker,
                         brightnessSliderControllerFactory,
                         mainExecutor,
                         backgroundHandler
@@ -108,14 +105,12 @@ class BrightnessDialogTest : SysuiTestCase() {
 
     class TestDialog(
         userTracker: UserTracker,
-        displayTracker: FakeDisplayTracker,
         brightnessSliderControllerFactory: BrightnessSliderController.Factory,
         mainExecutor: Executor,
         backgroundHandler: Handler
     ) :
         BrightnessDialog(
             userTracker,
-            displayTracker,
             brightnessSliderControllerFactory,
             mainExecutor,
             backgroundHandler

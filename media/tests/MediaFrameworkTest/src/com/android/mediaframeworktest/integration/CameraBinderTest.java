@@ -85,8 +85,7 @@ public class CameraBinderTest extends AndroidTestCase {
     public void testCameraInfo() throws Exception {
         for (int cameraId = 0; cameraId < mUtils.getGuessedNumCameras(); ++cameraId) {
 
-            CameraInfo info = mUtils.getCameraService().getCameraInfo(cameraId,
-                    /*overrideToPortrait*/false);
+            CameraInfo info = mUtils.getCameraService().getCameraInfo(cameraId);
             assertTrue("Facing was not set for camera " + cameraId, info.info.facing != -1);
             assertTrue("Orientation was not set for camera " + cameraId,
                     info.info.orientation != -1);
@@ -160,9 +159,7 @@ public class CameraBinderTest extends AndroidTestCase {
                     .connect(dummyCallbacks, cameraId, clientPackageName,
                             ICameraService.USE_CALLING_UID,
                             ICameraService.USE_CALLING_PID,
-                            getContext().getApplicationInfo().targetSdkVersion,
-                            /*overrideToPortrait*/false,
-                            /*forceSlowJpegMode*/false);
+                            getContext().getApplicationInfo().targetSdkVersion);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));
@@ -267,8 +264,7 @@ public class CameraBinderTest extends AndroidTestCase {
                         dummyCallbacks, String.valueOf(cameraId),
                         clientPackageName, clientAttributionTag,
                         ICameraService.USE_CALLING_UID, 0 /*oomScoreOffset*/,
-                        getContext().getApplicationInfo().targetSdkVersion,
-                        /*overrideToPortrait*/false);
+                        getContext().getApplicationInfo().targetSdkVersion);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));

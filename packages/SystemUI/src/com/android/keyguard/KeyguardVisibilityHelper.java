@@ -22,24 +22,26 @@ import android.view.View;
 import android.view.ViewPropertyAnimator;
 
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.plugins.log.LogBuffer;
-import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import com.google.errorprone.annotations.CompileTimeConstant;
+import com.android.systemui.xtended.AmbientText;
+import com.android.systemui.xtended.AmbientCustomImage;
+
+import com.android.systemui.R;
+
 
 /**
  * Helper class for updating visibility of keyguard views based on keyguard and status bar state.
  * This logic is shared by both the keyguard status view and the keyguard user switcher.
  */
 public class KeyguardVisibilityHelper {
-    private static final String TAG = "KeyguardVisibilityHelper";
 
     private View mView;
     private final KeyguardStateController mKeyguardStateController;
@@ -48,31 +50,32 @@ public class KeyguardVisibilityHelper {
     private boolean mAnimateYPos;
     private boolean mKeyguardViewVisibilityAnimating;
     private boolean mLastOccludedState = false;
+    private boolean mIsUnoccludeTransitionFlagEnabled = false;
     private final AnimationProperties mAnimationProperties = new AnimationProperties();
-    private final LogBuffer mLogBuffer;
+    // Ambient Customization
+    private AmbientText mAmbientText;
+    private AmbientCustomImage mAmbientCustomImage;
 
     public KeyguardVisibilityHelper(View view,
             KeyguardStateController keyguardStateController,
             DozeParameters dozeParameters,
             ScreenOffAnimationController screenOffAnimationController,
-            boolean animateYPos,
-            LogBuffer logBuffer) {
+            boolean animateYPos) {
         mView = view;
         mKeyguardStateController = keyguardStateController;
         mDozeParameters = dozeParameters;
         mScreenOffAnimationController = screenOffAnimationController;
         mAnimateYPos = animateYPos;
-        mLogBuffer = logBuffer;
-    }
-
-    private void log(@CompileTimeConstant String message) {
-        if (mLogBuffer != null) {
-            mLogBuffer.log(TAG, LogLevel.DEBUG, message);
-        }
+        mAmbientText = (AmbientText) mView.findViewById(R.id.text_container);
+        mAmbientCustomImage = (AmbientCustomImage) mView.findViewById(R.id.image_container);
     }
 
     public boolean isVisibilityAnimating() {
         return mKeyguardViewVisibilityAnimating;
+    }
+
+    public void setOcclusionTransitionFlagEnabled(boolean enabled) {
+        mIsUnoccludeTransitionFlagEnabled = enabled;
     }
 
     /**
@@ -97,14 +100,35 @@ public class KeyguardVisibilityHelper {
                     .setInterpolator(Interpolators.ALPHA_OUT)
                     .withEndAction(
                             mAnimateKeyguardStatusViewGoneEndRunnable);
+            if (mAmbientCustomImage != null) {
+                mAmbientCustomImage.animate()
+                    .alpha(0f)
+                    .setStartDelay(0)
+                    .setDuration(160);
+            }
+            if (mAmbientText != null) {
+                mAmbientText.animate()
+                    .alpha(0f)
+                    .setStartDelay(0)
+                    .setDuration(160);
+            }
             if (keyguardFadingAway) {
                 mView.animate()
                         .setStartDelay(mKeyguardStateController.getKeyguardFadingAwayDelay())
                         .setDuration(mKeyguardStateController.getShortenedFadingAwayDuration())
                         .start();
-                log("goingToFullShade && keyguardFadingAway");
-            } else {
-                log("goingToFullShade && !keyguardFadingAway");
+                if (mAmbientCustomImage != null) {
+                    mAmbientCustomImage.animate()
+                        .setStartDelay(mKeyguardStateController.getKeyguardFadingAwayDelay())
+                        .setDuration(mKeyguardStateController.getShortenedFadingAwayDuration())
+                        .start();
+                }
+                if (mAmbientText != null) {
+                    mAmbientText.animate()
+                        .setStartDelay(mKeyguardStateController.getKeyguardFadingAwayDelay())
+                        .setDuration(mKeyguardStateController.getShortenedFadingAwayDuration())
+                        .start();
+                }
             }
         } else if (oldStatusBarState == StatusBarState.SHADE_LOCKED && statusBarState == KEYGUARD) {
             mView.setVisibility(View.VISIBLE);
@@ -116,7 +140,20 @@ public class KeyguardVisibilityHelper {
                     .setDuration(320)
                     .setInterpolator(Interpolators.ALPHA_IN)
                     .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
-            log("keyguardFadingAway transition w/ Y Aniamtion");
+            if (mAmbientCustomImage != null) {
+                mAmbientCustomImage.setAlpha(0f);
+                mAmbientCustomImage.animate()
+                    .alpha(1f)
+                    .setStartDelay(0)
+                    .setDuration(320);
+            }
+            if (mAmbientText != null) {
+                mAmbientText.setAlpha(0f);
+                mAmbientText.animate()
+                    .alpha(1f)
+                    .setStartDelay(0)
+                    .setDuration(320);
+            }
         } else if (statusBarState == KEYGUARD) {
             if (keyguardFadingAway) {
                 mKeyguardViewVisibilityAnimating = true;
@@ -137,27 +174,55 @@ public class KeyguardVisibilityHelper {
                             true /* animate */);
                     animator.setDuration(duration)
                             .setStartDelay(delay);
-                    log("keyguardFadingAway transition w/ Y Aniamtion");
-                } else {
-                    log("keyguardFadingAway transition w/o Y Animation");
                 }
                 animator.start();
+                if (mAmbientCustomImage != null) {
+                    mAmbientCustomImage.animate().alpha(0).setDuration(125)
+                        .setStartDelay(0).start();
+                }
+                if (mAmbientText != null) {
+                    mAmbientText.animate().alpha(0).setDuration(125)
+                        .setStartDelay(0).start();
+                }
             } else if (mScreenOffAnimationController.shouldAnimateInKeyguard()) {
-                log("ScreenOff transition");
                 mKeyguardViewVisibilityAnimating = true;
 
                 // Ask the screen off animation controller to animate the keyguard visibility for us
                 // since it may need to be cancelled due to keyguard lifecycle events.
                 mScreenOffAnimationController.animateInKeyguard(
                         mView, mAnimateKeyguardStatusViewVisibleEndRunnable);
-            } else {
-                log("Direct set Visibility to VISIBLE");
+            } else if (!mIsUnoccludeTransitionFlagEnabled && mLastOccludedState && !isOccluded) {
+                // An activity was displayed over the lock screen, and has now gone away
                 mView.setVisibility(View.VISIBLE);
+                mView.setAlpha(0f);
+
+                mView.animate()
+                        .setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP)
+                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                        .alpha(1f)
+                        .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable)
+                        .start();
+            } else {
+                mView.setVisibility(View.VISIBLE);
+                if (!mIsUnoccludeTransitionFlagEnabled) {
+                    mView.setAlpha(1f);
+                    if (mAmbientCustomImage != null) {
+                        mAmbientCustomImage.setAlpha(1f);
+                    }
+                    if (mAmbientText != null) {
+                        mAmbientText.setAlpha(1f);
+                    }
+                }
             }
         } else {
-            log("Direct set Visibility to GONE");
             mView.setVisibility(View.GONE);
             mView.setAlpha(1f);
+            if (mAmbientCustomImage != null) {
+                mAmbientCustomImage.setAlpha(1f);
+            }
+            if (mAmbientText != null) {
+                mAmbientText.setAlpha(1f);
+            }
         }
 
         mLastOccludedState = isOccluded;
@@ -166,18 +231,14 @@ public class KeyguardVisibilityHelper {
     private final Runnable mAnimateKeyguardStatusViewInvisibleEndRunnable = () -> {
         mKeyguardViewVisibilityAnimating = false;
         mView.setVisibility(View.INVISIBLE);
-        log("Callback Set Visibility to INVISIBLE");
     };
 
     private final Runnable mAnimateKeyguardStatusViewGoneEndRunnable = () -> {
         mKeyguardViewVisibilityAnimating = false;
         mView.setVisibility(View.GONE);
-        log("CallbackSet Visibility to GONE");
     };
 
     private final Runnable mAnimateKeyguardStatusViewVisibleEndRunnable = () -> {
         mKeyguardViewVisibilityAnimating = false;
-        mView.setVisibility(View.VISIBLE);
-        log("Callback Set Visibility to VISIBLE");
     };
 }

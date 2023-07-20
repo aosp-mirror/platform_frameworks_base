@@ -284,6 +284,11 @@ interface IActivityTaskManager {
     int getLastResumedActivityUserId();
 
     /**
+     * Return the uid of last resumed activity.
+     */
+    int getLastResumedActivityUid();
+
+    /**
      * Updates global configuration and applies changes to the entire system.
      * @param values Update values for global configuration. If null is passed it will request the
      *               Window Manager to compute new config for the default display.

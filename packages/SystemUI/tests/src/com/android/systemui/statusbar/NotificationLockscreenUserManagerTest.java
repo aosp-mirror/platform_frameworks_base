@@ -44,7 +44,6 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -355,8 +354,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     mDeviceProvisionedController,
                     mKeyguardStateController,
                     mSettings,
-                    mock(DumpManager.class),
-                    mock(LockPatternUtils.class));
+                    mock(DumpManager.class));
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {

@@ -17,6 +17,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
@@ -186,6 +187,7 @@ public class WifiStatusTracker {
         mNetworkScoreManager = networkScoreManager;
         mConnectivityManager = connectivityManager;
         mCallback = callback;
+
         if (backgroundHandler == null) {
             HandlerThread handlerThread = new HandlerThread("WifiStatusTrackerHandler");
             handlerThread.start();
@@ -203,6 +205,20 @@ public class WifiStatusTracker {
                         mMainThreadHandler.post(() -> postResults());
                     }
                 };
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.WIFI_OFF_TIMEOUT),
+                false,
+                new ContentObserver(mMainThreadHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        super.onChange(selfChange);
+                        WifiTimeoutReceiver.setTimeoutAlarm(context,
+                                Settings.Global.getLong(context.getContentResolver(),
+                                        Settings.Global.WIFI_OFF_TIMEOUT, 0));
+                    }
+                }
+        );
     }
 
     public void setListening(boolean listening) {
@@ -249,6 +265,10 @@ public class WifiStatusTracker {
                 updateRssi(mWifiInfo.getRssi());
                 maybeRequestNetworkScore();
             }
+        } else {
+            WifiTimeoutReceiver.setTimeoutAlarm(mContext,
+                    Settings.Global.getLong(mContext.getContentResolver(),
+                            Settings.Global.WIFI_OFF_TIMEOUT, 0));
         }
         updateStatusLabel();
     }
@@ -260,6 +280,11 @@ public class WifiStatusTracker {
         String action = intent.getAction();
         if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
             updateWifiState();
+            if (intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_ENABLED) {
+                WifiTimeoutReceiver.setTimeoutAlarm(mContext,
+                        Settings.Global.getLong(mContext.getContentResolver(),
+                                Settings.Global.WIFI_OFF_TIMEOUT, 0));
+            }
         }
     }
 
@@ -278,6 +303,10 @@ public class WifiStatusTracker {
             subId = mWifiInfo.getSubscriptionId();
             updateRssi(mWifiInfo.getRssi());
             maybeRequestNetworkScore();
+        } else {
+            WifiTimeoutReceiver.setTimeoutAlarm(mContext,
+                    Settings.Global.getLong(mContext.getContentResolver(),
+                            Settings.Global.WIFI_OFF_TIMEOUT, 0));
         }
     }
 
@@ -391,3 +420,4 @@ public class WifiStatusTracker {
         }
     }
 }
+

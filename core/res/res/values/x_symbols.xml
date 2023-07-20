@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copyright (C) 2018-2022 The Project-Xtended ROM
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<resources>
+
+  <!-- Device keyhandlers -->
+  <java-symbol type="array" name="config_deviceKeyHandlerLibs" />
+  <java-symbol type="array" name="config_deviceKeyHandlerClasses" />
+
+  <!-- Alert slider. -->
+  <java-symbol type="string" name="alert_slider_state_path" />
+  <java-symbol type="string" name="alert_slider_uevent_match_path" />
+  <java-symbol type="bool" name="config_hasAlertSlider" />
+  <java-symbol type="string" name="config_alertSliderIntent" />
+  <java-symbol type="integer" name="config_alertSliderLocation" />
+  <java-symbol type="string" name="config_alertSliderIntent" />
+
+  <!-- For dynamic default font styles -->
+  <java-symbol type="string" name="config_bodyFontFamily" />
+
+  <!-- Vendor platform signatures -->
+  <java-symbol type="array" name="config_vendorPlatformSignatures" />
+
+  <!-- Advanced reboot -->
+  <java-symbol type="string" name="reboot_to_recovery_title" />
+  <java-symbol type="string" name="reboot_to_recovery_message" />
+  <java-symbol type="string" name="reboot_to_bootloader_title" />
+  <java-symbol type="string" name="reboot_to_bootloader_message" />
+  <java-symbol type="string" name="reboot_to_fastboot_title" />
+  <java-symbol type="string" name="reboot_to_fastboot_message" />
+  <java-symbol type="string" name="reboot_to_fastbootd_title" />
+  <java-symbol type="string" name="reboot_to_fastbootd_message" />
+  <java-symbol type="string" name="reboot_title" />
+  <java-symbol type="string" name="reboot_message" />
+
+  <!-- Powermenu animations -->
+  <java-symbol type="style" name="GlobalActionsAnimation" />
+  <java-symbol type="style" name="GlobalActionsAnimationTop" />
+  <java-symbol type="style" name="GlobalActionsAnimationEnter" />
+  <java-symbol type="style" name="GlobalActionsAnimationFly" />
+  <java-symbol type="style" name="GlobalActionsAnimationTn" />
+  <java-symbol type="style" name="GlobalActionsAnimationTranslucent" />
+  <java-symbol type="style" name="GlobalActionsAnimationXylon" />
+  <java-symbol type="style" name="GlobalActionsAnimationCard" />
+  <java-symbol type="style" name="GlobalActionsAnimationRotate" />
+
+  <!-- Global Actions pref list -->
+  <java-symbol type="array" name="custom_config_globalActionsList" />
+
+    <!-- Whether device has dash charging support -->
+    <java-symbol type="bool" name="config_hasDashCharger" />
+
+    <!-- Whether device has warp charging support -->
+    <java-symbol type="bool" name="config_hasWarpCharger" />
+
+    <!-- Paths to OP warp charging status file -->
+    <java-symbol type="string" name="config_opWarpChargerStatusPaths" />
+  
+    <!-- Whether device has VOOC charging support -->
+    <java-symbol type="bool" name="config_hasVoocCharger" />
+
+    <!-- Whether device has SuperDart charging support -->
+    <java-symbol type="bool" name="config_hasSuperDartCharger" />
+
+  <!-- App error dialog -->
+  <java-symbol type="id" name="aerr_copy" />
+  <java-symbol type="string" name="url_copy_success" />
+  <java-symbol type="string" name="url_copy_failed" />
+
+  <!-- Proximity check on screen on -->
+  <java-symbol type="bool" name="config_proximityCheckOnWake" />
+
+  <!-- Proximity check timeout -->
+  <java-symbol type="integer" name="config_proximityCheckTimeout" />
+
+  <!-- Proximity check on screen on default -->
+  <java-symbol type="bool" name="config_proximityCheckOnWakeEnabledByDefault" />
+
+  <!-- NightLight FOD -->
+  <java-symbol type="bool" name="disable_fod_night_light"/>
+
+  <!-- Light / Regular style fonts -->
+  <java-symbol type="string" name="config_lightFontFamily" />
+  <java-symbol type="string" name="config_regularFontFamily" />
+
+  <!-- Wether to handle audio direction changes between major call states -->
+  <java-symbol type="bool" name="config_handleAudioDirectionChangesBetweenCallStateChanges" />
+  
+  <!-- Whether to cancel fingerprint operation if not idle -->
+  <java-symbol type="bool" name="config_fpCancelIfNotIdle" />
+  
+  <!-- Camera -->
+  <java-symbol type="array" name="config_cameraHFRPrivAppList" />
+  
+   <!-- Enforce DisplayModeDirector to select user preferred resolution -->
+   <java-symbol type="bool" name="config_forceToUseSelectedResolution" />
+
+  <!-- HW keys binding -->
+  <java-symbol type="integer" name="config_deviceHardwareKeys" />
+
+  <!-- Custom Animations -->
+  <java-symbol type="anim" name="custom_app_in" />
+  <java-symbol type="anim" name="custom_app_out" />
+
+  <!-- Device Hardware Wake Keys -->
+  <java-symbol type="integer" name="config_deviceHardwareWakeKeys" />
+
+  <!-- Path to fast charging status file to detect whether an oem fast charger is active -->
+  <java-symbol type="string" name="config_oemFastChargerStatusPath" />
+  <!-- Path to fast charging status file to detect whether an oem fast charger is active -->
+  <java-symbol type="string" name="config_oemFastChargerStatusPath2" />
+  <!-- Expected value from fast charging status file -->
+  <java-symbol type="string" name="config_oemFastChargerStatusValue" />
+
+  <!-- Location indicator -->
+  <java-symbol type="drawable" name="stat_sys_location" />
+
+  <!-- Whether to cleanup fingerprints upon connection to the daemon and when user switches -->
+  <java-symbol type="bool" name="config_cleanupUnusedFingerprints" />
+
+    <!-- Parallel space badge -->
+    <java-symbol type="string" name="parallel_space_badge_label" />
+    <java-symbol type="drawable" name="ic_parallel_badge" />
+    <java-symbol type="drawable" name="ic_parallel_icon_badge" />
+
+    <!-- Parallel space badge colors -->
+    <java-symbol type="color" name="parallel_badge_1" />
+    <java-symbol type="color" name="parallel_badge_2" />
+    <java-symbol type="color" name="parallel_badge_3" />
+    <java-symbol type="color" name="parallel_badge_4" />
+    <java-symbol type="color" name="parallel_badge_5" />
+    <java-symbol type="color" name="parallel_badge_6" />
+    <java-symbol type="color" name="parallel_badge_7" />
+    <java-symbol type="color" name="parallel_badge_8" />
+    <java-symbol type="color" name="parallel_badge_9" />
+
+    <!-- Parallel Space -->
+    <java-symbol type="integer" name="config_parallelSpaceMaxCount" />
+    <java-symbol type="array" name="config_parallelSpaceWhitelist" />
+    <java-symbol type="array" name="config_parallelSpaceBlocklist" />
+
+    <!-- Smart charging -->
+    <java-symbol type="bool" name="config_smartChargingAvailable" />
+    <java-symbol type="integer" name="config_smartChargingBatteryLevel" />
+    <java-symbol type="integer" name="config_smartChargingBatteryResumeLevel" />
+    <java-symbol type="string" name="config_smartChargingSysfsNode" />
+    <java-symbol type="string" name="config_smartChargingSuspendValue" />
+    <java-symbol type="string" name="config_smartChargingResumeValue" />
+    
+   <!-- Settings Restart -->
+   <java-symbol type="string" name="settings_restart_title" />
+   <java-symbol type="string" name="settings_restart_message" />
+   
+    <!-- Battery Light -->
+    <java-symbol type="bool" name="config_hasNotificationLed" />
+    <java-symbol type="bool" name="config_intrusiveBatteryLed" />
+    <java-symbol type="bool" name="config_multiColorBatteryLed" />
+    <java-symbol type="bool" name="config_ledCanPulse" />
+
+    <!-- Boost Framework -->
+    <java-symbol type="bool" name="config_supportsBoostFramework" />
+       
+    <!-- Screen off delay -->
+    <java-symbol type="integer" name="config_screen_off_delay" />
+
+    <!-- Enable face auth only when swiping security view -->
+    <java-symbol type="bool" name="config_faceAuthOnlyOnSecurityView" />
+
+    <!-- InputFilter Class-->
+    <java-symbol type="string" name="config_deviceInputFilterLibs" />
+    <java-symbol type="string" name="config_deviceInputFilterClasses" />
+            
+    <!-- SystemUI Restart -->
+    <java-symbol type="string" name="systemui_restart_title" />
+    <java-symbol type="string" name="systemui_restart_message" />
+
+    <!-- Whether devices suports in-display fingerprint when screen is off -->
+    <java-symbol type="bool" name="config_supportScreenOffUdfps" />
+
+    <!-- Sensor block -->
+    <java-symbol type="array" name="config_blockPackagesSensorDrain" />
+
+    <!-- Mock Oplus LinearmotorVibratorService -->
+    <java-symbol type="bool" name="config_mockOplusLinearmotorVibratorService" />
+
+    <!-- Assisted GPS -->
+    <java-symbol type="string" name="location_agps_access_summary" />
+</resources>

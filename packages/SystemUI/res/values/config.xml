@@ -53,22 +53,22 @@
     <bool name="config_navigation_bar_enable_auto_dim_no_visible_wallpaper">true</bool>
 
     <!-- The maximum number of tiles in the QuickQSPanel -->
-    <integer name="quick_qs_panel_max_tiles">4</integer>
+    <integer name="quick_qs_panel_max_tiles">@integer/quick_qs_panel_max_tiles_custom</integer>
 
     <!-- The maximum number of rows in the QuickQSPanel -->
-    <integer name="quick_qs_panel_max_rows">2</integer>
+    <integer name="quick_qs_panel_max_rows">@integer/quick_qs_panel_max_rows_custom</integer>
 
     <!-- The number of columns in the QuickSettings -->
-    <integer name="quick_settings_num_columns">2</integer>
+    <integer name="quick_settings_num_columns">@integer/quick_settings_num_columns_custom</integer>
 
     <!-- The number of rows in the QuickSettings -->
-    <integer name="quick_settings_max_rows">4</integer>
+    <integer name="quick_settings_max_rows">@integer/quick_settings_max_rows_custom</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,custom(com.android.permissioncontroller/.permission.service.SafetyCenterQsTileService)
+        internet,wifi,cell,bt,dataswitch,flashlight,dnd,alarm,airplane,controls,wallet,nfc,rotation,battery,caffeine,cast,screenrecord,mictoggle,cameratoggle,custom(com.android.permissioncontroller/.permission.service.SafetyCenterQsTileService)
     </string>
 
     <!-- The class path of the Safety Quick Settings Tile -->
@@ -81,7 +81,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream,font_scaling
+        internet,wifi,cell,bt,dataswitch,flashlight,dnd,alarm,weather,airplane,controls,wallet,nfc,rotation,battery,caffeine,cast,screenrecord,sound,mictoggle,cameratoggle,aod,vpn,onthego,location,refresh_rate,hotspot,ambient_display,sync,reboot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream,preferred_network
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -401,7 +401,7 @@
     <bool name="config_smart_replies_in_notifications_enabled">true</bool>
 
     <!-- Smart replies in notifications: Whether we disable the feature unless the app targets P -->
-    <bool name="config_smart_replies_in_notifications_requires_targeting_p">true</bool>
+    <bool name="config_smart_replies_in_notifications_requires_targeting_p">false</bool>
 
     <!-- Smart replies in notifications: Maximum number of times SmartReplyView will try to find a
          better (narrower) line-break for a double-line smart reply button. -->
@@ -437,11 +437,6 @@
          This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_screenshotEditor" translatable="false"></string>
 
-    <!-- ComponentName for the file browsing app that the system would expect to be used in work
-         profile. The icon for this app will be shown to the user when informing them that a
-         screenshot has been saved to work profile. If blank, a default icon will be shown. -->
-    <string name="config_sceenshotWorkProfileFilesApp" translatable="false"></string>
-
     <!-- Remote copy default activity.  Must handle REMOTE_COPY_ACTION intents.
      This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_remoteCopyPackage" translatable="false"></string>
@@ -450,7 +445,7 @@
     <integer name="watch_heap_limit">256000</integer>
 
     <!-- SystemUI Plugins that can be loaded on user builds. -->
-    <string-array name="config_pluginAllowlist" translatable="false">
+    <string-array name="config_pluginWhitelist" translatable="false">
         <item>com.android.systemui</item>
     </string-array>
 
@@ -654,7 +649,7 @@
         <item>26</item> <!-- MOUTH_COVERING_DETECTED -->
     </integer-array>
 
-    <!-- Which device wake-ups will trigger passive auth. These values correspond with
+    <!-- Which device wake-ups will trigger face auth. These values correspond with
          PowerManager#WakeReason. -->
     <integer-array name="config_face_auth_wake_up_triggers">
         <item>1</item> <!-- WAKE_REASON_POWER_BUTTON -->
@@ -663,21 +658,10 @@
         <item>7</item> <!-- WAKE_REASON_WAKE_MOTION -->
         <item>9</item> <!-- WAKE_REASON_LID -->
         <item>10</item> <!-- WAKE_REASON_DISPLAY_GROUP_ADDED -->
-        <item>12</item> <!-- WAKE_REASON_UNFOLD_DEVICE -->
         <item>15</item> <!-- WAKE_REASON_TAP -->
         <item>16</item> <!-- WAKE_REASON_LIFT -->
         <item>17</item> <!-- WAKE_REASON_BIOMETRIC -->
     </integer-array>
-
-    <!-- Whether to support posture listening for face auth, default is 0(DEVICE_POSTURE_UNKNOWN)
-         means systemui will try listening on all postures.
-         0 : DEVICE_POSTURE_UNKNOWN
-         1 : DEVICE_POSTURE_CLOSED
-         2 : DEVICE_POSTURE_HALF_OPENED
-         3 : DEVICE_POSTURE_OPENED
-         4 : DEVICE_POSTURE_FLIPPED
-    -->
-    <integer name="config_face_auth_supported_posture">0</integer>
 
     <!-- Whether the communal service should be enabled -->
     <bool name="config_communalServiceEnabled">false</bool>
@@ -774,7 +758,7 @@
     <!-- Duration in milliseconds of the dream in complications fade-in animation. -->
     <integer name="config_dreamOverlayInComplicationsDurationMs">250</integer>
     <!-- Duration in milliseconds of the y-translation animation when entering a dream -->
-    <integer name="config_dreamOverlayInTranslationYDurationMs">1167</integer>
+    <integer name="config_dreamOverlayInTranslationYDurationMs">917</integer>
 
     <!-- Delay in milliseconds before switching to the dock user and dreaming if a secondary user is
     active when the device is locked and docked. 0 indicates disabled. Default is 1 minute. -->
@@ -825,12 +809,4 @@
         <item>bottom_end:wallet</item>
     </string-array>
 
-    <!-- Package name for the app that implements the wallpaper picker. -->
-    <string name="config_wallpaperPickerPackage" translatable="false">
-        com.android.wallpaper
-    </string>
-
-    <!-- Whether the floating rotation button should be on the left/right in the device's natural
-         orientation -->
-    <bool name="floating_rotation_button_position_left">true</bool>
 </resources>

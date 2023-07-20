@@ -23,6 +23,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.Layout
 import android.text.TextUtils
 import android.text.format.DateFormat
@@ -54,13 +56,14 @@ class AnimatableClockView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : TextView(context, attrs, defStyleAttr, defStyleRes) {
+    var tag: String = "UnnamedClockView"
     var logBuffer: LogBuffer? = null
 
     private val time = Calendar.getInstance()
 
     private val dozingWeightInternal: Int
     private val lockScreenWeightInternal: Int
-    private val isSingleLineInternal: Boolean
+    private var isSingleLineInternal: Boolean
 
     private var format: CharSequence? = null
     private var descFormat: CharSequence? = null
@@ -92,6 +95,12 @@ class AnimatableClockView @JvmOverloads constructor(
      * Burmese, this space can be significant and should be accounted for when computing layout.
      */
     val bottom get() = paint?.fontMetrics?.bottom ?: 0f
+    
+    private fun getClockFormat(): Int = Settings.System.getIntForUser(context.contentResolver, 
+    Settings.System.CLOCK_USE_CUSTOM_FORMAT, 0,  UserHandle.USER_CURRENT)
+    
+    private fun isClockSingleLine(): Boolean = Settings.System.getIntForUser(context.contentResolver, 
+    Settings.System.CLOCK_USE_CUSTOM_FORMAT, 0,  UserHandle.USER_CURRENT) == 1
 
     init {
         val animatableClockViewAttributes = context.obtainStyledAttributes(
@@ -126,12 +135,17 @@ class AnimatableClockView @JvmOverloads constructor(
                 textViewAttributes.recycle()
             }
 
+	if (getClockFormat() > 0) {
+	  setSingleLine(isClockSingleLine()) 
+          isSingleLineInternal = isClockSingleLine()
+        }
+
         refreshFormat()
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        logBuffer?.log(TAG, DEBUG, "onAttachedToWindow")
+        logBuffer?.log(tag, DEBUG, "onAttachedToWindow")
         refreshFormat()
     }
 
@@ -147,7 +161,7 @@ class AnimatableClockView @JvmOverloads constructor(
         time.timeInMillis = timeOverrideInMillis ?: System.currentTimeMillis()
         contentDescription = DateFormat.format(descFormat, time)
         val formattedText = DateFormat.format(format, time)
-        logBuffer?.log(TAG, DEBUG,
+        logBuffer?.log(tag, DEBUG,
                 { str1 = formattedText?.toString() },
                 { "refreshTime: new formattedText=$str1" }
         )
@@ -156,7 +170,7 @@ class AnimatableClockView @JvmOverloads constructor(
         // relayout if the text didn't actually change.
         if (!TextUtils.equals(text, formattedText)) {
             text = formattedText
-            logBuffer?.log(TAG, DEBUG,
+            logBuffer?.log(tag, DEBUG,
                     { str1 = formattedText?.toString() },
                     { "refreshTime: done setting new time text to: $str1" }
             )
@@ -166,17 +180,17 @@ class AnimatableClockView @JvmOverloads constructor(
             // without being notified TextInterpolator being notified.
             if (layout != null) {
                 textAnimator?.updateLayout(layout)
-                logBuffer?.log(TAG, DEBUG, "refreshTime: done updating textAnimator layout")
+                logBuffer?.log(tag, DEBUG, "refreshTime: done updating textAnimator layout")
             }
             requestLayout()
-            logBuffer?.log(TAG, DEBUG, "refreshTime: after requestLayout")
+            logBuffer?.log(tag, DEBUG, "refreshTime: after requestLayout")
         }
     }
 
     fun onTimeZoneChanged(timeZone: TimeZone?) {
         time.timeZone = timeZone
         refreshFormat()
-        logBuffer?.log(TAG, DEBUG,
+        logBuffer?.log(tag, DEBUG,
                 { str1 = timeZone?.toString() },
                 { "onTimeZoneChanged newTimeZone=$str1" }
         )
@@ -193,7 +207,7 @@ class AnimatableClockView @JvmOverloads constructor(
         } else {
             animator.updateLayout(layout)
         }
-        logBuffer?.log(TAG, DEBUG, "onMeasure")
+        logBuffer?.log(tag, DEBUG, "onMeasure")
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -205,12 +219,12 @@ class AnimatableClockView @JvmOverloads constructor(
         } else {
             super.onDraw(canvas)
         }
-        logBuffer?.log(TAG, DEBUG, "onDraw")
+        logBuffer?.log(tag, DEBUG, "onDraw lastDraw")
     }
 
     override fun invalidate() {
         super.invalidate()
-        logBuffer?.log(TAG, DEBUG, "invalidate")
+        logBuffer?.log(tag, DEBUG, "invalidate")
     }
 
     override fun onTextChanged(
@@ -220,7 +234,7 @@ class AnimatableClockView @JvmOverloads constructor(
             lengthAfter: Int
     ) {
         super.onTextChanged(text, start, lengthBefore, lengthAfter)
-        logBuffer?.log(TAG, DEBUG,
+        logBuffer?.log(tag, DEBUG,
                 { str1 = text.toString() },
                 { "onTextChanged text=$str1" }
         )
@@ -237,7 +251,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateColorChange() {
-        logBuffer?.log(TAG, DEBUG, "animateColorChange")
+        logBuffer?.log(tag, DEBUG, "animateColorChange")
         setTextStyle(
             weight = lockScreenWeight,
             textSize = -1f,
@@ -259,7 +273,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateAppearOnLockscreen() {
-        logBuffer?.log(TAG, DEBUG, "animateAppearOnLockscreen")
+        logBuffer?.log(tag, DEBUG, "animateAppearOnLockscreen")
         setTextStyle(
             weight = dozingWeight,
             textSize = -1f,
@@ -284,7 +298,7 @@ class AnimatableClockView @JvmOverloads constructor(
         if (isAnimationEnabled && textAnimator == null) {
             return
         }
-        logBuffer?.log(TAG, DEBUG, "animateFoldAppear")
+        logBuffer?.log(tag, DEBUG, "animateFoldAppear")
         setTextStyle(
             weight = lockScreenWeightInternal,
             textSize = -1f,
@@ -311,7 +325,7 @@ class AnimatableClockView @JvmOverloads constructor(
             // Skip charge animation if dozing animation is already playing.
             return
         }
-        logBuffer?.log(TAG, DEBUG, "animateCharge")
+        logBuffer?.log(tag, DEBUG, "animateCharge")
         val startAnimPhase2 = Runnable {
             setTextStyle(
                 weight = if (isDozing()) dozingWeight else lockScreenWeight,
@@ -335,7 +349,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     fun animateDoze(isDozing: Boolean, animate: Boolean) {
-        logBuffer?.log(TAG, DEBUG, "animateDoze")
+        logBuffer?.log(tag, DEBUG, "animateDoze")
         setTextStyle(
             weight = if (isDozing) dozingWeight else lockScreenWeight,
             textSize = -1f,
@@ -454,7 +468,7 @@ class AnimatableClockView @JvmOverloads constructor(
             isSingleLineInternal && !use24HourFormat -> Patterns.sClockView12
             else -> DOUBLE_LINE_FORMAT_12_HOUR
         }
-        logBuffer?.log(TAG, DEBUG,
+        logBuffer?.log(tag, DEBUG,
                 { str1 = format?.toString() },
                 { "refreshFormat format=$str1" }
         )
@@ -465,7 +479,6 @@ class AnimatableClockView @JvmOverloads constructor(
 
     fun dump(pw: PrintWriter) {
         pw.println("$this")
-        pw.println("    alpha=$alpha")
         pw.println("    measuredWidth=$measuredWidth")
         pw.println("    measuredHeight=$measuredHeight")
         pw.println("    singleLineInternal=$isSingleLineInternal")
@@ -626,7 +639,7 @@ class AnimatableClockView @JvmOverloads constructor(
     }
 
     companion object {
-        private val TAG = AnimatableClockView::class.simpleName!!
+        private val TAG = AnimatableClockView::class.simpleName
         const val ANIMATION_DURATION_FOLD_TO_AOD: Int = 600
         private const val DOUBLE_LINE_FORMAT_12_HOUR = "hh\nmm"
         private const val DOUBLE_LINE_FORMAT_24_HOUR = "HH\nmm"

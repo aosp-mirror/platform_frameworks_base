@@ -35,11 +35,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -120,13 +120,11 @@ public class DozeSensorsTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
-        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
         when(mAmbientDisplayConfiguration.tapSensorTypeMapping())
                 .thenReturn(new String[]{"tapSensor"});
         when(mAmbientDisplayConfiguration.getWakeLockScreenDebounce()).thenReturn(5000L);
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
-        when(mAmbientDisplayConfiguration.enabled(ActivityManager.getCurrentUser())).thenReturn(
-                true);
+        when(mAmbientDisplayConfiguration.enabled(UserHandle.USER_CURRENT)).thenReturn(true);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
@@ -146,7 +144,7 @@ public class DozeSensorsTest extends SysuiTestCase {
 
     @Test
     public void testSensorDebounce() {
-        mDozeSensors.setListening(true, true, true);
+        mDozeSensors.setListening(true, true);
 
         mWakeLockScreenListener.onSensorChanged(mock(SensorManagerPlugin.SensorEvent.class));
         mTestableLooper.processAllMessages();
@@ -164,7 +162,7 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Test
     public void testSetListening_firstTrue_registerSettingsObserver() {
         verify(mSensorManager, never()).registerListener(any(), any(Sensor.class), anyInt());
-        mDozeSensors.setListening(true, true, true);
+        mDozeSensors.setListening(true, true);
 
         verify(mTriggerSensor).registerSettingsObserver(any(ContentObserver.class));
     }
@@ -172,8 +170,8 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Test
     public void testSetListening_twiceTrue_onlyRegisterSettingsObserverOnce() {
         verify(mSensorManager, never()).registerListener(any(), any(Sensor.class), anyInt());
-        mDozeSensors.setListening(true, true, true);
-        mDozeSensors.setListening(true, true, true);
+        mDozeSensors.setListening(true, true);
+        mDozeSensors.setListening(true, true);
 
         verify(mTriggerSensor, times(1)).registerSettingsObserver(any(ContentObserver.class));
     }
@@ -198,7 +196,7 @@ public class DozeSensorsTest extends SysuiTestCase {
         assertFalse(mSensorTap.mRequested);
 
         // WHEN we're now in a low powered state
-        dozeSensors.setListeningWithPowerState(true, true, true, true);
+        dozeSensors.setListening(true, true, true);
 
         // THEN the tap sensor is registered
         assertTrue(mSensorTap.mRequested);
@@ -209,12 +207,12 @@ public class DozeSensorsTest extends SysuiTestCase {
         // GIVEN doze sensors enabled
         when(mAmbientDisplayConfiguration.enabled(anyInt())).thenReturn(true);
 
-        // GIVEN a trigger sensor that's enabled by settings
+        // GIVEN a trigger sensor
         Sensor mockSensor = mock(Sensor.class);
-        TriggerSensor triggerSensor = mDozeSensors.createDozeSensorWithSettingEnabled(
+        TriggerSensor triggerSensor = mDozeSensors.createDozeSensor(
                 mockSensor,
-                /* settingEnabled */ true
-        );
+                /* settingEnabled */ true,
+                /* requiresTouchScreen */ true);
         when(mSensorManager.requestTriggerSensor(eq(triggerSensor), eq(mockSensor)))
                 .thenReturn(true);
 
@@ -230,12 +228,12 @@ public class DozeSensorsTest extends SysuiTestCase {
         // GIVEN doze sensors enabled
         when(mAmbientDisplayConfiguration.enabled(anyInt())).thenReturn(true);
 
-        // GIVEN a trigger sensor that's not enabled by settings
+        // GIVEN a trigger sensor
         Sensor mockSensor = mock(Sensor.class);
-        TriggerSensor triggerSensor = mDozeSensors.createDozeSensorWithSettingEnabled(
+        TriggerSensor triggerSensor = mDozeSensors.createDozeSensor(
                 mockSensor,
-                /* settingEnabled*/ false
-        );
+                /* settingEnabled*/ false,
+                /* requiresTouchScreen */ true);
         when(mSensorManager.requestTriggerSensor(eq(triggerSensor), eq(mockSensor)))
                 .thenReturn(true);
 
@@ -251,12 +249,12 @@ public class DozeSensorsTest extends SysuiTestCase {
         // GIVEN doze sensors enabled
         when(mAmbientDisplayConfiguration.enabled(anyInt())).thenReturn(true);
 
-        // GIVEN a trigger sensor that's not enabled by settings
+        // GIVEN a trigger sensor that's
         Sensor mockSensor = mock(Sensor.class);
-        TriggerSensor triggerSensor = mDozeSensors.createDozeSensorWithSettingEnabled(
+        TriggerSensor triggerSensor = mDozeSensors.createDozeSensor(
                 mockSensor,
-                /* settingEnabled*/ false
-        );
+                /* settingEnabled*/ false,
+                /* requiresTouchScreen */ true);
         when(mSensorManager.requestTriggerSensor(eq(triggerSensor), eq(mockSensor)))
                 .thenReturn(true);
 
@@ -266,7 +264,7 @@ public class DozeSensorsTest extends SysuiTestCase {
         // WHEN ignoreSetting is called
         triggerSensor.ignoreSetting(true);
 
-        // THEN the sensor is still registered since the setting is ignore
+        // THEN the sensor is registered
         assertTrue(triggerSensor.mRegistered);
     }
 
@@ -277,10 +275,10 @@ public class DozeSensorsTest extends SysuiTestCase {
 
         // GIVEN a trigger sensor
         Sensor mockSensor = mock(Sensor.class);
-        TriggerSensor triggerSensor = mDozeSensors.createDozeSensorWithSettingEnabled(
+        TriggerSensor triggerSensor = mDozeSensors.createDozeSensor(
                 mockSensor,
-                /* settingEnabled*/ true
-        );
+                /* settingEnabled*/ true,
+                /* requiresTouchScreen */ true);
         when(mSensorManager.requestTriggerSensor(eq(triggerSensor), eq(mockSensor)))
                 .thenReturn(true);
 
@@ -297,7 +295,7 @@ public class DozeSensorsTest extends SysuiTestCase {
         // GIVEN doze sensor that supports postures
         Sensor closedSensor = createSensor(Sensor.TYPE_LIGHT, Sensor.STRING_TYPE_LIGHT);
         Sensor openedSensor = createSensor(Sensor.TYPE_PROXIMITY, Sensor.STRING_TYPE_LIGHT);
-        TriggerSensor triggerSensor = mDozeSensors.createDozeSensorForPosture(
+        TriggerSensor triggerSensor = mDozeSensors.createDozeSensor(
                 new Sensor[] {
                         null /* unknown */,
                         closedSensor,
@@ -318,7 +316,7 @@ public class DozeSensorsTest extends SysuiTestCase {
         // GIVEN doze sensor that supports postures
         Sensor closedSensor = createSensor(Sensor.TYPE_LIGHT, Sensor.STRING_TYPE_LIGHT);
         Sensor openedSensor = createSensor(Sensor.TYPE_PROXIMITY, Sensor.STRING_TYPE_LIGHT);
-        TriggerSensor triggerSensor = mDozeSensors.createDozeSensorForPosture(
+        TriggerSensor triggerSensor = mDozeSensors.createDozeSensor(
                 new Sensor[] {
                         null /* unknown */,
                         closedSensor,
@@ -347,7 +345,7 @@ public class DozeSensorsTest extends SysuiTestCase {
         // GIVEN doze sensor that supports postures
         Sensor closedSensor = createSensor(Sensor.TYPE_LIGHT, Sensor.STRING_TYPE_LIGHT);
         Sensor openedSensor = createSensor(Sensor.TYPE_PROXIMITY, Sensor.STRING_TYPE_LIGHT);
-        TriggerSensor triggerSensor = mDozeSensors.createDozeSensorForPosture(
+        TriggerSensor triggerSensor = mDozeSensors.createDozeSensor(
                 new Sensor[] {
                         null /* unknown */,
                         closedSensor,
@@ -402,7 +400,7 @@ public class DozeSensorsTest extends SysuiTestCase {
     public void testUdfpsEnrollmentChanged() throws Exception {
         // GIVEN a UDFPS_LONG_PRESS trigger sensor that's not configured
         Sensor mockSensor = mock(Sensor.class);
-        TriggerSensor triggerSensor = mDozeSensors.createDozeSensorForPosture(
+        TriggerSensor triggerSensor = mDozeSensors.createDozeSensor(
                 mockSensor,
                 REASON_SENSOR_UDFPS_LONG_PRESS,
                 /* configured */ false);
@@ -411,7 +409,7 @@ public class DozeSensorsTest extends SysuiTestCase {
                 .thenReturn(true);
 
         // WHEN listening state is set to TRUE
-        mDozeSensors.setListening(true, true, true);
+        mDozeSensors.setListening(true, true);
 
         // THEN mRegistered is still false b/c !mConfigured
         assertFalse(triggerSensor.mConfigured);
@@ -438,35 +436,6 @@ public class DozeSensorsTest extends SysuiTestCase {
         for (TriggerSensor sensor : dozeSensors.mTriggerSensors) {
             assertFalse(sensor.mIgnoresSetting);
         }
-    }
-
-    @Test
-    public void aodOnlySensor_onlyRegisteredWhenAodSensorsIncluded() {
-        // GIVEN doze sensors enabled
-        when(mAmbientDisplayConfiguration.enabled(anyInt())).thenReturn(true);
-
-        // GIVEN a trigger sensor that requires aod
-        Sensor mockSensor = mock(Sensor.class);
-        TriggerSensor aodOnlyTriggerSensor = mDozeSensors.createDozeSensorRequiringAod(mockSensor);
-        when(mSensorManager.requestTriggerSensor(eq(aodOnlyTriggerSensor), eq(mockSensor)))
-                .thenReturn(true);
-        mDozeSensors.addSensor(aodOnlyTriggerSensor);
-
-        // WHEN aod only sensors aren't included
-        mDozeSensors.setListening(/* listen */ true, /* includeTouchScreenSensors */true,
-                /* includeAodOnlySensors */false);
-
-        // THEN the sensor is not registered or requested
-        assertFalse(aodOnlyTriggerSensor.mRequested);
-        assertFalse(aodOnlyTriggerSensor.mRegistered);
-
-        // WHEN aod only sensors ARE included
-        mDozeSensors.setListening(/* listen */ true, /* includeTouchScreenSensors */true,
-                /* includeAodOnlySensors */true);
-
-        // THEN the sensor is registered and requested
-        assertTrue(aodOnlyTriggerSensor.mRequested);
-        assertTrue(aodOnlyTriggerSensor.mRegistered);
     }
 
     @Test
@@ -525,8 +494,8 @@ public class DozeSensorsTest extends SysuiTestCase {
             mTriggerSensors = new TriggerSensor[] {mTriggerSensor, mSensorTap};
         }
 
-        public TriggerSensor createDozeSensorWithSettingEnabled(Sensor sensor,
-                boolean settingEnabled) {
+        public TriggerSensor createDozeSensor(Sensor sensor, boolean settingEnabled,
+                boolean requiresTouchScreen) {
             return new TriggerSensor(/* sensor */ sensor,
                     /* setting name */ "test_setting",
                     /* settingDefault */ settingEnabled,
@@ -535,13 +504,11 @@ public class DozeSensorsTest extends SysuiTestCase {
                     /* reportsTouchCoordinate*/ false,
                     /* requiresTouchscreen */ false,
                     /* ignoresSetting */ false,
-                    /* requiresProx */ false,
-                    /* immediatelyReRegister */ true,
-                    /* requiresAod */false
-            );
+                    requiresTouchScreen,
+                    /* immediatelyReRegister */ true);
         }
 
-        public TriggerSensor createDozeSensorForPosture(
+        public TriggerSensor createDozeSensor(
                 Sensor sensor,
                 int pulseReason,
                 boolean configured
@@ -555,35 +522,15 @@ public class DozeSensorsTest extends SysuiTestCase {
                     /* requiresTouchscreen */ false,
                     /* ignoresSetting */ false,
                     /* requiresTouchScreen */ false,
-                    /* immediatelyReRegister*/ true,
-                    false
-            );
+                    /* immediatelyReRegister*/ true);
         }
 
         /**
-         * Create a doze sensor that requires Aod
+         * create a doze sensor that supports postures and is enabled
          */
-        public TriggerSensor createDozeSensorRequiringAod(Sensor sensor) {
-            return new TriggerSensor(/* sensor */ sensor,
-                    /* setting name */ "aod_requiring_sensor",
-                    /* settingDefault */ true,
-                    /* configured */ true,
-                    /* pulseReason*/ 0,
-                    /* reportsTouchCoordinate*/ false,
-                    /* requiresTouchscreen */ false,
-                    /* ignoresSetting */ false,
-                    /* requiresProx */ false,
-                    /* immediatelyReRegister */ true,
-                    /* requiresAoD */ true
-            );
-        }
-
-        /**
-         * Create a doze sensor that supports postures and is enabled
-         */
-        public TriggerSensor createDozeSensorForPosture(Sensor[] sensors, int posture) {
+        public TriggerSensor createDozeSensor(Sensor[] sensors, int posture) {
             return new TriggerSensor(/* sensor */ sensors,
-                    /* setting name */ "posture_test_setting",
+                    /* setting name */ "test_setting",
                     /* settingDefault */ true,
                     /* configured */ true,
                     /* pulseReason*/ 0,
@@ -592,9 +539,7 @@ public class DozeSensorsTest extends SysuiTestCase {
                     /* ignoresSetting */ true,
                     /* requiresProx */ false,
                     /* immediatelyReRegister */ true,
-                    posture,
-                    /* requiresUi */ false
-            );
+                    posture);
         }
 
         public void addSensor(TriggerSensor sensor) {

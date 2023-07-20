@@ -103,7 +103,6 @@ public class MarshalQueryableEnum<T extends Enum<T>> implements MarshalQueryable
         return new MarshalerEnum(managedType, nativeType);
     }
 
-    @SuppressWarnings("ReturnValueIgnored")
     @Override
     public boolean isTypeMappingSupported(TypeReference<T> managedType, int nativeType) {
         if (nativeType == TYPE_INT32 || nativeType == TYPE_BYTE) {

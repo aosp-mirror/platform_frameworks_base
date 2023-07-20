@@ -18,13 +18,13 @@
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:title="@string/nav_bar">
 
-    <com.android.systemui.tuner.RadioListPreference
+    <!--<com.android.systemui.tuner.RadioListPreference
         android:key="layout"
         android:title="@string/nav_bar_layout"
         android:summary="%s"
         android:persistent="false"
         android:entries="@array/nav_bar_layouts"
-        android:entryValues="@array/nav_bar_layouts_values" />
+        android:entryValues="@array/nav_bar_layouts_values" />-->
 
     <com.android.systemui.tuner.RadioListPreference
         android:key="type_left"

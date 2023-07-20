@@ -25,15 +25,17 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.util.mockito.whenever
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -58,6 +60,7 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
                 inputManager,
                 stylusUsiPowerUi,
                 featureFlags,
+                DIRECT_EXECUTOR,
             )
 
         whenever(featureFlags.isEnabled(Flags.ENABLE_USI_BATTERY_NOTIFICATIONS)).thenReturn(true)
@@ -76,33 +79,40 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun start_hostDeviceDoesNotSupportStylus_doesNotRegister() {
-        whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(EXTERNAL_DEVICE_ID))
-
+    fun start_addsBatteryListenerForInternalStylus() {
         startable.start()
 
-        verifyZeroInteractions(stylusManager)
+        verify(inputManager, times(1))
+            .addInputDeviceBatteryListener(STYLUS_DEVICE_ID, DIRECT_EXECUTOR, startable)
     }
 
     @Test
-    fun start_initStylusUsiPowerUi() {
-        startable.start()
-
-        verify(stylusUsiPowerUi, times(1)).init()
-    }
-
-    @Test
-    fun onStylusAdded_internal_updatesNotificationSuppression() {
+    fun onStylusAdded_internalStylus_addsBatteryListener() {
         startable.onStylusAdded(STYLUS_DEVICE_ID)
 
-        verify(stylusUsiPowerUi, times(1)).updateSuppression(false)
+        verify(inputManager, times(1))
+            .addInputDeviceBatteryListener(STYLUS_DEVICE_ID, DIRECT_EXECUTOR, startable)
     }
 
     @Test
-    fun onStylusAdded_external_noop() {
+    fun onStylusAdded_externalStylus_doesNotAddBatteryListener() {
         startable.onStylusAdded(EXTERNAL_DEVICE_ID)
 
-        verifyZeroInteractions(stylusUsiPowerUi)
+        verify(inputManager, never())
+            .addInputDeviceBatteryListener(EXTERNAL_DEVICE_ID, DIRECT_EXECUTOR, startable)
+    }
+
+    @Test
+    fun onStylusRemoved_registeredStylus_removesBatteryListener() {
+        startable.onStylusAdded(STYLUS_DEVICE_ID)
+        startable.onStylusRemoved(STYLUS_DEVICE_ID)
+
+        inOrder(inputManager).let {
+            it.verify(inputManager, times(1))
+                .addInputDeviceBatteryListener(STYLUS_DEVICE_ID, DIRECT_EXECUTOR, startable)
+            it.verify(inputManager, times(1))
+                .removeInputDeviceBatteryListener(STYLUS_DEVICE_ID, startable)
+        }
     }
 
     @Test
@@ -120,34 +130,28 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun onStylusUsiBatteryStateChanged_batteryPresentValidCapacity_refreshesNotification() {
-        val batteryState = FixedCapacityBatteryState(0.1f)
+    fun onBatteryStateChanged_batteryPresent_refreshesNotification() {
+        val batteryState = mock(BatteryState::class.java)
+        whenever(batteryState.isPresent).thenReturn(true)
 
-        startable.onStylusUsiBatteryStateChanged(STYLUS_DEVICE_ID, 123, batteryState)
+        startable.onBatteryStateChanged(STYLUS_DEVICE_ID, 123, batteryState)
 
-        verify(stylusUsiPowerUi, times(1)).updateBatteryState(STYLUS_DEVICE_ID, batteryState)
+        verify(stylusUsiPowerUi, times(1)).updateBatteryState(batteryState)
     }
 
     @Test
-    fun onStylusUsiBatteryStateChanged_batteryPresentInvalidCapacity_noop() {
-        val batteryState = FixedCapacityBatteryState(0f)
-
-        startable.onStylusUsiBatteryStateChanged(STYLUS_DEVICE_ID, 123, batteryState)
-
-        verifyNoMoreInteractions(stylusUsiPowerUi)
-    }
-
-    @Test
-    fun onStylusUsiBatteryStateChanged_batteryNotPresent_noop() {
+    fun onBatteryStateChanged_batteryNotPresent_noop() {
         val batteryState = mock(BatteryState::class.java)
         whenever(batteryState.isPresent).thenReturn(false)
 
-        startable.onStylusUsiBatteryStateChanged(STYLUS_DEVICE_ID, 123, batteryState)
+        startable.onBatteryStateChanged(STYLUS_DEVICE_ID, 123, batteryState)
 
         verifyNoMoreInteractions(stylusUsiPowerUi)
     }
 
     companion object {
+        private val DIRECT_EXECUTOR = Executor { r -> r.run() }
+
         private const val EXTERNAL_DEVICE_ID = 0
         private const val STYLUS_DEVICE_ID = 1
     }

@@ -67,7 +67,7 @@ private:
                     SkPoint pts[] = {SkPoint::Make(0, 0), SkPoint::Make(width, height)};
                     SkColor colors[2] = {Color::DeepPurple_500, Color::DeepOrange_500};
                     paint.setShader(SkGradientShader::MakeLinear(pts, colors, pos, 2,
-                                                                 SkTileMode::kClamp));
+                                                                 SkTileMode::kMirror));
 
                     // overdraw several times to emphasize shader cost
                     for (int i = 0; i < 10; i++) {

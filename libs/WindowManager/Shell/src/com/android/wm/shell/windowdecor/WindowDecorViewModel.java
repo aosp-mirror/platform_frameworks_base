@@ -29,8 +29,7 @@ import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
  */
 public interface WindowDecorViewModel {
     /**
-     * Sets the transition starter that starts freeform task transitions. Only called when
-     * {@link com.android.wm.shell.transition.Transitions#ENABLE_SHELL_TRANSITIONS} is {@code true}.
+     * Sets the transition starter that starts freeform task transitions.
      *
      * @param transitionStarter the transition starter that starts freeform task transitions
      */

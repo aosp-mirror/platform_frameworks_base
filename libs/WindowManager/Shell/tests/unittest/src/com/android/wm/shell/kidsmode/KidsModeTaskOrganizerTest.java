@@ -31,7 +31,6 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
-import android.content.res.Resources;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -78,7 +77,6 @@ public class KidsModeTaskOrganizerTest extends ShellTestCase {
     @Mock private ShellInit mShellInit;
     @Mock private ShellCommandHandler mShellCommandHandler;
     @Mock private DisplayInsetsController mDisplayInsetsController;
-    @Mock private Resources mResources;
 
     KidsModeTaskOrganizer mOrganizer;
 
@@ -91,12 +89,10 @@ public class KidsModeTaskOrganizerTest extends ShellTestCase {
         } catch (RemoteException e) {
         }
         // NOTE: KidsModeTaskOrganizer should have a null CompatUIController.
-        doReturn(mResources).when(mContext).getResources();
-        final KidsModeTaskOrganizer kidsModeTaskOrganizer = new KidsModeTaskOrganizer(mContext,
-                mShellInit, mShellCommandHandler, mTaskOrganizerController, mSyncTransactionQueue,
-                mDisplayController, mDisplayInsetsController, Optional.empty(), Optional.empty(),
-                mObserver, mTestExecutor, mHandler);
-        mOrganizer = spy(kidsModeTaskOrganizer);
+        mOrganizer = spy(new KidsModeTaskOrganizer(mContext, mShellInit, mShellCommandHandler,
+                mTaskOrganizerController, mSyncTransactionQueue, mDisplayController,
+                mDisplayInsetsController, Optional.empty(), Optional.empty(), mObserver,
+                mTestExecutor, mHandler));
         doReturn(mTransaction).when(mOrganizer).getWindowContainerTransaction();
         doReturn(new InsetsState()).when(mDisplayController).getInsetsState(DEFAULT_DISPLAY);
     }
@@ -116,8 +112,6 @@ public class KidsModeTaskOrganizerTest extends ShellTestCase {
         verify(mOrganizer, times(1)).registerOrganizer();
         verify(mOrganizer, times(1)).createRootTask(
                 eq(DEFAULT_DISPLAY), eq(WINDOWING_MODE_FULLSCREEN), eq(mOrganizer.mCookie));
-        verify(mOrganizer, times(1))
-                .setOrientationRequestPolicy(eq(true), any(), any());
 
         final ActivityManager.RunningTaskInfo rootTask = createTaskInfo(12,
                 WINDOWING_MODE_FULLSCREEN, mOrganizer.mCookie);
@@ -138,11 +132,10 @@ public class KidsModeTaskOrganizerTest extends ShellTestCase {
         doReturn(false).when(mObserver).isEnabled();
         mOrganizer.updateKidsModeState();
 
+
         verify(mOrganizer, times(1)).disable();
         verify(mOrganizer, times(1)).unregisterOrganizer();
         verify(mOrganizer, times(1)).deleteRootTask(rootTask.token);
-        verify(mOrganizer, times(1))
-                .setOrientationRequestPolicy(eq(false), any(), any());
         assertThat(mOrganizer.mLaunchRootLeash).isNull();
         assertThat(mOrganizer.mLaunchRootTask).isNull();
     }

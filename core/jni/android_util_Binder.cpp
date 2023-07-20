@@ -413,13 +413,9 @@ protected:
 
         if (env->ExceptionCheck()) {
             ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
-
-            auto state = IPCThreadState::self();
-            String8 msg;
-            msg.appendFormat("*** Uncaught remote exception! Exceptions are not yet supported "
-                             "across processes. Client PID %d UID %d.",
-                             state->getCallingPid(), state->getCallingUid());
-            binder_report_exception(env, excep.get(), msg.c_str());
+            binder_report_exception(env, excep.get(),
+                                    "*** Uncaught remote exception!  "
+                                    "(Exceptions are not yet supported across processes.)");
             res = JNI_FALSE;
         }
 
@@ -435,7 +431,6 @@ protected:
             ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
             binder_report_exception(env, excep.get(),
                                     "*** Uncaught exception in onBinderStrictModePolicyChange");
-            // TODO: should turn this to fatal?
         }
 
         // Need to always call through the native implementation of
@@ -804,12 +799,6 @@ sp<IBinder> ibinderForJavaObject(JNIEnv* env, jobject obj)
     if (env->IsInstanceOf(obj, gBinderOffsets.mClass)) {
         JavaBBinderHolder* jbh = (JavaBBinderHolder*)
             env->GetLongField(obj, gBinderOffsets.mObject);
-
-        if (jbh == nullptr) {
-            ALOGE("JavaBBinderHolder null on binder");
-            return nullptr;
-        }
-
         return jbh->get(env, obj);
     }
 
@@ -974,7 +963,7 @@ static jint android_os_Binder_getCallingUid()
     return IPCThreadState::self()->getCallingUid();
 }
 
-static jboolean android_os_Binder_isDirectlyHandlingTransactionNative() {
+static jboolean android_os_Binder_isDirectlyHandlingTransaction() {
     return getCurrentServingCall() == BinderCallType::BINDER;
 }
 
@@ -986,10 +975,6 @@ static jlong android_os_Binder_clearCallingIdentity()
 static void android_os_Binder_restoreCallingIdentity(jlong token)
 {
     IPCThreadState::self()->restoreCallingIdentity(token);
-}
-
-static jboolean android_os_Binder_hasExplicitIdentity() {
-    return IPCThreadState::self()->hasExplicitIdentity();
 }
 
 static void android_os_Binder_setThreadStrictModePolicy(jint policyMask)
@@ -1082,14 +1067,11 @@ static const JNINativeMethod gBinderMethods[] = {
     // @CriticalNative
     { "getCallingUid", "()I", (void*)android_os_Binder_getCallingUid },
     // @CriticalNative
-    { "isDirectlyHandlingTransactionNative", "()Z",
-        (void*)android_os_Binder_isDirectlyHandlingTransactionNative },
+    { "isDirectlyHandlingTransaction", "()Z", (void*)android_os_Binder_isDirectlyHandlingTransaction },
     // @CriticalNative
     { "clearCallingIdentity", "()J", (void*)android_os_Binder_clearCallingIdentity },
     // @CriticalNative
     { "restoreCallingIdentity", "(J)V", (void*)android_os_Binder_restoreCallingIdentity },
-    // @CriticalNative
-    { "hasExplicitIdentity", "()Z", (void*)android_os_Binder_hasExplicitIdentity },
     // @CriticalNative
     { "setThreadStrictModePolicy", "(I)V", (void*)android_os_Binder_setThreadStrictModePolicy },
     // @CriticalNative
@@ -1305,6 +1287,103 @@ static jboolean android_os_BinderProxy_isBinderAlive(JNIEnv* env, jobject obj)
     return alive ? JNI_TRUE : JNI_FALSE;
 }
 
+static int getprocname(pid_t pid, char *buf, size_t len) {
+    char filename[32];
+    FILE *f;
+
+    snprintf(filename, sizeof(filename), "/proc/%d/cmdline", pid);
+    f = fopen(filename, "re");
+    if (!f) {
+        *buf = '\0';
+        return 1;
+    }
+    if (!fgets(buf, len, f)) {
+        *buf = '\0';
+        fclose(f);
+        return 2;
+    }
+    fclose(f);
+    return 0;
+}
+
+static bool push_eventlog_string(char** pos, const char* end, const char* str) {
+    jint len = strlen(str);
+    int space_needed = 1 + sizeof(len) + len;
+    if (end - *pos < space_needed) {
+        ALOGW("not enough space for string. remain=%" PRIdPTR "; needed=%d",
+             end - *pos, space_needed);
+        return false;
+    }
+    **pos = EVENT_TYPE_STRING;
+    (*pos)++;
+    memcpy(*pos, &len, sizeof(len));
+    *pos += sizeof(len);
+    memcpy(*pos, str, len);
+    *pos += len;
+    return true;
+}
+
+static bool push_eventlog_int(char** pos, const char* end, jint val) {
+    int space_needed = 1 + sizeof(val);
+    if (end - *pos < space_needed) {
+        ALOGW("not enough space for int.  remain=%" PRIdPTR "; needed=%d",
+             end - *pos, space_needed);
+        return false;
+    }
+    **pos = EVENT_TYPE_INT;
+    (*pos)++;
+    memcpy(*pos, &val, sizeof(val));
+    *pos += sizeof(val);
+    return true;
+}
+
+// From frameworks/base/core/java/android/content/EventLogTags.logtags:
+
+static const bool kEnableBinderSample = false;
+
+#define LOGTAG_BINDER_OPERATION 52004
+
+static void conditionally_log_binder_call(int64_t start_millis,
+                                          IBinder* target, jint code) {
+    int duration_ms = static_cast<int>(uptimeMillis() - start_millis);
+
+    int sample_percent;
+    if (duration_ms >= 500) {
+        sample_percent = 100;
+    } else {
+        sample_percent = 100 * duration_ms / 500;
+        if (sample_percent == 0) {
+            return;
+        }
+        if (sample_percent < (random() % 100 + 1)) {
+            return;
+        }
+    }
+
+    char process_name[40];
+    getprocname(getpid(), process_name, sizeof(process_name));
+    String8 desc(target->getInterfaceDescriptor());
+
+    char buf[LOGGER_ENTRY_MAX_PAYLOAD];
+    buf[0] = EVENT_TYPE_LIST;
+    buf[1] = 5;
+    char* pos = &buf[2];
+    char* end = &buf[LOGGER_ENTRY_MAX_PAYLOAD - 1];  // leave room for final \n
+    if (!push_eventlog_string(&pos, end, desc.string())) return;
+    if (!push_eventlog_int(&pos, end, code)) return;
+    if (!push_eventlog_int(&pos, end, duration_ms)) return;
+    if (!push_eventlog_string(&pos, end, process_name)) return;
+    if (!push_eventlog_int(&pos, end, sample_percent)) return;
+    *(pos++) = '\n';   // conventional with EVENT_TYPE_LIST apparently.
+    android_bWriteLog(LOGTAG_BINDER_OPERATION, buf, pos - buf);
+}
+
+// We only measure binder call durations to potentially log them if
+// we're on the main thread.
+static bool should_time_binder_calls() {
+  return (getpid() == gettid());
+}
+
 static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
         jint code, jobject dataObj, jobject replyObj, jint flags) // throws RemoteException
 {
@@ -1331,9 +1410,28 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
     ALOGV("Java code calling transact on %p in Java object %p with code %" PRId32 "\n",
             target, obj, code);
 
+
+    bool time_binder_calls;
+    int64_t start_millis;
+    if (kEnableBinderSample) {
+        // Only log the binder call duration for things on the Java-level main thread.
+        // But if we don't
+        time_binder_calls = should_time_binder_calls();
+
+        if (time_binder_calls) {
+            start_millis = uptimeMillis();
+        }
+    }
+
     //printf("Transact from Java code to %p sending: ", target); data->print();
     status_t err = target->transact(code, *data, reply, flags);
     //if (reply) printf("Transact from Java code to %p received: ", target); reply->print();
+
+    if (kEnableBinderSample) {
+        if (time_binder_calls) {
+            conditionally_log_binder_call(start_millis, target, code);
+        }
+    }
 
     if (err == NO_ERROR) {
         return JNI_TRUE;

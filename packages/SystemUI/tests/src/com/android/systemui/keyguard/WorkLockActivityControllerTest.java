@@ -23,7 +23,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -36,12 +35,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.UserHandle;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 
@@ -72,7 +71,6 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
     private @Mock Context mContext;
     private @Mock TaskStackChangeListeners mTaskStackChangeListeners;
     private @Mock IActivityTaskManager mIActivityTaskManager;
-    private @Mock UserTracker mUserTracker;
 
     private WorkLockActivityController mController;
     private TaskStackChangeListener mTaskStackListener;
@@ -83,13 +81,12 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
 
         // Set a package name to use for checking ComponentName well-formedness in tests.
         doReturn("com.example.test").when(mContext).getPackageName();
-        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
         // Construct controller. Save the TaskStackListener for injecting events.
         final ArgumentCaptor<TaskStackChangeListener> listenerCaptor =
                 ArgumentCaptor.forClass(TaskStackChangeListener.class);
-        mController = new WorkLockActivityController(mContext, mUserTracker,
-                mTaskStackChangeListeners, mIActivityTaskManager);
+        mController = new WorkLockActivityController(mContext, mTaskStackChangeListeners,
+                mIActivityTaskManager);
 
         verify(mTaskStackChangeListeners).registerTaskStackListener(listenerCaptor.capture());
         mTaskStackListener = listenerCaptor.getValue();
@@ -138,7 +135,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
                 anyInt(),
                 eq((ProfilerInfo) null),
                 argThat(hasOptions(taskId, taskOverlay)),
-                eq(ActivityManager.getCurrentUser()));
+                eq(UserHandle.USER_CURRENT));
     }
 
     private void verifyStartActivity(int taskId, boolean taskOverlay) throws Exception {
@@ -154,7 +151,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
                 anyInt(),
                 eq((ProfilerInfo) null),
                 argThat(hasOptions(taskId, taskOverlay)),
-                eq(ActivityManager.getCurrentUser()));
+                eq(UserHandle.USER_CURRENT));
     }
 
     private static ArgumentMatcher<Intent> hasComponent(final Context context,

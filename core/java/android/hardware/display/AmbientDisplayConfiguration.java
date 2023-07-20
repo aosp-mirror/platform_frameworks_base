@@ -51,7 +51,8 @@ public class AmbientDisplayConfiguration {
             Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
             Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
             Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
-            Settings.Secure.DOZE_TAP_SCREEN_GESTURE
+            Settings.Secure.DOZE_TAP_SCREEN_GESTURE,
+            Settings.Secure.DOZE_FOR_NOTIFICATIONS,
     };
 
     /** Non-user configurable doze settings */
@@ -75,13 +76,15 @@ public class AmbientDisplayConfiguration {
         return pulseOnNotificationEnabled(user)
                 || pulseOnLongPressEnabled(user)
                 || alwaysOnEnabled(user)
+                || isAmbientTickerEnabled(user)
                 || wakeLockScreenGestureEnabled(user)
                 || wakeDisplayGestureEnabled(user)
                 || pickupGestureEnabled(user)
                 || tapGestureEnabled(user)
                 || doubleTapGestureEnabled(user)
                 || quickPickupSensorEnabled(user)
-                || screenOffUdfpsEnabled(user);
+                || screenOffUdfpsEnabled(user)
+                || alwaysOnAmbientLightEnabled(user);
     }
 
     /** @hide */
@@ -97,10 +100,27 @@ public class AmbientDisplayConfiguration {
     }
 
     /** @hide */
+    public boolean isAmbientTickerEnabled(int user) {
+        return boolSettingDefaultOff(Settings.Secure.PULSE_ON_NEW_TRACKS, user);
+    }
+
+    /** @hide */
+    public boolean userPulseOnNotificationEnabled(int user) {
+        return boolSettingDefaultOn(Settings.Secure.DOZE_FOR_NOTIFICATIONS, user)
+                && pulseOnNotificationEnabled(user);
+    }
+
+    /** @hide */
     public boolean pickupGestureEnabled(int user) {
         return boolSetting(Settings.Secure.DOZE_PICK_UP_GESTURE, user,
                 mPickupGestureEnabledByDefault ? 1 : 0)
                 && dozePickupSensorAvailable();
+    }
+
+    /** @hide */
+    public boolean pickupGestureAmbient(int user) {
+        return boolSettingDefaultOff(Settings.Secure.DOZE_PICK_UP_GESTURE_AMBIENT, user)
+                && pickupGestureEnabled(user) && pulseOnNotificationEnabled(user);
     }
 
     /** @hide */
@@ -136,6 +156,12 @@ public class AmbientDisplayConfiguration {
     }
 
     /** @hide */
+    public boolean doubleTapGestureAmbient(int user) {
+        return boolSettingDefaultOff(Settings.Secure.DOZE_DOUBLE_TAP_GESTURE_AMBIENT, user)
+                && doubleTapGestureEnabled(user) && pulseOnNotificationEnabled(user);
+    }
+
+    /** @hide */
     public boolean quickPickupSensorEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_QUICK_PICKUP_GESTURE, user)
                 && !TextUtils.isEmpty(quickPickupSensorType())
@@ -146,7 +172,8 @@ public class AmbientDisplayConfiguration {
     /** @hide */
     public boolean screenOffUdfpsEnabled(int user) {
         return !TextUtils.isEmpty(udfpsLongPressSensorType())
-            && boolSettingDefaultOff("screen_off_udfps_enabled", user);
+            && boolSettingDefaultOff("screen_off_udfps_enabled", user)
+            && mContext.getResources().getBoolean(R.bool.config_supportScreenOffUdfps);
     }
 
     /** @hide */
@@ -223,8 +250,25 @@ public class AmbientDisplayConfiguration {
      */
     @TestApi
     public boolean alwaysOnEnabled(int user) {
-        return boolSetting(Settings.Secure.DOZE_ALWAYS_ON, user, mAlwaysOnByDefault ? 1 : 0)
-                && alwaysOnAvailable() && !accessibilityInversionEnabled(user);
+        return alwaysOnEnabledSetting(user) || alwaysOnChargingEnabled(user);
+    }
+
+    private boolean boolSettingSystem(String name, int user, int def) {
+        return Settings.System.getIntForUser(mContext.getContentResolver(), name, def, user) != 0;
+    }
+
+    public boolean alwaysOnEnabledSetting(int user) {
+        boolean alwaysOnEnabled = boolSetting(Settings.Secure.DOZE_ALWAYS_ON, user, mAlwaysOnByDefault ? 1 : 0);
+        return alwaysOnEnabled && alwaysOnAvailable() && !accessibilityInversionEnabled(user);
+    }
+
+    public boolean alwaysOnChargingEnabled(int user) {
+        final boolean dozeOnChargeEnabled = boolSettingSystem(Settings.System.DOZE_ON_CHARGE, user, 0);
+        if (dozeOnChargeEnabled) {
+            final boolean dozeOnChargeEnabledNow = boolSettingSystem(Settings.System.DOZE_ON_CHARGE_NOW, user, 0);
+            return dozeOnChargeEnabledNow && alwaysOnAvailable() && !accessibilityInversionEnabled(user);
+        }
+        return false;
     }
 
     /**
@@ -334,5 +378,15 @@ public class AmbientDisplayConfiguration {
 
     private void putDozeSetting(String name, String value, int userId) {
         Settings.Secure.putStringForUser(mContext.getContentResolver(), name, value, userId);
+    }
+
+    /** {@hide} */
+    public boolean alwaysOnAmbientLightEnabled(int user) {
+        final boolean ambientLightsEnabled = boolSettingSystem(Settings.System.AOD_NOTIFICATION_PULSE, user, 0);
+        if (ambientLightsEnabled) {
+            boolean ambientLightsActivated = boolSettingSystem(Settings.System.AOD_NOTIFICATION_PULSE_ACTIVATED, user, 0);
+            return ambientLightsActivated && alwaysOnEnabled(user);
+        }
+        return false;
     }
 }

@@ -20,22 +20,22 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Parameterized.class)
 @LargeTest
 public class SystemArrayCopyPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    public static Collection<Object[]> getData() {
+    @Parameters(name = "arrayLength={0}")
+    public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[][] {
                     {2}, {4}, {8}, {16}, {32}, {64}, {128}, {256}, {512}, {1024}, {2048}, {4096},
@@ -43,10 +43,12 @@ public class SystemArrayCopyPerfTest {
                 });
     }
 
+    @Parameterized.Parameter(0)
+    public int arrayLength;
+
     // Provides benchmarking for different types of arrays using the arraycopy function.
     @Test
-    @Parameters(method = "getData")
-    public void timeSystemCharArrayCopy(int arrayLength) {
+    public void timeSystemCharArrayCopy() {
         final int len = arrayLength;
         char[] src = new char[len];
         char[] dst = new char[len];
@@ -57,8 +59,7 @@ public class SystemArrayCopyPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
-    public void timeSystemByteArrayCopy(int arrayLength) {
+    public void timeSystemByteArrayCopy() {
         final int len = arrayLength;
         byte[] src = new byte[len];
         byte[] dst = new byte[len];
@@ -69,8 +70,7 @@ public class SystemArrayCopyPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
-    public void timeSystemShortArrayCopy(int arrayLength) {
+    public void timeSystemShortArrayCopy() {
         final int len = arrayLength;
         short[] src = new short[len];
         short[] dst = new short[len];
@@ -81,8 +81,7 @@ public class SystemArrayCopyPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
-    public void timeSystemIntArrayCopy(int arrayLength) {
+    public void timeSystemIntArrayCopy() {
         final int len = arrayLength;
         int[] src = new int[len];
         int[] dst = new int[len];
@@ -93,8 +92,7 @@ public class SystemArrayCopyPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
-    public void timeSystemLongArrayCopy(int arrayLength) {
+    public void timeSystemLongArrayCopy() {
         final int len = arrayLength;
         long[] src = new long[len];
         long[] dst = new long[len];
@@ -105,8 +103,7 @@ public class SystemArrayCopyPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
-    public void timeSystemFloatArrayCopy(int arrayLength) {
+    public void timeSystemFloatArrayCopy() {
         final int len = arrayLength;
         float[] src = new float[len];
         float[] dst = new float[len];
@@ -117,8 +114,7 @@ public class SystemArrayCopyPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
-    public void timeSystemDoubleArrayCopy(int arrayLength) {
+    public void timeSystemDoubleArrayCopy() {
         final int len = arrayLength;
         double[] src = new double[len];
         double[] dst = new double[len];
@@ -129,8 +125,7 @@ public class SystemArrayCopyPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
-    public void timeSystemBooleanArrayCopy(int arrayLength) {
+    public void timeSystemBooleanArrayCopy() {
         final int len = arrayLength;
         boolean[] src = new boolean[len];
         boolean[] dst = new boolean[len];

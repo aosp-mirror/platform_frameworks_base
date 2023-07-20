@@ -8,9 +8,6 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation.getContentAlpha
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
-import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.EmptyShadeView
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarState
@@ -18,13 +15,11 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.util.mockito.mock
-import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.any
 import org.mockito.Mockito.eq
@@ -35,19 +30,12 @@ import org.mockito.Mockito.`when` as whenever
 @SmallTest
 class StackScrollAlgorithmTest : SysuiTestCase() {
 
-
-    @JvmField @Rule
-    var expect: Expect = Expect.create()
-
-    private val largeScreenShadeInterpolator = mock<LargeScreenShadeInterpolator>()
-
     private val hostView = FrameLayout(context)
     private val stackScrollAlgorithm = StackScrollAlgorithm(context, hostView)
     private val notificationRow = mock<ExpandableNotificationRow>()
     private val dumpManager = mock<DumpManager>()
     private val mStatusBarKeyguardViewManager = mock<StatusBarKeyguardViewManager>()
     private val notificationShelf = mock<NotificationShelf>()
-    private val featureFlags = mock<FeatureFlags>()
     private val emptyShadeView = EmptyShadeView(context, /* attrs= */ null).apply {
         layout(/* l= */ 0, /* t= */ 0, /* r= */ 100, /* b= */ 100)
     }
@@ -56,10 +44,8 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             dumpManager,
             /* sectionProvider */ { _, _ -> false },
             /* bypassController */ { false },
-            mStatusBarKeyguardViewManager,
-            largeScreenShadeInterpolator,
-            featureFlags,
-        )
+            mStatusBarKeyguardViewManager
+    )
 
     private val testableResources = mContext.getOrCreateTestableResources()
 
@@ -73,7 +59,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     fun setUp() {
         whenever(notificationShelf.viewState).thenReturn(ExpandableViewState())
         whenever(notificationRow.viewState).thenReturn(ExpandableViewState())
-        ambientState.isSmallScreen = true
 
         hostView.addView(notificationRow)
     }
@@ -160,46 +145,11 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
-    fun resetViewStates_flagTrue_largeScreen_expansionChanging_alphaUpdated_largeScreenValue() {
-        val expansionFraction = 0.6f
-        val surfaceAlpha = 123f
-        ambientState.isSmallScreen = false
-        whenever(featureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
-                .thenReturn(true)
-        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(false)
-        whenever(largeScreenShadeInterpolator.getNotificationContentAlpha(expansionFraction))
-            .thenReturn(surfaceAlpha)
-
-        resetViewStates_expansionChanging_notificationAlphaUpdated(
-            expansionFraction = expansionFraction,
-            expectedAlpha = surfaceAlpha,
-        )
-    }
-
-    @Test
-    fun resetViewStates_flagFalse_largeScreen_expansionChanging_alphaUpdated_standardValue() {
-        val expansionFraction = 0.6f
-        val surfaceAlpha = 123f
-        ambientState.isSmallScreen = false
-        whenever(featureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
-                .thenReturn(false)
-        whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(false)
-        whenever(largeScreenShadeInterpolator.getNotificationContentAlpha(expansionFraction))
-            .thenReturn(surfaceAlpha)
-
-        resetViewStates_expansionChanging_notificationAlphaUpdated(
-            expansionFraction = expansionFraction,
-            expectedAlpha = getContentAlpha(expansionFraction),
-        )
-    }
-
-    @Test
-    fun expansionChanging_largeScreen_bouncerInTransit_alphaUpdated_bouncerValues() {
-        ambientState.isSmallScreen = false
+    fun resetViewStates_expansionChangingWhileBouncerInTransit_notificationAlphaUpdated() {
         whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(true)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
                 expansionFraction = 0.95f,
-                expectedAlpha = aboutToShowBouncerProgress(0.95f),
+                expectedAlpha = aboutToShowBouncerProgress(0.95f)
         )
     }
 
@@ -568,7 +518,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val childHunView = createHunViewMock(
                 isShadeOpen = true,
                 fullyVisible = false,
-                headerVisibleAmount = 1f
+                headerVisibleAmount = 1f,
         )
         val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
         algorithmState.visibleChildren.add(childHunView)
@@ -576,7 +526,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // When: updateChildZValue() is called for the top HUN
         stackScrollAlgorithm.updateChildZValue(
                 /* i= */ 0,
-                /* childrenOnTop= */ 0.0f,
                 /* StackScrollAlgorithmState= */ algorithmState,
                 /* ambientState= */ ambientState,
                 /* shouldElevateHun= */ true
@@ -596,7 +545,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val childHunView = createHunViewMock(
                 isShadeOpen = true,
                 fullyVisible = false,
-                headerVisibleAmount = 1f
+                headerVisibleAmount = 1f,
         )
         // Use half of the HUN's height as overlap
         childHunView.viewState.yTranslation = (childHunView.viewState.height + 1 shr 1).toFloat()
@@ -606,7 +555,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // When: updateChildZValue() is called for the top HUN
         stackScrollAlgorithm.updateChildZValue(
                 /* i= */ 0,
-                /* childrenOnTop= */ 0.0f,
                 /* StackScrollAlgorithmState= */ algorithmState,
                 /* ambientState= */ ambientState,
                 /* shouldElevateHun= */ true
@@ -630,7 +578,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val childHunView = createHunViewMock(
                 isShadeOpen = true,
                 fullyVisible = true,
-                headerVisibleAmount = 1f
+                headerVisibleAmount = 1f,
         )
         // HUN doesn't overlap with QQS Panel
         childHunView.viewState.yTranslation = ambientState.topPadding +
@@ -641,7 +589,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // When: updateChildZValue() is called for the top HUN
         stackScrollAlgorithm.updateChildZValue(
                 /* i= */ 0,
-                /* childrenOnTop= */ 0.0f,
                 /* StackScrollAlgorithmState= */ algorithmState,
                 /* ambientState= */ ambientState,
                 /* shouldElevateHun= */ true
@@ -661,7 +608,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val childHunView = createHunViewMock(
                 isShadeOpen = false,
                 fullyVisible = false,
-                headerVisibleAmount = 0f
+                headerVisibleAmount = 0f,
         )
         childHunView.viewState.yTranslation = 0f
         // Shade is closed, thus childHunView's headerVisibleAmount is 0
@@ -672,7 +619,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // When: updateChildZValue() is called for the top HUN
         stackScrollAlgorithm.updateChildZValue(
                 /* i= */ 0,
-                /* childrenOnTop= */ 0.0f,
                 /* StackScrollAlgorithmState= */ algorithmState,
                 /* ambientState= */ ambientState,
                 /* shouldElevateHun= */ true
@@ -692,7 +638,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val childHunView = createHunViewMock(
                 isShadeOpen = false,
                 fullyVisible = false,
-                headerVisibleAmount = 0.5f
+                headerVisibleAmount = 0.5f,
         )
         childHunView.viewState.yTranslation = 0f
         // Shade is being opened, thus childHunView's headerVisibleAmount is between 0 and 1
@@ -704,7 +650,6 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // When: updateChildZValue() is called for the top HUN
         stackScrollAlgorithm.updateChildZValue(
                 /* i= */ 0,
-                /* childrenOnTop= */ 0.0f,
                 /* StackScrollAlgorithmState= */ algorithmState,
                 /* ambientState= */ ambientState,
                 /* shouldElevateHun= */ true
@@ -719,7 +664,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private fun createHunViewMock(
             isShadeOpen: Boolean,
             fullyVisible: Boolean,
-            headerVisibleAmount: Float
+            headerVisibleAmount: Float,
     ) =
             mock<ExpandableNotificationRow>().apply {
                 val childViewStateMock = createHunChildViewState(isShadeOpen, fullyVisible)
@@ -730,7 +675,10 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             }
 
 
-    private fun createHunChildViewState(isShadeOpen: Boolean, fullyVisible: Boolean) =
+    private fun createHunChildViewState(
+            isShadeOpen: Boolean,
+            fullyVisible: Boolean,
+    ) =
             ExpandableViewState().apply {
                 // Mock the HUN's height with ambientState.topPadding +
                 // ambientState.stackTranslation
@@ -746,7 +694,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     private fun resetViewStates_expansionChanging_notificationAlphaUpdated(
             expansionFraction: Float,
-            expectedAlpha: Float,
+            expectedAlpha: Float
     ) {
         ambientState.isExpansionChanging = true
         ambientState.expansionFraction = expansionFraction
@@ -754,7 +702,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
-        expect.that(notificationRow.viewState.alpha).isEqualTo(expectedAlpha)
+        assertThat(notificationRow.viewState.alpha).isEqualTo(expectedAlpha)
     }
 }
 

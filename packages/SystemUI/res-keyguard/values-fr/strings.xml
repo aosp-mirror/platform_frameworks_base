@@ -20,8 +20,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Saisissez votre code"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Tracez votre schéma"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Saisissez le code d\'accès"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Tracez le schéma"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Saisissez votre mot de passe"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Carte non valide."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Chargé"</string>
@@ -33,14 +33,14 @@
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Recharge optimisée pour protéger la batterie"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Appuyez sur \"Menu\" pour déverrouiller le clavier."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Réseau verrouillé"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Aucune SIM"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"Ajoutez une SIM."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"La SIM est absente ou illisible. Ajoutez une SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"SIM inutilisable."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"Votre SIM a été désactivée définitivement.\n Contactez votre opérateur de téléphonie mobile pour en obtenir une autre."</string>
-    <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"SIM verrouillée."</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIM verrouillée par clé PUK."</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"Déblocage de la SIM…"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Pas de carte SIM"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"Insérez une carte SIM."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"Carte SIM absente ou illisible. Insérez une carte SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"La carte SIM est inutilisable."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"Votre carte SIM a été définitivement désactivée.\nVeuillez contacter votre opérateur de téléphonie mobile pour en obtenir une autre."</string>
+    <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"La carte SIM est verrouillée."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"La carte SIM est verrouillée par clé PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"Déblocage de la carte SIM…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"Champ du code"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Mot de passe de l\'appareil"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"Champ du code PIN de la carte SIM"</string>
@@ -61,7 +61,7 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"La carte SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" est maintenant désactivée. Pour continuer, saisissez la clé PUK. Contactez votre opérateur pour en savoir plus."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Saisissez le code PIN de votre choix"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Confirmez le code PIN souhaité"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"Déblocage de la SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"Déblocage de la carte SIM…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Saisissez un code PIN comprenant 4 à 8 chiffres."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"La clé PUK doit contenir au moins 8 chiffres."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Vous avez saisi un code incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises.\n\nRéessayez dans <xliff:g id="NUMBER_1">%2$d</xliff:g> secondes."</string>

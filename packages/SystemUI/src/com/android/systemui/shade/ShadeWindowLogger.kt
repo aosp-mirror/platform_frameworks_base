@@ -32,21 +32,11 @@ class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: 
     ConstantStringsLogger by ConstantStringsLoggerImpl(buffer, TAG) {
 
     fun logApplyingWindowLayoutParams(lp: WindowManager.LayoutParams) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            { str1 = lp.toString() },
-            { "Applying new window layout params: $str1" }
-        )
+        log(DEBUG, { str1 = lp.toString() }, { "Applying new window layout params: $str1" })
     }
 
     fun logNewState(state: Any) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            { str1 = state.toString() },
-            { "Applying new state: $str1" }
-        )
+        log(DEBUG, { str1 = state.toString() }, { "Applying new state: $str1" })
     }
 
     private inline fun log(
@@ -58,16 +48,11 @@ class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: 
     }
 
     fun logApplyVisibility(visible: Boolean) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            { bool1 = visible },
-            { "Updating visibility, should be visible : $bool1" })
+        log(DEBUG, { bool1 = visible }, { "Updating visibility, should be visible : $bool1" })
     }
 
     fun logShadeVisibleAndFocusable(visible: Boolean) {
-        buffer.log(
-            TAG,
+        log(
             DEBUG,
             { bool1 = visible },
             { "Updating shade, should be visible and focusable: $bool1" }
@@ -75,11 +60,6 @@ class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: 
     }
 
     fun logShadeFocusable(focusable: Boolean) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            { bool1 = focusable },
-            { "Updating shade, should be focusable : $bool1" }
-        )
+        log(DEBUG, { bool1 = focusable }, { "Updating shade, should be focusable : $bool1" })
     }
 }

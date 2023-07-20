@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:angle="0.0"
+                android:endColor="@color/holo_green_light"
+                android:startColor="@color/holo_blue_light" />
+            <corners android:radius="24.0dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="2.0dp"
+        android:end="2.0dp"
+        android:start="2.0dp"
+        android:top="2.0dp">
+        <shape>
+            <gradient
+                android:angle="270"
+                android:endColor="@color/neumorph_outline_end"
+                android:startColor="@color/neumorph_outline_start"
+                android:type="linear" />
+            <corners android:radius="22.0dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="4.0dp"
+        android:end="4.0dp"
+        android:start="4.0dp"
+        android:top="4.0dp">
+        <shape>
+            <gradient
+                android:angle="90"
+                android:endColor="@color/neumorph_outline_end"
+                android:startColor="@color/neumorph_outline_start"
+                android:type="linear" />
+            <corners android:radius="20.0dp" />
+        </shape>
+    </item>
+</layer-list>

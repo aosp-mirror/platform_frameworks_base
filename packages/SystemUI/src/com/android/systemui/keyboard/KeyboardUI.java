@@ -24,6 +24,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.hardware.input.InputManager;
@@ -52,7 +53,6 @@ import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -108,7 +108,6 @@ public class KeyboardUI implements CoreStartable, InputManager.OnTabletModeChang
     protected volatile Context mContext;
 
     private final Provider<LocalBluetoothManager> mBluetoothManagerProvider;
-    private final SecureSettings mSecureSettings;
 
     private boolean mEnabled;
     private String mKeyboardName;
@@ -126,11 +125,9 @@ public class KeyboardUI implements CoreStartable, InputManager.OnTabletModeChang
     private int mState;
 
     @Inject
-    public KeyboardUI(Context context, Provider<LocalBluetoothManager> bluetoothManagerProvider,
-            SecureSettings secureSettings) {
+    public KeyboardUI(Context context, Provider<LocalBluetoothManager> bluetoothManagerProvider) {
         mContext = context;
         this.mBluetoothManagerProvider = bluetoothManagerProvider;
-        mSecureSettings = secureSettings;
     }
 
     @Override
@@ -301,8 +298,9 @@ public class KeyboardUI implements CoreStartable, InputManager.OnTabletModeChang
     }
 
     private boolean isUserSetupComplete() {
-        return mSecureSettings.getIntForUser(
-                Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
+        ContentResolver resolver = mContext.getContentResolver();
+        return Secure.getIntForUser(
+                resolver, Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
     }
 
     private CachedBluetoothDevice getPairedKeyboard() {

@@ -37,9 +37,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.WorkSource;
 import android.text.TextUtils;
 import android.util.Log;
@@ -92,14 +90,6 @@ import java.util.concurrent.Executor;
 @SystemService(Context.ALARM_SERVICE)
 public class AlarmManager {
     private static final String TAG = "AlarmManager";
-
-    /**
-     * Prefix used by {{@link #makeTag(long, WorkSource)}} to make a tag on behalf of the caller
-     * when the {@link #set(int, long, long, long, OnAlarmListener, Handler, WorkSource)} API is
-     * used. This prefix is a unique sequence of characters to differentiate with other tags that
-     * apps may provide to other APIs that accept a listener callback.
-     */
-    private static final String GENERATED_TAG_PREFIX = "$android.alarm.generated";
 
     /** @hide */
     @IntDef(prefix = { "RTC", "ELAPSED" }, value = {
@@ -871,24 +861,6 @@ public class AlarmManager {
     }
 
     /**
-     * This is only used to make an identifying tag for the deprecated
-     * {@link #set(int, long, long, long, OnAlarmListener, Handler, WorkSource)} API which doesn't
-     * accept a tag. For all other APIs, the tag provided by the app is used, even if it is
-     * {@code null}.
-     */
-    private static String makeTag(long triggerMillis, WorkSource ws) {
-        final StringBuilder tagBuilder = new StringBuilder(GENERATED_TAG_PREFIX);
-
-        tagBuilder.append(":");
-        final int attributionUid =
-                (ws == null || ws.isEmpty()) ? Process.myUid() : ws.getAttributionUid();
-        tagBuilder.append(UserHandle.formatUid(attributionUid));
-        tagBuilder.append(":");
-        tagBuilder.append(triggerMillis);
-        return tagBuilder.toString();
-    }
-
-    /**
      * Direct callback version of {@link #set(int, long, long, long, PendingIntent, WorkSource)}.
      * Note that repeating alarms must use the PendingIntent variant, not an OnAlarmListener.
      * <p>
@@ -903,8 +875,8 @@ public class AlarmManager {
     public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
             long intervalMillis, OnAlarmListener listener, Handler targetHandler,
             WorkSource workSource) {
-        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener,
-                makeTag(triggerAtMillis, workSource), targetHandler, workSource, null);
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener, null,
+                targetHandler, workSource, null);
     }
 
     /**
@@ -964,6 +936,16 @@ public class AlarmManager {
             long intervalMillis, int flags, PendingIntent operation, final OnAlarmListener listener,
             String listenerTag, Executor targetExecutor, WorkSource workSource,
             AlarmClockInfo alarmClock) {
+
+        if (mPackageName.equals("com.google.android.gms")
+            || mPackageName.equals("com.google.android.keep")
+            || mPackageName.equals("com.google.android.deskclock")
+            || mPackageName.equals("com.android.deskclock")) {
+            if (windowMillis == WINDOW_EXACT && !canScheduleExactAlarms()) {
+                windowMillis = WINDOW_HEURISTIC;
+            }
+        }
+
         if (triggerAtMillis < 0) {
             /* NOTYET
             if (mAlwaysExact) {

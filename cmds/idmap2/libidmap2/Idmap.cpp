@@ -17,7 +17,6 @@
 #include "idmap2/Idmap.h"
 
 #include <algorithm>
-#include <cassert>
 #include <iostream>
 #include <iterator>
 #include <limits>

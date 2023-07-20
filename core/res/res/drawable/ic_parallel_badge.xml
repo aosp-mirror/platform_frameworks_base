@@ -1,0 +1,31 @@
+<!--
+  Copyright (C) 2022 Project Kaleidoscope
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<vector android:height="24dp" android:viewportHeight="1024"
+    android:viewportWidth="1024" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#00000000"
+        android:pathData="M186.1,555.7L537.2,212.5"
+        android:strokeColor="#000" android:strokeWidth="100"/>
+    <path android:fillColor="#00000000"
+        android:pathData="M811.8,493.4L460.6,836.6"
+        android:strokeColor="#000" android:strokeWidth="100"/>
+    <path android:fillColor="#00000000"
+        android:pathData="M537.2,212.6c97,-94.8 237,-108.7 312.8,-31.2s58.7,217.3 -38.3,312.1"
+        android:strokeColor="#000" android:strokeWidth="100"/>
+    <path android:fillColor="#FF000000"
+        android:pathData="M323.4,696.1m-196.4,0a196.4,196.4 0,1 1,392.8 0a196.4,196.4 0,1 1,-392.8 0"
+        android:strokeColor="#000" android:strokeWidth="100"/>
+</vector>

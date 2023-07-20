@@ -597,9 +597,12 @@ public final class UserHandle implements Parcelable {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (obj instanceof UserHandle) {
-            UserHandle other = (UserHandle) obj;
-            return mHandle == other.mHandle;
+        try {
+            if (obj != null) {
+                UserHandle other = (UserHandle)obj;
+                return mHandle == other.mHandle;
+            }
+        } catch (ClassCastException ignore) {
         }
         return false;
     }

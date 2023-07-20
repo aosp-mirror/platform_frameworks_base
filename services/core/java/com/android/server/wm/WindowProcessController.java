@@ -40,7 +40,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 
 import android.Manifest;
@@ -263,7 +262,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
         boolean isSysUiPackage = info.packageName.equals(
                 mAtm.getSysUiServiceComponentLocked().getPackageName());
-        if (isSysUiPackage || UserHandle.getAppId(mUid) == Process.SYSTEM_UID) {
+        if (isSysUiPackage || mUid == Process.SYSTEM_UID || mUserId != UserHandle.USER_SYSTEM
+                && UserHandle.getAppId(mUid) == Process.SYSTEM_UID) {
             // This is a system owned process and should not use an activity config.
             // TODO(b/151161907): Remove after support for display-independent (raw) SysUi configs.
             mIsActivityConfigOverrideAllowed = false;
@@ -546,17 +546,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @HotPath(caller = HotPath.START_SERVICE)
     public boolean areBackgroundFgsStartsAllowed() {
         return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesState(),
-                true /* isCheckingForFgsStart */) != BAL_BLOCK;
+                true /* isCheckingForFgsStart */);
     }
 
-    @BackgroundActivityStartController.BalCode
-    int areBackgroundActivityStartsAllowed(int appSwitchState) {
+    boolean areBackgroundActivityStartsAllowed(int appSwitchState) {
         return areBackgroundActivityStartsAllowed(appSwitchState,
                 false /* isCheckingForFgsStart */);
     }
 
-    @BackgroundActivityStartController.BalCode
-    private int areBackgroundActivityStartsAllowed(int appSwitchState,
+    private boolean areBackgroundActivityStartsAllowed(int appSwitchState,
             boolean isCheckingForFgsStart) {
         return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid, mInfo.packageName,
                 appSwitchState, isCheckingForFgsStart, hasActivityInVisibleTask(),

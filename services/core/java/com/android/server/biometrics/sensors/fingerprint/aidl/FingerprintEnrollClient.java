@@ -37,7 +37,6 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 
-import com.android.internal.R;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
@@ -135,7 +134,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
                 vibrateSuccess();
             }
             mSensorOverlays.ifUdfps(
-                    controller -> controller.onAcquired(getSensorId(), acquiredInfo));
+                    controller -> controller.onAcquired(getSensorId(), acquiredInfo, vendorCode));
         }
 
         mSensorOverlays.ifUdfps(controller -> {
@@ -144,17 +143,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
             }
         });
         mCallback.onBiometricAction(BiometricStateListener.ACTION_SENSOR_TOUCH);
-
-        if (getContext().getResources().getBoolean(R.bool.config_powerPressMapping)
-                && acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR
-                && vendorCode == getContext().getResources()
-                .getInteger(R.integer.config_powerPressCode)) {
-            // Translating vendor code to internal code
-            super.onAcquired(BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED,
-                    0 /* vendorCode */);
-        } else {
-            super.onAcquired(acquiredInfo, vendorCode);
-        }
+        super.onAcquired(acquiredInfo, vendorCode);
     }
 
     @Override
@@ -281,5 +270,8 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     }
 
     @Override
-    public void onPowerPressed() {}
+    public void onPowerPressed() {
+        onAcquired(BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED,
+                0 /* vendorCode */);
+    }
 }

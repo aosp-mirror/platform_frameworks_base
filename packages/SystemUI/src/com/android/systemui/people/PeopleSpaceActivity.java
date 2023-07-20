@@ -68,10 +68,8 @@ public class PeopleSpaceActivity extends ComponentActivity {
         };
 
         if (ComposeFacade.INSTANCE.isComposeAvailable()) {
-            Log.d(TAG, "Using the Compose implementation of the PeopleSpaceActivity");
             ComposeFacade.INSTANCE.setPeopleSpaceActivityContent(this, viewModel, onResult);
         } else {
-            Log.d(TAG, "Using the View implementation of the PeopleSpaceActivity");
             ViewGroup view = PeopleViewBinder.create(this);
             PeopleViewBinder.bind(view, viewModel, /* lifecycleOwner= */ this, onResult);
             setContentView(view);

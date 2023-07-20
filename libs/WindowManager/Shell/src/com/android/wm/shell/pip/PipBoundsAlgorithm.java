@@ -16,19 +16,24 @@
 
 package com.android.wm.shell.pip;
 
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.Size;
+import android.util.TypedValue;
 import android.view.Gravity;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
+import com.android.wm.shell.common.DisplayLayout;
 
 import java.io.PrintWriter;
 
@@ -40,29 +45,33 @@ public class PipBoundsAlgorithm {
     private static final String TAG = PipBoundsAlgorithm.class.getSimpleName();
     private static final float INVALID_SNAP_FRACTION = -1f;
 
-    @NonNull private final PipBoundsState mPipBoundsState;
-    @NonNull protected final PipSizeSpecHandler mPipSizeSpecHandler;
+    private final @NonNull PipBoundsState mPipBoundsState;
     private final PipSnapAlgorithm mSnapAlgorithm;
-    private final PipKeepClearAlgorithmInterface mPipKeepClearAlgorithm;
+    private final PipKeepClearAlgorithm mPipKeepClearAlgorithm;
 
+    private float mDefaultSizePercent;
+    private float mMinAspectRatioForMinSize;
+    private float mMaxAspectRatioForMinSize;
     private float mDefaultAspectRatio;
     private float mMinAspectRatio;
     private float mMaxAspectRatio;
     private int mDefaultStackGravity;
+    private int mDefaultMinSize;
+    private int mOverridableMinSize;
+    protected Point mScreenEdgeInsets;
 
     public PipBoundsAlgorithm(Context context, @NonNull PipBoundsState pipBoundsState,
             @NonNull PipSnapAlgorithm pipSnapAlgorithm,
-            @NonNull PipKeepClearAlgorithmInterface pipKeepClearAlgorithm,
-            @NonNull PipSizeSpecHandler pipSizeSpecHandler) {
+            @NonNull PipKeepClearAlgorithm pipKeepClearAlgorithm) {
         mPipBoundsState = pipBoundsState;
         mSnapAlgorithm = pipSnapAlgorithm;
         mPipKeepClearAlgorithm = pipKeepClearAlgorithm;
-        mPipSizeSpecHandler = pipSizeSpecHandler;
         reloadResources(context);
         // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
         // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
         // triggers a configuration change and the resources to be reloaded.
         mPipBoundsState.setAspectRatio(mDefaultAspectRatio);
+        mPipBoundsState.setMinEdgeSize(mDefaultMinSize);
     }
 
     /**
@@ -74,15 +83,27 @@ public class PipBoundsAlgorithm {
                 R.dimen.config_pictureInPictureDefaultAspectRatio);
         mDefaultStackGravity = res.getInteger(
                 R.integer.config_defaultPictureInPictureGravity);
+        mDefaultMinSize = res.getDimensionPixelSize(
+                R.dimen.default_minimal_size_pip_resizable_task);
+        mOverridableMinSize = res.getDimensionPixelSize(
+                R.dimen.overridable_minimal_size_pip_resizable_task);
         final String screenEdgeInsetsDpString = res.getString(
                 R.string.config_defaultPictureInPictureScreenEdgeInsets);
         final Size screenEdgeInsetsDp = !screenEdgeInsetsDpString.isEmpty()
                 ? Size.parseSize(screenEdgeInsetsDpString)
                 : null;
+        mScreenEdgeInsets = screenEdgeInsetsDp == null ? new Point()
+                : new Point(dpToPx(screenEdgeInsetsDp.getWidth(), res.getDisplayMetrics()),
+                        dpToPx(screenEdgeInsetsDp.getHeight(), res.getDisplayMetrics()));
         mMinAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
         mMaxAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
+        mDefaultSizePercent = res.getFloat(
+                R.dimen.config_pictureInPictureDefaultSizePercent);
+        mMaxAspectRatioForMinSize = res.getFloat(
+                R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
+        mMinAspectRatioForMinSize = 1f / mMaxAspectRatioForMinSize;
     }
 
     /**
@@ -159,9 +180,8 @@ public class PipBoundsAlgorithm {
         if (windowLayout.minWidth > 0 && windowLayout.minHeight > 0) {
             // If either dimension is smaller than the allowed minimum, adjust them
             // according to mOverridableMinSize
-            return new Size(
-                    Math.max(windowLayout.minWidth, mPipSizeSpecHandler.getOverrideMinEdgeSize()),
-                    Math.max(windowLayout.minHeight, mPipSizeSpecHandler.getOverrideMinEdgeSize()));
+            return new Size(Math.max(windowLayout.minWidth, mOverridableMinSize),
+                    Math.max(windowLayout.minHeight, mOverridableMinSize));
         }
         return null;
     }
@@ -198,7 +218,7 @@ public class PipBoundsAlgorithm {
     /**
      * @return whether the given {@param aspectRatio} is valid.
      */
-    public boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
+    private boolean isValidPictureInPictureAspectRatio(float aspectRatio) {
         return Float.compare(mMinAspectRatio, aspectRatio) <= 0
                 && Float.compare(aspectRatio, mMaxAspectRatio) <= 0;
     }
@@ -223,19 +243,46 @@ public class PipBoundsAlgorithm {
         final float snapFraction = mSnapAlgorithm.getSnapFraction(stackBounds,
                 getMovementBounds(stackBounds), mPipBoundsState.getStashedState());
 
+        final Size overrideMinSize = mPipBoundsState.getOverrideMinSize();
         final Size size;
         if (useCurrentMinEdgeSize || useCurrentSize) {
-            // Use the existing size but adjusted to the new aspect ratio.
-            size = mPipSizeSpecHandler.getSizeForAspectRatio(
-                    new Size(stackBounds.width(), stackBounds.height()), aspectRatio);
+            // The default minimum edge size, or the override min edge size if set.
+            final int defaultMinEdgeSize = overrideMinSize == null ? mDefaultMinSize
+                    : mPipBoundsState.getOverrideMinEdgeSize();
+            final int minEdgeSize = useCurrentMinEdgeSize ? mPipBoundsState.getMinEdgeSize()
+                    : defaultMinEdgeSize;
+            // Use the existing size but adjusted to the aspect ratio and min edge size.
+            size = getSizeForAspectRatio(
+                    new Size(stackBounds.width(), stackBounds.height()), aspectRatio, minEdgeSize);
         } else {
-            size = mPipSizeSpecHandler.getDefaultSize(aspectRatio);
+            if (overrideMinSize != null) {
+                // The override minimal size is set, use that as the default size making sure it's
+                // adjusted to the aspect ratio.
+                size = adjustSizeToAspectRatio(overrideMinSize, aspectRatio);
+            } else {
+                // Calculate the default size using the display size and default min edge size.
+                final DisplayLayout displayLayout = mPipBoundsState.getDisplayLayout();
+                size = getSizeForAspectRatio(aspectRatio, mDefaultMinSize,
+                        displayLayout.width(), displayLayout.height());
+            }
         }
 
         final int left = (int) (stackBounds.centerX() - size.getWidth() / 2f);
         final int top = (int) (stackBounds.centerY() - size.getHeight() / 2f);
         stackBounds.set(left, top, left + size.getWidth(), top + size.getHeight());
         mSnapAlgorithm.applySnapFraction(stackBounds, getMovementBounds(stackBounds), snapFraction);
+    }
+
+    /** Adjusts the given size to conform to the given aspect ratio. */
+    private Size adjustSizeToAspectRatio(@NonNull Size size, float aspectRatio) {
+        final float sizeAspectRatio = size.getWidth() / (float) size.getHeight();
+        if (sizeAspectRatio > aspectRatio) {
+            // Size is wider, fix the width and increase the height
+            return new Size(size.getWidth(), (int) (size.getWidth() / aspectRatio));
+        } else {
+            // Size is taller, fix the height and adjust the width.
+            return new Size((int) (size.getHeight() * aspectRatio), size.getHeight());
+        }
     }
 
     /**
@@ -256,9 +303,17 @@ public class PipBoundsAlgorithm {
         final Size defaultSize;
         final Rect insetBounds = new Rect();
         getInsetBounds(insetBounds);
-
-        // Calculate the default size
-        defaultSize = mPipSizeSpecHandler.getDefaultSize(mDefaultAspectRatio);
+        final DisplayLayout displayLayout = mPipBoundsState.getDisplayLayout();
+        final Size overrideMinSize = mPipBoundsState.getOverrideMinSize();
+        if (overrideMinSize != null) {
+            // The override minimal size is set, use that as the default size making sure it's
+            // adjusted to the aspect ratio.
+            defaultSize = adjustSizeToAspectRatio(overrideMinSize, mDefaultAspectRatio);
+        } else {
+            // Calculate the default size using the display size and default min edge size.
+            defaultSize = getSizeForAspectRatio(mDefaultAspectRatio,
+                    mDefaultMinSize, displayLayout.width(), displayLayout.height());
+        }
 
         // Now that we have the default size, apply the snap fraction if valid or position the
         // bounds using the default gravity.
@@ -280,7 +335,12 @@ public class PipBoundsAlgorithm {
      * Populates the bounds on the screen that the PIP can be visible in.
      */
     public void getInsetBounds(Rect outRect) {
-        outRect.set(mPipSizeSpecHandler.getInsetBounds());
+        final DisplayLayout displayLayout = mPipBoundsState.getDisplayLayout();
+        Rect insets = mPipBoundsState.getDisplayLayout().stableInsets();
+        outRect.set(insets.left + mScreenEdgeInsets.x,
+                insets.top + mScreenEdgeInsets.y,
+                displayLayout.width() - insets.right - mScreenEdgeInsets.x,
+                displayLayout.height() - insets.bottom - mScreenEdgeInsets.y);
     }
 
     /**
@@ -345,11 +405,71 @@ public class PipBoundsAlgorithm {
         mSnapAlgorithm.applySnapFraction(stackBounds, movementBounds, snapFraction);
     }
 
+    public int getDefaultMinSize() {
+        return mDefaultMinSize;
+    }
+
     /**
      * @return the pixels for a given dp value.
      */
     private int dpToPx(float dpValue, DisplayMetrics dm) {
-        return PipUtils.dpToPx(dpValue, dm);
+        return (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP, dpValue, dm);
+    }
+
+    /**
+     * @return the size of the PiP at the given aspectRatio, ensuring that the minimum edge
+     * is at least minEdgeSize.
+     */
+    public Size getSizeForAspectRatio(float aspectRatio, float minEdgeSize, int displayWidth,
+            int displayHeight) {
+        final int smallestDisplaySize = Math.min(displayWidth, displayHeight);
+        final int minSize = (int) Math.max(minEdgeSize, smallestDisplaySize * mDefaultSizePercent);
+
+        final int width;
+        final int height;
+        if (aspectRatio <= mMinAspectRatioForMinSize || aspectRatio > mMaxAspectRatioForMinSize) {
+            // Beyond these points, we can just use the min size as the shorter edge
+            if (aspectRatio <= 1) {
+                // Portrait, width is the minimum size
+                width = minSize;
+                height = Math.round(width / aspectRatio);
+            } else {
+                // Landscape, height is the minimum size
+                height = minSize;
+                width = Math.round(height * aspectRatio);
+            }
+        } else {
+            // Within these points, we ensure that the bounds fit within the radius of the limits
+            // at the points
+            final float widthAtMaxAspectRatioForMinSize = mMaxAspectRatioForMinSize * minSize;
+            final float radius = PointF.length(widthAtMaxAspectRatioForMinSize, minSize);
+            height = (int) Math.round(Math.sqrt((radius * radius)
+                    / (aspectRatio * aspectRatio + 1)));
+            width = Math.round(height * aspectRatio);
+        }
+        return new Size(width, height);
+    }
+
+    /**
+     * @return the adjusted size so that it conforms to the given aspectRatio, ensuring that the
+     * minimum edge is at least minEdgeSize.
+     */
+    public Size getSizeForAspectRatio(Size size, float aspectRatio, float minEdgeSize) {
+        final int smallestSize = Math.min(size.getWidth(), size.getHeight());
+        final int minSize = (int) Math.max(minEdgeSize, smallestSize);
+
+        final int width;
+        final int height;
+        if (aspectRatio <= 1) {
+            // Portrait, width is the minimum size.
+            width = minSize;
+            height = Math.round(width / aspectRatio);
+        } else {
+            // Landscape, height is the minimum size
+            height = minSize;
+            width = Math.round(height * aspectRatio);
+        }
+        return new Size(width, height);
     }
 
     /**

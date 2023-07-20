@@ -644,7 +644,6 @@ public class MmTelFeature extends ImsFeature {
             throw new IllegalStateException("Session is not available.");
         }
         try {
-            c.setDefaultExecutor(MmTelFeature.this.mExecutor);
             listener.onIncomingCall(c.getServiceImpl(), extras);
         } catch (RemoteException e) {
             throw new RuntimeException(e);

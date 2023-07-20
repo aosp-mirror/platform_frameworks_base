@@ -25,7 +25,6 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.android.internal.accessibility.AccessibilityShortcutController.REDUCE_BRIGHT_COLORS_COMPONENT_NAME;
 import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
 import static com.android.internal.accessibility.util.ShortcutUtils.isShortcutContained;
-import static com.android.internal.os.RoSystemProperties.SUPPORT_ONE_HANDED_MODE;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityShortcutInfo;
@@ -210,7 +209,6 @@ public final class AccessibilityTargetHelper {
                         context.getString(R.string.accessibility_magnification_chooser_text),
                         context.getDrawable(R.drawable.ic_accessibility_magnification),
                         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
-        targets.add(magnification);
 
         final ToggleAllowListingFeatureTarget daltonizer =
                 new ToggleAllowListingFeatureTarget(context,
@@ -221,7 +219,6 @@ public final class AccessibilityTargetHelper {
                         context.getString(R.string.color_correction_feature_name),
                         context.getDrawable(R.drawable.ic_accessibility_color_correction),
                         Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
-        targets.add(daltonizer);
 
         final ToggleAllowListingFeatureTarget colorInversion =
                 new ToggleAllowListingFeatureTarget(context,
@@ -232,20 +229,16 @@ public final class AccessibilityTargetHelper {
                         context.getString(R.string.color_inversion_feature_name),
                         context.getDrawable(R.drawable.ic_accessibility_color_inversion),
                         Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
-        targets.add(colorInversion);
 
-        if (SUPPORT_ONE_HANDED_MODE) {
-            final ToggleAllowListingFeatureTarget oneHandedMode =
-                    new ToggleAllowListingFeatureTarget(context,
-                            shortcutType,
-                            isShortcutContained(context, shortcutType,
-                                    ONE_HANDED_COMPONENT_NAME.flattenToString()),
-                            ONE_HANDED_COMPONENT_NAME.flattenToString(),
-                            context.getString(R.string.one_handed_mode_feature_name),
-                            context.getDrawable(R.drawable.ic_accessibility_one_handed),
-                            Settings.Secure.ONE_HANDED_MODE_ACTIVATED);
-            targets.add(oneHandedMode);
-        }
+        final ToggleAllowListingFeatureTarget oneHandedMode =
+                new ToggleAllowListingFeatureTarget(context,
+                        shortcutType,
+                        isShortcutContained(context, shortcutType,
+                                ONE_HANDED_COMPONENT_NAME.flattenToString()),
+                        ONE_HANDED_COMPONENT_NAME.flattenToString(),
+                        context.getString(R.string.one_handed_mode_feature_name),
+                        context.getDrawable(R.drawable.ic_accessibility_one_handed),
+                        Settings.Secure.ONE_HANDED_MODE_ACTIVATED);
 
         final ToggleAllowListingFeatureTarget reduceBrightColors =
                 new ToggleAllowListingFeatureTarget(context,
@@ -256,6 +249,11 @@ public final class AccessibilityTargetHelper {
                         context.getString(R.string.reduce_bright_colors_feature_name),
                         context.getDrawable(R.drawable.ic_accessibility_reduce_bright_colors),
                         Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED);
+
+        targets.add(magnification);
+        targets.add(daltonizer);
+        targets.add(colorInversion);
+        targets.add(oneHandedMode);
         targets.add(reduceBrightColors);
 
         return targets;

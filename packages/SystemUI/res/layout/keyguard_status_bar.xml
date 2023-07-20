@@ -68,6 +68,7 @@
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingStart="@dimen/status_bar_padding_start"
         android:paddingTop="@dimen/status_bar_padding_top"
         android:layout_marginStart="@dimen/keyguard_carrier_text_margin"
         android:layout_toStartOf="@id/system_icons_container"

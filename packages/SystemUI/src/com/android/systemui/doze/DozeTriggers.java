@@ -29,6 +29,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.SystemClock;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.format.Formatter;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -111,7 +113,6 @@ public class DozeTriggers implements DozeMachine.Part {
     private boolean mWantProxSensor;
     private boolean mWantTouchScreenSensors;
     private boolean mWantSensors;
-    private boolean mInAod;
 
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
@@ -246,7 +247,7 @@ public class DozeTriggers implements DozeMachine.Part {
             return;
         }
         mNotificationPulseTime = SystemClock.elapsedRealtime();
-        if (!mConfig.pulseOnNotificationEnabled(mUserTracker.getUserId())) {
+        if (!mConfig.userPulseOnNotificationEnabled(mUserTracker.getUserId())) {
             runIfNotNull(onPulseSuppressedListener);
             mDozeLog.tracePulseDropped("pulseOnNotificationsDisabled");
             return;
@@ -367,6 +368,13 @@ public class DozeTriggers implements DozeMachine.Part {
     }
 
     private void gentleWakeUp(@DozeLog.Reason int reason) {
+        if (reason == DozeLog.REASON_SENSOR_PICKUP &&
+            mConfig.pickupGestureAmbient(UserHandle.USER_CURRENT) ||
+            reason == DozeLog.REASON_SENSOR_DOUBLE_TAP
+            && mConfig.doubleTapGestureAmbient(UserHandle.USER_CURRENT)) {
+            requestPulse(reason, true, null);
+            return;
+        }
         // Log screen wake up reason (lift/pickup, tap, double-tap)
         Optional.ofNullable(DozingUpdateUiEvent.fromReason(reason))
                 .ifPresent(uiEventEnum -> mUiEventLogger.log(uiEventEnum, getKeyguardSessionId()));
@@ -461,19 +469,12 @@ public class DozeTriggers implements DozeMachine.Part {
                 mDozeSensors.requestTemporaryDisable();
                 break;
             case DOZE:
-                mAodInterruptRunnable = null;
-                mWantProxSensor = false;
-                mWantSensors = true;
-                mWantTouchScreenSensors = true;
-                mInAod = false;
-                break;
             case DOZE_AOD:
                 mAodInterruptRunnable = null;
-                mWantProxSensor = true;
+                mWantProxSensor = newState != DozeMachine.State.DOZE;
                 mWantSensors = true;
                 mWantTouchScreenSensors = true;
-                mInAod = true;
-                if (!sWakeDisplaySensorState) {
+                if (newState == DozeMachine.State.DOZE_AOD && !sWakeDisplaySensorState) {
                     onWakeScreen(false, newState, DozeLog.REASON_SENSOR_WAKE_UP_PRESENCE);
                 }
                 break;
@@ -499,7 +500,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 break;
             default:
         }
-        mDozeSensors.setListening(mWantSensors, mWantTouchScreenSensors, mInAod);
+        mDozeSensors.setListening(mWantSensors, mWantTouchScreenSensors);
     }
 
     private void registerCallbacks() {
@@ -518,12 +519,11 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private void stopListeningToAllTriggers() {
         unregisterCallbacks();
-        mDozeSensors.setListening(false, false, false);
+        mDozeSensors.setListening(false, false);
         mDozeSensors.setProxListening(false);
         mWantSensors = false;
         mWantProxSensor = false;
         mWantTouchScreenSensors = false;
-        mInAod = false;
     }
 
     @Override
@@ -532,8 +532,7 @@ public class DozeTriggers implements DozeMachine.Part {
         final boolean lowPowerStateOrOff = state == Display.STATE_DOZE
                 || state == Display.STATE_DOZE_SUSPEND || state == Display.STATE_OFF;
         mDozeSensors.setProxListening(mWantProxSensor && lowPowerStateOrOff);
-        mDozeSensors.setListeningWithPowerState(mWantSensors, mWantTouchScreenSensors,
-                mInAod, lowPowerStateOrOff);
+        mDozeSensors.setListening(mWantSensors, mWantTouchScreenSensors, lowPowerStateOrOff);
 
         if (mAodInterruptRunnable != null && state == Display.STATE_ON) {
             mAodInterruptRunnable.run();
@@ -598,6 +597,9 @@ public class DozeTriggers implements DozeMachine.Part {
                     return;
                 }
 
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                       Settings.System.PULSE_TRIGGER_REASON, reason,
+                       UserHandle.USER_CURRENT);
                 mMachine.requestPulse(reason);
             }
         }, !mDozeParameters.getProxCheckBeforePulse() || performedProxCheck, reason);

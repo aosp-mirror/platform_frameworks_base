@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -59,8 +58,6 @@ import javax.inject.Named;
 
 /** Quick settings tile: Screensaver (dream) **/
 public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
-
-    public static final String TILE_SPEC = "dream";
 
     private static final String LOG_TAG = "QSDream";
     // TODO: consider 1 animated icon instead
@@ -203,8 +200,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
     public boolean isAvailable() {
         // Only enable for devices that have dreams for the user(s) that can dream.
         // For now, restrict to debug users.
-        return Build.isDebuggable()
-                && mDreamSupported
+        return mDreamSupported
                 // TODO(b/257333623): Allow the Dock User to be non-SystemUser user in HSUM.
                 && (!mDreamOnlyEnabledForDockUser || mUserTracker.getUserHandle().isSystem());
     }

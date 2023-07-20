@@ -162,7 +162,9 @@ class TaskSnapshotPersister {
     void removeObsoleteFiles(ArraySet<Integer> persistentTaskIds, int[] runningUserIds) {
         synchronized (mLock) {
             mPersistedTaskIdsSinceLastRemoveObsolete.clear();
-            sendToQueueLocked(new RemoveObsoleteFilesQueueItem(persistentTaskIds, runningUserIds));
+            // Copy persistentTaskIds to avoid two threads manipulating it at the same time.
+            sendToQueueLocked(new RemoveObsoleteFilesQueueItem(
+                    new ArraySet<>(persistentTaskIds), runningUserIds));
         }
     }
 

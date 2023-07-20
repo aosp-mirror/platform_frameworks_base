@@ -125,7 +125,7 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
         flags.set(unreleasedFlag, false)
         flags.set(unreleasedFlag, false)
 
-        listener.verifyInOrder(unreleasedFlag.name, unreleasedFlag.name)
+        listener.verifyInOrder(unreleasedFlag.id, unreleasedFlag.id)
     }
 
     @Test
@@ -137,7 +137,7 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
         flags.set(stringFlag, "Test")
         flags.set(stringFlag, "Test")
 
-        listener.verifyInOrder(stringFlag.name)
+        listener.verifyInOrder(stringFlag.id)
     }
 
     @Test
@@ -149,7 +149,7 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
         flags.removeListener(listener)
         flags.set(unreleasedFlag, false)
 
-        listener.verifyInOrder(unreleasedFlag.name)
+        listener.verifyInOrder(unreleasedFlag.id)
     }
 
     @Test
@@ -162,7 +162,7 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
         flags.removeListener(listener)
         flags.set(stringFlag, "Other")
 
-        listener.verifyInOrder(stringFlag.name)
+        listener.verifyInOrder(stringFlag.id)
     }
 
     @Test
@@ -175,7 +175,7 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
         flags.set(releasedFlag, true)
         flags.set(unreleasedFlag, true)
 
-        listener.verifyInOrder(releasedFlag.name, unreleasedFlag.name)
+        listener.verifyInOrder(releasedFlag.id, unreleasedFlag.id)
     }
 
     @Test
@@ -191,7 +191,7 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
         flags.set(releasedFlag, false)
         flags.set(unreleasedFlag, false)
 
-        listener.verifyInOrder(releasedFlag.name, unreleasedFlag.name)
+        listener.verifyInOrder(releasedFlag.id, unreleasedFlag.id)
     }
 
     @Test
@@ -204,8 +204,8 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
 
         flags.set(releasedFlag, true)
 
-        listener1.verifyInOrder(releasedFlag.name)
-        listener2.verifyInOrder(releasedFlag.name)
+        listener1.verifyInOrder(releasedFlag.id)
+        listener2.verifyInOrder(releasedFlag.id)
     }
 
     @Test
@@ -220,18 +220,18 @@ class FakeFeatureFlagsTest : SysuiTestCase() {
         flags.removeListener(listener2)
         flags.set(releasedFlag, false)
 
-        listener1.verifyInOrder(releasedFlag.name, releasedFlag.name)
-        listener2.verifyInOrder(releasedFlag.name)
+        listener1.verifyInOrder(releasedFlag.id, releasedFlag.id)
+        listener2.verifyInOrder(releasedFlag.id)
     }
 
     class VerifyingListener : FlagListenable.Listener {
-        var flagEventNames = mutableListOf<String>()
+        var flagEventIds = mutableListOf<Int>()
         override fun onFlagChanged(event: FlagListenable.FlagEvent) {
-            flagEventNames.add(event.flagName)
+            flagEventIds.add(event.flagId)
         }
 
-        fun verifyInOrder(vararg eventNames: String) {
-            assertThat(flagEventNames).containsExactlyElementsIn(eventNames.asList())
+        fun verifyInOrder(vararg eventIds: Int) {
+            assertThat(flagEventIds).containsExactlyElementsIn(eventIds.asList())
         }
     }
 }

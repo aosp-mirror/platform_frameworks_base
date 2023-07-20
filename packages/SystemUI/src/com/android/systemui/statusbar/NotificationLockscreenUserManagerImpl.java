@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar;
 
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
+
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.app.KeyguardManager;
@@ -58,6 +59,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.settings.SecureSettings;
+
+import ink.kaleidoscope.ParallelSpaceManager;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -140,14 +143,12 @@ public class NotificationLockscreenUserManagerImpl implements
                 case Intent.ACTION_USER_ADDED:
                 case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
                 case Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE:
+                case Intent.ACTION_PARALLEL_SPACE_CHANGED:
                     updateCurrentProfilesCache();
                     break;
                 case Intent.ACTION_USER_UNLOCKED:
                     // Start the overview connection to the launcher service
-                    // Connect if user hasn't connected yet
-                    if (mOverviewProxyServiceLazy.get().getProxy() == null) {
-                        mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
-                    }
+                    mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
                     break;
                 case NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION:
                     final IntentSender intentSender = intent.getParcelableExtra(
@@ -215,8 +216,7 @@ public class NotificationLockscreenUserManagerImpl implements
             DeviceProvisionedController deviceProvisionedController,
             KeyguardStateController keyguardStateController,
             SecureSettings secureSettings,
-            DumpManager dumpManager,
-            LockPatternUtils lockPatternUtils) {
+            DumpManager dumpManager) {
         mContext = context;
         mMainHandler = mainHandler;
         mDevicePolicyManager = devicePolicyManager;
@@ -228,7 +228,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mClickNotifier = clickNotifier;
         mOverviewProxyServiceLazy = overviewProxyServiceLazy;
         statusBarStateController.addCallback(this);
-        mLockPatternUtils = lockPatternUtils;
+        mLockPatternUtils = new LockPatternUtils(context);
         mKeyguardManager = keyguardManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mDeviceProvisionedController = deviceProvisionedController;
@@ -298,6 +298,7 @@ public class NotificationLockscreenUserManagerImpl implements
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+        filter.addAction(Intent.ACTION_PARALLEL_SPACE_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBaseBroadcastReceiver, filter,
                 null /* executor */, UserHandle.ALL);
 
@@ -489,7 +490,9 @@ public class NotificationLockscreenUserManagerImpl implements
             mCurrentProfiles.clear();
             mCurrentManagedProfiles.clear();
             if (mUserManager != null) {
-                for (UserInfo user : mUserManager.getProfiles(mCurrentUserId)) {
+                List<UserInfo> users = mUserManager.getProfiles(mCurrentUserId);
+                users.addAll(ParallelSpaceManager.getInstance().getParallelUsers());
+                for (UserInfo user : users) {
                     mCurrentProfiles.put(user.id, user);
                     if (UserManager.USER_TYPE_PROFILE_MANAGED.equals(user.userType)) {
                         mCurrentManagedProfiles.put(user.id, user);

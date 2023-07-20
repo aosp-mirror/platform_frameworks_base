@@ -522,6 +522,8 @@ interface IActivityManager {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean stopBinderTrackingAndDump(in ParcelFileDescriptor fd);
 
+    void enableBinderTracing();
+
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void suppressResizeConfigChanges(boolean suppress);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
@@ -757,4 +759,14 @@ interface IActivityManager {
      * </p>
      */
     int getBackgroundRestrictionExemptionReason(int uid);
+
+    /**
+     *  Should disable touch if three fingers to screen shot is active?
+     */
+    boolean isSwipeToScreenshotGestureActive();
+
+    /**
+     *  Force full screen for devices with cutout
+     */
+    boolean shouldForceCutoutFullscreen(in String packageName);
 }

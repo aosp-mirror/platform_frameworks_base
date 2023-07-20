@@ -876,8 +876,4 @@ final class OverlayManagerServiceImpl {
             super(message, cause);
         }
     }
-
-    OverlayConfig getOverlayConfig() {
-        return mOverlayConfig;
-    }
 }

@@ -36,7 +36,6 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.ApplicationExitInfo;
 import android.app.ILocalWallpaperColorConsumer;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
@@ -189,10 +188,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     private final Object mLock = new Object();
-
-    private static final double LMK_LOW_THRESHOLD_MEMORY_PERCENTAGE = 10;
-    private static final int LMK_RECONNECT_REBIND_RETRIES = 3;
-    private static final long LMK_RECONNECT_DELAY_MS = 5000;
 
     /**
      * Minimum time between crashes of a wallpaper service for us to consider
@@ -1213,7 +1208,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         /** Time in milliseconds until we expect the wallpaper to reconnect (unless we're in the
          *  middle of an update). If exceeded, the wallpaper gets reset to the system default. */
         private static final long WALLPAPER_RECONNECT_TIMEOUT_MS = 10000;
-        private int mLmkLimitRebindRetries = LMK_RECONNECT_REBIND_RETRIES;
 
         final WallpaperInfo mInfo;
         IWallpaperService mService;
@@ -1454,51 +1448,20 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             && mWallpaper.userId == mCurrentUserId
                             && !Objects.equals(mDefaultWallpaperComponent, wpService)
                             && !Objects.equals(mImageWallpaper, wpService)) {
-                        List<ApplicationExitInfo> reasonList =
-                                mActivityManager.getHistoricalProcessExitReasons(
-                                wpService.getPackageName(), 0, 1);
-                        int exitReason = ApplicationExitInfo.REASON_UNKNOWN;
-                        if (reasonList != null && !reasonList.isEmpty()) {
-                            ApplicationExitInfo info = reasonList.get(0);
-                            exitReason = info.getReason();
-                        }
-                        Slog.d(TAG, "exitReason: " + exitReason);
-                        // If exit reason is LOW_MEMORY_KILLER
-                        // delay the mTryToRebindRunnable for 10s
-                        if (exitReason == ApplicationExitInfo.REASON_LOW_MEMORY) {
-                            if (isRunningOnLowMemory()) {
-                                Slog.i(TAG, "Rebind is delayed due to lmk");
-                                mContext.getMainThreadHandler().postDelayed(mTryToRebindRunnable,
-                                        LMK_RECONNECT_DELAY_MS);
-                                mLmkLimitRebindRetries = LMK_RECONNECT_REBIND_RETRIES;
-                            } else {
-                                if (mLmkLimitRebindRetries <= 0) {
-                                    Slog.w(TAG, "Reverting to built-in wallpaper due to lmk!");
-                                    clearWallpaperLocked(true, FLAG_SYSTEM, mWallpaper.userId,
-                                            null);
-                                    mLmkLimitRebindRetries = LMK_RECONNECT_REBIND_RETRIES;
-                                    return;
-                                }
-                                mLmkLimitRebindRetries--;
-                                mContext.getMainThreadHandler().postDelayed(mTryToRebindRunnable,
-                                        LMK_RECONNECT_DELAY_MS);
-                            }
+                        // There is a race condition which causes
+                        // {@link #mWallpaper.wallpaperUpdating} to be false even if it is
+                        // currently updating since the broadcast notifying us is async.
+                        // This race is overcome by the general rule that we only reset the
+                        // wallpaper if its service was shut down twice
+                        // during {@link #MIN_WALLPAPER_CRASH_TIME} millis.
+                        if (mWallpaper.lastDiedTime != 0
+                                && mWallpaper.lastDiedTime + MIN_WALLPAPER_CRASH_TIME
+                                > SystemClock.uptimeMillis()) {
+                            Slog.w(TAG, "Reverting to built-in wallpaper!");
+                            clearWallpaperLocked(true, FLAG_SYSTEM, mWallpaper.userId, null);
                         } else {
-                            // There is a race condition which causes
-                            // {@link #mWallpaper.wallpaperUpdating} to be false even if it is
-                            // currently updating since the broadcast notifying us is async.
-                            // This race is overcome by the general rule that we only reset the
-                            // wallpaper if its service was shut down twice
-                            // during {@link #MIN_WALLPAPER_CRASH_TIME} millis.
-                            if (mWallpaper.lastDiedTime != 0
-                                    && mWallpaper.lastDiedTime + MIN_WALLPAPER_CRASH_TIME
-                                    > SystemClock.uptimeMillis()) {
-                                Slog.w(TAG, "Reverting to built-in wallpaper!");
-                                clearWallpaperLocked(true, FLAG_SYSTEM, mWallpaper.userId, null);
-                            } else {
-                                mWallpaper.lastDiedTime = SystemClock.uptimeMillis();
-                                tryToRebind();
-                            }
+                            mWallpaper.lastDiedTime = SystemClock.uptimeMillis();
+                            tryToRebind();
                         }
                     }
                 } else {
@@ -1508,14 +1471,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
         };
-
-        private boolean isRunningOnLowMemory() {
-            ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-            mActivityManager.getMemoryInfo(memoryInfo);
-            double availableMBsInPercentage = memoryInfo.availMem / (double)memoryInfo.totalMem *
-                    100.0;
-            return availableMBsInPercentage < LMK_LOW_THRESHOLD_MEMORY_PERCENTAGE;
-        }
 
         /**
          * Called by a live wallpaper if its colors have changed.
@@ -1808,15 +1763,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         public void onDisplayReady(int displayId) {
             onDisplayReadyInternal(displayId);
         }
-
-        @Override
-        public void onScreenTurnedOn(int displayId) {
-            notifyScreenTurnedOn(displayId);
-        }
-        @Override
-        public void onScreenTurningOn(int displayId) {
-            notifyScreenTurningOn(displayId);
-        }
     }
 
     void initialize() {
@@ -1957,9 +1903,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private static final Map<Integer, String> sWallpaperType = Map.of(
-            FLAG_SYSTEM, RECORD_FILE,
-            FLAG_LOCK, RECORD_LOCK_FILE);
+    private static final HashMap<Integer, String> sWallpaperType = new HashMap<Integer, String>() {
+        {
+            put(FLAG_SYSTEM, RECORD_FILE);
+            put(FLAG_LOCK, RECORD_LOCK_FILE);
+        }
+    };
 
     private void errorCheck(int userID) {
         sWallpaperType.forEach((type, filename) -> {
@@ -2623,54 +2572,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                 }
                             }
                         });
-            }
-        }
-    }
-
-    /**
-     * Propagates screen turned on event to wallpaper engine.
-     */
-    @Override
-    public void notifyScreenTurnedOn(int displayId) {
-        synchronized (mLock) {
-            final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
-            if (data != null
-                    && data.connection != null
-                    && data.connection.containsDisplay(displayId)) {
-                final IWallpaperEngine engine = data.connection
-                        .getDisplayConnectorOrCreate(displayId).mEngine;
-                if (engine != null) {
-                    try {
-                        engine.onScreenTurnedOn();
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
-
-
-
-    /**
-     * Propagate screen turning on event to wallpaper engine.
-     */
-    @Override
-    public void notifyScreenTurningOn(int displayId) {
-        synchronized (mLock) {
-            final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
-            if (data != null
-                    && data.connection != null
-                    && data.connection.containsDisplay(displayId)) {
-                final IWallpaperEngine engine = data.connection
-                        .getDisplayConnectorOrCreate(displayId).mEngine;
-                if (engine != null) {
-                    try {
-                        engine.onScreenTurningOn();
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
         }
     }

@@ -37,8 +37,6 @@ public class SerialService extends ISerialManager.Stub {
 
     @EnforcePermission(android.Manifest.permission.SERIAL_PORT)
     public String[] getSerialPorts() {
-        super.getSerialPorts_enforcePermission();
-
         ArrayList<String> ports = new ArrayList<String>();
         for (int i = 0; i < mSerialPorts.length; i++) {
             String path = mSerialPorts[i];
@@ -53,8 +51,6 @@ public class SerialService extends ISerialManager.Stub {
 
     @EnforcePermission(android.Manifest.permission.SERIAL_PORT)
     public ParcelFileDescriptor openSerialPort(String path) {
-        super.openSerialPort_enforcePermission();
-
         for (int i = 0; i < mSerialPorts.length; i++) {
             if (mSerialPorts[i].equals(path)) {
                 return native_open(path);

@@ -80,6 +80,15 @@ class UdfpsViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun forwardsEvents() {
+        view.dozeTimeTick()
+        verify(animationViewController).dozeTimeTick()
+
+        view.onTouchOutsideView()
+        verify(animationViewController).onTouchOutsideView()
+    }
+
+    @Test
     fun layoutSizeFitsSensor() {
         val params = withArgCaptor<RectF> {
             verify(animationViewController).onSensorRectUpdated(capture())

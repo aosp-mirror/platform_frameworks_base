@@ -39,7 +39,6 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.pip.tv.TvPipBoundsAlgorithm;
 import com.android.wm.shell.pip.tv.TvPipBoundsController;
 import com.android.wm.shell.pip.tv.TvPipBoundsState;
@@ -70,7 +69,6 @@ public abstract class TvPipModule {
             ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
             PipAppOpsListener pipAppOpsListener,
@@ -90,7 +88,6 @@ public abstract class TvPipModule {
                         shellInit,
                         shellController,
                         tvPipBoundsState,
-                        pipSizeSpecHandler,
                         tvPipBoundsAlgorithm,
                         tvPipBoundsController,
                         pipAppOpsListener,
@@ -130,23 +127,14 @@ public abstract class TvPipModule {
     @WMSingleton
     @Provides
     static TvPipBoundsAlgorithm provideTvPipBoundsAlgorithm(Context context,
-            TvPipBoundsState tvPipBoundsState, PipSnapAlgorithm pipSnapAlgorithm,
-            PipSizeSpecHandler pipSizeSpecHandler) {
-        return new TvPipBoundsAlgorithm(context, tvPipBoundsState, pipSnapAlgorithm,
-                pipSizeSpecHandler);
+            TvPipBoundsState tvPipBoundsState, PipSnapAlgorithm pipSnapAlgorithm) {
+        return new TvPipBoundsAlgorithm(context, tvPipBoundsState, pipSnapAlgorithm);
     }
 
     @WMSingleton
     @Provides
-    static TvPipBoundsState provideTvPipBoundsState(Context context,
-            PipSizeSpecHandler pipSizeSpecHandler) {
-        return new TvPipBoundsState(context, pipSizeSpecHandler);
-    }
-
-    @WMSingleton
-    @Provides
-    static PipSizeSpecHandler providePipSizeSpecHelper(Context context) {
-        return new PipSizeSpecHandler(context);
+    static TvPipBoundsState provideTvPipBoundsState(Context context) {
+        return new TvPipBoundsState(context);
     }
 
     // Handler needed for loadDrawableAsync() in PipControlsViewController
@@ -206,7 +194,6 @@ public abstract class TvPipModule {
             TvPipMenuController tvPipMenuController,
             SyncTransactionQueue syncTransactionQueue,
             TvPipBoundsState tvPipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
             PipTransitionState pipTransitionState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             PipAnimationController pipAnimationController,
@@ -218,11 +205,10 @@ public abstract class TvPipModule {
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new TvPipTaskOrganizer(context,
-                syncTransactionQueue, pipTransitionState, tvPipBoundsState, pipSizeSpecHandler,
-                tvPipBoundsAlgorithm, tvPipMenuController, pipAnimationController,
-                pipSurfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
-                splitScreenControllerOptional, displayController, pipUiEventLogger,
-                shellTaskOrganizer, mainExecutor);
+                syncTransactionQueue, pipTransitionState, tvPipBoundsState, tvPipBoundsAlgorithm,
+                tvPipMenuController, pipAnimationController, pipSurfaceTransactionHelper,
+                pipTransitionController, pipParamsChangedForwarder, splitScreenControllerOptional,
+                displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 
     @WMSingleton

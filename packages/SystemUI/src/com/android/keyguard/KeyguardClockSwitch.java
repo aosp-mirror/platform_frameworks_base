@@ -7,6 +7,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -19,14 +20,10 @@ import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.plugins.ClockController;
-import com.android.systemui.plugins.log.LogBuffer;
-import com.android.systemui.plugins.log.LogLevel;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import kotlin.Unit;
 
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
@@ -90,7 +87,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private int mClockSwitchYAmount;
     @VisibleForTesting boolean mChildrenAreLaidOut = false;
     @VisibleForTesting boolean mAnimateOnLayout = true;
-    private LogBuffer mLogBuffer = null;
 
     public KeyguardClockSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -117,14 +113,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
         onDensityOrFontScaleChanged();
     }
 
-    public void setLogBuffer(LogBuffer logBuffer) {
-        mLogBuffer = logBuffer;
-    }
-
-    public LogBuffer getLogBuffer() {
-        return mLogBuffer;
-    }
-
     void setClock(ClockController clock, int statusBarState) {
         mClock = clock;
 
@@ -133,16 +121,12 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mLargeClockFrame.removeAllViews();
 
         if (clock == null) {
-            if (mLogBuffer != null) {
-                mLogBuffer.log(TAG, LogLevel.ERROR, "No clock being shown");
-            }
+            Log.e(TAG, "No clock being shown");
             return;
         }
 
         // Attach small and big clock views to hierarchy.
-        if (mLogBuffer != null) {
-            mLogBuffer.log(TAG, LogLevel.INFO, "Attached new clock views to switch");
-        }
+        Log.i(TAG, "Attached new clock views to switch");
         mSmallClockFrame.addView(clock.getSmallClock().getView());
         mLargeClockFrame.addView(clock.getLargeClock().getView());
         updateClockTargetRegions();
@@ -168,18 +152,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
     }
 
     private void updateClockViews(boolean useLargeClock, boolean animate) {
-        if (mLogBuffer != null) {
-            mLogBuffer.log(TAG, LogLevel.DEBUG, (msg) -> {
-                msg.setBool1(useLargeClock);
-                msg.setBool2(animate);
-                msg.setBool3(mChildrenAreLaidOut);
-                return Unit.INSTANCE;
-            }, (msg) -> "updateClockViews"
-                    + "; useLargeClock=" + msg.getBool1()
-                    + "; animate=" + msg.getBool2()
-                    + "; mChildrenAreLaidOut=" + msg.getBool3());
-        }
-
+        Log.i(TAG, "updateClockViews; useLargeClock=" + useLargeClock + "; animate=" + animate
+                + "; mChildrenAreLaidOut=" + mChildrenAreLaidOut);
         if (mClockInAnim != null) mClockInAnim.cancel();
         if (mClockOutAnim != null) mClockOutAnim.cancel();
         if (mStatusAreaAnim != null) mStatusAreaAnim.cancel();
@@ -295,9 +269,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardClockSwitch:");
         pw.println("  mSmallClockFrame: " + mSmallClockFrame);
-        pw.println("  mSmallClockFrame.alpha: " + mSmallClockFrame.getAlpha());
         pw.println("  mLargeClockFrame: " + mLargeClockFrame);
-        pw.println("  mLargeClockFrame.alpha: " + mLargeClockFrame.getAlpha());
         pw.println("  mStatusArea: " + mStatusArea);
         pw.println("  mDisplayedClockSize: " + mDisplayedClockSize);
     }

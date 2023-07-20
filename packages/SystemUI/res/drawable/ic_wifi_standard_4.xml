@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2022 Project Kaleidoscope
+               (C) 2022 Paranoid Android
+     SPDX-License-Identifier: Apache-2.0
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M 17.37 19.6795 L 17.37 18.85 L 21.318 13.1905 L 22.368 13.1905 L 22.368 18.661 L 23.5335 18.661 L 23.5335 19.711 L 22.389 19.711 L 22.389 21.5905 L 21.15 21.5905 L 21.15 19.6795 Z M 18.7245 18.6295 L 21.15 18.6295 L 21.15 15.2695 Z"/>
+</vector>

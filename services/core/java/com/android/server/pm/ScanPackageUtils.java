@@ -51,6 +51,7 @@ import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.SharedLibraryInfo;
+import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
@@ -823,7 +824,7 @@ final class ScanPackageUtils {
      */
     public static void applyPolicy(ParsedPackage parsedPackage,
             final @PackageManagerService.ScanFlags int scanFlags, AndroidPackage platformPkg,
-            boolean isUpdatedSystemApp) {
+            boolean isUpdatedSystemApp, Signature[] vendorPlatformSignatures) {
         if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
             parsedPackage.setSystem(true);
             // TODO(b/135203078): Can this be done in PackageParser? Or just inferred when the flag
@@ -860,12 +861,14 @@ final class ScanPackageUtils {
                 .setOdm((scanFlags & SCAN_AS_ODM) != 0);
 
         // Check if the package is signed with the same key as the platform package.
+        final Signature[] pkgSig = parsedPackage.getSigningDetails().getSignatures();
         parsedPackage.setSignedWithPlatformKey(
                 (PLATFORM_PACKAGE_NAME.equals(parsedPackage.getPackageName())
                         || (platformPkg != null && compareSignatures(
                         platformPkg.getSigningDetails().getSignatures(),
-                        parsedPackage.getSigningDetails().getSignatures()
-                ) == PackageManager.SIGNATURE_MATCH))
+                        pkgSig) == PackageManager.SIGNATURE_MATCH) ||
+                        (compareSignatures(vendorPlatformSignatures,
+                        pkgSig) == PackageManager.SIGNATURE_MATCH))
         );
 
         if (!parsedPackage.isSystem()) {
@@ -926,8 +929,9 @@ final class ScanPackageUtils {
     }
 
     public static void collectCertificatesLI(PackageSetting ps, ParsedPackage parsedPackage,
-            Settings.VersionInfo settingsVersionForPackage, boolean forceCollect,
-            boolean skipVerify, boolean isPreNMR1Upgrade)
+            AndroidPackage platformPackage, Settings.VersionInfo settingsVersionForPackage,
+            boolean forceCollect, boolean skipVerify, boolean isPreNMR1Upgrade,
+            Signature[] vendorPlatformSignatures)
             throws PackageManagerException {
         // When upgrading from pre-N MR1, verify the package time stamp using the package
         // directory and not the APK file.
@@ -968,6 +972,20 @@ final class ScanPackageUtils {
                         result.getErrorCode(), result.getErrorMessage(), result.getException());
             }
             parsedPackage.setSigningDetails(result.getResult());
+            if (compareSignatures(result.getResult().getSignatures(),
+                    vendorPlatformSignatures) == PackageManager.SIGNATURE_MATCH) {
+                // Overwrite package signature with our platform signature
+                // if the signature is the vendor's platform signature
+                if (platformPackage != null) {
+                    Slog.i(TAG, "Overwriting vendor package " + ps.getPackageName()
+                            + " signature with platform signature");
+                    parsedPackage.setSigningDetails(platformPackage.getSigningDetails());
+                    parsedPackage.setSeInfo(SELinuxMMAC.getSeInfo(
+                        parsedPackage,
+                        parsedPackage.isPrivileged(),
+                        parsedPackage.getTargetSdkVersion()));
+                }
+            }
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }

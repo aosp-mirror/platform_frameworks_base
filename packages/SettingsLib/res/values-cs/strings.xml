@@ -61,8 +61,8 @@
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Zkontrolujte heslo a zkuste to znovu"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Mimo dosah"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Připojení nebude automaticky navázáno"</string>
-    <string name="wifi_no_internet" msgid="1774198889176926299">"Není připojení k internetu"</string>
-    <string name="saved_network" msgid="7143698034077223645">"Uložil(a): <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"Nebyl zjištěn žádný přístup k internetu"</string>
+    <string name="saved_network" msgid="7143698034077223645">"Uloženo uživatelem <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Připojeno k měřené síti"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automaticky připojeno přes poskytovatele %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automaticky připojeno přes poskytovatele hodnocení sítí"</string>
@@ -190,7 +190,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Výška"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Určuje tón syntetizované řeči"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Jazyk"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Používat jazyk systému"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Použít jazyk systému"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Nebyl vybrán jazyk"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Nastavení jazyka hlasu pro mluvený text"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Poslechnout příklad"</string>
@@ -309,7 +309,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Název hostitele poskytovatele soukromého DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Zadejte hostitele poskytovatele DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nelze se připojit"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobrazovat možnosti certifikace bezdrátového displeje"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobrazit možnosti certifikace bezdrátového displeje"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšit úroveň protokolování Wi‑Fi, při výběru Wi‑Fi zobrazovat RSSI pro každý SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Snižuje vyčerpávání baterie a vylepšuje výkon sítě"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Když je tento režim aktivován, adresa MAC tohoto zařízení se může změnit pokaždé, když se zařízení připojí k síti s aktivovanou randomizací adres MAC."</string>
@@ -346,7 +346,7 @@
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kontrola HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Nastavit chování kontroly HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Ladění"</string>
-    <string name="debug_app" msgid="8903350241392391766">"Výběr aplikace pro ladění"</string>
+    <string name="debug_app" msgid="8903350241392391766">"Vybrat aplikaci pro ladění"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Není nastavena žádná aplikace pro ladění"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Aplikace pro ladění: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Výběr aplikace"</string>
@@ -375,7 +375,7 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Vždy použít GPU ke skládání obrazovky"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulace barevného prostoru"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Povolit trasování OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Zakázat směrování zvuku do USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Směrování zvuku do USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Vypnout automatické směrování zvuku do zvukových periferií USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Zobrazit ohraničení"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"U výstřižku zobrazit ohraničení, okraje atd."</string>
@@ -662,9 +662,9 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fyzická klávesnice"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Zvolte rozložení klávesnice"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Výchozí"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínání obrazovky"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Zapínat obrazovku"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Povolit zapínání obrazovky"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povolte aplikaci zapínat obrazovku. Pokud aplikace bude mít toto oprávnění, může kdykoli zapnout obrazovku bez požadavku uživatele."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Povolte aplikaci zapínat obrazovku. Pokud aplikace bude mít toto oprávnění, může kdykoli zapnout obrazovku bez explicitního intentu."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zastavit vysílání v aplikaci <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Pokud budete vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g> nebo změníte výstup, aktuální vysílání se zastaví"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Vysílat v aplikaci <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

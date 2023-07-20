@@ -333,8 +333,8 @@ public abstract class GestureMatcher {
         public void post(
                 int state, long delay, MotionEvent event, MotionEvent rawEvent, int policyFlags) {
             mTargetState = state;
-            mEvent = event;
-            mRawEvent = rawEvent;
+            mEvent = event.copy();
+            mRawEvent = rawEvent.copy();
             mPolicyFlags = policyFlags;
             mHandler.postDelayed(this, delay);
             if (DEBUG) {
@@ -367,6 +367,8 @@ public abstract class GestureMatcher {
                                 + getStateSymbolicName(mTargetState));
             }
             setState(mTargetState, mEvent, mRawEvent, mPolicyFlags);
+            mEvent.recycle();
+            mRawEvent.recycle();
         }
     }
 

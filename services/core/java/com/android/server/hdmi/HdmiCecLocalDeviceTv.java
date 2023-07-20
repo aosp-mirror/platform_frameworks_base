@@ -377,7 +377,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
         int oldPath = getActivePortId() != Constants.INVALID_PORT_ID
-                && getActivePortId() != Constants.CEC_SWITCH_HOME
                 ? mService.portIdToPath(getActivePortId()) : getDeviceInfo().getPhysicalAddress();
         setActivePath(oldPath);
         if (mSkipRoutingControl) {
@@ -1233,8 +1232,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void launchRoutingControl(boolean routingForBootup) {
         assertRunOnServiceThread();
         // Seq #24
-        if (getActivePortId() != Constants.INVALID_PORT_ID
-                && getActivePortId() != Constants.CEC_SWITCH_HOME) {
+        if (getActivePortId() != Constants.INVALID_PORT_ID) {
             if (!routingForBootup && !isProhibitMode()) {
                 int newPath = mService.portIdToPath(getActivePortId());
                 setActivePath(newPath);
@@ -1338,7 +1336,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    private void forceDisableArcOnAllPins() {
+    private void forceDisableAllArcPin() {
         List<HdmiPortInfo> ports = mService.getPortInfo();
         for (HdmiPortInfo port : ports) {
             if (isArcFeatureEnabled(port.getId())) {
@@ -1362,7 +1360,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
 
         // Disable ARC Pin earlier, prevent the case where AVR doesn't send <Terminate ARC> in time
-        forceDisableArcOnAllPins();
+        forceDisableAllArcPin();
     }
 
     @ServiceThreadOnly

@@ -24,7 +24,7 @@
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"ໃສ່ຮູບແບບປົດລັອກຂອງທ່ານ"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ປ້ອນລະຫັດຜ່ານຂອງທ່ານ"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ບັດບໍ່ຖືກຕ້ອງ."</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"ສາກເຕັມແລ້ວ"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"ສາກເຕັມແລ້ວ."</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳ​ລັງ​ສາກ​ໄຟໄຮ້​ສາຍ"</string>
     <string name="keyguard_plugged_in_dock" msgid="2122073051904360987">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກໄຟ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກ"</string>
@@ -33,14 +33,14 @@
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ການສາກຖືກປັບໃຫ້ເໝາະສົມເພື່ອປົກປ້ອງແບັດເຕີຣີ"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ກົດ \"ເມນູ\" ເພື່ອປົດລັອກ."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ເຄືອຂ່າຍຖືກລັອກ"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ບໍ່ມີຊິມ"</string>
-    <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"ເພີ່ມຊິມ."</string>
-    <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"ບໍ່ມີຊິມ ຫຼື ອ່ານຊິມບໍ່ໄດ້. ເພີ່ມຊິມ."</string>
-    <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ຊິມໃຊ້ບໍ່ໄດ້."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5034635040020685428">"ຊິມຂອງທ່ານຖືກປິດໃຊ້ຢ່າງຖາວອນແລ້ວ.\n ຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການໂທລະສັບໄຮ້ສາຍຂອງທ່ານເພື່ອຂໍຊິມໃໝ່."</string>
-    <string name="keyguard_sim_locked_message" msgid="7095293254587575270">"ຊິມຖືກລັອກຢູ່."</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"ຊິມຖືກລັອກດ້ວຍ PUK."</string>
-    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"ກຳລັງປົດລັອກຊິມ…"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"ບໍ່ມີຊິມກາດ"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"ໃສ່ຊິມກາດ."</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"ບໍ່ພົບເຫັນຊິມກາດ ຫຼືບໍ່ສາມາດອ່ານຊິມກາດໄດ້. ກະລຸນາໃສ່ຊິມກາດໃໝ່."</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"SIM card ບໍ່ສາມາດໃຊ້ໄດ້."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"ຊິມກາດຂອງທ່ານຖືກປິດການນຳໃຊ້ຢ່າງຖາວອນແລ້ວ.\n ກະລຸນາຕິດຕໍ່ຜູ່ໃຫ້ບໍລິການໂທລະສັບຂອງທ່ານ ເພື່ອຂໍເອົາຊິມກາດໃໝ່."</string>
+    <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"SIM card ຖືກລັອກ."</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"ຊິມກາດຖືກລັອກດ້ວຍລະຫັດ PUK."</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"ປົດລັອກ SIM card..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"ພື້ນທີ່ PIN"</string>
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"ລະຫັດຜ່ານອຸປະກອນ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"ພື້ນທີ່ PIN ຂອງ SIM"</string>
@@ -61,7 +61,7 @@
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"ດຽວນີ້ \"<xliff:g id="CARRIER">%1$s</xliff:g>\" SIM ປິດນຳໃຊ້. ປ້ອນລະຫັດ PUK ເພື່ອສືບຕໍ່. ຕິດຕໍ່ບໍລິສັດໃຫ້ບໍລິການ ເພື່ອຂໍລາຍລະອຽດ."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"ໃສ່ລະຫັດ PIN ທີ່ຕ້ອງການ."</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"ຢືນຢັນລະຫັດ PIN ທີ່ຕ້ອງການ"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="1123048780346295748">"ກຳລັງປົດລັອກຊິມ…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"ປົດລັອກ SIM card..."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"ພິມລະຫັດ PIN ທີ່ມີ 4 ຫາ 8 ໂຕເລກ."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"ລະຫັດ PUK ຄວນມີຢ່າງໜ້ອຍ 8 ໂຕເລກ."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"ທ່ານພິມລະຫັດ PIN ຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. \n\nກະລຸນາລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ວິນາທີ."</string>
@@ -74,7 +74,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"PIN ຂອງ SIM ເຮັດວຽກລົ້ມເຫຼວ!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"PUK ຂອງ SIM ເຮັດວຽກລົ້ມເຫຼວ!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ສະລັບຮູບແບບການປ້ອນຂໍ້ມູນ"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"ໂໝດຢູ່ໃນຍົນ"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"ໂໝດໃນຍົນ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ຈຳເປັນຕ້ອງມີແບບຮູບປົດລັອກຫຼັງຈາກອຸປະກອນເລີ່ມລະບົບໃໝ່"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ຈຳເປັນຕ້ອງມີ PIN ຫຼັງຈາກອຸປະກອນເລີ່ມລະບົບໃໝ່"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ຈຳເປັນຕ້ອງມີລະຫັດຜ່ານຫຼັງຈາກອຸປະກອນເລີ່ມລະບົບໃໝ່"</string>

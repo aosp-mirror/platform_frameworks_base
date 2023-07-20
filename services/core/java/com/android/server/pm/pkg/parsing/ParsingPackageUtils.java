@@ -2236,7 +2236,7 @@ public class ParsingPackageUtils {
         // CHECKSTYLE:off
         pkg
                 // Default true
-                .setAllowBackup(bool(true, R.styleable.AndroidManifestApplication_allowBackup, sa))
+                .setAllowBackup(bool(false, R.styleable.AndroidManifestApplication_allowBackup, sa))
                 .setAllowClearUserData(bool(true, R.styleable.AndroidManifestApplication_allowClearUserData, sa))
                 .setAllowClearUserDataOnFailedRestore(bool(true, R.styleable.AndroidManifestApplication_allowClearUserDataOnFailedRestore, sa))
                 .setAllowNativeHeapPointerTagging(bool(true, R.styleable.AndroidManifestApplication_allowNativeHeapPointerTagging, sa))
@@ -2752,9 +2752,8 @@ public class ParsingPackageUtils {
      * ratio set.
      */
     private static void setMaxAspectRatio(ParsingPackage pkg) {
-        // Default to (1.86) 16.7:9 aspect ratio for pre-O apps and unset for O and greater.
-        // NOTE: 16.7:9 was the max aspect ratio Android devices can support pre-O per the CDD.
-        float maxAspectRatio = pkg.getTargetSdkVersion() < O ? DEFAULT_PRE_O_MAX_ASPECT_RATIO : 0;
+        // Start at an unlimited aspect ratio unless we get a more restrictive one
+        float maxAspectRatio = 0;
 
         float packageMaxAspectRatio = pkg.getMaxAspectRatio();
         if (packageMaxAspectRatio != 0) {

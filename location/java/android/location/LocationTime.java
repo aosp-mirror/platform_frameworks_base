@@ -20,32 +20,28 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.time.Duration;
-import java.time.Instant;
-
 /**
- * Data class for passing GNSS-derived time.
+ * Data class for passing location derived time.
  * @hide
  */
 public final class LocationTime implements Parcelable {
 
-    private final long mUnixEpochTimeMillis;
+    private final long mTime;
     private final long mElapsedRealtimeNanos;
 
-    public LocationTime(long unixEpochTimeMillis, long elapsedRealtimeNanos) {
-        mUnixEpochTimeMillis = unixEpochTimeMillis;
+    public LocationTime(long time, long elapsedRealtimeNanos) {
+        mTime = time;
         mElapsedRealtimeNanos = elapsedRealtimeNanos;
     }
 
     /**
-     * The Unix epoch time in millis, according to the Gnss location provider.
-     */
-    public long getUnixEpochTimeMillis() {
-        return mUnixEpochTimeMillis;
+     * The current time, according to the Gnss location provider. */
+    public long getTime() {
+        return mTime;
     }
 
     /**
-     * The elapsed nanos since boot when {@link #getUnixEpochTimeMillis} was the current time.
+     * The elapsed nanos since boot {@link #getTime} was computed at.
      */
     public long getElapsedRealtimeNanos() {
         return mElapsedRealtimeNanos;
@@ -53,7 +49,7 @@ public final class LocationTime implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeLong(mUnixEpochTimeMillis);
+        out.writeLong(mTime);
         out.writeLong(mElapsedRealtimeNanos);
     }
 
@@ -62,18 +58,8 @@ public final class LocationTime implements Parcelable {
         return 0;
     }
 
-    @Override
-    public String toString() {
-        return "LocationTime{"
-                + "mUnixEpochTimeMillis=" + Instant.ofEpochMilli(mUnixEpochTimeMillis)
-                + "(" + mUnixEpochTimeMillis + ")"
-                + ", mElapsedRealtimeNanos=" + Duration.ofNanos(mElapsedRealtimeNanos)
-                + "(" + mElapsedRealtimeNanos + ")"
-                + '}';
-    }
-
     public static final @NonNull Parcelable.Creator<LocationTime> CREATOR =
-            new Parcelable.Creator<>() {
+            new Parcelable.Creator<LocationTime>() {
                 public LocationTime createFromParcel(Parcel in) {
                     long time = in.readLong();
                     long elapsedRealtimeNanos = in.readLong();

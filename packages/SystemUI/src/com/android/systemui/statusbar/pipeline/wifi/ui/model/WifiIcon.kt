@@ -53,4 +53,4 @@ sealed interface WifiIcon : Diffable<WifiIcon> {
     }
 }
 
-private const val COL_ICON = "icon"
+private const val COL_ICON = "wifiIcon"

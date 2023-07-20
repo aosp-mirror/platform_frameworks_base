@@ -162,8 +162,8 @@ internal constructor(
                     context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
                         UI_MODE_NIGHT_YES
                 )
-                    colorScheme.accent1.s100
-                else colorScheme.accent1.s200
+                    colorScheme.accent1[2]
+                else colorScheme.accent1[3]
             },
             { seamlessColor: Int ->
                 val accentColorList = ColorStateList.valueOf(seamlessColor)
@@ -201,9 +201,7 @@ internal constructor(
         animatingColorTransitionFactory(
             loadDefaultColor(R.attr.textColorSecondary),
             ::textSecondaryFromScheme
-        ) { textSecondary ->
-            mediaViewHolder.artistText.setTextColor(textSecondary)
-        }
+        ) { textSecondary -> mediaViewHolder.artistText.setTextColor(textSecondary) }
 
     val textTertiary =
         animatingColorTransitionFactory(
@@ -232,14 +230,7 @@ internal constructor(
 
     fun updateColorScheme(colorScheme: ColorScheme?): Boolean {
         var anyChanged = false
-        colorTransitions.forEach {
-            val isChanged = it.updateColorScheme(colorScheme)
-
-            // Ignore changes to colorSeamless, since that is expected when toggling dark mode
-            if (it == colorSeamless) return@forEach
-
-            anyChanged = isChanged || anyChanged
-        }
+        colorTransitions.forEach { anyChanged = it.updateColorScheme(colorScheme) || anyChanged }
         colorScheme?.let { mediaViewHolder.gutsViewHolder.colorScheme = colorScheme }
         return anyChanged
     }

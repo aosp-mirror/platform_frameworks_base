@@ -35,8 +35,6 @@ import com.android.systemui.unfold.FoldStateLogger;
 import com.android.systemui.unfold.FoldStateLoggingProvider;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldLatencyTracker;
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
-import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.back.BackAnimation;
@@ -139,10 +137,6 @@ public interface SysUIComponent {
         getUnfoldLatencyTracker().init();
         getFoldStateLoggingProvider().ifPresent(FoldStateLoggingProvider::init);
         getFoldStateLogger().ifPresent(FoldStateLogger::init);
-        getUnfoldTransitionProgressProvider().ifPresent((progressProvider) ->
-                getUnfoldTransitionProgressForwarder().ifPresent((forwarder) ->
-                        progressProvider.addCallback(forwarder)
-                ));
     }
 
     /**
@@ -168,18 +162,6 @@ public interface SysUIComponent {
      */
     @SysUISingleton
     UnfoldLatencyTracker getUnfoldLatencyTracker();
-
-    /**
-     * Creates a UnfoldTransitionProgressProvider.
-     */
-    @SysUISingleton
-    Optional<UnfoldTransitionProgressProvider> getUnfoldTransitionProgressProvider();
-
-    /**
-     * Creates a UnfoldTransitionProgressForwarder.
-     */
-    @SysUISingleton
-    Optional<UnfoldTransitionProgressForwarder> getUnfoldTransitionProgressForwarder();
 
     /**
      * Creates a FoldStateLoggingProvider.

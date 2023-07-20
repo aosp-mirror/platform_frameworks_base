@@ -30,11 +30,10 @@ import java.util.Map;
  * data requested from a {@link IdentityCredential}.
  */
 class CredstoreResultData extends ResultData {
-    int mFeatureVersion = 0;
+
     byte[] mStaticAuthenticationData = null;
     byte[] mAuthenticatedData = null;
     byte[] mMessageAuthenticationCode = null;
-    byte[] mSignature = null;
 
     private Map<String, Map<String, EntryData>> mData = new LinkedHashMap<>();
 
@@ -59,14 +58,6 @@ class CredstoreResultData extends ResultData {
     @Override
     public @Nullable byte[] getMessageAuthenticationCode() {
         return mMessageAuthenticationCode;
-    }
-
-    @Override
-    @Nullable byte[] getSignature() {
-        if (mFeatureVersion < 202301) {
-            throw new UnsupportedOperationException();
-        }
-        return mSignature;
     }
 
     @Override
@@ -133,17 +124,13 @@ class CredstoreResultData extends ResultData {
     static class Builder {
         private CredstoreResultData mResultData;
 
-        Builder(int featureVersion,
-                byte[] staticAuthenticationData,
+        Builder(byte[] staticAuthenticationData,
                 byte[] authenticatedData,
-                byte[] messageAuthenticationCode,
-                byte[] signature) {
+                byte[] messageAuthenticationCode) {
             this.mResultData = new CredstoreResultData();
-            this.mResultData.mFeatureVersion = featureVersion;
             this.mResultData.mStaticAuthenticationData = staticAuthenticationData;
             this.mResultData.mAuthenticatedData = authenticatedData;
             this.mResultData.mMessageAuthenticationCode = messageAuthenticationCode;
-            this.mResultData.mSignature = signature;
         }
 
         private Map<String, EntryData> getOrCreateInnerMap(String namespaceName) {

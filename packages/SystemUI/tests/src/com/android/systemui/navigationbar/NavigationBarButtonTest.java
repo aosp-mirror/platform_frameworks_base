@@ -40,7 +40,6 @@ import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.After;
@@ -66,7 +65,6 @@ public class NavigationBarButtonTest extends SysuiTestCase {
     private ImageReader mReader;
     private NavigationBarView mNavBar;
     private VirtualDisplay mVirtualDisplay;
-    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Before
     public void setup() {
@@ -85,7 +83,6 @@ public class NavigationBarButtonTest extends SysuiTestCase {
         mDependency.injectTestDependency(EdgeBackGestureHandler.Factory.class,
                 mEdgeBackGestureHandlerFactory);
         mNavBar = new NavigationBarView(context, null);
-        mNavBar.setDisplayTracker(mDisplayTracker);
     }
 
     private Display createVirtualDisplay() {

@@ -66,14 +66,13 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -100,7 +99,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
             .setComponent(new ComponentName(mContext.getPackageName(), "WalletActivity"));
 
     @Mock
-    private QSHost mHost;
+    private QSTileHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
@@ -159,12 +158,6 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
                 mController);
 
         mTile.initialize();
-        mTestableLooper.processAllMessages();
-    }
-
-    @After
-    public void tearDown() {
-        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 

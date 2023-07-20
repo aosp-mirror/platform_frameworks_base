@@ -25,6 +25,7 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.PluralsMessageFormatter;
@@ -36,7 +37,6 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStatusBarItemsProvider.StatusBarItem;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
@@ -72,7 +72,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             mDreamOverlayNotificationCountProvider;
     private final ZenModeController mZenModeController;
     private final DreamOverlayStateController mDreamOverlayStateController;
-    private final UserTracker mUserTracker;
     private final StatusBarWindowStateController mStatusBarWindowStateController;
     private final DreamOverlayStatusBarItemsProvider mStatusBarItemsProvider;
     private final Executor mMainExecutor;
@@ -155,8 +154,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             ZenModeController zenModeController,
             StatusBarWindowStateController statusBarWindowStateController,
             DreamOverlayStatusBarItemsProvider statusBarItemsProvider,
-            DreamOverlayStateController dreamOverlayStateController,
-            UserTracker userTracker) {
+            DreamOverlayStateController dreamOverlayStateController) {
         super(view);
         mResources = resources;
         mMainExecutor = mainExecutor;
@@ -171,7 +169,6 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mStatusBarItemsProvider = statusBarItemsProvider;
         mZenModeController = zenModeController;
         mDreamOverlayStateController = dreamOverlayStateController;
-        mUserTracker = userTracker;
 
         // Register to receive show/hide updates for the system status bar. Our custom status bar
         // needs to hide when the system status bar is showing to ovoid overlapping status bars.
@@ -200,6 +197,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mStatusBarItemsProvider.addCallback(mStatusBarItemsProviderCallback);
 
         mDreamOverlayStateController.addCallback(mDreamOverlayStateCallback);
+
+        mTouchInsetSession.addViewToTracking(mView);
     }
 
     @Override
@@ -255,13 +254,12 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                         mConnectivityManager.getActiveNetwork());
         final boolean available = capabilities != null
                 && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
-        showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, !available,
-                R.string.wifi_unavailable_dream_overlay_content_description);
+        showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, !available);
     }
 
     private void updateAlarmStatusIcon() {
         final AlarmManager.AlarmClockInfo alarm =
-                mAlarmManager.getNextAlarmClock(mUserTracker.getUserId());
+                mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
         final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
         showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_ALARM_SET,
@@ -293,16 +291,13 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         @DreamOverlayStatusBarView.StatusIconType int iconType = Resources.ID_NULL;
         showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_CAMERA_DISABLED,
-                !micBlocked && cameraBlocked,
-                R.string.camera_blocked_dream_overlay_content_description);
+                !micBlocked && cameraBlocked);
         showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_MIC_DISABLED,
-                micBlocked && !cameraBlocked,
-                R.string.microphone_blocked_dream_overlay_content_description);
+                micBlocked && !cameraBlocked);
         showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED,
-                micBlocked && cameraBlocked,
-                R.string.camera_and_microphone_blocked_dream_overlay_content_description);
+                micBlocked && cameraBlocked);
     }
 
     private String buildNotificationsContentDescription(int notificationCount) {
@@ -315,13 +310,11 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     private void updatePriorityModeStatusIcon() {
         showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON,
-                mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF,
-                R.string.priority_mode_dream_overlay_content_description);
+                mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF);
     }
 
-    private void showIcon(@DreamOverlayStatusBarView.StatusIconType int iconType, boolean show,
-            int contentDescriptionResId) {
-        showIcon(iconType, show, mResources.getString(contentDescriptionResId));
+    private void showIcon(@DreamOverlayStatusBarView.StatusIconType int iconType, boolean show) {
+        showIcon(iconType, show, null);
     }
 
     private void showIcon(

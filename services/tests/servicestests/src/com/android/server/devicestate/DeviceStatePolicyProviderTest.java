@@ -16,8 +16,6 @@
 
 package com.android.server.devicestate;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
@@ -26,6 +24,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.platform.test.annotations.Presubmit;
 
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -39,35 +39,37 @@ public class DeviceStatePolicyProviderTest {
 
     @Test
     public void test_emptyPolicyProvider() {
-        assertThat(DeviceStatePolicy.Provider.fromResources(resourcesWithProvider("")),
-                instanceOf(DeviceStatePolicy.DefaultProvider.class));
+        Assert.assertThat(DeviceStatePolicy.Provider.fromResources(resourcesWithProvider("")),
+                Matchers.instanceOf(DeviceStatePolicy.DefaultProvider.class));
     }
 
     @Test
     public void test_nullPolicyProvider() {
-        assertThat(DeviceStatePolicy.Provider.fromResources(resourcesWithProvider(null)),
-                instanceOf(DeviceStatePolicy.DefaultProvider.class));
+        Assert.assertThat(DeviceStatePolicy.Provider.fromResources(resourcesWithProvider(null)),
+                Matchers.instanceOf(DeviceStatePolicy.DefaultProvider.class));
     }
 
     @Test
     public void test_customPolicyProvider() {
-        assertThat(DeviceStatePolicy.Provider.fromResources(resourcesWithProvider(
-                        TestProvider.class.getName())),
-                instanceOf(TestProvider.class));
+        Assert.assertThat(DeviceStatePolicy.Provider.fromResources(resourcesWithProvider(
+                TestProvider.class.getName())),
+                Matchers.instanceOf(TestProvider.class));
     }
 
     @Test
     public void test_badPolicyProvider_notImplementingProviderInterface() {
-        assertThrows(IllegalStateException.class, () ->
-                DeviceStatePolicy.Provider.fromResources(resourcesWithProvider(
-                        Object.class.getName())));
+        assertThrows(IllegalStateException.class, () -> {
+            DeviceStatePolicy.Provider.fromResources(resourcesWithProvider(
+                    Object.class.getName()));
+        });
     }
 
     @Test
-    public void test_badPolicyProvider_returnsDefault() {
-        assertThat(DeviceStatePolicy.Provider.fromResources(
-                        resourcesWithProvider("com.android.devicestate.nonexistent.policy")),
-                instanceOf(DeviceStatePolicy.DefaultProvider.class));
+    public void test_badPolicyProvider_doesntExist() {
+        assertThrows(IllegalStateException.class, () -> {
+            DeviceStatePolicy.Provider.fromResources(resourcesWithProvider(
+                    "com.android.devicestate.nonexistent.policy"));
+        });
     }
 
     private static Resources resourcesWithProvider(String provider) {

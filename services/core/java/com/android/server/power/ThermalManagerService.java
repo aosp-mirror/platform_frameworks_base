@@ -547,8 +547,6 @@ public class ThermalManagerService extends SystemService {
         @Override
         public int onCommand(String cmd) {
             switch(cmd != null ? cmd : "") {
-                case "inject-temperature":
-                    return runInjectTemperature();
                 case "override-status":
                     return runOverrideStatus();
                 case "reset":
@@ -566,95 +564,6 @@ public class ThermalManagerService extends SystemService {
                     onTemperatureMapChangedLocked();
                     return 0;
                 }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-
-        private int runInjectTemperature() {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final PrintWriter pw = getOutPrintWriter();
-                int type;
-                String typeName = getNextArgRequired();
-                switch (typeName.toUpperCase()) {
-                    case "UNKNOWN":
-                        type = Temperature.TYPE_UNKNOWN;
-                        break;
-                    case "CPU":
-                        type = Temperature.TYPE_CPU;
-                        break;
-                    case "GPU":
-                        type = Temperature.TYPE_GPU;
-                        break;
-                    case "BATTERY":
-                        type = Temperature.TYPE_BATTERY;
-                        break;
-                    case "SKIN":
-                        type = Temperature.TYPE_SKIN;
-                        break;
-                    case "USB_PORT":
-                        type = Temperature.TYPE_USB_PORT;
-                        break;
-                    case "POWER_AMPLIFIER":
-                        type = Temperature.TYPE_POWER_AMPLIFIER;
-                        break;
-                    case "BCL_VOLTAGE":
-                        type = Temperature.TYPE_BCL_VOLTAGE;
-                        break;
-                    case "BCL_CURRENT":
-                        type = Temperature.TYPE_BCL_CURRENT;
-                        break;
-                    case "BCL_PERCENTAGE":
-                        type = Temperature.TYPE_BCL_PERCENTAGE;
-                        break;
-                    case "NPU":
-                        type = Temperature.TYPE_NPU;
-                        break;
-                    default:
-                        pw.println("Invalid temperature type: " + typeName);
-                        return -1;
-                }
-                int throttle;
-                String throttleName = getNextArgRequired();
-                switch (throttleName.toUpperCase()) {
-                    case "NONE":
-                        throttle = Temperature.THROTTLING_NONE;
-                        break;
-                    case "LIGHT":
-                        throttle = Temperature.THROTTLING_LIGHT;
-                        break;
-                    case "MODERATE":
-                        throttle = Temperature.THROTTLING_MODERATE;
-                        break;
-                    case "SEVERE":
-                        throttle = Temperature.THROTTLING_SEVERE;
-                        break;
-                    case "CRITICAL":
-                        throttle = Temperature.THROTTLING_CRITICAL;
-                        break;
-                    case "EMERGENCY":
-                        throttle = Temperature.THROTTLING_EMERGENCY;
-                        break;
-                    case "SHUTDOWN":
-                        throttle = Temperature.THROTTLING_SHUTDOWN;
-                        break;
-                    default:
-                        pw.println("Invalid throttle status: " + throttleName);
-                        return -1;
-                }
-                String name = getNextArgRequired();
-                float value = 28.0f;
-                try {
-                    String valueStr = getNextArg();
-                    if (valueStr != null) value = Float.parseFloat(valueStr);
-                } catch (RuntimeException ex) {
-                    pw.println("Error: " + ex.toString());
-                    return -1;
-                }
-                onTemperatureChanged(new Temperature(value, type, name, throttle), true);
-                return 0;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -692,9 +601,6 @@ public class ThermalManagerService extends SystemService {
             pw.println("  help");
             pw.println("    Print this help text.");
             pw.println("");
-            pw.println("  inject-temperature TYPE STATUS NAME [VALUE]");
-            pw.println("    injects a new temperature sample for the specified device.");
-            pw.println("    type and status strings follow the names in android.os.Temperature.");
             pw.println("  override-status STATUS");
             pw.println("    sets and locks the thermal status of the device to STATUS.");
             pw.println("    status code is defined in android.os.Temperature.");

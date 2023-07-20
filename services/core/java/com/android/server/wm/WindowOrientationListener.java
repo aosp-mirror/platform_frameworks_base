@@ -88,19 +88,14 @@ public abstract class WindowOrientationListener {
 
     private final Object mLock = new Object();
 
-    @Surface.Rotation
-    private final int mDefaultRotation;
-
     /**
      * Creates a new WindowOrientationListener.
      *
      * @param context for the WindowOrientationListener.
      * @param handler Provides the Looper for receiving sensor updates.
-     * @param defaultRotation Default rotation of the display.
      */
-    public WindowOrientationListener(Context context, Handler handler,
-            @Surface.Rotation int defaultRotation) {
-        this(context, handler, defaultRotation, SensorManager.SENSOR_DELAY_UI);
+    public WindowOrientationListener(Context context, Handler handler) {
+        this(context, handler, SensorManager.SENSOR_DELAY_UI);
     }
 
     /**
@@ -108,7 +103,7 @@ public abstract class WindowOrientationListener {
      *
      * @param context for the WindowOrientationListener.
      * @param handler Provides the Looper for receiving sensor updates.
-     * @param defaultRotation Default rotation of the display.
+     * @param wmService WindowManagerService to read the device config from.
      * @param rate at which sensor events are processed (see also
      * {@link android.hardware.SensorManager SensorManager}). Use the default
      * value of {@link android.hardware.SensorManager#SENSOR_DELAY_NORMAL
@@ -116,11 +111,10 @@ public abstract class WindowOrientationListener {
      *
      * This constructor is private since no one uses it.
      */
-    private WindowOrientationListener(Context context, Handler handler,
-            @Surface.Rotation int defaultRotation, int rate) {
+    private WindowOrientationListener(
+            Context context, Handler handler, int rate) {
         mContext = context;
         mHandler = handler;
-        mDefaultRotation = defaultRotation;
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         mRate = rate;
         List<Sensor> l = mSensorManager.getSensorList(Sensor.TYPE_DEVICE_ORIENTATION);
@@ -460,22 +454,22 @@ public abstract class WindowOrientationListener {
         // the low-pass filter already suppresses most of the noise so we're really just
         // looking for quick confirmation that the last few samples are in agreement as to
         // the desired orientation.
-        private static final long PROPOSAL_SETTLE_TIME_NANOS = 40 * NANOS_PER_MS;
+        private static final long PROPOSAL_SETTLE_TIME_NANOS = 25 * NANOS_PER_MS;
 
         // The minimum amount of time that must have elapsed since the device last exited
         // the flat state (time since it was picked up) before the proposed rotation
         // can change.
-        private static final long PROPOSAL_MIN_TIME_SINCE_FLAT_ENDED_NANOS = 500 * NANOS_PER_MS;
+        private static final long PROPOSAL_MIN_TIME_SINCE_FLAT_ENDED_NANOS = 250 * NANOS_PER_MS;
 
         // The minimum amount of time that must have elapsed since the device stopped
         // swinging (time since device appeared to be in the process of being put down
         // or put away into a pocket) before the proposed rotation can change.
-        private static final long PROPOSAL_MIN_TIME_SINCE_SWING_ENDED_NANOS = 300 * NANOS_PER_MS;
+        private static final long PROPOSAL_MIN_TIME_SINCE_SWING_ENDED_NANOS = 150 * NANOS_PER_MS;
 
         // The minimum amount of time that must have elapsed since the device stopped
         // undergoing external acceleration before the proposed rotation can change.
         private static final long PROPOSAL_MIN_TIME_SINCE_ACCELERATION_ENDED_NANOS =
-                500 * NANOS_PER_MS;
+                250 * NANOS_PER_MS;
 
         // If the tilt angle remains greater than the specified angle for a minimum of
         // the specified time, then the device is deemed to be lying flat
@@ -1165,7 +1159,7 @@ public abstract class WindowOrientationListener {
                                 "Reusing the last rotation resolution: " + mLastRotationResolution);
                         finalizeRotation(mLastRotationResolution);
                     } else {
-                        finalizeRotation(mDefaultRotation);
+                        finalizeRotation(Surface.ROTATION_0);
                     }
                     return;
                 }

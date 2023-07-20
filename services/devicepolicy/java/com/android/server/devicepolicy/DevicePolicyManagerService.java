@@ -136,7 +136,6 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
-import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_BLOCKING;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
@@ -439,8 +438,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
     private static final int REQUEST_PROFILE_OFF_DEADLINE = 5572;
-
-    private static final int MAX_PROFILE_NAME_LENGTH = 200;
 
     private static final long MS_PER_DAY = TimeUnit.DAYS.toMillis(1);
 
@@ -9209,10 +9206,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwner(caller));
 
-        final String truncatedProfileName =
-                profileName.substring(0, Math.min(profileName.length(), MAX_PROFILE_NAME_LENGTH));
         mInjector.binderWithCleanCallingIdentity(() -> {
-            mUserManager.setUserName(caller.getUserId(), truncatedProfileName);
+            mUserManager.setUserName(caller.getUserId(), profileName);
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_PROFILE_NAME)
                     .setAdmin(caller.getComponentName())
@@ -12172,23 +12167,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 "Caller is not managed profile owner or device owner;"
                         + " only managed profile owner or device owner may control the preferential"
                         + " network service");
-
-        try {
-            updateNetworkPreferenceForUser(caller.getUserId(), preferentialNetworkServiceConfigs);
-            synchronized (getLockObject()) {
-                final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
-                        caller.getUserId());
-                if (!requiredAdmin.mPreferentialNetworkServiceConfigs.equals(
-                        preferentialNetworkServiceConfigs)) {
-                    requiredAdmin.mPreferentialNetworkServiceConfigs =
-                            new ArrayList<>(preferentialNetworkServiceConfigs);
-                    saveSettingsLocked(caller.getUserId());
-                }
+        synchronized (getLockObject()) {
+            final ActiveAdmin requiredAdmin = getDeviceOrProfileOwnerAdminLocked(
+                    caller.getUserId());
+            if (!requiredAdmin.mPreferentialNetworkServiceConfigs.equals(
+                    preferentialNetworkServiceConfigs)) {
+                requiredAdmin.mPreferentialNetworkServiceConfigs =
+                        new ArrayList<>(preferentialNetworkServiceConfigs);
+                saveSettingsLocked(caller.getUserId());
             }
-        } catch (Exception e) {
-            Slogf.e(LOG_TAG, "Failed to set preferential network service configs");
-            throw e;
         }
+        updateNetworkPreferenceForUser(caller.getUserId(), preferentialNetworkServiceConfigs);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PREFERENTIAL_NETWORK_SERVICE_ENABLED)
                 .setBoolean(preferentialNetworkServiceConfigs
@@ -16076,11 +16065,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean isLogoutEnabled() {
         if (!mHasFeature) {
-            return false;
+            return true;
         }
         synchronized (getLockObject()) {
             ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-            return (deviceOwner != null) && deviceOwner.isLogoutEnabled;
+            return (deviceOwner == null) || deviceOwner.isLogoutEnabled;
         }
     }
 
@@ -18345,9 +18334,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (preferentialNetworkServiceConfig.isEnabled()) {
                 if (preferentialNetworkServiceConfig.isFallbackToDefaultConnectionAllowed()) {
                     preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_ENTERPRISE);
-                } else if (preferentialNetworkServiceConfig.shouldBlockNonMatchingNetworks()) {
-                    preferenceBuilder.setPreference(
-                            PROFILE_NETWORK_PREFERENCE_ENTERPRISE_BLOCKING);
                 } else {
                     preferenceBuilder.setPreference(
                             PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK);
@@ -18659,10 +18645,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Objects.requireNonNull(strings, "strings must be provided.");
 
         mInjector.binderWithCleanCallingIdentity(() -> {
-            if (mDeviceManagementResourcesProvider.updateStrings(strings)) {
-                sendStringsUpdatedBroadcast(
-                        strings.stream().map(s -> s.getStringId()).collect(Collectors.toList()));
-            }
+            if (mDeviceManagementResourcesProvider.updateStrings(strings))
+            sendStringsUpdatedBroadcast(
+                    strings.stream().map(s -> s.getStringId()).collect(Collectors.toList()));
         });
     }
 

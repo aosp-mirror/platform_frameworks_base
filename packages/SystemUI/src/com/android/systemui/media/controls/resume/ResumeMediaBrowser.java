@@ -85,13 +85,16 @@ public class ResumeMediaBrowser {
      * ResumeMediaBrowser#disconnect will be called automatically with this function.
      */
     public void findRecentMedia() {
+        disconnect();
         Bundle rootHints = new Bundle();
         rootHints.putBoolean(MediaBrowserService.BrowserRoot.EXTRA_RECENT, true);
-        MediaBrowser browser = mBrowserFactory.create(
+        mMediaBrowser = mBrowserFactory.create(
                 mComponentName,
                 mConnectionCallback,
                 rootHints);
-        connectBrowser(browser, "findRecentMedia");
+        updateMediaController();
+        mLogger.logConnection(mComponentName, "findRecentMedia");
+        mMediaBrowser.connect();
     }
 
     private final MediaBrowser.SubscriptionCallback mSubscriptionCallback =
@@ -199,21 +202,6 @@ public class ResumeMediaBrowser {
     };
 
     /**
-     * Connect using a new media browser. Disconnects the existing browser first, if it exists.
-     * @param browser media browser to connect
-     * @param reason Reason to log for connection
-     */
-    private void connectBrowser(MediaBrowser browser, String reason) {
-        mLogger.logConnection(mComponentName, reason);
-        disconnect();
-        mMediaBrowser = browser;
-        if (browser != null) {
-            browser.connect();
-        }
-        updateMediaController();
-    }
-
-    /**
      * Disconnect the media browser. This should be done after callbacks have completed to
      * disconnect from the media browser service.
      */
@@ -234,9 +222,10 @@ public class ResumeMediaBrowser {
      * getting a media update from the app
      */
     public void restart() {
+        disconnect();
         Bundle rootHints = new Bundle();
         rootHints.putBoolean(MediaBrowserService.BrowserRoot.EXTRA_RECENT, true);
-        MediaBrowser browser = mBrowserFactory.create(mComponentName,
+        mMediaBrowser = mBrowserFactory.create(mComponentName,
                 new MediaBrowser.ConnectionCallback() {
                     @Override
                     public void onConnected() {
@@ -276,7 +265,9 @@ public class ResumeMediaBrowser {
                         disconnect();
                     }
                 }, rootHints);
-        connectBrowser(browser, "restart");
+        updateMediaController();
+        mLogger.logConnection(mComponentName, "restart");
+        mMediaBrowser.connect();
     }
 
     @VisibleForTesting
@@ -314,13 +305,16 @@ public class ResumeMediaBrowser {
      * ResumeMediaBrowser#disconnect should be called after this to ensure the connection is closed.
      */
     public void testConnection() {
+        disconnect();
         Bundle rootHints = new Bundle();
         rootHints.putBoolean(MediaBrowserService.BrowserRoot.EXTRA_RECENT, true);
-        MediaBrowser browser = mBrowserFactory.create(
+        mMediaBrowser = mBrowserFactory.create(
                 mComponentName,
                 mConnectionCallback,
                 rootHints);
-        connectBrowser(browser, "testConnection");
+        updateMediaController();
+        mLogger.logConnection(mComponentName, "testConnection");
+        mMediaBrowser.connect();
     }
 
     /** Updates mMediaController based on our current browser values. */

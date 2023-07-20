@@ -352,7 +352,7 @@ public final class SystemClock {
                 }
                 long currentNanos = elapsedRealtimeNanos();
                 long deltaMs = (currentNanos - time.getElapsedRealtimeNanos()) / 1000000L;
-                return time.getUnixEpochTimeMillis() + deltaMs;
+                return time.getTime() + deltaMs;
             }
         };
     }

@@ -23,9 +23,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.util.AttributeSet;
-import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
-import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
@@ -44,9 +42,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
-import com.android.systemui.util.DumpUtilsKt;
 
-import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -203,7 +199,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      * be useful in a configuration change.
      */
     protected void initBackground() {
-        mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
+        setTranslucentBackground(true);
     }
 
     protected boolean hideBackground() {
@@ -214,6 +210,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundNormal.setVisibility(hideBackground() ? INVISIBLE : VISIBLE);
     }
 
+    public void setTranslucentBackground(boolean translucent) {
+        if (translucent) {
+            mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
+        } else {
+            mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg_monet);
+        }
+    }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -496,9 +499,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (animationListener != null) {
             mAppearAnimator.addListener(animationListener);
         }
-        // we need to apply the initial state already to avoid drawn frames in the wrong state
-        updateAppearAnimationAlpha();
-        updateAppearRect();
+        if (delay > 0) {
+            // we need to apply the initial state already to avoid drawn frames in the wrong state
+            updateAppearAnimationAlpha();
+            updateAppearRect();
+            mAppearAnimator.setStartDelay(delay);
+        }
         mAppearAnimator.addListener(new AnimatorListenerAdapter() {
             private boolean mWasCancelled;
 
@@ -529,20 +535,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 mWasCancelled = true;
             }
         });
-
-        // Cache the original animator so we can check if the animation should be started in the
-        // Choreographer callback. It's possible that the original animator (mAppearAnimator) is
-        // replaced with a new value before the callback is called.
-        ValueAnimator cachedAnimator = mAppearAnimator;
-        // Even when delay=0, starting the animation on the next frame is necessary to avoid jank.
-        // Not doing so will increase the chances our Animator will be forced to skip a value of
-        // the animation's progression, causing stutter.
-        Choreographer.getInstance().postFrameCallbackDelayed(
-                frameTimeNanos -> {
-                    if (mAppearAnimator == cachedAnimator) {
-                        mAppearAnimator.start();
-                    }
-                }, delay);
+        mAppearAnimator.start();
     }
 
     private int getCujType(boolean isAppearing) {
@@ -652,6 +645,11 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private void applyBackgroundRoundness(float topRadius, float bottomRadius) {
         mBackgroundNormal.setRadius(topRadius, bottomRadius);
+    }
+
+    @Override
+    protected void setBackgroundTop(int backgroundTop) {
+        mBackgroundNormal.setBackgroundTop(backgroundTop);
     }
 
     protected abstract View getContentView();
@@ -815,22 +813,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      */
     public void addOnDetachResetRoundness(SourceType sourceType) {
         mOnDetachResetRoundness.add(sourceType);
-    }
-
-    @Override
-    public void dump(PrintWriter pwOriginal, String[] args) {
-        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
-        super.dump(pw, args);
-        if (DUMP_VERBOSE) {
-            DumpUtilsKt.withIncreasedIndent(pw, () -> {
-                pw.println("mBackgroundNormal: " + mBackgroundNormal);
-                if (mBackgroundNormal != null) {
-                    DumpUtilsKt.withIncreasedIndent(pw, () -> {
-                        mBackgroundNormal.dump(pw, args);
-                    });
-                }
-            });
-        }
     }
 
     public interface OnActivatedListener {

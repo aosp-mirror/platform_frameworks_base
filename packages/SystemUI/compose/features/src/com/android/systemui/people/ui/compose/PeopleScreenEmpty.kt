@@ -79,9 +79,7 @@ internal fun PeopleScreenEmpty(
                     containerColor = androidColors.colorAccentPrimary,
                     contentColor = androidColors.textColorOnAccent,
                 )
-        ) {
-            Text(stringResource(R.string.got_it))
-        }
+        ) { Text(stringResource(R.string.got_it)) }
     }
 }
 

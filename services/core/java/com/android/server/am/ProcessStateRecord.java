@@ -36,6 +36,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.PlatformCompatCache.CachedCompatChangeId;
 
 import java.io.PrintWriter;
@@ -599,6 +600,12 @@ final class ProcessStateRecord {
     @GuardedBy({"mService", "mProcLock"})
     void setReportedProcState(int repProcState) {
         mRepProcState = repProcState;
+        mApp.getPkgList().forEachPackage((pkgName, holder) ->
+                FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
+                    mApp.uid, mApp.processName, pkgName,
+                    ActivityManager.processStateAmToProto(mRepProcState),
+                    holder.appVersion)
+        );
         mApp.getWindowProcessController().setReportedProcState(repProcState);
     }
 
@@ -611,9 +618,15 @@ final class ProcessStateRecord {
     void forceProcessStateUpTo(int newState) {
         if (mRepProcState > newState) {
             synchronized (mProcLock) {
-                setReportedProcState(newState);
+                mRepProcState = newState;
                 setCurProcState(newState);
                 setCurRawProcState(newState);
+                mApp.getPkgList().forEachPackage((pkgName, holder) ->
+                        FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
+                            mApp.uid, mApp.processName, pkgName,
+                            ActivityManager.processStateAmToProto(mRepProcState),
+                            holder.appVersion)
+                );
             }
         }
     }

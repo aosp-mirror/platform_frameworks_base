@@ -21,14 +21,10 @@ import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
-import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
-import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
-import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModelTest.Companion.defaultSignal
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -50,8 +46,8 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     private lateinit var qsIcon: QsMobileIconViewModel
     private lateinit var keyguardIcon: KeyguardMobileIconViewModel
     private lateinit var interactor: FakeMobileIconInteractor
-    private lateinit var airplaneModeInteractor: AirplaneModeInteractor
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
+    @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var constants: ConnectivityConstants
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
 
@@ -61,11 +57,6 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        airplaneModeInteractor =
-            AirplaneModeInteractor(
-                FakeAirplaneModeRepository(),
-                FakeConnectivityRepository(),
-            )
         interactor = FakeMobileIconInteractor(tableLogBuffer)
         interactor.apply {
             setLevel(1)
@@ -77,15 +68,9 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
             isDataConnected.value = true
         }
         commonImpl =
-            MobileIconViewModel(
-                SUB_1_ID,
-                interactor,
-                airplaneModeInteractor,
-                constants,
-                testScope.backgroundScope,
-            )
+            MobileIconViewModel(SUB_1_ID, interactor, logger, constants, testScope.backgroundScope)
 
-        homeIcon = HomeMobileIconViewModel(commonImpl, statusBarPipelineFlags, mock())
+        homeIcon = HomeMobileIconViewModel(commonImpl, statusBarPipelineFlags)
         qsIcon = QsMobileIconViewModel(commonImpl, statusBarPipelineFlags)
         keyguardIcon = KeyguardMobileIconViewModel(commonImpl, statusBarPipelineFlags)
     }
@@ -93,14 +78,14 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun `location based view models receive same icon id when common impl updates`() =
         testScope.runTest {
-            var latestHome: SignalIconModel? = null
-            val homeJob = homeIcon.icon.onEach { latestHome = it }.launchIn(this)
+            var latestHome: Int? = null
+            val homeJob = homeIcon.iconId.onEach { latestHome = it }.launchIn(this)
 
-            var latestQs: SignalIconModel? = null
-            val qsJob = qsIcon.icon.onEach { latestQs = it }.launchIn(this)
+            var latestQs: Int? = null
+            val qsJob = qsIcon.iconId.onEach { latestQs = it }.launchIn(this)
 
-            var latestKeyguard: SignalIconModel? = null
-            val keyguardJob = keyguardIcon.icon.onEach { latestKeyguard = it }.launchIn(this)
+            var latestKeyguard: Int? = null
+            val keyguardJob = keyguardIcon.iconId.onEach { latestKeyguard = it }.launchIn(this)
 
             var expected = defaultSignal(level = 1)
 

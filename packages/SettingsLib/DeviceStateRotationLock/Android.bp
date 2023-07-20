@@ -10,10 +10,7 @@ package {
 android_library {
     name: "SettingsLibDeviceStateRotationLock",
 
-    srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
-    ],
+    srcs: ["src/**/*.java"],
 
     min_sdk_version: "21",
 }

@@ -18,8 +18,6 @@ package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
-import android.platform.test.rule.SettingOverrideRule
-import android.provider.Settings
 import androidx.test.filters.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -27,7 +25,6 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.traces.common.FlickerComponentName
-import org.junit.ClassRule
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -127,16 +124,5 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter)
             return com.android.server.wm.flicker.FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(repetitions = 3)
         }
-
-        /**
-         * Ensures that posted notifications will be visible on the lockscreen and not
-         * suppressed due to being marked as seen.
-         */
-        @ClassRule
-        @JvmField
-        val disableUnseenNotifFilterRule = SettingOverrideRule(
-            Settings.Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
-            /* value= */ "0",
-        )
     }
 }

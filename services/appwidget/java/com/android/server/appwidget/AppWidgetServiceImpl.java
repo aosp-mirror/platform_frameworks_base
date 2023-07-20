@@ -817,8 +817,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             if (host != null) {
                 host.callbacks = null;
                 pruneHostLocked(host);
-                mAppOpsManagerInternal.updateAppWidgetVisibility(host.getWidgetUidsIfBound(),
-                        false);
+                mAppOpsManagerInternal.updateAppWidgetVisibility(host.getWidgetUids(), false);
             }
         }
     }
@@ -889,8 +888,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Host host = lookupHostLocked(id);
 
             if (host != null) {
-                mAppOpsManagerInternal.updateAppWidgetVisibility(host.getWidgetUidsIfBound(),
-                        false);
+                try {
+                    mAppOpsManagerInternal.updateAppWidgetVisibility(host.getWidgetUids(), false);
+                } catch (NullPointerException e) {
+                    Slog.e(TAG, "setAppWidgetHidden(): Getting host uids: " + host.toString(), e);
+                    throw e;
+                }
             }
         }
     }
@@ -4342,15 +4345,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     PendingHostUpdate.appWidgetRemoved(appWidgetId));
         }
 
-        public SparseArray<String> getWidgetUidsIfBound() {
+        public SparseArray<String> getWidgetUids() {
             final SparseArray<String> uids = new SparseArray<>();
             for (int i = widgets.size() - 1; i >= 0; i--) {
                 final Widget widget = widgets.get(i);
                 if (widget.provider == null) {
                     if (DEBUG) {
-                        Slog.d(TAG, "Widget with no provider " + widget.toString());
+                        Slog.e(TAG, "Widget with no provider " + widget.toString());
                     }
-                    continue;
                 }
                 final ProviderId providerId = widget.provider.id;
                 uids.put(providerId.uid, providerId.componentName.getPackageName());

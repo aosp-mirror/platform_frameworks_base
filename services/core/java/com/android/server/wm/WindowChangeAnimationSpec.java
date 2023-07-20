@@ -79,9 +79,8 @@ public class WindowChangeAnimationSpec implements AnimationSpec {
      * or shrinking:
      * If growing, it will do a clip-reveal after quicker fade-out/scale of the smaller (old)
      * snapshot.
-     * If shrinking, it will do an opposite clip-reveal on the old snapshot followed by a quicker
-     * fade-out of the bigger (old) snapshot while simultaneously shrinking the new window into
-     * place.
+     * If shrinking, it will shrink the old snapshot into place followed by a quicker
+     * fade-out of the bigger (old) snapshot while leaving the (new) window in the same place.
      * @param duration
      * @param displayInfo
      */
@@ -94,73 +93,98 @@ public class WindowChangeAnimationSpec implements AnimationSpec {
                 + (1.f - scalePart);
         float startScaleY = scalePart * ((float) mStartBounds.height()) / mEndBounds.height()
                 + (1.f - scalePart);
+        float myScaleX = 1f / (((float) mStartBounds.width()) / mEndBounds.width());
+        float myScaleY = 1f / (((float) mStartBounds.height()) / mEndBounds.height());
+        final AnimationSet animSet = new AnimationSet(true);
         if (mIsThumbnail) {
-            AnimationSet animSet = new AnimationSet(true);
-            Animation anim = new AlphaAnimation(1.f, 0.f);
-            anim.setDuration(scalePeriod);
+            final Animation alphaAnim = new AlphaAnimation(1.f, 0.f);
             if (!growing) {
-                anim.setStartOffset(duration - scalePeriod);
+                alphaAnim.setStartOffset(scalePeriod);
+                alphaAnim.setDuration(duration - scalePeriod);
+            } else {
+                alphaAnim.setDuration(scalePeriod);
             }
-            animSet.addAnimation(anim);
-            float endScaleX = 1.f / startScaleX;
-            float endScaleY = 1.f / startScaleY;
-            anim = new ScaleAnimation(endScaleX, endScaleX, endScaleY, endScaleY);
-            anim.setDuration(duration);
-            animSet.addAnimation(anim);
-            mAnimation = animSet;
-            mAnimation.initialize(mStartBounds.width(), mStartBounds.height(),
-                    mEndBounds.width(), mEndBounds.height());
-        } else {
-            AnimationSet animSet = new AnimationSet(true);
-            final Animation scaleAnim = new ScaleAnimation(startScaleX, 1, startScaleY, 1);
-            scaleAnim.setDuration(scalePeriod);
-            if (!growing) {
-                scaleAnim.setStartOffset(duration - scalePeriod);
+            animSet.addAnimation(alphaAnim);
+
+            final Animation scaleAnim;
+            if (growing) {
+                float endScaleX = 1.f / startScaleX;
+                float endScaleY = 1.f / startScaleY;
+                scaleAnim = new ScaleAnimation(endScaleX, endScaleX, endScaleY, endScaleY);
+                scaleAnim.setDuration(duration);
+            } else {
+                scaleAnim = new ScaleAnimation(1, myScaleX, 1, myScaleY);
+                scaleAnim.setDuration(scalePeriod);
             }
             animSet.addAnimation(scaleAnim);
-            final Animation translateAnim = new TranslateAnimation(mStartBounds.left,
-                    mEndBounds.left, mStartBounds.top, mEndBounds.top);
-            translateAnim.setDuration(duration);
-            animSet.addAnimation(translateAnim);
-            Rect startClip = new Rect(mStartBounds);
-            Rect endClip = new Rect(mEndBounds);
-            startClip.offsetTo(0, 0);
-            endClip.offsetTo(0, 0);
-            final Animation clipAnim = new ClipRectAnimation(startClip, endClip);
-            clipAnim.setDuration(duration);
-            animSet.addAnimation(clipAnim);
-            mAnimation = animSet;
-            mAnimation.initialize(mStartBounds.width(), mStartBounds.height(),
-                    displayInfo.appWidth, displayInfo.appHeight);
+
+            if (!growing) {
+                final Animation translateAnim = new TranslateAnimation(mStartBounds.left,
+                        mEndBounds.left, mStartBounds.top, mEndBounds.top);
+                translateAnim.setDuration(scalePeriod);
+                animSet.addAnimation(translateAnim);
+
+                Rect startClip = new Rect(mStartBounds);
+                Rect endClip = new Rect(mEndBounds);
+                startClip.offsetTo(0, 0);
+                endClip.offsetTo(0, 0);
+                final Animation clipAnim = new ClipRectAnimation(startClip, endClip);
+                clipAnim.setDuration(duration);
+                animSet.addAnimation(clipAnim);
+            }
+        } else {
+            if (growing) {
+                final Animation scaleAnim = new ScaleAnimation(startScaleX, 1, startScaleY, 1);
+                scaleAnim.setDuration(scalePeriod);
+                animSet.addAnimation(scaleAnim);
+
+                final Animation translateAnim = new TranslateAnimation(mStartBounds.left,
+                        mEndBounds.left, mStartBounds.top, mEndBounds.top);
+                translateAnim.setDuration(duration);
+                animSet.addAnimation(translateAnim);
+
+                Rect startClip = new Rect(mStartBounds);
+                Rect endClip = new Rect(mEndBounds);
+                startClip.offsetTo(0, 0);
+                endClip.offsetTo(0, 0);
+                final Animation clipAnim = new ClipRectAnimation(startClip, endClip);
+                clipAnim.setDuration(duration);
+                animSet.addAnimation(clipAnim);
+            } else {
+                // no visual effect, but keeps animator busy. it otherwise just jumps to last frame
+                final Animation alphaAnim = new AlphaAnimation(1.f, 1.f);
+                alphaAnim.setDuration(duration);
+                animSet.addAnimation(alphaAnim);
+            }
+
         }
+        mAnimation = animSet;
+        mAnimation.initialize(mStartBounds.width(), mStartBounds.height(),
+                mEndBounds.width(), mEndBounds.height());
     }
 
     @Override
     public void apply(Transaction t, SurfaceControl leash, long currentPlayTime) {
         final TmpValues tmp = mThreadLocalTmps.get();
+        mAnimation.getTransformation(currentPlayTime, tmp.mTransformation);
         if (mIsThumbnail) {
-            mAnimation.getTransformation(currentPlayTime, tmp.mTransformation);
-            t.setMatrix(leash, tmp.mTransformation.getMatrix(), tmp.mFloats);
             t.setAlpha(leash, tmp.mTransformation.getAlpha());
-        } else {
-            mAnimation.getTransformation(currentPlayTime, tmp.mTransformation);
-            final Matrix matrix = tmp.mTransformation.getMatrix();
-            t.setMatrix(leash, matrix, tmp.mFloats);
-
-            // The following applies an inverse scale to the clip-rect so that it crops "after" the
-            // scale instead of before.
-            tmp.mVecs[1] = tmp.mVecs[2] = 0;
-            tmp.mVecs[0] = tmp.mVecs[3] = 1;
-            matrix.mapVectors(tmp.mVecs);
-            tmp.mVecs[0] = 1.f / tmp.mVecs[0];
-            tmp.mVecs[3] = 1.f / tmp.mVecs[3];
-            final Rect clipRect = tmp.mTransformation.getClipRect();
-            mTmpRect.left = (int) (clipRect.left * tmp.mVecs[0] + 0.5f);
-            mTmpRect.right = (int) (clipRect.right * tmp.mVecs[0] + 0.5f);
-            mTmpRect.top = (int) (clipRect.top * tmp.mVecs[3] + 0.5f);
-            mTmpRect.bottom = (int) (clipRect.bottom * tmp.mVecs[3] + 0.5f);
-            t.setWindowCrop(leash, mTmpRect);
         }
+        final Matrix matrix = tmp.mTransformation.getMatrix();
+        t.setMatrix(leash, matrix, tmp.mFloats);
+        final Rect clipRect = tmp.mTransformation.getClipRect();
+        // The following applies an inverse scale to the clip-rect so that it crops "after" the
+        // scale instead of before.
+        tmp.mVecs[1] = tmp.mVecs[2] = 0;
+        tmp.mVecs[0] = tmp.mVecs[3] = 1;
+        matrix.mapVectors(tmp.mVecs);
+        tmp.mVecs[0] = 1.f / tmp.mVecs[0];
+        tmp.mVecs[3] = 1.f / tmp.mVecs[3];
+        mTmpRect.left = (int) (clipRect.left * tmp.mVecs[0] + 0.5f);
+        mTmpRect.right = (int) (clipRect.right * tmp.mVecs[0] + 0.5f);
+        mTmpRect.top = (int) (clipRect.top * tmp.mVecs[3] + 0.5f);
+        mTmpRect.bottom = (int) (clipRect.bottom * tmp.mVecs[3] + 0.5f);
+        t.setWindowCrop(leash, mTmpRect);
     }
 
     @Override

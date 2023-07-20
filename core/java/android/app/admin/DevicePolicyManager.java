@@ -2400,7 +2400,6 @@ public class DevicePolicyManager {
      * applied (cross profile intent filters updated). Only usesd for CTS tests.
      * @hide
      */
-    @SuppressLint("ActionValue")
     @TestApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED =
@@ -2411,7 +2410,6 @@ public class DevicePolicyManager {
      * has been changed.
      * @hide
      */
-    @SuppressLint("ActionValue")
     @TestApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DEVICE_POLICY_CONSTANTS_CHANGED =
@@ -3564,7 +3562,7 @@ public class DevicePolicyManager {
      * Maximum supported password length. Kind-of arbitrary.
      * @hide
      */
-    public static final int MAX_PASSWORD_LENGTH = 16;
+    public static final int MAX_PASSWORD_LENGTH = 64;
 
     /**
      * Service Action: Service implemented by a device owner or profile owner supervision app to
@@ -6640,13 +6638,6 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_IRIS = 1 << 8;
 
     /**
-     * Disable all keyguard shortcuts.
-     *
-     * @hide
-     */
-    public static final int KEYGUARD_DISABLE_SHORTCUTS_ALL = 1 << 9;
-
-    /**
      * NOTE: Please remember to update the DevicePolicyManagerTest's testKeyguardDisabledFeatures
      * CTS test when adding to the list above.
      */
@@ -6689,8 +6680,7 @@ public class DevicePolicyManager {
      */
     public static final int ORG_OWNED_PROFILE_KEYGUARD_FEATURES_PARENT_ONLY =
             DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA
-                    | DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS
-                    | DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL;
+                    | DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
 
     /**
      * Keyguard features that when set on a normal or organization-owned managed profile, have
@@ -6797,8 +6787,6 @@ public class DevicePolicyManager {
      * {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link #ENCRYPTION_STATUS_INACTIVE},
      * {@link #ENCRYPTION_STATUS_ACTIVATING}, {@link #ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY},
      * {@link #ENCRYPTION_STATUS_ACTIVE}, or {@link #ENCRYPTION_STATUS_ACTIVE_PER_USER}.
-     *
-     * @throws SecurityException if called on a parent instance.
      */
     public int getStorageEncryptionStatus() {
         throwIfParentInstance("getStorageEncryptionStatus");
@@ -9190,8 +9178,7 @@ public class DevicePolicyManager {
      * @see #isProfileOwnerApp
      * @see #isDeviceOwnerApp
      * @param admin Which {@link DeviceAdminReceiver} this request is associate with.
-     * @param profileName The name of the profile. If the name is longer than 200 characters
-     *                    it will be truncated.
+     * @param profileName The name of the profile.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setProfileName(@NonNull ComponentName admin, String profileName) {

@@ -106,7 +106,7 @@
         app:layout_constrainedWidth="true"
         app:layout_constraintWidth_min="@dimen/min_clickable_item_size"
         app:layout_constraintHeight_min="@dimen/min_clickable_item_size">
-        <com.android.systemui.animation.view.LaunchableLinearLayout
+        <LinearLayout
             android:id="@+id/media_seamless_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -135,7 +135,7 @@
                 android:textDirection="locale"
                 android:textSize="12sp"
                 android:lineHeight="16sp" />
-        </com.android.systemui.animation.view.LaunchableLinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Song name -->
@@ -146,14 +146,6 @@
         android:textSize="16sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-
-    <!-- Explicit Indicator -->
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/media_explicit_indicator"
-        android:layout_width="@dimen/qs_media_explicit_indicator_icon_size"
-        android:layout_height="@dimen/qs_media_explicit_indicator_icon_size"
-        android:src="@drawable/ic_media_explicit_indicator"
-        />
 
     <!-- Artist name -->
     <TextView
@@ -213,7 +205,7 @@
         style="@style/MediaPlayer.SessionAction.Secondary"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp"
@@ -228,7 +220,7 @@
         style="@style/MediaPlayer.ScrubbingTime"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp"
@@ -293,7 +285,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
-        android:layout_marginEnd="4dp"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp" />
 
@@ -303,7 +295,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
-        android:layout_marginEnd="4dp"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp" />
 
@@ -313,7 +305,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
-        android:layout_marginEnd="4dp"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp" />
 
@@ -323,7 +315,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginStart="@dimen/qs_media_action_spacing"
-        android:layout_marginEnd="4dp"
+        android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:layout_marginBottom="@dimen/qs_media_padding"
         android:layout_marginTop="0dp" />
 

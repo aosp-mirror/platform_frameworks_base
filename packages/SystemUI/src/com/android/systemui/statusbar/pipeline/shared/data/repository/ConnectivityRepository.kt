@@ -26,7 +26,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.phone.StatusBarIconController
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityInputLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlots
 import com.android.systemui.tuner.TunerService
@@ -44,61 +45,59 @@ import kotlinx.coroutines.flow.stateIn
  * types of connectivity (wifi, mobile, ethernet, etc.)
  */
 interface ConnectivityRepository {
-    /** Observable for the current set of connectivity icons that should be force-hidden. */
+    /**
+     * Observable for the current set of connectivity icons that should be force-hidden.
+     */
     val forceHiddenSlots: StateFlow<Set<ConnectivitySlot>>
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
-class ConnectivityRepositoryImpl
-@Inject
-constructor(
+class ConnectivityRepositoryImpl @Inject constructor(
     private val connectivitySlots: ConnectivitySlots,
     context: Context,
     dumpManager: DumpManager,
-    logger: ConnectivityInputLogger,
+    logger: ConnectivityPipelineLogger,
     @Application scope: CoroutineScope,
     tunerService: TunerService,
 ) : ConnectivityRepository, Dumpable {
     init {
-        dumpManager.registerDumpable("ConnectivityRepository", this)
+        dumpManager.registerDumpable("${SB_LOGGING_TAG}Repository", this)
     }
 
     // The default set of hidden icons to use if we don't get any from [TunerService].
     private val defaultHiddenIcons: Set<ConnectivitySlot> =
-        context.resources
-            .getStringArray(DEFAULT_HIDDEN_ICONS_RESOURCE)
-            .asList()
-            .toSlotSet(connectivitySlots)
+            context.resources.getStringArray(DEFAULT_HIDDEN_ICONS_RESOURCE)
+                .asList()
+                .toSlotSet(connectivitySlots)
 
-    override val forceHiddenSlots: StateFlow<Set<ConnectivitySlot>> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : TunerService.Tunable {
-                        override fun onTuningChanged(key: String, newHideList: String?) {
-                            if (key != HIDDEN_ICONS_TUNABLE_KEY) {
-                                return
-                            }
-                            logger.logTuningChanged(newHideList)
+    override val forceHiddenSlots: StateFlow<Set<ConnectivitySlot>> = conflatedCallbackFlow {
+        val callback = object : TunerService.Tunable {
+            override fun onTuningChanged(key: String, newHideList: String?) {
+                if (key != HIDDEN_ICONS_TUNABLE_KEY) {
+                    return
+                }
+                logger.logInputChange("onTuningChanged", newHideList)
 
-                            val outputList =
-                                newHideList?.split(",")?.toSlotSet(connectivitySlots)
-                                    ?: defaultHiddenIcons
-                            trySend(outputList)
-                        }
-                    }
-                tunerService.addTunable(callback, HIDDEN_ICONS_TUNABLE_KEY)
-
-                awaitClose { tunerService.removeTunable(callback) }
+                val outputList = newHideList?.split(",")?.toSlotSet(connectivitySlots)
+                    ?: defaultHiddenIcons
+                trySend(outputList)
             }
-            .stateIn(
-                scope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = defaultHiddenIcons
-            )
+        }
+        tunerService.addTunable(callback, HIDDEN_ICONS_TUNABLE_KEY)
+
+        awaitClose { tunerService.removeTunable(callback) }
+    }
+        .stateIn(
+            scope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = defaultHiddenIcons
+        )
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.apply { println("defaultHiddenIcons=$defaultHiddenIcons") }
+        pw.apply {
+            println("defaultHiddenIcons=$defaultHiddenIcons")
+        }
     }
 
     companion object {
@@ -112,7 +111,8 @@ constructor(
         private fun List<String>.toSlotSet(
             connectivitySlots: ConnectivitySlots
         ): Set<ConnectivitySlot> {
-            return this.filter { it.isNotBlank() }
+            return this
+                .filter { it.isNotBlank() }
                 .mapNotNull { connectivitySlots.getSlotFromName(it) }
                 .toSet()
         }

@@ -51,7 +51,7 @@
     <bool name="def_networks_available_notification_on">true</bool>
 
     <bool name="def_backup_enabled">false</bool>
-    <string name="def_backup_transport" translatable="false">com.android.localtransport/.LocalTransport</string>
+    <string name="def_backup_transport" translatable="false">com.google.android.gms/.backup.BackupTransportService</string>
 
     <!-- Default value for whether or not to pulse the notification LED when there is a
          pending notification -->
@@ -255,7 +255,7 @@
     <integer name="def_accessibility_magnification_capabilities">3</integer>
 
     <!-- Default for Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW -->
-    <bool name="def_enable_non_resizable_multi_window">false</bool>
+    <bool name="def_enable_non_resizable_multi_window">true</bool>
 
     <!-- Default for Settings.Secure.ACCESSIBILITY_BUTTON_MODE -->
     <integer name="def_accessibility_button_mode">1</integer>
@@ -320,4 +320,13 @@
 
     <!-- Whether vibrate icon is shown in the status bar by default. -->
     <integer name="def_statusBarVibrateIconEnabled">0</integer>
+
+    <integer name="def_ota_disable_automatic_update">1</integer>
+
+    <!-- Show Password Off by default. -->
+    <bool name="def_text_show_password">false</bool>
+
+    <!-- Default for Settings.System.STATUS_BAR_NOTIF_COUNT. -->
+    <integer name="def_notif_count">0</integer>
+
 </resources>

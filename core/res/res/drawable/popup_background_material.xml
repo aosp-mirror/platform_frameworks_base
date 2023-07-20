@@ -18,7 +18,7 @@
        android:shape="rectangle">
 
     <corners
-            android:radius="2dp" />
+            android:radius="?attr/dialogCornerRadius" />
     <solid
             android:color="?attr/colorPopupBackground" />
 

@@ -16,12 +16,8 @@
 
 package com.android.systemui.stylus
 
-import android.app.Notification
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
+import android.hardware.BatteryState
 import android.hardware.input.InputManager
-import android.os.Bundle
 import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.view.InputDevice
@@ -30,22 +26,14 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
-import com.google.common.truth.Truth.assertThat
-import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.inOrder
-import org.mockito.Mockito.never
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
@@ -58,18 +46,12 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     @Mock lateinit var inputManager: InputManager
     @Mock lateinit var handler: Handler
     @Mock lateinit var btStylusDevice: InputDevice
-    @Captor lateinit var notificationCaptor: ArgumentCaptor<Notification>
 
     private lateinit var stylusUsiPowerUi: StylusUsiPowerUI
-    private lateinit var broadcastReceiver: BroadcastReceiver
-    private lateinit var contextSpy: Context
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        contextSpy = spy(mContext)
-        doNothing().whenever(contextSpy).startActivity(any())
 
         whenever(handler.post(any())).thenAnswer {
             (it.arguments[0] as Runnable).run()
@@ -81,77 +63,56 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         whenever(btStylusDevice.supportsSource(InputDevice.SOURCE_STYLUS)).thenReturn(true)
         // whenever(btStylusDevice.bluetoothAddress).thenReturn("SO:ME:AD:DR:ES")
 
-        stylusUsiPowerUi = StylusUsiPowerUI(contextSpy, notificationManager, inputManager, handler)
-        broadcastReceiver = stylusUsiPowerUi.receiver
-    }
-
-    @Test
-    fun updateBatteryState_capacityZero_noop() {
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0f))
-
-        verifyNoMoreInteractions(notificationManager)
+        stylusUsiPowerUi = StylusUsiPowerUI(mContext, notificationManager, inputManager, handler)
     }
 
     @Test
     fun updateBatteryState_capacityBelowThreshold_notifies() {
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.1f))
 
-        verify(notificationManager, times(1))
-            .notify(eq(R.string.stylus_battery_low_percentage), any())
+        verify(notificationManager, times(1)).notify(eq(R.string.stylus_battery_low), any())
         verifyNoMoreInteractions(notificationManager)
     }
 
     @Test
     fun updateBatteryState_capacityAboveThreshold_cancelsNotificattion() {
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.8f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.8f))
 
-        verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
+        verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low)
         verifyNoMoreInteractions(notificationManager)
     }
 
     @Test
     fun updateBatteryState_existingNotification_capacityAboveThreshold_cancelsNotification() {
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.8f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.1f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.8f))
 
         inOrder(notificationManager).let {
-            it.verify(notificationManager, times(1))
-                .notify(eq(R.string.stylus_battery_low_percentage), any())
-            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
+            it.verify(notificationManager, times(1)).notify(eq(R.string.stylus_battery_low), any())
+            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low)
             it.verifyNoMoreInteractions()
         }
     }
 
     @Test
     fun updateBatteryState_existingNotification_capacityBelowThreshold_updatesNotification() {
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.15f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.1f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.15f))
 
-        verify(notificationManager, times(2))
-            .notify(eq(R.string.stylus_battery_low_percentage), notificationCaptor.capture())
-        assertEquals(
-            notificationCaptor.value.extras.getString(Notification.EXTRA_TITLE),
-            context.getString(R.string.stylus_battery_low_percentage, "15%")
-        )
-        assertEquals(
-            notificationCaptor.value.extras.getString(Notification.EXTRA_TEXT),
-            context.getString(R.string.stylus_battery_low_subtitle)
-        )
+        verify(notificationManager, times(2)).notify(eq(R.string.stylus_battery_low), any())
         verifyNoMoreInteractions(notificationManager)
     }
 
     @Test
     fun updateBatteryState_capacityAboveThenBelowThreshold_hidesThenShowsNotification() {
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.5f))
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.1f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.5f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.1f))
 
         inOrder(notificationManager).let {
-            it.verify(notificationManager, times(1))
-                .notify(eq(R.string.stylus_battery_low_percentage), any())
-            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
-            it.verify(notificationManager, times(1))
-                .notify(eq(R.string.stylus_battery_low_percentage), any())
+            it.verify(notificationManager, times(1)).notify(eq(R.string.stylus_battery_low), any())
+            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low)
+            it.verify(notificationManager, times(1)).notify(eq(R.string.stylus_battery_low), any())
             it.verifyNoMoreInteractions()
         }
     }
@@ -160,66 +121,47 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     fun updateSuppression_noExistingNotification_cancelsNotification() {
         stylusUsiPowerUi.updateSuppression(true)
 
-        verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
+        verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low)
         verifyNoMoreInteractions(notificationManager)
     }
 
     @Test
     fun updateSuppression_existingNotification_cancelsNotification() {
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.1f))
 
         stylusUsiPowerUi.updateSuppression(true)
 
         inOrder(notificationManager).let {
-            it.verify(notificationManager, times(1))
-                .notify(eq(R.string.stylus_battery_low_percentage), any())
-            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low_percentage)
+            it.verify(notificationManager, times(1)).notify(eq(R.string.stylus_battery_low), any())
+            it.verify(notificationManager, times(1)).cancel(R.string.stylus_battery_low)
             it.verifyNoMoreInteractions()
         }
     }
 
     @Test
     @Ignore("TODO(b/257936830): get bt address once input api available")
-    fun refresh_hasConnectedBluetoothStylus_cancelsNotification() {
+    fun refresh_hasConnectedBluetoothStylus_doesNotNotify() {
         whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(0))
 
         stylusUsiPowerUi.refresh()
 
-        verify(notificationManager).cancel(R.string.stylus_battery_low_percentage)
+        verifyNoMoreInteractions(notificationManager)
     }
 
     @Test
     @Ignore("TODO(b/257936830): get bt address once input api available")
     fun refresh_hasConnectedBluetoothStylus_existingNotification_cancelsNotification() {
-        stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
+        stylusUsiPowerUi.updateBatteryState(FixedCapacityBatteryState(0.1f))
         whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(0))
 
         stylusUsiPowerUi.refresh()
 
-        verify(notificationManager).cancel(R.string.stylus_battery_low_percentage)
+        verify(notificationManager).cancel(R.string.stylus_battery_low)
     }
 
-    @Test
-    fun broadcastReceiver_clicked_hasInputDeviceId_startsUsiDetailsActivity() {
-        val intent = Intent(StylusUsiPowerUI.ACTION_CLICKED_LOW_BATTERY)
-        val activityIntentCaptor = argumentCaptor<Intent>()
-        stylusUsiPowerUi.updateBatteryState(1, FixedCapacityBatteryState(0.15f))
-        broadcastReceiver.onReceive(contextSpy, intent)
-
-        verify(contextSpy, times(1)).startActivity(activityIntentCaptor.capture())
-        assertThat(activityIntentCaptor.value.action)
-            .isEqualTo(StylusUsiPowerUI.ACTION_STYLUS_USI_DETAILS)
-        val args =
-            activityIntentCaptor.value.getExtra(StylusUsiPowerUI.KEY_SETTINGS_FRAGMENT_ARGS)
-                as Bundle
-        assertThat(args.getInt(StylusUsiPowerUI.KEY_DEVICE_INPUT_ID)).isEqualTo(1)
-    }
-
-    @Test
-    fun broadcastReceiver_clicked_nullInputDeviceId_doesNotStartActivity() {
-        val intent = Intent(StylusUsiPowerUI.ACTION_CLICKED_LOW_BATTERY)
-        broadcastReceiver.onReceive(contextSpy, intent)
-
-        verify(contextSpy, never()).startActivity(any())
+    class FixedCapacityBatteryState(private val capacity: Float) : BatteryState() {
+        override fun getCapacity() = capacity
+        override fun getStatus() = 0
+        override fun isPresent() = true
     }
 }

@@ -33,5 +33,4 @@ android_test {
     ],
     platform_apis: true,
     test_suites: ["device-tests"],
-    data: [":AppEnumerationSyncProviderTestApp"],
 }

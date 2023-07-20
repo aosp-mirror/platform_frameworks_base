@@ -16,13 +16,7 @@
 
 package android.net.vcn;
 
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
-import static android.net.NetworkCapabilities.TRANSPORT_TEST;
-import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -30,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Parcel;
-import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -49,34 +42,17 @@ public class VcnConfigTest {
     private static final Set<VcnGatewayConnectionConfig> GATEWAY_CONNECTION_CONFIGS =
             Collections.singleton(VcnGatewayConnectionConfigTest.buildTestConfig());
 
-    private static final Set<Integer> RESTRICTED_TRANSPORTS = new ArraySet<>();
-
-    static {
-        RESTRICTED_TRANSPORTS.add(TRANSPORT_WIFI);
-        RESTRICTED_TRANSPORTS.add(TRANSPORT_CELLULAR);
-    }
-
     private final Context mContext = mock(Context.class);
 
     // Public visibility for VcnManagementServiceTest
-    public static VcnConfig buildTestConfig(
-            @NonNull Context context, Set<Integer> restrictedTransports) {
+    public static VcnConfig buildTestConfig(@NonNull Context context) {
         VcnConfig.Builder builder = new VcnConfig.Builder(context);
 
         for (VcnGatewayConnectionConfig gatewayConnectionConfig : GATEWAY_CONNECTION_CONFIGS) {
             builder.addGatewayConnectionConfig(gatewayConnectionConfig);
         }
 
-        if (restrictedTransports != null) {
-            builder.setRestrictedUnderlyingNetworkTransports(restrictedTransports);
-        }
-
         return builder.build();
-    }
-
-    // Public visibility for VcnManagementServiceTest
-    public static VcnConfig buildTestConfig(@NonNull Context context) {
-        return buildTestConfig(context, null);
     }
 
     @Before
@@ -115,25 +91,11 @@ public class VcnConfigTest {
     }
 
     @Test
-    public void testBuilderAndGettersDefaultValues() {
+    public void testBuilderAndGetters() {
         final VcnConfig config = buildTestConfig(mContext);
 
         assertEquals(TEST_PACKAGE_NAME, config.getProvisioningPackageName());
         assertEquals(GATEWAY_CONNECTION_CONFIGS, config.getGatewayConnectionConfigs());
-        assertFalse(config.isTestModeProfile());
-        assertEquals(
-                Collections.singleton(TRANSPORT_WIFI),
-                config.getRestrictedUnderlyingNetworkTransports());
-    }
-
-    @Test
-    public void testBuilderAndGettersConfigRestrictedTransports() {
-        final VcnConfig config = buildTestConfig(mContext, RESTRICTED_TRANSPORTS);
-
-        assertEquals(TEST_PACKAGE_NAME, config.getProvisioningPackageName());
-        assertEquals(GATEWAY_CONNECTION_CONFIGS, config.getGatewayConnectionConfigs());
-        assertFalse(config.isTestModeProfile());
-        assertEquals(RESTRICTED_TRANSPORTS, config.getRestrictedUnderlyingNetworkTransports());
     }
 
     @Test
@@ -141,55 +103,6 @@ public class VcnConfigTest {
         final VcnConfig config = buildTestConfig(mContext);
 
         assertEquals(config, new VcnConfig(config.toPersistableBundle()));
-    }
-
-    @Test
-    public void testPersistableBundleWithRestrictedTransports() {
-        final VcnConfig config = buildTestConfig(mContext, RESTRICTED_TRANSPORTS);
-
-        assertEquals(config, new VcnConfig(config.toPersistableBundle()));
-    }
-
-    @Test
-    public void testEqualityWithRestrictedTransports() {
-        final VcnConfig config = buildTestConfig(mContext, RESTRICTED_TRANSPORTS);
-        final VcnConfig configEqual = buildTestConfig(mContext, RESTRICTED_TRANSPORTS);
-        final VcnConfig configNotEqual =
-                buildTestConfig(mContext, Collections.singleton(TRANSPORT_WIFI));
-
-        assertEquals(config, configEqual);
-        assertNotEquals(config, configNotEqual);
-    }
-
-    private VcnConfig buildConfigRestrictTransportTest(boolean isTestMode) throws Exception {
-        VcnConfig.Builder builder =
-                new VcnConfig.Builder(mContext)
-                        .setRestrictedUnderlyingNetworkTransports(Set.of(TRANSPORT_TEST));
-        if (isTestMode) {
-            builder.setIsTestModeProfile();
-        }
-
-        for (VcnGatewayConnectionConfig gatewayConnectionConfig : GATEWAY_CONNECTION_CONFIGS) {
-            builder.addGatewayConnectionConfig(gatewayConnectionConfig);
-        }
-
-        return builder.build();
-    }
-
-    @Test
-    public void testRestrictTransportTestInTestModeProfile() throws Exception {
-        final VcnConfig config = buildConfigRestrictTransportTest(true /*  isTestMode */);
-        assertEquals(Set.of(TRANSPORT_TEST), config.getRestrictedUnderlyingNetworkTransports());
-    }
-
-    @Test
-    public void testRestrictTransportTestInNonTestModeProfile() throws Exception {
-        try {
-            buildConfigRestrictTransportTest(false /*  isTestMode */);
-            fail("Expected exception because the config is not a test mode profile");
-        } catch (Exception expected) {
-
-        }
     }
 
     @Test

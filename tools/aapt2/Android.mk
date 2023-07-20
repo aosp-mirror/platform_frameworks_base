@@ -15,7 +15,7 @@ $(aapt2_results): .KATI_IMPLICIT_OUTPUTS := $(aapt2_results)-nocache
 $(aapt2_results): $(HOST_OUT_NATIVE_TESTS)/aapt2_tests/aapt2_tests
 	-$(HOST_OUT_NATIVE_TESTS)/aapt2_tests/aapt2_tests --gtest_output=xml:$@ > /dev/null 2>&1
 
-$(call declare-1p-target,$(aapt2_results))
+$(call declare-0p-target,$(aapt2_results))
 
 aapt2_results :=
 

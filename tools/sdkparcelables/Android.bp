@@ -14,7 +14,7 @@ java_binary_host {
         "src/**/*.kt",
     ],
     static_libs: [
-        "ow2-asm",
+        "asm-9.2",
     ],
 }
 

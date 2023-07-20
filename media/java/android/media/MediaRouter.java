@@ -171,8 +171,6 @@ public class MediaRouter {
                     .isVolumeFixed()) {
                 mDefaultAudioVideo.mVolumeHandling = RouteInfo.PLAYBACK_VOLUME_FIXED;
             }
-            mDefaultAudioVideo.mGlobalRouteId = sStatic.mResources.getString(
-                    R.string.default_audio_route_id);
             addRouteStatic(mDefaultAudioVideo);
 
             // This will select the active wifi display route if there is one.
@@ -221,7 +219,7 @@ public class MediaRouter {
                 } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
                     name = R.string.default_audio_route_name_dock_speakers;
                 } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_HDMI) != 0) {
-                    name = R.string.default_audio_route_name_external_device;
+                    name = R.string.default_audio_route_name_hdmi;
                 } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_USB) != 0) {
                     name = R.string.default_audio_route_name_usb;
                 } else {

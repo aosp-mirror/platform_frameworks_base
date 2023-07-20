@@ -5,8 +5,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.shade.STATE_CLOSED
 import com.android.systemui.shade.STATE_OPEN
 import com.android.systemui.shade.STATE_OPENING
@@ -32,7 +30,6 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var headsUpManager: HeadsUpManager
-    @Mock private lateinit var featureFlags: FeatureFlags
     private val configurationController = FakeConfigurationController()
 
     private lateinit var controller: ScrimShadeTransitionController
@@ -48,8 +45,7 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
                 scrimController,
                 context.resources,
                 statusBarStateController,
-                headsUpManager,
-                featureFlags)
+                headsUpManager)
 
         controller.onPanelStateChanged(STATE_OPENING)
     }
@@ -103,19 +99,6 @@ class ScrimShadeTransitionControllerTest : SysuiTestCase() {
     fun onPanelExpansionChanged_inSplitShade_onLockedShade_setsFractionEqualToEventFraction() {
         whenever(statusBarStateController.currentOrUpcomingState)
             .thenReturn(StatusBarState.SHADE_LOCKED)
-        setSplitShadeEnabled(true)
-
-        controller.onPanelExpansionChanged(EXPANSION_EVENT)
-
-        verify(scrimController).setRawPanelExpansionFraction(EXPANSION_EVENT.fraction)
-    }
-
-    @Test
-    fun onPanelExpansionChanged_inSplitShade_flagTrue_setsFractionEqualToEventFraction() {
-        whenever(featureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION))
-                .thenReturn(true)
-        whenever(statusBarStateController.currentOrUpcomingState)
-            .thenReturn(StatusBarState.SHADE)
         setSplitShadeEnabled(true)
 
         controller.onPanelExpansionChanged(EXPANSION_EVENT)

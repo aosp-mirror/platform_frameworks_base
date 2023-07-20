@@ -43,7 +43,7 @@ public abstract class AbstractPreferenceController {
                 final Preference preference = screen.findPreference(prefKey);
                 if (preference != null) {
                     preference.setOnPreferenceChangeListener(
-                            (Preference.OnPreferenceChangeListener) this);
+                        (Preference.OnPreferenceChangeListener) this);
                 }
             }
         } else {

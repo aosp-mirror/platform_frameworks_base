@@ -188,7 +188,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* options */null,
                 /* inTask */null,
                 /* inTaskFragment */ null,
-                /* balCode */ BackgroundActivityStartController.BAL_ALLOW_DEFAULT,
+                /* restrictedBgActivity */false,
                 /* intentGrants */null);
 
         assertEquals(result, START_ABORTED);

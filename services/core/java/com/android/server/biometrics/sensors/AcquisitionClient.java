@@ -24,9 +24,11 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.server.biometrics.log.BiometricContext;
@@ -198,7 +200,9 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
     protected final void vibrateSuccess() {
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
-        if (vibrator != null && mShouldVibrate) {
+        boolean FingerprintVib = Settings.System.getIntForUser(getContext().getContentResolver(),
+            Settings.System.UDFPS_SUCCESS_VIBRATE, 1, UserHandle.USER_CURRENT) == 1;
+        if (vibrator != null && mShouldVibrate && FingerprintVib) {
             vibrator.vibrate(Process.myUid(),
                     getContext().getOpPackageName(),
                     SUCCESS_VIBRATION_EFFECT,
@@ -209,7 +213,9 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
     protected final void vibrateError() {
         Vibrator vibrator = getContext().getSystemService(Vibrator.class);
-        if (vibrator != null && mShouldVibrate) {
+        boolean FingerprintVib = Settings.System.getIntForUser(getContext().getContentResolver(),
+            Settings.System.UDFPS_ERROR_VIBRATE, 1, UserHandle.USER_CURRENT) == 1;
+        if (vibrator != null && mShouldVibrate && FingerprintVib) {
             vibrator.vibrate(Process.myUid(),
                     getContext().getOpPackageName(),
                     ERROR_VIBRATION_EFFECT,

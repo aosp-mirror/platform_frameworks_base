@@ -47,20 +47,21 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.qs.tiles.dialog.BluetoothDialogFactory;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
 /** Quick settings tile: Bluetooth **/
-public class BluetoothTile extends QSTileImpl<BooleanState> {
+public class BluetoothTile extends SecureQSTile<BooleanState> {
+    private static final Intent BLUETOOTH_SETTINGS = new Intent(Settings.Panel.ACTION_BLUETOOTH);
 
-    public static final String TILE_SPEC = "bt";
-
-    private static final Intent BLUETOOTH_SETTINGS = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
-
+    private final Handler mHandler;
     private final BluetoothController mController;
+    private final BluetoothDialogFactory mBluetoothDialogFactory;
 
     @Inject
     public BluetoothTile(
@@ -72,21 +73,31 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            BluetoothController bluetoothController
+            BluetoothController bluetoothController,
+            BluetoothDialogFactory bluetoothDialogFactory,
+            KeyguardStateController keyguardStateController
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
-                statusBarStateController, activityStarter, qsLogger);
+                statusBarStateController, activityStarter, qsLogger, keyguardStateController);
+        mHandler = mainHandler;
         mController = bluetoothController;
+        mBluetoothDialogFactory = bluetoothDialogFactory;
         mController.observe(getLifecycle(), mCallback);
     }
 
     @Override
     public BooleanState newTileState() {
-        return new BooleanState();
+        BooleanState s = new BooleanState();
+        s.forceExpandIcon = true;
+        return s;
     }
 
     @Override
-    protected void handleClick(@Nullable View view) {
+    protected void handleClick(@Nullable View view, boolean keyguardShowing) {
+        if (checkKeyguard(view, keyguardShowing)) {
+            return;
+        }
+
         // Secondary clicks are header clicks, just toggle.
         final boolean isEnabled = mState.value;
         // Immediately enter transient enabling state when turning bluetooth on.
@@ -95,8 +106,13 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
+    protected void handleLongClick(@Nullable View view) {
+        mHandler.post(() -> mBluetoothDialogFactory.create(true, view));
+    }
+
+    @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
+        return null;
     }
 
     @Override

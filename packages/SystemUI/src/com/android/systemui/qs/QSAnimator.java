@@ -44,6 +44,9 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
 /**
  * Performs the animated transition between the QQS and QS views.
  *
@@ -135,18 +138,24 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private int mNumQuickTiles;
     private int mLastQQSTileHeight;
     private float mLastPosition;
-    private final QSHost mHost;
+    private final QSTileHost mHost;
     private final Executor mExecutor;
+    private final TunerService mTunerService;
     private boolean mShowCollapsedOnKeyguard;
     private int mQQSTop;
 
     private int[] mTmpLoc1 = new int[2];
     private int[] mTmpLoc2 = new int[2];
 
+    private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
+        requestAnimatorUpdate();
+        return null;
+    };
+
     @Inject
     public QSAnimator(QS qs, QuickQSPanel quickPanel, QuickStatusBarHeader quickStatusBarHeader,
             QSPanelController qsPanelController,
-            QuickQSPanelController quickQSPanelController, QSHost qsTileHost,
+            QuickQSPanelController quickQSPanelController, QSTileHost qsTileHost,
             @Main Executor executor, TunerService tunerService,
             QSExpansionPathInterpolator qsExpansionPathInterpolator) {
         mQs = qs;
@@ -156,6 +165,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         mQuickStatusBarHeader = quickStatusBarHeader;
         mHost = qsTileHost;
         mExecutor = executor;
+        mTunerService = tunerService;
         mQSExpansionPathInterpolator = qsExpansionPathInterpolator;
         mHost.addCallback(this);
         mQsPanelController.addOnAttachStateChangeListener(this);
@@ -213,11 +223,13 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     @Override
     public void onViewAttachedToWindow(@NonNull View view) {
         updateAnimators();
+        mQuickQSPanelController.mMediaHost.addVisibilityChangeListener(mMediaHostVisibilityListener);
     }
 
     @Override
     public void onViewDetachedFromWindow(@NonNull View v) {
         mHost.removeCallback(this);
+        mQuickQSPanelController.mMediaHost.removeVisibilityChangeListener(mMediaHostVisibilityListener);
     }
 
     private void addNonFirstPageAnimators(int page) {
@@ -330,8 +342,12 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
 
                     // Offset the translation animation on the views
                     // (that goes from 0 to getOffsetTranslation)
-                    qqsTranslationYBuilder.addFloat(quickTileView, "translationY", 0, yOffset);
-                    translationYBuilder.addFloat(tileView, "translationY", -yOffset, 0);
+                    int offsetWithQSBHTranslation =
+                            yOffset - mQuickStatusBarHeader.getOffsetTranslation();
+                    qqsTranslationYBuilder.addFloat(quickTileView, "translationY", 0,
+                            offsetWithQSBHTranslation);
+                    translationYBuilder.addFloat(tileView, "translationY",
+                            -offsetWithQSBHTranslation, 0);
 
                     translationXBuilder.addFloat(quickTileView, "translationX", 0, xOffset);
                     translationXBuilder.addFloat(tileView, "translationX", -xOffset, 0);
@@ -418,6 +434,11 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
                     mAllViews.add(tileView.getSecondaryLabel());
                 }
 
+                QSTileView quickTileView = mQuickQSPanelController.getTileView(tile);
+                if (quickTileView != null) {
+                    quickTileView.getSecondaryLabel().setAlpha(0f);
+                }
+
                 mAllViews.add(tileView);
                 count++;
             }
@@ -485,7 +506,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         if (specs.isEmpty()) {
             // specs should not be empty in a valid secondary page, as we scrolled to it.
             // We may crash later on because there's a null animator.
-            specs = mHost.getSpecs();
+            specs = mQsPanelController.getHost().mTileSpecs;
             Log.e(TAG, "Trying to create animators for empty page " + page + ". Tiles: " + specs);
             // return null;
         }
@@ -557,6 +578,12 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         mBrightnessOpacityAnimator = null;
         View qsBrightness = mQsPanelController.getBrightnessView();
         View qqsBrightness = mQuickQSPanelController.getBrightnessView();
+
+        if (mTunerService.getValue(QSPanel.QS_SHOW_BRIGHTNESS_SLIDER, 1) == 0) {
+            qsBrightness.setVisibility(View.GONE);
+            qqsBrightness.setVisibility(View.GONE);
+        }
+
         if (qqsBrightness != null && qqsBrightness.getVisibility() == View.VISIBLE) {
             // animating in split shade mode
             mAnimatedQsViews.add(qsBrightness);
@@ -569,6 +596,8 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
                     .addFloat(qsBrightness, "sliderScaleY", 0.3f, 1)
                     .addFloat(qqsBrightness, "translationY", 0, translationY)
                     .setInterpolator(mQSExpansionPathInterpolator.getYInterpolator())
+                    .setInterpolator(mQuickQSPanelController.mMediaHost.getVisible() ?
+                            Interpolators.ALPHA_OUT : Interpolators.SLOWDOWN)
                     .build();
         } else if (qsBrightness != null) {
             // The brightness slider's visible bottom edge must maintain a constant margin from the
@@ -610,7 +639,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         View commonView = mQs.getView();
         getRelativePositionInt(qsPosition, view1, commonView);
         getRelativePositionInt(qqsPosition, view2, commonView);
-        return qsPosition[1] - qqsPosition[1];
+        return (qsPosition[1] - qqsPosition[1]) - mQuickStatusBarHeader.getOffsetTranslation();
     }
 
     private boolean isIconInAnimatedRow(int count) {

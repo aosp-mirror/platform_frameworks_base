@@ -190,10 +190,6 @@ public class InfoMediaManager extends MediaManager {
         return !isGroup;
     }
 
-    boolean preferRouteListingOrdering() {
-        return false;
-    }
-
     /**
      * Remove a {@code device} from current media.
      *

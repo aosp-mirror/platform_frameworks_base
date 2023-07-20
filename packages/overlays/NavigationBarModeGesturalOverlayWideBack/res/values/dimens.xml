@@ -18,13 +18,13 @@
 -->
 <resources>
     <!-- Height of the bottom navigation / system bar. -->
-    <dimen name="navigation_bar_height">24dp</dimen>
+    <dimen name="navigation_bar_height">0dp</dimen>
     <!-- Height of the bottom navigation bar in portrait; often the same as @dimen/navigation_bar_height -->
-    <dimen name="navigation_bar_height_landscape">24dp</dimen>
+    <dimen name="navigation_bar_height_landscape">0dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
-    <dimen name="navigation_bar_width">24dp</dimen>
+    <dimen name="navigation_bar_width">0dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
-    <dimen name="navigation_bar_frame_height">48dp</dimen>
+    <dimen name="navigation_bar_frame_height">0dp</dimen>
     <!-- The height of the bottom navigation gesture area. -->
-    <dimen name="navigation_bar_gesture_height">32dp</dimen>
+    <dimen name="navigation_bar_gesture_height">24dp</dimen>
 </resources>

@@ -23,7 +23,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.ResultReceiver
-import android.os.UserHandle
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -42,7 +41,6 @@ import com.android.systemui.settings.UserContextProvider
 /** Dialog to select screen recording options */
 class ScreenRecordPermissionDialog(
     context: Context?,
-    private val hostUserHandle: UserHandle,
     private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
@@ -60,6 +58,9 @@ class ScreenRecordPermissionDialog(
     private lateinit var tapsView: View
     private lateinit var audioSwitch: Switch
     private lateinit var options: Spinner
+    private lateinit var stopDotSwitch: Switch
+    private lateinit var lowQualitySwitch: Switch
+    private lateinit var longerDurationSwitch: Switch
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setDialogTitle(R.string.screenrecord_start_label)
@@ -79,12 +80,6 @@ class ScreenRecordPermissionDialog(
                     MediaProjectionAppSelectorActivity.EXTRA_CAPTURE_REGION_RESULT_RECEIVER,
                     CaptureTargetResultReceiver()
                 )
-
-                intent.putExtra(
-                    MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
-                    hostUserHandle
-                )
-
                 val animationController = dialogLaunchAnimator.createActivityLaunchController(v!!)
                 if (animationController == null) {
                     dismiss()
@@ -104,6 +99,9 @@ class ScreenRecordPermissionDialog(
         tapsView = findViewById(R.id.show_taps)
         updateTapsViewVisibility()
         options = findViewById(R.id.screen_recording_options)
+        stopDotSwitch = findViewById(R.id.screenrecord_stopdot_switch)
+        lowQualitySwitch = findViewById(R.id.screenrecord_lowquality_switch)
+        longerDurationSwitch = findViewById(R.id.screenrecord_longer_timeout_switch)
         val a: ArrayAdapter<*> =
             ScreenRecordingAdapter(context, android.R.layout.simple_spinner_dropdown_item, MODES)
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -124,9 +122,8 @@ class ScreenRecordPermissionDialog(
 
     /**
      * Starts screen capture after some countdown
-     *
      * @param captureTarget target to capture (could be e.g. a task) or null to record the whole
-     *   screen
+     * screen
      */
     private fun requestScreenCapture(captureTarget: MediaProjectionCaptureTarget?) {
         val userContext = userContextProvider.userContext
@@ -134,6 +131,9 @@ class ScreenRecordPermissionDialog(
         val audioMode =
             if (audioSwitch.isChecked) options.selectedItem as ScreenRecordingAudioSource
             else ScreenRecordingAudioSource.NONE
+        val showStopDot = stopDotSwitch.isChecked
+        val lowQuality = lowQualitySwitch.isChecked
+        val longerDuration = longerDurationSwitch.isChecked
         val startIntent =
             PendingIntent.getForegroundService(
                 userContext,
@@ -143,6 +143,9 @@ class ScreenRecordPermissionDialog(
                     Activity.RESULT_OK,
                     audioMode.ordinal,
                     showTaps,
+                    showStopDot,
+                    lowQuality,
+                    longerDuration,
                     captureTarget
                 ),
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE

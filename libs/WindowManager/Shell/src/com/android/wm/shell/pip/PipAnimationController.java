@@ -28,7 +28,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.TaskInfo;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -36,7 +35,6 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.transition.Transitions;
 
@@ -363,28 +361,22 @@ public class PipAnimationController {
         }
 
         void setColorContentOverlay(Context context) {
-            reattachContentOverlay(new PipContentOverlay.PipColorOverlay(context));
-        }
-
-        void setSnapshotContentOverlay(TaskSnapshot snapshot, Rect sourceRectHint) {
-            reattachContentOverlay(
-                    new PipContentOverlay.PipSnapshotOverlay(snapshot, sourceRectHint));
-        }
-
-        void setAppIconContentOverlay(Context context, Rect bounds, ActivityInfo activityInfo,
-                int appIconSizePx) {
-            reattachContentOverlay(
-                    new PipContentOverlay.PipAppIconOverlay(context, bounds,
-                            new IconProvider(context).getIcon(activityInfo), appIconSizePx));
-        }
-
-        private void reattachContentOverlay(PipContentOverlay overlay) {
             final SurfaceControl.Transaction tx =
                     mSurfaceControlTransactionFactory.getTransaction();
             if (mContentOverlay != null) {
                 mContentOverlay.detach(tx);
             }
-            mContentOverlay = overlay;
+            mContentOverlay = new PipContentOverlay.PipColorOverlay(context);
+            mContentOverlay.attach(tx, mLeash);
+        }
+
+        void setSnapshotContentOverlay(TaskSnapshot snapshot, Rect sourceRectHint) {
+            final SurfaceControl.Transaction tx =
+                    mSurfaceControlTransactionFactory.getTransaction();
+            if (mContentOverlay != null) {
+                mContentOverlay.detach(tx);
+            }
+            mContentOverlay = new PipContentOverlay.PipSnapshotOverlay(snapshot, sourceRectHint);
             mContentOverlay.attach(tx, mLeash);
         }
 
@@ -578,9 +570,8 @@ public class PipAnimationController {
                     final Rect base = getBaseValue();
                     final Rect start = getStartValue();
                     final Rect end = getEndValue();
-                    Rect bounds = mRectEvaluator.evaluate(fraction, start, end);
                     if (mContentOverlay != null) {
-                        mContentOverlay.onAnimationUpdate(tx, bounds, fraction);
+                        mContentOverlay.onAnimationUpdate(tx, fraction);
                     }
                     if (rotatedEndRect != null) {
                         // Animate the bounds in a different orientation. It only happens when
@@ -588,6 +579,7 @@ public class PipAnimationController {
                         applyRotation(tx, leash, fraction, start, end);
                         return;
                     }
+                    Rect bounds = mRectEvaluator.evaluate(fraction, start, end);
                     float angle = (1.0f - fraction) * startingAngle;
                     setCurrentValue(bounds);
                     if (inScaleTransition() || sourceHintRect == null) {

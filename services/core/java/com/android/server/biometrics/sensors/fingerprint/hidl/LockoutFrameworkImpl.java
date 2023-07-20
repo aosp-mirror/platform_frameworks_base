@@ -40,7 +40,7 @@ public class LockoutFrameworkImpl implements LockoutTracker {
     private static final String TAG = "LockoutTracker";
     private static final String ACTION_LOCKOUT_RESET =
             "com.android.server.biometrics.sensors.fingerprint.ACTION_LOCKOUT_RESET";
-    private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED = 5;
+    private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED = 10;
     private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT = 20;
     private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30 * 1000;
     private static final String KEY_LOCKOUT_RESET_USER = "lockout_reset_user";
@@ -100,25 +100,10 @@ public class LockoutFrameworkImpl implements LockoutTracker {
         mLockoutResetCallback.onLockoutReset(userId);
     }
 
-    void addFailedAttemptForUser(int userId) {
-        mFailedAttempts.put(userId, mFailedAttempts.get(userId, 0) + 1);
-        mTimedLockoutCleared.put(userId, false);
-
-        if (getLockoutModeForUser(userId) != LOCKOUT_NONE) {
-            scheduleLockoutResetForUser(userId);
-        }
-    }
+    void addFailedAttemptForUser(int userId) {}
 
     @Override
     public @LockoutMode int getLockoutModeForUser(int userId) {
-        final int failedAttempts = mFailedAttempts.get(userId, 0);
-        if (failedAttempts >= MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT) {
-            return LOCKOUT_PERMANENT;
-        } else if (failedAttempts > 0
-                && !mTimedLockoutCleared.get(userId, false)
-                && (failedAttempts % MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED == 0)) {
-            return LOCKOUT_TIMED;
-        }
         return LOCKOUT_NONE;
     }
 

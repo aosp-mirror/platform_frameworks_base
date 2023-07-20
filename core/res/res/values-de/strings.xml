@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Unbenannt&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Keine Telefonnummer)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Die von dir eingegebenen PIN-Nummern stimmen nicht überein."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Gib eine PIN ein, die 4 bis 8 Zahlen enthält."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Gib eine mindestens achtstellige PUK ein."</string>
-    <string name="needPuk" msgid="3503414069503752211">"Deine SIM-Karte ist mit einem PUK gesperrt. Gib zum Entsperren den PUK-Code ein."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Gib den PUK2-Code ein, um die SIM-Karte zu entsperren."</string>
+    <string name="needPuk" msgid="7321876090152422918">"Deine SIM-Karte ist mit einem PUK gesperrt. Gib zum Entsperren den PUK-Code ein."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Gib zum Entsperren der SIM-Karte den PUK2 ein."</string>
     <string name="enablePin" msgid="2543771964137091212">"Fehler. SIM-/RUIM-Sperre aktivieren."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Du hast noch <xliff:g id="NUMBER_1">%d</xliff:g> Versuche, bevor deine SIM-Karte gesperrt wird.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Anrufer-ID ist standardmäßig nicht beschränkt. Nächster Anruf: Nicht beschränkt"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Dienst nicht eingerichtet."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Du kannst die Einstellung für die Anrufer-ID nicht ändern."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Mobile Daten wurden auf <xliff:g id="CARRIERDISPLAY">%s</xliff:g> umgestellt"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Du kannst dies jederzeit in den Einstellungen ändern"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Kein mobiler Datendienst"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Notrufe nicht möglich"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Keine Anrufe"</string>
@@ -293,7 +296,7 @@
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Android-System"</string>
-    <string name="user_owner_label" msgid="8628726904184471211">"Zum privaten Profil wechseln"</string>
+    <string name="user_owner_label" msgid="8628726904184471211">"Zum persönlichen Profil wechseln"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Zum Arbeitsprofil wechseln"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"auf deine Kontakte zugreifen"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Erfasst Touch-Gesten auf dem Fingerabdrucksensor des Geräts."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot erstellen"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Es kann ein Screenshot des Displays erstellt werden."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Vorschau – <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ermöglicht der App, die Statusleiste zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Statusleiste darstellen"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ermöglicht der App, Informationen zum bevorzugten NFC-Zahlungsdienst abzurufen, etwa registrierte Hilfsmittel oder das Routenziel."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Nahfeldkommunikation steuern"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ermöglicht der App die Kommunikation mit Tags für die Nahfeldkommunikation, Karten und Readern"</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Transaktion in einem Secure Element"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Ermöglicht der App, Informationen zu Transaktionen abzurufen, die in einem Secure Element stattfinden."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"Displaysperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ermöglicht der App, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. Das Telefon deaktiviert die Tastensperre beispielsweise, wenn ein Anruf eingeht, und aktiviert sie wieder, nachdem das Gespräch beendet wurde."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Komplexitätsstufe der Displaysperre anfragen"</string>
@@ -647,7 +647,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smartphone nach links"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Bewege das Smartphone nach rechts"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Bitte sieh direkt auf dein Gerät."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Gesicht nicht erkannt. Smartphone auf Augenhöhe halten."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Dein Gesicht wurde nicht erkannt. Halte dein Smartphone auf Augenhöhe."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Bitte registriere dein Gesicht noch einmal."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Gesicht nicht erkannt. Versuche es noch einmal."</string>
@@ -663,9 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Dein Gesichtsmodell kann nicht erstellt werden. Versuche es noch einmal."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Dunkle Brille erkannt. Dein Gesicht muss vollständig sichtbar sein."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gesicht ist bedeckt. Es muss vollständig sichtbar sein."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Dein Gesicht ist bedeckt. Es muss vollständig sichtbar sein."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Versuche es noch mal mit der Gesichtsentsperrung"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Kein Speicherplatz frei. Bitte erst ein Gesicht löschen."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Entsperrung per Gesichtserkennung oder Displaysperre verwenden"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gesichtserkennung verwenden, um fortzufahren"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Verwende die Gesichtserkennung oder deine Display-Entsperrmethode, um fortzufahren"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Ein Problem ist aufgetreten. Versuch es noch einmal."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Gesichtssymbol"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"Synchronisierungseinstellungen lesen"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Erneut versuchen"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Entsperren, um alle Funktionen und Daten zu nutzen"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Die maximal zulässige Anzahl an Versuchen zur Entsperrung per Gesichtserkennung wurde überschritten."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Keine SIM-Karte"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Keine SIM-Karte im Tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Keine SIM-Karte in deinem Android TV-Gerät."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Keine SIM-Karte im Smartphone."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Lege eine SIM-Karte ein."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM-Karte fehlt oder ist nicht lesbar. Lege eine SIM-Karte ein."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"SIM-Karte ist nicht nutzbar."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Deine SIM-Karte wurde dauerhaft deaktiviert.\n Wende dich an deinen Mobilfunkanbieter, um eine andere SIM-Karte zu erhalten."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Keine SIM-Karte"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Keine SIM-Karte im Tablet"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Keine SIM-Karte in deinem Android TV-Gerät."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Keine SIM-Karte im Telefon"</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Lege eine SIM-Karte ein."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-Karte fehlt oder ist nicht lesbar. Bitte lege eine SIM-Karte ein."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM-Karte unbrauchbar"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Deine SIM-Karte wurde dauerhaft deaktiviert.\n Wende dich an deinen Mobilfunkanbieter, um eine andere SIM-Karte zu erhalten."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Vorheriger Titel"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Nächster Titel"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausieren"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Vorspulen"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Nur Notrufe"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Netzwerk gesperrt"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM-Karte ist mit einem PUK gesperrt."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"PUK-Sperre auf SIM"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Weitere Informationen erhältst du im Nutzerhandbuch oder beim Kundendienst."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM-Karte ist gesperrt."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM-Karte wird entsperrt…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"PIN eingeben"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM-Karte wird entsperrt..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Du hast dein Entsperrungsmuster <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch gezeichnet. \n\nBitte versuche es in <xliff:g id="NUMBER_1">%2$d</xliff:g> Sekunden noch einmal."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Du hast dein Passwort <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch eingegeben.\n\nBitte versuche es in <xliff:g id="NUMBER_1">%2$d</xliff:g> Sekunden noch einmal."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Du hast dein Passwort <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch eingegeben.\n\nBitte versuche es in <xliff:g id="NUMBER_1">%2$d</xliff:g> Sekunden noch einmal."</string>
@@ -1252,7 +1248,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Start wird abgeschlossen..."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um deinen Fingerabdruck einzurichten."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zum Beenden Bildschirm deaktivieren"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zum Beenden der Einrichtung Bildschirm deaktivieren"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktivieren"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Mit der Fingerabdruckprüfung fortfahren?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um mit deinem Fingerabdruck deine Identität zu bestätigen."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Du kannst dies unter \"Einstellungen &gt; Apps\" ändern."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Immer zulassen"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Nie zulassen"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM-Karte wurde entfernt"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Das Mobilfunknetz ist erst wieder verfügbar, wenn du einen Neustart mit einer gültigen SIM-Karte durchführst."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM-Karte entfernt"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Das Mobilfunknetz ist erst wieder verfügbar, wenn du einen Neustart mit einer gültigen SIM-Karte durchführst."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Fertig"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM-Karte wurde hinzugefügt"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM-Karte hinzugefügt"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Starte zur Nutzung des Mobilfunknetzes dein Gerät neu."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Neu starten"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Mobilfunkdienst aktivieren"</string>
@@ -1365,7 +1361,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analoges Audiozubehör erkannt"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Das angeschlossene Gerät ist nicht mit diesem Smartphone kompatibel. Für weitere Informationen tippen."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB-Debugging aktiviert"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Zum Deaktivieren tippen"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Zum Deaktivieren von USB-Debugging tippen"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB-Debugging deaktivieren: auswählen"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"\"Debugging über WLAN\" verbunden"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Tippen, um \"Debugging über WLAN\" zu deaktivieren"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Dock-Lautsprecher"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Externes Gerät"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Kopfhörer"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"System"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Weitere Informationen erhältst du von deinem Mobilfunkanbieter."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Gewünschten PIN-Code eingeben"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Gewünschten PIN-Code bestätigen"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM-Karte wird entsperrt…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM-Karte wird entsperrt…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Falscher PIN-Code"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Gib eine 4- bis 8-stellige PIN ein."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Der PUK-Code muss 8 Ziffern aufweisen."</string>
@@ -1688,9 +1684,9 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AUS"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"„<xliff:g id="SERVICE">%1$s</xliff:g>“ die vollständige Kontrolle über dein Gerät geben?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Die vollständige Kontrolle sollte nur für Apps aktiviert werden, die dir bei der Barrierefreiheit helfen. Das ist in der Regel nur ein kleiner Teil der Apps."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Die vollständige Kontrolle sollte nur für Apps aktiviert werden, die dir Zugang zu App-Funktionen erleichtern. Das ist in der Regel nur ein kleiner Teil der Apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Bildschirm aufrufen und steuern"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Die Funktion kann alle Inhalte auf dem Bildschirm lesen und diese Inhalte über anderen Apps anzeigen."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Die Funktion kann alle Inhalte auf dem Bildschirm lesen und diese Inhalte über andere Apps anzeigen."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Aktionen aufrufen und durchführen"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Die Funktion kann deine Interaktionen mit einer App oder einem Hardwaresensor verfolgen und in deinem Namen mit Apps interagieren."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Zulassen"</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Vollbildmodus wird aktiviert"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Zum Beenden von oben nach unten wischen"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ok"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Drehen, um die Ansicht zu verbessern"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Splitscreen-Modus beenden, um die Ansicht zu verbessern"</string>
     <string name="done_label" msgid="7283767013231718521">"Fertig"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kreisförmiger Schieberegler für Stunden"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kreisförmiger Schieberegler für Minuten"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Zugriff auf die Kamera des Tablets über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Während des Streamings ist kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Standardeinstellung des Systems"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"KARTE <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

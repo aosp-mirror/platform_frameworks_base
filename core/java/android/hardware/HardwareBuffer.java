@@ -188,6 +188,9 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static HardwareBuffer create(
             @IntRange(from = 1) int width, @IntRange(from = 1) int height,
             @Format int format, @IntRange(from = 1) int layers, @Usage long usage) {
+        if (!HardwareBuffer.isSupportedFormat(format)) {
+            throw new IllegalArgumentException("Invalid pixel format " + format);
+        }
         if (width <= 0) {
             throw new IllegalArgumentException("Invalid width " + width);
         }
@@ -223,6 +226,9 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      */
     public static boolean isSupported(@IntRange(from = 1) int width, @IntRange(from = 1) int height,
             @Format int format, @IntRange(from = 1) int layers, @Usage long usage) {
+        if (!HardwareBuffer.isSupportedFormat(format)) {
+            throw new IllegalArgumentException("Invalid pixel format " + format);
+        }
         if (width <= 0) {
             throw new IllegalArgumentException("Invalid width " + width);
         }
@@ -280,7 +286,10 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * Returns the width of this buffer in pixels.
      */
     public int getWidth() {
-        checkClosed("width");
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and its width "
+                    + "cannot be obtained.");
+        }
         return nGetWidth(mNativeObject);
     }
 
@@ -288,7 +297,10 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * Returns the height of this buffer in pixels.
      */
     public int getHeight() {
-        checkClosed("height");
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and its height "
+                    + "cannot be obtained.");
+        }
         return nGetHeight(mNativeObject);
     }
 
@@ -297,7 +309,10 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      */
     @Format
     public int getFormat() {
-        checkClosed("format");
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and its format "
+                    + "cannot be obtained.");
+        }
         return nGetFormat(mNativeObject);
     }
 
@@ -305,7 +320,10 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * Returns the number of layers in this buffer.
      */
     public int getLayers() {
-        checkClosed("layer count");
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and its layer "
+                    + "count cannot be obtained.");
+        }
         return nGetLayers(mNativeObject);
     }
 
@@ -313,24 +331,11 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * Returns the usage flags of the usage hints set on this buffer.
      */
     public long getUsage() {
-        checkClosed("usage");
-        return nGetUsage(mNativeObject);
-    }
-
-    /**
-     * Returns the system-wide unique id for this buffer
-     *
-     */
-    public long getId() {
-        checkClosed("id");
-        return nGetId(mNativeObject);
-    }
-
-    private void checkClosed(String name) {
         if (isClosed()) {
-            throw new IllegalStateException("This HardwareBuffer has been closed and its "
-                    + name + " cannot be obtained.");
+            throw new IllegalStateException("This HardwareBuffer has been closed and its usage "
+                    + "cannot be obtained.");
         }
+        return nGetUsage(mNativeObject);
     }
 
     /**
@@ -402,6 +407,36 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
         }
     };
 
+    /**
+     * Validates whether a particular format is supported by HardwareBuffer.
+     *
+     * @param format The format to validate.
+     *
+     * @return True if <code>format</code> is a supported format. false otherwise.
+     * See {@link #create(int, int, int, int, long)}.
+     */
+    private static boolean isSupportedFormat(@Format int format) {
+        switch(format) {
+            case RGBA_8888:
+            case RGBA_FP16:
+            case RGBA_1010102:
+            case RGBX_8888:
+            case RGB_565:
+            case RGB_888:
+            case BLOB:
+            case YCBCR_420_888:
+            case D_16:
+            case D_24:
+            case DS_24UI8:
+            case D_FP32:
+            case DS_FP32UI8:
+            case S_UI8:
+            case YCBCR_P010:
+                return true;
+        }
+        return false;
+    }
+
     private static native long nCreateHardwareBuffer(int width, int height, int format, int layers,
             long usage);
     private static native long nCreateFromGraphicBuffer(GraphicBuffer graphicBuffer);
@@ -422,6 +457,4 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             long usage);
     @CriticalNative
     private static native long nEstimateSize(long nativeObject);
-    @CriticalNative
-    private static native long nGetId(long nativeObject);
 }

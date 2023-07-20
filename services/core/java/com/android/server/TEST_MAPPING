@@ -20,18 +20,6 @@
             "file_patterns": ["NotificationManagerService\\.java"]
         },
         {
-            "name": "CtsScopedStorageCoreHostTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
-        {
-            "name": "CtsScopedStorageHostTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
-        {
-            "name": "CtsScopedStorageDeviceOnlyTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
-        {
             "name": "FrameworksMockingServicesTests",
             "options": [
                 {
@@ -48,22 +36,21 @@
                 }
             ],
             "file_patterns": ["BinaryTransparencyService\\.java"]
-        },
-        {
-            // GWP-ASan's CTS test ensures that recoverable tombstones work,
-            // which is emitted by the NativeTombstoneManager.
-            "name": "CtsGwpAsanTestCases"
-        },
-        {
-            "name": "FrameworksVcnTests",
-            "file_patterns": ["VcnManagementService\\.java"]
-        },
-        {
-            "name": "CtsVcnTestCases",
-            "file_patterns": ["VcnManagementService\\.java"]
         }
     ],
     "presubmit-large": [
+        {
+            "name": "CtsScopedStorageCoreHostTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageHostTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageDeviceOnlyTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
         {
             "name": "CtsContentTestCases",
             "options": [

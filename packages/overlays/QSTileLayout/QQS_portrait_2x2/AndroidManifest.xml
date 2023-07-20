@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.xtended.qqs.portrait.layout_2x2"
+    android:versionCode="1"
+    android:versionName="1.0">
+    <overlay android:targetPackage="com.android.systemui" android:category="android.qqs.portrait" android:priority="999" />
+    <application android:label="Quick QS tile portrait 2x2" android:hasCode="false" />
+</manifest>

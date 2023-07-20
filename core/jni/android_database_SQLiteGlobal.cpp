@@ -44,7 +44,9 @@ static void sqliteLogCallback(void* data, int err, const char* msg) {
             ALOG(LOG_VERBOSE, SQLITE_LOG_TAG, "(%d) %s\n", err, msg);
         }
     } else if (errType == SQLITE_WARNING) {
-        ALOG(LOG_WARN, SQLITE_LOG_TAG, "(%d) %s\n", err, msg);
+        if (verboseLog) {
+            ALOG(LOG_WARN, SQLITE_LOG_TAG, "(%d) %s\n", err, msg);
+        }
     } else {
         ALOG(LOG_ERROR, SQLITE_LOG_TAG, "(%d) %s\n", err, msg);
     }

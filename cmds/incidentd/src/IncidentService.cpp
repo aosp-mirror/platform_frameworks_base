@@ -47,12 +47,10 @@ enum {
 #define DEFAULT_REFACTORY_PERIOD_MS (24 * 60 * 60 * 1000)  // 1 Day
 
 // Skip these sections (for dumpstate only)
-// Skip logs (1100 - 1108), traces (1200 - 1202), dumpsys (3000 - 3024, 3027 - 3056, 4000 - 4001)
-// because they are already in the bug report.
+// Skip logs (1100 - 1108) and traces (1200 - 1202) because they are already in the bug report.
 #define SKIPPED_DUMPSTATE_SECTIONS { \
             1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, /* Logs */ \
-            1200, 1201, 1202, /* Native, hal, java traces */ \
-            3018, /* dumpsys meminfo*/ }
+            1200, 1201, 1202, /* Native, hal, java traces */ }
 
 namespace android {
 namespace os {

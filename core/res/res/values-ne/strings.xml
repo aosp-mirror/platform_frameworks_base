@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"के.बि."</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;बिना शीर्षक&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(कुनै फोन नम्बर छैन)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"तपाईंले टाइप गर्नुभएको PIN मेल खाँदैन।"</string>
     <string name="invalidPin" msgid="7542498253319440408">"४ देखि ८ वटा नम्बर भएको एउटा PIN टाइप गर्नुहोस्।"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"८ वटा नम्बरहरू वा सो भन्दा लामो एउटा PUK टाइप गर्नुहोस्।"</string>
-    <string name="needPuk" msgid="3503414069503752211">"तपाईंको SIM कार्ड PUK प्रयोग गरी लक गरिएको छ। उक्त SIM कार्ड अनलक गर्न PUK कोड टाइप गर्नुहोस्।"</string>
-    <string name="needPuk2" msgid="3910763547447344963">"SIM कार्ड अनब्लक गर्न PUK2 टाइप गर्नुहोस्।"</string>
+    <string name="needPuk" msgid="7321876090152422918">"तपाईंको SIM कार्ड PUK-लक छ। यसलाई अनलक गर्न PUK कोड टाइप गर्नुहोस्।"</string>
+    <string name="needPuk2" msgid="7032612093451537186">"SIM कार्ड अनलक गर्न PUK2 टाइप गर्नुहोस्।"</string>
     <string name="enablePin" msgid="2543771964137091212">"असफल, SIM/RUIM बन्द छ।"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">तपाईंसँग SIM बन्द हुनु अघि <xliff:g id="NUMBER_1">%d</xliff:g> बाँकी प्रयासहरू छन्।</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"कलर ID पूर्वनिर्धारितको लागि रोकावट छैन। अर्को कल: रोकावट छैन"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"सेवाको व्यवस्था छैन।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"तपाईं कलर ID सेटिङ परिवर्तन गर्न सक्नुहुन्न।"</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> को डेटा प्रयोग गर्न थालिएको छ"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"तपाईं जुनसुकै बेला सेटिङमा गई यो कुरा बदल्न सक्नुहुन्छ"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"कुनै पनि मोबाइल डेटा सेवा उपलब्ध छैन"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"आपत्‌कालीन कल सेवा उपलब्ध छैन"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"कुनै पनि भ्वाइस सेवा उपलब्ध छैन"</string>
@@ -178,7 +181,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"भण्डारण भरिएको छ हेर्नुहोस्। ठाउँ खाली गर्न केही फाइलहरू मेटाउनुहोस्।"</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android टिभी डिभाइसको भण्डारण भरिएको छ। ठाउँ खाली गर्न केही फाइलहरू मेट्नुहोस्।"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"फोन भण्डारण भरिएको छ! ठाउँ खाली गर्नको लागि केही फाइलहरू मेटाउनुहोस्।"</string>
-    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{प्रमाणपत्र जारी गर्ने निकायको प्रमाणपत्र इन्स्टल गरियो}other{प्रमाणपत्र जारी गर्ने निकायका प्रमाणपत्रहरू इन्स्टल गरिए}}"</string>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{प्रमाणपत्र जारी गर्ने निकाय इन्स्टल गरियो}other{प्रमाणपत्र जारी गर्ने निकायहरू इन्स्टल गरियो}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"अज्ञात तेस्रो पक्ष द्वारा"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"तपाईंको कार्य प्रोफाइलका प्रशासकद्वारा"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> द्वारा"</string>
@@ -205,7 +208,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ले छाप्ने कार्यलाई असक्षम पार्यो।"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"आफ्नो कार्य प्रोफाइल अन गर्नुहोस्"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"तपाईंले आफ्नो कार्य प्रोफाइल सक्रिय नगरुन्जेल तपाईंका व्यक्तिगत एपहरूलाई रोक लगाइन्छ"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"मिति <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> बजे व्यक्तिगत एपहरूलाई रोक लगाइने छ। तपाईंका IT एड्मिन तपाईंलाई आफ्नो कार्य प्रोफाइल <xliff:g id="NUMBER">%3$d</xliff:g> भन्दा धेरै दिन निष्क्रिय राख्ने अनुमति दिनुहुन्न।"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"मिति <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> बजे व्यक्तिगत एपहरूलाई रोक लगाइने छ। तपाईंका IT एडमिन तपाईंलाई आफ्नो कार्य प्रोफाइल <xliff:g id="NUMBER">%3$d</xliff:g> भन्दा धेरै दिन निष्क्रिय राख्ने अनुमति दिनुहुन्न।"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"अन गर्नुहोस्"</string>
     <string name="me" msgid="6207584824693813140">"मलाई"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ट्याब्लेट विकल्पहरू"</string>
@@ -331,15 +334,14 @@
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"ट्याप गरिएका वस्तुहरू चर्को स्वरमा बोलिने छन् र इसाराहरूको प्रयोग गरेर स्क्रिनमा अन्वेषण गर्न सकिन्छ।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"आफुले टाइप गरेको पाठको निरीक्षण गर्नुहोस्"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"व्यक्तिगत डेटा जस्तै क्रेडिट कार्ड नम्बरहरू र पासवर्डहरू समावेश गर्दछ।"</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"डिस्प्ले म्याग्निफिकेसन नियन्त्रण गर्नुहोस्"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"डिस्प्लेको जुम लेबल र स्थिति नियन्त्रण गर्नुहोस्।"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"प्रदर्शन आवर्धन नियन्त्रण गर्नुहोस्"</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"प्रदर्शनको जुम स्तर र स्थिति नियन्त्रण गर्नुहोस्।"</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"इसाराहरू सम्बन्धी कार्य गर्नुहोस्"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ट्याप, स्वाइप गर्न, थिच्न र अन्य इसाराहरू सम्बन्धी कार्य गर्न सक्छ"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"फिंगरप्रिन्टका इसाराहरू"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"यसले यन्त्रक‍ो फिंगरप्रिन्टसम्बन्धी सेन्सरमा गरिएका इसाराहरूलाई खिच्‍न सक्छ।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"स्क्रिनसट लिनुहोस्"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"डिस्प्लेको स्क्रिनसट लिन सकिन्छ।"</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"प्रिभ्यू, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"स्थिति पट्टिलाई अक्षम वा संशोधित गर्नुहोस्"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"स्थिति पट्टि असक्षम पार्न वा प्रणाली आइकनहरू थप्न र हटाउन एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"स्टाटस बार हुन दिनुहोस्"</string>
@@ -411,9 +413,9 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"एपलाई प्रसारण समाप्त भइसकेपछि पनि रहिरहने स्टिकी प्रसारणहरू पठाउने अनुमति दिन्छ। यो सुविधाको अत्यधिक प्रयोगले धेरै मेमोरी प्रयोग हुने भएकाले तपाईंको Android टिभी यन्त्र सुस्त वा अस्थिर हुन सक्छ।"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"औपचारिक प्रसारणलाई पठाउनको लागि एक एपलाई अनुमति दिन्छ, जुन प्रसारण समाप्त भएपछि बाँकी रहन्छ। अत्यधिक प्रयोगले धेरै मेमोरी प्रयोग गरेको कारणले फोनलाई ढिलो र अस्थिर बनाउन सक्छ।"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"तपाईँका सम्पर्कहरू पढ्नुहोस्"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"एपलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका कन्ट्याक्टहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले कन्ट्याक्टहरू बनाउने तपाईंको ट्याब्लेटमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा पढ्न अनुमति दिन्छ। एपहरूले कन्ट्याक्टहरू बनाउने तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
-    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"एपलाई तपाईंको फोनमा भण्डारण गरिएका कन्ट्याक्टहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले कन्ट्याक्टहरू बनाउने तपाईंको फोनमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"एपलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको ट्याब्लेटमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा पढ्न अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"एपलाई तपाईंको फोनमा भण्डारण गरिएका सम्पर्क ठेगानाहरूसँग सम्बन्धित डेटा पढ्ने अनुमति दिन्छ। एपहरूले सम्पर्क ठेगानाहरू बनाउने तपाईंको फोनमा भण्डारण गरिएका खाताहरूमाथि पनि पहुँच प्राप्त गर्ने छन्। यसमा तपाईंले स्थापना गरेका एपहरूले बनाएका खाताहरू पर्न सक्छन्। यस अनुमतिले एपहरूलाई तपाईंको सम्पर्क ठेगानासम्बन्धी डेटा सेभ गर्न दिने भएकाले हानिकारक एपहरूले तपाईंलाई थाहै नदिइकन सम्पर्क ठेगानासम्बन्धी डेटा आदान प्रदान गर्न सक्छन्।"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"तपाईँका सम्पर्कहरू परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"एपलाई तपाईंको ट्याब्लेटमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा परिमार्जन गर्न अनुमति दिन्छ। यो अनुमतिले एपलाई सम्पर्क ठेगानासम्बन्धी डेटा मेटाउन अनुमति दिन्छ।"</string>
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"एपलाई तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका सम्पर्क ठेगानासम्बन्धी डेटा परिमार्जन गर्न अनुमति दिन्छ। यो अनुमतिले एपलाई सम्पर्क ठेगानासम्बन्धी डेटा मेटाउन अनुमति दिन्छ।"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"यसले एपलाई दर्ता गरिएका सहायता तथा मार्गको गन्तव्य जस्ता रुचाइएका NFC भुक्तानी सेवासम्बन्धी जानकारी प्राप्त गर्न दिन्छ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नजिक क्षेत्र संचार नियन्त्रणहरू"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"एपलाई नयाँ क्षेत्र संचार (NFC) ट्यागहरू, कार्डहरू र पाठकहरूसँग अन्तर्क्रिया गर्न अनुमति दिन्छ।"</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"\"सुरक्षित तत्त्व\" मा भएको कारोबार"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"यो विकल्प छनौट गर्नाले एपलाई \"सुरक्षित तत्त्व\" मा भएका कारोबारहरूका बारेमा जानकारी प्राप्त गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"स्क्रिन लक असक्षम पार्नुहोस्"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"कुनै सम्बन्धित पासवर्ड सुरक्षा र किलकलाई असक्षम पार्न एपलाई अनुमति दिन्छ। उदाहरणको लागि, अन्तर्गमन फोन कल प्राप्त गर्दा फोनले किलकलाई असक्षम पार्छ, त्यसपछि कल सकिएको बेला किलक पुनःसक्षम पार्छ।"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"स्क्रिन लकको जटिलतासम्बन्धी जानकारी प्राप्त गर्ने अनुरोध गर्नुहोस्"</string>
@@ -624,7 +624,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"जारी राख्न आफ्नो फिंगरप्रिन्ट वा स्क्रिन लक प्रयोग गरी पुष्टि गर्नुहोस्"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"कुनै समस्या आयो। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"केही चिज गडबड भयो। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"फिंगरप्रिन्ट आइकन"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"फेस अनलक"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"फेस अनलक सुविधामा अनुहार दर्ता गर्ने क्रममा त्रुटि भयो"</string>
@@ -655,7 +655,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"आफ्नो फोनमा अझ सीधा हेर्नुहोस्"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"आफ्नो अनुहार छोप्ने सबै कुरा हटाउनुहोस्।"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"तपाईंको अनुहार लुकाउने सबै कुरा हटाउनुहोस्।"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"कालो रङको पट्टीलगायत आफ्नो स्क्रिनको माथिल्लो भाग सफा गर्नुहोस्"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -664,8 +664,6 @@
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"तपाईंको फेस मोडेल सिर्जना गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"कालो चस्मा लगाइएको पाइयो। तपाईंको अनुहार पूरै देखिनु पर्छ।"</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"अनुहार छोपिएको पाइयो। तपाईंको अनुहार पूरै देखिनु पर्छ।"</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"अनुहार पुष्टि गर्न सकिएन। हार्डवेयर उपलब्ध छैन।"</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"फेरि फेस अनलक प्रयोग गरी हेर्नुहोस्"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"अनुहारसम्बन्धी नयाँ डेटा भण्डारण गर्न सकिएन। पहिले कुनै पुरानो डेटा मेटाउनुहोस्।"</string>
@@ -683,9 +681,7 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"फेस अनलक वा स्क्रिन लक प्रयोग गर्नुहोस्"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"जारी राख्न आफ्नो अनुहारको सहायताले पुष्टि गर्नुहोस्"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"जारी राख्न आफ्नो फेस वा स्क्रिन लक प्रयोग गरी पुष्टि गर्नुहोस्"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"कुनै समस्या आयो। फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"केही चिज गडबड भयो। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"अनुहारको आइकन"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"समीकरण सेटिङहरू पढ्नुहोस्"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"एपलाई खाताको लागि सिंक सेटिङहरू पढ्न अनुमति दिन्छ। उदाहरणको लागि यसले व्यक्तिहरको एप खातासँग सिंक भएको नभएको निर्धारण गर्न सक्दछ।"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"फेरि प्रयास गर्नुहोस्"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"सबै सुविधाहरू र डेटाका लागि अनलक गर्नुहोस्"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"फेस अनलक प्रयोग गरी अनलक गर्ने प्रयास अत्याधिक धेरै भयो"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM कार्ड हालिएको छैन"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"ट्याब्लेटमा SIM कार्ड हालिएको छैन।"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"तपाईंको Android TV डिभाइसमा SIM कार्ड हालिएको छैन।"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"फोनमा SIM कार्ड हालिएको छैन।"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"SIM कार्ड हाल्नुहोस्।"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM कार्ड हालिएको छैन वा रिड गर्न मिल्दैन। SIM कार्ड हाल्नुहोस्।"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"यो SIM कार्ड प्रयोग गर्न मिल्दैन।"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"तपाईंको SIM कार्ड सदाका लागि डिएक्टिभेट गरिएको छ।\n आफ्नो वायरलेस सेवा प्रदायकलाई सम्पर्क गरी अर्को SIM कार्ड प्राप्त गर्नुहोस्।"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM कार्ड छैन"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ट्याब्लेटमा SIM कार्ड छैन।"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"तपाईंको Android टिभी डिभाइसमा SIM कार्ड छैन।"</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"फोनमा SIM कार्ड छैन।"</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM कार्ड घुसाउनुहोस्"</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM कार्ड छैन वा पढ्न मिल्दैन। SIM कार्ड हाल्नुहोस्।"</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"प्रयोग गर्न अयोग्य SIM कार्ड"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"तपाईंको SIM कार्ड स्थायी रूपमा अक्षम भयो।\n अर्को SIM कार्डको लागि आफनो ताररहित सेवा प्रदायकसँग सम्पर्क गर्नुहोस्।"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"अघिल्लो ट्रयाक"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"अर्को ट्रयाक"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"रोक्नुहोस्"</string>
@@ -946,13 +942,13 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"फास्ट फर्वार्ड"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"आपत्‌कालीन कलहरू मात्र"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"नेटवर्क लक छ"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM कार्ड PUK प्रयोग गरी लक गरिएको छ।"</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM कार्ड PUK-लक गरिएको छ।"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"प्रयोगकर्ता निर्देशक वा ग्राहक सेवा सम्पर्क हर्नुहोस्।"</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM कार्ड लक गरिएको छ।"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM कार्ड अनलक गरिँदै छ…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM कार्ड लक गरिएको छ।"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM कार्ड अनलक गरिँदै..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"तपाईँले तपाईँको अनलक प्याटर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि कोसिस गर्नुहोस्।"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"तपाईंले गलत तरिकाले आफ्नो पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नुभयो। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत PIN टाइप गर्नुभएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"तपाईँले गलत तरिकाले तपाईँको PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नु भएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"तपाईँले तपाईँको अनलक प्याटर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। पछि <xliff:g id="NUMBER_1">%2$d</xliff:g> थप असफल कोसिसहरू, तपाईँको Google साइन इन प्रयोग गरी तपाईँको ट्याब्लेट अनलक गर्न भनिने छ।\n\n  <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा फरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"तपाईंले आफ्नो अनलक शैली <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले कोर्नुभएको छ। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> प्रयासहरू असफल भएपछि तपाईंलाई आफ्नो Google खाता मार्फत साइन इन गरेर आफ्नो Android टिभी डिभाइस अनलक गर्न अनुरोध गरिने छ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डपछि फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"तपाईँले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत तरिकाले तपाईँको अनलक ढाँचालाई कोर्नु भएको छ। पछि <xliff:g id="NUMBER_1">%2$d</xliff:g> अरू धेरै असफल कोसिसहरूपछि, तपाईँलाई तपाईँको फोन Google साइन इन प्रयोग गरेर अनलक गर्नको लागि सोधिने छ। \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा पुनः प्रयास गर्नुहोस्।"</string>
@@ -1280,13 +1276,13 @@
     <string name="volume_call" msgid="7625321655265747433">"इन-कल भोल्युम"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ब्लुटुथ भित्री-कल मात्रा"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"आलर्मको भोल्युम"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"सूचनाको भोल्युम"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"सूचना मात्रा"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"मात्रा"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ब्लुटुथ भोल्युम"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"घन्टिको आवाज मात्रा"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"कला मात्रा"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"मिडियाको भोल्युम"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"सूचनाको भोल्युम"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"सूचना भोल्युम"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"डिफल्ट रिङटोन"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"डिफल्ट (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"कुनै पनि होइन"</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"तपाईं यसलाई पछि सेटिङहरूमा बदल्न सक्नु हुन्छ &gt; एपहरू"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"सधैँ अनुमति दिनुहोस्"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"कहिल्यै अनुमति नदिनुहोस्"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM कार्ड हटाइयो"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"तपाईंले वैध SIM कार्ड हालेर डिभाइस रिस्टार्ट गरेपछि मात्र मोबाइल नेटवर्क उपलब्ध हुने छ।"</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM कार्ड हटाइयो"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"एउटा मान्य SIM कार्ड राखेर पुनःस्टार्ट नगरेसम्म मोबाइल नेटवर्क उपलब्ध हुने छैन।"</string>
     <string name="sim_done_button" msgid="6464250841528410598">"भयो"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM कार्ड हालियो"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM कार्ड थप गरियो"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"मोबाइल नेटवर्क पहुँच गर्न तपाईँको उपकरण पुनःस्टार्ट गर्नुहोस्।"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"पुनः सुरु गर्नुहोस्"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"मोबाइल सेवा अन गर्नुहोस्"</string>
@@ -1364,7 +1360,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"कनेक्ट गरिएको डिभाइस चार्ज गर्दै। थप विकल्पहरूका लागि ट्याप गर्नुहोस्।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"एनालग अडियोको सहायक उपकरण पत्ता लाग्यो"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"संलग्न गरिएको यन्त्र यो फोनसँग कम्प्याटिबल छैन। थप जान्न ट्याप गर्नुहोस्।"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB डिबगिङ कनेक्ट गरिएको छ कनेक्ट गरिएको छ"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB डिबग गर्न ADB कनेक्ट गरिएको छ"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB डिबगिङ अफ गर्न ट्याप गर्नुहोस्‌"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB डिबगिङलाई असक्षम पार्न ट्याप गर्नुहोस्।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"वायरलेस डिबगिङ जोडियो"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"टिभी"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"फोन"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"डक स्पिकरहरू"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"बााह्य डिभाइस"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"हेडफोनहरू"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"प्रणाली"</string>
@@ -1627,7 +1623,7 @@
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"सेटिंङहरू"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"डिस्कनेक्ट गर्नुहोस्"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"स्क्यान गर्दै ..."</string>
-    <string name="media_route_status_connecting" msgid="5845597961412010540">"कनेक्ट गरिँदै छ..."</string>
+    <string name="media_route_status_connecting" msgid="5845597961412010540">"जडान हुँदै..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"उपलब्ध"</string>
     <string name="media_route_status_not_available" msgid="480912417977515261">"उपलब्ध छैन"</string>
     <string name="media_route_status_in_use" msgid="6684112905244944724">"प्रयोगमा छ"</string>
@@ -1641,13 +1637,13 @@
     <string name="kg_wrong_password" msgid="2384677900494439426">"गलत पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"गलत PIN"</string>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"आफ्नो ढाँचा कोर्नुहोस्"</string>
-    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN हाल्नुहोस्"</string>
-    <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN हाल्नुहोस्"</string>
+    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN प्रविष्टि गर्नुहोस्"</string>
+    <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"पासवर्ड प्रविष्टि गर्नुहोस्"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM कार्ड अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड प्रविष्टि गर्नुहोस्।  विवरणको लागि वाहकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"इच्छित PIN कोड प्रविष्टि गर्नुहोस्"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"मनपर्दो PIN कोड निश्चित गर्नुहोस्"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM कार्ड अनलक गरिँदै छ…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM कार्ड अनलक गर्दै…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"गलत PIN कोड।"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"४ देखि ८ वाट नम्बर भएको एउटा PIN टाइप गर्नुहोस्।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK कोड ८ संख्याको हुनु पर्दछ।"</string>
@@ -1661,7 +1657,7 @@
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"अमान्य प्रयोगकर्तानाम वा पासवर्ड।"</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"के तपाईँले उपयोगकर्ता नाम वा पासवर्ड बिर्सनुभयो?\n"<b>"google.com/accounts/recovery"</b>" मा जानुहोस्।"</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"खाता जाँच हुँदै…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत PIN टाइप गर्नुभएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"तपाईँले गलत तरिकाले तपाईँको PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नु भएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"तपाईँले तपाईँक पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक गलत टाइप गर्नुभएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"तपाईँले तपाईँको अनलक प्याटर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि कोसिस गर्नुहोस्।"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"तपाईँले ट्याब्लेटलाई अनलक गर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक कोसिस गर्नु भएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> पछि थप असफल प्रयासहरू, ट्याब्लेट डिफल्ट कार्यशालामा रिसेट गरिने छ र सबै प्रयोग डेटा हराउने छ।"</string>
@@ -1688,13 +1684,13 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"सक्रिय"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"निष्क्रिय"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> लाई तपाईंको यन्त्र पूर्ण रूपमा नियन्त्रण गर्न दिने हो?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"एक्सेसिबिलिटीसम्बन्धी आवश्यकतामा सहयोग गर्ने एपको पूर्ण नियन्त्रण गर्न दिनु उपयुक्त हुन्छ तर अधिकांश एपका हकमा यस्तो नियन्त्रण उपयुक्त हुँदैन।"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"एक्सेसिबिलिटीसम्बन्धी आवश्यकतामा सहयोग गर्ने एपको पूर्ण नियन्त्रण गर्नु उपयुक्त हुन्छ तर अधिकांश एपका हकमा यस्तो नियन्त्रण उपयुक्त हुँदैन।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रिन हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यसले स्क्रिनमा देखिने सबै सामग्री पढ्न सक्छ र अन्य एपहरूमा उक्त सामग्री देखाउन सक्छ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"कारबाहीहरू हेर्नुहोस् र तिनमा कार्य गर्नुहोस्"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यसले कुनै एप वा हार्डवेयर सेन्सरसँग तपाईंले गर्ने अन्तर्क्रिया ट्र्याक गर्न सक्छ र तपाईंका तर्फबाट एपहरूसँग अन्तर्क्रिया गर्न सक्छ।"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यसले कुनै एप वा हार्डवेयर सेन्सरसँग तपाईंले गर्ने अन्तर्क्रियाको ट्र्याक गर्न सक्छ र तपाईंका तर्फबाट एपहरूसँग अन्तर्क्रिया गर्न सक्छ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दिनुहोस्"</string>
-    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"नदिनुहोस्"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"इन्कार गर्नु⋯"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"कुनै सुविधा प्रयोग गर्न थाल्न उक्त सुविधामा ट्याप गर्नुहोस्:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"पहुँचको बटनमार्फत प्रयोग गर्न चाहेका सुविधाहरू छनौट गर्नुहोस्"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"भोल्युम कुञ्जीको सर्टकटमार्फत प्रयोग गर्न चाहेका सुविधाहरू छनौट गर्नुहोस्"</string>
@@ -1827,8 +1823,8 @@
     <string name="reason_service_unavailable" msgid="5288405248063804713">"प्रिन्ट सेवा सक्षम गरिएको छैन"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> सेवा स्थापित भयो"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"सक्षम पार्न ट्याप गर्नुहोस्"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"प्रशासकको PIN हाल्नुहोस्"</string>
-    <string name="restr_pin_enter_pin" msgid="373139384161304555">"PIN हाल्नुहोस्"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"प्रशासकको PIN प्रविष्टि गर्नुहोस्"</string>
+    <string name="restr_pin_enter_pin" msgid="373139384161304555">"PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"गलत"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"वर्तमान PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"नयाँ PIN"</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"पूरा पर्दा हेर्दै"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहिर निस्कन, माथिबाट तल स्वाइप गर्नुहोस्।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"बुझेँ"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"अझ राम्रो दृश्य हेर्न चाहनुहुन्छ भने रोटेट गर्नुहोस्"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"अझ राम्रो दृश्य हेर्न चाहनुहुन्छ भने \"स्प्लिट स्क्रिन\" बाट बाहिरिनुहोस्"</string>
     <string name="done_label" msgid="7283767013231718521">"भयो"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"घन्टा गोलाकार स्लाइडर"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"मिनेट गोलाकार स्लाइडर"</string>
@@ -2081,11 +2075,11 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"यस सूचनालाई धेरै महत्त्वपूर्ण सूचनाका रूपमा सेट गरिएको छ। प्रतिक्रिया दिन ट्याप गर्नुहोस्।"</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"यस सूचनालाई कम महत्त्वपूर्ण सूचनाका रूपमा सेट गरिएको छ। प्रतिक्रिया दिन ट्याप गर्नुहोस्।"</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"परिष्कृत सूचनाहरू"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"अब परिष्कृत सूचनाहरू नामक सुविधाले कारबाही तथा जवाफहरूसम्बन्धी सुझाव देखाउँछ। Android को एड्याप्टिभ सूचनाहरू नामक सुविधाले अब उप्रान्त काम गर्दैन।"</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"अब परिष्कृत सूचनाहरू नामक सुविधाले कारबाही तथा जवाफहरूसम्बन्धी सुझाव देखाउँछ। Android को अनुकूल पार्न मिल्ने सूचनाहरू नामक सुविधाले अब उप्रान्त काम गर्दैन।"</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ठिक छ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"अफ गर्नुहोस्"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"थप जान्नुहोस्"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android १२ मा Android को एड्याप्टिभ सूचनाहरू नामक सुविधालाई परिष्कृत सूचनाहरू नामक सुविधाले प्रतिस्थापन गरेको छ। यो सुविधाले कारबाही तथा जवाफसम्बन्धी सुझाव देखाउँछ र तपाईंका सूचनाहरू व्यवस्थित गर्छ।\n\nपरिष्कृत सूचनाहरू नामक सुविधाले सूचनामा उल्लिखित सम्पर्क व्यक्तिको नाम र म्यासेज जस्ता व्यक्तिगत जानकारीलगायतका सामग्री हेर्न तथा प्रयोग गर्न सक्छ। यो सुविधाले फोन उठाउने तथा \'बाधा नपुऱ्याउनुहोस्\' मोड नियन्त्रण गर्ने कार्यसहित सूचनाहरू हटाउने वा सूचनाहरूको जवाफ दिने कार्य पनि गर्न सक्छ।"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android १२ मा Android को अनुकूल पार्न मिल्ने सूचनाहरू नामक सुविधालाई परिष्कृत सूचनाहरू नामक सुविधाले प्रतिस्थापन गरेको छ। यो सुविधाले कारबाही तथा जवाफसम्बन्धी सुझाव देखाउँछ र तपाईंका सूचनाहरू व्यवस्थित गर्छ।\n\nपरिष्कृत सूचनाहरू नामक सुविधाले सूचनामा उल्लिखित सम्पर्क व्यक्तिको नाम र म्यासेज जस्ता व्यक्तिगत जानकारीलगायतका सामग्री हेर्न तथा प्रयोग गर्न सक्छ। यो सुविधाले फोन उठाउने तथा \'बाधा नपुऱ्याउनुहोस्\' मोड नियन्त्रण गर्ने कार्यसहित सूचनाहरू हटाउने वा सूचनाहरूको जवाफ दिने कार्य पनि गर्न सक्छ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनचर्या मोडको जानकारीमूलक सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"प्रायः चार्ज गर्ने समय हुनुभन्दा पहिले नै ब्याट्री सकिन सक्छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ब्याट्रीको आयु बढाउन ब्याट्री सेभर सक्रिय गरियो"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मार्फत ट्याब्लेटको क्यामेरा प्रयोग गर्न मिल्दैन"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"स्ट्रिम गरिरहेका बेला यो सामग्री हेर्न तथा प्रयोग गर्न मिल्दैन। बरु आफ्नो फोनमार्फत सो सामग्री हेर्ने तथा प्रयोग गर्ने प्रयास गर्नुहोस्।"</string>
     <string name="system_locale_title" msgid="711882686834677268">"सिस्टम डिफल्ट"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"कार्ड <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -25,6 +25,7 @@ import static android.service.notification.NotificationListenerService.REASON_GR
 import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import static com.android.systemui.flags.Flags.WM_BUBBLE_BAR;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -235,8 +236,7 @@ public class BubblesManager {
 
         // Store callback in a field so it won't get GC'd
         mStatusBarWindowCallback =
-                (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, isDozing,
-                        panelExpanded, isDreaming) ->
+                (keyguardShowing, keyguardOccluded, bouncerShowing, isDozing, panelExpanded) ->
                         mBubbles.onNotificationPanelExpandedChanged(panelExpanded);
         notificationShadeWindowController.registerCallback(mStatusBarWindowCallback);
 
@@ -357,6 +357,7 @@ public class BubblesManager {
                 });
             }
         };
+        mBubbles.setBubbleBarEnabled(featureFlags.isEnabled(WM_BUBBLE_BAR));
         mBubbles.setSysuiProxy(mSysuiProxy);
     }
 

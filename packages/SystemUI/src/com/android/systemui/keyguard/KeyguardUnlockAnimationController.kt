@@ -380,7 +380,10 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 // If the launcher is underneath, but we're about to launch an activity, don't do
                 // the animations since they won't be visible.
                 !notificationShadeWindowController.isLaunchingActivity &&
-                launcherUnlockController != null
+                launcherUnlockController != null &&
+                // Temporarily disable for foldables since foldable launcher has two first pages,
+                // which breaks the in-window animation.
+                !isFoldable(context)
     }
 
     /**
@@ -930,7 +933,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         // The smartspace is not visible if the bouncer is showing, so don't shared element it.
-        if (keyguardStateController.isPrimaryBouncerShowing) {
+        if (keyguardStateController.isBouncerShowing) {
             return false
         }
 
@@ -947,9 +950,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
             return false
         }
 
-        // We don't do the shared element on large screens because the smartspace has to fly across
-        // large distances, which is distracting.
-        if (Utilities.isLargeScreen(context)) {
+        // We don't do the shared element on tablets because they're large and the smartspace has to
+        // fly across large distances, which is distracting.
+        if (Utilities.isTablet(context)) {
             return false
         }
 

@@ -1,2 +1,0 @@
-# Locale related test
-per-file *Locale* = file:/services/core/java/com/android/server/locales/OWNERS

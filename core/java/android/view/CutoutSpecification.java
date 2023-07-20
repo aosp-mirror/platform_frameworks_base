@@ -394,6 +394,7 @@ public class CutoutSpecification {
                 Log.e(TAG, "According to SVG definition, it shouldn't happen");
                 return;
             }
+            spec.trim();
             translateMatrix();
 
             final Path newPath = PathParser.createPathFromPathData(spec);

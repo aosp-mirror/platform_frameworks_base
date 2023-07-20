@@ -24,11 +24,10 @@ import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.accessibility.AccessibilityManager;
-
-import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +51,8 @@ public class UdfpsEnrollHelper {
         void onLastStepAcquired();
     }
 
+    @NonNull private final Context mContext;
     @NonNull private final FingerprintManager mFingerprintManager;
-    @NonNull private final SecureSettings mSecureSettings;
     // IUdfpsOverlayController reason
     private final int mEnrollReason;
     private final boolean mAccessibilityEnabled;
@@ -71,11 +70,10 @@ public class UdfpsEnrollHelper {
     @Nullable Listener mListener;
 
     public UdfpsEnrollHelper(@NonNull Context context,
-            @NonNull FingerprintManager fingerprintManager, SecureSettings secureSettings,
-            int reason) {
+            @NonNull FingerprintManager fingerprintManager, int reason) {
 
+        mContext = context;
         mFingerprintManager = fingerprintManager;
-        mSecureSettings = secureSettings;
         mEnrollReason = reason;
 
         final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
@@ -86,7 +84,8 @@ public class UdfpsEnrollHelper {
         // Number of pixels per mm
         float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 1,
                 context.getResources().getDisplayMetrics());
-        boolean useNewCoords = mSecureSettings.getIntForUser(NEW_COORDS_OVERRIDE, 0,
+        boolean useNewCoords = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                NEW_COORDS_OVERRIDE, 0,
                 UserHandle.USER_CURRENT) != 0;
         if (useNewCoords && (Build.IS_ENG || Build.IS_USERDEBUG)) {
             Log.v(TAG, "Using new coordinates");
@@ -211,7 +210,8 @@ public class UdfpsEnrollHelper {
 
         float scale = SCALE;
         if (Build.IS_ENG || Build.IS_USERDEBUG) {
-            scale = mSecureSettings.getFloatForUser(SCALE_OVERRIDE, SCALE,
+            scale = Settings.Secure.getFloatForUser(mContext.getContentResolver(),
+                    SCALE_OVERRIDE, SCALE,
                     UserHandle.USER_CURRENT);
         }
         final int index = mLocationsEnrolled - mCenterTouchCount;

@@ -16,10 +16,13 @@
 
 package android.hardware.camera2.impl;
 
+import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.app.ActivityThread;
 import android.graphics.ImageFormat;
 import android.hardware.ICameraService;
 import android.hardware.camera2.CameraAccessException;
@@ -53,6 +56,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
@@ -84,10 +88,9 @@ public class CameraDeviceImpl extends CameraDevice
     private final boolean DEBUG = false;
 
     private static final int REQUEST_ID_NONE = -1;
-
+    private int customOpMode = 0;
     // TODO: guard every function with if (!mRemoteDevice) check (if it was closed)
     private ICameraDeviceUserWrapper mRemoteDevice;
-    private boolean mRemoteDeviceInit = false;
 
     // Lock to synchronize cross-thread access to device public interface
     final Object mInterfaceLock = new Object(); // access from this class and Session only!
@@ -152,6 +155,7 @@ public class CameraDeviceImpl extends CameraDevice
     private int mNextSessionId = 0;
 
     private final int mAppTargetSdkVersion;
+    private final boolean mIsPrivilegedApp;
 
     private ExecutorService mOfflineSwitchService;
     private CameraOfflineSessionImpl mOfflineSessionImpl;
@@ -302,6 +306,7 @@ public class CameraDeviceImpl extends CameraDevice
         } else {
             mTotalPartialCount = partialCount;
         }
+        mIsPrivilegedApp = checkPrivilegedAppList();
     }
 
     public CameraDeviceCallbacks getCallbacks() {
@@ -339,8 +344,6 @@ public class CameraDeviceImpl extends CameraDevice
 
             mDeviceExecutor.execute(mCallOnOpened);
             mDeviceExecutor.execute(mCallOnUnconfigured);
-
-            mRemoteDeviceInit = true;
         }
     }
 
@@ -390,6 +393,10 @@ public class CameraDeviceImpl extends CameraDevice
                 }
             });
         }
+    }
+
+    public void setVendorStreamConfigMode(int fpsrange) {
+        customOpMode = fpsrange;
     }
 
     @Override
@@ -445,7 +452,11 @@ public class CameraDeviceImpl extends CameraDevice
                     "any output streams");
         }
 
-        checkInputConfiguration(inputConfig);
+        try {
+            checkInputConfiguration(inputConfig);
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Check input configuration failed due to: " + e.getMessage());
+        }
 
         boolean success = false;
 
@@ -510,6 +521,7 @@ public class CameraDeviceImpl extends CameraDevice
                         mConfiguredOutputs.put(streamId, outConfig);
                     }
                 }
+                operatingMode = (operatingMode | (customOpMode << 16));
 
                 int offlineStreamIds[];
                 if (sessionParams != null) {
@@ -1506,6 +1518,26 @@ public class CameraDeviceImpl extends CameraDevice
         return false;
     }
 
+    private boolean checkPrivilegedAppList() {
+        String packageName = ActivityThread.currentOpPackageName();
+        String packageList = SystemProperties.get("persist.vendor.camera.privapp.list");
+
+        if (packageList.length() > 0) {
+            String[] packages = packageList.split(",");
+            for (String str : packages) {
+                if (packageName.equals(str)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isPrivilegedApp() {
+        return mIsPrivilegedApp;
+    }
+
     private void checkInputConfiguration(InputConfiguration inputConfig) {
         if (inputConfig == null) {
             return;
@@ -1514,6 +1546,15 @@ public class CameraDeviceImpl extends CameraDevice
         if (inputConfig.isMultiResolution()) {
             MultiResolutionStreamConfigurationMap configMap = mCharacteristics.get(
                     CameraCharacteristics.SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP);
+
+            /*
+             * don't check input format and size,
+             * if the package name is in the white list
+             */
+            if (isPrivilegedApp()) {
+                Log.w(TAG, "ignore input format/size check for white listed app");
+                return;
+            }
 
             int[] inputFormats = configMap.getInputFormats();
             boolean validFormat = false;
@@ -1757,8 +1798,8 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         synchronized(mInterfaceLock) {
-            if (mRemoteDevice == null && mRemoteDeviceInit) {
-                return; // Camera already closed, user is not interested in errors anymore.
+            if (mRemoteDevice == null) {
+                return; // Camera already closed
             }
 
             // Redirect device callback to the offline session in case we are in the middle
@@ -2028,16 +2069,12 @@ public class CameraDeviceImpl extends CameraDevice
                     resultExtras.getLastCompletedReprocessFrameNumber();
             final long lastCompletedZslFrameNumber =
                     resultExtras.getLastCompletedZslFrameNumber();
-            final boolean hasReadoutTimestamp = resultExtras.hasReadoutTimestamp();
-            final long readoutTimestamp = resultExtras.getReadoutTimestamp();
 
             if (DEBUG) {
                 Log.d(TAG, "Capture started for id " + requestId + " frame number " + frameNumber
                         + ": completedRegularFrameNumber " + lastCompletedRegularFrameNumber
                         + ", completedReprocessFrameNUmber " + lastCompletedReprocessFrameNumber
-                        + ", completedZslFrameNumber " + lastCompletedZslFrameNumber
-                        + ", hasReadoutTimestamp " + hasReadoutTimestamp
-                        + (hasReadoutTimestamp ? ", readoutTimestamp " + readoutTimestamp : "")) ;
+                        + ", completedZslFrameNumber " + lastCompletedZslFrameNumber);
             }
             final CaptureCallbackHolder holder;
 
@@ -2089,26 +2126,14 @@ public class CameraDeviceImpl extends CameraDevice
                                                 CameraDeviceImpl.this,
                                                 holder.getRequest(i),
                                                 timestamp - (subsequenceId - i) *
-                                                NANO_PER_SECOND / fpsRange.getUpper(),
+                                                NANO_PER_SECOND/fpsRange.getUpper(),
                                                 frameNumber - (subsequenceId - i));
-                                            if (hasReadoutTimestamp) {
-                                                holder.getCallback().onReadoutStarted(
-                                                    CameraDeviceImpl.this,
-                                                    holder.getRequest(i),
-                                                    readoutTimestamp - (subsequenceId - i) *
-                                                    NANO_PER_SECOND / fpsRange.getUpper(),
-                                                    frameNumber - (subsequenceId - i));
-                                            }
                                         }
                                     } else {
                                         holder.getCallback().onCaptureStarted(
-                                            CameraDeviceImpl.this, request,
+                                            CameraDeviceImpl.this,
+                                            holder.getRequest(resultExtras.getSubsequenceId()),
                                             timestamp, frameNumber);
-                                        if (hasReadoutTimestamp) {
-                                            holder.getCallback().onReadoutStarted(
-                                                CameraDeviceImpl.this, request,
-                                                readoutTimestamp, frameNumber);
-                                        }
                                     }
                                 }
                             }

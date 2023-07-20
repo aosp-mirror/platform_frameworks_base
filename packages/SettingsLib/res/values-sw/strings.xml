@@ -223,8 +223,8 @@
     <item msgid="581904787661470707">"Kasi zaidi"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Chagua wasifu"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Binafsi"</string>
-    <string name="category_work" msgid="4014193632325996115">"Kazini"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Ya Binafsi"</string>
+    <string name="category_work" msgid="4014193632325996115">"Ya Kazini"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Chaguo za wasanidi"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Washa chaguo za wasanidi programu"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Weka chaguo kwa ajili ya maendeleo ya programu"</string>
@@ -401,7 +401,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Onyesha historia ya ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Onyesha kidirisha cha Programu Kutorejesha Majibu kwa programu zinazotumika chinichini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Onyesha arifa za maonyo ya kituo"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Huonyesha onyo kwenye skrini programu inapochapisha arifa bila kituo sahihi"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Huonyesha onyo kwenye skrini programu inapochapisha arifa bila kituo sahihi."</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Lazima uruhusu programu kwenye hifadhi ya nje"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Huruhusu programu yoyote iwekwe kwenye hifadhi ya nje, bila kujali thamani za faili ya maelezo"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Lazimisha shughuli ziweze kubadilishwa ukubwa"</string>
@@ -494,7 +494,7 @@
     <string name="disabled" msgid="8017887509554714950">"Imezimwa"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Imeruhusiwa"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Hairuhusiwi"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Kusakinisha programu zisizojulikana"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Kuweka programu zisizojulikana"</string>
     <string name="home" msgid="973834627243661438">"Ukurasa wa Kwanza wa Mipangilio"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -528,7 +528,7 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Muda kidogo."</string>
     <string name="cancel" msgid="5665114069455378395">"Ghairi"</string>
     <string name="okay" msgid="949938843324579502">"Sawa"</string>
-    <string name="done" msgid="381184316122520313">"Nimemaliza"</string>
+    <string name="done" msgid="381184316122520313">"Imemaliza"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ving\'ora na vikumbusho"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Ruhusu iweke kengele na vikumbusho"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Kengele na vikumbusho"</string>

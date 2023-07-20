@@ -360,7 +360,6 @@ public class BatteryStatsNoteTest extends TestCase {
         // map of ActivityManager process states and how long to simulate run time in each state
         Map<Integer, Integer> stateRuntimeMap = new HashMap<Integer, Integer>();
         stateRuntimeMap.put(ActivityManager.PROCESS_STATE_TOP, 1111);
-        stateRuntimeMap.put(ActivityManager.PROCESS_STATE_BOUND_TOP, 7382);
         stateRuntimeMap.put(ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE, 1234);
         stateRuntimeMap.put(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 2468);
         stateRuntimeMap.put(ActivityManager.PROCESS_STATE_TOP_SLEEPING, 7531);
@@ -397,8 +396,7 @@ public class BatteryStatsNoteTest extends TestCase {
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE,
                 elapsedTimeUs, STATS_SINCE_CHARGED);
-        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE)
-                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_TOP_SLEEPING,
@@ -408,7 +406,8 @@ public class BatteryStatsNoteTest extends TestCase {
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND,
                 elapsedTimeUs, STATS_SINCE_CHARGED);
-        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_BACKGROUND,
@@ -416,8 +415,7 @@ public class BatteryStatsNoteTest extends TestCase {
         expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND)
                 + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_BACKUP)
                 + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_SERVICE)
-                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_RECEIVER)
-                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_BOUND_TOP);
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_RECEIVER);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_CACHED,

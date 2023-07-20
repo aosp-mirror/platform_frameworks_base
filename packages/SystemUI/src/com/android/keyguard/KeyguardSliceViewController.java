@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static android.app.slice.Slice.HINT_LIST_ITEM;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.PendingIntent;
 import android.net.Uri;
@@ -42,7 +43,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
@@ -64,7 +64,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     private final ConfigurationController mConfigurationController;
     private final TunerService mTunerService;
     private final DumpManager mDumpManager;
-    private final DisplayTracker mDisplayTracker;
     private int mDisplayId;
     private LiveData<Slice> mLiveData;
     private Uri mKeyguardSliceUri;
@@ -109,14 +108,12 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
             ActivityStarter activityStarter,
             ConfigurationController configurationController,
             TunerService tunerService,
-            DumpManager dumpManager,
-            DisplayTracker displayTracker) {
+            DumpManager dumpManager) {
         super(keyguardSliceView);
         mActivityStarter = activityStarter;
         mConfigurationController = configurationController;
         mTunerService = tunerService;
         mDumpManager = dumpManager;
-        mDisplayTracker = displayTracker;
     }
 
     @Override
@@ -127,7 +124,7 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
         }
         mTunerService.addTunable(mTunable, Settings.Secure.KEYGUARD_SLICE_URI);
         // Make sure we always have the most current slice
-        if (mDisplayId == mDisplayTracker.getDefaultDisplayId() && mLiveData != null) {
+        if (mDisplayId == DEFAULT_DISPLAY && mLiveData != null) {
             mLiveData.observeForever(mObserver);
         }
         mConfigurationController.addCallback(mConfigurationListener);
@@ -140,7 +137,7 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     @Override
     protected void onViewDetached() {
         // TODO(b/117344873) Remove below work around after this issue be fixed.
-        if (mDisplayId == mDisplayTracker.getDefaultDisplayId()) {
+        if (mDisplayId == DEFAULT_DISPLAY) {
             mLiveData.removeObserver(mObserver);
         }
         mTunerService.removeTunable(mTunable);

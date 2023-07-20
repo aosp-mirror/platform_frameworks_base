@@ -36,7 +36,7 @@ android_app {
     certificate: "platform",
 
     optimize: {
-        proguard_flags_files: ["proguard.flags"],
+        enabled: false,
     },
 
 	static_libs: [

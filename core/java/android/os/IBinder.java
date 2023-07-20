@@ -311,11 +311,9 @@ public interface IBinder {
         public void binderDied();
 
         /**
-         * Interface for receiving a callback when the process hosting an IBinder
-         * has gone away.
-         * @param who The IBinder that has become invalid
+         * @hide
          */
-        default void binderDied(@NonNull IBinder who) {
+        default void binderDied(IBinder who) {
             binderDied();
         }
     }

@@ -25,6 +25,7 @@ import android.app.ActivityManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.health.HealthInfo;
 import android.hardware.health.V2_1.BatteryCapacityLevel;
@@ -55,6 +56,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.battery.BatteryServiceDumpProto;
 import android.sysprop.PowerProperties;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -67,9 +69,12 @@ import com.android.server.health.HealthServiceWrapper;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
@@ -149,8 +154,6 @@ public final class BatteryService extends SystemService {
     private int mLastMaxChargingCurrent;
     private int mLastMaxChargingVoltage;
     private int mLastChargeCounter;
-    private int mLastBatteryCycleCount;
-    private int mLastCharingState;
 
     private int mSequence = 1;
 
@@ -160,13 +163,25 @@ public final class BatteryService extends SystemService {
     private int mLowBatteryWarningLevel;
     private int mLastLowBatteryWarningLevel;
     private int mLowBatteryCloseWarningLevel;
-    private int mBatteryNearlyFullLevel;
     private int mShutdownBatteryTemperature;
 
     private int mPlugType;
     private int mLastPlugType = -1; // Extra state so we can detect first run
 
     private boolean mBatteryLevelLow;
+
+    private boolean mDashCharger;
+    private boolean mHasDashCharger;
+    private boolean mLastDashCharger;
+
+    private boolean mWarpCharger;
+    private boolean mHasWarpCharger;
+    private boolean mLastWarpCharger;
+    private String mOpWarpChargerPath;
+
+    private boolean mVoocCharger;
+    private boolean mHasVoocCharger;
+    private boolean mLastVoocCharger;
 
     private long mDischargeStartTime;
     private int mDischargeStartLevel;
@@ -178,6 +193,17 @@ public final class BatteryService extends SystemService {
     private boolean mBatteryInputSuspended;
 
     private Led mLed;
+
+    //Battery light color customization
+    private boolean mLightEnabled = false;
+    private boolean mAllowBatteryLightOnDnd;
+    private boolean mIsDndActive;
+    private boolean mLowBatteryBlinking;
+    private boolean mMultiColorLed;
+    private int mBatteryLowARGB;
+    private int mBatteryMediumARGB;
+    private int mBatteryFullARGB;
+    private int mBatteryReallyFullARGB;
 
     private boolean mSentLowBatteryBroadcast = false;
 
@@ -198,6 +224,16 @@ public final class BatteryService extends SystemService {
         mLed = new Led(context, getLocalService(LightsManager.class));
         mBatteryStats = BatteryStatsService.getService();
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+
+        mHasDashCharger = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_hasDashCharger);
+        mHasWarpCharger = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_hasWarpCharger);
+        mHasVoocCharger = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_hasVoocCharger)
+                        || mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_hasSuperDartCharger);
+
 
         mCriticalBatteryLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
@@ -261,6 +297,83 @@ public final class BatteryService extends SystemService {
                         false, obs, UserHandle.USER_ALL);
                 updateBatteryWarningLevelLocked();
             }
+        } else if (phase == PHASE_BOOT_COMPLETED) {
+            SettingsObserver mObserver = new SettingsObserver(new Handler());
+            mObserver.observe();
+        }
+    }
+
+    private synchronized void updateLed() {
+        mLed.updateLightsLocked();
+    }
+
+    class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+
+            // Battery light enabled
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BATTERY_LIGHT_ENABLED),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BATTERY_LIGHT_ALLOW_ON_DND),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.ZEN_MODE),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BATTERY_LIGHT_LOW_BLINKING),
+                    false, this, UserHandle.USER_ALL);
+            if (mMultiColorLed) {
+                resolver.registerContentObserver(Settings.System.getUriFor(
+                        Settings.System.BATTERY_LIGHT_LOW_COLOR),
+                        false, this, UserHandle.USER_ALL);
+                resolver.registerContentObserver(Settings.System.getUriFor(
+                        Settings.System.BATTERY_LIGHT_MEDIUM_COLOR),
+                        false, this, UserHandle.USER_ALL);
+                resolver.registerContentObserver(Settings.System.getUriFor(
+                        Settings.System.BATTERY_LIGHT_FULL_COLOR),
+                        false, this, UserHandle.USER_ALL);
+                resolver.registerContentObserver(Settings.System.getUriFor(
+                        Settings.System.BATTERY_LIGHT_REALLYFULL_COLOR),
+                        false, this, UserHandle.USER_ALL);
+            }
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            ContentResolver resolver = mContext.getContentResolver();
+            Resources res = mContext.getResources();
+
+            // Battery light enabled
+            mLightEnabled = Settings.System.getInt(resolver,
+                    Settings.System.BATTERY_LIGHT_ENABLED, 1) != 0;
+            mAllowBatteryLightOnDnd = Settings.System.getInt(resolver,
+                    Settings.System.BATTERY_LIGHT_ALLOW_ON_DND, 0) == 1;
+            mIsDndActive = Settings.Global.getInt(resolver,
+                    Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF)
+                    != Settings.Global.ZEN_MODE_OFF;
+            mLowBatteryBlinking = Settings.System.getInt(resolver,
+                    Settings.System.BATTERY_LIGHT_LOW_BLINKING, 0) == 1;
+            mBatteryLowARGB = Settings.System.getInt(resolver,
+                    Settings.System.BATTERY_LIGHT_LOW_COLOR, 0xFFFF0000);
+            mBatteryMediumARGB = Settings.System.getInt(resolver,
+                    Settings.System.BATTERY_LIGHT_MEDIUM_COLOR, 0xFFFFFF00);
+            mBatteryFullARGB = Settings.System.getInt(resolver,
+                    Settings.System.BATTERY_LIGHT_FULL_COLOR, 0xFFFFFF00);
+            mBatteryReallyFullARGB = Settings.System.getInt(resolver,
+                    Settings.System.BATTERY_LIGHT_REALLYFULL_COLOR, 0xFF00FF00);
+
+            updateLed();
         }
     }
 
@@ -494,6 +607,10 @@ public final class BatteryService extends SystemService {
         shutdownIfNoPowerLocked();
         shutdownIfOverTempLocked();
 
+        mDashCharger = mHasDashCharger && (isDashCharger() || isOemCharger());
+        mWarpCharger = mHasWarpCharger && (isWarpCharger() || isOemCharger());
+        mVoocCharger = mHasVoocCharger && (isVoocCharger() || isOemCharger());
+
         if (force
                 || (mHealthInfo.batteryStatus != mLastBatteryStatus
                         || mHealthInfo.batteryHealth != mLastBatteryHealth
@@ -506,8 +623,9 @@ public final class BatteryService extends SystemService {
                         || mHealthInfo.maxChargingVoltageMicrovolts != mLastMaxChargingVoltage
                         || mHealthInfo.batteryChargeCounterUah != mLastChargeCounter
                         || mInvalidCharger != mLastInvalidCharger
-                        || mHealthInfo.batteryCycleCount != mLastBatteryCycleCount
-                        || mHealthInfo.chargingState != mLastCharingState)) {
+                        || mDashCharger != mLastDashCharger
+                        || mWarpCharger != mLastWarpCharger
+                        || mVoocCharger != mLastVoocCharger)) {
 
             if (mPlugType != mLastPlugType) {
                 if (mLastPlugType == BATTERY_PLUGGED_NONE) {
@@ -681,8 +799,9 @@ public final class BatteryService extends SystemService {
             mLastChargeCounter = mHealthInfo.batteryChargeCounterUah;
             mLastBatteryLevelCritical = mBatteryLevelCritical;
             mLastInvalidCharger = mInvalidCharger;
-            mLastBatteryCycleCount = mHealthInfo.batteryCycleCount;
-            mLastCharingState = mHealthInfo.chargingState;
+            mLastDashCharger = mDashCharger;
+            mLastWarpCharger = mWarpCharger;
+            mLastVoocCharger = mVoocCharger;
         }
     }
 
@@ -714,8 +833,9 @@ public final class BatteryService extends SystemService {
                 BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE,
                 mHealthInfo.maxChargingVoltageMicrovolts);
         intent.putExtra(BatteryManager.EXTRA_CHARGE_COUNTER, mHealthInfo.batteryChargeCounterUah);
-        intent.putExtra(BatteryManager.EXTRA_CYCLE_COUNT, mHealthInfo.batteryCycleCount);
-        intent.putExtra(BatteryManager.EXTRA_CHARGING_STATUS, mHealthInfo.chargingState);
+        intent.putExtra(BatteryManager.EXTRA_DASH_CHARGER, mDashCharger);
+        intent.putExtra(BatteryManager.EXTRA_WARP_CHARGER, mWarpCharger);
+        intent.putExtra(BatteryManager.EXTRA_VOOC_CHARGER, mVoocCharger);
         if (DEBUG) {
             Slog.d(TAG, "Sending ACTION_BATTERY_CHANGED. scale:" + BATTERY_SCALE
                     + ", info:" + mHealthInfo.toString());
@@ -739,8 +859,6 @@ public final class BatteryService extends SystemService {
         event.putInt(BatteryManager.EXTRA_TEMPERATURE, mHealthInfo.batteryTemperatureTenthsCelsius);
         event.putInt(BatteryManager.EXTRA_CHARGE_COUNTER, mHealthInfo.batteryChargeCounterUah);
         event.putLong(BatteryManager.EXTRA_EVENT_TIMESTAMP, now);
-        event.putInt(BatteryManager.EXTRA_CYCLE_COUNT, mHealthInfo.batteryCycleCount);
-        event.putInt(BatteryManager.EXTRA_CHARGING_STATUS, mHealthInfo.chargingState);
 
         boolean queueWasEmpty = mBatteryLevelsEventQueue.isEmpty();
         mBatteryLevelsEventQueue.add(event);
@@ -770,6 +888,77 @@ public final class BatteryService extends SystemService {
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 android.Manifest.permission.BATTERY_STATS);
         mLastBatteryLevelChangedSentMs = SystemClock.elapsedRealtime();
+    }
+
+    private boolean isDashCharger() {
+        try {
+            FileReader file = new FileReader("/sys/class/power_supply/battery/fastchg_status");
+            BufferedReader br = new BufferedReader(file);
+            String state = br.readLine();
+            br.close();
+            file.close();
+            return "1".equals(state);
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
+        return false;
+    }
+
+    private boolean isWarpCharger() {
+        mOpWarpChargerPath = mContext.getResources().getString(com.android.internal.R.string.config_opWarpChargerStatusPaths);
+        try {
+            FileReader file = new FileReader(mOpWarpChargerPath);
+            BufferedReader br = new BufferedReader(file);
+            String state = br.readLine();
+            br.close();
+            file.close();
+            return "1".equals(state);
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
+        return false;
+    }
+
+    private boolean isVoocCharger() {
+        try {
+            FileReader file = new FileReader("/sys/class/power_supply/battery/voocchg_ing");
+            BufferedReader br = new BufferedReader(file);
+            String state = br.readLine();
+            br.close();
+            file.close();
+            return "1".equals(state);
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
+        return false;
+    }
+
+    private boolean isOemCharger() {
+        String path = mContext.getResources().getString(
+                com.android.internal.R.string.config_oemFastChargerStatusPath);
+        String path2 = mContext.getResources().getString(
+                com.android.internal.R.string.config_oemFastChargerStatusPath2);
+        if (TextUtils.isEmpty(path) && TextUtils.isEmpty(path2))
+            return false;
+        String value = mContext.getResources().getString(
+                com.android.internal.R.string.config_oemFastChargerStatusValue);
+        if (TextUtils.isEmpty(value))
+            value = "1";
+        try {
+            boolean isFastCharge = false;
+            boolean isFastCharge2 = false;
+            if (!TextUtils.isEmpty(path)) {
+                isFastCharge = FileUtils.readTextFile(new File(path), value.length(), null).equals(value);
+            } 
+            if (!TextUtils.isEmpty(path2)) {
+                isFastCharge2 = FileUtils.readTextFile(new File(path2), value.length(), null).equals(value);
+            } 
+            return isFastCharge || isFastCharge2;
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to read oem fast charger status path: "
+                + path + " " + path2);
+        }
+        return false;
     }
 
     // TODO: Current code doesn't work since "--unplugged" flag in BSS was purposefully removed.
@@ -1173,37 +1362,21 @@ public final class BatteryService extends SystemService {
     }
 
     private final class Led {
-        // must match: config_notificationsBatteryLowBehavior in config.xml
-        static final int LOW_BATTERY_BEHAVIOR_DEFAULT = 0;
-        static final int LOW_BATTERY_BEHAVIOR_SOLID = 1;
-        static final int LOW_BATTERY_BEHAVIOR_FLASHING = 2;
-
         private final LogicalLight mBatteryLight;
 
-        private final int mBatteryLowARGB;
-        private final int mBatteryMediumARGB;
-        private final int mBatteryFullARGB;
         private final int mBatteryLedOn;
         private final int mBatteryLedOff;
-        private final int mBatteryLowBehavior;
 
         public Led(Context context, LightsManager lights) {
             mBatteryLight = lights.getLight(LightsManager.LIGHT_ID_BATTERY);
 
-            mBatteryLowARGB = context.getResources().getInteger(
-                    com.android.internal.R.integer.config_notificationsBatteryLowARGB);
-            mBatteryMediumARGB = context.getResources().getInteger(
-                    com.android.internal.R.integer.config_notificationsBatteryMediumARGB);
-            mBatteryFullARGB = context.getResources().getInteger(
-                    com.android.internal.R.integer.config_notificationsBatteryFullARGB);
+            // Does the Device support changing battery LED colors?
+            mMultiColorLed = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_multiColorBatteryLed);
             mBatteryLedOn = context.getResources().getInteger(
                     com.android.internal.R.integer.config_notificationsBatteryLedOn);
             mBatteryLedOff = context.getResources().getInteger(
                     com.android.internal.R.integer.config_notificationsBatteryLedOff);
-            mBatteryNearlyFullLevel = context.getResources().getInteger(
-                    com.android.internal.R.integer.config_notificationsBatteryNearlyFullLevel);
-            mBatteryLowBehavior = context.getResources().getInteger(
-                    com.android.internal.R.integer.config_notificationsBatteryLowBehavior);
         }
 
         /**
@@ -1213,38 +1386,39 @@ public final class BatteryService extends SystemService {
             if (mBatteryLight == null) {
                 return;
             }
+            // mHealthInfo could be null on startup (called by SettingsObserver)
+            if (mHealthInfo == null) {
+                Slog.w(TAG, "updateLightsLocked: mHealthInfo is null; skipping");
+                return;
+            }
             final int level = mHealthInfo.batteryLevel;
             final int status = mHealthInfo.batteryStatus;
-            if (level < mLowBatteryWarningLevel) {
-                switch (mBatteryLowBehavior) {
-                    case LOW_BATTERY_BEHAVIOR_SOLID:
-                        // Solid red when low battery
-                        mBatteryLight.setColor(mBatteryLowARGB);
-                        break;
-                    case LOW_BATTERY_BEHAVIOR_FLASHING:
-                        // Flash red when battery is low and not charging
-                        mBatteryLight.setFlashing(mBatteryLowARGB, LogicalLight.LIGHT_FLASH_TIMED,
-                                mBatteryLedOn, mBatteryLedOff);
-                        break;
-                    default:
-                        if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-                            // Solid red when battery is charging
-                            mBatteryLight.setColor(mBatteryLowARGB);
-                        } else {
-                            // Flash red when battery is low and not charging
-                            mBatteryLight.setFlashing(mBatteryLowARGB,
-                                    LogicalLight.LIGHT_FLASH_TIMED, mBatteryLedOn, mBatteryLedOff);
-                        }
-                        break;
+            if (!mLightEnabled || (mIsDndActive && !mAllowBatteryLightOnDnd)) {
+                mBatteryLight.turnOff();
+            } else if (level < mLowBatteryWarningLevel) {
+                if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+                    // Battery is charging and low
+                    mBatteryLight.setColor(mBatteryLowARGB);
+                } else if (mLowBatteryBlinking) {
+                    // Flash when battery is low and not charging
+                    mBatteryLight.setFlashing(mBatteryLowARGB, LogicalLight.LIGHT_FLASH_TIMED,
+                            mBatteryLedOn, mBatteryLedOff);
+                } else {
+                    // "Pulse low battery light" is disabled, no lights.
+                    mBatteryLight.turnOff();
                 }
             } else if (status == BatteryManager.BATTERY_STATUS_CHARGING
                     || status == BatteryManager.BATTERY_STATUS_FULL) {
-                if (status == BatteryManager.BATTERY_STATUS_FULL
-                        || level >= mBatteryNearlyFullLevel) {
-                    // Solid green when full or charging and nearly full
-                    mBatteryLight.setColor(mBatteryFullARGB);
+                if (status == BatteryManager.BATTERY_STATUS_FULL || level >= 90) {
+                    if (level == 100) {
+                        // Battery is really full
+                        mBatteryLight.setColor(mBatteryReallyFullARGB);
+                    } else {
+                        // Battery is full or charging and nearly full
+                        mBatteryLight.setColor(mBatteryFullARGB);
+                    }
                 } else {
-                    // Solid orange when charging and halfway full
+                    // Battery is charging and halfway full
                     mBatteryLight.setColor(mBatteryMediumARGB);
                 }
             } else {
@@ -1272,20 +1446,11 @@ public final class BatteryService extends SystemService {
         }
     }
 
-    // Reduced IBatteryPropertiesRegistrar that implements getProperty for usage
-    // in BatteryManager and enforce permissions.
+    // Reduced IBatteryPropertiesRegistrar that only implements getProperty for usage
+    // in BatteryManager.
     private final class BatteryPropertiesRegistrar extends IBatteryPropertiesRegistrar.Stub {
         @Override
         public int getProperty(int id, final BatteryProperty prop) throws RemoteException {
-            switch (id) {
-                case BatteryManager.BATTERY_PROPERTY_MANUFACTURING_DATE:
-                case BatteryManager.BATTERY_PROPERTY_FIRST_USAGE_DATE:
-                case BatteryManager.BATTERY_PROPERTY_CHARGING_POLICY:
-                case BatteryManager.BATTERY_PROPERTY_STATE_OF_HEALTH:
-                    mContext.enforceCallingPermission(
-                            android.Manifest.permission.BATTERY_STATS, null);
-                    break;
-            }
             return mHealthServiceWrapper.getProperty(id, prop);
         }
         @Override

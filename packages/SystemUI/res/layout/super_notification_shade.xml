@@ -31,6 +31,7 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         sysui:ignoreRightInset="true"
+        sysui:ignoreLeftInset="true"
     >
         <ImageView android:id="@+id/backdrop_back"
                    android:layout_width="match_parent"
@@ -49,6 +50,7 @@
         android:layout_height="match_parent"
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
+        sysui:ignoreLeftInset="true"
     />
 
     <com.android.systemui.scrim.ScrimView
@@ -63,6 +65,15 @@
         android:id="@+id/light_reveal_scrim"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <com.android.systemui.pulse.VisualizerView
+        android:id="@+id/visualizerview"
+        android:gravity="bottom"
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        sysui:ignoreRightInset="true" />
 
     <include layout="@layout/status_bar_expanded"
              android:layout_width="match_parent"

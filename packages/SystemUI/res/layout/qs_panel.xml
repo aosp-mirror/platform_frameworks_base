@@ -50,9 +50,10 @@
     <include
         layout="@layout/footer_actions"
         android:id="@+id/qs_footer_actions"
+        android:background="@android:color/transparent"        
         android:layout_height="@dimen/footer_actions_height"
-        android:layout_width="match_parent"
-        android:layout_gravity="bottom"
+        android:layout_width="wrap_content"
+        android:layout_gravity="bottom|center"
         />
 
     <include

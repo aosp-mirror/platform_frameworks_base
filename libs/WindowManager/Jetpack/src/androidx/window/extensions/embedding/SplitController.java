@@ -77,9 +77,6 @@ import androidx.annotation.Nullable;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
-import androidx.window.extensions.WindowExtensionsImpl;
-import androidx.window.extensions.core.util.function.Consumer;
-import androidx.window.extensions.core.util.function.Function;
 import androidx.window.extensions.embedding.TransactionManager.TransactionRecord;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
 
@@ -90,6 +87,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Main controller class that manages split states and presentation.
@@ -115,7 +113,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     /**
      * A developer-defined {@link SplitAttributes} calculator to compute the current
      * {@link SplitAttributes} with the current device and window states.
-     * It is registered via {@link #setSplitAttributesCalculator(Function)}
+     * It is registered via {@link #setSplitAttributesCalculator(SplitAttributesCalculator)}
      * and unregistered via {@link #clearSplitAttributesCalculator()}.
      * This is called when:
      * <ul>
@@ -128,7 +126,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     @GuardedBy("mLock")
     @Nullable
-    private Function<SplitAttributesCalculatorParams, SplitAttributes> mSplitAttributesCalculator;
+    private SplitAttributesCalculator mSplitAttributesCalculator;
 
     /**
      * Map from Task id to {@link TaskContainer} which contains all TaskFragment and split pair info
@@ -141,7 +139,6 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     final SparseArray<TaskContainer> mTaskContainers = new SparseArray<>();
 
     /** Callback to Jetpack to notify about changes to split states. */
-    @GuardedBy("mLock")
     @Nullable
     private Consumer<List<SplitInfo>> mEmbeddingCallback;
     private final List<SplitInfo> mLastReportedSplitStates = new ArrayList<>();
@@ -167,8 +164,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         foldingFeatureProducer.addDataChangedCallback(new FoldingFeatureListener());
     }
 
-    private class FoldingFeatureListener
-            implements java.util.function.Consumer<List<CommonFoldingFeature>> {
+    private class FoldingFeatureListener implements Consumer<List<CommonFoldingFeature>> {
         @Override
         public void accept(List<CommonFoldingFeature> foldingFeatures) {
             synchronized (mLock) {
@@ -209,8 +205,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @Override
-    public void setSplitAttributesCalculator(
-            @NonNull Function<SplitAttributesCalculatorParams, SplitAttributes> calculator) {
+    public void setSplitAttributesCalculator(@NonNull SplitAttributesCalculator calculator) {
         synchronized (mLock) {
             mSplitAttributesCalculator = calculator;
         }
@@ -225,7 +220,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @GuardedBy("mLock")
     @Nullable
-    Function<SplitAttributesCalculatorParams, SplitAttributes> getSplitAttributesCalculator() {
+    SplitAttributesCalculator getSplitAttributesCalculator() {
         return mSplitAttributesCalculator;
     }
 
@@ -238,22 +233,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     /**
      * Registers the split organizer callback to notify about changes to active splits.
-     * @deprecated Use {@link #setSplitInfoCallback(Consumer)} starting with
-     * {@link WindowExtensionsImpl#getVendorApiLevel()} 2.
      */
-    @Deprecated
     @Override
-    public void setSplitInfoCallback(
-            @NonNull java.util.function.Consumer<List<SplitInfo>> callback) {
-        Consumer<List<SplitInfo>> oemConsumer = callback::accept;
-        setSplitInfoCallback(oemConsumer);
-    }
-
-    /**
-     * Registers the split organizer callback to notify about changes to active splits.
-     * @since {@link WindowExtensionsImpl#getVendorApiLevel()} 2
-     */
-    public void setSplitInfoCallback(Consumer<List<SplitInfo>> callback) {
+    public void setSplitInfoCallback(@NonNull Consumer<List<SplitInfo>> callback) {
         synchronized (mLock) {
             mEmbeddingCallback = callback;
             updateCallbackIfNecessary();
@@ -1499,7 +1481,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Returns the active split that has the provided containers as primary and secondary or as
      * secondary and primary, if available.
      */
-    @GuardedBy("mLock")
+    @VisibleForTesting
     @Nullable
     SplitContainer getActiveSplitForContainers(
             @NonNull TaskFragmentContainer firstContainer,
@@ -2155,31 +2137,5 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     private static boolean isInPictureInPicture(@Nullable Configuration configuration) {
         return configuration != null
                 && configuration.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED;
-    }
-
-    @Override
-    public ActivityOptions setLaunchingActivityStack(@NonNull ActivityOptions options,
-            @NonNull IBinder token) {
-        throw new UnsupportedOperationException(
-                "setLaunchingActivityStack is not supported in API_VERSION=2");
-    }
-
-    @Override
-    public void finishActivityStacks(@NonNull Set<IBinder> activityStackTokens) {
-        throw new UnsupportedOperationException(
-                "finishActivityStacks is not supported in API_VERSION=2");
-    }
-
-    @Override
-    public void invalidateTopVisibleSplitAttributes() {
-        throw new UnsupportedOperationException(
-                "invalidateTopVisibleSplitAttributes is not supported in API_VERSION=2");
-    }
-
-    @Override
-    public void updateSplitAttributes(@NonNull IBinder splitInfoToken,
-            @NonNull SplitAttributes splitAttributes) {
-        throw new UnsupportedOperationException(
-                "updateSplitAttributes is not supported in API_VERSION=2");
     }
 }

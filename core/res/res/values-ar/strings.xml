@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"بايت"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"كيلوبايت"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"ميغابايت"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"غيغابايت"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"تيرابايت"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"بيتابايت"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"‏&lt;بلا عنوان&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(ليس هناك رقم هاتف)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"أرقام التعريف الشخصية التي كتبتها غير مطابقة."</string>
     <string name="invalidPin" msgid="7542498253319440408">"ادخل رقم تعريف شخصي مكون من ٤ إلى ٨ أرقام."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"‏اكتب رمز PUK مكونًا من ٨ أرقام أو أكثر."</string>
-    <string name="needPuk" msgid="3503414069503752211">"‏شريحة SIM مُقفَلة برمز PUK. اكتب رمز PUK لإلغاء قفلها."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"‏اكتب رمز PUK2 لإلغاء قفل شريحة SIM."</string>
+    <string name="needPuk" msgid="7321876090152422918">"‏شريحة SIM مؤمّنة برمز PUK. اكتب رمز PUK لإلغاء تأمينها."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"‏اكتب PUK2 لإلغاء تأمين شريحة SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"‏محاولة غير ناجحة، فعّل قفل SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="zero">‏لم يتبق لديك أي محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>) يتم بعدها قفل شريحة SIM.</item>
@@ -77,8 +82,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"الإعداد التلقائي لمعرف المتصل هو غير محظور  . الاتصال التالي: غير محظور"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"لا يمكنك تغيير إعداد معرّف المتصل."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"تم تبديل البيانات إلى <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"يمكنك تغيير هذه الميزة في أي وقت في الإعدادات."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"لا تتوفّر خدمة بيانات جوّال."</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"لا تتوفّر مكالمات طوارئ."</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"لا تتوفر خدمة صوتية"</string>
@@ -343,7 +346,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"يمكن أن تلتقط الإيماءات من أداة استشعار بصمة الإصبع في الجهاز."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"أخذ لقطة شاشة"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"يمكن أخذ لقطة شاشة."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"نسخة حصرية، \"<xliff:g id="DREAM_NAME">%1$s</xliff:g>\""</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"إيقاف شريط الحالة أو تعديله"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"للسماح للتطبيق بإيقاف شريط الحالة أو إضافة رموز نظام وإزالتها."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"العمل كشريط للحالة"</string>
@@ -555,8 +557,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏يسمح هذا الإذن للتطبيق بالحصول على معلومات الخدمات المدفوعة باستخدام الاتصال قصير المدى NFC المفضّل، مثلاً المساعدات المسجّلة ووجهة المسار."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"التحكم في اتصال الحقل القريب"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏للسماح للتطبيق بالاتصال بعلامات الاتصال قريب المدى (NFC)، والبطاقات وبرامج القراءة."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"حدث معاملة \"عنصر آمن\""</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"يسمح هذا الإذن للتطبيق بتلقّي معلومات حول المعاملات التي تتم على \"عنصر آمن\"."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"إيقاف قفل الشاشة"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"للسماح للتطبيق بإيقاف تأمين المفاتيح وأي أمان لكلمة مرور مرتبطة. على سبيل المثال، يعطل الهاتف تأمين المفاتيح عند استقبال مكالمة هاتفية واردة، ثم يعيد تفعيل تأمين المفاتيح عند انتهاء المكالمة."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"طلب معرفة مستوى صعوبة قفل الشاشة"</string>
@@ -590,17 +590,17 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"خطأ في المصادقة"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"استخدام قفل الشاشة"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"أدخِل قفل الشاشة للمتابعة"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"اضغط بقوة على أداة الاستشعار"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"اضغط بقوة على المستشعر"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"يتعذّر التعرّف على بصمة الإصبع. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"يُرجى تنظيف مستشعر بصمات الإصبع ثم إعادة المحاولة."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"تنظيف المستشعر ثم إعادة المحاولة"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على أداة الاستشعار"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"اضغط بقوة على المستشعر"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"تم تحريك الإصبع ببطء شديد. يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"يمكنك تجربة بصمة إصبع أخرى."</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"الصورة ساطعة للغاية."</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"تم رصد الضغط على زر التشغيل."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"حاوِل تعديل بصمة الإصبع."</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"غيِّر موضع إصبعك قليلاً في كل مرة"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"غيِّر موضع إصبعك قليلاً في كل مرة."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"لم يتمّ التعرّف على البصمة."</string>
@@ -642,24 +642,24 @@
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"لا يمكن استخدام مستشعر بصمات الإصبع"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"يُرجى التواصل مع مقدِّم خدمات إصلاح."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"يتعذّر إنشاء نموذج الوجه. يُرجى إعادة المحاولة."</string>
-    <string name="face_acquired_too_bright" msgid="8070756048978079164">"ساطع للغاية. يُرجى تجربة مستوى سطوع أقلّ"</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"الإضاءة غير كافية"</string>
+    <string name="face_acquired_too_bright" msgid="8070756048978079164">"ساطع للغاية. تجربة مستوى سطوع أقلّ."</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"الإضاءة غير كافية."</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"يُرجى إبعاد الهاتف عنك."</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"يُرجى تقريب الهاتف منك"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"يُرجى رفع الهاتف للأعلى"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"يُرجى خفض الهاتف للأسفل"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"يُرجى تحريك الهاتف لجهة اليسار"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"يُرجى تحريك الهاتف لجهة اليمين"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"يُرجى تقريب الهاتف منك."</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"يُرجى رفع الهاتف للأعلى."</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"يُرجى خفض الهاتف للأسفل."</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"يُرجى تحريك الهاتف جهة اليسار."</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"يُرجى تحريك الهاتف جهة اليمين."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"يُرجى النظر إلى جهازك مباشرة أكثر."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"ارفع هاتفك إلى مستوى العينَين لأنّه تتعذّر رؤية وجهك"</string>
-    <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حركة أكثر من اللازم. يُرجى حمل الهاتف بثبات."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"تتعذّر رؤية وجهك. ارفع هاتفك إلى مستوى العينَين."</string>
+    <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حركة أكثر من اللازم يُرجى حمل بدون حركة."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"يُرجى إعادة تسجيل وجهك."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"يتعذّر التعرّف على الوجه. يُرجى إعادة المحاولة."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"غيِّر موضع رأسك قليلاً."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"يُرجى النظر إلى هاتفك مباشرةً"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"يُرجى النظر إلى هاتفك مباشرةً"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"يُرجى النظر إلى هاتفك مباشرةً"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"يجب إزالة أي شيء يُخفي وجهك"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"يُرجى النظر إلى هاتفك مباشرةً."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"يُرجى النظر إلى هاتفك مباشرةً."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"يُرجى النظر إلى هاتفك مباشرةً."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"عليك بإزالة أي شيء يُخفي وجهك."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"يُرجى تنظيف الجزء العلوي من الشاشة، بما في ذلك الشريط الأسود."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -667,9 +667,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"يتعذّر إنشاء نموذج الوجه. يُرجى إعادة المحاولة."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"تمّ رصد نظارة شمسية. يجب أن يكون وجهك ظاهرًا بالكامل."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"تمّ رصد قناع على الوجه في حين يجب ظهور وجهك بالكامل"</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"تمّ رصد قناع على الوجه. يجب أن يكون وجهك ظاهرًا بالكامل."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"يتعذّر التحقُّق من الوجه. الجهاز غير مُتاح."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"جرِّب \"فتح الجهاز بالتعرف على الوجه\" مرة أخرى."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"يتعذَّر تخزين بيانات الوجه الجديد. احذف الوجه القديم أولاً."</string>
@@ -687,8 +685,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"استخدام ميزة \"فتح الجهاز بالتعرف على الوجه\" أو ميزة \"قفل الشاشة\""</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"استخدِم الوجه للمتابعة"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"استخدام ميزة \"فتح القفل بالوجه\" أو ميزة \"قفل الشاشة\" للمتابعة"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"حدث خطأ، يُرجى إعادة المحاولة."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"رمز الوجه"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"قراءة إعدادات المزامنة"</string>
@@ -933,14 +929,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"أعد المحاولة"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"فتح قفل جميع الميزات والبيانات"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"تم تجاوز الحد الأقصى لعدد محاولات فتح الجهاز بالتعرف على الوجه"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"‏لا تتوفر شريحة SIM."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"‏لا تتوفر شريحة SIM في الجهاز اللوحي."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"‏لا تتوفر شريحة SIM في جهاز Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"‏لا تتوفر شريحة SIM في الهاتف."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"‏يجب إضافة شريحة SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"‏شريحة SIM مفقودة أو غير قابلة للقراءة. يجب إضافة شريحة SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"‏شريحة SIM غير قابلة للاستخدام."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"‏تم إيقاف شريحة SIM نهائيًا.\n عليك التواصل مع مقدم خدمة اللاسلكي للحصول على شريحة SIM أخرى."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"‏ليست هناك شريحة SIM"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"‏ليس هناك شريحة SIM في الجهاز اللوحي."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"‏لا تتوفر شريحة SIM في جهاز Android TV."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"‏ليس هناك شريحة SIM في الهاتف."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"‏أدخل شريحة SIM."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"‏شريحة SIM مفقودة أو غير قابلة للقراءة. أدخل شريحة SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"‏شريحة SIM غير قابلة للاستخدام."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"‏تم إيقاف شريحة SIM بشكل دائم.\n اتصل بمقدم خدمة اللاسلكي للحصول على شريحة SIM أخرى."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"المقطع الصوتي السابق"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"المقطع الصوتي التالي"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"إيقاف مؤقت"</string>
@@ -950,10 +946,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"تقديم سريع"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"مكالمات الطوارئ فقط"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"الشبكة مؤمّنة"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"‏شريحة SIM مُقفَلة برمز PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"‏شريحة SIM مؤمّنة بكود PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"راجع دليل المستخدم أو اتصل بخدمة العملاء."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"‏شريحة SIM مُقفَلة."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"‏جارٍ إلغاء قفل شريحة SIM…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"‏شريحة SIM مؤمّنة."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"‏جارٍ فتح قفل شريحة SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"لقد رسمت نقش فتح القفل بطريقة غير صحيحة <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة.\n\nيُرجى إعادة المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"لقد كتبت كلمة المرور <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"‏لقد كتبت رمز PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة بشكل غير صحيح. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانية."</string>
@@ -1256,7 +1252,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"بدء التطبيقات."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"جارٍ إعادة التشغيل."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة أثناء إعداد بصمتك."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"لإيقاف عملية الإعداد، أغلِق الشاشة."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"لإنهاء عملية الإعداد، أوقِف الشاشة."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"إيقاف"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"هل تريد مواصلة تأكيد بصمة إصبعك؟"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة لتأكيد بصمة إصبعك."</string>
@@ -1336,10 +1332,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"‏يمكنك تغيير ذلك لاحقًا من إعدادات &gt; تطبيقات"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"السماح دومًا"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"عدم السماح مطلقًا"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"‏تمت إزالة شريحة SIM"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"‏لن تتوفّر شبكة الجوال إلى أن تتم إعادة تشغيل الهاتف باستخدام شريحة SIM صالحة."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"‏تمت إزالة شريحة SIM"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"‏لن تكون شبكة الجوال متاحة حتى تتم إعادة التشغيل وإدخال شريحة SIM صالحة."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"تم"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"‏تمت إضافة شريحة SIM"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"‏تمت إضافة شريحة SIM"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"أعد تشغيل جهازك للدخول إلى شبكة الجوال."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"إعادة التشغيل"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"تفعيل خدمة الجوّال"</string>
@@ -1391,7 +1387,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"مشاركة"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"رفض"</string>
     <string name="select_input_method" msgid="3971267998568587025">"اختيار أسلوب الإدخال"</string>
-    <string name="show_ime" msgid="6406112007347443383">"استمرار عرضها على الشاشة عندما تكون لوحة المفاتيح الخارجية متصلة"</string>
+    <string name="show_ime" msgid="6406112007347443383">"استمرار عرضها على الشاشة أثناء نشاط لوحة المفاتيح الفعلية"</string>
     <string name="hardware" msgid="1800597768237606953">"إظهار لوحة المفاتيح الافتراضية"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"إعداد لوحة المفاتيح الفعلية"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"انقر لاختيار لغة وتنسيق"</string>
@@ -1618,7 +1614,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"التلفزيون"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"الهاتف"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"مكبرات صوت للإرساء"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"جهاز خارجي"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"سماعات رأس"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"النظام"</string>
@@ -1651,7 +1647,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"‏شريحة SIM غير مفعّلة الآن. أدخل رمز PUK للمتابعة. اتصل بمشغل شبكة الجوال للاطلاع على التفاصيل."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"‏إدخال رمز رمز PIN المراد"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"‏تأكيد رمز رمز PIN المراد"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"‏جارٍ إلغاء قفل شريحة SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"‏جارٍ فتح قفل شريحة SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"‏رمز PIN غير صحيح."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"اكتب  رقم التعريف الشخصي المكون من ٤ إلى ٨ أرقام."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"‏يجب أن يتكون رمز PUK من ۸ أرقام."</string>
@@ -1691,12 +1687,12 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"عدم التفعيل"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"مفعّل"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"غير مفعّل"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"هل تريد السماح لـ \"<xliff:g id="SERVICE">%1$s</xliff:g>\" بالتحكّم الكامل في جهازك؟"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"إنّ التحكّم الكامل ليس ملائمًا لمعظم التطبيقات، باستثناء التطبيقات المعنية بتسهيل الاستخدام."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"هل تريد السماح لخدمة <xliff:g id="SERVICE">%1$s</xliff:g> بالتحكّم الكامل في جهازك؟"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"إنّ التحكّم الكامل ليس ملائمًا لمعظم التطبيقات، باستثناء التطبيقات المعنية بسهولة الاستخدام."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"قراءة محتوى الشاشة والتحكم به"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"يمكنها قراءة كل المحتوى على الشاشة وعرض المحتوى فوق تطبيقات أخرى."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"عرض الإجراءات وتنفيذها"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"قد يؤدي ذلك إلى السماح للميزة بتتبّع تفاعلاتك مع تطبيق أو جهاز استشعار والتفاعل مع التطبيقات نيابةً عنك."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"يمكنها تتبّع تفاعلاتك مع تطبيق أو جهاز استشعار والتفاعل مع التطبيقات نيابةً عنك."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"سماح"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"رفض"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"انقر على ميزة لبدء استخدامها:"</string>
@@ -1844,8 +1840,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"جارٍ العرض بملء الشاشة"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"للخروج، مرر بسرعة من أعلى إلى أسفل."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"حسنًا"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"يمكنك تدوير الجهاز لرؤية شاشة معاينة الكاميرا بشكل أوضح."</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"يمكنك الخروج من وضع \"تقسيم الشاشة\" لرؤية شاشة معاينة الكاميرا بشكل أوضح."</string>
     <string name="done_label" msgid="7283767013231718521">"تم"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"شريط التمرير الدائري للساعات"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"شريط التمرير الدائري للدقائق"</string>
@@ -2301,5 +2295,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"يتعذّر الوصول إلى كاميرا الجهاز اللوحي من على جهاز <xliff:g id="DEVICE">%1$s</xliff:g>."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"لا يمكن الوصول إلى هذا المحتوى أثناء البث. بدلاً من ذلك، جرِّب استخدام هاتفك."</string>
     <string name="system_locale_title" msgid="711882686834677268">"الإعداد التلقائي للنظام"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"‏رقم البطاقة ‎<xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -16,7 +16,6 @@
 
 package com.android.systemui.classifier;
 
-import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 
@@ -39,7 +38,6 @@ public class ClassifierTest extends SysuiTestCase {
     private float mOffsetY = 0;
     @Mock
     private BatteryController mBatteryController;
-    private FoldStateListener mFoldStateListener = new FoldStateListener(mContext);
     private final DockManagerFake mDockManager = new DockManagerFake();
 
     public void setup() {
@@ -49,8 +47,7 @@ public class ClassifierTest extends SysuiTestCase {
         displayMetrics.ydpi = 100;
         displayMetrics.widthPixels = 1000;
         displayMetrics.heightPixels = 1000;
-        mDataProvider = new FalsingDataProvider(
-                displayMetrics, mBatteryController, mFoldStateListener, mDockManager, false);
+        mDataProvider = new FalsingDataProvider(displayMetrics, mBatteryController, mDockManager);
     }
 
     @After

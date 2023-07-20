@@ -151,29 +151,6 @@ public abstract class PackageManager {
             "android.media.PROPERTY_MEDIA_CAPABILITIES";
 
     /**
-     * &lt;application&gt; level {@link android.content.pm.PackageManager.Property} tag
-     * specifying the XML resource ID containing the declaration of the self-certified network
-     * capabilities used by the application.
-     *
-     * <p> Starting from Android 14, usage of some network capabilities in
-     * {@link android.net.ConnectivityManager#requestNetwork} require the application to
-     * declare its usage of that particular capability in this resource. Only some capabilities
-     * require a declaration. Please look up the specific capability you want to use in
-     * {@link android.net.NetworkCapabilities} to see if it needs declaration in this property.
-     *
-     * For example:
-     * &lt;application&gt;
-     *   &lt;property android:name="android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES"
-     *     android:resource="@xml/self_certified_network_capabilities"&gt;
-     * &lt;application&gt;
-     *
-     * <p> The detail format of self_certified_network_capabilities.xml is described in
-     * {@link android.net.NetworkRequest}
-     */
-    public static final String PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES =
-            "android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES";
-
-    /**
      * Application level property that an app can specify to opt-out from having private data
      * directories both on the internal and external storages.
      *
@@ -212,12 +189,12 @@ public abstract class PackageManager {
         @VisibleForTesting
         public Property(@NonNull String name, int type,
                 @NonNull String packageName, @Nullable String className) {
-            if (type < TYPE_BOOLEAN || type > TYPE_STRING) {
-                throw new IllegalArgumentException("Invalid type");
-            }
-            this.mName = Objects.requireNonNull(name);
+            assert name != null;
+            assert type >= TYPE_BOOLEAN && type <= TYPE_STRING;
+            assert packageName != null;
+            this.mName = name;
             this.mType = type;
-            this.mPackageName = Objects.requireNonNull(packageName);
+            this.mPackageName = packageName;
             this.mClassName = className;
         }
         /** @hide */
@@ -465,8 +442,9 @@ public abstract class PackageManager {
          */
         public ComponentEnabledSetting(@NonNull ComponentName componentName,
                 @EnabledState int newState, @EnabledFlags int flags) {
+            Objects.nonNull(componentName);
             mPackageName = null;
-            mComponentName = Objects.requireNonNull(componentName);
+            mComponentName = componentName;
             mEnabledState = newState;
             mEnabledFlags = flags;
         }
@@ -482,7 +460,8 @@ public abstract class PackageManager {
          */
         public ComponentEnabledSetting(@NonNull String packageName,
                 @EnabledState int newState, @EnabledFlags int flags) {
-            mPackageName = Objects.requireNonNull(packageName);
+            Objects.nonNull(packageName);
+            mPackageName = packageName;
             mComponentName = null;
             mEnabledState = newState;
             mEnabledFlags = flags;
@@ -1552,14 +1531,6 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK = 0x00400000;
-
-    /**
-     * Flag parameter for {@link #installPackage} to bypass the low target sdk version block
-     * for this install.
-     *
-     * @hide
-     */
-    public static final int INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK = 0x01000000;
 
     /** @hide */
     @IntDef(flag = true, value = {
@@ -2976,18 +2947,6 @@ public abstract class PackageManager {
     public static final String FEATURE_OPENGLES_EXTENSION_PACK = "android.hardware.opengles.aep";
 
     /**
-     * Feature for {@link #getSystemAvailableFeatures()} and {@link #hasSystemFeature(String)}.
-     * This feature indicates whether device supports
-     * <a href="https://source.android.com/docs/core/virtualization">Android Virtualization Framework</a>.
-     *
-     * @hide
-     */
-    @SystemApi
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_VIRTUALIZATION_FRAMEWORK =
-            "android.software.virtualization_framework";
-
-    /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature(String, int)}: If this feature is supported, the Vulkan
      * implementation on this device is hardware accelerated, and the Vulkan native API will
@@ -3449,6 +3408,7 @@ public abstract class PackageManager {
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device is capable of communicating with
      * other devices via ultra wideband.
+     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_UWB = "android.hardware.uwb";
@@ -4086,17 +4046,6 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
-
-    /**
-     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
-     * the requisite kernel support for migrating IPsec tunnels to new source/destination addresses.
-     *
-     * <p>This feature implies that the device supports XFRM Migration (CONFIG_XFRM_MIGRATE) and has
-     * the kernel fixes to support cross-address-family IPsec tunnel migration
-     */
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_IPSEC_TUNNEL_MIGRATION =
-            "android.software.ipsec_tunnel_migration";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and

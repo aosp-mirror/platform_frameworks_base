@@ -27,8 +27,6 @@ import android.view.ViewTreeObserver
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.animation.LaunchableView
-import com.android.systemui.animation.LaunchableViewDelegate
 import com.android.systemui.statusbar.CrossFadeHelper
 
 /**
@@ -40,7 +38,7 @@ class TransitionLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr), LaunchableView {
+) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     private val boundsRect = Rect()
     private val originalGoneChildrenSet: MutableSet<Int> = mutableSetOf()
@@ -52,11 +50,7 @@ class TransitionLayout @JvmOverloads constructor(
 
     private var desiredMeasureWidth = 0
     private var desiredMeasureHeight = 0
-    private val delegate =
-        LaunchableViewDelegate(
-            this,
-            superSetVisibility = { super.setVisibility(it) },
-        )
+    private var transitionVisibility = View.VISIBLE
 
     /**
      * The measured state of this view which is the one we will lay ourselves out with. This
@@ -89,12 +83,11 @@ class TransitionLayout @JvmOverloads constructor(
         }
     }
 
-    override fun setShouldBlockVisibilityChanges(block: Boolean) {
-        delegate.setShouldBlockVisibilityChanges(block)
-    }
-
-    override fun setVisibility(visibility: Int) {
-        delegate.setVisibility(visibility)
+    override fun setTransitionVisibility(visibility: Int) {
+        // We store the last transition visibility assigned to this view to restore it later if
+        // necessary.
+        super.setTransitionVisibility(visibility)
+        transitionVisibility = visibility
     }
 
     override fun onFinishInflate() {
@@ -180,6 +173,14 @@ class TransitionLayout @JvmOverloads constructor(
         translationY = currentState.translation.y
 
         CrossFadeHelper.fadeIn(this, currentState.alpha)
+
+        // CrossFadeHelper#fadeIn will change this view visibility, which overrides the transition
+        // visibility. We set the transition visibility again to make sure that this view plays well
+        // with GhostView, which sets the transition visibility and is used for activity launch
+        // animations.
+        if (transitionVisibility != View.VISIBLE) {
+            setTransitionVisibility(transitionVisibility)
+        }
     }
 
     private fun applyCurrentStateOnPredraw() {

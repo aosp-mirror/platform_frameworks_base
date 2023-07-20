@@ -19,10 +19,12 @@
         <item name="android:fontFamily">@string/settingslib_config_headlineFontFamily</item>
         <item name="android:textSize">20dp</item>
         <item name="android:textColor">@color/settingslib_text_color_primary_device_default</item>
+        <item name="android:letterSpacing">-0.016657338648324763</item>
     </style>
 
     <style name="CollapsingToolbarTitle.Expanded" parent="CollapsingToolbarTitle.Collapsed">
         <item name="android:textSize">36dp</item>
         <item name="android:textColor">@color/settingslib_text_color_primary_device_default</item>
+        <item name="android:letterSpacing">-0.02195411335559237</item>
     </style>
 </resources>

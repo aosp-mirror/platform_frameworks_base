@@ -40,6 +40,8 @@ import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -636,10 +638,19 @@ public class ApkChecksums {
         return null;
     }
 
+    private static boolean containsFile(File dir, String filePath) {
+        if (dir == null) {
+            return false;
+        }
+        return FileUtils.contains(dir.getAbsolutePath(), filePath);
+    }
+
     private static ApkChecksum extractHashFromFS(String split, String filePath) {
         // verity first
-        if (VerityUtils.hasFsverity(filePath)) {
-            byte[] verityHash = VerityUtils.getFsverityDigest(filePath);
+        // Skip /product folder.
+        // TODO(b/231354111): remove this hack once we are allowed to change SELinux rules.
+        if (!containsFile(Environment.getProductDirectory(), filePath)) {
+            byte[] verityHash = VerityUtils.getFsverityRootHash(filePath);
             if (verityHash != null) {
                 return new ApkChecksum(split, TYPE_WHOLE_MERKLE_ROOT_4K_SHA256, verityHash);
             }

@@ -10,8 +10,6 @@ package {
 cc_library_shared {
     name: "libmockingservicestestjni",
 
-    defaults: ["android.hardware.graphics.common-ndk_shared"],
-
     cflags: [
         "-Wall",
         "-Werror",
@@ -50,6 +48,7 @@ cc_library_shared {
         "android.hardware.graphics.bufferqueue@1.0",
         "android.hardware.graphics.bufferqueue@2.0",
         "android.hardware.graphics.common@1.2",
+        "android.hardware.graphics.common-V3-ndk",
         "android.hardware.graphics.mapper@4.0",
         "android.hidl.token@1.0-utils",
     ],

@@ -41,6 +41,7 @@ import java.util.Set;
  */
 public final class ChangeReporter {
     private static final String TAG = "CompatibilityChangeReporter";
+    private static final boolean DBG = false;
     private int mSource;
 
     private static final class ChangeReport {
@@ -177,6 +178,7 @@ public final class ChangeReporter {
     }
 
     private void debugLog(int uid, long changeId, int state) {
+        if (!DBG) return;
         String message = formatSimple("Compat change id reported: %d; UID %d; state: %s", changeId,
                 uid, stateToString(state));
         if (mSource == SOURCE_SYSTEM_SERVER) {

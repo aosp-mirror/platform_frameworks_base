@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewConfiguration
 import androidx.annotation.FloatRange
 import androidx.annotation.VisibleForTesting
+import com.android.internal.util.xtended.XtendedUtils
 import com.android.systemui.Dumpable
 import com.android.systemui.ExpandHelper
 import com.android.systemui.Gefingerpoken
@@ -187,8 +188,6 @@ class LockscreenShadeTransitionController @Inject constructor(
 
     private val qsTransitionController = qsTransitionControllerFactory.create { qS }
 
-    private val callbacks = mutableListOf<Callback>()
-
     /** See [LockscreenShadeQsTransitionController.qsTransitionFraction].*/
     @get:FloatRange(from = 0.0, to = 1.0)
     val qSDragProgress: Float
@@ -264,6 +263,7 @@ class LockscreenShadeTransitionController @Inject constructor(
 
     fun setStackScroller(nsslController: NotificationStackScrollLayoutController) {
         this.nsslController = nsslController
+        touchHelper.host = nsslController.view
         touchHelper.expandCallback = nsslController.expandHelperCallback
     }
 
@@ -321,8 +321,8 @@ class LockscreenShadeTransitionController @Inject constructor(
                                     true /* drag down is always an open */)
                         }
                         notificationPanelController.animateToFullShade(delay)
-                        callbacks.forEach { it.setTransitionToFullShadeAmount(0f,
-                                true /* animated */, delay) }
+                        notificationPanelController.setTransitionToFullShadeAmount(0f,
+                                true /* animated */, delay)
 
                         // Let's reset ourselves, ready for the next animation
 
@@ -426,8 +426,8 @@ class LockscreenShadeTransitionController @Inject constructor(
 
                     qsTransitionController.dragDownAmount = value
 
-                    callbacks.forEach { it.setTransitionToFullShadeAmount(field,
-                            false /* animate */, 0 /* delay */) }
+                    notificationPanelController.setTransitionToFullShadeAmount(field,
+                            false /* animate */, 0 /* delay */)
 
                     mediaHierarchyManager.setTransitionToFullShadeAmount(field)
                     scrimTransitionController.dragDownAmount = value
@@ -510,14 +510,9 @@ class LockscreenShadeTransitionController @Inject constructor(
      * If secure with redaction: Show bouncer, go to unlocked shade.
      * If secure without redaction or no security: Go to [StatusBarState.SHADE_LOCKED].
      *
-     * Split shade is special case and [needsQSAnimation] will be always overridden to true.
-     * That's because handheld shade will automatically follow notifications animation, but that's
-     * not the case for split shade.
-     *
      * @param expandView The view to expand after going to the shade
      * @param needsQSAnimation if this needs the quick settings to slide in from the top or if
-     *                         that's already handled separately. This argument will be ignored on
-     *                         split shade as there QS animation can't be handled separately.
+     *                         that's already handled separately
      */
     @JvmOverloads
     fun goToLockedShade(expandedView: View?, needsQSAnimation: Boolean = true) {
@@ -525,7 +520,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         logger.logTryGoToLockedShade(isKeyguard)
         if (isKeyguard) {
             val animationHandler: ((Long) -> Unit)?
-            if (needsQSAnimation || useSplitShade) {
+            if (needsQSAnimation) {
                 // Let's use the default animation
                 animationHandler = null
             } else {
@@ -572,7 +567,8 @@ class LockscreenShadeTransitionController @Inject constructor(
             entry.setGroupExpansionChanging(true)
             userId = entry.sbn.userId
         }
-        var fullShadeNeedsBouncer = (
+        var fullShadeNeedsBouncer = (!lockScreenUserManager.userAllowsPrivateNotificationsInPublic(
+                lockScreenUserManager.getCurrentUserId()) ||
                 !lockScreenUserManager.shouldShowLockscreenNotifications() ||
                 falsingCollector.shouldEnforceBouncer())
         if (keyguardBypassController.bypassEnabled) {
@@ -689,7 +685,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         if (cancelled) {
             setPulseHeight(0f, animate = true)
         } else {
-            callbacks.forEach { it.onPulseExpansionFinished() }
+            notificationPanelController.onPulseExpansionFinished()
             setPulseHeight(0f, animate = false)
         }
     }
@@ -721,27 +717,6 @@ class LockscreenShadeTransitionController @Inject constructor(
                 "${animationHandlerOnKeyguardDismiss != null}")
         }
     }
-
-
-    fun addCallback(callback: Callback) {
-        if (!callbacks.contains(callback)) {
-            callbacks.add(callback)
-        }
-    }
-
-    /**
-     * Callback for authentication events.
-     */
-    interface Callback {
-        /** TODO: comment here  */
-        fun onPulseExpansionFinished() {}
-
-        /**
-         * Sets the amount of pixels we have currently dragged down if we're transitioning
-         * to the full shade. 0.0f means we're not transitioning yet.
-         */
-        fun setTransitionToFullShadeAmount(pxAmount: Float, animate: Boolean, delay: Long) {}
-    }
 }
 
 /**
@@ -757,15 +732,24 @@ class DragDownHelper(
 
     private var dragDownAmountOnStart = 0.0f
     lateinit var expandCallback: ExpandHelper.Callback
+    lateinit var host: View
 
     private var minDragDistance = 0
     private var initialTouchX = 0f
     private var initialTouchY = 0f
     private var touchSlop = 0f
     private var slopMultiplier = 0f
+    private val temp2 = IntArray(2)
     private var draggedFarEnough = false
     private var startingChild: ExpandableView? = null
     private var lastHeight = 0f
+
+    private var doubleTapToSleepEnabled = false
+    private var statusBarHeaderHeight = 0
+    private var lastDownEvent = -1
+    private var doubleTapTimeout = -1
+    private var goToSleep: Runnable? = null
+
     var isDraggingDown = false
         private set
 
@@ -791,6 +775,12 @@ class DragDownHelper(
         val configuration = ViewConfiguration.get(context)
         touchSlop = configuration.scaledTouchSlop.toFloat()
         slopMultiplier = configuration.scaledAmbiguousGestureMultiplier
+        doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout()
+        statusBarHeaderHeight = context
+                .resources.getDimensionPixelSize(R.dimen.status_bar_header_height_keyguard)
+        goToSleep = Runnable {
+            XtendedUtils.switchScreenOff(context)
+        }
     }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
@@ -803,6 +793,19 @@ class DragDownHelper(
                 startingChild = null
                 initialTouchY = y
                 initialTouchX = x
+                if (doubleTapToSleepEnabled && y < statusBarHeaderHeight) {
+                    val eventTime  = event.getEventTime().toInt()
+                    if (lastDownEvent != -1) {
+                        val diff = eventTime - lastDownEvent
+
+                        if (diff < doubleTapTimeout) {
+                            goToSleep?.run()
+                        }
+                        lastDownEvent = -1
+                    } else {
+                        lastDownEvent = eventTime
+                    }
+                }
             }
             MotionEvent.ACTION_MOVE -> {
                 val h = y - initialTouchY
@@ -942,6 +945,11 @@ class DragDownHelper(
     }
 
     private fun findView(x: Float, y: Float): ExpandableView? {
-        return expandCallback.getChildAtRawPosition(x, y)
+        host.getLocationOnScreen(temp2)
+        return expandCallback.getChildAtRawPosition(x + temp2[0], y + temp2[1])
+    }
+
+    public fun updateDoubleTapToSleep(updateDoubleTapToSleep: Boolean) {
+        doubleTapToSleepEnabled = updateDoubleTapToSleep
     }
 }

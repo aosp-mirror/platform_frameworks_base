@@ -33,6 +33,8 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INJECT_EVENTS" />
     <uses-permission android:name="android.permission.MODIFY_TOUCH_MODE_STATE" />
     <uses-permission android:name="android.permission.DUMP" />
@@ -68,7 +70,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG" />
@@ -81,6 +82,7 @@
     <uses-permission android:name="android.permission.CONTROL_VPN" />
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
+    <uses-permission android:name="android.permission.NETWORK_STACK" />
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -194,6 +196,9 @@
     <permission android:name="com.android.systemui.permission.FLAGS"
                 android:protectionLevel="signature" />
 
+    <permission android:name="com.android.systemui.permission.SCREEN_RECORDING"
+            android:protectionLevel="signature" />
+
     <permission android:name="android.permission.CUSTOMIZE_SYSTEM_UI"
         android:protectionLevel="signature|privileged" />
 
@@ -293,7 +298,7 @@
 
     <queries>
         <intent>
-            <action android:name="android.intent.action.CREATE_NOTE" />
+            <action android:name="android.intent.action.NOTES" />
         </intent>
     </queries>
 
@@ -337,9 +342,42 @@
 
     <uses-permission android:name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS" />
 
+    <!-- To broadcast status of the GameSpaceManager -->
+    <uses-permission android:name="android.permission.MANAGE_GAME_MODE" />
+
+    <!-- Kill button in notification guts -->
+    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
+    <protected-broadcast android:name="com.android.systemui.doze.pulse" />
+
+    <!-- DataSwitch tile -->
+    <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
+
+    <!-- Sync tile -->
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+
+    <!-- Reboot -->
+    <uses-permission android:name="android.permission.REBOOT" />
+    <uses-permission android:name="android.permission.RECOVERY" />
+
+    <!-- Custom permissions -->
+    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
+
+    <!-- Screenshot tile -->
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+
+    <!-- Pulse -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Parallel spaces -->
+    <uses-permission android:name="android.permission.MANAGE_PARALLEL_SPACES" />
+
+    <!-- OmniJaws -->
+    <uses-permission android:name="org.omnirom.omnijaws.READ_WEATHER" />
 
     <application
         android:name=".SystemUIApplication"
@@ -412,9 +450,22 @@
 
         <service android:name=".screenshot.ScreenshotCrossProfileService"
                  android:permission="com.android.systemui.permission.SELF"
+                 android:process=":screenshot_cross_profile"
                  android:exported="false" />
 
-        <service android:name=".screenrecord.RecordingService" />
+        <service android:name=".screenrecord.RecordingService"
+            android:exported="true"
+            android:permission="com.android.systemui.permission.SCREEN_RECORDING">
+            <intent-filter>
+                <action android:name="com.android.systemui.screenrecord.RecordingService" />
+            </intent-filter>
+        </service>
+
+        <!-- started from PhoneWindowManager
+             TODO: Should have an android:permission attribute -->
+        <service android:name=".xtended.onthego.OnTheGoService"
+            android:process=":onthego"
+            android:exported="false" />
 
         <receiver android:name=".SysuiRestartReceiver"
             android:exported="false">
@@ -433,7 +484,7 @@
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
                   android:icon="@drawable/tuner"
-                  android:theme="@style/TunerSettings"
+                  android:theme="@style/Theme.SubSettingsBase"
                   android:label="@string/system_ui_tuner"
                   android:process=":tuner"
                   android:exported="true">
@@ -441,10 +492,9 @@
                 <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <meta-data android:name="com.android.settings.category"
-                    android:value="com.android.settings.category.ia.system" />
-            <meta-data android:name="com.android.settings.summary"
-                    android:resource="@string/summary_empty"/>
+            <intent-filter android:priority="0">
+                <action android:name="com.android.settings.action.SETTINGS" />
+            </intent-filter>
         </activity>
 
         <activity-alias android:name=".DemoMode"
@@ -459,6 +509,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity-alias>
+
+        <activity android:name=".tuner.StatusbarItemsActivity"
+                  android:label="@string/status_bar_items_title"
+                  android:theme="@style/Theme.SubSettingsBase"
+                  android:process=":tuner"
+                  android:parentActivityName="com.xtended.fragments.StatusBarSettings"
+                  android:exported="true">
+        </activity>
 
         <activity
             android:name="com.android.wm.shell.legacysplitscreen.ForcedResizableInfoActivity"
@@ -664,21 +722,6 @@
             android:excludeFromRecents="true"
             android:exported="true" />
 
-        <!-- started from Telecomm(CallsManager) -->
-        <activity
-            android:name=".telephony.ui.activity.SwitchToManagedProfileForCallActivity"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:finishOnCloseSystemDialogs="true"
-            android:permission="android.permission.MODIFY_PHONE_STATE"
-            android:theme="@style/Theme.SystemUI.Dialog.Alert">
-            <intent-filter>
-                <action android:name="android.telecom.action.SHOW_SWITCH_TO_WORK_PROFILE_FOR_CALL_DIALOG" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="tel" />
-            </intent-filter>
-        </activity>
-
         <!-- platform logo easter egg activity -->
         <activity
             android:name=".DessertCase"
@@ -878,7 +921,7 @@
                   android:showForAllUsers="true"
                   android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden|orientation"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
         </activity>
 
@@ -888,6 +931,18 @@
                   android:excludeFromRecents="true"
                   android:showWhenLocked="true"
                   android:showForAllUsers="true"
+                  android:launchMode="singleInstance"
+                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
+                  android:visibleToInstantApps="true">
+        </activity>
+
+        <activity android:name=".user.UserSwitcherActivity"
+                  android:label="@string/accessibility_multi_user_switch_switcher"
+                  android:theme="@style/Theme.UserSwitcherActivity"
+                  android:excludeFromRecents="true"
+                  android:showWhenLocked="true"
+                  android:showForAllUsers="true"
+                  android:finishOnTaskLaunch="true"
                   android:launchMode="singleInstance"
                   android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                   android:visibleToInstantApps="true">
@@ -911,7 +966,7 @@
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.NoDisplay"
             android:label="@string/note_task_button_label"
-            android:icon="@drawable/ic_note_task_shortcut_widget">
+            android:icon="@drawable/ic_note_task_button">
 
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
@@ -995,6 +1050,57 @@
                 <action android:name="com.android.systemui.action.DISMISS_MEDIA_OUTPUT_DIALOG" />
             </intent-filter>
         </receiver>
+        <!-- Wifi Timeout -->
+        <receiver android:name="com.android.settingslib.wifi.WifiTimeoutReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.net.wifi.intent.TIMEOUT" />
+            </intent-filter>
+        </receiver>
+        <!-- Custom Advanced NavBar Gestures -->
+        <activity
+            android:name="com.android.systemui.statusbar.phone.LeftBackSwipeCustomApp"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.MinWidth"
+            android:label="@string/app_picker_dialog_title"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.systemui.statusbar.phone.LeftBackSwipeCustomApp" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.android.systemui.statusbar.phone.RightBackSwipeCustomApp"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.MinWidth"
+            android:label="@string/app_picker_dialog_title"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.systemui.statusbar.phone.RightBackSwipeCustomApp" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.android.systemui.statusbar.phone.LeftBackVerticalSwipeCustomApp"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.MinWidth"
+            android:label="@string/app_picker_dialog_title"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.systemui.statusbar.phone.LeftBackVerticalSwipeCustomApp" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.android.systemui.statusbar.phone.RightBackVerticalSwipeCustomApp"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.MinWidth"
+            android:label="@string/app_picker_dialog_title"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.android.systemui.statusbar.phone.RightBackVerticalSwipeCustomApp" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <receiver android:name=".volume.VolumePanelDialogReceiver"
                   android:exported="true">

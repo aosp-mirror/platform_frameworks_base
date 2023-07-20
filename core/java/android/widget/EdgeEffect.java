@@ -26,6 +26,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
@@ -34,7 +35,11 @@ import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Vibrator;
+import android.os.VibrationEffect;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
@@ -217,6 +222,10 @@ public class EdgeEffect {
     private float mBaseGlowScale;
     private float mDisplacement = 0.5f;
     private float mTargetDisplacement = 0.5f;
+    
+    private boolean callerHasVibratePermission;
+    private Vibrator vibrator;
+    private int vibrateIntensity;
 
     /**
      * Current edge effect type, consumers should always query
@@ -233,6 +242,11 @@ public class EdgeEffect {
      */
     public EdgeEffect(Context context) {
         this(context, null);
+        callerHasVibratePermission = context.checkCallingOrSelfPermission(
+                    android.Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED;
+        vibrator = context.getSystemService(Vibrator.class);
+        vibrateIntensity = Settings.System.getInt(context.getContentResolver(),
+                Settings.System.EDGE_SCROLLING_HAPTICS_INTENSITY, 3);
     }
 
     /**
@@ -253,6 +267,11 @@ public class EdgeEffect {
         mPaint.setColor((themeColor & 0xffffff) | 0x33000000);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setBlendMode(DEFAULT_BLEND_MODE);
+        callerHasVibratePermission = context.checkCallingOrSelfPermission(
+                    android.Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED;
+        vibrator = context.getSystemService(Vibrator.class);
+        vibrateIntensity = Settings.System.getInt(context.getContentResolver(),
+                Settings.System.EDGE_SCROLLING_HAPTICS_INTENSITY, 3);
     }
 
     @EdgeEffectType
@@ -262,6 +281,36 @@ public class EdgeEffect {
         } else {
             return mEdgeEffectType;
         }
+    }
+
+    private void triggerVibration() {
+        if (vibrator == null || !callerHasVibratePermission || vibrateIntensity == 0) {
+            return;
+        }
+
+            VibrationEffect effect;
+            switch (vibrateIntensity) {
+                case 1:
+                    effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TEXTURE_TICK);
+                    break;
+                case 2:
+                    effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK);
+                    break;
+                case 3:
+                    effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
+                    break;
+                case 4:
+                    effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK);
+                    break;
+                case 5:
+                    effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK);
+                    break;
+                default:
+                    effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
+                    break;
+            }
+
+        AsyncTask.execute(() -> vibrator.vibrate(effect));
     }
 
     /**
@@ -497,6 +546,7 @@ public class EdgeEffect {
             mState = STATE_RECEDE;
             mVelocity = velocity * ON_ABSORB_VELOCITY_ADJUSTMENT;
             mStartTime = AnimationUtils.currentAnimationTimeMillis();
+            triggerVibration();
         } else if (edgeEffectBehavior == TYPE_GLOW) {
             mState = STATE_ABSORB;
             mVelocity = 0;
@@ -521,6 +571,7 @@ public class EdgeEffect {
                     mGlowAlphaStart,
                     Math.min(velocity * VELOCITY_GLOW_FACTOR * .00001f, MAX_ALPHA));
             mTargetDisplacement = 0.5f;
+            triggerVibration();
         } else {
             finish();
         }

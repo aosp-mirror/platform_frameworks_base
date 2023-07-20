@@ -1,5 +1,10 @@
-# Bug component: 1193469
+# Bug component: 656484
 
-set noparent
-
-include platform/frameworks/base:/services/backup/BACKUP_OWNERS
+bryanmawhinney@google.com
+jstemmer@google.com
+millmore@google.com
+nathch@google.com
+niagra@google.com
+niamhfw@google.com
+philippov@google.com
+rthakohov@google.com

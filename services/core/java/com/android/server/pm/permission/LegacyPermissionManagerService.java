@@ -413,8 +413,8 @@ public class LegacyPermissionManagerService extends ILegacyPermissionManager.Stu
                 return result;
             }
             mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(
-                    AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO, uid, packageName,
-                    attributionTag, reason);
+                    AppOpsManager.OP_RECORD_AUDIO_HOTWORD, uid, packageName, attributionTag,
+                    reason);
             return result;
         }
     }

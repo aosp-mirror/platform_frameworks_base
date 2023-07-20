@@ -167,18 +167,14 @@ class UserDataPreparer {
             if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
                 if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
                     FileUtils.deleteContentsAndDir(getUserSystemDirectory(userId));
-                    // Delete the contents of /data/system_de/$userId, but not the directory itself
-                    // since vold is responsible for that and system_server isn't allowed to do it.
-                    FileUtils.deleteContents(getDataSystemDeDirectory(userId));
+                    FileUtils.deleteContentsAndDir(getDataSystemDeDirectory(userId));
                 }
                 if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
-                    // Likewise, delete the contents of /data/system_ce/$userId but not the
-                    // directory itself.
-                    FileUtils.deleteContents(getDataSystemCeDirectory(userId));
+                    FileUtils.deleteContentsAndDir(getDataSystemCeDirectory(userId));
                 }
             }
 
-            // All the user's data directories should be empty now, so finish the job.
+            // Data with special labels is now gone, so finish the job
             storage.destroyUserStorage(volumeUuid, userId, flags);
 
         } catch (Exception e) {
@@ -289,6 +285,11 @@ class UserDataPreparer {
         return Environment.getDataUserDeDirectory(volumeUuid, userId);
     }
 
+    @VisibleForTesting
+    protected boolean isFileEncryptedEmulatedOnly() {
+        return StorageManager.isFileEncryptedEmulatedOnly();
+    }
+
     /**
      * Enforce that serial number stored in user directory inode matches the
      * given expected value. Gracefully sets the serial number if currently
@@ -298,6 +299,14 @@ class UserDataPreparer {
      *             number is mismatched.
      */
     void enforceSerialNumber(File file, int serialNumber) throws IOException {
+        if (isFileEncryptedEmulatedOnly()) {
+            // When we're emulating FBE, the directory may have been chmod
+            // 000'ed, meaning we can't read the serial number to enforce it;
+            // instead of destroying the user, just log a warning.
+            Slog.w(TAG, "Device is emulating FBE; assuming current serial number is valid");
+            return;
+        }
+
         final int foundSerial = getSerialNumber(file);
         Slog.v(TAG, "Found " + file + " with serial number " + foundSerial);
 

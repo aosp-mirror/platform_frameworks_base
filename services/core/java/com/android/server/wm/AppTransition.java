@@ -651,8 +651,8 @@ public class AppTransition implements Dump {
     }
 
     @Nullable
-    Animation loadAnimationAttr(LayoutParams lp, int animAttr, int transit) {
-        return mTransitionAnimation.loadAnimationAttr(lp, animAttr, transit);
+    Animation loadAnimationAttr(LayoutParams lp, int animAttr, int transit, boolean freeform) {
+        return mTransitionAnimation.loadAnimationAttr(lp, animAttr, transit, freeform);
     }
 
     private void getDefaultNextAppTransitionStartRect(Rect rect) {
@@ -777,7 +777,7 @@ public class AppTransition implements Dump {
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean isVoiceInteraction,
             boolean freeform, WindowContainer container) {
 
-        final boolean canCustomizeAppTransition = container.canCustomizeAppTransition();
+        final boolean canCustomizeAppTransition = !freeform && container.canCustomizeAppTransition();
 
         if (mNextAppTransitionOverrideRequested) {
             if (canCustomizeAppTransition || mOverrideTaskTransition) {
@@ -899,8 +899,8 @@ public class AppTransition implements Dump {
         } else {
             int animAttr = mapOpenCloseTransitTypes(transit, enter);
             a = animAttr == 0 ? null : (canCustomizeAppTransition
-                ? loadAnimationAttr(lp, animAttr, transit)
-                : mTransitionAnimation.loadDefaultAnimationAttr(animAttr, transit));
+                ? loadAnimationAttr(lp, animAttr, transit, freeform)
+                : mTransitionAnimation.loadDefaultAnimationAttr(animAttr, transit, freeform));
 
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s animAttr=0x%x transit=%s isEntrance=%b "

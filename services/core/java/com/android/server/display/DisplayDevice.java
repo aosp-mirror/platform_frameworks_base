@@ -22,7 +22,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
-import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.Surface;
@@ -38,7 +37,6 @@ import java.io.PrintWriter;
  * </p>
  */
 abstract class DisplayDevice {
-    private static final String TAG = "DisplayDevice";
     private static final Display.Mode EMPTY_DISPLAY_MODE = new Display.Mode.Builder().build();
 
     private final DisplayAdapter mDisplayAdapter;
@@ -268,13 +266,10 @@ abstract class DisplayDevice {
     /**
      * Sets the display layer stack while in a transaction.
      */
-    public final void setLayerStackLocked(SurfaceControl.Transaction t, int layerStack,
-            int layerStackTag) {
+    public final void setLayerStackLocked(SurfaceControl.Transaction t, int layerStack) {
         if (mCurrentLayerStack != layerStack) {
             mCurrentLayerStack = layerStack;
             t.setDisplayLayerStack(mDisplayToken, layerStack);
-            Slog.i(TAG, "[" + layerStackTag + "] Layerstack set to " + layerStack + " for "
-                    + mUniqueId);
         }
     }
 

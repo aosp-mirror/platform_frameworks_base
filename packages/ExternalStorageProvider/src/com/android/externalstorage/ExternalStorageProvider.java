@@ -22,6 +22,7 @@ import android.app.usage.StorageStatsManager;
 import android.content.AttributionSource;
 import android.content.ContentResolver;
 import android.content.UriPermission;
+import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
@@ -53,6 +54,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.FileSystemProvider;
 import com.android.internal.util.IndentingPrintWriter;
+
+import ink.kaleidoscope.ParallelSpaceManager;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -165,10 +168,20 @@ public class ExternalStorageProvider extends FileSystemProvider {
     private void updateVolumesLocked() {
         mRoots.clear();
 
-        final int userId = UserHandle.myUserId();
         final List<VolumeInfo> volumes = mStorageManager.getVolumes();
+        final List<Integer> parallelUserIds =
+                ParallelSpaceManager.getInstance().getParallelUserIds();
+        final List<UserInfo> parallelUsers =
+                ParallelSpaceManager.getInstance().getParallelUsers();
+        final int realUserId = UserHandle.myUserId();
+        // Convert to parallel owner so that we are going to have same dick view
+        // across all parallel users.
+        final int userId = parallelUserIds.contains(realUserId) ?
+                ParallelSpaceManager.getInstance().getParallelOwnerId() : realUserId;
         for (VolumeInfo volume : volumes) {
-            if (!volume.isMountedReadable() || volume.getMountUserId() != userId) continue;
+            if (!volume.isMountedReadable()) continue;
+            int mountUserId = volume.getMountUserId();
+            if (mountUserId != userId && !parallelUserIds.contains(mountUserId)) continue;
 
             final String rootId;
             final String title;
@@ -177,7 +190,12 @@ public class ExternalStorageProvider extends FileSystemProvider {
                 // We currently only support a single emulated volume per user mounted at
                 // a time, and it's always considered the primary
                 if (DEBUG) Log.d(TAG, "Found primary volume: " + volume);
-                rootId = ROOT_ID_PRIMARY_EMULATED;
+
+                // Must be realUserId here otherwise it'll break SAF.
+                if (mountUserId == realUserId)
+                    rootId = ROOT_ID_PRIMARY_EMULATED;
+                else
+                    rootId = "parallel" + mountUserId;
 
                 if (volume.isPrimaryEmulatedForUser(userId)) {
                     // This is basically the user's primary device storage.
@@ -191,6 +209,15 @@ public class ExternalStorageProvider extends FileSystemProvider {
                     title = !TextUtils.isEmpty(deviceName)
                             ? deviceName
                             : getContext().getString(R.string.root_internal_storage);
+                    storageUuid = StorageManager.UUID_DEFAULT;
+                } else if (volume.isPrimaryEmulatedForUser(mountUserId)) {
+                    String name = rootId;
+                    for (UserInfo info : parallelUsers) {
+                        if (info.id != mountUserId) continue;
+                        if (info.name != null)
+                            name = info.name;
+                    }
+                    title = name;
                     storageUuid = StorageManager.UUID_DEFAULT;
                 } else {
                     // This should cover all other storage devices, like an SD card
@@ -253,12 +280,12 @@ public class ExternalStorageProvider extends FileSystemProvider {
             if (volume.getType() == VolumeInfo.TYPE_PUBLIC) {
                 root.flags |= Root.FLAG_HAS_SETTINGS;
             }
-            if (volume.isVisibleForUser(userId)) {
-                root.visiblePath = volume.getPathForUser(userId);
+            if (volume.isVisibleForUser(mountUserId)) {
+                root.visiblePath = volume.getPathForUser(mountUserId);
             } else {
                 root.visiblePath = null;
             }
-            root.path = volume.getInternalPathForUser(userId);
+            root.path = volume.getInternalPathForUser(mountUserId);
             try {
                 root.docId = getDocIdForFile(root.path);
             } catch (FileNotFoundException e) {

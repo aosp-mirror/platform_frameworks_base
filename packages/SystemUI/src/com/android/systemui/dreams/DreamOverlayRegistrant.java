@@ -17,7 +17,6 @@
 package com.android.systemui.dreams;
 
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_SERVICE_COMPONENT;
-import static com.android.systemui.dreams.dagger.DreamModule.DREAM_PRETEXT_MONITOR;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -34,9 +33,8 @@ import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.Log;
 
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.shared.condition.Monitor;
-import com.android.systemui.util.condition.ConditionalCoreStartable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -45,7 +43,7 @@ import javax.inject.Named;
  * {@link DreamOverlayRegistrant} is responsible for telling system server that SystemUI should be
  * the designated dream overlay component.
  */
-public class DreamOverlayRegistrant extends ConditionalCoreStartable {
+public class DreamOverlayRegistrant implements CoreStartable {
     private static final String TAG = "DreamOverlayRegistrant";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private final IDreamManager mDreamManager;
@@ -104,9 +102,7 @@ public class DreamOverlayRegistrant extends ConditionalCoreStartable {
 
     @Inject
     public DreamOverlayRegistrant(Context context, @Main Resources resources,
-            @Named(DREAM_OVERLAY_SERVICE_COMPONENT) ComponentName dreamOverlayServiceComponent,
-            @Named(DREAM_PRETEXT_MONITOR) Monitor monitor) {
-        super(monitor);
+            @Named(DREAM_OVERLAY_SERVICE_COMPONENT) ComponentName dreamOverlayServiceComponent) {
         mContext = context;
         mResources = resources;
         mDreamManager = IDreamManager.Stub.asInterface(
@@ -115,7 +111,7 @@ public class DreamOverlayRegistrant extends ConditionalCoreStartable {
     }
 
     @Override
-    protected void onStart() {
+    public void start() {
         final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         filter.addDataSchemeSpecificPart(mOverlayServiceComponent.getPackageName(),

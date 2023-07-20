@@ -51,10 +51,4 @@ cc_library_shared {
         "-Wunreachable-code",
         "-Wno-deprecated-declarations",
     ],
-
-    target: {
-        android_riscv64: {
-            enabled: false,
-        },
-    },
 }

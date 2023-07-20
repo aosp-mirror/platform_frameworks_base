@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:minHeight="64dp"
                 android:gravity="center"
-                android:textAppearance="?android:attr/textAppearanceButton"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="@string/empty_shade_text"/>
         <TextView
                 android:id="@+id/no_notifications_footer"
@@ -43,7 +43,7 @@
                 android:gravity="center"
                 android:drawablePadding="8dp"
                 android:visibility="gone"
-                android:textAppearance="?android:attr/textAppearanceButton"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="@string/unlock_to_see_notif_text"/>
     </LinearLayout>
 </com.android.systemui.statusbar.EmptyShadeView>

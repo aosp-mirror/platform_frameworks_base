@@ -1,3 +1,1 @@
 include /services/core/java/com/android/server/power/OWNERS
-
-per-file ThermalManagerServiceTest.java=wvw@google.com, xwxw@google.com

@@ -1,2 +1,0 @@
-include platform/frameworks/base:/graphics/java/android/graphics/OWNERS
-include platform/frameworks/native:/services/surfaceflinger/OWNERS

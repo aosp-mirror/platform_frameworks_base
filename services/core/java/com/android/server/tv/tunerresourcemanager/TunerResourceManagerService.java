@@ -996,15 +996,9 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         if (DEBUG) {
             Slog.d(TAG, "shareFrontend from " + selfClientId + " with " + targetClientId);
         }
-        Integer shareeFeClientId = getClientProfile(selfClientId).getShareeFeClientId();
-        if (shareeFeClientId != ClientProfile.INVALID_RESOURCE_ID) {
-            getClientProfile(shareeFeClientId).stopSharingFrontend(selfClientId);
-            getClientProfile(selfClientId).releaseFrontend();
-        }
         for (int feId : getClientProfile(targetClientId).getInUseFrontendHandles()) {
             getClientProfile(selfClientId).useFrontend(feId);
         }
-        getClientProfile(selfClientId).setShareeFeClientId(targetClientId);
         getClientProfile(targetClientId).shareFrontend(selfClientId);
     }
 
@@ -1014,8 +1008,6 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         // change the owner of all the inUse frontend
         newOwnerProfile.shareFrontend(currentOwnerId);
         currentOwnerProfile.stopSharingFrontend(newOwnerId);
-        newOwnerProfile.setShareeFeClientId(ClientProfile.INVALID_RESOURCE_ID);
-        currentOwnerProfile.setShareeFeClientId(newOwnerId);
         for (int inUseHandle : newOwnerProfile.getInUseFrontendHandles()) {
             getFrontendResource(inUseHandle).setOwner(newOwnerId);
         }

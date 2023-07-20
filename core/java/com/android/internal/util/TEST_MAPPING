@@ -1,20 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "ScreenshotHelperTests",
-      "file_patterns": ["ScreenshotHelper"]
-    },
-    {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.util.XmlTest"
-        },
-        {
-          "include-filter": "android.util.BinaryXmlTest"
-        }
-      ],
-      "file_patterns": ["Xml"]
+      "name": "ScreenshotHelperTests"
     },
     {
       "name": "FrameworksCoreTests",

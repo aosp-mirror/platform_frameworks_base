@@ -2245,7 +2245,6 @@ public final class SmsManager {
             RESULT_SMS_SEND_RETRY_FAILED,
             RESULT_REMOTE_EXCEPTION,
             RESULT_NO_DEFAULT_SMS_APP,
-            RESULT_USER_NOT_ALLOWED,
             RESULT_RIL_RADIO_NOT_AVAILABLE,
             RESULT_RIL_SMS_SEND_FAIL_RETRY,
             RESULT_RIL_NETWORK_REJECT,
@@ -2425,13 +2424,6 @@ public final class SmsManager {
      * Set by BroadcastReceiver to indicate there's no default sms app.
      */
     public static final int RESULT_NO_DEFAULT_SMS_APP = 32;
-
-    /**
-     * User is not associated with the subscription.
-     * TODO(b/263279115): Make this error code public.
-     * @hide
-     */
-    public static final int RESULT_USER_NOT_ALLOWED = 33;
 
     // Radio Error results
 

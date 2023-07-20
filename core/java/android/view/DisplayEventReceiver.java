@@ -138,12 +138,8 @@ public abstract class DisplayEventReceiver {
         mMessageQueue = null;
     }
 
-    /**
-     * Class to capture all inputs required for syncing events data.
-     *
-     * @hide
-     */
-    public static final class VsyncEventData {
+    static final class VsyncEventData {
+
         static final FrameTimeline[] INVALID_FRAME_TIMELINES =
                 {new FrameTimeline(FrameInfo.INVALID_VSYNC_ID, Long.MAX_VALUE, Long.MAX_VALUE)};
 

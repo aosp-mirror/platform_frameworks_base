@@ -730,25 +730,6 @@ public abstract class EuiccService extends Service {
     }
 
     /**
-     * Result code to string
-     *
-     * @param result The result code.
-     * @return The result code in string format.
-     *
-     * @hide
-     */
-    public static String resultToString(@Result int result) {
-        switch (result) {
-            case RESULT_OK: return "OK";
-            case RESULT_MUST_DEACTIVATE_SIM : return "MUST_DEACTIVATE_SIM";
-            case RESULT_RESOLVABLE_ERRORS: return "RESOLVABLE_ERRORS";
-            case RESULT_FIRST_USER: return "FIRST_USER";
-            default:
-            return "UNKNOWN(" + result + ")";
-        }
-    }
-
-    /**
      * Wrapper around IEuiccService that forwards calls to implementations of {@link EuiccService}.
      */
     private class IEuiccServiceWrapper extends IEuiccService.Stub {

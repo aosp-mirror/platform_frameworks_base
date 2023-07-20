@@ -1,16 +1,5 @@
-include /graphics/java/android/graphics/OWNERS
 include /graphics/java/android/graphics/fonts/OWNERS
 
 # Bug component: 568761
 per-file /apct-tests/perftests/core/res/* = felkachang@google.com,zyy@google.com
-per-file /apct-tests/perftests/core/res/* = file:/core/java/android/content/om/OWNERS
-per-file /apct-tests/perftests/core/src/android/content/res/* = felkachang@google.com
-per-file /apct-tests/perftests/core/src/android/content/res/* = file:/core/java/android/content/res/OWNERS
 
-
-# Bug component: 568631
-per-file /apct-tests/perftests/core/src/android/content/om/* = felkachang@google.com
-per-file /apct-tests/perftests/core/src/android/content/om/* = file:/core/java/android/content/om/OWNERS
-
-# Bug component: 44215
-per-file **Accessibility* = file:/core/java/android/view/accessibility/OWNERS

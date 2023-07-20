@@ -33,24 +33,20 @@ interface KeyguardDataQuickAffordanceModule {
         @Provides
         @ElementsIntoSet
         fun quickAffordanceConfigs(
-            camera: CameraQuickAffordanceConfig,
             doNotDisturb: DoNotDisturbQuickAffordanceConfig,
             flashlight: FlashlightQuickAffordanceConfig,
             home: HomeControlsKeyguardQuickAffordanceConfig,
-            mute: MuteQuickAffordanceConfig,
             quickAccessWallet: QuickAccessWalletKeyguardQuickAffordanceConfig,
             qrCodeScanner: QrCodeScannerKeyguardQuickAffordanceConfig,
-            videoCamera: VideoCameraQuickAffordanceConfig,
+            camera: CameraQuickAffordanceConfig,
         ): Set<KeyguardQuickAffordanceConfig> {
             return setOf(
                 camera,
                 doNotDisturb,
                 flashlight,
                 home,
-                mute,
                 quickAccessWallet,
                 qrCodeScanner,
-                videoCamera,
             )
         }
     }

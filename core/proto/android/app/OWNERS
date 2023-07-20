@@ -1,3 +1,2 @@
-per-file appstartinfo.proto = file:/services/core/java/com/android/server/am/OWNERS
 per-file location_time_zone_manager.proto = file:platform/frameworks/base:/services/core/java/com/android/server/timezonedetector/OWNERS
 per-file time_zone_detector.proto = file:platform/frameworks/base:/services/core/java/com/android/server/timezonedetector/OWNERS

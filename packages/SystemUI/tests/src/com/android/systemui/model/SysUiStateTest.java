@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.settings.FakeDisplayTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,8 +46,7 @@ public class SysUiStateTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        FakeDisplayTracker displayTracker = new FakeDisplayTracker(mContext);
-        mFlagsContainer = new SysUiState(displayTracker);
+        mFlagsContainer = new SysUiState();
         mCallback = mock(SysUiState.SysUiStateCallback.class);
         mFlagsContainer.addCallback(mCallback);
     }

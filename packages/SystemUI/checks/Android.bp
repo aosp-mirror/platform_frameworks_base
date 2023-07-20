@@ -32,7 +32,6 @@ java_library_host {
         "auto_service_annotations",
         "lint_api",
     ],
-    kotlincflags: ["-Xjvm-default=all"],
 }
 
 java_test_host {
@@ -53,19 +52,5 @@ java_test_host {
     ],
     test_options: {
         unit_test: true,
-        tradefed_options: [
-            {
-                // lint bundles in some classes that were built with older versions
-                // of libraries, and no longer load. Since tradefed tries to load
-                // all classes in the jar to look for tests, it crashes loading them.
-                // Exclude these classes from tradefed's search.
-                name: "exclude-paths",
-                value: "org/apache",
-            },
-            {
-                name: "exclude-paths",
-                value: "META-INF",
-            },
-        ],
     },
 }

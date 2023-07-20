@@ -34,7 +34,7 @@
     <bool name="config_imeDrawsImeNavBar">true</bool>
 
     <!-- Controls the size of the back gesture inset. -->
-    <dimen name="config_backGestureInset">18dp</dimen>
+    <dimen name="config_backGestureInset">30dp</dimen>
 
     <!-- Controls whether the navbar needs a scrim with
      {@link Window#setEnsuringNavigationBarContrastWhenTransparent}. -->

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/dimens.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources>
+
+    <!-- Ambient Text font size parameters -->
+    <dimen name="amb_txt_font_size_0">0dp</dimen>
+    <dimen name="amb_txt_font_size_1">1dp</dimen>
+    <dimen name="amb_txt_font_size_2">2dp</dimen>
+    <dimen name="amb_txt_font_size_3">3dp</dimen>
+    <dimen name="amb_txt_font_size_4">4dp</dimen>
+    <dimen name="amb_txt_font_size_5">5dp</dimen>
+    <dimen name="amb_txt_font_size_6">6dp</dimen>
+    <dimen name="amb_txt_font_size_7">7dp</dimen>
+    <dimen name="amb_txt_font_size_8">8dp</dimen>
+    <dimen name="amb_txt_font_size_9">9dp</dimen>
+    <dimen name="amb_txt_font_size_10">10dp</dimen>
+    <dimen name="amb_txt_font_size_11">11dp</dimen>
+    <dimen name="amb_txt_font_size_12">12dp</dimen>
+    <dimen name="amb_txt_font_size_13">13dp</dimen>
+    <dimen name="amb_txt_font_size_14">14dp</dimen>
+    <dimen name="amb_txt_font_size_15">15dp</dimen>
+    <dimen name="amb_txt_font_size_16">16dp</dimen>
+    <dimen name="amb_txt_font_size_17">17dp</dimen>
+    <dimen name="amb_txt_font_size_18">18dp</dimen>
+    <dimen name="amb_txt_font_size_19">19dp</dimen>
+    <dimen name="amb_txt_font_size_20">20dp</dimen>
+    <dimen name="amb_txt_font_size_21">21dp</dimen>
+    <dimen name="amb_txt_font_size_22">22dp</dimen>
+    <dimen name="amb_txt_font_size_23">23dp</dimen>
+    <dimen name="amb_txt_font_size_24">24dp</dimen>
+    <dimen name="amb_txt_font_size_25">25dp</dimen>
+    <dimen name="amb_txt_font_size_26">26dp</dimen>
+    <dimen name="amb_txt_font_size_27">27dp</dimen>
+    <dimen name="amb_txt_font_size_28">28dp</dimen>
+    <dimen name="amb_txt_font_size_29">29dp</dimen>
+    <dimen name="amb_txt_font_size_30">30dp</dimen>
+    <dimen name="amb_txt_font_size_31">31dp</dimen>
+    <dimen name="amb_txt_font_size_32">32dp</dimen>
+    <dimen name="amb_txt_font_size_33">33dp</dimen>
+    <dimen name="amb_txt_font_size_34">34dp</dimen>
+    <dimen name="amb_txt_font_size_35">35dp</dimen>
+    <dimen name="amb_txt_font_size_36">36dp</dimen>
+    <dimen name="amb_txt_font_size_37">37dp</dimen>
+    <dimen name="amb_txt_font_size_38">38dp</dimen>
+    <dimen name="amb_txt_font_size_39">39dp</dimen>
+    <dimen name="amb_txt_font_size_40">40dp</dimen>
+    <dimen name="amb_txt_font_size_41">41dp</dimen>
+    <dimen name="amb_txt_font_size_42">42dp</dimen>
+    <dimen name="amb_txt_font_size_43">43dp</dimen>
+    <dimen name="amb_txt_font_size_44">44dp</dimen>
+    <dimen name="amb_txt_font_size_45">45dp</dimen>
+    <dimen name="amb_txt_font_size_46">46dp</dimen>
+    <dimen name="amb_txt_font_size_47">47dp</dimen>
+    <dimen name="amb_txt_font_size_48">48dp</dimen>
+    <dimen name="amb_txt_font_size_49">49dp</dimen>
+    <dimen name="amb_txt_font_size_50">50dp</dimen>
+    <dimen name="amb_txt_font_size_51">51dp</dimen>
+    <dimen name="amb_txt_font_size_52">52dp</dimen>
+    <dimen name="amb_txt_font_size_53">53dp</dimen>
+    <dimen name="amb_txt_font_size_54">54dp</dimen>
+    <dimen name="amb_txt_font_size_55">55dp</dimen>
+    <dimen name="amb_txt_font_size_56">56dp</dimen>
+    <dimen name="amb_txt_font_size_57">57dp</dimen>
+    <dimen name="amb_txt_font_size_58">58dp</dimen>
+    <dimen name="amb_txt_font_size_59">59dp</dimen>
+    <dimen name="amb_txt_font_size_60">60dp</dimen>
+    <dimen name="amb_txt_font_size_61">61dp</dimen>
+    <dimen name="amb_txt_font_size_62">62dp</dimen>
+    <dimen name="amb_txt_font_size_63">63dp</dimen>
+    <dimen name="amb_txt_font_size_64">64dp</dimen>
+    <dimen name="amb_txt_font_size_65">65dp</dimen>
+    <dimen name="amb_txt_font_size_66">66dp</dimen>
+    <dimen name="amb_txt_font_size_67">67dp</dimen>
+    <dimen name="amb_txt_font_size_68">68dp</dimen>
+    <dimen name="amb_txt_font_size_69">69dp</dimen>
+    <dimen name="amb_txt_font_size_70">70dp</dimen>
+    <dimen name="amb_txt_font_size_71">71dp</dimen>
+    <dimen name="amb_txt_font_size_72">72dp</dimen>
+    <dimen name="amb_txt_font_size_73">73dp</dimen>
+    <dimen name="amb_txt_font_size_74">74dp</dimen>
+    <dimen name="amb_txt_font_size_75">75dp</dimen>
+    <dimen name="amb_txt_font_size_76">76dp</dimen>
+    <dimen name="amb_txt_font_size_77">77dp</dimen>
+    <dimen name="amb_txt_font_size_78">78dp</dimen>
+    <dimen name="amb_txt_font_size_79">79dp</dimen>
+    <dimen name="amb_txt_font_size_80">80dp</dimen>
+    <dimen name="amb_txt_font_size_81">81dp</dimen>
+    <dimen name="amb_txt_font_size_82">82dp</dimen>
+    <dimen name="amb_txt_font_size_83">83dp</dimen>
+    <dimen name="amb_txt_font_size_84">84dp</dimen>
+    <dimen name="amb_txt_font_size_85">85dp</dimen>
+    <dimen name="amb_txt_font_size_86">86dp</dimen>
+    <dimen name="amb_txt_font_size_87">87dp</dimen>
+    <dimen name="amb_txt_font_size_88">88dp</dimen>
+    <dimen name="amb_txt_font_size_89">89dp</dimen>
+    <dimen name="amb_txt_font_size_90">90dp</dimen>
+    <dimen name="amb_txt_font_size_91">91dp</dimen>
+    <dimen name="amb_txt_font_size_92">92dp</dimen>
+    <dimen name="amb_txt_font_size_93">93dp</dimen>
+    <dimen name="amb_txt_font_size_94">94dp</dimen>
+    <dimen name="amb_txt_font_size_95">95dp</dimen>
+    <dimen name="amb_txt_font_size_96">96dp</dimen>
+    <dimen name="amb_txt_font_size_97">97dp</dimen>
+    <dimen name="amb_txt_font_size_98">98dp</dimen>
+    <dimen name="amb_txt_font_size_99">99dp</dimen>
+    <dimen name="amb_txt_font_size_100">100dp</dimen>
+
+    <!-- Weather condition icon  -->
+    <dimen name="weather_icon_size">24dp</dimen>
+    <dimen name="date_owner_info_margin">4dp</dimen>
+    <dimen name="weather_margin_start">14dp</dimen>
+
+    <!-- Weather styles padding-->
+    <dimen name="widget_date_box_padding_hor">12dp</dimen>
+    <dimen name="widget_date_box_padding_ver">8dp</dimen>
+    <dimen name="q_nowplay_pill_padding_hor">17.0sp</dimen>
+    <dimen name="q_nowplay_pill_padding_ver">8.0sp</dimen>
+
+    <!-- Accent Date styles padding-->
+    <dimen name="widget_date_accent_box_padding_hor">10dp</dimen>
+    <dimen name="widget_date_accent_box_padding_ver">6dp</dimen>
+
+</resources>
+

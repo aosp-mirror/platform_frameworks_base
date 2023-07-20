@@ -21,7 +21,6 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.commandline.CommandRegistry
-import com.android.systemui.util.InitializationChecker
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -35,8 +34,7 @@ constructor(
     private val commandRegistry: CommandRegistry,
     private val flagCommand: FlagCommand,
     private val featureFlags: FeatureFlagsDebug,
-    private val broadcastSender: BroadcastSender,
-    private val initializationChecker: InitializationChecker,
+    private val broadcastSender: BroadcastSender
 ) : CoreStartable {
 
     init {
@@ -48,11 +46,8 @@ constructor(
     override fun start() {
         featureFlags.init()
         commandRegistry.registerCommand(FlagCommand.FLAG_COMMAND) { flagCommand }
-        if (initializationChecker.initializeComponents()) {
-            // protected broadcast should only be sent for the main process
-            val intent = Intent(FlagManager.ACTION_SYSUI_STARTED)
-            broadcastSender.sendBroadcast(intent)
-        }
+        val intent = Intent(FlagManager.ACTION_SYSUI_STARTED)
+        broadcastSender.sendBroadcast(intent)
     }
 }
 

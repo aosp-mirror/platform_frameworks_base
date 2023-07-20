@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"بایت"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"کیلوبایت"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"مگابایت"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"گیگابایت"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"ترابایت"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"پتابایت"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> ‏<xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"‏&lt;بدون عنوان&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(بدون شماره تلفن)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"‏پین‎هایی که وارد کرده‎اید با یکدیگر مطابقت ندارند."</string>
     <string name="invalidPin" msgid="7542498253319440408">"یک پین بنویسید که ۴ تا ۸ رقم باشد."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"‏یک PUK با ۸ رقم یا بیشتر تایپ کنید."</string>
-    <string name="needPuk" msgid="3503414069503752211">"‏سیم‌کارت شما با PUK قفل شده است. کد PUK را برای باز کردن قفل آن تایپ کنید."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"‏برای باز کردن قفل سیم‌کارت، کد PUK2 را تایپ کنید."</string>
+    <string name="needPuk" msgid="7321876090152422918">"‏سیم کارت شما با PUK قفل شده است. کد PUK را برای بازگشایی آن بنویسید."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"‏PUK2 را برای بازگشایی قفل سیم کارت بنویسید."</string>
     <string name="enablePin" msgid="2543771964137091212">"‏ناموفق بود، قفل سیم/RUIM را فعال کنید."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one"><xliff:g id="NUMBER_1">%d</xliff:g> بار دیگر می‌توانید تلاش کنید و پس از آن سیم‌کارت قفل می‌شود.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"پیش‌فرض شناسه تماس‌گیرنده روی غیرمحدود است. تماس بعدی: بدون محدودیت"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"سرویس دارای مجوز نیست."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"‏شما می‎توانید تنظیم شناسه تماس‌گیرنده را تغییر دهید."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"داده به <xliff:g id="CARRIERDISPLAY">%s</xliff:g> تغییر کرد"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"هرزمان بخواهید می‌توانید این را در «تنظیمات» تغییر دهید"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"بدون سرویس داده تلفن همراه"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"تماس اضطراری دردسترس نیست"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"سرویس صوتی دردسترس نیست"</string>
@@ -231,8 +234,8 @@
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"ساعت شما خاموش می‌شود."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"گوشی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"‏آیا می‎خواهید تلفن خاموش شود؟"</string>
-    <string name="reboot_safemode_title" msgid="5853949122655346734">"بازراه‌اندازی به حالت امن"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"آیا می‌خواهید به حالت امن بازراه‌اندازی شود؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با بازراه‌اندازی سیستم، این برنامه‌ها دوباره بازیابی می‌شوند."</string>
+    <string name="reboot_safemode_title" msgid="5853949122655346734">"راه‌اندازی مجدد در حالت امن"</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"آیا می‌خواهید با حالت امن راه‌اندازی مجدد کنید؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با راه‌اندازی دوباره سیستم این برنامه‌ها دوباره بازیابی می‌شوند."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"اخیر"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"برنامه‌های جدید موجود نیست."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"گزینه‌های رایانهٔ لوحی"</string>
@@ -294,7 +297,7 @@
     <string name="safeMode" msgid="8974401416068943888">"حالت ایمن"</string>
     <string name="android_system_label" msgid="5974767339591067210">"‏سیستم Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"جابه‌جا شدن به نمایه شخصی"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"رفتن به نمایه کاری"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"جابه‌جا شدن به نمایه کاری"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"مخاطبین"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"دسترسی به مخاطبین شما"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"مکان"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"می‌تواند اشاره‌های اجرا‌شده روی حسگر اثرانگشت دستگاه را ثبت کند."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"گرفتن نماگرفت"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"می‌تواند از نمایشگر نماگرفت بگیرد."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"پیش‌نما، <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"غیرفعال کردن یا تغییر نوار وضعیت"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"‏به برنامه اجازه می‎دهد تا نوار وضعیت را غیرفعال کند یا نمادهای سیستم را اضافه یا حذف کند."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"نوار وضعیت باشد"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏به برنامه اجازه می‌دهد اطلاعات ترجیحی سرویس پولی NFC، مانند کمک‌های ثبت‌شده و مقصد مسیر را دریافت کند."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"کنترل ارتباط راه نزدیک"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏به برنامه اجازه می‎دهد تا با تگ‌های NFC، کارت‌ها و فایل‌خوان ارتباط برقرار کند."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"‏رویداد تراکنش Secure Element"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"‏به برنامه اجازه می‌دهد اطلاعات مربوط به تراکنش‌هایی را که در Secure Element انجام می‌شود دریافت کند."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"غیرفعال کردن قفل صفحه شما"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"به برنامه امکان می‌دهد قفل کلید و هر گونه امنیت گذرواژه مرتبط را غیرفعال کند. به‌عنوان مثال تلفن هنگام دریافت یک تماس تلفنی ورودی قفل کلید را غیرفعال می‌کند و بعد از پایان تماس، قفل کلید را دوباره فعال می‌کند."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"درخواست پیچیدگی قفل صفحه"</string>
@@ -567,7 +567,7 @@
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"به برنامه امکان می‌دهد از سخت‌افزار اثر انگشت برای اصالت‌سنجی استفاده کند"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"تغییر مجموعه موسیقی شما"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"به برنامه اجازه می‌دهد مجموعه موسیقی‌تان را تغییر دهد."</string>
-    <string name="permlab_videoWrite" msgid="5940738769586451318">"تغییر مجموعه ویدیو  شما"</string>
+    <string name="permlab_videoWrite" msgid="5940738769586451318">"تغییر مجموعه ویدیوی شما"</string>
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"به برنامه اجازه می‌دهد مجموعه ویدیویتان را تغییر دهد."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"تغییر مجموعه عکس شما"</string>
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"به برنامه اجازه می‌دهد مجموعه عکستان را تغییر دهد."</string>
@@ -575,7 +575,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"به برنامه اجازه می‌دهد مکان‌ها را از مجموعه رسانه‌تان بخواند."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"استفاده از زیست‌سنجشی"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استفاده از زیست‌سنجشی یا قفل صفحه"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شمایید"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شما هستید"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"برای ادامه، از زیست‌سنجشی استفاده کنید"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"برای ادامه، از زیست‌سنجشی یا قفل صفحه استفاده کنید"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"سخت‌افزار زیست‌سنجی دردسترس نیست"</string>
@@ -594,7 +594,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"حرکت انگشت خیلی آهسته بود. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"اثر انگشت دیگری را امتحان کنید"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"خیلی روشن است"</string>
-    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"فشردن دکمه روشن/خاموش شناسایی شد"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"فشردن دکمه روشن/ خاموش شناسایی شد"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"اثر انگشت را تنظیم کنید"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"هربار موقعیت انگشتتان را کمی تغییر دهید"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -606,7 +606,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"سخت‌افزار اثرانگشت در دسترس نیست."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"اثر انگشت راه‌اندازی نشد"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"مهلت تنظیم اثر انگشت به‌پایان رسید. دوباره امتحان کنید."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"مهلت راه‌اندازی اثر انگشت به‌پایان رسید. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"کاربر عملیات اثر انگشت را لغو کرد"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"تلاش‌ها از حد مجاز بیشتر شده است. به‌جای آن از قفل صفحه استفاده کنید."</string>
@@ -616,7 +616,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"این دستگاه حسگر اثر انگشت ندارد."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"حسگر به‌طور موقت غیرفعال است."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"امکان استفاده از حسگر اثر انگشت وجود ندارد. به ارائه‌دهنده خدمات تعمیر مراجعه کنید"</string>
-    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"دکمه روشن/خاموش فشار داده شد"</string>
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"دکمه روشن/ خاموش فشار داده شد"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"انگشت <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"استفاده از اثر انگشت"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"استفاده از اثر انگشت یا قفل صفحه"</string>
@@ -664,8 +664,6 @@
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"مدل چهره ایجاد نشد. دوباره امتحان کنید."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"عینک تیره شناسایی شد. چهره‌تان باید کاملاً نمایان باشد."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"پوشش صورت شناسایی شد. چهره‌تان باید کاملاً نمایان باشد."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"چهره تأیید نشد. سخت‌افزار در دسترس نیست."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"«قفل‌گشایی با چهره» را دوباره امتحان کنید"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"داده‌ چهره جدید ذخیره نشد. اول داده‌ چهره قدیمی را حذف کنید."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"استفاده از قفل صفحه یا چهره"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"برای ادامه، از چهره‌تان استفاده کنید"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"برای ادامه، از تشخیص چهره یا قفل صفحه استفاده کنید"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"مشکلی پیش آمد. دوباره امتحان کنید."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"نماد چهره"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"خواندن تنظیمات همگام‌سازی"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"دوباره امتحان کنید"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"باز کردن قفل تمام قابلیت‌ها و داده‌ها"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"دفعات تلاش برای «قفل‌گشایی با چهره» از حداکثر مجاز بیشتر شد"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"سیم‌کارتی وجود ندارد"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"سیم‌کارت در رایانه لوحی وجود ندارد."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"‏سیم‌کارت در دستگاه Android TV وجود ندارد."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"سیم‌کارت در تلفن وجود ندارد."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"سیم‌کارت اضافه کنید."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"سیم‌کارت موجود نیست یا قابل‌خواندن نیست. سیم‌کارت اضافه کنید."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"سیم‌کارت قابل‌استفاده نیست."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"سیم‌کارت شما برای همیشه غیرفعال شده است.\n برای دریافت سیم‌کارتی دیگر، با رساننده خدمات بی‌سیم خود تماس بگیرید."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"سیم کارت موجود نیست"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"سیم کارت درون رایانهٔ لوحی نیست."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"‏هیچ سیم‌کارتی در دستگاه Android TV شما قرار داده نشده است."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"سیم کارت درون تلفن نیست."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"سیم کارت را وارد کنید."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"سیم کارت موجود نیست یا قابل خواندن نیست. یک سیم کارت وارد کنید."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"سیم کارت غیرقابل استفاده است."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"‏سیم کارت شما به‌طور دائم غیر فعال شده است. \nبرای داشتن سیم کارت دیگر با ارائه‎دهنده سرویس بی‎سیم خود تماس بگیرید."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"آهنگ قبلی"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"آهنگ بعدی"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"مکث"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"جلو بردن سریع"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"فقط تماس‌های اضطراری"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"شبکه قفل شد"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"‏سیم‌کارت با کد PUK قفل شده است."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"‏سیم کارت با PUK قفل شده است."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"لطفاً به «راهنمای کاربر» مراجعه کنید یا با مرکز «مراقبت از مشتریان» تماس بگیرید."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"سیم‌کارت قفل است."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"درحال باز کردن قفل سیم‌کارت…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"سیم کارت قفل شد."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"بازگشایی قفل سیم کارت…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"‏الگوی بازگشایی قفل را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎‌اید. \n\nپس‌از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"گذرواژهٔ خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه تایپ کرده‌اید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"‏پین را<xliff:g id="NUMBER_0">%1$d</xliff:g>  بار اشتباه تایپ کرده‎اید. \n\nپس از <xliff:g id="NUMBER_1">%2$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
@@ -1015,7 +1011,7 @@
     <string name="factorytest_failed" msgid="3190979160945298006">"تست کارخانه انجام نشد"</string>
     <string name="factorytest_not_system" msgid="5658160199925519869">"‏عملکرد FACTORY_TEST تنها برای بسته‌های نصب شده در /system/app پشتیبانی می‌شود."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"‏بسته‌ای یافت نشد که عملکرد FACTORY_TEST را ارائه کند."</string>
-    <string name="factorytest_reboot" msgid="2050147445567257365">"بازراه‌اندازی"</string>
+    <string name="factorytest_reboot" msgid="2050147445567257365">"راه‌اندازی مجدد"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"‏صفحه در \"<xliff:g id="TITLE">%s</xliff:g>\" می‎گوید:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"جاوا اسکریپت"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"تأیید پیمایش"</string>
@@ -1251,11 +1247,11 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"آماده‌سازی <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"درحال آغاز کردن برنامه‌ها."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"درحال اتمام راه‌اندازی."</string>
-    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام ضربه بزنید."</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام ضربه بزنید."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"برای اتمام راه‌اندازی، صفحه را خاموش کنید"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"خاموش کردن"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"تأیید اثر انگشت را ادامه می‌دهید؟"</string>
-    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"دکمه روشن/خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nبرای تأیید اثر انگشتتان، آرام ضربه بزنید."</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nبرای تأیید اثر انگشتتان، آرام ضربه بزنید."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"خاموش کردن صفحه"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ادامه"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"‏می‌توانید بعداً آن را در تنظیمات &gt; برنامه‌ها تغییر دهید"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"همیشه مجاز است"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"همیشه غیرمجاز"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"سیم‌کارت برداشته شد"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"تاوقتی‌که با سیم‌کارت معتبر بازراه‌اندازی نکنید، شبکه تلفن همراه دردسترس نخواهد بود."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"سیم کارت برداشته شد"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"تا وقتی که با یک سیم‌کارت معتبر راه‌اندازی مجدد نکنید شبکهٔ تلفن همراه غیر قابل‌ دسترس خواهد بود."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"تمام"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"سیم‌کارت اضافه شد"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"سیم کارت اضافه شد"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"برای دسترسی به شبکهٔ تلفن همراه، دستگاه خود را مجدداً راه‌اندازی کنید."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"راه‌اندازی مجدد"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"سرویس دستگاه همراه را فعال کنید"</string>
@@ -1375,7 +1371,7 @@
     <string name="console_running_notification_title" msgid="6087888939261635904">"کنسول سریال فعال است"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"‏عملکرد تحت‌تأثیر قرار گرفته است. برای غیرفعال کردن، bootloader را بررسی کنید."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"‏MTE آزمایشی فعال شد"</string>
-    <string name="mte_override_notification_message" msgid="2441170442725738942">"‏شاید عملکرد و پایداری تحت تأثیر قرار بگیرند. برای غیرفعال کردن، بازراه‌اندازی کنید. اگر بااستفاده از arm64.memtag.bootctl فعال شده است، پیش‌از بازراه‌اندازی مقدار آن را روی هیچ‌کدام تنظیم کنید."</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"‏شاید عملکرد و پایداری تحت تأثیر قرار بگیرند. برای غیرفعال کردن، راه‌اندازی مجدد کنید. اگر بااستفاده ازarm64.memtag.bootctl فعال شده است، پیش‌از راه‌اندازی مقدار آن را روی هیچ‌کدام تنظیم کنید."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏مایعات یا خاکروبه در درگاه USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"‏درگاه USB به‌طور خودکار غیرفعال شده است. برای اطلاعات بیشتر، ضربه بزنید."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"‏می‌توان از درگاه USB استفاده کرد"</string>
@@ -1471,7 +1467,7 @@
     <string name="ime_action_default" msgid="8265027027659800121">"اجرا کردن"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"شماره گیری \nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"ایجاد مخاطب\nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست اجازه کرده‌اند."</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست مجوز کرده‌اند."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"می‌خواهید به این درخواست اجازه دهید؟"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"درخواست دسترسی"</string>
     <string name="allow" msgid="6195617008611933762">"ارزیابی‌شده"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"تلویزیون"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"تلفن"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"بلندگوهای جایگاه"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"دستگاه خارجی"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"هدفون‌ها"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"سیستم"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"اکنون سیم کارت غیرفعال است. پین کد را برای ادامه وارد کنید. برای جزئیات با شرکت مخابراتی خود تماس بگیرید."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"پین کد دلخواه را وارد کنید"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"تأیید پین کد دلخواه"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"درحال باز کردن قفل سیم‌کارت…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"بازگشایی قفل سیم کارت..."</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"پین کد اشتباه است."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"یک پین ۴ تا ۸ رقمی را تایپ کنید."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"‏کد PUK باید ۸ عدد داشته باشد."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"مشاهده در حالت تمام صفحه"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"برای خروج، انگشتتان را از بالای صفحه به پایین بکشید."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"متوجه شدم"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"برای دید بهتر، دستگاه را بچرخانید"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"برای دید بهتر، از صفحهٔ دونیمه خارج شوید"</string>
     <string name="done_label" msgid="7283767013231718521">"تمام"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"لغزنده دایره‌ای ساعت"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"لغزنده دایره‌ای دقیقه"</string>
@@ -1937,7 +1931,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"برنامه در دسترس نیست"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> درحال‌حاضر در دسترس نیست. <xliff:g id="APP_NAME_1">%2$s</xliff:g> آن را مدیریت می‌کند."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"بیشتر بدانید"</string>
-    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"لغو مکث برنامه"</string>
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"لغو توقف موقت برنامه"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"برنامه‌های کاری روشن شود؟"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"دسترسی به اعلان‌ها و برنامه‌های کاری"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"روشن کردن"</string>
@@ -2040,7 +2034,7 @@
     <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> مجوز لازم را ندارد"</string>
     <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> مجاز نیست"</string>
     <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> مجاز نیست"</string>
-    <string name="popup_window_default_title" msgid="6907717596694826919">"پنجره بالاپر"</string>
+    <string name="popup_window_default_title" msgid="6907717596694826919">"پنجره بازشو"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"‎+ <xliff:g id="NUMBER">%1$d</xliff:g>‎"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"نسخه برنامه تنزل داده شده است یا با این میان‌بر سازگار نیست"</string>
     <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"نمی‌توان میان‌بر را بازیابی کرد زیرا برنامه از پشتیبان‌گیری و بازیابی پشتیبانی نمی‌کند"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"نمی‌توان از <xliff:g id="DEVICE">%1$s</xliff:g> شما به دوربین رایانه لوحی دسترسی داشت"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"درحین جاری‌سازی، نمی‌توانید به آن دسترسی داشته باشید. دسترسی به آن را در تلفنتان امتحان کنید."</string>
     <string name="system_locale_title" msgid="711882686834677268">"پیش‌فرض سیستم"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"کارت <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

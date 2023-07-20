@@ -179,6 +179,7 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.SystemSensorManager;
 import android.hardware.power.Mode;
 import android.net.Uri;
 import android.os.Binder;
@@ -268,6 +269,9 @@ import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
+
+import com.android.internal.util.xtended.CutoutFullscreenController;
+import com.android.internal.util.xtended.PixelPropsUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -377,7 +381,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * @see WindowManagerThreadPriorityBooster
      */
     final Object mGlobalLockWithoutBoost = mGlobalLock;
-    ActivityTaskSupervisor mTaskSupervisor;
+    public ActivityTaskSupervisor mTaskSupervisor;
     ActivityClientController mActivityClientController;
     RootWindowContainer mRootWindowContainer;
     WindowManagerService mWindowManager;
@@ -779,6 +783,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
 
+    private SystemSensorManager mSystemSensorManager;
+
+    private CutoutFullscreenController mCutoutFullscreenController;
+
     private final class SettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
         private final Uri mHideErrorDialogsUri = Settings.Global.getUriFor(HIDE_ERROR_DIALOGS);
@@ -874,13 +882,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     public void installSystemProviders() {
         mSettingsObserver = new SettingObserver();
+
+        // Block sensor usage per app
+        mSystemSensorManager = new SystemSensorManager(mContext, mContext.getMainLooper());
+
+        // Force full screen for devices with cutout
+        mCutoutFullscreenController = new CutoutFullscreenController(mContext);
     }
 
     public void retrieveSettings(ContentResolver resolver) {
         final boolean freeformWindowManagement =
                 mContext.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT)
                         || Settings.Global.getInt(
-                        resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
+                        resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 1) != 0;
 
         final boolean supportsMultiWindow = ActivityTaskManager.supportsMultiWindow(mContext);
         final boolean supportsPictureInPicture = supportsMultiWindow &&
@@ -894,9 +908,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .hasSystemFeature(FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS);
         final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
         final boolean forceResizable = Settings.Global.getInt(
-                resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
+                resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 1) != 0;
         final boolean devEnableNonResizableMultiWindow = Settings.Global.getInt(
-                resolver, DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 0) != 0;
+                resolver, DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 1) != 0;
         final int supportsNonResizableMultiWindow = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_supportsNonResizableMultiWindow);
         final int respectsActivityMinWidthHeightMultiWindow = mContext.getResources().getInteger(
@@ -1961,7 +1975,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public RootTaskInfo getFocusedRootTaskInfo() throws RemoteException {
-        enforceTaskPermission("getFocusedRootTaskInfo()");
+        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+            enforceTaskPermission("getFocusedRootTaskInfo()");
+        }
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -2182,19 +2198,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (appThread != null) {
             callerApp = getProcessController(appThread);
         }
-        final BackgroundActivityStartController balController =
-                getActivityStartController().getBackgroundActivityLaunchController();
-        if (balController.shouldAbortBackgroundActivityStart(
-                callingUid,
-                callingPid,
-                callingPackage,
-                -1,
-                -1,
-                callerApp,
-                null,
-                false,
-                null,
-                null)) {
+        final ActivityStarter starter = getActivityStartController().obtainStarter(
+                null /* intent */, "moveTaskToFront");
+        if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage, -1,
+                -1, callerApp, null, false, null, null)) {
             if (!isBackgroundActivityStartsEnabled()) {
                 return;
             }
@@ -2991,7 +2998,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** Sets the task stack listener that gets callbacks when a task stack changes. */
     @Override
     public void registerTaskStackListener(ITaskStackListener listener) {
-        enforceTaskPermission("registerTaskStackListener()");
+        if (!PixelPropsUtils.shouldBypassTaskPermission(mContext)) {
+            enforceTaskPermission("registerTaskStackListener()");
+        }
         mTaskChangeNotificationController.registerTaskStackListener(listener);
     }
 
@@ -3767,6 +3776,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return getCurrentUserId();
             }
             return mLastResumedActivity.mUserId;
+        }
+    }
+
+    /** Return the uid of the last resumed activity. */
+    @Override
+    public int getLastResumedActivityUid() {
+        mAmInternal.enforceCallingPermission(
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL, "getLastResumedActivityUserId()");
+        synchronized (mGlobalLock) {
+            if (mLastResumedActivity == null) {
+                return 0;
+            }
+            return mLastResumedActivity.getUid();
         }
     }
 
@@ -4724,7 +4746,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mTaskChangeNotificationController.notifyTaskFocusChanged(prevTask.mTaskId, false);
             }
             mTaskChangeNotificationController.notifyTaskFocusChanged(task.mTaskId, true);
-            mTaskSupervisor.mRecentTasks.add(task);
         }
 
         applyUpdateLockStateLocked(r);
@@ -5894,6 +5915,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mAppWarnings.onPackageUninstalled(name);
                 mCompatModePackages.handlePackageUninstalledLocked(name);
                 mPackageConfigPersister.onPackageUninstall(name, userId);
+                if (mSystemSensorManager != null) {
+                   mSystemSensorManager.notePackageUninstalled(name);
+                }
             }
         }
 
@@ -6009,11 +6033,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public ActivityServiceConnectionsHolder getServiceConnectionsHolder(IBinder token) {
-            final ActivityRecord r = ActivityRecord.forToken(token);
-            if (r == null || !r.inHistory) {
-                return null;
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+                if (r == null) {
+                    return null;
+                }
+                if (r.mServiceConnectionsHolder == null) {
+                    r.mServiceConnectionsHolder = new ActivityServiceConnectionsHolder(
+                            ActivityTaskManagerService.this, r);
+                }
+
+                return r.mServiceConnectionsHolder;
             }
-            return r.getOrCreateServiceConnectionsHolder();
         }
 
         @Override
@@ -6869,6 +6900,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 activity.restartProcessIfVisible();
             }
+        }
+    }
+
+    public boolean shouldForceCutoutFullscreen(String packageName) {
+        synchronized (this) {
+            return mCutoutFullscreenController.shouldForceCutoutFullscreen(packageName);
         }
     }
 }

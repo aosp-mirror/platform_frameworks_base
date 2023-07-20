@@ -166,6 +166,16 @@
 
         <!-- end aligned fields -->
         <ImageButton
+            android:id="@+id/force_stop"
+            android:layout_width="@dimen/notification_importance_toggle_size"
+            android:layout_height="@dimen/notification_importance_toggle_size"
+            android:layout_centerVertical="true"
+            android:background="@drawable/ripple_drawable"
+            android:contentDescription="@string/notification_app_settings"
+            android:src="@drawable/ic_force_stop"
+            android:layout_toStartOf="@id/info"
+            android:tint="@color/notification_guts_link_icon_tint"/>
+        <ImageButton
             android:id="@+id/info"
             android:layout_width="@dimen/notification_importance_toggle_size"
             android:layout_height="@dimen/notification_importance_toggle_size"

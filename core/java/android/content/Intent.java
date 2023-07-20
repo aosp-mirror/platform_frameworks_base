@@ -4128,6 +4128,13 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.PROFILE_INACCESSIBLE";
 
     /**
+     * Broadcast sent to the parallel owner user when parallel space info has been refreshed.
+     * @hide
+     */
+    public static final String ACTION_PARALLEL_SPACE_CHANGED =
+            "android.intent.action.PARALLEL_SPACE_CHANGED";
+
+    /**
      * Broadcast sent to the system user when the 'device locked' state changes for any user.
      * Carries an extra {@link #EXTRA_USER_HANDLE} that specifies the ID of the user for which
      * the device was locked or unlocked.
@@ -5737,17 +5744,18 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final String EXTRA_CHOOSER_CUSTOM_ACTIONS =
-            "android.intent.extra.CHOOSER_CUSTOM_ACTIONS";
+            "android.intent.extra.EXTRA_CHOOSER_CUSTOM_ACTIONS";
 
     /**
      * Optional argument to be used with {@link #ACTION_CHOOSER}.
-     * A {@link android.app.PendingIntent} to be sent when the user wants to modify the content that
-     * they're sharing. This can be used to allow the user to return to the source app to, for
-     * example, select different media.
+     * A {@link android.app.PendingIntent} to be sent when the user wants to do payload reselection
+     * in the sharesheet.
+     * A reselection action allows the user to return to the source app to change the content being
+     * shared.
      * @hide
      */
-    public static final String EXTRA_CHOOSER_MODIFY_SHARE_ACTION =
-            "android.intent.extra.CHOOSER_MODIFY_SHARE_ACTION";
+    public static final String EXTRA_CHOOSER_PAYLOAD_RESELECTION_ACTION =
+            "android.intent.extra.EXTRA_CHOOSER_PAYLOAD_RESELECTION_ACTION";
 
     /**
      * An {@code ArrayList} of {@code String} annotations describing content for
@@ -6491,6 +6499,15 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_VISIBILITY_ALLOW_LIST =
             "android.intent.extra.VISIBILITY_ALLOW_LIST";
+
+    /**
+     * Broadcast action: notify the system that the user has performed a gesture on the screen
+     * to launch the camera. Broadcast should be protected to receivers holding the
+     * {@link Manifest.permission#STATUS_BAR_SERVICE} permission.
+     * @hide
+     */
+    public static final String ACTION_SCREEN_CAMERA_GESTURE =
+            "android.intent.action.SCREEN_CAMERA_GESTURE";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

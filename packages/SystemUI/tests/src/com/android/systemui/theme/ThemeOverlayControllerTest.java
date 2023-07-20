@@ -172,7 +172,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         verify(mDumpManager).registerDumpable(any(), any());
         verify(mDeviceProvisionedController).addCallback(mDeviceProvisionedListener.capture());
         verify(mSecureSettings).registerContentObserverForUser(
-                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES),
+                eq(Settings.Secure.getUriFor(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES)),
                 eq(false), mSettingsObserver.capture(), eq(UserHandle.USER_ALL)
         );
     }
@@ -237,6 +237,12 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
         verify(mThemeOverlayApplier)
                 .applyCurrentUserOverlays(themeOverlays.capture(), any(), anyInt(), any());
+
+        // Assert that we received the colors that we were expecting
+        assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
+                .isEqualTo(new OverlayIdentifier("ffff0000"));
+        assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_ACCENT_COLOR))
+                .isEqualTo(new OverlayIdentifier("ffff0000"));
 
         // Should not change theme after changing wallpapers, if intent doesn't have
         // WallpaperManager.EXTRA_FROM_FOREGROUND_APP set to true.
@@ -790,15 +796,15 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
         reset(mResources);
         when(mResources.getColor(eq(android.R.color.system_accent1_500), any()))
-                .thenReturn(mThemeOverlayController.mColorScheme.getAccent1().getS500());
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent1().get(6));
         when(mResources.getColor(eq(android.R.color.system_accent2_500), any()))
-                .thenReturn(mThemeOverlayController.mColorScheme.getAccent2().getS500());
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent2().get(6));
         when(mResources.getColor(eq(android.R.color.system_accent3_500), any()))
-                .thenReturn(mThemeOverlayController.mColorScheme.getAccent3().getS500());
+                .thenReturn(mThemeOverlayController.mColorScheme.getAccent3().get(6));
         when(mResources.getColor(eq(android.R.color.system_neutral1_500), any()))
-                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral1().getS500());
+                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral1().get(6));
         when(mResources.getColor(eq(android.R.color.system_neutral2_500), any()))
-                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral2().getS500());
+                .thenReturn(mThemeOverlayController.mColorScheme.getNeutral2().get(6));
 
         // Defers event because we already have initial colors.
         verify(mThemeOverlayApplier, never())

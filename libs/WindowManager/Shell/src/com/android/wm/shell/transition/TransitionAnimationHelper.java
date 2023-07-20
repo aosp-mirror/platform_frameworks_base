@@ -77,7 +77,7 @@ public class TransitionAnimationHelper {
     @Nullable
     public static Animation loadAttributeAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, int wallpaperTransit,
-            @NonNull TransitionAnimation transitionAnimation) {
+            @NonNull TransitionAnimation transitionAnimation, boolean freeform) {
         final int type = info.getType();
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
@@ -160,9 +160,9 @@ public class TransitionAnimationHelper {
             if (overrideType == ANIM_FROM_STYLE && canCustomContainer) {
                 a = transitionAnimation
                         .loadAnimationAttr(options.getPackageName(), options.getAnimations(),
-                                animAttr, translucent);
+                                animAttr, translucent, freeform);
             } else {
-                a = transitionAnimation.loadDefaultAnimationAttr(animAttr, translucent);
+                a = transitionAnimation.loadDefaultAnimationAttr(animAttr, translucent, freeform);
             }
         }
 

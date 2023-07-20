@@ -855,7 +855,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final MenuHelper helper;
         final boolean isPopup = !Float.isNaN(x) && !Float.isNaN(y);
         if (isPopup) {
-            helper = mWindow.mContextMenu.showPopup(getContext(), originalView, x, y);
+            final Context context;
+            if (originalView != null && originalView.getContext() != null) {
+                context = originalView.getContext();
+            } else {
+                context = getContext();
+            }
+            helper = mWindow.mContextMenu.showPopup(context, originalView, x, y);
         } else {
             helper = mWindow.mContextMenu.showDialog(originalView, originalView.getWindowToken());
         }
@@ -1217,11 +1223,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 || (mLastShouldAlwaysConsumeSystemBars && hideNavigation);
 
         boolean consumingNavBar =
-                ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
+                (((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
                         && decorFitsSystemWindows
                         && !hideNavigation)
-                || forceConsumingNavBar;
+                || forceConsumingNavBar)
+                && getResources().getConfiguration().windowConfiguration
+                    .getWindowingMode() != WINDOWING_MODE_FREEFORM;
 
         // If we didn't request fullscreen layout, but we still got it because of the
         // mForceWindowDrawsBarBackgrounds flag, also consume top inset.
@@ -1230,13 +1238,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         boolean fullscreen = (sysUiVisibility & SYSTEM_UI_FLAG_FULLSCREEN) != 0
                 || (attrs.flags & FLAG_FULLSCREEN) != 0
                 || !(controller == null || controller.isRequestedVisible(ITYPE_STATUS_BAR));
-        boolean consumingStatusBar = (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == 0
+        boolean consumingStatusBar = ((sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == 0
                 && decorFitsSystemWindows
                 && (attrs.flags & FLAG_LAYOUT_IN_SCREEN) == 0
                 && (attrs.flags & FLAG_LAYOUT_INSET_DECOR) == 0
                 && mForceWindowDrawsBarBackgrounds
                 && mLastTopInset != 0
-                || (mLastShouldAlwaysConsumeSystemBars && fullscreen);
+                || (mLastShouldAlwaysConsumeSystemBars && fullscreen))
+                && getResources().getConfiguration().windowConfiguration
+                    .getWindowingMode() != WINDOWING_MODE_FREEFORM;
 
         int consumedTop = consumingStatusBar ? mLastTopInset : 0;
         int consumedRight = consumingNavBar ? mLastRightInset : 0;

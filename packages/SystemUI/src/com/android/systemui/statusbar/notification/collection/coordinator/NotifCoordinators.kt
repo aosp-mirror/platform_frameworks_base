@@ -88,7 +88,9 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)
         mCoordinators.add(sensitiveContentCoordinator)
-        mCoordinators.add(smartspaceDedupingCoordinator)
+        if (notifPipelineFlags.isSmartspaceDedupingEnabled()) {
+            mCoordinators.add(smartspaceDedupingCoordinator)
+        }
         mCoordinators.add(headsUpCoordinator)
         mCoordinators.add(gutsCoordinator)
         mCoordinators.add(preparationCoordinator)

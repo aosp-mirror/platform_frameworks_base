@@ -20,6 +20,7 @@
         <permission name="android.permission.ACCESS_NOTIFICATIONS"/>
         <permission name="android.permission.BACKUP"/>
         <permission name="android.permission.BATTERY_STATS"/>
+        <permission name="android.permission.RESET_BATTERY_STATS"/>
         <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
         <permission name="android.permission.CHANGE_APP_IDLE_STATE"/>
         <permission name="android.permission.CHANGE_CONFIGURATION"/>
@@ -27,6 +28,7 @@
         <permission name="android.permission.FORCE_STOP_PACKAGES"/>
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.LOG_COMPAT_CHANGE" />
+        <permission name="android.permission.MANAGE_APP_LOCK" />
         <permission name="android.permission.MANAGE_DEBUGGING"/>
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
         <permission name="android.permission.MANAGE_FINGERPRINT"/>
@@ -46,6 +48,7 @@
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.READ_SEARCH_INDEXABLES"/>
         <permission name="android.permission.REBOOT"/>
+        <permission name="android.permission.RESET_BATTERY_STATS"/>
         <permission name="android.permission.STATUS_BAR"/>
         <permission name="android.permission.SUGGEST_MANUAL_TIME_AND_ZONE"/>
         <permission name="android.permission.TETHER_PRIVILEGED"/>
@@ -62,5 +65,7 @@
         <permission name="android.permission.RESTART_WIFI_SUBSYSTEM"/>
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
         <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
+        <permission name="android.permission.READ_DEVICE_CONFIG"/>
+        <permission name="android.permission.WRITE_DEVICE_CONFIG"/>
     </privapp-permissions>
 </permissions>

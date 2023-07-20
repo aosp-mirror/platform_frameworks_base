@@ -127,7 +127,8 @@
 
                 <LinearLayout
                     android:id="@+id/mobile_network_layout"
-                    style="@style/InternetDialog.Network">
+                    style="@style/InternetDialog.Network"
+                    android:layout_height="72dp">
 
                     <FrameLayout
                         android:layout_width="24dp"
@@ -190,6 +191,80 @@
 
                 </LinearLayout>
 
+                <Space
+                    android:id="@+id/mobile_connected_space"
+                    android:layout_height="8dp"
+                    android:layout_width="match_parent"
+                    android:visibility="gone"/>
+
+                <LinearLayout
+                    android:id="@+id/hotspot_layout"
+                    style="@style/InternetDialog.Network"
+                    android:layout_height="72dp">
+
+                    <FrameLayout
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:clickable="false"
+                        android:layout_gravity="center_vertical|start">
+                        <ImageView
+                            android:id="@+id/hotspot_icon"
+                            android:autoMirrored="true"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_internet_hotspot_disabled"/>
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:clickable="false"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="start|center_vertical">
+                        <TextView
+                            android:id="@+id/hotspot_title"
+                            android:maxLines="1"
+                            style="@style/InternetDialog.NetworkTitle"/>
+                        <TextView
+                            android:id="@+id/hotspot_summary"
+                            style="@style/InternetDialog.NetworkSummary"/>
+                    </LinearLayout>
+
+                    <View
+                        android:id="@+id/hotspot_toggle_divider"
+                        android:layout_width="1dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="7dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="?android:attr/textColorSecondary"/>
+
+                    <FrameLayout
+                        android:layout_width="@dimen/settingslib_switch_track_width"
+                        android:layout_height="48dp"
+                        android:layout_gravity="end|center_vertical">
+                        <Switch
+                            android:id="@+id/hotspot_toggle"
+                            android:contentDescription="@string/quick_settings_hotspot_label"
+                            android:switchMinWidth="@dimen/settingslib_switch_track_width"
+                            android:layout_gravity="center"
+                            android:layout_width="@dimen/settingslib_switch_track_width"
+                            android:layout_height="match_parent"
+                            android:track="@drawable/settingslib_track_selector"
+                            android:thumb="@drawable/settingslib_thumb_selector"
+                            android:theme="@style/MainSwitch.Settingslib"/>
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <Space
+                    android:id="@+id/wifi_connected_space"
+                    android:layout_height="8dp"
+                    android:layout_width="match_parent"
+                    android:visibility="gone"/>
+
                 <ViewStub android:id="@+id/secondary_mobile_network_stub"
                   android:inflatedId="@+id/secondary_mobile_network_layout"
                   android:layout="@layout/qs_dialog_secondary_mobile_network"
@@ -198,7 +273,7 @@
                 <LinearLayout
                     android:id="@+id/turn_on_wifi_layout"
                     style="@style/InternetDialog.Network"
-                    android:layout_height="@dimen/internet_dialog_wifi_network_height"
+                    android:layout_height="@dimen/internet_dialog_wifi_toggle_height"
                     android:gravity="center"
                     android:clickable="false"
                     android:focusable="false">
@@ -250,6 +325,7 @@
                     android:id="@+id/wifi_connected_layout"
                     style="@style/InternetDialog.Network"
                     android:layout_height="@dimen/internet_dialog_wifi_network_height"
+                    android:layout_marginTop="8dp"
                     android:paddingStart="20dp"
                     android:paddingEnd="24dp"
                     android:background="@drawable/settingslib_switch_bar_bg_on"
@@ -314,6 +390,7 @@
                 android:id="@+id/see_all_layout"
                 style="@style/InternetDialog.Network"
                 android:layout_height="64dp"
+                android:paddingTop="8dp"
                 android:paddingStart="20dp">
 
                 <FrameLayout

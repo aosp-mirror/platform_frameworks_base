@@ -33,13 +33,6 @@ public final class TaskFragmentAnimationParams implements Parcelable {
     public static final TaskFragmentAnimationParams DEFAULT =
             new TaskFragmentAnimationParams.Builder().build();
 
-    /**
-     * The default value for animation background color, which means to use the theme window
-     * background color.
-     */
-    @ColorInt
-    public static final int DEFAULT_ANIMATION_BACKGROUND_COLOR = 0;
-
     @ColorInt
     private final int mAnimationBackgroundColor;
 
@@ -111,13 +104,12 @@ public final class TaskFragmentAnimationParams implements Parcelable {
     public static final class Builder {
 
         @ColorInt
-        private int mAnimationBackgroundColor = DEFAULT_ANIMATION_BACKGROUND_COLOR;
+        private int mAnimationBackgroundColor = 0;
 
         /**
          * Sets the {@link ColorInt} to use for the background during the animation with this
          * TaskFragment if the animation requires a background. The default value is
-         * {@link #DEFAULT_ANIMATION_BACKGROUND_COLOR}, which is to use the theme window background
-         * color.
+         * {@code 0}, which is to use the theme window background.
          *
          * @param color a packed color int, {@code AARRGGBB}, for the animation background color.
          * @return this {@link Builder}.

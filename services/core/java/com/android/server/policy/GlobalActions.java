@@ -93,8 +93,7 @@ class GlobalActions implements GlobalActionsProvider.GlobalActionsListener {
         mGlobalActionsAvailable = available;
         if (mShowing && !mGlobalActionsAvailable) {
             // Global actions provider died but we need to be showing global actions still, show the
-            // legacy global actions provider and remove timeout callbacks to avoid legacy re-show.
-            mHandler.removeCallbacks(mShowTimeout);
+            // legacy global acrions provider.
             ensureLegacyCreated();
             mLegacyGlobalActions.showDialog(mKeyguardShowing, mDeviceProvisioned);
         }

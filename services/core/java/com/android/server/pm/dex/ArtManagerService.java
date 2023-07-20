@@ -320,13 +320,15 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
 
         switch (profileType) {
             case ArtManager.PROFILE_APPS :
-                return true;
+                return SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
             case ArtManager.PROFILE_BOOT_IMAGE:
                 // The device config property overrides the system property version.
                 boolean profileBootClassPath = SystemProperties.getBoolean(
                         "persist.device_config.runtime_native_boot.profilebootclasspath",
                         SystemProperties.getBoolean("dalvik.vm.profilebootclasspath", false));
-                return (Build.IS_USERDEBUG || Build.IS_ENG) && profileBootClassPath;
+                return (Build.IS_USERDEBUG || Build.IS_ENG) &&
+                        SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false) &&
+                        profileBootClassPath;
             default:
                 throw new IllegalArgumentException("Invalid profile type:" + profileType);
         }

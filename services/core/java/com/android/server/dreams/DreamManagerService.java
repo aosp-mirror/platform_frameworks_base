@@ -654,15 +654,11 @@ public final class DreamManagerService extends SystemService {
                 && mCurrentDream.isPreview == isPreviewMode
                 && mCurrentDream.canDoze == canDoze
                 && mCurrentDream.userId == userId) {
-            Slog.i(TAG, "Already in target dream.");
+            if (DEBUG) Slog.i(TAG, "Already in target dream.");
             return;
         }
 
-        Slog.i(TAG, "Entering dreamland.");
-
-        if (mCurrentDream != null && mCurrentDream.isDozing) {
-            stopDozingInternal(mCurrentDream.token);
-        }
+        if (DEBUG) Slog.i(TAG, "Entering dreamland.");
 
         mCurrentDream = new DreamRecord(name, userId, isPreviewMode, canDoze);
 
@@ -687,12 +683,12 @@ public final class DreamManagerService extends SystemService {
     private void stopDreamLocked(final boolean immediate, String reason) {
         if (mCurrentDream != null) {
             if (immediate) {
-                Slog.i(TAG, "Leaving dreamland.");
+                if (DEBUG) Slog.i(TAG, "Leaving dreamland.");
                 cleanupDreamLocked();
             } else if (mCurrentDream.isWaking) {
                 return; // already waking
             } else {
-                Slog.i(TAG, "Gently waking up from dream.");
+                if (DEBUG) Slog.i(TAG, "Gently waking up from dream.");
                 mCurrentDream.isWaking = true;
             }
 

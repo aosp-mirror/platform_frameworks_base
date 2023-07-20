@@ -16,6 +16,8 @@
 
 package com.android.server.twilight;
 
+import static android.location.LocationManager.FUSED_PROVIDER;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
@@ -23,12 +25,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.icu.util.Calendar;
 import android.location.Location;
+import android.location.LocationRequest;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.util.ArrayMap;
@@ -36,9 +42,11 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 
 import com.ibm.icu.impl.CalendarAstronomer;
 
+import java.io.File;
 import java.util.Objects;
 
 /**
@@ -52,6 +60,9 @@ public final class TwilightService extends SystemService
 
     private static final String TAG = "TwilightService";
     private static final String ATTRIBUTION_TAG = "TwilightService";
+    private static final String PREF_FILE_NAME = TAG + "_preferences.xml";
+    private static final String LONG_PREF_KEY = TAG + "_LONGITUDE";
+    private static final String LATI_PREF_KEY = TAG + "_LATITUDE";
     private static final boolean DEBUG = false;
 
     private static final int MSG_START_LISTENING = 1;
@@ -73,6 +84,8 @@ public final class TwilightService extends SystemService
 
     @GuardedBy("mListeners")
     protected TwilightState mLastTwilightState;
+
+    private SharedPreferences mSharedPreferences;
 
     public TwilightService(Context context) {
         super(context.createAttributionContext(ATTRIBUTION_TAG));
@@ -157,8 +170,12 @@ public final class TwilightService extends SystemService
         Slog.d(TAG, "startListening");
 
         // Start listening for location updates (default: low power, max 1h, min 10m).
-        mLocationManager.requestLocationUpdates(
-                null /* default */, this, Looper.getMainLooper());
+        final LocationRequest locationRequest = new LocationRequest.Builder(60 * 60 * 1000)
+                .setQuality(LocationRequest.QUALITY_LOW_POWER)
+                .build();
+        final Handler handler = new Handler(Looper.getMainLooper());
+        mLocationManager.requestLocationUpdates(FUSED_PROVIDER, locationRequest,
+                new HandlerExecutor(handler), this);
 
         // Request the device's location immediately if a previous location isn't available.
         if (mLocationManager.getLastLocation() == null) {
@@ -211,8 +228,30 @@ public final class TwilightService extends SystemService
     private void updateTwilightState() {
         // Calculate the twilight state based on the current time and location.
         final long currentTimeMillis = System.currentTimeMillis();
-        final Location location = mLastLocation != null ? mLastLocation
+        Location location = mLastLocation != null ? mLastLocation
                 : mLocationManager.getLastLocation();
+
+        if (location == null && mSharedPreferences != null) {
+            // try using last fetched location
+            final Long spLong = mSharedPreferences.getLong(LONG_PREF_KEY, 0);
+            final Long spLati = mSharedPreferences.getLong(LATI_PREF_KEY, 0);
+            if (spLong != 0 && spLati != 0) {
+                location = new Location("");
+                location.setLongitude(Double.longBitsToDouble(spLong));
+                location.setLatitude(Double.longBitsToDouble(spLati));
+                if (DEBUG) Slog.i(TAG, "Fetched saved location: "
+                        + location.getLongitude() + " : " + location.getLatitude());
+            }
+        } else if (mSharedPreferences != null) {
+            // save last fetched location for offline usage
+            mSharedPreferences.edit().putLong(LONG_PREF_KEY,
+                    Double.doubleToRawLongBits(location.getLongitude())).apply();
+            mSharedPreferences.edit().putLong(LATI_PREF_KEY,
+                    Double.doubleToRawLongBits(location.getLatitude())).apply();
+            if (DEBUG) Slog.i(TAG, "Saved location: "
+                    + location.getLongitude() + " : " + location.getLatitude());
+        }
+
         final TwilightState state = calculateTwilightState(location, currentTimeMillis);
         if (DEBUG) {
             Slog.d(TAG, "updateTwilightState: " + state);
@@ -269,6 +308,14 @@ public final class TwilightService extends SystemService
     public void onProviderDisabled(String provider) {
     }
 
+    @Override
+    public void onUserUnlocked(@NonNull TargetUser user) {
+        mSharedPreferences = getContext().getSharedPreferences(
+                new File(Environment.getUserSystemDirectory(user.getUserIdentifier()),
+                        PREF_FILE_NAME), Context.MODE_PRIVATE);
+        updateTwilightState();
+    }
+
     /**
      * Calculates the twilight state for a specific location and time.
      *
@@ -278,7 +325,7 @@ public final class TwilightService extends SystemService
      */
     private static TwilightState calculateTwilightState(Location location, long timeMillis) {
         if (location == null) {
-            return null;
+            return getManualTwilightState(timeMillis);
         }
 
         final CalendarAstronomer ca = new CalendarAstronomer(
@@ -306,5 +353,30 @@ public final class TwilightService extends SystemService
         }
 
         return new TwilightState(sunriseTimeMillis, sunsetTimeMillis);
+    }
+
+    private static TwilightState getManualTwilightState(long timeMillis) {
+        final Calendar sunrise = Calendar.getInstance();
+        sunrise.setTimeInMillis(timeMillis);
+        sunrise.set(Calendar.HOUR_OF_DAY, 6);
+        sunrise.set(Calendar.MINUTE, 0);
+        sunrise.set(Calendar.SECOND, 0);
+        sunrise.set(Calendar.MILLISECOND, 0);
+        final Calendar sunset = Calendar.getInstance();
+        sunset.setTimeInMillis(timeMillis);
+        sunset.set(Calendar.HOUR_OF_DAY, 20);
+        sunset.set(Calendar.MINUTE, 0);
+        sunset.set(Calendar.SECOND, 0);
+        sunset.set(Calendar.MILLISECOND, 0);
+        long sunriseMillis = sunrise.getTimeInMillis();
+        long sunsetMillis = sunset.getTimeInMillis();
+        if (sunsetMillis < timeMillis) {
+            sunrise.add(Calendar.DATE, 1);
+            sunriseMillis = sunrise.getTimeInMillis();
+        } else if (sunriseMillis > timeMillis) {
+            sunset.add(Calendar.DATE, -1);
+            sunsetMillis = sunset.getTimeInMillis();
+        }
+        return new TwilightState(sunriseMillis, sunsetMillis);
     }
 }

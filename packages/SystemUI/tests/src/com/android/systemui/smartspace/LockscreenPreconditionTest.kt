@@ -20,6 +20,8 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.smartspace.preconditions.LockscreenPrecondition
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.Execution
@@ -38,6 +40,9 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class LockscreenPreconditionTest : SysuiTestCase() {
+    @Mock
+    private lateinit var featureFlags: FeatureFlags
+
     @Mock
     private lateinit var deviceProvisionedController: DeviceProvisionedController
 
@@ -59,7 +64,10 @@ class LockscreenPreconditionTest : SysuiTestCase() {
     fun testFullyEnabled() {
         `when`(deviceProvisionedController.isCurrentUserSetup).thenReturn(true)
         `when`(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
-        val precondition = LockscreenPrecondition(deviceProvisionedController, execution)
+        `when`(featureFlags.isEnabled(Mockito.eq(Flags.SMARTSPACE) ?: Flags.SMARTSPACE))
+                .thenReturn(true)
+        val precondition = LockscreenPrecondition(featureFlags, deviceProvisionedController,
+                execution)
         precondition.addListener(listener)
 
         `verify`(listener).onCriteriaChanged()
@@ -73,8 +81,10 @@ class LockscreenPreconditionTest : SysuiTestCase() {
     fun testProvisioning() {
         `when`(deviceProvisionedController.isCurrentUserSetup).thenReturn(true)
         `when`(deviceProvisionedController.isDeviceProvisioned).thenReturn(false)
+        `when`(featureFlags.isEnabled(Mockito.eq(Flags.SMARTSPACE) ?: Flags.SMARTSPACE))
+                .thenReturn(true)
         val precondition =
-                LockscreenPrecondition(deviceProvisionedController, execution)
+                LockscreenPrecondition(featureFlags, deviceProvisionedController, execution)
         precondition.addListener(listener)
 
         verify(listener).onCriteriaChanged()
@@ -99,8 +109,10 @@ class LockscreenPreconditionTest : SysuiTestCase() {
     fun testUserSetup() {
         `when`(deviceProvisionedController.isCurrentUserSetup).thenReturn(false)
         `when`(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
+        `when`(featureFlags.isEnabled(Mockito.eq(Flags.SMARTSPACE) ?: Flags.SMARTSPACE))
+                .thenReturn(true)
         val precondition =
-                LockscreenPrecondition(deviceProvisionedController, execution)
+                LockscreenPrecondition(featureFlags, deviceProvisionedController, execution)
         precondition.addListener(listener)
 
         verify(listener).onCriteriaChanged()

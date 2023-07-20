@@ -19,6 +19,7 @@ package com.android.systemui.shade
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.PowerManager
 import android.os.SystemClock
+import android.os.UserHandle
 import android.provider.Settings
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -28,7 +29,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
 import com.android.systemui.tuner.TunerService
@@ -54,25 +54,28 @@ class PulsingGestureListener @Inject constructor(
         private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
         private val statusBarStateController: StatusBarStateController,
         private val shadeLogger: ShadeLogger,
-        userTracker: UserTracker,
         tunerService: TunerService,
         dumpManager: DumpManager
 ) : GestureDetector.SimpleOnGestureListener(), Dumpable {
     private var doubleTapEnabled = false
     private var singleTapEnabled = false
+    private var doubleTapEnabledNative = false
 
     init {
-        val tunable = Tunable { key: String?, _: String? ->
+        val tunable = Tunable { key: String?, value: String? ->
             when (key) {
+                Settings.Secure.DOUBLE_TAP_TO_WAKE ->
+                    doubleTapEnabledNative = TunerService.parseIntegerSwitch(value, false)
                 Settings.Secure.DOZE_DOUBLE_TAP_GESTURE ->
                     doubleTapEnabled = ambientDisplayConfiguration.doubleTapGestureEnabled(
-                            userTracker.userId)
+                            UserHandle.USER_CURRENT)
                 Settings.Secure.DOZE_TAP_SCREEN_GESTURE ->
                     singleTapEnabled = ambientDisplayConfiguration.tapGestureEnabled(
-                            userTracker.userId)
+                            UserHandle.USER_CURRENT)
             }
         }
         tunerService.addTunable(tunable,
+                Settings.Secure.DOUBLE_TAP_TO_WAKE,
                 Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                 Settings.Secure.DOZE_TAP_SCREEN_GESTURE)
 
@@ -110,7 +113,7 @@ class PulsingGestureListener @Inject constructor(
         // checks MUST be on the ACTION_UP event.
         if (e.actionMasked == MotionEvent.ACTION_UP &&
                 statusBarStateController.isDozing &&
-                (doubleTapEnabled || singleTapEnabled) &&
+                (doubleTapEnabled || singleTapEnabled || doubleTapEnabledNative) &&
                 !falsingManager.isProximityNear &&
                 !falsingManager.isFalseDoubleTap
         ) {
@@ -128,6 +131,7 @@ class PulsingGestureListener @Inject constructor(
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("singleTapEnabled=$singleTapEnabled")
         pw.println("doubleTapEnabled=$doubleTapEnabled")
+        pw.println("doubleTapEnabledNative=$doubleTapEnabledNative")
         pw.println("isDocked=${dockManager.isDocked}")
         pw.println("isProxCovered=${falsingManager.isProximityNear}")
     }

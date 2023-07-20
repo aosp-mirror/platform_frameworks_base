@@ -1319,7 +1319,7 @@ public class ContentProviderHelper {
         mService.mConstants.start(mService.mContext.getContentResolver());
         mService.mCoreSettingsObserver = new CoreSettingsObserver(mService);
         mService.mActivityTaskManager.installSystemProviders();
-        new DevelopmentSettingsObserver(); // init to observe developer settings enable/disable
+        //new DevelopmentSettingsObserver(); // init to observe developer settings enable/disable
         SettingsToPropertiesMapper.start(mService.mContext.getContentResolver());
         mService.mOomAdjuster.initSettings();
 

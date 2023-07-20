@@ -45,7 +45,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.settingslib.Utils;
@@ -143,12 +142,11 @@ public abstract class MediaOutputBaseAdapter extends
         final TextView mVolumeValueText;
         final ImageView mTitleIcon;
         final ProgressBar mProgressBar;
+        final MediaOutputSeekbar mSeekBar;
         final LinearLayout mTwoLineLayout;
         final ImageView mStatusIcon;
         final CheckBox mCheckBox;
         final ViewGroup mEndTouchArea;
-        @VisibleForTesting
-        MediaOutputSeekbar mSeekBar;
         private String mDeviceId;
         private ValueAnimator mCornerAnimator;
         private ValueAnimator mVolumeAnimator;
@@ -392,7 +390,6 @@ public abstract class MediaOutputBaseAdapter extends
                         mTitleIcon.setVisibility(View.VISIBLE);
                         mVolumeValueText.setVisibility(View.GONE);
                     }
-                    mController.logInteractionAdjustVolume(device);
                     mIsDragging = false;
                 }
             });

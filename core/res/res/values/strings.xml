@@ -20,11 +20,23 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Suffix added to a number to signify size in bytes. -->
     <string name="byteShort">B</string>
-    <!-- Format string used to add a suffix like "B" to a number
-         to display a size in bytes.
-         Some languages may want to remove the space between the placeholders
-         or replace it with a non-breaking space. -->
-    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g> <xliff:g id="unit" example="B">%2$s</xliff:g></string>
+    <!-- Suffix added to a number to signify size in kilobytes (1000 bytes).
+        If you retain the Latin script for the localization, please use the lowercase
+        'k', as it signifies 1000 bytes as opposed to 1024 bytes. -->
+    <string name="kilobyteShort">kB</string>
+    <!-- Suffix added to a number to signify size in megabytes. -->
+    <string name="megabyteShort">MB</string>
+    <!-- Suffix added to a number to signify size in gigabytes. -->
+    <string name="gigabyteShort">GB</string>
+    <!-- Suffix added to a number to signify size in terabytes. -->
+    <string name="terabyteShort">TB</string>
+    <!-- Suffix added to a number to signify size in petabytes. -->
+    <string name="petabyteShort">PB</string>
+    <!-- Format string used to add a suffix like "kB" or "MB" to a number
+         to display a size in kilobytes, megabytes, or other size units.
+         Some languages (like French) will want to add a space between
+         the placeholders. -->
+    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g> <xliff:g id="unit" example="MB">%2$s</xliff:g></string>
 
     <!-- Used in Contacts for a field that has no label and in Note Pad
          for a note with no name. -->
@@ -139,9 +151,9 @@
     <!-- Displayed when a SIM PUK password is too short. -->
     <string name="invalidPuk">Type a PUK that is 8 numbers or longer.</string>
     <!-- Displayed to prompt the user to type the PUK password to unlock
-         the SIM. -->
-    <string name="needPuk">Your SIM is PUK-locked. Type the PUK code to unlock it.</string>
-    <string name="needPuk2">Type PUK2 to unblock SIM.</string>
+         the SIM card. -->
+    <string name="needPuk">Your SIM card is PUK-locked. Type the PUK code to unlock it.</string>
+    <string name="needPuk2">Type PUK2 to unblock SIM card.</string>
     <!-- Displayed when user attempts to change SIM PIN1 without enabling PIN1. -->
     <string name="enablePin">Unsuccessful, enable SIM/RUIM Lock.</string>
     <!-- Displayed when a SIM PIN/PUK is entered incorrectly. -->
@@ -204,11 +216,6 @@
     <string name="serviceNotProvisioned">Service not provisioned.</string>
     <!-- Displayed to tell the user that they cannot change the caller ID setting. -->
     <string name="CLIRPermanent">You can\'t change the caller ID setting.</string>
-
-    <!-- Notification title to tell the user that auto data switch has occurred. [CHAR LIMIT=NOTIF_TITLE] -->
-    <string name="auto_data_switch_title">Switched data to <xliff:g id="carrierDisplay" example="Verizon">%s</xliff:g></string>
-    <!-- Notification content to tell the user that auto data switch can be disabled at settings. [CHAR LIMIT=NOTIF_BODY] -->
-    <string name="auto_data_switch_content">You can change this anytime in Settings</string>
 
     <!-- Notification title to tell the user that data service is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="RestrictedOnDataTitle">No mobile data service</string>
@@ -922,6 +929,16 @@
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_sensors">access sensor data about your vital signs</string>
 
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_otherSensors">Sensors</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_otherSensors">access sensor data about orientation, movement, etc.</string>
+
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_network">Network</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_network">access the network</string>
+
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
     <string name="permgrouplab_notifications">Notifications</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
@@ -968,12 +985,19 @@
     <!-- Description for the capability of an accessibility service to take screenshot. [CHAR LIMIT=NONE] -->
     <string name="capability_desc_canTakeScreenshot">Can take a screenshot of the display.</string>
 
-    <!-- Dream -->
-
-    <!-- The title to use when a dream is opened in preview mode. [CHAR LIMIT=NONE] -->
-    <string name="dream_preview_title">Preview, <xliff:g id="dream_name" example="Clock">%1$s</xliff:g></string>
-
     <!--  Permissions -->
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_fakePackageSignature">Spoof package signature</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_fakePackageSignature">Allows the app to pretend to be a different app. Malicious applications might be able to use this to access private application data. Legitimate uses include an emulator pretending to be what it emulates. Grant this permission with caution only!</string>
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgrouplab_fake_package_signature">Spoof package signature</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permgroupdesc_fake_package_signature">allow to spoof package signature</string>
+    <!-- Message shown to the user when the apps requests permission from this group. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
+    <string name="permgrouprequest_fake_package_signature">Allow
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to spoof package signature?</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_statusBar">disable or modify status bar</string>
@@ -1256,6 +1280,12 @@
     <string name="permlab_bodySensors_background">Access body sensor data, like heart rate, while in the background</string>
     <!-- Description of the background body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors in the background. [CHAR LIMIT=NONE] -->
     <string name="permdesc_bodySensors_background" product="default">Allows the app to access body sensor data, such as heart rate, temperature, and blood oxygen percentage, while the app is in the background.</string>
+
+    <!-- Title of the sensors permission, listed so the user can decide whether to allow the application to access sensor data. [CHAR LIMIT=80] -->
+    <string name="permlab_otherSensors">access sensors (like the compass)
+    </string>
+    <!-- Description of the sensors permission, listed so the user can decide whether to allow the application to access data from sensors. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_otherSensors" product="default">Allows the app to access data from sensors monitoring orientation, movement, vibration (including low frequency sound) and environmental data</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">Read calendar events and details</string>
@@ -1609,12 +1639,6 @@
       with Near Field Communication (NFC) tags, cards, and readers.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_nfcTransactionEvent">Secure Element transaction event</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_nfcTransactionEvent">Allows the app to receive information about
-      transactions happening on a Secure Element.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_disableKeyguard">disable your screen lock</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_disableKeyguard">Allows the app to disable the
@@ -1901,9 +1925,6 @@
     <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their face or screen lock credential (i.e. PIN, pattern, or password). [CHAR LIMIT=90] -->
     <string name="face_or_screen_lock_dialog_default_subtitle">Use your face or screen lock to continue</string>
 
-    <!-- Array containing custom error messages from vendor.  Vendor is expected to add and translate these strings -->
-    <string-array name="face_error_vendor">
-    </string-array>
     <!-- Default error message to use when face_error_vendor does not contain a message. [CHAR LIMIT=NONE] -->
     <string name="face_error_vendor_unknown">Something went wrong. Try again.</string>
 
@@ -2453,23 +2474,23 @@
     <!-- Shown when face unlock failed multiple times so we're just using the backup -->
     <string name="faceunlock_multiple_failures">Maximum Face Unlock attempts exceeded</string>
 
-    <!-- Shown in the lock screen when there is no SIM. -->
-    <string name="lockscreen_missing_sim_message_short">No SIM</string>
-    <!-- Shown in the lock screen when there is no SIM. -->
-    <string name="lockscreen_missing_sim_message" product="tablet">No SIM in tablet.</string>
-    <!-- Shown in the lock screen when there is no SIM. -->
-    <string name="lockscreen_missing_sim_message" product="tv">No SIM in your Android TV device.</string>
-    <!-- Shown in the lock screen when there is no SIM. -->
-    <string name="lockscreen_missing_sim_message" product="default">No SIM in phone.</string>
-    <!-- Shown in the lock screen to ask the user to add a SIM. -->
-    <string name="lockscreen_missing_sim_instructions">Add a SIM.</string>
-    <!-- Shown in the lock screen to ask the user to add a SIM when sim is missing or not readable. -->
-    <string name="lockscreen_missing_sim_instructions_long">The SIM is missing or not readable. Add a SIM.</string>
-    <!-- Shown in the lock screen when SIM is permanently disabled. -->
-    <string name="lockscreen_permanent_disabled_sim_message_short">Unusable SIM.</string>
-    <!-- Shown in the lock screen to inform the user to SIM is permanently deactivated. -->
-    <string name="lockscreen_permanent_disabled_sim_instructions">Your SIM has been permanently deactivated.\n
-    Contact your wireless service provider for another SIM.</string>
+    <!-- Shown in the lock screen when there is no SIM card. -->
+    <string name="lockscreen_missing_sim_message_short">No SIM card</string>
+    <!-- Shown in the lock screen when there is no SIM card. -->
+    <string name="lockscreen_missing_sim_message" product="tablet">No SIM card in tablet.</string>
+    <!-- Shown in the lock screen when there is no SIM card. -->
+    <string name="lockscreen_missing_sim_message" product="tv">No SIM card in your Android TV device.</string>
+    <!-- Shown in the lock screen when there is no SIM card. -->
+    <string name="lockscreen_missing_sim_message" product="default">No SIM card in phone.</string>
+    <!-- Shown in the lock screen to ask the user to insert a SIM card. -->
+    <string name="lockscreen_missing_sim_instructions">Insert a SIM card.</string>
+    <!-- Shown in the lock screen to ask the user to insert a SIM card when sim is missing or not readable. -->
+    <string name="lockscreen_missing_sim_instructions_long">The SIM card is missing or not readable. Insert a SIM card.</string>
+    <!-- Shown in the lock screen when SIM card is permanently disabled. -->
+    <string name="lockscreen_permanent_disabled_sim_message_short">Unusable SIM card.</string>
+    <!-- Shown in the lock screen to inform the user to SIM card is permanently disabled. -->
+    <string name="lockscreen_permanent_disabled_sim_instructions">Your SIM card has been permanently disabled.\n
+    Contact your wireless service provider for another SIM card.</string>
 
     <!-- Shown on transport control of lockscreen. Pressing button goes to previous track. -->
     <string name="lockscreen_transport_prev_description">Previous track</string>
@@ -2496,17 +2517,17 @@
 
     <!-- When the user enters a wrong sim pin too many times, it becomes
          PUK locked (Pin Unlock Kode) -->
-    <string name="lockscreen_sim_puk_locked_message">SIM is PUK-locked.</string>
+    <string name="lockscreen_sim_puk_locked_message">SIM card is PUK-locked.</string>
     <!-- Shown in the lock screen when the SIM has become PUK locked and the user must call customer care to unlock it. -->
     <string name="lockscreen_sim_puk_locked_instructions">See the User Guide or contact Customer Care.</string>
 
     <!-- Shown in the lock screen to tell the user that their SIM is locked and they must unlock it. -->
-    <string name="lockscreen_sim_locked_message">SIM is locked.</string>
+    <string name="lockscreen_sim_locked_message">SIM card is locked.</string>
 
     <!-- For the unlock screen, When the user enters a sim unlock code, it takes a little while to check
          whether it is valid, and to unlock the sim if it is valid.  we display a
          progress dialog in the meantime.  this is the emssage. -->
-    <string name="lockscreen_sim_unlock_progress_dialog_message">Unlocking SIM\u2026</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
 
     <!-- For the unlock screen, Information message shown in dialog when user has too many failed attempts at
          drawing the unlock pattern -->
@@ -3800,13 +3821,13 @@
 
     <!-- SIM swap and device reboot Dialog --> <skip />
     <!-- See SIM_REMOVED_DIALOG.  This is the title of that dialog. -->
-    <string name="sim_removed_title">SIM removed</string>
+    <string name="sim_removed_title">SIM card removed</string>
     <!-- See SIM_REMOVED_DIALOG.  This is the message of that dialog. -->
-    <string name="sim_removed_message">The mobile network will be unavailable until you restart with a valid SIM.</string>
+    <string name="sim_removed_message">The mobile network will be unavailable until you restart with a valid SIM card inserted.</string>
     <!-- See SIM_REMOVED_DIALOG.  This is the button of that dialog. -->
     <string name="sim_done_button">Done</string>
     <!-- See SIM_ADDED_DIALOG.  This is the title of that dialog. -->
-    <string name="sim_added_title">SIM added</string>
+    <string name="sim_added_title">SIM card added</string>
     <!-- See SIM_ADDED_DIALOG.  This is the message of that dialog. -->
     <string name="sim_added_message">Restart your device to access the mobile network.</string>
     <!-- See SIM_ADDED_DIALOG.  This is the button of that dialog. -->
@@ -4534,8 +4555,8 @@
     <!-- Name of the default audio route when an audio dock is connected. [CHAR LIMIT=50] -->
     <string name="default_audio_route_name_dock_speakers">Dock speakers</string>
 
-    <!-- Name of the default audio route when an external device is connected. [CHAR LIMIT=50] -->
-    <string name="default_audio_route_name_external_device">External Device</string>
+    <!-- Name of the default audio route when HDMI is connected. [CHAR LIMIT=50] -->
+    <string name="default_audio_route_name_hdmi">HDMI</string>
 
     <!-- Name of the default audio route when wired headphones are
          connected. [CHAR LIMIT=50] -->
@@ -4630,8 +4651,8 @@
     <string name="kg_puk_enter_pin_hint">Enter desired PIN code</string>
     <!-- Message shown when the user needs to confirm the PIN they just entered in the PUK screen -->
     <string name="kg_enter_confirm_pin_hint">Confirm desired PIN code</string>
-    <!-- Message shown in dialog while the device is unlocking the SIM -->
-    <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM\u2026</string>
+    <!-- Message shown in dialog while the device is unlocking the SIM card -->
+    <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
     <!-- Message shown when the user enters the wrong PIN code -->
     <string name="kg_password_wrong_pin_code">Incorrect PIN code.</string>
     <!-- Message shown when the user enters an invalid SIM pin password in PUK screen -->
@@ -5158,14 +5179,6 @@
     <!-- Cling help message confirmation button when hiding the navigation bar entering immersive mode [CHAR LIMIT=30] -->
     <string name="immersive_cling_positive">Got it</string>
 
-    <!-- Text on a toast shown after the system rotates the screen for camera app
-         compatibility. [CHAR LIMIT=NONE] -->
-    <string name="display_rotation_camera_compat_toast_after_rotation">Rotate for a better view</string>
-
-    <!-- Text on a toast shown when a camera view is started within the app that may not be able
-         to display the camera preview correctly while in split screen. [CHAR LIMIT=NONE] -->
-    <string name="display_rotation_camera_compat_toast_in_split_screen">Exit split screen for a better view</string>
-
     <!-- Label for button to confirm chosen date or time [CHAR LIMIT=30] -->
     <string name="done_label">Done</string>
     <!--
@@ -5200,21 +5213,34 @@
     <string name="managed_profile_label_badge">Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
     <string name="managed_profile_label_badge_2">2nd Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
     <string name="managed_profile_label_badge_3">3rd Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_4">4th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_5">5th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_6">6th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_7">7th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_8">8th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_9">9th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_10">10th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_11">11th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_12">12th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_13">13th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_14">14th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_15">15th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
+    <string name="managed_profile_label_badge_16">16th Work <xliff:g id="label" example="Email">%1$s</xliff:g></string>
 
     <!-- DO NOT TRANSLATE -->
     <string name="time_placeholder">--</string>
 
     <!-- DO NOT TRANSLATE -->
-    <string name="radial_numbers_typeface">sans-serif</string>
+    <string name="radial_numbers_typeface">@string/config_bodyFontFamily</string>
     <!-- DO NOT TRANSLATE -->
-    <string name="sans_serif">sans-serif</string>
+    <string name="sans_serif">@string/config_bodyFontFamily</string>
 
     <!-- DO NOT TRANSLATE -->
-    <string name="date_picker_month_typeface">sans-serif-medium</string>
+    <string name="date_picker_month_typeface">@string/config_bodyFontFamilyMedium</string>
     <!-- DO NOT TRANSLATE -->
-    <string name="date_picker_day_of_week_typeface">sans-serif-medium</string>
+    <string name="date_picker_day_of_week_typeface">@string/config_bodyFontFamilyMedium</string>
     <!-- DO NOT TRANSLATE -->
-    <string name="date_picker_day_typeface">sans-serif-medium</string>
+    <string name="date_picker_day_typeface">@string/config_bodyFontFamilyMedium</string>
 
     <!-- Lock-to-app unlock pin string -->
     <string name="lock_to_app_unlock_pin">Ask for PIN before unpinning</string>
@@ -6358,7 +6384,4 @@ ul.</string>
 
     <!-- Title for preference of the system default locale. [CHAR LIMIT=50]-->
     <string name="system_locale_title">System default</string>
-
-    <!-- Display content to tell the user the sim card name and number-->
-    <string name="default_card_name">CARD <xliff:g id="cardNumber" example="1">%d</xliff:g></string>
 </resources>

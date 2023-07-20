@@ -23,7 +23,4 @@ interface IDesktopMode {
 
     /** Show apps on the desktop */
     void showDesktopApps();
-
-    /** Get count of visible desktop tasks */
-    int getVisibleTaskCount();
 }

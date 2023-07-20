@@ -35,33 +35,9 @@ class ActionIntentCreatorTest : SysuiTestCase() {
     @Test
     fun testCreateShareIntent() {
         val uri = Uri.parse("content://fake")
-
-        val output = ActionIntentCreator.createShareIntent(uri)
-
-        assertThat(output.action).isEqualTo(Intent.ACTION_CHOOSER)
-        assertFlagsSet(
-            Intent.FLAG_ACTIVITY_NEW_TASK or
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                Intent.FLAG_GRANT_READ_URI_PERMISSION,
-            output.flags
-        )
-
-        val wrappedIntent = output.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
-        assertThat(wrappedIntent?.action).isEqualTo(Intent.ACTION_SEND)
-        assertThat(wrappedIntent?.data).isEqualTo(uri)
-        assertThat(wrappedIntent?.type).isEqualTo("image/png")
-        assertThat(wrappedIntent?.getStringExtra(Intent.EXTRA_SUBJECT)).isNull()
-        assertThat(wrappedIntent?.getStringExtra(Intent.EXTRA_TEXT)).isNull()
-        assertThat(wrappedIntent?.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java))
-            .isEqualTo(uri)
-    }
-
-    @Test
-    fun testCreateShareIntentWithSubject() {
-        val uri = Uri.parse("content://fake")
         val subject = "Example subject"
 
-        val output = ActionIntentCreator.createShareIntentWithSubject(uri, subject)
+        val output = ActionIntentCreator.createShareIntent(uri, subject)
 
         assertThat(output.action).isEqualTo(Intent.ACTION_CHOOSER)
         assertFlagsSet(
@@ -76,34 +52,16 @@ class ActionIntentCreatorTest : SysuiTestCase() {
         assertThat(wrappedIntent?.data).isEqualTo(uri)
         assertThat(wrappedIntent?.type).isEqualTo("image/png")
         assertThat(wrappedIntent?.getStringExtra(Intent.EXTRA_SUBJECT)).isEqualTo(subject)
-        assertThat(wrappedIntent?.getStringExtra(Intent.EXTRA_TEXT)).isNull()
         assertThat(wrappedIntent?.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java))
             .isEqualTo(uri)
     }
 
     @Test
-    fun testCreateShareIntentWithExtraText() {
+    fun testCreateShareIntent_noSubject() {
         val uri = Uri.parse("content://fake")
-        val extraText = "Extra text"
-
-        val output = ActionIntentCreator.createShareIntentWithExtraText(uri, extraText)
-
-        assertThat(output.action).isEqualTo(Intent.ACTION_CHOOSER)
-        assertFlagsSet(
-            Intent.FLAG_ACTIVITY_NEW_TASK or
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or
-                Intent.FLAG_GRANT_READ_URI_PERMISSION,
-            output.flags
-        )
-
+        val output = ActionIntentCreator.createShareIntent(uri, null)
         val wrappedIntent = output.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
-        assertThat(wrappedIntent?.action).isEqualTo(Intent.ACTION_SEND)
-        assertThat(wrappedIntent?.data).isEqualTo(uri)
-        assertThat(wrappedIntent?.type).isEqualTo("image/png")
         assertThat(wrappedIntent?.getStringExtra(Intent.EXTRA_SUBJECT)).isNull()
-        assertThat(wrappedIntent?.getStringExtra(Intent.EXTRA_TEXT)).isEqualTo(extraText)
-        assertThat(wrappedIntent?.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java))
-            .isEqualTo(uri)
     }
 
     @Test

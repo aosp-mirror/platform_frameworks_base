@@ -104,7 +104,6 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.sysprop.DisplayProperties;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IntArray;
@@ -256,13 +255,6 @@ public final class DisplayManagerService extends SystemService {
      */
     final SparseArray<Pair<IVirtualDevice, DisplayWindowPolicyController>>
             mDisplayWindowPolicyControllers = new SparseArray<>();
-
-    /**
-     *  Map of every display device {@link HighBrightnessModeMetadata}s indexed by
-     *  {@link DisplayDevice#mUniqueId}.
-     */
-    public final ArrayMap<String, HighBrightnessModeMetadata> mHighBrightnessModeMetadataMap =
-            new ArrayMap<>();
 
     // List of all currently registered display adapters.
     private final ArrayList<DisplayAdapter> mDisplayAdapters = new ArrayList<DisplayAdapter>();
@@ -434,8 +426,6 @@ public final class DisplayManagerService extends SystemService {
     private boolean mIsDocked;
     private boolean mIsDreaming;
 
-    private boolean mBootCompleted = false;
-
     private final BroadcastReceiver mIdleModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -575,12 +565,6 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
         } else if (phase == PHASE_BOOT_COMPLETED) {
-            synchronized (mSyncRoot) {
-                mBootCompleted = true;
-                for (int i = 0; i < mDisplayPowerControllers.size(); i++) {
-                    mDisplayPowerControllers.valueAt(i).onBootCompleted();
-                }
-            }
             mDisplayModeDirector.onBootCompleted();
             mLogicalDisplayMapper.onBootCompleted();
         }
@@ -863,15 +847,6 @@ public final class DisplayManagerService extends SystemService {
                 for (int i = 0; i < userDisabledHdrTypeStrings.length; i++) {
                     mUserDisabledHdrTypes[i] = Integer.parseInt(userDisabledHdrTypeStrings[i]);
                 }
-
-                if (!mAreUserDisabledHdrTypesAllowed) {
-                    mLogicalDisplayMapper.forEachLocked(
-                            display -> {
-                                display.setUserDisabledHdrTypes(mUserDisabledHdrTypes);
-                                handleLogicalDisplayChangedLocked(display);
-                            });
-                }
-
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Failed to parse USER_DISABLED_HDR_FORMATS. "
                         + "Clearing the setting.", e);
@@ -899,15 +874,6 @@ public final class DisplayManagerService extends SystemService {
                 Settings.Global.USER_PREFERRED_RESOLUTION_WIDTH, Display.INVALID_DISPLAY_WIDTH);
         Display.Mode mode = new Display.Mode(width, height, refreshRate);
         mUserPreferredMode = isResolutionAndRefreshRateValid(mode) ? mode : null;
-        if (mUserPreferredMode != null) {
-            mDisplayDeviceRepo.forEachLocked((DisplayDevice device) -> {
-                device.setUserPreferredDisplayModeLocked(mode);
-            });
-        } else {
-            mLogicalDisplayMapper.forEachLocked((LogicalDisplay display) -> {
-                configurePreferredDisplayModeLocked(display);
-            });
-        }
     }
 
     private DisplayInfo getDisplayInfoForFrameRateOverride(DisplayEventReceiver.FrameRateOverride[]
@@ -1551,7 +1517,6 @@ public final class DisplayManagerService extends SystemService {
         final int displayId = display.getDisplayIdLocked();
         final boolean isDefault = displayId == Display.DEFAULT_DISPLAY;
         configureColorModeLocked(display, device);
-
         if (!mAreUserDisabledHdrTypesAllowed) {
             display.setUserDisabledHdrTypes(mUserDisabledHdrTypes);
         }
@@ -1605,16 +1570,7 @@ public final class DisplayManagerService extends SystemService {
 
         DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
         if (dpc != null) {
-            final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
-            if (device == null) {
-                Slog.wtf(TAG, "Display Device is null in DisplayManagerService for display: "
-                        + display.getDisplayIdLocked());
-                return;
-            }
-
-            final String uniqueId = device.getUniqueId();
-            HighBrightnessModeMetadata hbmMetadata = mHighBrightnessModeMetadataMap.get(uniqueId);
-            dpc.onDisplayChanged(hbmMetadata);
+            dpc.onDisplayChanged();
         }
     }
 
@@ -1671,15 +1627,7 @@ public final class DisplayManagerService extends SystemService {
         final int displayId = display.getDisplayIdLocked();
         final DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
         if (dpc != null) {
-            final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
-            if (device == null) {
-                Slog.wtf(TAG, "Display Device is null in DisplayManagerService for display: "
-                        + display.getDisplayIdLocked());
-                return;
-            }
-            final String uniqueId = device.getUniqueId();
-            HighBrightnessModeMetadata hbmMetadata = mHighBrightnessModeMetadataMap.get(uniqueId);
-            dpc.onDisplayChanged(hbmMetadata);
+            dpc.onDisplayChanged();
         }
     }
 
@@ -2665,27 +2613,6 @@ public final class DisplayManagerService extends SystemService {
         mLogicalDisplayMapper.forEachLocked(this::addDisplayPowerControllerLocked);
     }
 
-    @VisibleForTesting
-    HighBrightnessModeMetadata getHighBrightnessModeMetadata(LogicalDisplay display) {
-        final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
-        if (device == null) {
-            Slog.wtf(TAG, "Display Device is null in DisplayPowerController for display: "
-                    + display.getDisplayIdLocked());
-            return null;
-        }
-
-        final String uniqueId = device.getUniqueId();
-
-        if (mHighBrightnessModeMetadataMap.containsKey(uniqueId)) {
-            return mHighBrightnessModeMetadataMap.get(uniqueId);
-        }
-
-        // HBM Time info not present. Create a new one for this physical display.
-        HighBrightnessModeMetadata hbmInfo = new HighBrightnessModeMetadata();
-        mHighBrightnessModeMetadataMap.put(uniqueId, hbmInfo);
-        return hbmInfo;
-    }
-
     private void addDisplayPowerControllerLocked(LogicalDisplay display) {
         if (mPowerHandler == null) {
             // initPowerManagement has not yet been called.
@@ -2697,18 +2624,10 @@ public final class DisplayManagerService extends SystemService {
 
         final BrightnessSetting brightnessSetting = new BrightnessSetting(mPersistentDataStore,
                 display, mSyncRoot);
-
-        // If display already has a HighBrightnessModeMetadata mapping, use that.
-        // Or create a new one and use that.
-        // We also need to pass a mapping of the HighBrightnessModeTimeInfoMap to
-        // displayPowerController, so the hbm info can be correctly associated
-        // with the corresponding displaydevice.
-        HighBrightnessModeMetadata hbmMetadata = getHighBrightnessModeMetadata(display);
-
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
                 mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
-                () -> handleBrightnessChange(display), hbmMetadata, mBootCompleted);
+                () -> handleBrightnessChange(display));
         mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
     }
 

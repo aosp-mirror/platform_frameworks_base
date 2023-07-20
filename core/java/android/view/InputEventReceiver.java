@@ -49,6 +49,7 @@ public abstract class InputEventReceiver {
 
     // Map from InputEvent sequence numbers to dispatcher sequence numbers.
     private final SparseIntArray mSeqMap = new SparseIntArray();
+    Choreographer mChoreographer;
 
     private static native long nativeInit(WeakReference<InputEventReceiver> receiver,
             InputChannel inputChannel, MessageQueue messageQueue);
@@ -77,7 +78,7 @@ public abstract class InputEventReceiver {
         mInputChannel = inputChannel;
         mMessageQueue = looper.getQueue();
         mReceiverPtr = nativeInit(new WeakReference<InputEventReceiver>(this),
-                mInputChannel, mMessageQueue);
+                inputChannel, mMessageQueue);
 
         mCloseGuard.open("InputEventReceiver.dispose");
     }
@@ -265,6 +266,20 @@ public abstract class InputEventReceiver {
     private void dispatchInputEvent(int seq, InputEvent event) {
         mSeqMap.put(event.getSequenceNumber(), seq);
         onInputEvent(event);
+    }
+
+    // Called from native code.
+    @SuppressWarnings("unused")
+    private void dispatchMotionEventInfo(int motionEventType, int touchMoveNum) {
+        try {
+            if (mChoreographer == null)
+                mChoreographer = Choreographer.getInstance();
+
+            if (mChoreographer != null)
+                mChoreographer.setMotionEventInfo(motionEventType, touchMoveNum);
+        } catch (Exception e) {
+            Log.e(TAG, "cannot invoke setMotionEventInfo.");
+        }
     }
 
     /**

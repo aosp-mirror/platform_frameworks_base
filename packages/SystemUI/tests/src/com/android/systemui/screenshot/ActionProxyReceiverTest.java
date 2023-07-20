@@ -39,7 +39,6 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
@@ -68,7 +67,6 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
     private PendingIntent mMockPendingIntent;
 
     private Intent mIntent;
-    private final FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Before
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
@@ -137,11 +135,10 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
         if (withStatusBar) {
             return new ActionProxyReceiver(
                     Optional.of(mMockCentralSurfaces), mMockActivityManagerWrapper,
-                    mMockScreenshotSmartActions, mDisplayTracker);
+                    mMockScreenshotSmartActions);
         } else {
             return new ActionProxyReceiver(
-                    Optional.empty(), mMockActivityManagerWrapper, mMockScreenshotSmartActions,
-                    mDisplayTracker);
+                    Optional.empty(), mMockActivityManagerWrapper, mMockScreenshotSmartActions);
         }
     }
 }

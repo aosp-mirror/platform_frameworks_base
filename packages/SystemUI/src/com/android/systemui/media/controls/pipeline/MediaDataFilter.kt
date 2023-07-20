@@ -23,9 +23,7 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.controls.models.player.MediaData
-import com.android.systemui.media.controls.models.recommendation.EXTRA_KEY_TRIGGER_RESUME
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -68,8 +66,7 @@ constructor(
     private val lockscreenUserManager: NotificationLockscreenUserManager,
     @Main private val executor: Executor,
     private val systemClock: SystemClock,
-    private val logger: MediaUiEventLogger,
-    private val mediaFlags: MediaFlags,
+    private val logger: MediaUiEventLogger
 ) : MediaDataManager.Listener {
     private val _listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
     internal val listeners: Set<MediaDataManager.Listener>
@@ -124,9 +121,7 @@ constructor(
         data: SmartspaceMediaData,
         shouldPrioritize: Boolean
     ) {
-        // With persistent recommendation card, we could get a background update while inactive
-        // Otherwise, consider it an invalid update
-        if (!data.isActive && !mediaFlags.isPersistentSsCardEnabled()) {
+        if (!data.isActive) {
             Log.d(TAG, "Inactive recommendation data. Skip triggering.")
             return
         }
@@ -139,23 +134,14 @@ constructor(
         val sorted = userEntries.toSortedMap(compareBy { userEntries.get(it)?.lastActive ?: -1 })
         val timeSinceActive = timeSinceActiveForMostRecentMedia(sorted)
         var smartspaceMaxAgeMillis = SMARTSPACE_MAX_AGE
-        data.cardAction?.extras?.let {
-            val smartspaceMaxAgeSeconds = it.getLong(RESUMABLE_MEDIA_MAX_AGE_SECONDS_KEY, 0)
+        data.cardAction?.let {
+            val smartspaceMaxAgeSeconds = it.extras.getLong(RESUMABLE_MEDIA_MAX_AGE_SECONDS_KEY, 0)
             if (smartspaceMaxAgeSeconds > 0) {
                 smartspaceMaxAgeMillis = TimeUnit.SECONDS.toMillis(smartspaceMaxAgeSeconds)
             }
         }
 
-        // Check if smartspace has explicitly specified whether to re-activate resumable media.
-        // The default behavior is to trigger if the smartspace data is active.
-        val shouldTriggerResume =
-            if (data.cardAction?.extras?.containsKey(EXTRA_KEY_TRIGGER_RESUME) == true) {
-                data.cardAction.extras.getBoolean(EXTRA_KEY_TRIGGER_RESUME, true)
-            } else {
-                true
-            }
-        val shouldReactivate =
-            shouldTriggerResume && !hasActiveMedia() && hasAnyMedia() && data.isActive
+        val shouldReactivate = !hasActiveMedia() && hasAnyMedia()
 
         if (timeSinceActive < smartspaceMaxAgeMillis) {
             // It could happen there are existing active media resume cards, then we don't need to
@@ -183,7 +169,7 @@ constructor(
                     )
                 }
             }
-        } else if (data.isActive) {
+        } else {
             // Mark to prioritize Smartspace card if no recent media.
             shouldPrioritizeMutable = true
         }
@@ -266,7 +252,7 @@ constructor(
             if (dismissIntent == null) {
                 Log.w(
                     TAG,
-                    "Cannot create dismiss action click action: extras missing dismiss_intent."
+                    "Cannot create dismiss action click action: " + "extras missing dismiss_intent."
                 )
             } else if (
                 dismissIntent.getComponent() != null &&
@@ -278,21 +264,15 @@ constructor(
             } else {
                 broadcastSender.sendBroadcast(dismissIntent)
             }
-
-            if (mediaFlags.isPersistentSsCardEnabled()) {
-                smartspaceMediaData = smartspaceMediaData.copy(isActive = false)
-                mediaDataManager.setRecommendationInactive(smartspaceMediaData.targetId)
-            } else {
-                smartspaceMediaData =
-                    EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                        targetId = smartspaceMediaData.targetId,
-                        instanceId = smartspaceMediaData.instanceId,
-                    )
-                mediaDataManager.dismissSmartspaceRecommendation(
-                    smartspaceMediaData.targetId,
-                    delay = 0L,
+            smartspaceMediaData =
+                EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                    targetId = smartspaceMediaData.targetId,
+                    instanceId = smartspaceMediaData.instanceId
                 )
-            }
+            mediaDataManager.dismissSmartspaceRecommendation(
+                smartspaceMediaData.targetId,
+                delay = 0L
+            )
         }
     }
 
@@ -303,15 +283,8 @@ constructor(
                 (smartspaceMediaData.isValid() || reactivatedKey != null))
 
     /** Are there any media entries we should display? */
-    fun hasAnyMediaOrRecommendation(): Boolean {
-        val hasSmartspace =
-            if (mediaFlags.isPersistentSsCardEnabled()) {
-                smartspaceMediaData.isValid()
-            } else {
-                smartspaceMediaData.isActive && smartspaceMediaData.isValid()
-            }
-        return userEntries.isNotEmpty() || hasSmartspace
-    }
+    fun hasAnyMediaOrRecommendation() =
+        userEntries.isNotEmpty() || (smartspaceMediaData.isActive && smartspaceMediaData.isValid())
 
     /** Are there any media notifications active (excluding the recommendation)? */
     fun hasActiveMedia() = userEntries.any { it.value.active }
@@ -329,8 +302,9 @@ constructor(
      * Return the time since last active for the most-recent media.
      *
      * @param sortedEntries userEntries sorted from the earliest to the most-recent.
+     *
      * @return The duration in milliseconds from the most-recent media's last active timestamp to
-     *   the present. MAX_VALUE will be returned if there is no media.
+     * the present. MAX_VALUE will be returned if there is no media.
      */
     private fun timeSinceActiveForMostRecentMedia(
         sortedEntries: SortedMap<String, MediaData>

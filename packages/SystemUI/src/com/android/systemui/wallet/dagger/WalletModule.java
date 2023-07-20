@@ -22,8 +22,6 @@ import android.service.quickaccesswallet.QuickAccessWalletClient;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.qs.tiles.QuickAccessWalletTile;
 import com.android.systemui.wallet.ui.WalletActivity;
 
 import java.util.concurrent.Executor;
@@ -33,7 +31,6 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
-import dagger.multibindings.StringKey;
 
 
 /**
@@ -55,11 +52,4 @@ public abstract class WalletModule {
             @Background Executor bgExecutor) {
         return QuickAccessWalletClient.create(context, bgExecutor);
     }
-
-    /** */
-    @Binds
-    @IntoMap
-    @StringKey(QuickAccessWalletTile.TILE_SPEC)
-    public abstract QSTileImpl<?> bindQuickAccessWalletTile(
-            QuickAccessWalletTile quickAccessWalletTile);
 }

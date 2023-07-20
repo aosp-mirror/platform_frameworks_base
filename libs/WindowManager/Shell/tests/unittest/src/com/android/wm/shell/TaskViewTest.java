@@ -28,11 +28,9 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -84,14 +82,13 @@ public class TaskViewTest extends ShellTestCase {
     @Mock
     SyncTransactionQueue mSyncQueue;
     @Mock
-    Transitions mTransitions;
+    TaskViewTransitions mTaskViewTransitions;
 
     SurfaceSession mSession;
     SurfaceControl mLeash;
 
     Context mContext;
     TaskView mTaskView;
-    TaskViewTransitions mTaskViewTransitions;
 
     @Before
     public void setUp() {
@@ -121,10 +118,6 @@ public class TaskViewTest extends ShellTestCase {
             return null;
         }).when(mSyncQueue).runInSync(any());
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            doReturn(true).when(mTransitions).isRegistered();
-        }
-        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions));
         mTaskView = new TaskView(mContext, mOrganizer, mTaskViewTransitions, mSyncQueue);
         mTaskView.setListener(mExecutor, mViewListener);
     }

@@ -48,6 +48,7 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     private static final int MSG_MOBILE_DATA_ENABLED_CHANGED = 5;
     private static final int MSG_ADD_REMOVE_EMERGENCY        = 6;
     private static final int MSG_ADD_REMOVE_SIGNAL           = 7;
+    private static final int MSG_IMS_STATE_CHANGED           = 8;
     private static final int HISTORY_SIZE = 64;
     private static final SimpleDateFormat SSDF = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
@@ -113,6 +114,11 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
                     mSignalCallbacks.add((SignalCallback) msg.obj);
                 } else {
                     mSignalCallbacks.remove((SignalCallback) msg.obj);
+                }
+                break;
+            case MSG_IMS_STATE_CHANGED:
+                for (SignalCallback signalCluster : mSignalCallbacks) {
+                    signalCluster.setImsIcon((ImsIconState) msg.obj);
                 }
                 break;
         }
@@ -251,6 +257,11 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
             recordLastCallback(log);
         }
         obtainMessage(MSG_AIRPLANE_MODE_CHANGED, icon).sendToTarget();
+    }
+
+    @Override
+    public void setImsIcon(ImsIconState icon) {
+        obtainMessage(MSG_IMS_STATE_CHANGED, icon).sendToTarget();;
     }
 
     void setListening(EmergencyListener listener, boolean listening) {

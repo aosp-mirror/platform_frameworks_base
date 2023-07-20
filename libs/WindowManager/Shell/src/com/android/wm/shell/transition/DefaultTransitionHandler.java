@@ -23,6 +23,7 @@ import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
@@ -398,7 +399,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // Don't animate anything that isn't independent.
             if (!TransitionInfo.isIndependent(change, info)) continue;
 
-            Animation a = loadAnimation(info, change, wallpaperTransit);
+            Animation a = loadAnimation(info, change, wallpaperTransit,
+                        change.getTaskInfo().configuration.windowConfiguration
+                        .getWindowingMode() == WINDOWING_MODE_FREEFORM);
             if (a != null) {
                 if (isTask) {
                     final @TransitionType int type = info.getType();
@@ -548,7 +551,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     @Nullable
     private Animation loadAnimation(@NonNull TransitionInfo info,
-            @NonNull TransitionInfo.Change change, int wallpaperTransit) {
+            @NonNull TransitionInfo.Change change, int wallpaperTransit, boolean freeform) {
         Animation a;
 
         final int type = info.getType();
@@ -604,7 +607,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // This received a transferred starting window, so don't animate
             return null;
         } else {
-            a = loadAttributeAnimation(info, change, wallpaperTransit, mTransitionAnimation);
+            a = loadAttributeAnimation(info, change, wallpaperTransit, mTransitionAnimation, freeform);
         }
 
         if (a != null) {

@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">" KB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Naamloos&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Geen telefoonnummer)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"De pincodes die je hebt ingevoerd, komen niet overeen."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Voer een pincode van 4 tot 8 cijfers in."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Typ een pukcode die 8 cijfers of langer is."</string>
-    <string name="needPuk" msgid="3503414069503752211">"Je simkaart is vergrendeld met de pukcode. Typ de pukcode om te ontgrendelen."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Typ de PUK2-code om de simkaart niet meer te blokkeren."</string>
+    <string name="needPuk" msgid="7321876090152422918">"Je simkaart is vergrendeld met de pukcode. Typ de pukcode om te ontgrendelen."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Voer de PUK2-code in om de simkaart te ontgrendelen."</string>
     <string name="enablePin" msgid="2543771964137091212">"Mislukt. Zet SIM/RUIM-vergrendeling aan."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Je hebt nog <xliff:g id="NUMBER_1">%d</xliff:g> pogingen over voordat de simkaart wordt vergrendeld.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Beller-ID standaard ingesteld op \'onbeperkt\'. Volgend gesprek: onbeperkt."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Service niet voorzien."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"U kunt de instelling voor de beller-ID niet wijzigen."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Mobiele data overgeschakeld naar <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Je kunt dit altijd wijzigen via Instellingen"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Geen service voor mobiele data"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Noodoproepen niet beschikbaar"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Geen belservice"</string>
@@ -228,7 +231,7 @@
     <string name="shutdown_progress" msgid="5017145516412657345">"Uitzetten…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Je tablet wordt uitgezet."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Je Android TV-apparaat wordt uitgezet."</string>
-    <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Je smartwatch wordt uitgezet."</string>
+    <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Je horloge wordt uitgezet."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"Je telefoon wordt uitgezet."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"Wil je afsluiten?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Opnieuw opstarten in veilige modus"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan gebaren registreren die op de vingerafdruksensor van het apparaat worden getekend."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot maken"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan een screenshot van het scherm maken."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Voorbeeld, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"statusbalk uitzetten of wijzigen"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Hiermee kan de app de statusbalk uitzetten of systeemiconen toevoegen en verwijderen."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"de statusbalk zijn"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Hiermee kun je zorgen dat de app informatie krijgt over de voorkeursservice voor NFC-betaling, zoals geregistreerde hulpmiddelen en routebestemmingen."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Near Field Communication regelen"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Hiermee kan de app communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element-transactiegebeurtenis"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Staat toe dat de app informatie krijgt over transacties die plaatsvinden in een Secure Element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"je schermvergrendeling uitzetten"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Hiermee kan de app de toetsenblokkering en bijbehorende wachtwoordbeveiliging uitzetten. Zo kan de telefoon de toetsenblokkering uitzetten als je wordt gebeld en de toetsenblokkering weer aanzetten als het gesprek is beëindigd."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"complexiteit van schermvergrendeling opvragen"</string>
@@ -655,7 +655,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Kijk goed recht naar je telefoon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Kijk goed recht naar je telefoon"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Kijk goed recht naar je telefoon"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Zorg dat er niets voor je gezicht zit"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Zorg dat je gezicht volledig zichtbaar is"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Reinig de bovenkant van je scherm, inclusief de zwarte balk"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -664,8 +664,6 @@
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan gezichtsmodel niet maken. Probeer het opnieuw."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkere bril waargenomen. Je gezicht moet geheel zichtbaar zijn."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gezichtsbedekking waargenomen. Je gezicht moet geheel zichtbaar zijn."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan gezicht niet verifiëren. Hardware niet beschikbaar."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Ontgrendel opnieuw via gezichtsherkenning"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Kan nieuwe gezichten niet opslaan. Verwijder eerst een oude."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gezicht of schermgrendeling gebruiken"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gebruik je gezicht om door te gaan"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gebruik je gezicht of schermvergrendeling om door te gaan"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Er is iets misgegaan. Probeer het opnieuw."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Gezichtspictogram"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"synchronisatie-instellingen lezen"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Nogmaals proberen"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Ontgrendelen voor alle functies en gegevens"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Maximaal aantal pogingen voor Ontgrendelen via gezichtsherkenning overschreden"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Geen simkaart"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Geen simkaart in tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Geen simkaart in je Android TV-apparaat."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Geen simkaart in telefoon."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Voeg een simkaart toe."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"De simkaart ontbreekt of kan niet worden gelezen. Voeg een simkaart toe."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Onbruikbare simkaart."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Je simkaart is permanent gedeactiveerd.\n Neem contact op met je mobiele serviceprovider voor een nieuwe simkaart."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Geen simkaart"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Geen simkaart in tablet."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Geen simkaart in je Android TV-apparaat."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Geen simkaart in telefoon."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Plaats een simkaart."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"De simkaart ontbreekt of kan niet worden gelezen. Plaats een simkaart."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Onbruikbare simkaart."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Je simkaart is definitief uitgezet.\n Neem contact op met je mobiele serviceprovider voor een nieuwe simkaart."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Vorig nummer"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Volgend nummer"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Onderbreken"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Vooruitspoelen"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Alleen noodoproepen"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Netwerk vergrendeld"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"Simkaart is vergrendeld met pukcode."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"Simkaart is vergrendeld met pukcode."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Raadpleeg de gebruikershandleiding of neem contact op met de klantenservice."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"Simkaart is vergrendeld."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Simkaart ontgrendelen…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"Simkaart is vergrendeld."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Simkaart ontgrendelen..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. \n\nProbeer het  opnieuw over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Je hebt je wachtwoord <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getypt. \n\nProbeer het  opnieuw over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Je hebt je pincode <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getypt. \n\nProbeer het opnieuw over <xliff:g id="NUMBER_1">%2$d</xliff:g> seconden."</string>
@@ -1234,7 +1230,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Altijd tonen"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> is gemaakt voor een niet-geschikte versie van het Android-besturingssysteem en kan onverwacht gedrag vertonen. Mogelijk is er een geüpdatete versie van de app beschikbaar."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Altijd tonen"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Controleren op updates"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Checken op updates"</string>
     <string name="smv_application" msgid="3775183542777792638">"De app <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
     <string name="smv_process" msgid="1398801497130695446">"Het proces <xliff:g id="PROCESS">%1$s</xliff:g> heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefoon wordt geüpdatet…"</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"U kunt dit later wijzigen in Instellingen &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Altijd toestaan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Nooit toestaan"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"Simkaart verwijderd"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Het mobiele netwerk is niet beschikbaar totdat je het apparaat opnieuw opstart met een geldige simkaart."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"Simkaart verwijderd"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Het mobiele netwerk is niet beschikbaar totdat u het apparaat opnieuw start met een geldige simkaart."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Klaar"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"Simkaart toegevoegd"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"Simkaart aangesloten"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Start je apparaat opnieuw voor toegang tot het mobiele netwerk."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Opnieuw starten"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Mobiele service activeren"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Tv"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefoon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Dockluidsprekers"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Extern apparaat"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Hoofdtelefoon"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Systeem"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"De simkaart is nu uitgezet. Geef de pukcode op om door te gaan. Neem contact op met de provider voor informatie."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Gewenste pincode opgeven"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Gewenste pincode bevestigen"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Simkaart ontgrendelen…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Simkaart ontgrendelen..."</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Onjuiste pincode."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Voer een pincode van 4 tot 8 cijfers in."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"De pukcode is acht cijfers lang."</string>
@@ -1688,11 +1684,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AAN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"UIT"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Toestaan dat <xliff:g id="SERVICE">%1$s</xliff:g> volledige controle over je apparaat heeft?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volledige controle is gepast voor apps die je helpen met toegankelijkheid, maar niet voor de meeste andere apps."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volledige controle is gepast voor apps die je helpen met toegankelijkheid, maar niet voor de meeste apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Scherm bekijken en bedienen"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Deze functie kan alle content op het scherm lezen en content bovenop andere apps weergeven."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"De functie kan alle content op het scherm lezen en content bovenop andere apps weergeven."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Acties bekijken en uitvoeren"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Deze functie kan je interacties met een app of een hardwaresensor bijhouden en namens jou met apps communiceren."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"De functie kan je interacties met een app of een hardwaresensor bijhouden en namens jou met apps communiceren."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Toestaan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Weigeren"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tik op een functie om deze te gebruiken:"</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Volledig scherm wordt getoond"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Swipe omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ik snap het"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Draai voor een betere weergave"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Sluit het gesplitste scherm voor een betere weergave"</string>
     <string name="done_label" msgid="7283767013231718521">"Klaar"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ronde schuifregelaar voor uren"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Ronde schuifregelaar voor minuten"</string>
@@ -1962,7 +1956,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Je hebt hier geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je tablet."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Je hebt hier geen toegang toe op je <xliff:g id="DEVICE">%1$s</xliff:g>. Probeer het in plaats daarvan op je telefoon."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Deze app is ontwikkeld voor een oudere versie van Android en werkt mogelijk niet op de juiste manier. Controleer op updates of neem contact op met de ontwikkelaar."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Controleren op updates"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Checken op updates"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Je hebt nieuwe berichten"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Open je sms-app om ze te bekijken"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Functionaliteit kan beperkt zijn"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Kan geen toegang tot de camera van de tablet krijgen vanaf je <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Je hebt hier geen toegang toe tijdens streaming. Probeer het in plaats daarvan op je telefoon."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systeemstandaard"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"KAART <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

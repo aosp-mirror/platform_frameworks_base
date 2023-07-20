@@ -26,5 +26,6 @@
         <permission name="com.android.voicemail.permission.WRITE_VOICEMAIL"/>
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+        <permission name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
     </privapp-permissions>
 </permissions>

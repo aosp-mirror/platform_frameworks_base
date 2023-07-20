@@ -41,7 +41,6 @@ import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.back.BackAnimationController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.common.DevicePostureController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -51,16 +50,13 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
-import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
-import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
-import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
@@ -162,28 +158,6 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static DevicePostureController provideDevicePostureController(
-            Context context,
-            ShellInit shellInit,
-            @ShellMainThread ShellExecutor mainExecutor
-    ) {
-        return new DevicePostureController(context, shellInit, mainExecutor);
-    }
-
-    @WMSingleton
-    @Provides
-    static TabletopModeController provideTabletopModeController(
-            Context context,
-            ShellInit shellInit,
-            DevicePostureController postureController,
-            DisplayController displayController,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new TabletopModeController(
-                context, shellInit, postureController, displayController, mainExecutor);
-    }
-
-    @WMSingleton
-    @Provides
     static DragAndDropController provideDragAndDropController(Context context,
             ShellInit shellInit,
             ShellController shellController,
@@ -222,11 +196,10 @@ public abstract class WMShellBaseModule {
             DisplayController displayController, DisplayInsetsController displayInsetsController,
             DisplayImeController imeController, SyncTransactionQueue syncQueue,
             @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy,
-            DockStateReader dockStateReader, CompatUIConfiguration compatUIConfiguration,
-            CompatUIShellCommandHandler compatUIShellCommandHandler) {
+            DockStateReader dockStateReader) {
         return new CompatUIController(context, shellInit, shellController, displayController,
                 displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy,
-                dockStateReader, compatUIConfiguration, compatUIShellCommandHandler);
+                dockStateReader);
     }
 
     @WMSingleton

@@ -43,11 +43,11 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.window.extensions.core.util.function.Function;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.ExpandContainersSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.HingeSplitType;
 import androidx.window.extensions.embedding.SplitAttributes.SplitType.RatioSplitType;
+import androidx.window.extensions.embedding.SplitAttributesCalculator.SplitAttributesCalculatorParams;
 import androidx.window.extensions.embedding.TaskContainer.TaskProperties;
 import androidx.window.extensions.layout.DisplayFeature;
 import androidx.window.extensions.layout.FoldingFeature;
@@ -268,11 +268,10 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             container = mController.newContainer(activity, taskId);
             final int windowingMode = mController.getTaskContainer(taskId)
                     .getWindowingModeForSplitTaskFragment(bounds);
-            final IBinder reparentActivityToken = activity.getActivityToken();
-            createTaskFragment(wct, container.getTaskFragmentToken(), reparentActivityToken,
-                    bounds, windowingMode, reparentActivityToken);
+            createTaskFragment(wct, container.getTaskFragmentToken(), activity.getActivityToken(),
+                    bounds, windowingMode);
             wct.reparentActivityToTaskFragment(container.getTaskFragmentToken(),
-                    reparentActivityToken);
+                    activity.getActivityToken());
         } else {
             resizeTaskFragmentIfRegistered(wct, container, bounds);
             final int windowingMode = mController.getTaskContainer(taskId)
@@ -552,12 +551,11 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             @NonNull SplitRule rule, @Nullable Pair<Size, Size> minDimensionsPair) {
         final Configuration taskConfiguration = taskProperties.getConfiguration();
         final WindowMetrics taskWindowMetrics = getTaskWindowMetrics(taskConfiguration);
-        final Function<SplitAttributesCalculatorParams, SplitAttributes> calculator =
-                mController.getSplitAttributesCalculator();
+        final SplitAttributesCalculator calculator = mController.getSplitAttributesCalculator();
         final SplitAttributes defaultSplitAttributes = rule.getDefaultSplitAttributes();
-        final boolean areDefaultConstraintsSatisfied = rule.checkParentMetrics(taskWindowMetrics);
+        final boolean isDefaultMinSizeSatisfied = rule.checkParentMetrics(taskWindowMetrics);
         if (calculator == null) {
-            if (!areDefaultConstraintsSatisfied) {
+            if (!isDefaultMinSizeSatisfied) {
                 return EXPAND_CONTAINERS_ATTRIBUTES;
             }
             return sanitizeSplitAttributes(taskProperties, defaultSplitAttributes,
@@ -567,9 +565,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
                 .getCurrentWindowLayoutInfo(taskProperties.getDisplayId(),
                         taskConfiguration.windowConfiguration);
         final SplitAttributesCalculatorParams params = new SplitAttributesCalculatorParams(
-                taskWindowMetrics, taskConfiguration, windowLayoutInfo, defaultSplitAttributes,
-                areDefaultConstraintsSatisfied, rule.getTag());
-        final SplitAttributes splitAttributes = calculator.apply(params);
+                taskWindowMetrics, taskConfiguration, defaultSplitAttributes,
+                isDefaultMinSizeSatisfied, windowLayoutInfo, rule.getTag());
+        final SplitAttributes splitAttributes = calculator.computeSplitAttributesForParams(params);
         return sanitizeSplitAttributes(taskProperties, splitAttributes, minDimensionsPair);
     }
 
@@ -661,14 +659,21 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             @NonNull SplitAttributes splitAttributes) {
         final Configuration taskConfiguration = taskProperties.getConfiguration();
         final FoldingFeature foldingFeature = getFoldingFeature(taskProperties);
-        if (!shouldShowSplit(splitAttributes)) {
+        final SplitType splitType = computeSplitType(splitAttributes, taskConfiguration,
+                foldingFeature);
+        final SplitAttributes computedSplitAttributes = new SplitAttributes.Builder()
+                .setSplitType(splitType)
+                .setLayoutDirection(splitAttributes.getLayoutDirection())
+                .build();
+        if (!shouldShowSplit(computedSplitAttributes)) {
             return new Rect();
         }
         switch (position) {
             case POSITION_START:
-                return getPrimaryBounds(taskConfiguration, splitAttributes, foldingFeature);
+                return getPrimaryBounds(taskConfiguration, computedSplitAttributes, foldingFeature);
             case POSITION_END:
-                return getSecondaryBounds(taskConfiguration, splitAttributes, foldingFeature);
+                return getSecondaryBounds(taskConfiguration, computedSplitAttributes,
+                        foldingFeature);
             case POSITION_FILL:
             default:
                 return new Rect();
@@ -678,76 +683,29 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     @NonNull
     private Rect getPrimaryBounds(@NonNull Configuration taskConfiguration,
             @NonNull SplitAttributes splitAttributes, @Nullable FoldingFeature foldingFeature) {
-        final SplitAttributes computedSplitAttributes = updateSplitAttributesType(splitAttributes,
-                computeSplitType(splitAttributes, taskConfiguration, foldingFeature));
-        if (!shouldShowSplit(computedSplitAttributes)) {
+        if (!shouldShowSplit(splitAttributes)) {
             return new Rect();
         }
-        switch (computedSplitAttributes.getLayoutDirection()) {
+        switch (splitAttributes.getLayoutDirection()) {
             case SplitAttributes.LayoutDirection.LEFT_TO_RIGHT: {
-                return getLeftContainerBounds(taskConfiguration, computedSplitAttributes,
-                        foldingFeature);
+                return getLeftContainerBounds(taskConfiguration, splitAttributes, foldingFeature);
             }
             case SplitAttributes.LayoutDirection.RIGHT_TO_LEFT: {
-                return getRightContainerBounds(taskConfiguration, computedSplitAttributes,
-                        foldingFeature);
+                return getRightContainerBounds(taskConfiguration, splitAttributes, foldingFeature);
             }
             case SplitAttributes.LayoutDirection.LOCALE: {
                 final boolean isLtr = taskConfiguration.getLayoutDirection()
                         == View.LAYOUT_DIRECTION_LTR;
                 return isLtr
-                        ? getLeftContainerBounds(taskConfiguration, computedSplitAttributes,
-                                foldingFeature)
-                        : getRightContainerBounds(taskConfiguration, computedSplitAttributes,
+                        ? getLeftContainerBounds(taskConfiguration, splitAttributes, foldingFeature)
+                        : getRightContainerBounds(taskConfiguration, splitAttributes,
                                 foldingFeature);
             }
             case SplitAttributes.LayoutDirection.TOP_TO_BOTTOM: {
-                return getTopContainerBounds(taskConfiguration, computedSplitAttributes,
-                        foldingFeature);
+                return getTopContainerBounds(taskConfiguration, splitAttributes, foldingFeature);
             }
             case SplitAttributes.LayoutDirection.BOTTOM_TO_TOP: {
-                return getBottomContainerBounds(taskConfiguration, computedSplitAttributes,
-                        foldingFeature);
-            }
-            default:
-                throw new IllegalArgumentException("Unknown layout direction:"
-                        + computedSplitAttributes.getLayoutDirection());
-        }
-    }
-
-    @NonNull
-    private Rect getSecondaryBounds(@NonNull Configuration taskConfiguration,
-            @NonNull SplitAttributes splitAttributes, @Nullable FoldingFeature foldingFeature) {
-        final SplitAttributes computedSplitAttributes = updateSplitAttributesType(splitAttributes,
-                computeSplitType(splitAttributes, taskConfiguration, foldingFeature));
-        if (!shouldShowSplit(computedSplitAttributes)) {
-            return new Rect();
-        }
-        switch (computedSplitAttributes.getLayoutDirection()) {
-            case SplitAttributes.LayoutDirection.LEFT_TO_RIGHT: {
-                return getRightContainerBounds(taskConfiguration, computedSplitAttributes,
-                        foldingFeature);
-            }
-            case SplitAttributes.LayoutDirection.RIGHT_TO_LEFT: {
-                return getLeftContainerBounds(taskConfiguration, computedSplitAttributes,
-                        foldingFeature);
-            }
-            case SplitAttributes.LayoutDirection.LOCALE: {
-                final boolean isLtr = taskConfiguration.getLayoutDirection()
-                        == View.LAYOUT_DIRECTION_LTR;
-                return isLtr
-                        ? getRightContainerBounds(taskConfiguration, computedSplitAttributes,
-                                foldingFeature)
-                        : getLeftContainerBounds(taskConfiguration, computedSplitAttributes,
-                                foldingFeature);
-            }
-            case SplitAttributes.LayoutDirection.TOP_TO_BOTTOM: {
-                return getBottomContainerBounds(taskConfiguration, computedSplitAttributes,
-                        foldingFeature);
-            }
-            case SplitAttributes.LayoutDirection.BOTTOM_TO_TOP: {
-                return getTopContainerBounds(taskConfiguration, computedSplitAttributes,
-                        foldingFeature);
+                return getBottomContainerBounds(taskConfiguration, splitAttributes, foldingFeature);
             }
             default:
                 throw new IllegalArgumentException("Unknown layout direction:"
@@ -755,17 +713,38 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         }
     }
 
-    /**
-     * Returns the {@link SplitAttributes} that update the {@link SplitType} to
-     * {@code splitTypeToUpdate}.
-     */
-    private static SplitAttributes updateSplitAttributesType(
-            @NonNull SplitAttributes splitAttributes, @NonNull SplitType splitTypeToUpdate) {
-        return new SplitAttributes.Builder()
-                .setSplitType(splitTypeToUpdate)
-                .setLayoutDirection(splitAttributes.getLayoutDirection())
-                .setAnimationBackgroundColor(splitAttributes.getAnimationBackgroundColor())
-                .build();
+    @NonNull
+    private Rect getSecondaryBounds(@NonNull Configuration taskConfiguration,
+            @NonNull SplitAttributes splitAttributes, @Nullable FoldingFeature foldingFeature) {
+        if (!shouldShowSplit(splitAttributes)) {
+            return new Rect();
+        }
+        switch (splitAttributes.getLayoutDirection()) {
+            case SplitAttributes.LayoutDirection.LEFT_TO_RIGHT: {
+                return getRightContainerBounds(taskConfiguration, splitAttributes, foldingFeature);
+            }
+            case SplitAttributes.LayoutDirection.RIGHT_TO_LEFT: {
+                return getLeftContainerBounds(taskConfiguration, splitAttributes, foldingFeature);
+            }
+            case SplitAttributes.LayoutDirection.LOCALE: {
+                final boolean isLtr = taskConfiguration.getLayoutDirection()
+                        == View.LAYOUT_DIRECTION_LTR;
+                return isLtr
+                        ? getRightContainerBounds(taskConfiguration, splitAttributes,
+                                foldingFeature)
+                        : getLeftContainerBounds(taskConfiguration, splitAttributes,
+                                foldingFeature);
+            }
+            case SplitAttributes.LayoutDirection.TOP_TO_BOTTOM: {
+                return getBottomContainerBounds(taskConfiguration, splitAttributes, foldingFeature);
+            }
+            case SplitAttributes.LayoutDirection.BOTTOM_TO_TOP: {
+                return getTopContainerBounds(taskConfiguration, splitAttributes, foldingFeature);
+            }
+            default:
+                throw new IllegalArgumentException("Unknown layout direction:"
+                        + splitAttributes.getLayoutDirection());
+        }
     }
 
     @NonNull
@@ -860,8 +839,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     @Nullable
-    @VisibleForTesting
-    FoldingFeature getFoldingFeature(@NonNull TaskProperties taskProperties) {
+    private FoldingFeature getFoldingFeature(@NonNull TaskProperties taskProperties) {
         final int displayId = taskProperties.getDisplayId();
         final WindowConfiguration windowConfiguration = taskProperties.getConfiguration()
                 .windowConfiguration;

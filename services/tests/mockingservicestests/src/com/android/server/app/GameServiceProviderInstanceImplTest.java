@@ -1089,7 +1089,8 @@ public final class GameServiceProviderInstanceImplTest {
             Consumer<Uri> consumer = invocation.getArgument(invocation.getArguments().length - 1);
             consumer.accept(Uri.parse("a/b.png"));
             return null;
-        }).when(mMockScreenshotHelper).takeScreenshot(any(), any(), any());
+        }).when(mMockScreenshotHelper).provideScreenshot(
+                any(), any(), any(), anyInt(), anyInt(), any(), anyInt(), any(), any());
         mGameServiceProviderInstance.start();
         startTask(taskId, GAME_A_MAIN_ACTIVITY);
         mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);

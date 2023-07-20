@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Không có tiêu đề&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Không có số điện thoại nào)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Mã PIN bạn đã nhập không khớp."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Nhập mã PIN có từ 4 đến 8 số."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Nhập PUK có từ 8 số trở lên."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM của bạn đang bị khoá PUK. Hãy nhập mã PUK để mở khoá."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Hãy nhập mã PUK2 để mở khoá SIM."</string>
+    <string name="needPuk" msgid="7321876090152422918">"Thẻ SIM của bạn đã bị khóa PUK. Nhập mã PUK để mở khóa thẻ SIM đó."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Nhập mã PUK2 để bỏ chặn thẻ SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Không thành công, kích hoạt tính năng khóa SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Bạn còn <xliff:g id="NUMBER_1">%d</xliff:g> lần thử trước khi SIM bị khóa.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Số gọi đến mặc định thành không bị giới hạn. Cuộc gọi tiếp theo. Không bị giới hạn"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Dịch vụ không được cấp phép."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Bạn không thể thay đổi cài đặt ID người gọi."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Đã chuyển dữ liệu sang <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Bạn có thể thay đổi chế độ này bất cứ lúc nào trong phần Cài đặt"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Không có dịch vụ dữ liệu di động"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Không có dịch vụ gọi khẩn cấp"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Không có dịch vụ thoại"</string>
@@ -327,7 +330,7 @@
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"hiển thị thông báo"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Truy xuất nội dung cửa sổ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Kiểm tra nội dung của cửa sổ bạn đang tương tác."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Bật tính năng Khám phá bằng cách chạm"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Bật Khám phá bằng cách chạm"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Đọc to các mục được nhấn và cho phép khám phá màn hình bằng cử chỉ."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Quan sát nội dung bạn nhập"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Bao gồm dữ liệu cá nhân chẳng hạn như số thẻ tín dụng và mật khẩu."</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Có thể ghi lại các cử chỉ được thực hiện trên cảm biến vân tay của thiết bị."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Chụp ảnh màn hình"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Có thể chụp ảnh màn hình."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Bản xem trước, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"vô hiệu hóa hoặc sửa đổi thanh trạng thái"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Cho phép ứng dụng vô hiệu hóa thanh trạng thái hoặc thêm và xóa biểu tượng hệ thống."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"trở thành thanh trạng thái"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Cho phép ứng dụng giao tiếp với thẻ Giao tiếp trường gần (NFC), thẻ và trình đọc."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Sự kiện giao dịch trên Phần tử bảo mật"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Cho phép ứng dụng nhận thông tin về giao dịch diễn ra trên Phần tử bảo mật."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"vô hiệu hóa khóa màn hình của bạn"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Cho phép ứng dụng tắt khóa phím và bất kỳ bảo mật mật khẩu được liên kết nào. Ví dụ: điện thoại tắt khóa phím khi nhận được cuộc gọi đến, sau đó bật lại khóa phím khi cuộc gọi kết thúc."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"cần biết độ phức tạp của khóa màn hình"</string>
@@ -586,11 +586,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Lỗi khi xác thực"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Dùng phương thức khóa màn hình"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Hãy nhập phương thức khóa màn hình của bạn để tiếp tục"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Ấn mạnh lên cảm biến"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Nhấn chắc trên cảm biến"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Không nhận dạng được vân tay. Hãy thử lại."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Hãy vệ sinh cảm biến vân tay rồi thử lại"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vệ sinh cảm biến rồi thử lại"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Ấn mạnh lên cảm biến"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Nhấn chắc trên cảm biến"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Di chuyển ngón tay quá chậm. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Hãy thử một vân tay khác"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Quá sáng"</string>
@@ -647,7 +647,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Đưa điện thoại sang bên trái"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Đưa điện thoại sang bên phải"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Vui lòng nhìn thẳng vào thiết bị."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Không thấy khuôn mặt. Hãy cầm điện thoại ngang tầm mắt"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Không phát hiện thấy khuôn mặt của bạn. Hãy cầm điện thoại ngang tầm mắt"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Thiết bị di chuyển quá nhiều. Giữ yên thiết bị."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Vui lòng đăng ký lại khuôn mặt của bạn."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Không thể nhận dạng khuôn mặt. Hãy thử lại."</string>
@@ -655,7 +655,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Nhìn thẳng vào điện thoại"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Nhìn thẳng vào điện thoại"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Nhìn thẳng vào điện thoại"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Loại bỏ mọi thứ che khuất khuôn mặt bạn."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Hãy loại bỏ mọi thứ che khuất khuôn mặt bạn."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Vệ sinh phần đầu màn hình, bao gồm cả thanh màu đen"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -663,9 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Không thể tạo mẫu khuôn mặt của bạn. Hãy thử lại."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Đã phát hiện thấy kính râm. Toàn bộ khuôn mặt của bạn phải được trông thấy rõ ràng."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Khuôn mặt bị che. Bạn phải cho thấy toàn bộ khuôn mặt."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Đã phát hiện khuôn mặt bị che khuất. Toàn bộ khuôn mặt của bạn phải được hiển thị."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Không thể xác minh khuôn mặt. Phần cứng không có sẵn."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Hãy thử lại thao tác Mở khóa bằng khuôn mặt"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Không lưu được dữ liệu khuôn mặt mới. Hãy xóa dữ liệu cũ trước."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Dùng khuôn mặt hoặc phương thức khóa màn hình"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Hãy dùng khuôn mặt của bạn để tiếp tục"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Dùng khuôn mặt của bạn hoặc phương thức khóa màn hình để tiếp tục"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Đã xảy ra lỗi. Hãy thử lại."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Biểu tượng khuôn mặt"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"đọc cài đặt đồng bộ hóa"</string>
@@ -796,7 +792,7 @@
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Nhà riêng"</item>
     <item msgid="7740243458912727194">"Di động"</item>
-    <item msgid="8526146065496663766">"Nơi làm việc"</item>
+    <item msgid="8526146065496663766">"Cơ quan"</item>
     <item msgid="8150904584178569699">"Số fax cơ quan"</item>
     <item msgid="4537253139152229577">"Số fax nhà riêng"</item>
     <item msgid="6751245029698664340">"Số máy nhắn tin"</item>
@@ -805,24 +801,24 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"Nhà riêng"</item>
-    <item msgid="435564470865989199">"Nơi làm việc"</item>
+    <item msgid="435564470865989199">"Cơ quan"</item>
     <item msgid="4199433197875490373">"Khác"</item>
     <item msgid="3233938986670468328">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="3861463339764243038">"Nhà riêng"</item>
-    <item msgid="5472578890164979109">"Nơi làm việc"</item>
+    <item msgid="5472578890164979109">"Cơ quan"</item>
     <item msgid="5718921296646594739">"Khác"</item>
     <item msgid="5523122236731783179">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"Nhà riêng"</item>
-    <item msgid="5503060422020476757">"Nơi làm việc"</item>
+    <item msgid="5503060422020476757">"Cơ quan"</item>
     <item msgid="2530391194653760297">"Khác"</item>
     <item msgid="7640927178025203330">"Tùy chỉnh"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="6144047813304847762">"Nơi làm việc"</item>
+    <item msgid="6144047813304847762">"Cơ quan"</item>
     <item msgid="7402720230065674193">"Khác"</item>
     <item msgid="808230403067569648">"Tùy chỉnh"</item>
   </string-array>
@@ -839,7 +835,7 @@
     <string name="phoneTypeCustom" msgid="5120365721260686814">"Tùy chỉnh"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"Nhà riêng"</string>
     <string name="phoneTypeMobile" msgid="1178852541462086735">"Di động"</string>
-    <string name="phoneTypeWork" msgid="6604967163358864607">"Nơi làm việc"</string>
+    <string name="phoneTypeWork" msgid="6604967163358864607">"Cơ quan"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"Số fax cơ quan"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Số fax nhà riêng"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"Số máy nhắn tin"</string>
@@ -863,16 +859,16 @@
     <string name="eventTypeOther" msgid="530671238533887997">"Khác"</string>
     <string name="emailTypeCustom" msgid="1809435350482181786">"Tùy chỉnh"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"Nhà riêng"</string>
-    <string name="emailTypeWork" msgid="2020095414401882111">"Nơi làm việc"</string>
+    <string name="emailTypeWork" msgid="2020095414401882111">"Cơ quan"</string>
     <string name="emailTypeOther" msgid="5131130857030897465">"Khác"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"Di Động"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"Tùy chỉnh"</string>
     <string name="postalTypeHome" msgid="7562272480949727912">"Nhà riêng"</string>
-    <string name="postalTypeWork" msgid="8553425424652012826">"Nơi làm việc"</string>
+    <string name="postalTypeWork" msgid="8553425424652012826">"Cơ quan"</string>
     <string name="postalTypeOther" msgid="7094245413678857420">"Khác"</string>
     <string name="imTypeCustom" msgid="5653384545085765570">"Tùy chỉnh"</string>
     <string name="imTypeHome" msgid="6996507981044278216">"Nhà riêng"</string>
-    <string name="imTypeWork" msgid="2099668940169903123">"Nơi làm việc"</string>
+    <string name="imTypeWork" msgid="2099668940169903123">"Cơ quan"</string>
     <string name="imTypeOther" msgid="8068447383276219810">"Khác"</string>
     <string name="imProtocolCustom" msgid="4437878287653764692">"Tùy chỉnh"</string>
     <string name="imProtocolAim" msgid="4050198236506604378">"AIM"</string>
@@ -884,7 +880,7 @@
     <string name="imProtocolIcq" msgid="2410325380427389521">"ICQ"</string>
     <string name="imProtocolJabber" msgid="7919269388889582015">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="8684458700669564172">"Nơi làm việc"</string>
+    <string name="orgTypeWork" msgid="8684458700669564172">"Cơ quan"</string>
     <string name="orgTypeOther" msgid="5450675258408005553">"Khác"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"Tùy chỉnh"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"Tùy chỉnh"</string>
@@ -904,7 +900,7 @@
     <string name="relationTypeSpouse" msgid="6916682664436031703">"Vợ/chồng"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"Tùy chỉnh"</string>
     <string name="sipAddressTypeHome" msgid="5918441930656878367">"Nhà riêng"</string>
-    <string name="sipAddressTypeWork" msgid="7873967986701216770">"Nơi làm việc"</string>
+    <string name="sipAddressTypeWork" msgid="7873967986701216770">"Cơ quan"</string>
     <string name="sipAddressTypeOther" msgid="6317012577345187275">"Khác"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"Không tìm thấy ứng dụng nào để xem liên hệ này."</string>
     <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"Nhập mã PIN"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Thử lại"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Mở khóa đối với tất cả các tính năng và dữ liệu"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Đã vượt quá số lần Mở khóa bằng khuôn mặt tối đa"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Không có SIM"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Không có SIM nào trong máy tính bảng."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Không có SIM nào trong thiết bị Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Không có SIM nào trong điện thoại."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Hãy thêm SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"Không tìm thấy hoặc không đọc được SIM. Hãy thêm SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"SIM không sử dụng được."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM của bạn đã bị vô hiệu hoá vĩnh viễn.\n Hãy liên hệ với nhà cung cấp dịch vụ viễn thông không dây của bạn để yêu cầu cấp SIM khác."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Không có thẻ SIM nào"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Không có thẻ SIM nào trong máy tính bảng."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Thiết bị Android TV không có thẻ SIM."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Không có thẻ SIM nào trong điện thoại."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Hãy lắp thẻ SIM."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Thẻ SIM bị thiếu hoặc không thể đọc được. Vui lòng lắp thẻ SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Thẻ SIM không sử dụng được."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Thẻ SIM của bạn đã bị vô hiệu hóa vĩnh viễn .\n Hãy liên hệ với nhà cung cấp dịch vụ không dây của bạn để lấy thẻ SIM khác."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Bản nhạc trước"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Bản nhạc tiếp theo"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Tạm dừng"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Tua đi"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Chỉ cuộc gọi khẩn cấp"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Mạng đã khóa"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM này đang bị khoá PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"Thẻ SIM đã bị khóa PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Vui lòng xem Hướng dẫn người dùng hoặc liên hệ với Bộ phận chăm sóc khách hàng."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM này đang bị khoá."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Đang mở khoá SIM…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"Thẻ SIM đã bị khóa."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Đang mở khóa thẻ SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Bạn đã <xliff:g id="NUMBER_0">%1$d</xliff:g> lần vẽ không chính xác hình mở khóa. \n\nVui lòng thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Bạn đã <xliff:g id="NUMBER_0">%1$d</xliff:g> lần nhập sai mật khẩu. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Bạn đã nhập sai mã PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Bạn có thể thay đổi cài đặt này sau trong Cài đặt &gt; Ứng dụng"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Luôn cho phép"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Không bao giờ cho phép"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"Đã xoá SIM"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Bạn sẽ không dùng được mạng di động cho đến khi khởi động lại bằng một SIM hợp lệ."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"Đã xóa thẻ SIM"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Mạng di động sẽ không khả dụng cho đến khi bạn khởi động lại với thẻ SIM hợp lệ được lắp."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Xong"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"Đã thêm SIM"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"Đã thêm thẻ SIM"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Khởi động lại thiết bị của bạn để truy cập mạng di động."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Khởi động lại"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Kích hoạt dịch vụ di động"</string>
@@ -1613,8 +1609,8 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Máy tính bảng"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Điện thoại"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Loa kiêm đế sạc"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Thiết bị bên ngoài"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Loa đế"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Tai nghe"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Hệ thống"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM hiện bị vô hiệu hóa. Nhập mã PUK để tiếp tục. Liên hệ với nhà cung cấp dịch vụ để biết chi tiết."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Nhập mã PIN mong muốn"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Xác nhận mã PIN mong muốn"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Đang mở khoá SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Đang mở khóa thẻ SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Mã PIN không chính xác."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Nhập mã PIN có từ 4 đến 8 số."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Mã PUK phải có 8 số."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Xem toàn màn hình"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Để thoát, hãy vuốt từ trên cùng xuống dưới."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Xoay để xem dễ hơn"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Thoát chế độ chia đôi màn hình để xem dễ hơn"</string>
     <string name="done_label" msgid="7283767013231718521">"Xong"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Thanh trượt giờ hình tròn"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Thanh trượt phút hình tròn"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Không truy cập được vào máy ảnh trên máy tính bảng từ <xliff:g id="DEVICE">%1$s</xliff:g> của bạn"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Bạn không thể truy cập vào nội dung này trong khi phát trực tuyến. Hãy thử trên điện thoại."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Theo chế độ mặc định của hệ thống"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"THẺ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -169,10 +169,6 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         initSurface(mLeash);
     }
 
-    protected ShellTaskOrganizer.TaskListener getTaskListener() {
-        return mTaskListener;
-    }
-
     /** Inits the z-order of the surface. */
     private void initSurface(SurfaceControl leash) {
         final int z = getZOrder();
@@ -210,8 +206,7 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         }
 
         View layout = getLayout();
-        if (layout == null || prevTaskListener != taskListener
-                || mTaskConfig.uiMode != prevTaskConfig.uiMode) {
+        if (layout == null || prevTaskListener != taskListener) {
             // Layout wasn't created yet or TaskListener changed, recreate the layout for new
             // surface parent.
             release();
@@ -384,19 +379,12 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
                 // Cannot be wrap_content as this determines the actual window size
                 width, height,
                 TYPE_APPLICATION_OVERLAY,
-                getWindowManagerLayoutParamsFlags(),
+                FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
         winParams.token = new Binder();
         winParams.setTitle(getClass().getSimpleName() + mTaskId);
         winParams.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION | PRIVATE_FLAG_TRUSTED_OVERLAY;
         return winParams;
-    }
-
-    /**
-     * @return Flags to use for the {@link WindowManager} layout
-     */
-    protected int getWindowManagerLayoutParamsFlags() {
-        return FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL;
     }
 
     protected final String getTag() {

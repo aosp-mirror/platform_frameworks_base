@@ -16,31 +16,27 @@
 
 package com.android.systemui.dreams.complication;
 
-import static com.android.systemui.dreams.dagger.DreamModule.DREAM_PRETEXT_MONITOR;
-
 import android.database.ContentObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
 
 import com.android.settingslib.dream.DreamBackend;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.shared.condition.Monitor;
-import com.android.systemui.util.condition.ConditionalCoreStartable;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * {@link ComplicationTypesUpdater} observes the state of available complication types set by the
  * user, and pushes updates to {@link DreamOverlayStateController}.
  */
 @SysUISingleton
-public class ComplicationTypesUpdater extends ConditionalCoreStartable {
+public class ComplicationTypesUpdater implements CoreStartable {
     private final DreamBackend mDreamBackend;
     private final Executor mExecutor;
     private final SecureSettings mSecureSettings;
@@ -52,9 +48,7 @@ public class ComplicationTypesUpdater extends ConditionalCoreStartable {
             DreamBackend dreamBackend,
             @Main Executor executor,
             SecureSettings secureSettings,
-            DreamOverlayStateController dreamOverlayStateController,
-            @Named(DREAM_PRETEXT_MONITOR) Monitor monitor) {
-        super(monitor);
+            DreamOverlayStateController dreamOverlayStateController) {
         mDreamBackend = dreamBackend;
         mExecutor = executor;
         mSecureSettings = secureSettings;
@@ -62,7 +56,7 @@ public class ComplicationTypesUpdater extends ConditionalCoreStartable {
     }
 
     @Override
-    public void onStart() {
+    public void start() {
         final ContentObserver settingsObserver = new ContentObserver(null /*handler*/) {
             @Override
             public void onChange(boolean selfChange) {
@@ -73,10 +67,6 @@ public class ComplicationTypesUpdater extends ConditionalCoreStartable {
 
         mSecureSettings.registerContentObserverForUser(
                 Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED,
-                settingsObserver,
-                UserHandle.myUserId());
-        mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED,
                 settingsObserver,
                 UserHandle.myUserId());
         settingsObserver.onChange(false);

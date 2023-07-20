@@ -335,13 +335,13 @@ final public class MediaMuxer {
     }
 
     /**
+     * Constructor.
      * Creates a media muxer that writes to the specified path.
-     * <p>The caller must not use the file {@code path} before calling {@link #stop}.
      * @param path The path of the output media file.
      * @param format The format of the output media file.
      * @see android.media.MediaMuxer.OutputFormat
      * @throws IllegalArgumentException if path is invalid or format is not supported.
-     * @throws IOException if an error occurs while opening or creating the output file.
+     * @throws IOException if failed to open the file for write.
      */
     public MediaMuxer(@NonNull String path, @Format int format) throws IOException {
         if (path == null) {
@@ -363,19 +363,16 @@ final public class MediaMuxer {
     }
 
     /**
-     * Creates a media muxer that writes to the specified FileDescriptor.
-     * <p>The caller must not use the file referenced by the specified {@code fd} before calling
-     * {@link #stop}.
-     * <p>It is the caller's responsibility to close the file descriptor, which is safe to do so
-     * as soon as this call returns.
-     * @param fd The FileDescriptor of the output media file. If {@code format} is
-     * {@link OutputFormat#MUXER_OUTPUT_WEBM}, {@code fd} must be open in read-write mode.
-     * Otherwise, write mode is sufficient, but read-write is also accepted.
+     * Constructor.
+     * Creates a media muxer that writes to the specified FileDescriptor. File descriptor
+     * must be seekable and writable. Application should not use the file referenced
+     * by this file descriptor until {@link #stop}. It is the application's responsibility
+     * to close the file descriptor. It is safe to do so as soon as this call returns.
+     * @param fd The FileDescriptor of the output media file.
      * @param format The format of the output media file.
      * @see android.media.MediaMuxer.OutputFormat
-     * @throws IllegalArgumentException if {@code format} is not supported, or if {@code fd} is
-     * not open in the expected mode.
-     * @throws IOException if an error occurs while performing an IO operation.
+     * @throws IllegalArgumentException if fd is invalid or format is not supported.
+     * @throws IOException if failed to open the file for write.
      */
     public MediaMuxer(@NonNull FileDescriptor fd, @Format int format) throws IOException {
         setUpMediaMuxer(fd, format);

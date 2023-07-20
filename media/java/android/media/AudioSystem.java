@@ -72,7 +72,7 @@ public class AudioSystem
         throw new UnsupportedOperationException("Trying to instantiate AudioSystem");
     }
 
-    /* These values must be kept in sync with system/media/audio/include/system/audio-hal-enums.h */
+    /* These values must be kept in sync with system/audio.h */
     /*
      * If these are modified, please also update Settings.System.VOLUME_SETTINGS
      * and attrs.xml and AudioManager.java.
@@ -275,11 +275,10 @@ public class AudioSystem
     /** @hide */
     @IntDef(flag = false, prefix = "DEVICE_", value = {
             DEVICE_OUT_BLUETOOTH_A2DP,
-            DEVICE_OUT_BLE_HEADSET,
-            DEVICE_OUT_BLE_BROADCAST}
+            DEVICE_OUT_BLE_HEADSET}
     )
     @Retention(RetentionPolicy.SOURCE)
-    public @interface BtOffloadDeviceType {}
+    public @interface DeviceType {}
 
     /**
      * @hide
@@ -449,14 +448,6 @@ public class AudioSystem
                 return "AUDIO_FORMAT_DTS_UHD";
             case /* AUDIO_FORMAT_DRA             */ 0x2F000000:
                 return "AUDIO_FORMAT_DRA";
-            case /* AUDIO_FORMAT_APTX_ADAPTIVE_QLEA */ 0x30000000:
-                return "AUDIO_FORMAT_APTX_ADAPTIVE_QLEA";
-            case /* AUDIO_FORMAT_APTX_ADAPTIVE_R4   */ 0x31000000:
-                return "AUDIO_FORMAT_APTX_ADAPTIVE_R4";
-            case /* AUDIO_FORMAT_DTS_HD_MA       */ 0x32000000:
-                return "AUDIO_FORMAT_DTS_HD_MA";
-            case /* AUDIO_FORMAT_DTS_UHD_P2      */ 0x33000000:
-                return "AUDIO_FORMAT_DTS_UHD_P2";
 
             /* Aliases */
             case /* AUDIO_FORMAT_PCM_16_BIT        */ 0x1:
@@ -534,9 +525,9 @@ public class AudioSystem
             case /* AUDIO_FORMAT_MPEGH_SUB_BL_L4   */ 0x2C000014:
                 return "AUDIO_FORMAT_MPEGH_SUB_BL_L4";
             case /* AUDIO_FORMAT_MPEGH_SUB_LC_L3   */ 0x2C000023:
-                return "AUDIO_FORMAT_MPEGH_SUB_LC_L3";
+                return "AUDIO_FORMAT_MPEGH_SUB_BL_L3";
             case /* AUDIO_FORMAT_MPEGH_SUB_LC_L4   */ 0x2C000024:
-                return "AUDIO_FORMAT_MPEGH_SUB_LC_L4";
+                return "AUDIO_FORMAT_MPEGH_SUB_BL_L4";
             default:
                 return "AUDIO_FORMAT_(" + audioFormat + ")";
         }
@@ -963,8 +954,7 @@ public class AudioSystem
      */
 
     //
-    // audio device definitions: must be kept in sync with values
-    // in system/media/audio/include/system/audio-hal-enums.h
+    // audio device definitions: must be kept in sync with values in system/core/audio.h
     //
     /** @hide */
     public static final int DEVICE_NONE = 0x0;
@@ -1737,6 +1727,13 @@ public class AudioSystem
                 getDevicesForAttributes(attr, true /* forVolume */)));
     }
 
+    /** @hide */
+    public static native int setAppVolume(@NonNull String packageName, float volume);
+    /** @hide */
+    public static native int setAppMute(@NonNull String packageName, boolean mute);
+    /** @hide */
+    public static native int listAppVolumes(ArrayList<AppVolume> volumes);
+
     /** @hide
      * Conversion from a device set to a bit mask.
      *
@@ -1974,7 +1971,7 @@ public class AudioSystem
      * Returns a list of audio formats (codec) supported on the A2DP and LE audio offload path.
      */
     public static native int getHwOffloadFormatsSupportedForBluetoothMedia(
-            @BtOffloadDeviceType int deviceType, ArrayList<Integer> formatList);
+            @DeviceType int deviceType, ArrayList<Integer> formatList);
 
     /** @hide */
     public static native int setSurroundFormatEnabled(int audioFormat, boolean enabled);
@@ -2430,30 +2427,4 @@ public class AudioSystem
      * Keep in sync with core/jni/android_media_DeviceCallback.h.
      */
     final static int NATIVE_EVENT_ROUTING_CHANGE = 1000;
-
-
-    /**
-     * Requests if the implementation supports controlling the latency modes
-     * over the Bluetooth A2DP or LE Audio links.
-     *
-     * @return true if supported, false otherwise
-     *
-     * @hide
-     */
-    public static native boolean supportsBluetoothVariableLatency();
-
-    /**
-     * Enables or disables the variable Bluetooth latency control mechanism in the
-     * audio framework and the audio HAL. This does not apply to the latency mode control
-     * on the spatializer output as this is a built-in feature.
-     *
-     * @hide
-     */
-    public static native int setBluetoothVariableLatencyEnabled(boolean enabled);
-
-    /**
-     * Indicates if the variable Bluetooth latency control mechanism is enabled or disabled.
-     * @hide
-     */
-    public static native boolean isBluetoothVariableLatencyEnabled();
 }

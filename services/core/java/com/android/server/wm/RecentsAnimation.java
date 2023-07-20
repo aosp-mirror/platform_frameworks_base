@@ -290,6 +290,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                     mWindowManager.getRecentsAnimationController();
             if (controller == null) return;
 
+            if (controller.isActivityStarting()) {
+                //Fix screenshot sharing failure after the recent task is opened.
+                Slog.i(TAG, "Change reorderMode because a activity is starting");
+                reorderMode = REORDER_MOVE_TO_ORIGINAL_POSITION;
+            }
+
             // Just to be sure end the launch hint in case the target activity was never launched.
             // However, if we're keeping the activity and making it visible, we can leave it on.
             if (reorderMode != REORDER_KEEP_IN_PLACE) {
@@ -302,12 +308,14 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 mService.stopAppSwitches();
             }
 
+            final int changedReorderMode = reorderMode;
+
             mWindowManager.inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                         "RecentsAnimation#onAnimationFinished_inSurfaceTransaction");
                 mService.deferWindowLayout();
                 try {
-                    mWindowManager.cleanupRecentsAnimation(reorderMode);
+                    mWindowManager.cleanupRecentsAnimation(changedReorderMode);
 
                     final Task targetRootTask = mDefaultTaskDisplayArea.getRootTask(
                             WINDOWING_MODE_UNDEFINED, mTargetActivityType);
@@ -327,7 +335,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                     // Restore the launched-behind state
                     targetActivity.mLaunchTaskBehind = false;
 
-                    if (reorderMode == REORDER_MOVE_TO_TOP) {
+                    if (changedReorderMode == REORDER_MOVE_TO_TOP) {
                         // Bring the target root task to the front
                         mTaskSupervisor.mNoAnimActivities.add(targetActivity);
 
@@ -351,7 +359,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                                         targetRootTask, topRootTask);
                             }
                         }
-                    } else if (reorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION){
+                    } else if (changedReorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION){
                         // Restore the target root task to its previous position
                         final TaskDisplayArea taskDisplayArea = targetActivity.getDisplayArea();
                         taskDisplayArea.moveRootTaskBehindRootTask(targetRootTask,

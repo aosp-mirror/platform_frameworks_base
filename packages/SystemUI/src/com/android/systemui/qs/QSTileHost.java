@@ -18,6 +18,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Secure;
@@ -55,14 +56,17 @@ import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.util.settings.SecureSettings;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -90,13 +94,16 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final int MAX_QS_INSTANCE_ID = 1 << 20;
 
+    public static final int POSITION_AT_END = -1;
+    public static final String TILES_SETTING = Secure.QS_TILES;
+
     // Shared prefs that hold tile lifecycle info.
     @VisibleForTesting
     static final String TILES = "tiles_prefs";
 
     private final Context mContext;
     private final LinkedHashMap<String, QSTile> mTiles = new LinkedHashMap<>();
-    private final ArrayList<String> mTileSpecs = new ArrayList<>();
+    protected final ArrayList<String> mTileSpecs = new ArrayList<>();
     private final TunerService mTunerService;
     private final PluginManager mPluginManager;
     private final DumpManager mDumpManager;
@@ -110,6 +117,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
     private final List<Callback> mCallbacks = new ArrayList<>();
     @Nullable
     private AutoTileManager mAutoTiles;
+    private final StatusBarIconController mIconController;
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
     private final Optional<CentralSurfaces> mCentralSurfacesOptional;
@@ -127,6 +135,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
 
     @Inject
     public QSTileHost(Context context,
+            StatusBarIconController iconController,
             QSFactory defaultFactory,
             @Main Executor mainExecutor,
             PluginManager pluginManager,
@@ -143,6 +152,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             TileLifecycleManager.Factory tileLifecycleManagerFactory,
             UserFileManager userFileManager
     ) {
+        mIconController = iconController;
         mContext = context;
         mUserContext = context;
         mTunerService = tunerService;
@@ -174,6 +184,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             mAutoTiles = autoTiles.get();
             mTileServiceRequestController.init();
         });
+    }
+
+    public StatusBarIconController getIconController() {
+        return mIconController;
     }
 
     @Override
@@ -300,6 +314,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         if (!TILES_SETTING.equals(key)) {
             return;
         }
+        Log.d(TAG, "Recreating tiles");
         if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }
@@ -312,7 +327,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             }
         }
         if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
-        Log.d(TAG, "Recreating tiles: " + tileSpecs);
         mTiles.entrySet().stream().filter(tile -> !tileSpecs.contains(tile.getKey())).forEach(
                 tile -> {
                     Log.d(TAG, "Destroying tile: " + tile.getKey());
@@ -358,8 +372,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
                             Log.d(TAG, "Destroying not available tile: " + tileSpec);
                             mQSLogger.logTileDestroyed(tileSpec, "Tile not available");
                         }
-                    } else {
-                        Log.d(TAG, "No factory for a spec: " + tileSpec);
                     }
                 } catch (Throwable t) {
                     Log.w(TAG, "Error creating tile for spec: " + tileSpec, t);
@@ -424,7 +436,12 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         addTile(spec, POSITION_AT_END);
     }
 
-    @Override
+    /**
+     * Add a tile into the requested spot, or at the end if the position is greater than the number
+     * of tiles.
+     * @param spec string matching a pre-defined tilespec
+     * @param requestPosition -1 for end, 0 for beginning, or X for insertion at position X
+     */
     public void addTile(String spec, int requestPosition) {
         mMainExecutor.execute(() ->
                 changeTileSpecs(tileSpecs -> {
@@ -464,12 +481,15 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         }
     }
 
-    @Override
     public void addTile(ComponentName tile) {
         addTile(tile, /* end */ false);
     }
 
-    @Override
+    /**
+     * Adds a custom tile to the set of current tiles.
+     * @param tile the component name of the {@link android.service.quicksettings.TileService}
+     * @param end if true, the tile will be added at the end. If false, at the beginning.
+     */
     public void addTile(ComponentName tile, boolean end) {
         String spec = CustomTile.toSpec(tile);
         addTile(spec, end ? POSITION_AT_END : 0);
@@ -479,7 +499,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
      * This will call through {@link #changeTilesByUser}. It should only be used when a tile is
      * removed by a <b>user action</b> like {@code adb}.
      */
-    @Override
     public void removeTileByUser(ComponentName tile) {
         mMainExecutor.execute(() -> {
             List<String> newSpecs = new ArrayList<>(mTileSpecs);
@@ -498,7 +517,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
      * that are removed.
      */
     @MainThread
-    @Override
     public void changeTilesByUser(List<String> previousTiles, List<String> newTiles) {
         final List<String> copy = new ArrayList<>(previousTiles);
         final int NP = copy.size();
@@ -522,8 +540,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         saveTilesToSettings(newTiles);
     }
 
+    /** Create a {@link QSTile} of a {@code tileSpec} type. */
     @Nullable
-    @Override
     public QSTile createTile(String tileSpec) {
         for (int i = 0; i < mQsFactories.size(); i++) {
             QSTile t = mQsFactories.get(i).createTile(tileSpec);
@@ -534,7 +552,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
         return null;
     }
 
-    @Override
+    /**
+     * Create a view for a tile, iterating over all possible {@link QSFactory}.
+     *
+     * @see QSFactory#createTileView
+     */
     public QSTileView createTileView(Context themedContext, QSTile tile, boolean collapsedView) {
         for (int i = 0; i < mQsFactories.size(); i++) {
             QSTileView view = mQsFactories.get(i)
@@ -554,7 +576,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
      *                      tile.
      * @param userId the user to check
      */
-    @Override
     public boolean isTileAdded(ComponentName componentName, int userId) {
         return mUserFileManager
                 .getSharedPreferences(TILES, 0, userId)
@@ -570,17 +591,11 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
      * @param userId the user for this tile
      * @param added {@code true} if the tile is being added, {@code false} otherwise
      */
-    @Override
     public void setTileAdded(ComponentName componentName, int userId, boolean added) {
         mUserFileManager.getSharedPreferences(TILES, 0, userId)
                 .edit()
                 .putBoolean(componentName.flattenToString(), added)
                 .apply();
-    }
-
-    @Override
-    public List<String> getSpecs() {
-        return mTileSpecs;
     }
 
     protected static List<String> loadTileSpecs(Context context, String tileList) {
@@ -600,7 +615,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             if (tile.isEmpty()) continue;
             if (tile.equals("default")) {
                 if (!addedDefault) {
-                    List<String> defaultSpecs = QSHost.getDefaultSpecs(context);
+                    List<String> defaultSpecs = getDefaultSpecs(context);
                     for (String spec : defaultSpecs) {
                         if (!addedSpecs.contains(spec)) {
                             tiles.add(spec);
@@ -616,19 +631,24 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
                 }
             }
         }
+        return tiles;
+    }
 
-        if (!tiles.contains("internet")) {
-            if (tiles.contains("wifi")) {
-                // Replace the WiFi with Internet, and remove the Cell
-                tiles.set(tiles.indexOf("wifi"), "internet");
-                tiles.remove("cell");
-            } else if (tiles.contains("cell")) {
-                // Replace the Cell with Internet
-                tiles.set(tiles.indexOf("cell"), "internet");
-            }
-        } else {
-            tiles.remove("wifi");
-            tiles.remove("cell");
+    /**
+     * Returns the default QS tiles for the context.
+     * @param context the context to obtain the resources from
+     * @return a list of specs of the default tiles
+     */
+    public static List<String> getDefaultSpecs(Context context) {
+        final ArrayList<String> tiles = new ArrayList<String>();
+
+        final Resources res = context.getResources();
+        final String defaultTileList = res.getString(R.string.quick_settings_tiles_default);
+
+        tiles.addAll(Arrays.asList(defaultTileList.split(",")));
+        if (Build.IS_ENG
+                && GarbageMonitor.ADD_MEMORY_TILE_TO_DEFAULT_ON_DEBUGGABLE_BUILDS) {
+            tiles.add(GarbageMonitor.MemoryTile.TILE_SPEC);
         }
         return tiles;
     }

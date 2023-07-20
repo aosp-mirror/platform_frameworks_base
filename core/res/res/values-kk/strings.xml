@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"Б"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MБ"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TБ"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Атаусыз&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Телефон нөмірі жоқ)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Сіз терген PIN кодтары сәйкес емес."</string>
     <string name="invalidPin" msgid="7542498253319440408">"4-8 саннан тұратын PIN кодын теру."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8 немесе одан көп саннан тұратын PUK кодын теру."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM картаңыз PUK кодымен құлыпталған. Ашу үшін PUK кодын теріңіз."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"SIM картасының құлпын ашу үшін PUK2 кодын теріңіз."</string>
+    <string name="needPuk" msgid="7321876090152422918">"SIM картаңыз PUK арқылы бекітілген. Ашу үшін PUK кодын теріңіз."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"SIM картасын ашу үшін PUK2 кодын теріңіз."</string>
     <string name="enablePin" msgid="2543771964137091212">"Сәтсіз, SIM/RUIM бекітпесін қосыңыз."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">SIM картасының бекітілуіне <xliff:g id="NUMBER_1">%d</xliff:g> әрекет қалды.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелмеген"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Қызмет ұсынылмаған."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Қоңырау шалушы идентификаторы параметрін өзгерту мүмкін емес."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Деректер <xliff:g id="CARRIERDISPLAY">%s</xliff:g> операторына ауыстырылды"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Бұны кез келген уақытта \"Параметрлер\" бөлімінен өзгертуге болады."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Мобильдік интернет қызметі жоқ"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Жедел қызметке қоңырау шалу қолжетімді емес"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Дауыстық қоңыраулар қызметі жоқ"</string>
@@ -330,7 +333,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Түртілген элементтерді дыбыстау функциясын қосу"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Түртілген элементтер дауыстап айтылады және экранды қимылдар арқылы зерттеуге болады."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Терілген мәтінді тексеру"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Несиелік карта нөмірлері және құпия сөздер сияқты жеке деректерді қамтиды."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Несиелік карта нөмірі және құпия сөздер сияқты жеке деректі қоса."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Дисплей ұлғайтуды басқару"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Дисплейдің масштабтау деңгейін және орналастыруды басқару."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Қимылдарды орындау"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Құрылғының саусақ ізі сенсорында орындалған қимылдарды сақтайды."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Скриншот жасау"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Дисплейдің скриншотын жасай аласыз."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Алғы көрініс, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"күйін көрсету тақтасын өшіру немесе өзгерту"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Қолданбаға күй жолағын өшіруге немесе жүйелік белгішелерді қосуға және жоюға рұқсат береді."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"күй жолағы болу"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Қолданба тіркелген көмектер және баратын жер маршруты сияқты таңдаулы NFC төлеу қызметі туралы ақпаратты ала алатын болады."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC функциясын басқару"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Қауіпсіз элемент арқылы жасалатын транзакция оқиғасы"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Қолданбаға қауіпсіз элемент арқылы жасалатын транзакциялар жөнінде ақпарат алуға мүмкіндік береді."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"экран бекітпесін істен шығару"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Қолданбаларға кілтперне және басқа кілтсөзге қатысты қауіпсіздік шараларын өшіру мүмкіндігін береді. Мысалы, телефон кіріс қоңырауларын алғанда кілтпернені өшіреді және қоңырау аяқталғанда қайта қосады."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"экранды құлыптау күрделілігін сұрау"</string>
@@ -586,7 +586,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Аутентификациялауда қате шықты."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Экран құлпын пайдалану"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Жалғастыру үшін экран құлпын енгізіңіз."</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сканерді қатты басыңыз"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сканерді қатты басыңыз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Саусақ ізін тану мүмкін емес. Қайталап көріңіз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Саусақ ізін оқу сканерін тазалап, әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сканерді тазалап, әрекетті қайталаңыз."</string>
@@ -596,7 +596,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Тым жарық."</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Қуат түймесін басу әрекеті анықталды."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Дұрыстап қойып көріңіз."</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Саусағыңыздың орнын аздап өзгертіп тұрыңыз"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Саусағыңыздың қалпын аздап өзгертіп тұрыңыз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Саусақ ізі танылмады."</string>
@@ -644,17 +644,17 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Телефонды жақынырақ ұстаңыз."</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонды жоғарырақ ұстаңыз."</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Телефонды төменірек ұстаңыз."</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай жылжытыңыз."</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай жылжытыңыз."</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай ұстаңыз."</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай ұстаңыз."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Құрылғының камерасына тура қараңыз."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Бетіңіз көрінбей тұр. Телефонды көз деңгейінде ұстаңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Қозғалыс тым көп. Телефонды қозғалтпаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Қайта тіркеліңіз."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Бет танылмады. Қайталап көріңіз."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Басыңыздың қалпын сәл өзгертіңіз."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға тура қараңыз."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға тура қараңыз."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға тура қараңыз."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға барынша тура қараңыз."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға барынша тура қараңыз."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға барынша тура қараңыз."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Бетіңізді жауып тұрған нәрсені алып тастаңыз."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Экранның жоғарғы жағын, сонымен қатар қара жолақты өшіріңіз."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
@@ -663,9 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Бет үлгісі жасалмады. Қайталап көріңіз."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Қою түсті көзілдірік анықталды. Бетіңіз толық көрініп тұруы керек."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Бетперде тағып алғансыз. Бетіңіз толық көрініп тұруы керек."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Бетперде анықталды. Бетіңіз толық көрініп тұруы керек."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Бет тану функциясын қайта қолданып көріңіз."</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Жаңа бетті сақтау мүмкін емес. Алдымен ескісін жойыңыз."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Face Lock функциясын немесе экран құлпын пайдалану"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Жалғастыру үшін бетіңізді көрсетіңіз."</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Жалғастыру үшін бетті анықтау функциясын немесе экран құлпын пайдаланыңыз."</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Бірдеңе дұрыс болмады. Қайталап көріңіз."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Бет белгішесі"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"синх параметрлерін оқу"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Қайталап көріңіз"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Мүмкіндіктер мен деректер үшін құлыпты ашыңыз"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Бет тану арқылы ашу әрекеттері анықталған шегінен асып кетті"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM картасы жоқ."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Планшетте SIM картасы жоқ."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Android TV құрылғыңызда SIM картасы жоқ."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Телефонда SIM картасы жоқ."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"SIM картасын қосыңыз."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM картасы жоқ немесе оқылмай тұр. SIM картасын қосыңыз."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"SIM картасын пайдалану мүмкін емес."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM картаңыз біржола өшірілді.\n Сымсыз байланыс провайдеріне хабарласып, басқа SIM картасын алыңыз."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM картасы жоқ"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Планшетте SIM картасы жоқ."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV құрылғыңызда SIM картасы жоқ."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Телефонда SIM картасы жоқ."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM картасын салыңыз."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM картасы жоқ немесе оны оқу мүмкін емес. SIM картасына салыңыз."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Қолдануға жарамсыз SIM картасы."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM картаңыз біржола өшірілді. \n Сымсыз байланыс провайдеріне хабарласып, басқа SIM картасын алыңыз."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Алдыңғы трек"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Келесі трек"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Кідірту"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Жылдам алға айналдыру"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Құтқару қызметіне ғана қоңырау шалынады"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Желі бекітілген"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM картасы PUK кодымен құлыпталды."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM картасы PUK арқылы бекітілген."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Пайдаланушы нұсқаулығын қараңыз немесе тұтынушыларды қолдау орталығына хабарласыңыз."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM картасы құлыпталған."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM картасының құлпы ашылып жатыр…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM картасы бөгелген."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM картаны ашуда…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате салдыңыз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Құпия сөзді <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін қайталаңыз."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"PIN кодын <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін қайталаңыз."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Бұны кейінірек Параметрлер &gt; Қолданбалар арқылы өзгертуге болады"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Әрқашан рұқсат беру"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Ешқашан рұқсат бермеу"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM картасы өшірілді"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Жарамды SIM картасымен өшіріп қоспайынша, мобильдік желі қолжетімді болмайды."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM картасы алынды"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Жарамды SIM картасын енгізіп, қайт бастағанша, ұялы желі қол жетімсіз болады."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Дайын"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM картасы қосылды"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM картасы қосылды"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Ұялы желіге кіру үшін құрылғыны қайта бастаңыз."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Қайта бастау"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Мобильдік қызметті іске қосыңыз"</string>
@@ -1357,7 +1353,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Жалғанған құрылғы USB арқылы зарядталуда"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB арқылы файл жіберу мүмкіндігі қосылды"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP режимі USB арқылы қосылды"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-тетеринг режимі қосылды"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB тетеринг режимі қосылды"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI режимі USB арқылы қосылды"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB жабдығы жалғанған"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Қосымша опциялар үшін түртіңіз."</string>
@@ -1390,7 +1386,7 @@
     <string name="show_ime" msgid="6406112007347443383">"Физикалық пернетақта қосулы кезде оны экранға шығару"</string>
     <string name="hardware" msgid="1800597768237606953">"Виртуалдық пернетақтаны көрсету"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Физикалық пернетақтаны конфигурациялау"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Тіл мен пернетақта схемасын таңдау үшін түртіңіз."</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Тіл мен пернетақта схемасын таңдау үшін түртіңіз"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Басқа қолданбалардың үстінен көрсету"</string>
@@ -1613,8 +1609,8 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Планшет"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"ТД"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Қондыру станциясының динамиктері"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Сыртқы құрылғы"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Үндеткіштерді қондыру"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Құлақаспаптар"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Жүйе"</string>
@@ -1623,7 +1619,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Трансляциялау"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Құрылғыға жалғау"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Экран трансляциясы"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Құрылғылар ізделіп жатыр…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Құрылғылар ізделуде…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Параметрлер"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Ажырату"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Тексеруде..."</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM картасы істен шықты. Жалғастыру үшін PUK кодын енгізіңіз. Толығырақ ақпаратты жабдықтаушыдан алыңыз."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Қажетті PIN кодын енгізіңіз"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Қажетті PIN кодты растау"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM картасының құлпы ашылып жатыр…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM картаны ашу…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Қате PIN код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4-8 сандардан тұратын PIN кодты теріңіз."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK коды 8 саннан тұруы керек."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Толық экранда көру"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Шығу үшін жоғарыдан төмен қарай сырғытыңыз."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Түсінікті"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Жақсырақ көру үшін бұрыңыз."</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Жақсырақ көру үшін экранды бөлу режимінен шығыңыз."</string>
     <string name="done_label" msgid="7283767013231718521">"Дайын"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Сағаттар айналымының қозғалтқышы"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Минут айналымын қозғалтқыш"</string>
@@ -1862,7 +1856,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Жарайды"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батареяны үнемдеу режимі қараңғы режимді іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Батареяны үнемдеу режимі қараңғы режимді іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу режимі қосылсын ба?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Бір минут ({formattedTime} дейін)}other{# минут ({formattedTime} дейін)}}"</string>
@@ -2120,7 +2114,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Қолданбаға жазу рұқсаты берілмеді, бірақ ол осы USB құрылғысы арқылы дыбыс жаза алады."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Негізгі экран"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Артқа"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Соңғы қолданбалар"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Соңғы пайдаланылған қолданбалар"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Хабарландырулар"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Жылдам параметрлер"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Қуат диалогтік терезесі"</string>
@@ -2276,10 +2270,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Енді экранның бір бөлігін ұлғайтуға болады."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Параметрлер бөлімінен қосу"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Қабылдамау"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Құрылғы микрофонын блоктан шығарыңыз"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Құрылғы камерасын блоктан шығарыңыз"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Құрылғы микрофонының бөгеуін алыңыз"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Құрылғы камерасының бөгеуін алыңыз"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; және барлық қолданбалар мен қызметтерге арналған."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Блоктан шығару"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Бөгеуді алу"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Датчикке қатысты құпиялық"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Қолданба белгішесі"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Қолданба брендін ілгері жылжыту кескіні"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> құрылғысынан планшет камерасын пайдалану мүмкін емес."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Трансляция кезінде контентті көру мүмкін емес. Оның орнына телефоннан көріңіз."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Жүйенің әдепкі параметрі"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"<xliff:g id="CARDNUMBER">%d</xliff:g>-КАРТА"</string>
 </resources>

@@ -17,7 +17,6 @@
 package com.android.keyguard;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,11 +29,11 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -49,8 +48,6 @@ import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.plugins.ClockEvents;
 import com.android.systemui.plugins.ClockFaceController;
-import com.android.systemui.plugins.ClockFaceEvents;
-import com.android.systemui.plugins.log.LogBuffer;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.shared.clocks.ClockRegistry;
@@ -102,8 +99,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Mock
     private ClockEvents mClockEvents;
     @Mock
-    private ClockFaceEvents mClockFaceEvents;
-    @Mock
     DumpManager mDumpManager;
     @Mock
     ClockEventController mClockEventController;
@@ -120,14 +115,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     private FrameLayout mLargeClockFrame;
     @Mock
     private SecureSettings mSecureSettings;
-    @Mock
-    private LogBuffer mLogBuffer;
 
-    private final View mFakeDateView = (View) (new ViewGroup(mContext) {
-        @Override
-        protected void onLayout(boolean changed, int l, int t, int r, int b) {}
-    });
-    private final View mFakeWeatherView = new View(mContext);
     private final View mFakeSmartspaceView = new View(mContext);
 
     private KeyguardClockSwitchController mController;
@@ -155,8 +143,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mLargeClockView.getContext()).thenReturn(getContext());
 
         when(mView.isAttachedToWindow()).thenReturn(true);
-        when(mSmartspaceController.buildAndConnectDateView(any())).thenReturn(mFakeDateView);
-        when(mSmartspaceController.buildAndConnectWeatherView(any())).thenReturn(mFakeWeatherView);
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
         mExecutor = new FakeExecutor(new FakeSystemClock());
         mController = new KeyguardClockSwitchController(
@@ -170,8 +156,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
                 mSecureSettings,
                 mExecutor,
                 mDumpManager,
-                mClockEventController,
-                mLogBuffer
+                mClockEventController
         );
 
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
@@ -180,8 +165,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         when(mClockController.getLargeClock()).thenReturn(mLargeClockController);
         when(mClockController.getSmallClock()).thenReturn(mSmallClockController);
         when(mClockController.getEvents()).thenReturn(mClockEvents);
-        when(mSmallClockController.getEvents()).thenReturn(mClockFaceEvents);
-        when(mLargeClockController.getEvents()).thenReturn(mClockFaceEvents);
         when(mClockController.getAnimations()).thenReturn(mClockAnimations);
         when(mClockRegistry.createCurrentClock()).thenReturn(mClockController);
         when(mClockEventController.getClock()).thenReturn(mClockController);
@@ -242,7 +225,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         mController.init();
         verify(mClockRegistry).registerClockChangeListener(listenerArgumentCaptor.capture());
 
-        listenerArgumentCaptor.getValue().onCurrentClockChanged();
+        listenerArgumentCaptor.getValue().onClockChanged();
         verify(mView, times(2)).setClock(mClockController, StatusBarState.SHADE);
         verify(mClockEventController, times(2)).setClock(mClockController);
     }
@@ -262,19 +245,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         mController.onLocaleListChanged();
         // Should be called once on initial setup, then once again for locale change
-        verify(mSmartspaceController, times(2)).buildAndConnectView(mView);
-    }
-
-    @Test
-    public void onLocaleListChanged_rebuildsSmartspaceViews_whenDecouplingEnabled() {
-        when(mSmartspaceController.isEnabled()).thenReturn(true);
-        when(mSmartspaceController.isDateWeatherDecoupled()).thenReturn(true);
-        mController.init();
-
-        mController.onLocaleListChanged();
-        // Should be called once on initial setup, then once again for locale change
-        verify(mSmartspaceController, times(2)).buildAndConnectDateView(mView);
-        verify(mSmartspaceController, times(2)).buildAndConnectWeatherView(mView);
         verify(mSmartspaceController, times(2)).buildAndConnectView(mView);
     }
 
@@ -301,9 +271,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
         mController.init();
-        verify(mSecureSettings).registerContentObserverForUser(
-                eq(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK),
-                    anyBoolean(), observerCaptor.capture(), eq(UserHandle.USER_ALL));
+        verify(mSecureSettings).registerContentObserverForUser(any(Uri.class),
+                anyBoolean(), observerCaptor.capture(), eq(UserHandle.USER_ALL));
         ContentObserver observer = observerCaptor.getValue();
         mExecutor.runAllReady();
 
@@ -349,28 +318,6 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         assertEquals(0, mController.getClockBottom(10));
     }
 
-    @Test
-    public void testChangeLockscreenWeatherEnabledSetsWeatherViewVisible() {
-        when(mSmartspaceController.isWeatherEnabled()).thenReturn(true);
-        ArgumentCaptor<ContentObserver> observerCaptor =
-                ArgumentCaptor.forClass(ContentObserver.class);
-        mController.init();
-        verify(mSecureSettings).registerContentObserverForUser(
-                eq(Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED), anyBoolean(),
-                    observerCaptor.capture(), eq(UserHandle.USER_ALL));
-        ContentObserver observer = observerCaptor.getValue();
-        mExecutor.runAllReady();
-        // When a settings change has occurred, check that view is visible.
-        observer.onChange(true);
-        mExecutor.runAllReady();
-        assertEquals(View.VISIBLE, mFakeWeatherView.getVisibility());
-    }
-
-    @Test
-    public void testGetClockAnimations_nullClock_returnsNull() {
-        when(mClockEventController.getClock()).thenReturn(null);
-        assertNull(mController.getClockAnimations());
-    }
 
     private void verifyAttachment(VerificationMode times) {
         verify(mClockRegistry, times).registerClockChangeListener(

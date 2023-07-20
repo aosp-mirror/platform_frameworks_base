@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"b"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"Tb"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"Pb"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Uden titel&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Intet telefonnummer)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"De indtastede pinkoder er ikke ens"</string>
     <string name="invalidPin" msgid="7542498253319440408">"Angiv en pinkode på mellem 4 og 8 tal."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Angiv en PUK-kode på 8 eller flere cifre."</string>
-    <string name="needPuk" msgid="3503414069503752211">"Dit SIM-kort er låst med PUK-koden. Angiv PUK-koden for at låse det op."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Angiv PUK2-koden for at fjerne blokeringen fra SIM-kortet."</string>
+    <string name="needPuk" msgid="7321876090152422918">"Dit SIM-kort er låst med PUK-koden. Angiv PUK-koden for at låse den op."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Angiv PUK2-koden for at låse op for SIM-kortet."</string>
     <string name="enablePin" msgid="2543771964137091212">"Mislykkedes. Aktivér SIM-/RUIM-lås."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver låst.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Standarder for opkalds-id til ikke begrænset. Næste opkald: Ikke begrænset"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Tjenesten provisioneres ikke."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Du kan ikke ændre indstillingen for opkalds-id\'et."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Der blev skiftet til <xliff:g id="CARRIERDISPLAY">%s</xliff:g>-data"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Du kan altid ændre dette under Indstillinger"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Ingen mobildatatjeneste"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Det er ikke muligt at foretage nødopkald"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Ingen taletjeneste"</string>
@@ -214,7 +217,7 @@
     <string name="silent_mode" msgid="8796112363642579333">"Lydløs"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"Slå trådløs til"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Slå trådløs fra"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"Skærm­lås"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"Skærmlås"</string>
     <string name="power_off" msgid="4111692782492232778">"Sluk"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Ringeren er deaktiveret"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Ringervibrering"</string>
@@ -238,7 +241,7 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Valgmuligheder for tabletcomputeren"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Valgmuligheder for Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Indstillinger for telefon"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"Skærm­lås"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"Skærmlås"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Sluk"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Afbryderknap"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Genstart"</string>
@@ -264,7 +267,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Indstillinger"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Assistance"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Taleassistent"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Ekstralås"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Lås enhed"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Ny notifikation"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Virtuelt tastatur"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan registrere bevægelser, der foretages på enhedens fingeraftrykssensor."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Tag screenshot"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan tage et screenshot af skærmen."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Preview, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktivere eller redigere statuslinje"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tillader, at appen kan deaktivere statusbjælken eller tilføje og fjerne systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"vær statusbjælken"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillader, at appen får foretrukne oplysninger vedrørende NFC-betalingstjeneste, f.eks. registrerede hjælpemidler og rutedestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"administrere Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Tillader, at appen kan kommunikere med NFC-tags (Near Field Communication), -kort og -læsere."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element-transaktion"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Tillader, at appen kan modtage oplysninger om transaktioner, der foretages via Secure Element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"deaktivere din skærmlås"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Tillader, at appen kan deaktivere tastaturlåsen og anden form for tilknyttet adgangskodesikkerhed. Telefonen deaktiverer f.eks. tastaturlåsen ved indgående telefonopkald og aktiverer tastaturlåsen igen, når opkaldet er afsluttet."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"anmode om skærmlåsens kompleksitet"</string>
@@ -575,7 +575,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tillader, at appen kan læse lokationer fra din mediesamling."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Brug biometri"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Brug biometri eller skærmlås"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verificer, at det er dig"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Bekræft, at det er dig"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Brug dine biometriske data for at fortsætte"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Brug dine biometriske data eller din skærmlås for at fortsætte"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk hardware er ikke tilgængelig"</string>
@@ -645,7 +645,7 @@
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Løft telefonen højere op"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Sænk telefonen"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Flyt telefonen længere til venstre for dig"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Flyt telefonen længere til højre"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Flyt telefonen længere til højre for dig"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Kig mere direkte på din enhed."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Dit ansigt kan ikke registreres. Hold din telefon i øjenhøjde."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Der er for meget bevægelse. Hold telefonen stille."</string>
@@ -664,9 +664,7 @@
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Din ansigtsmodel kan ikke oprettes. Prøv igen."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mørke briller er registreret. Dit ansigt skal være helt synligt."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansigtsdækning er registreret. Dit ansigt skal være helt synligt."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
-    <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansigt ikke verificeret. Hardware ikke tilgængelig."</string>
+    <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansigt ikke bekræftet. Hardware ikke tilgængelig."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Prøv ansigtslås igen"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Der kan ikke gemmes nye ansigtsdata. Slet et gammelt først."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Ansigtshandlingen blev annulleret."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Brug ansigts- eller skærmlås"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Brug dit ansigt for at fortsætte"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Brug din ansigts- eller skærmlås for at fortsætte"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Noget gik galt. Prøv igen."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ansigt"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"læse indstillinger for synkronisering"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Prøv igen"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Lås op for at se alle funktioner og data"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Det maksimale antal forsøg på at bruge ansigtslås er overskredet"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Intet SIM-kort"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Intet SIM-kort i tabletten."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Intet SIM-kort i din Android TV-enhed."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Intet SIM-kort i telefonen."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Tilføj et SIM-kort."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM-kortet mangler eller kan ikke læses. Tilføj et SIM-kort."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Deaktiveret SIM-kort."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Dit SIM-kort er permanent deaktiveret.\n Kontakt din tjenesteudbyder for at få et nyt SIM-kort."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Intet SIM-kort"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Der er ikke noget SIM-kort i tabletcomputeren."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Der er intet SIM-kort i din Android TV-enhed."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Der er ikke noget SIM-kort i telefonen."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Indsæt et SIM-kort."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-kortet mangler eller kan ikke læses. Indsæt et SIM-kort."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Ubrugeligt SIM-kort."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Dit SIM-kort er blevet permanent deaktiveret.\nKontakt din tjenesteudbyder for at få et nyt SIM-kort."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Forrige nummer"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Næste nummer"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pause"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Spol frem"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Kun nødopkald"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Netværket er låst"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM-kortet er låst med PUK-koden."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM-kortet er låst med PUK-koden."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Se brugervejledningen, eller kontakt kundeservice."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM-kortet er låst."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM-kortet låses op…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM-kortet er låst."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Låser SIM-kortet op ..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Du har indtastet din adgangskode forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Du har indtastet en forkert pinkode <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
@@ -1087,7 +1083,7 @@
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Vil du aktivere Udforsk ved berøring?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er tændt, kan du høre eller se beskrivelser af, hvad der er under din finger eller udføre bevægelser for at interagere med tabletten."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er aktiveret, kan du høre eller se beskrivelser af, hvad der er under din finger, eller udføre bevægelser for at interagere med telefonen."</string>
-    <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 måned siden"</string>
+    <string name="oneMonthDurationPast" msgid="4538030857114635777">"for 1 måned siden"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Før for 1 måned siden"</string>
     <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Seneste dag}one{De seneste # dag}other{De seneste # dage}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Seneste måned"</string>
@@ -1117,8 +1113,8 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"om <xliff:g id="COUNT">%d</xliff:g> d."</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{For # minut siden}one{For # minut siden}other{For # minutter siden}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# time siden}one{# time siden}other{# timer siden}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{1 dag siden}one{1 dag siden}other{# dag siden}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{For # time siden}one{For # time siden}other{For # timer siden}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{For # dag siden}one{For # dag siden}other{For # dage siden}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{For # år siden}one{For # år siden}other{For # år siden}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minut}one{# minut}other{# minutter}}"</string>
     <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# time}one{# time}other{# timer}}"</string>
@@ -1147,7 +1143,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Markér tekst"</string>
     <string name="undo" msgid="3175318090002654673">"Fortryd"</string>
     <string name="redo" msgid="7231448494008532233">"Annuller fortryd"</string>
-    <string name="autofill" msgid="511224882647795296">"Autofyld"</string>
+    <string name="autofill" msgid="511224882647795296">"AutoFyld"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Tekstmarkering"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Føj til ordbog"</string>
     <string name="deleteText" msgid="4200807474529938112">"Slet"</string>
@@ -1254,8 +1250,8 @@
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen, mens du konfigurerer dit fingeraftryk."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Sluk skærmen for at afslutte konfigurationen"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktiver"</string>
-    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du verificere dit fingeraftryk?"</string>
-    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at verificere dit fingeraftryk."</string>
+    <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Vil du bekræfte dit fingeraftryk?"</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du har trykket på afbryderknappen, hvilket som regel slukker skærmen.\n\nPrøv at trykke let på knappen for at bekræfte dit fingeraftryk."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Sluk skærm"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"Fortsæt"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> er i gang"</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Du kan altid ændre dette i Indstillinger &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Tillad altid"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Tillad aldrig"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM-kortet er fjernet"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Det mobile netværk er utilgængeligt, indtil du genstarter med et gyldigt SIM-kort."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM-kort blev fjernet"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Det mobile netværk er utilgængeligt, indtil du genstarter med et gyldigt SIM-kort."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Afslut"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM-kortet er tilføjet"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM-kort blev tilføjet"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Genstart din enhed for at få adgang til mobilnetværket."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Genstart"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktivér mobilselskab"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Tv"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Dockstationens højttalere"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Ekstern enhed"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Hovedtelefoner"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"System"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Angiv den ønskede pinkode"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Bekræft den ønskede pinkode"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM-kortet låses op…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM-kortet låses op…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Forkert pinkode."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Angiv en pinkode på mellem 4 og 8 tal."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-koden skal være på 8 tal."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visning i fuld skærm"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Stryg ned fra toppen for at afslutte."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK, det er forstået"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Roter, og få en bedre visning"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Afslut opdelt skærm, og få en bedre visning"</string>
     <string name="done_label" msgid="7283767013231718521">"Udfør"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Cirkulær timevælger"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Cirkulær minutvælger"</string>
@@ -1900,7 +1894,7 @@
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishingadvarsel"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Arbejdsprofil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Underrettet"</string>
-    <string name="notification_verified_content_description" msgid="6401483602782359391">"Verificeret"</string>
+    <string name="notification_verified_content_description" msgid="6401483602782359391">"Bekræftet"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Udvid"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"Skjul"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"Slå udvidelse til eller fra"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Kameraet på din tablet kan ikke tilgås via din <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Der er ikke adgang til dette indhold under streaming. Prøv på din telefon i stedet."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Systemstandard"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"KORT <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

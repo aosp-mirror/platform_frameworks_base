@@ -1,4 +1,4 @@
-per-file PointerLocationView.java = file:/INPUT_OWNERS
+per-file PointerLocationView.java = michaelwr@google.com, svv@google.com
 per-file RecyclerView.java = mount@google.com
 per-file ViewPager.java = mount@google.com
 
@@ -21,6 +21,3 @@ per-file ImageFloatingTextView.java = file:/services/core/java/com/android/serve
 per-file ObservableTextView.java = file:/services/core/java/com/android/server/notification/OWNERS
 per-file RemeasuringLinearLayout.java = file:/services/core/java/com/android/server/notification/OWNERS
 per-file ViewClippingUtil.java = file:/services/core/java/com/android/server/notification/OWNERS
-
-# Appwidget related
-per-file *RemoteViews* = file:/services/appwidget/java/com/android/server/appwidget/OWNERS

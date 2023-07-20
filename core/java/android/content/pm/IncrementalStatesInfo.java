@@ -24,8 +24,8 @@ import android.os.Parcelable;
  * @hide
  */
 public class IncrementalStatesInfo implements Parcelable {
-    private final boolean mIsLoading;
-    private final float mProgress;
+    private boolean mIsLoading;
+    private float mProgress;
 
     public IncrementalStatesInfo(boolean isLoading, float progress) {
         mIsLoading = isLoading;

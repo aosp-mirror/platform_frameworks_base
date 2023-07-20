@@ -103,6 +103,8 @@ import com.android.server.wm.ActivityInterceptorCallback;
 import com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import com.android.internal.util.custom.faceunlock.FaceUnlockUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -935,6 +937,12 @@ public final class PermissionPolicyService extends SystemService {
                             permissionInfo.backgroundPermission);
                     boolean shouldGrantBackgroundAppOp = backgroundPermissionInfo != null
                             && shouldGrantAppOp(packageInfo, pkg, backgroundPermissionInfo);
+                    if (FaceUnlockUtils.getServicePackageName().equals(packageName) &&
+                            FaceUnlockUtils.isFaceUnlockSupported() &&
+                            "android.permission.CAMERA".equals(permissionInfo.name) &&
+                            packageInfo.applicationInfo.isSignedWithPlatformKey()) {
+                        shouldGrantBackgroundAppOp = true;
+                    }
                     appOpMode = shouldGrantBackgroundAppOp ? MODE_ALLOWED : MODE_FOREGROUND;
                 } else {
                     appOpMode = MODE_ALLOWED;

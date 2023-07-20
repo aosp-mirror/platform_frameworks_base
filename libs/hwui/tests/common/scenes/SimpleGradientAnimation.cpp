@@ -57,7 +57,7 @@ private:
                         // use i%2 start position to pick 2 color combo with black in it
                         SkColor colors[3] = {Color::Transparent, Color::Black, Color::Cyan_500};
                         paint.setShader(SkGradientShader::MakeLinear(pts, colors + (i % 2), pos, 2,
-                                                                     SkTileMode::kClamp));
+                                                                     SkTileMode::kMirror));
                         canvas.drawRect(i, i, width, height, paint);
                     }
                 });

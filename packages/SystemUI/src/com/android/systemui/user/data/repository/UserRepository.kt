@@ -30,8 +30,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.util.settings.GlobalSettings
@@ -44,14 +42,12 @@ import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -71,9 +67,6 @@ interface UserRepository {
 
     /** [UserInfo] of the currently-selected user. */
     val selectedUserInfo: Flow<UserInfo>
-
-    /** Whether user switching is currently in progress. */
-    val userSwitchingInProgress: Flow<Boolean>
 
     /** User ID of the last non-guest selected user. */
     val lastSelectedNonGuestUserId: Int
@@ -115,28 +108,11 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val globalSettings: GlobalSettings,
     private val tracker: UserTracker,
-    featureFlags: FeatureFlags,
 ) : UserRepository {
 
-    private val _userSwitcherSettings: StateFlow<UserSwitcherSettingsModel> =
-        globalSettings
-            .observerFlow(
-                names =
-                    arrayOf(
-                        SETTING_SIMPLE_USER_SWITCHER,
-                        Settings.Global.ADD_USERS_WHEN_LOCKED,
-                        Settings.Global.USER_SWITCHER_ENABLED,
-                    ),
-                userId = UserHandle.USER_SYSTEM,
-            )
-            .onStart { emit(Unit) } // Forces an initial update.
-            .map { getSettings() }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = runBlocking { getSettings() },
-            )
-    override val userSwitcherSettings: Flow<UserSwitcherSettingsModel> = _userSwitcherSettings
+    private val _userSwitcherSettings = MutableStateFlow(runBlocking { getSettings() })
+    override val userSwitcherSettings: Flow<UserSwitcherSettingsModel> =
+        _userSwitcherSettings.asStateFlow().filterNotNull()
 
     private val _userInfos = MutableStateFlow<List<UserInfo>?>(null)
     override val userInfos: Flow<List<UserInfo>> = _userInfos.filterNotNull()
@@ -153,10 +129,6 @@ constructor(
     private var _isGuestUserResetting: Boolean = false
     override var isGuestUserResetting: Boolean = _isGuestUserResetting
 
-    private val _isUserSwitchingInProgress = MutableStateFlow(false)
-    override val userSwitchingInProgress: Flow<Boolean>
-        get() = _isUserSwitchingInProgress
-
     override val isGuestUserCreationScheduled = AtomicBoolean()
 
     override val isStatusBarUserChipEnabled: Boolean =
@@ -168,9 +140,7 @@ constructor(
 
     init {
         observeSelectedUser()
-        if (featureFlags.isEnabled(FACE_AUTH_REFACTOR)) {
-            observeUserSwitching()
-        }
+        observeUserSettings()
     }
 
     override fun refreshUsers() {
@@ -196,28 +166,6 @@ constructor(
         return _userSwitcherSettings.value.isSimpleUserSwitcher
     }
 
-    private fun observeUserSwitching() {
-        conflatedCallbackFlow {
-                val callback =
-                    object : UserTracker.Callback {
-                        override fun onUserChanging(newUser: Int, userContext: Context) {
-                            trySendWithFailureLogging(true, TAG, "userSwitching started")
-                        }
-
-                        override fun onUserChanged(newUserId: Int, userContext: Context) {
-                            trySendWithFailureLogging(false, TAG, "userSwitching completed")
-                        }
-                    }
-                tracker.addCallback(callback, mainDispatcher.asExecutor())
-                trySendWithFailureLogging(false, TAG, "initial value defaulting to false")
-                awaitClose { tracker.removeCallback(callback) }
-            }
-            .onEach { _isUserSwitchingInProgress.value = it }
-            // TODO (b/262838215), Make this stateIn and initialize directly in field declaration
-            //  once the flag is launched
-            .launchIn(applicationScope)
-    }
-
     private fun observeSelectedUser() {
         conflatedCallbackFlow {
                 fun send() {
@@ -226,7 +174,7 @@ constructor(
 
                 val callback =
                     object : UserTracker.Callback {
-                        override fun onUserChanging(newUser: Int, userContext: Context) {
+                        override fun onUserChanged(newUser: Int, userContext: Context) {
                             send()
                         }
 
@@ -247,6 +195,23 @@ constructor(
 
                 _selectedUserInfo.value = it
             }
+            .launchIn(applicationScope)
+    }
+
+    private fun observeUserSettings() {
+        globalSettings
+            .observerFlow(
+                names =
+                    arrayOf(
+                        SETTING_SIMPLE_USER_SWITCHER,
+                        Settings.Global.ADD_USERS_WHEN_LOCKED,
+                        Settings.Global.USER_SWITCHER_ENABLED,
+                    ),
+                userId = UserHandle.USER_SYSTEM,
+            )
+            .onStart { emit(Unit) } // Forces an initial update.
+            .map { getSettings() }
+            .onEach { _userSwitcherSettings.value = it }
             .launchIn(applicationScope)
     }
 

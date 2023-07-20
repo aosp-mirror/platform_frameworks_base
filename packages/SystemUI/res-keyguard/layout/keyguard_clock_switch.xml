@@ -55,6 +55,14 @@
                android:layout_width="match_parent"
                android:layout_height="wrap_content" />
 
+      <include layout="@layout/current_weather_view"
+              android:id="@+id/weather_container"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="@dimen/date_owner_info_margin"
+              android:layout_below="@id/keyguard_slice_view"
+              android:visibility="gone" />
+
       <com.android.systemui.statusbar.phone.NotificationIconContainer
           android:id="@+id/left_aligned_notification_icon_container"
           android:layout_width="match_parent"

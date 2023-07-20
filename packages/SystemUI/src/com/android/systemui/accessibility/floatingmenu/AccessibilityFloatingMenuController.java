@@ -31,7 +31,6 @@ import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver.AccessibilityButtonMode;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
 
@@ -45,7 +44,6 @@ public class AccessibilityFloatingMenuController implements
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final SecureSettings mSecureSettings;
 
     private Context mContext;
     @VisibleForTesting
@@ -87,13 +85,11 @@ public class AccessibilityFloatingMenuController implements
     public AccessibilityFloatingMenuController(Context context,
             AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            SecureSettings secureSettings) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mContext = context;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mSecureSettings = secureSettings;
 
         mIsKeyguardVisible = false;
     }
@@ -163,7 +159,7 @@ public class AccessibilityFloatingMenuController implements
 
     private void showFloatingMenu() {
         if (mFloatingMenu == null) {
-            mFloatingMenu = new AccessibilityFloatingMenu(mContext, mSecureSettings);
+            mFloatingMenu = new AccessibilityFloatingMenu(mContext);
         }
 
         mFloatingMenu.show();

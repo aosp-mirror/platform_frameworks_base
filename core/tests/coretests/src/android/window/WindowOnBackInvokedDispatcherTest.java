@@ -17,7 +17,6 @@
 package android.window;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -61,8 +60,8 @@ public class WindowOnBackInvokedDispatcherTest {
     private OnBackAnimationCallback mCallback1;
     @Mock
     private OnBackAnimationCallback mCallback2;
-    private final BackMotionEvent mBackEvent = new BackMotionEvent(
-            0, 0, 0, BackEvent.EDGE_LEFT, null);
+    @Mock
+    private BackEvent mBackEvent;
 
     @Before
     public void setUp() throws Exception {
@@ -90,12 +89,12 @@ public class WindowOnBackInvokedDispatcherTest {
                 captor.capture());
         captor.getAllValues().get(0).getCallback().onBackStarted(mBackEvent);
         waitForIdle();
-        verify(mCallback1).onBackStarted(any(BackEvent.class));
+        verify(mCallback1).onBackStarted(mBackEvent);
         verifyZeroInteractions(mCallback2);
 
         captor.getAllValues().get(1).getCallback().onBackStarted(mBackEvent);
         waitForIdle();
-        verify(mCallback2).onBackStarted(any(BackEvent.class));
+        verify(mCallback2).onBackStarted(mBackEvent);
         verifyNoMoreInteractions(mCallback1);
     }
 
@@ -115,7 +114,7 @@ public class WindowOnBackInvokedDispatcherTest {
         assertEquals(captor.getValue().getPriority(), OnBackInvokedDispatcher.PRIORITY_OVERLAY);
         captor.getValue().getCallback().onBackStarted(mBackEvent);
         waitForIdle();
-        verify(mCallback1).onBackStarted(any(BackEvent.class));
+        verify(mCallback1).onBackStarted(mBackEvent);
     }
 
     @Test
@@ -153,6 +152,6 @@ public class WindowOnBackInvokedDispatcherTest {
         verify(mWindowSession).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow), captor.capture());
         captor.getValue().getCallback().onBackStarted(mBackEvent);
         waitForIdle();
-        verify(mCallback2).onBackStarted(any(BackEvent.class));
+        verify(mCallback2).onBackStarted(mBackEvent);
     }
 }

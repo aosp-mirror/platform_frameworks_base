@@ -54,7 +54,6 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
 import android.text.TextUtils;
-import android.util.DataUnit;
 import android.util.Log;
 import android.util.Slog;
 import android.webkit.MimeTypeMap;
@@ -84,7 +83,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -1301,93 +1299,16 @@ public final class FileUtils {
     public static long roundStorageSize(long size) {
         long val = 1;
         long pow = 1;
-        while ((val * pow) < size) {
+        long pow1024 = 1;
+        while ((val * pow1024) < size) {
             val <<= 1;
             if (val > 512) {
                 val = 1;
                 pow *= 1000;
+                pow1024 *= 1024;
             }
         }
         return val * pow;
-    }
-
-    private static long toBytes(long value, String unit) {
-        unit = unit.toUpperCase();
-
-        if (List.of("B").contains(unit)) {
-            return value;
-        }
-
-        if (List.of("K", "KB").contains(unit)) {
-            return DataUnit.KILOBYTES.toBytes(value);
-        }
-
-        if (List.of("M", "MB").contains(unit)) {
-            return DataUnit.MEGABYTES.toBytes(value);
-        }
-
-        if (List.of("G", "GB").contains(unit)) {
-            return DataUnit.GIGABYTES.toBytes(value);
-        }
-
-        if (List.of("KI", "KIB").contains(unit)) {
-            return DataUnit.KIBIBYTES.toBytes(value);
-        }
-
-        if (List.of("MI", "MIB").contains(unit)) {
-            return DataUnit.MEBIBYTES.toBytes(value);
-        }
-
-        if (List.of("GI", "GIB").contains(unit)) {
-            return DataUnit.GIBIBYTES.toBytes(value);
-        }
-
-        return Long.MIN_VALUE;
-    }
-
-    /**
-     * @param fmtSize The string that contains the size to be parsed. The
-     *   expected format is:
-     *
-     *   <p>"^((\\s*[-+]?[0-9]+)\\s*(B|K|KB|M|MB|G|GB|Ki|KiB|Mi|MiB|Gi|GiB)\\s*)$"
-     *
-     *   <p>For example: 10Kb, 500GiB, 100mb. The unit is not case sensitive.
-     *
-     * @return the size in bytes. If {@code fmtSize} has invalid format, it
-     *   returns {@link Long#MIN_VALUE}.
-     * @hide
-     */
-    public static long parseSize(@Nullable String fmtSize) {
-        if (fmtSize == null || fmtSize.isBlank()) {
-            return Long.MIN_VALUE;
-        }
-
-        int sign = 1;
-        fmtSize = fmtSize.trim();
-        char first = fmtSize.charAt(0);
-        if (first == '-' ||  first == '+') {
-            if (first == '-') {
-                sign = -1;
-            }
-
-            fmtSize = fmtSize.replace(first + "", "");
-        }
-
-        int index = 0;
-        // Find the last index of the value in fmtSize.
-        while (index < fmtSize.length() && Character.isDigit(fmtSize.charAt(index))) {
-            index++;
-        }
-
-        // Check if number and units are present.
-        if (index == 0 || index == fmtSize.length()) {
-            return Long.MIN_VALUE;
-        }
-
-        long value = sign * Long.valueOf(fmtSize.substring(0, index));
-        String unit = fmtSize.substring(index).trim();
-
-        return toBytes(value, unit);
     }
 
     /**

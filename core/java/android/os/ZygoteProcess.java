@@ -82,6 +82,13 @@ public class ZygoteProcess {
     private static final String LOG_TAG = "ZygoteProcess";
 
     /**
+     * The default value for enabling the unspecialized app process (USAP) pool.  This value will
+     * not be used if the devices has a DeviceConfig profile pushed to it that contains a value for
+     * this key.
+     */
+    private static final String USAP_POOL_ENABLED_DEFAULT = "false";
+
+    /**
      * The name of the socket used to communicate with the primary zygote.
      */
     private final LocalSocketAddress mZygoteSocketAddress;
@@ -786,8 +793,14 @@ public class ZygoteProcess {
     private boolean fetchUsapPoolEnabledProp() {
         boolean origVal = mUsapPoolEnabled;
 
-        mUsapPoolEnabled = ZygoteConfig.getBool(
-            ZygoteConfig.USAP_POOL_ENABLED, ZygoteConfig.USAP_POOL_ENABLED_DEFAULT);
+        final String propertyString = Zygote.getConfigurationProperty(
+                ZygoteConfig.USAP_POOL_ENABLED, USAP_POOL_ENABLED_DEFAULT);
+
+        if (!propertyString.isEmpty()) {
+            mUsapPoolEnabled = Zygote.getConfigurationPropertyBoolean(
+                  ZygoteConfig.USAP_POOL_ENABLED,
+                  Boolean.parseBoolean(USAP_POOL_ENABLED_DEFAULT));
+        }
 
         boolean valueChanged = origVal != mUsapPoolEnabled;
 

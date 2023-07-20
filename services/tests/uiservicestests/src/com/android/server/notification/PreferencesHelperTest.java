@@ -1699,7 +1699,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         channel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
         channel.setShowBadge(true);
         channel.setAllowBubbles(false);
-        channel.setImportantConversation(true);
         int lockMask = 0;
         for (int i = 0; i < NotificationChannel.LOCKABLE_FIELDS.length; i++) {
             lockMask |= NotificationChannel.LOCKABLE_FIELDS[i];
@@ -1715,7 +1714,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(channel.shouldShowLights(), savedChannel.shouldShowLights());
         assertFalse(savedChannel.canBypassDnd());
         assertFalse(Notification.VISIBILITY_SECRET == savedChannel.getLockscreenVisibility());
-        assertFalse(channel.isImportantConversation());
         assertEquals(channel.canShowBadge(), savedChannel.canShowBadge());
         assertEquals(channel.canBubble(), savedChannel.canBubble());
 
@@ -2725,7 +2723,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testCreateChannel_addToGroup() {
-        NotificationChannelGroup group = new NotificationChannelGroup("group", "group");
+        NotificationChannelGroup group = new NotificationChannelGroup("group", "");
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, group, true);
         NotificationChannel nc = new NotificationChannel("id", "hello", IMPORTANCE_DEFAULT);
         assertTrue(mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, nc, true, false));
@@ -3175,8 +3173,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testGetNotificationChannelGroupWithChannels() throws Exception {
-        NotificationChannelGroup group = new NotificationChannelGroup("group", "group");
-        NotificationChannelGroup other = new NotificationChannelGroup("something else", "name");
+        NotificationChannelGroup group = new NotificationChannelGroup("group", "");
+        NotificationChannelGroup other = new NotificationChannelGroup("something else", "");
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, group, true);
         mHelper.createNotificationChannelGroup(PKG_N_MR1, UID_N_MR1, other, true);
 
@@ -4394,7 +4392,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 new NotificationChannel("A person calls", "calls from A", IMPORTANCE_DEFAULT);
         channel2.setConversationId(calls.getId(), convoId);
         channel2.setImportantConversation(true);
-        mHelper.createNotificationChannel(PKG_O, UID_O, channel2, false, false);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
 
         List<ConversationChannelWrapper> convos =
                 mHelper.getConversations(IntArray.wrap(new int[] {0}), false);
@@ -4471,7 +4469,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 new NotificationChannel("A person calls", "calls from A", IMPORTANCE_DEFAULT);
         channel2.setConversationId(calls.getId(), convoId);
         channel2.setImportantConversation(true);
-        mHelper.createNotificationChannel(PKG_O, UID_O, channel2, false, false);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel2, true, false);
 
         List<ConversationChannelWrapper> convos =
                 mHelper.getConversations(IntArray.wrap(new int[] {0}), false);
@@ -4499,13 +4497,13 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 new NotificationChannel("A person msgs", "messages from A", IMPORTANCE_DEFAULT);
         channel.setConversationId(messages.getId(), convoId);
         channel.setImportantConversation(true);
-        mHelper.createNotificationChannel(PKG_O, UID_O, channel, false, false);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
 
         NotificationChannel diffConvo =
                 new NotificationChannel("B person msgs", "messages from B", IMPORTANCE_DEFAULT);
         diffConvo.setConversationId(p.getId(), "different convo");
         diffConvo.setImportantConversation(true);
-        mHelper.createNotificationChannel(PKG_P, UID_P, diffConvo, false, false);
+        mHelper.createNotificationChannel(PKG_P, UID_P, diffConvo, true, false);
 
         NotificationChannel channel2 =
                 new NotificationChannel("A person calls", "calls from A", IMPORTANCE_DEFAULT);
@@ -4532,7 +4530,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 new NotificationChannel("A person msgs", "messages from A", IMPORTANCE_DEFAULT);
         channel.setConversationId(messages.getId(), convoId);
         channel.setImportantConversation(true);
-        mHelper.createNotificationChannel(PKG_O, UID_O, channel, false, false);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
 
         mHelper.permanentlyDeleteNotificationChannel(PKG_O, UID_O, "messages");
 
@@ -4933,7 +4931,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 "conversation", IMPORTANCE_DEFAULT);
         friend.setConversationId(parent.getId(), "friend");
         friend.setImportantConversation(true);
-        mHelper.createNotificationChannel(PKG_O, UID_O, friend, false, false);
+        mHelper.createNotificationChannel(PKG_O, UID_O, friend, true, false);
 
         ArrayList<StatsEvent> events = new ArrayList<>();
         mHelper.pullPackageChannelPreferencesStats(events);

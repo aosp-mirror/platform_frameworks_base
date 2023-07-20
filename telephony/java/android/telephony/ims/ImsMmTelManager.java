@@ -72,18 +72,11 @@ public class ImsMmTelManager implements RegistrationManager {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "WIFI_MODE_", value = {
-            WIFI_MODE_UNKNOWN,
             WIFI_MODE_WIFI_ONLY,
             WIFI_MODE_CELLULAR_PREFERRED,
             WIFI_MODE_WIFI_PREFERRED
             })
     public @interface WiFiCallingMode {}
-
-    /**
-     * Wifi calling mode is unknown. This is for initialization only.
-     * @hide
-     */
-    public static final int WIFI_MODE_UNKNOWN = -1;
 
     /**
      * Register for IMS over IWLAN if WiFi signal quality is high enough. Do not hand over to LTE
@@ -1587,25 +1580,5 @@ public class ImsMmTelManager implements RegistrationManager {
                         .getTelephonyServiceRegisterer()
                         .get());
         return binder;
-    }
-
-    /**
-     * Convert Wi-Fi calling mode to string.
-     *
-     * @param mode Wi-Fi calling mode.
-     * @return The Wi-Fi calling mode in string format.
-     *
-     * @hide
-     */
-    @NonNull
-    public static String wifiCallingModeToString(@ImsMmTelManager.WiFiCallingMode int mode) {
-        switch (mode) {
-            case ImsMmTelManager.WIFI_MODE_UNKNOWN: return "UNKNOWN";
-            case ImsMmTelManager.WIFI_MODE_WIFI_ONLY: return "WIFI_ONLY";
-            case ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED: return "CELLULAR_PREFERRED";
-            case ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED: return "WIFI_PREFERRED";
-            default:
-                return "UNKNOWN(" + mode + ")";
-        }
     }
 }

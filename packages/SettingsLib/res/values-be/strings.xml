@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Скасаваць"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Спалучэнне дае доступ да вашых кантактаў і гісторыі выклікаў пры падключэнні."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не атрымалася падключыцца да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не спалучана з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g> з-за няправільнага PIN-кода або ключа доступу."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не атрымалася спалучыцца з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, таму што PIN-код або пароль няправiльныя."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Не магу размаўляць з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Злучэнне адхілена прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Камп\'ютар"</string>
@@ -313,7 +313,7 @@
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Пры выбары сеткі Wi-Fi указваць у журнале RSSI для кожнага SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Зніжае расход зараду акумулятара і павышае прадукцыйнасць мабільных сетак"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Калі ўключаны гэты рэжым, MAC-адрас гэтай прылады можа змяняцца падчас кожнага падключэння да сеткі з актыўнай рандамізацыяй MAC-адрасоў."</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"Сетка з падлікам трафіка"</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"Сетка з улікам трафіка"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сетка без уліку трафіка"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Памеры буфера журнала"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Выберыце памеры сродку вядзення журнала для буфераў журнала"</string>
@@ -572,8 +572,8 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Карыстальнік"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Абмежаваны профiль"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Дадаць новага карыстальніка?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Вы можаце адкрыць доступ да гэтай прылады іншым карыстальнікам шляхам стварэння дадатковых профіляў. Кожны карыстальнік будзе мець свой уласны профіль, на якім ён зможа наладзіць свае праграмы, шпалеры і іншае. Карыстальнікі таксама змогуць наладжваць параметры прылады, напрыклад Wi-Fi, якія ўплываюць на ўсіх.\n\nКалі вы дадаяце новага карыстальніка, ён павінен наладзіць свой профіль.\n\nЛюбы карыстальнік можа абнаўляць праграмы для ўсіх астатніх карыстальнікаў. Спецыяльныя магчымасці наладжваюцца асабіста кожным карыстальнікам."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Пасля стварэння профілю яго трэба наладзіць.\n\nЛюбы карыстальнік прылады можа абнаўляць праграмы ўсіх іншых карыстальнікаў."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Вы можаце адкрыць доступ да гэтай прылады іншым людзям шляхам стварэння дадатковых карыстальнікаў. Кожны карыстальнік мае свой уласны раздзел, на якім ён можа наладзіць свае праграмы, шпалеры і іншае. Карыстальнікі таксама могуць наладжваць параметры прылады, напрыклад Wi-Fi, якія ўплываюць на ўсіх.\n\nКалі вы дадаяце новага карыстальніка, ён павінен наладзіць свой раздзел.\n\nЛюбы карыстальнік можа абнаўляць праграмы для ўсіх астатніх карыстальнікаў. Спецыяльныя магчымасці наладжваюцца асабіста кожным карыстальнікам."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Пасля стварэння профіля яго трэба наладзіць.\n\nЛюбы карыстальнік прылады можа абнаўляць праграмы ўсіх іншых карыстальнікаў."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Наладзіць профіль?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Пераканайцеся, што чалавек мае магчымасць узяць прыладу і наладзіць свой раздзел"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Наладзiць профiль?"</string>

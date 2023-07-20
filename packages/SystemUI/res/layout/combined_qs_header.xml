@@ -26,7 +26,7 @@
     android:paddingLeft="@dimen/qs_panel_padding"
     android:paddingRight="@dimen/qs_panel_padding"
     android:visibility="gone"
-    android:theme="@style/Theme.SystemUI.QuickSettings.Header"
+    android:theme="@style/QSHeaderTheme"
     app:layoutDescription="@xml/combined_qs_header_scene">
 
     <androidx.constraintlayout.widget.Guideline
@@ -141,14 +141,11 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/large_screen_shade_header_min_height"
         android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="@id/date"
         app:layout_constraintEnd_toEndOf="@id/end_guide"
-        app:layout_constraintTop_toTopOf="@id/date">
-
-        <com.android.systemui.privacy.OngoingPrivacyChip
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
-
+        app:layout_constraintTop_toTopOf="@id/date"
+        app:layout_constraintBottom_toBottomOf="@id/date"
+        >
+        <include layout="@layout/ongoing_privacy_chip"/>
     </FrameLayout>
 
 </com.android.systemui.util.NoRemeasureMotionLayout>

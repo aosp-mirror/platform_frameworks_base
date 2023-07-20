@@ -86,8 +86,8 @@ static jint convertAudioProductStrategiesFromNative(
 
     // Audio Attributes Group array
     int attrGroupIndex = 0;
-    std::map<int /**attributesGroupIndex*/, std::vector<VolumeGroupAttributes> > groups;
-    for (const auto &attr : strategy.getVolumeGroupAttributes()) {
+    std::map<int /**attributesGroupIndex*/, std::vector<AudioAttributes> > groups;
+    for (const auto &attr : strategy.getAudioAttributes()) {
         int groupId = attr.getGroupId();
         int streamType = attr.getStreamType();
         const auto &iter = std::find_if(begin(groups), end(groups),
@@ -108,17 +108,17 @@ static jint convertAudioProductStrategiesFromNative(
     jAudioAttributesGroups = env->NewObjectArray(numAttributesGroups, gAudioAttributesGroupClass, NULL);
 
     for (const auto &iter : groups) {
-        std::vector<VolumeGroupAttributes> volumeGroupAttributes = iter.second;
-        jint numAttributes = volumeGroupAttributes.size();
-        jint jGroupId = volumeGroupAttributes.front().getGroupId();
-        jint jLegacyStreamType = volumeGroupAttributes.front().getStreamType();
+        std::vector<AudioAttributes> audioAttributesGroups = iter.second;
+        jint numAttributes = audioAttributesGroups.size();
+        jint jGroupId = audioAttributesGroups.front().getGroupId();
+        jint jLegacyStreamType = audioAttributesGroups.front().getStreamType();
 
         jStatus = JNIAudioAttributeHelper::getJavaArray(env, &jAudioAttributes, numAttributes);
         if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
             goto exit;
         }
         for (size_t j = 0; j < static_cast<size_t>(numAttributes); j++) {
-            auto attributes = volumeGroupAttributes[j].getAttributes();
+            auto attributes = audioAttributesGroups[j].getAttributes();
 
             jStatus = JNIAudioAttributeHelper::nativeToJava(env, &jAudioAttribute, attributes);
             if (jStatus != AUDIO_JAVA_SUCCESS) {

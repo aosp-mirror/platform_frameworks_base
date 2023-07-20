@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Bez mena&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(žiadne telefónne číslo)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Zadané kódy PIN sa nezhodujú."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Zadajte kód PIN s dĺžkou 4 až 8 číslic."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Zadajte kód PUK, ktorý má 8 alebo viac čísel."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM karta je uzamknutá kódom PUK. Zadaním kódu PUK ju odomknite."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Ak chcete SIM kartu odblokovať, zadajte kód PUK2."</string>
+    <string name="needPuk" msgid="7321876090152422918">"SIM karta je uzamknutá pomocou kódu PUK. Odomknite ju zadaním kódu PUK."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Ak chcete odblokovať SIM kartu, zadajte kód PUK2."</string>
     <string name="enablePin" msgid="2543771964137091212">"Neúspešné, povoľte uzamknutie SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="few">Zostávajú vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusy, potom sa vaša SIM karta uzamkne.</item>
@@ -75,8 +80,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"V predvolenom nastavení nie je identifikácia volajúceho obmedzená. Ďalší hovor: Bez obmedzenia"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Služba nie je poskytovaná."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nemôžete meniť nastavenie identifikácie volajúcich."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Dátové pripojenie bolo prepnuté na operátora <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Toto môžete kedykoľvek zmeniť v Nastaveniach"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Žiadna mobilná dátová služba"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Tiesňové volania nie sú k dispozícii"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Žiadne hlasové hovory"</string>
@@ -315,7 +318,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nahrávanie zvuku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fyzická aktivita"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"prístup k vašej fyzickej aktivite"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparát"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotenie a natáčanie videí"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Zariadenia v okolí"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"objavovať a pripájať zariadenia v okolí"</string>
@@ -332,7 +335,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Zapnúť funkciu Preskúmanie dotykom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Po klepnutí na položku sa vysloví jej názov a obrazovku je možné preskúmať pomocou gest."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Sledovať zadávaný text"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sledovanie zahŕňa osobné údaje, ako sú čísla kreditných kariet a heslá."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Ovládať priblíženie obrazovky"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Ovládajte umiestnenie a úroveň priblíženia obrazovky."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Gestá"</string>
@@ -341,7 +344,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Dokáže zaznamenať gestá na senzore odtlačkov prstov zariadenia."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Vytvoriť snímku obrazovky"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Je možné vytvoriť snímku obrazovky."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Ukážka, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"vydávanie sa za stavový riadok"</string>
@@ -553,8 +555,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Umožňuje aplikácii získavať preferované informácie platenej služby NFC, napríklad o registrovanej pomoci a trasách k cieľu."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ovládať technológiu NFC"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Umožňuje aplikácii komunikovať so značkami, kartami a čítačkami s podporou technológie NFC."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Udalosť transakcie bezpečnostného prvku"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Umožňuje aplikácii dostávať informácie o transakciách prebiehajúcich v bezpečnostnom prvku."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"deaktivácia zámky obrazovky"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Umožňuje aplikácii zakázať uzamknutie klávesnice a akékoľvek súvisiace zabezpečenie heslom. Príkladom je zakázanie uzamknutia klávesnice pri prichádzajúcom telefonickom hovore a jeho opätovné povolenie po skončení hovoru."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"požadovať zložitosť zámky obrazovky"</string>
@@ -588,11 +588,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Chyba overenia"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použiť zámku obrazovky"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadaním zámky obrazovky"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevne pritlačte prst na senzor"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevne pridržte senzor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Odtlačok prsta sa nedá rozpoznať. Skúste to znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistite senzor odtlačkov prstov a skúste to znova"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistite senzor a skúste to znova"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevne pritlačte prst na senzor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevne pridržte senzor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Vyskúšajte iný odtlačok prsta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Príliš jasno"</string>
@@ -657,7 +657,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Pozrite sa na telefón priamejšie"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Pozrite sa na telefón priamejšie"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Pozrite sa na telefón priamejšie"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Odstráňte všetko, čo vám zakrýva tvár"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Odstráňte všetko, čo vám zakrýva tvár."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Vyčistite hornú časť obrazovky vrátane čierneho panela"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -666,8 +666,6 @@
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Model tváre sa nedá vytvoriť. Skúste to znova."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Boli rozpoznané tmavé okuliare. Musí vám byť vidieť celú tvár."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Bolo rozpoznané rúško. Musí vám byť vidieť celú tvár."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tvár sa nedá overiť. Hardvér nie je k dispozícii."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Skúste znova použiť odomknutie tvárou"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Nové údaje o tvári sa nedajú uložiť. Najprv odstráňte jeden zo starých záznamov."</string>
@@ -685,8 +683,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Použiť tvár alebo zámku obrazovky"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Pokračujte pomocou tváre"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Pokračujte použitím tváre alebo zámky obrazovky"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Vyskytla sa chyba. Skúste to znova."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikona tváre"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"čítať nastavenia synchronizácie"</string>
@@ -924,21 +920,21 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Ak chcete odomknúť telefón alebo uskutočniť tiesňové volanie, stlačte Menu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Telefón odomknete stlačením tlačidla Menu."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Odomknite nakreslením vzoru"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Tiesňová linka"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Stav tiesne"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Zavolať späť"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Správne!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Skúsiť znova"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Skúsiť znova"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Všetky funkcie a dáta získate po odomknutí"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Prekročili ste maximálny povolený počet pokusov o odomknutie tvárou"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Žiadna SIM karta"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"V tablete nie je SIM karta."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"V zariadení Android TV nie je SIM karta."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"V telefóne nie je SIM karta."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Pridajte SIM kartu."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM karta chýba alebo sa nedá čítať. Pridajte SIM kartu."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Nepoužiteľná SIM karta."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Vaša SIM karta bola natrvalo deaktivovaná.\n Požiadajte svojho poskytovateľa bezdrôtových služieb o ďalšiu SIM kartu."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Žiadna SIM karta"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"V tablete nie je žiadna SIM karta."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"V zariadení Android TV nie je SIM karta."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"V telefóne nie je žiadna SIM karta."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Vložte SIM kartu."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM karta chýba alebo sa z nej nedá čítať. Vložte SIM kartu."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM karta je nepoužiteľná."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Vaša SIM karta bola natrvalo zakázaná.\nAk chcete získať inú SIM kartu, kontaktujte svojho operátora."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Predchádzajúca stopa"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Ďalšia stopa"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pozastaviť"</string>
@@ -948,10 +944,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Pretočiť dopredu"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Len tiesňové volania"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Sieť je zablokovaná"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM karta je uzamknutá kódom PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM karta je uzamknutá pomocou kódu PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Prečítajte si Príručku používateľa alebo kontaktujte podporu zákazníka."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM karta je uzamknutá."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM karta sa odomyká…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM karta je uzamknutá."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Prebieha odomykanie SIM karty..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"<xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste použili nesprávny bezpečnostný vzor. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"<xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste zadali nesprávne heslo. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"<xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste zadali nesprávny kód PIN. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
@@ -1334,10 +1330,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Zmena v časti Nastavenia &gt; Aplikácie"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Vždy povoliť"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Nikdy nepovoliť"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM karta bola odstránená"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Mobilná sieť bude nedostupná, kým nepoužijete platnú SIM kartu."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM karta bola odobraná"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Mobilná sieť nebude k dispozícii, kým nevložíte platnú SIM kartu a zariadenie nereštartujete."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Hotovo"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"Bola pridaná SIM karta"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"Bola pridaná SIM karta"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Ak chcete získať prístup k mobilnej sieti, reštartujte svoje zariadenie."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Reštartovať"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktivovať mobilnú službu"</string>
@@ -1362,11 +1358,11 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Bol zapnutý tethering cez USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Bol zapnutý režim MIDI cez USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Bolo pripojené príslušenstvo USB"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte ďalšie možnosti"</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte ďalšie možnosti."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pripojené zariadenie sa nabíja. Ďalšie možností získate klepnutím."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bolo zistené analógové zvukové príslušenstvo"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Pripojené zariadenie nie je kompatibilné s týmto telefónom. Ďalšie informácie zobrazíte klepnutím."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Ladenie cez USB je pripojené"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Ladenie cez USB pripojené"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Klepnutím vypnite ladenie cez USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Vyberte, ak chcete zakázať ladenie cez USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Bezdrôtové ladenie je pripojené"</string>
@@ -1572,7 +1568,7 @@
     <string name="storage_internal" msgid="8490227947584914460">"Interné zdieľané úložisko"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD karta"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"SD karta <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
-    <string name="storage_usb_drive" msgid="448030813201444573">"Kľúč USB"</string>
+    <string name="storage_usb_drive" msgid="448030813201444573">"Disk USB"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"Disk USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="2391213347883616886">"Ukladací priestor USB"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Upraviť"</string>
@@ -1616,7 +1612,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televízor"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefón"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Reproduktory doku"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Externé zariadenie"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Slúchadlá"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Systém"</string>
@@ -1649,7 +1645,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM karta je teraz zakázaná. Ak chcete pokračovať, zadajte kód PUK. Podrobné informácie získate od operátora."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Zadajte požadovaný kód PIN"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Potvrďte požadovaný kód PIN"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM karta sa odomyká…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Prebieha odomykanie SIM karty..."</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Nesprávny kód PIN."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Zadajte kód PIN s dĺžkou 4 až 8 číslic."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Kód PUK musí obsahovať 8 číslic."</string>
@@ -1842,8 +1838,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Zobrazenie na celú obrazovku"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ukončíte potiahnutím zhora nadol."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Dobre"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Otočte zariadenie pre lepšie zobrazenie"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Ukončite rozdelenú obrazovku pre lepšie zobrazenie"</string>
     <string name="done_label" msgid="7283767013231718521">"Hotovo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kruhový posúvač hodín"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kruhový posúvač minút"</string>
@@ -2126,7 +2120,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Upozornenia"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Rýchle nastavenia"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialógové okno napájania"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zamknúť obrazovku"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Uzamknúť obrazovku"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snímka obrazovky"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Hák na slúchadlá s mikrofónom"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Skratka dostupnosti na obrazovke"</string>
@@ -2299,5 +2293,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere tabletu"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"K tomuto obsahu nie je počas streamovania prístup. Skúste použiť telefón."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predvolené systémom"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"KARTA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

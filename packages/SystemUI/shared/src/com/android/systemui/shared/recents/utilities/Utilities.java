@@ -137,7 +137,7 @@ public class Utilities {
 
     /** @return whether or not {@param context} represents that of a large screen device or not */
     @TargetApi(Build.VERSION_CODES.R)
-    public static boolean isLargeScreen(Context context) {
+    public static boolean isTablet(Context context) {
         final WindowManager windowManager = context.getSystemService(WindowManager.class);
         final Rect bounds = windowManager.getCurrentWindowMetrics().getBounds();
 

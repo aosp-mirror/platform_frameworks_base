@@ -22,7 +22,6 @@ import static com.android.systemui.screenrecord.ScreenShareOptionKt.ENTIRE_SCREE
 import static com.android.systemui.screenrecord.ScreenShareOptionKt.SINGLE_APP;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -36,7 +35,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.text.BidiFormatter;
 import android.text.SpannableString;
 import android.text.TextPaint;
@@ -45,46 +43,33 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Window;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
-import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
 import com.android.systemui.screenrecord.MediaProjectionPermissionDialog;
 import com.android.systemui.screenrecord.ScreenShareOption;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.Utils;
 
-import javax.inject.Inject;
-
-import dagger.Lazy;
-
 public class MediaProjectionPermissionActivity extends Activity
-        implements DialogInterface.OnClickListener {
+        implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
     private static final String TAG = "MediaProjectionPermissionActivity";
     private static final float MAX_APP_NAME_SIZE_PX = 500f;
     private static final String ELLIPSIS = "\u2026";
 
-    private final FeatureFlags mFeatureFlags;
-    private final Lazy<ScreenCaptureDevicePolicyResolver> mScreenCaptureDevicePolicyResolver;
-
     private String mPackageName;
     private int mUid;
     private IMediaProjectionManager mService;
+    private FeatureFlags mFeatureFlags;
 
     private AlertDialog mDialog;
-
-    @Inject
-    public MediaProjectionPermissionActivity(FeatureFlags featureFlags,
-            Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver) {
-        mFeatureFlags = featureFlags;
-        mScreenCaptureDevicePolicyResolver = screenCaptureDevicePolicyResolver;
-    }
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        mFeatureFlags = Dependency.get(FeatureFlags.class);
         mPackageName = getCallingPackage();
         IBinder b = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
         mService = IMediaProjectionManager.Stub.asInterface(b);
@@ -115,12 +100,6 @@ public class MediaProjectionPermissionActivity extends Activity
             Log.e(TAG, "Error checking projection permissions", e);
             finish();
             return;
-        }
-
-        if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
-            if (showScreenCaptureDisabledDialogIfNeeded()) {
-                return;
-            }
         }
 
         TextPaint paint = new TextPaint();
@@ -190,7 +169,16 @@ public class MediaProjectionPermissionActivity extends Activity
             mDialog = dialogBuilder.create();
         }
 
-        setUpDialog(mDialog);
+        SystemUIDialog.registerDismissListener(mDialog);
+        SystemUIDialog.applyFlags(mDialog);
+        SystemUIDialog.setDialogSize(mDialog);
+
+        mDialog.setOnCancelListener(this);
+        mDialog.create();
+        mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
+
+        final Window w = mDialog.getWindow();
+        w.addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         mDialog.show();
     }
@@ -210,33 +198,6 @@ public class MediaProjectionPermissionActivity extends Activity
         }
     }
 
-    private void setUpDialog(AlertDialog dialog) {
-        SystemUIDialog.registerDismissListener(dialog);
-        SystemUIDialog.applyFlags(dialog);
-        SystemUIDialog.setDialogSize(dialog);
-
-        dialog.setOnCancelListener(this::onDialogDismissedOrCancelled);
-        dialog.setOnDismissListener(this::onDialogDismissedOrCancelled);
-        dialog.create();
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
-
-        final Window w = dialog.getWindow();
-        w.addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
-    }
-
-    private boolean showScreenCaptureDisabledDialogIfNeeded() {
-        final UserHandle hostUserHandle = getHostUserHandle();
-        if (mScreenCaptureDevicePolicyResolver.get()
-                .isScreenCaptureCompletelyDisabled(hostUserHandle)) {
-            AlertDialog dialog = new ScreenCaptureDisabledDialog(this);
-            setUpDialog(dialog);
-            dialog.show();
-            return true;
-        }
-
-        return false;
-    }
-
     private void grantMediaProjectionPermission(int screenShareMode) {
         try {
             if (screenShareMode == ENTIRE_SCREEN) {
@@ -247,14 +208,8 @@ public class MediaProjectionPermissionActivity extends Activity
                 final Intent intent = new Intent(this, MediaProjectionAppSelectorActivity.class);
                 intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION,
                         projection.asBinder());
-                intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
-                        getHostUserHandle());
                 intent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
-
-                // Start activity from the current foreground user to avoid creating a separate
-                // SystemUI process without access to recent tasks because it won't have
-                // WM Shell running inside.
-                startActivityAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
+                startActivity(intent);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error granting projection permission", e);
@@ -265,10 +220,6 @@ public class MediaProjectionPermissionActivity extends Activity
             }
             finish();
         }
-    }
-
-    private UserHandle getHostUserHandle() {
-        return UserHandle.getUserHandleForUid(getLaunchedFromUid());
     }
 
     private IMediaProjection createProjection(int uid, String packageName) throws RemoteException {
@@ -284,13 +235,12 @@ public class MediaProjectionPermissionActivity extends Activity
         return intent;
     }
 
-    private void onDialogDismissedOrCancelled(DialogInterface dialogInterface) {
-        if (!isFinishing()) {
-            finish();
-        }
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        finish();
     }
 
     private boolean isPartialScreenSharingEnabled() {
-        return mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING);
+        return mFeatureFlags != null && mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING);
     }
 }

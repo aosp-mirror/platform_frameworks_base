@@ -348,7 +348,7 @@ private:
     virtual int handleEvent(int fd, int events, void* data) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         sp<SensorEventQueue> q = reinterpret_cast<SensorEventQueue *>(data);
-        ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
+        ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
 
         ssize_t n;
         ASensorEvent buffer[16];

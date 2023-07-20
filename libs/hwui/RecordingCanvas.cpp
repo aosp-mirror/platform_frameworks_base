@@ -39,9 +39,6 @@
 #include "VectorDrawable.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/FunctorDrawable.h"
-#ifdef __ANDROID__
-#include "renderthread/CanvasContext.h"
-#endif
 
 namespace android {
 namespace uirenderer {
@@ -437,19 +434,7 @@ struct DrawPoints final : Op {
     size_t count;
     SkPaint paint;
     void draw(SkCanvas* c, const SkMatrix&) const {
-        if (paint.isAntiAlias()) {
-            c->drawPoints(mode, count, pod<SkPoint>(this), paint);
-        } else {
-            c->save();
-#ifdef __ANDROID__
-            auto pixelSnap = renderthread::CanvasContext::getActiveContext()->getPixelSnapMatrix();
-            auto transform = c->getLocalToDevice();
-            transform.postConcat(pixelSnap);
-            c->setMatrix(transform);
-#endif
-            c->drawPoints(mode, count, pod<SkPoint>(this), paint);
-            c->restore();
-        }
+        c->drawPoints(mode, count, pod<SkPoint>(this), paint);
     }
 };
 struct DrawVertices final : Op {

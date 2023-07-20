@@ -26,14 +26,14 @@ import java.util.Arrays;
 import java.util.List;
 
 /** Utility methods related to {@link ShellCommand} objects used in several tests. */
-public final class ShellCommandTestSupport {
+final class ShellCommandTestSupport {
     private ShellCommandTestSupport() {}
 
-    public static ShellCommand createShellCommandWithArgsAndOptions(String argsWithSpaces) {
+    static ShellCommand createShellCommandWithArgsAndOptions(String argsWithSpaces) {
         return createShellCommandWithArgsAndOptions(Arrays.asList(argsWithSpaces.split(" ")));
     }
 
-    public static ShellCommand createShellCommandWithArgsAndOptions(List<String> args) {
+    static ShellCommand createShellCommandWithArgsAndOptions(List<String> args) {
         ShellCommand command = mock(ShellCommand.class);
         class ArgProvider {
             private int mCount;

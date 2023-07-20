@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -27,7 +26,6 @@ import static android.window.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.wm.DisplayAreaProto.FEATURE_ID;
-import static com.android.server.wm.DisplayAreaProto.IS_IGNORING_ORIENTATION_REQUEST;
 import static com.android.server.wm.DisplayAreaProto.IS_ORGANIZED;
 import static com.android.server.wm.DisplayAreaProto.IS_ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayAreaProto.IS_TASK_DISPLAY_AREA;
@@ -95,7 +93,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     DisplayArea(WindowManagerService wms, Type type, String name, int featureId) {
         super(wms);
         // TODO(display-area): move this up to ConfigurationContainer
-        setOverrideOrientation(SCREEN_ORIENTATION_UNSET);
+        mOrientation = SCREEN_ORIENTATION_UNSET;
         mType = type;
         mName = name;
         mFeatureId = featureId;
@@ -148,7 +146,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @ScreenOrientation
     int getOrientation(int candidate) {
         final int orientation = super.getOrientation(candidate);
-        if (shouldIgnoreOrientationRequest(orientation)) {
+        if (getIgnoreOrientationRequest(orientation)) {
             // In all the other case, mLastOrientationSource will be reassigned to a new value
             mLastOrientationSource = null;
             return SCREEN_ORIENTATION_UNSET;
@@ -158,7 +156,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     boolean handlesOrientationChangeFromDescendant(@ScreenOrientation int orientation) {
-        return !shouldIgnoreOrientationRequest(orientation)
+        return !getIgnoreOrientationRequest(orientation)
                 && super.handlesOrientationChangeFromDescendant(orientation);
     }
 
@@ -167,9 +165,8 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         // If this is set to ignore the orientation request, we don't propagate descendant
         // orientation request.
         final int orientation = requestingContainer != null
-                ? requestingContainer.getOverrideOrientation()
-                : SCREEN_ORIENTATION_UNSET;
-        return !shouldIgnoreOrientationRequest(orientation)
+                ? requestingContainer.mOrientation : SCREEN_ORIENTATION_UNSET;
+        return !getIgnoreOrientationRequest(orientation)
                 && super.onDescendantOrientationChanged(requestingContainer);
     }
 
@@ -236,7 +233,8 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     /**
      * @return {@value true} if we need to ignore the orientation in input.
      */
-    boolean shouldIgnoreOrientationRequest(@ScreenOrientation int orientation) {
+    // TODO(b/262366204): Rename getIgnoreOrientationRequest to shouldIgnoreOrientationRequest
+    boolean getIgnoreOrientationRequest(@ScreenOrientation int orientation) {
         // We always respect orientation request for ActivityInfo.SCREEN_ORIENTATION_LOCKED
         // ActivityInfo.SCREEN_ORIENTATION_NOSENSOR.
         // Main use case why this is important is Camera apps that rely on those
@@ -246,22 +244,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 || orientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
             return false;
         }
-        return getIgnoreOrientationRequest()
-                && !shouldRespectOrientationRequestDueToPerAppOverride();
-    }
-
-    private boolean shouldRespectOrientationRequestDueToPerAppOverride() {
-        if (mDisplayContent == null) {
-            return false;
-        }
-        ActivityRecord activity = mDisplayContent.topRunningActivity(
-                /* considerKeyguardState= */ true);
-        return activity != null && activity.getTaskFragment() != null
-                // Checking TaskFragment rather than ActivityRecord to ensure that transition
-                // between fullscreen and PiP would work well. Checking TaskFragment rather than
-                // Task to ensure that Activity Embedding is excluded.
-                && activity.getTaskFragment().getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && activity.mLetterboxUiController.isOverrideRespectRequestedOrientationEnabled();
+        return getIgnoreOrientationRequest();
     }
 
     boolean getIgnoreOrientationRequest() {
@@ -360,7 +343,6 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         proto.write(IS_ROOT_DISPLAY_AREA, asRootDisplayArea() != null);
         proto.write(FEATURE_ID, mFeatureId);
         proto.write(IS_ORGANIZED, isOrganized());
-        proto.write(IS_IGNORING_ORIENTATION_REQUEST, getIgnoreOrientationRequest());
         proto.end(token);
     }
 

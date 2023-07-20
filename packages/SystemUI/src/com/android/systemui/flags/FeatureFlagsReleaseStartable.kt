@@ -26,10 +26,7 @@ import javax.inject.Inject
 
 class FeatureFlagsReleaseStartable
 @Inject
-constructor(
-    dumpManager: DumpManager,
-    featureFlags: FeatureFlags,
-) : CoreStartable {
+constructor(dumpManager: DumpManager, featureFlags: FeatureFlags) : CoreStartable {
 
     init {
         dumpManager.registerCriticalDumpable(FeatureFlagsRelease.TAG) { pw, args ->
@@ -37,7 +34,9 @@ constructor(
         }
     }
 
-    override fun start() {}
+    override fun start() {
+        // no-op
+    }
 }
 
 @Module

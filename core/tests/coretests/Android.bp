@@ -72,6 +72,7 @@ android_test {
         "libpowermanagertest_jni",
     ],
 
+    platform_apis: true,
     sdk_version: "core_platform",
     test_suites: ["device-tests"],
 
@@ -84,8 +85,8 @@ android_test {
         ":BstatsTestApp",
         ":BinderDeathRecipientHelperApp1",
         ":BinderDeathRecipientHelperApp2",
-        ":com.android.cts.helpers.aosp",
     ],
+    required: ["com.android.cts.helpers.aosp"],
 }
 
 // Rules to copy all the test apks to the intermediate raw resource directory

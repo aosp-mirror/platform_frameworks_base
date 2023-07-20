@@ -34,10 +34,6 @@ import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsListingControllerImpl
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.controls.management.ControlsRequestDialog
-import com.android.systemui.controls.panels.AuthorizedPanelsRepository
-import com.android.systemui.controls.panels.AuthorizedPanelsRepositoryImpl
-import com.android.systemui.controls.panels.SelectedComponentRepository
-import com.android.systemui.controls.panels.SelectedComponentRepositoryImpl
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager
 import com.android.systemui.controls.settings.ControlsSettingsDialogManagerImpl
 import com.android.systemui.controls.ui.ControlActionCoordinator
@@ -46,15 +42,12 @@ import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.ControlsUiControllerImpl
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.tileimpl.QSTileImpl
-import com.android.systemui.qs.tiles.DeviceControlsTile
 import dagger.Binds
 import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import dagger.multibindings.StringKey
 
 /**
  * Module for injecting classes in `com.android.systemui.controls`-
@@ -111,16 +104,6 @@ abstract class ControlsModule {
         coordinator: ControlActionCoordinatorImpl
     ): ControlActionCoordinator
 
-    @Binds
-    abstract fun provideAuthorizedPanelsRepository(
-        repository: AuthorizedPanelsRepositoryImpl
-    ): AuthorizedPanelsRepository
-
-    @Binds
-    abstract fun providePreferredPanelRepository(
-        repository: SelectedComponentRepositoryImpl
-    ): SelectedComponentRepository
-
     @BindsOptionalOf
     abstract fun optionalPersistenceWrapper(): ControlsFavoritePersistenceWrapper
 
@@ -159,9 +142,4 @@ abstract class ControlsModule {
     @IntoMap
     @ClassKey(ControlsActivity::class)
     abstract fun provideControlsActivity(activity: ControlsActivity): Activity
-
-    @Binds
-    @IntoMap
-    @StringKey(DeviceControlsTile.TILE_SPEC)
-    abstract fun bindDeviceControlsTile(controlsTile: DeviceControlsTile): QSTileImpl<*>
 }

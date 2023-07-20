@@ -338,7 +338,7 @@ abstract class BaseAppStateTimeSlotEventsTracker
                 pw.print(prefix);
                 pw.print(mKeyNumOfEventsThreshold);
                 pw.print('=');
-                pw.println(mNumOfEventsThreshold);
+                pw.println(mDefaultNumOfEventsThreshold);
             }
             pw.print(prefix);
             pw.print("event_time_slot_size=");

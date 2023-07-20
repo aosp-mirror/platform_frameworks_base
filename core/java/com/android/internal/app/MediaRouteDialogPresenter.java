@@ -89,7 +89,8 @@ public abstract class MediaRouteDialogPresenter {
         final MediaRouter router = context.getSystemService(MediaRouter.class);
 
         MediaRouter.RouteInfo route = router.getSelectedRoute();
-        if (route.isDefault() || !route.matchesTypes(routeTypes)) {
+        if (route.isDefault() || !route.matchesTypes(routeTypes)
+            || route.getStatusCode() == MediaRouter.RouteInfo.STATUS_NOT_AVAILABLE) {
             final MediaRouteChooserDialog d = new MediaRouteChooserDialog(context, theme,
                     showProgressBarWhenEmpty);
             d.setRouteTypes(routeTypes);

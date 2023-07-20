@@ -763,10 +763,10 @@ class UserController implements Handler.Callback {
         final UserInfo info = getUserInfo(userId);
         if (!Objects.equals(info.lastLoggedInFingerprint, PackagePartitions.FINGERPRINT)
                 || SystemProperties.getBoolean("persist.pm.mock-upgrade", false)) {
-            // Suppress double notifications for managed profiles that
-            // were unlocked automatically as part of their parent user being
+            // Suppress double notifications for managed profiles and parallel space
+            // that were unlocked automatically as part of their parent user being
             // unlocked.  TODO(b/217442918): this code doesn't work correctly.
-            final boolean quiet = info.isManagedProfile();
+            final boolean quiet = info.isManagedProfile() || info.isParallel();
             mInjector.sendPreBootBroadcast(userId, quiet,
                     () -> finishUserUnlockedCompleted(uss));
         } else {
@@ -1370,12 +1370,11 @@ class UserController implements Handler.Callback {
             }
         }
         final int profilesToStartSize = profilesToStart.size();
-        int i = 0;
-        for (; i < profilesToStartSize && i < (getMaxRunningUsers() - 1); ++i) {
-            startUser(profilesToStart.get(i).id, /* foreground= */ false);
+        if (profilesToStartSize > getMaxRunningUsers()) {
+            Slogf.w(TAG, "More profiles than MAX_RUNNING_USERS; starting all anyway");
         }
-        if (i < profilesToStartSize) {
-            Slogf.w(TAG, "More profiles than MAX_RUNNING_USERS");
+        for (int i = 0; i < profilesToStartSize; ++i) {
+            startUser(profilesToStart.get(i).id, /* foreground= */ false);
         }
     }
 
@@ -1517,7 +1516,7 @@ class UserController implements Handler.Callback {
                 Slogf.w(TAG, "No user info for user #" + userId);
                 return false;
             }
-            if (foreground && userInfo.isProfile()) {
+            if (foreground && (userInfo.isProfile() || userInfo.isParallel())) {
                 Slogf.w(TAG, "Cannot switch to User #" + userId + ": not a full user");
                 return false;
             }

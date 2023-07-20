@@ -209,7 +209,7 @@ sk_sp<SkShader> StretchEffect::getShader(float width, float height,
     }
 
     mBuilder->child(CONTENT_TEXTURE) =
-            snapshotImage->makeShader(SkTileMode::kClamp, SkTileMode::kClamp,
+            snapshotImage->makeShader(SkTileMode::kMirror, SkTileMode::kMirror,
                                       SkSamplingOptions(SkFilterMode::kLinear), matrix);
     mBuilder->uniform("uInterpolationStrength").set(&INTERPOLATION_STRENGTH_VALUE, 1);
     mBuilder->uniform("uStretchAffectedDistX").set(&width, 1);

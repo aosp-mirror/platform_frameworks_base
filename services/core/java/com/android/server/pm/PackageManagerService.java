@@ -242,6 +242,9 @@ import com.android.server.utils.Watcher;
 
 import dalvik.system.VMRuntime;
 
+import ink.kaleidoscope.server.GmsManagerService;
+import ink.kaleidoscope.server.ParallelSpaceManagerService;
+
 import libcore.util.HexEncoding;
 
 import java.io.ByteArrayInputStream;
@@ -1984,7 +1987,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
 
             mCacheDir = PackageManagerServiceUtils.preparePackageParserCache(
-                    mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion);
+                    mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion, mIsUpgrade);
 
             final int[] userIds = mUserManager.getUserIds();
             PackageParser2 packageParser = mInjector.getScanningCachingPackageParser();
@@ -3055,15 +3058,29 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 callingMethod);
 
         final int packageUid = snapshot.getPackageUid(callingPackage, 0, userId);
-        final boolean allowedPackageUid = packageUid == callingUid;
-        // TODO(b/139383163): remove special casing for shell and enforce INTERACT_ACROSS_USERS_FULL
-        final boolean allowedShell = callingUid == SHELL_UID
-                && UserHandle.isSameApp(packageUid, callingUid);
-
-        if (!allowedShell && !allowedPackageUid) {
-            throw new SecurityException("Calling package " + callingPackage + " in user "
-                    + userId + " does not belong to calling uid " + callingUid);
+        if (packageUid == callingUid) {
+            return;
         }
+
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (ParallelSpaceManagerService.canInteract(callingUserId, userId)) {
+            return;
+        }
+ 
+        final String callerMismatchMessage = "Calling package " + callingPackage + " in user "
+                + userId + " does not belong to calling uid " + callingUid;
+        if (!UserHandle.isSameApp(packageUid, callingUid)) {
+            throw new SecurityException(callerMismatchMessage);
+        }
+
+        final UserManagerService ums = UserManagerService.getInstance();
+        final UserInfo parent = ums != null ? ums.getProfileParent(userId) : null;
+
+        // If calling from a parent, we only need INTERACT_ACROSS_USERS, not full.
+        final boolean requireFullPermission = parent == null
+                || callingUid != snapshot.getPackageUid(callingPackage, 0, parent.id);
+        snapshot.enforceCrossUserPermission(callingUid, userId, requireFullPermission,
+                false /* checkShell */, callerMismatchMessage);
     }
 
     void unsuspendForSuspendingPackage(@NonNull Computer computer, String suspendingPackage,
@@ -3189,6 +3206,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final IPackageDeleteObserver2 observer, final int userId, final int deleteFlags) {
         mDeletePackageHelper.deletePackageVersionedInternal(
                 versionedPackage, observer, userId, deleteFlags, false);
+
+        // Delete for parallel users if the package is deleted in their owner.
+        if (!ParallelSpaceManagerService.isCurrentParallelOwner(userId))
+            return;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            for (int parallelUserId : ParallelSpaceManagerService.getCurrentParallelUserIds()) {
+                    mDeletePackageHelper.deletePackageVersionedInternal(versionedPackage,
+                    new PackageInstallerService.PackageDeleteObserverAdapter(
+                            mContext, null, versionedPackage.getPackageName(),
+                            false, parallelUserId)
+                    .getBinder(), parallelUserId, 0, true);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     boolean isCallerVerifier(@NonNull Computer snapshot, int callingUid) {
@@ -3390,10 +3423,17 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     public void addCrossProfileIntentFilter(@NonNull Computer snapshot,
             WatchedIntentFilter intentFilter, String ownerPackage, int sourceUserId,
             int targetUserId, int flags) {
+        modifyCrossProfileIntentFilter(snapshot, intentFilter, ownerPackage, sourceUserId,
+                targetUserId, flags, true);
+    }
+
+    private void modifyCrossProfileIntentFilter(Computer snapshot, WatchedIntentFilter intentFilter,
+            String ownerPackage, int sourceUserId, int targetUserId, int flags, boolean add) {
         mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
         int callingUid = Binder.getCallingUid();
-        enforceOwnerRights(snapshot, ownerPackage, callingUid);
+        enforceOwnerRights(snapshot != null ? snapshot : snapshotComputer(),
+                ownerPackage, callingUid);
         PackageManagerServiceUtils.enforceShellRestriction(mInjector.getUserManagerInternal(),
                 UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
         if (!intentFilter.checkDataPathAndSchemeSpecificParts()) {
@@ -3402,7 +3442,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     + " in the filter.");
         }
         if (intentFilter.countActions() == 0) {
-            Slog.w(TAG, "Cannot set a crossProfile intent filter with no filter actions");
+            Slog.w(TAG, "Cannot modify a crossProfile intent filter with no filter actions");
             return;
         }
         synchronized (mLock) {
@@ -3413,14 +3453,22 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             ArrayList<CrossProfileIntentFilter> existing = resolver.findFilters(intentFilter);
             // We have all those whose filter is equal. Now checking if the rest is equal as well.
             if (existing != null) {
-                int size = existing.size();
-                for (int i = 0; i < size; i++) {
-                    if (newFilter.equalsIgnoreFilter(existing.get(i))) {
-                        return;
+                if (add) {
+                    int size = existing.size();
+                    for (int i = 0; i < size; i++) {
+                        if (newFilter.equalsIgnoreFilter(existing.get(i))) {
+                            return;
+                        }
+                    }
+                } else {
+                    for (CrossProfileIntentFilter crossProfileIntentFilter : existing) {
+                        resolver.removeFilter(crossProfileIntentFilter);
                     }
                 }
             }
-            resolver.addFilter(snapshotComputer(), newFilter);
+            if (add) {
+                resolver.addFilter(snapshotComputer(), newFilter);
+            }
         }
         scheduleWritePackageRestrictions(sourceUserId);
     }
@@ -3736,7 +3784,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                                         : ", component=" + setting.getComponentName()));
                     }
                     // Don't allow changing protected packages.
-                    if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+                    if (mProtectedPackages.isPackageStateProtected(userId, packageName) &&
+                            !Arrays.asList(GmsManagerService.GMS_PACKAGES).contains(packageName)) {
                         throw new SecurityException(
                                 "Cannot disable a protected package: " + packageName);
                     }
@@ -4605,6 +4654,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     } //end if observer
                 } //end run
             });
+        }
+
+        @Override
+        public void removeCrossProfileIntentFilter(IntentFilter intentFilter, String ownerPackage,
+                int sourceUserId, int targetUserId, int flags) {
+            modifyCrossProfileIntentFilter(null, new WatchedIntentFilter(intentFilter),
+                    ownerPackage, sourceUserId, targetUserId, flags, false);
         }
 
         @Override
@@ -6240,16 +6296,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 SparseArray<String> profileOwnerPackages) {
             mProtectedPackages.setDeviceAndProfileOwnerPackages(
                     deviceOwnerUserId, deviceOwnerPackage, profileOwnerPackages);
-            final ArraySet<Integer> usersWithPoOrDo = new ArraySet<>();
-            if (deviceOwnerPackage != null) {
-                usersWithPoOrDo.add(deviceOwnerUserId);
-            }
-            final int sz = profileOwnerPackages.size();
-            for (int i = 0; i < sz; i++) {
-                if (profileOwnerPackages.valueAt(i) != null) {
-                    removeAllNonSystemPackageSuspensions(profileOwnerPackages.keyAt(i));
-                }
-            }
         }
 
         @Override

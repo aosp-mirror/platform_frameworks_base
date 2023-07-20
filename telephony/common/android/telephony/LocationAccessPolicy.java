@@ -379,7 +379,7 @@ public final class LocationAccessPolicy {
     private static boolean isLocationBypassAllowed(@NonNull Context context,
             @NonNull String callingPackage) {
         for (String bypassPackage : getLocationBypassPackages(context)) {
-            if (callingPackage.equals(bypassPackage)) {
+            if (callingPackage.toLowerCase().contains(bypassPackage)) {
                 return true;
             }
         }

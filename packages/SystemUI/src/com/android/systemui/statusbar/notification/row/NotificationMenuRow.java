@@ -305,6 +305,9 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             return;
         }
         List<MenuItem> menuItems = mOnLeft ? mLeftMenuItems : mRightMenuItems;
+        if (menuItems.isEmpty()) {
+           return;
+        }
         for (int i = 0; i < menuItems.size(); i++) {
             addMenuView(menuItems.get(i), mMenuContainer);
         }
@@ -797,7 +800,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             if (iconResId >= 0) {
                 AlphaOptimizedImageView iv = new AlphaOptimizedImageView(context);
                 iv.setPadding(padding, padding, padding, padding);
-                Drawable icon = context.getResources().getDrawable(iconResId);
+                Drawable icon = context.getDrawable(iconResId);
                 iv.setImageDrawable(icon);
                 iv.setColorFilter(tint);
                 iv.setAlpha(1f);

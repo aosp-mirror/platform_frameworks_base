@@ -135,7 +135,9 @@ int DrawFrameTask::drawFrame() {
 void DrawFrameTask::postAndWait() {
     ATRACE_CALL();
     AutoMutex _lock(mLock);
-    mRenderThread->queue().post([this]() { run(); });
+    if (mRenderThread) {
+      mRenderThread->queue().post([this]() { run(); });
+    }
     mSignal.wait(mLock);
 }
 
@@ -278,11 +280,6 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
 void DrawFrameTask::unblockUiThread() {
     AutoMutex _lock(mLock);
     mSignal.signal();
-}
-
-void DrawFrameTask::createHintSession(pid_t uiThreadId, pid_t renderThreadId) {
-    if (mHintSessionWrapper) return;
-    mHintSessionWrapper.emplace(uiThreadId, renderThreadId);
 }
 
 DrawFrameTask::HintSessionWrapper::HintSessionWrapper(int32_t uiThreadId, int32_t renderThreadId) {

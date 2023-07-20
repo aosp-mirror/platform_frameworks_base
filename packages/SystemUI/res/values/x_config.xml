@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2018-2022 The Project-Xtended
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+          http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <!-- On-The-Go -->
+    <integer name="quick_settings_onthego_dialog_short_timeout">3000</integer>
+    <integer name="quick_settings_onthego_dialog_long_timeout">6000</integer>
+
+    <!-- Udfps vendor code -->
+    <integer name="config_udfps_vendor_code">0</integer>
+
+    <!-- Color of the UDFPS pressed view -->
+    <color name="config_udfpsColor">#ffffffff</color>
+    
+    <!-- Udfps display mode provider class name -->
+    <string name="config_udfpsDisplayModeProviderComponent">com.android.systemui.biometrics.DummyUdfpsDisplayModeProvider</string>
+    
+    <!-- Flag to enable framework dimming for udfps -->
+    <bool name="config_udfpsFrameworkDimming">false</bool>
+
+    <!-- Array of brightness-alpha lut for framework dimming -->
+    <string-array name="config_udfpsDimmingBrightnessAlphaArray" translatable="false">
+          <!-- Example:
+          <item>0,255</item>
+          <item>1,234</item>
+          <item>3,227</item>
+          <item>8,208</item>
+          <item>16,192</item>
+          <item>27,176</item>
+          <item>41,160</item>
+          <item>61,144</item>
+          <item>80,128</item>
+          <item>104,112</item>
+          <item>130,96</item>
+          <item>158,80</item>
+          <item>188,64</item>
+          <item>221,48</item>
+          <item>250,36</item>
+          <item>255,33</item>
+          -->
+    </string-array>
+
+    <!-- StatusBar burn-in protection -->
+    <bool name="config_disableStatusBarBurnInProtection">false</bool>
+    
+    <!-- Max visible system icons -->
+    <integer name="config_maxVisibleStatusIconContainer">7</integer>
+
+    <!-- The maximum number of tiles in the QuickQSPanel -->
+    <integer name="quick_qs_panel_max_tiles_custom">4</integer>
+
+    <!-- The maximum number of rows in the QuickQSPanel -->
+    <integer name="quick_qs_panel_max_rows_custom">2</integer>
+
+    <!-- The number of columns in the QuickSettings -->
+    <integer name="quick_settings_num_columns_custom">2</integer>
+
+    <!-- The number of rows in the QuickSettings -->
+    <integer name="quick_settings_max_rows_custom">4</integer>
+    
+    <!-- Update battery info every second when device is charging -->
+    <bool name="config_alternateFastchargeInfoUpdate">false</bool>
+    
+    <!-- Max visible notification icons -->
+    <integer name="config_maxVisibleNotificationIcons">4</integer>
+    <integer name="config_maxVisibleNotificationIconsOnLock">3</integer>
+
+    <!-- Charging info current divider, if needed -->
+    <integer name="config_currentInfoDivider" translatable="false">1000</integer>
+
+    <!-- Whether to pulse onFingerDown actions instead
+        of waking the screen while the screen is off or in lpm. -->
+    <bool name="config_pulseOnFingerDown">false</bool>
+
+    <!-- Preferred max refresh rate at AOD & Ambient Display, if supported by the display. -->
+    <integer name="config_aodMaxRefreshRate">-1</integer>
+</resources>

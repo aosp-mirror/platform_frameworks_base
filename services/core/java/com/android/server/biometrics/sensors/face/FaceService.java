@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
@@ -62,6 +63,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.face.aidl.FaceProvider;
+import com.android.server.biometrics.sensors.face.custom.CustomFaceProvider;
 import com.android.server.biometrics.sensors.face.hidl.Face10;
 
 import java.io.FileDescriptor;
@@ -647,6 +649,12 @@ public class FaceService extends SystemService {
             }
         }
 
+        private void addCustomProviders() {
+            if (CustomFaceProvider.useCustomFaceUnlockService()) {
+                mServiceProviders.add(new CustomFaceProvider(getContext(), new FaceSensorPropertiesInternal(CustomFaceProvider.DEVICE_ID, SensorProperties.STRENGTH_WEAK, 1, new ArrayList(), 1, false, false, false), mLockoutResetDispatcher));
+            }
+        }
+
         @Override // Binder call
         public void registerAuthenticators(
                 @NonNull List<FaceSensorPropertiesInternal> hidlSensors) {
@@ -664,6 +672,7 @@ public class FaceService extends SystemService {
             handler.post(() -> {
                 addHidlProviders(hidlSensors);
                 addAidlProviders();
+                addCustomProviders();
 
                 final IBiometricService biometricService = IBiometricService.Stub.asInterface(
                         ServiceManager.getService(Context.BIOMETRIC_SERVICE));

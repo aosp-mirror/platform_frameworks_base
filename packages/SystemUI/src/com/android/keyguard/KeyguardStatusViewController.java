@@ -20,7 +20,8 @@ import android.graphics.Rect;
 import android.util.Slog;
 
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
-import com.android.keyguard.logging.KeyguardLogger;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ClockAnimations;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -30,6 +31,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -60,16 +62,17 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ConfigurationController configurationController,
             DozeParameters dozeParameters,
-            ScreenOffAnimationController screenOffAnimationController,
-            KeyguardLogger logger) {
+            FeatureFlags featureFlags,
+            ScreenOffAnimationController screenOffAnimationController) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mConfigurationController = configurationController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
-                dozeParameters, screenOffAnimationController, /* animateYPos= */ true,
-                logger.getBuffer());
+                dozeParameters, screenOffAnimationController, /* animateYPos= */ true);
+        mKeyguardVisibilityHelper.setOcclusionTransitionFlagEnabled(
+                featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION));
     }
 
     @Override
@@ -207,6 +210,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         public void onDensityOrFontScaleChanged() {
             mKeyguardClockSwitchController.onDensityOrFontScaleChanged();
         }
+
+        @Override
+        public void onThemeChanged() {
+            mKeyguardClockSwitchController.onDensityOrFontScaleChanged();
+        }
     };
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
@@ -220,7 +228,13 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             if (visible) {
                 if (DEBUG) Slog.v(TAG, "refresh statusview visible:true");
                 refreshTime();
+                mView.updateWeatherView();
             }
+        }
+
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            mView.updateWeatherView();
         }
     };
 
