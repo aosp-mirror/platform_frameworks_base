@@ -28,7 +28,6 @@ import static org.junit.Assert.assertThrows;
 
 import android.os.VibrationEffect;
 import android.os.vibrator.PrebakedSegment;
-import android.platform.test.annotations.Presubmit;
 import android.util.Xml;
 
 import com.android.modules.utils.TypedXmlPullParser;
@@ -50,7 +49,6 @@ import java.util.Map;
  * <p>The {@link VibrationEffect} public APIs are covered by CTS to enforce the schema defined at
  * services/core/xsd/vibrator/vibration/vibration.xsd.
  */
-@Presubmit
 @RunWith(JUnit4.class)
 public class VibrationEffectXmlSerializationTest {
 

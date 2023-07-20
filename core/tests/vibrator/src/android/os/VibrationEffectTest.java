@@ -40,7 +40,6 @@ import android.net.Uri;
 import android.os.VibrationEffect.Composition.UnreachableAfterRepeatingIndefinitelyException;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -54,7 +53,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.time.Duration;
 import java.util.Arrays;
 
-@Presubmit
 @RunWith(MockitoJUnitRunner.class)
 public class VibrationEffectTest {
 

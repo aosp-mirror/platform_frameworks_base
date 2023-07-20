@@ -24,13 +24,11 @@ import static org.junit.Assert.assertTrue;
 
 import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
-import android.platform.test.annotations.Presubmit;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-@Presubmit
 @RunWith(JUnit4.class)
 public class VibratorInfoTest {
     private static final float TEST_TOLERANCE = 1e-5f;

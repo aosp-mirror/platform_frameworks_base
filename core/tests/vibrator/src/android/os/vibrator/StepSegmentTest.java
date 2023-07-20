@@ -27,7 +27,6 @@ import static org.testng.Assert.assertThrows;
 import android.os.Parcel;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.platform.test.annotations.Presubmit;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,7 +36,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.MockitoRule;
 
-@Presubmit
 @RunWith(MockitoJUnitRunner.class)
 public class StepSegmentTest {
     private static final float TOLERANCE = 1e-2f;
