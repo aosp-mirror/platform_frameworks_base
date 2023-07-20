@@ -502,35 +502,35 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         return vsyncId >= mBeginVsyncId;
     }
 
-    // This will be executed in the HardwareRendererObserver handler, which is the FrameTracker
-    // handler by construction.
     @Override
     public void onFrameMetricsAvailable(int dropCountSinceLastInvocation) {
-        if (mCancelled || mMetricsFinalized) {
-            return;
-        }
+        postCallback(() -> {
+            if (mCancelled || mMetricsFinalized) {
+                return;
+            }
 
-        // Since this callback might come a little bit late after the end() call.
-        // We should keep tracking the begin / end timestamp that we can compare with
-        // vsync timestamp to check if the frame is in the duration of the CUJ.
-        long totalDurationNanos = mMetricsWrapper.getMetric(FrameMetrics.TOTAL_DURATION);
-        boolean isFirstFrame = mMetricsWrapper.getMetric(FrameMetrics.FIRST_DRAW_FRAME) == 1;
-        long frameVsyncId =
-                mMetricsWrapper.getTiming()[FrameMetrics.Index.FRAME_TIMELINE_VSYNC_ID];
+            // Since this callback might come a little bit late after the end() call.
+            // We should keep tracking the begin / end timestamp that we can compare with
+            // vsync timestamp to check if the frame is in the duration of the CUJ.
+            long totalDurationNanos = mMetricsWrapper.getMetric(FrameMetrics.TOTAL_DURATION);
+            boolean isFirstFrame = mMetricsWrapper.getMetric(FrameMetrics.FIRST_DRAW_FRAME) == 1;
+            long frameVsyncId =
+                    mMetricsWrapper.getTiming()[FrameMetrics.Index.FRAME_TIMELINE_VSYNC_ID];
 
-        if (!isInRange(frameVsyncId)) {
-            return;
-        }
-        JankInfo info = findJankInfo(frameVsyncId);
-        if (info != null) {
-            info.hwuiCallbackFired = true;
-            info.totalDurationNanos = totalDurationNanos;
-            info.isFirstFrame = isFirstFrame;
-        } else {
-            mJankInfos.put((int) frameVsyncId, JankInfo.createFromHwuiCallback(
-                    frameVsyncId, totalDurationNanos, isFirstFrame));
-        }
-        processJankInfos();
+            if (!isInRange(frameVsyncId)) {
+                return;
+            }
+            JankInfo info = findJankInfo(frameVsyncId);
+            if (info != null) {
+                info.hwuiCallbackFired = true;
+                info.totalDurationNanos = totalDurationNanos;
+                info.isFirstFrame = isFirstFrame;
+            } else {
+                mJankInfos.put((int) frameVsyncId, JankInfo.createFromHwuiCallback(
+                        frameVsyncId, totalDurationNanos, isFirstFrame));
+            }
+            processJankInfos();
+        });
     }
 
     @UiThread

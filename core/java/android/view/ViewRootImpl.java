@@ -5795,15 +5795,6 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_PAUSED_FOR_SYNC_TIMEOUT = 37;
 
     final class ViewRootHandler extends Handler {
-        @androidx.annotation.NonNull
-        @Override
-        public String getTraceName(@androidx.annotation.NonNull Message message) {
-            if (message.getCallback() == null) {
-                return getMessageName(message);
-            }
-            return super.getTraceName(message);
-        }
-
         @Override
         public String getMessageName(Message message) {
             switch (message.what) {
