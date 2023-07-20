@@ -52,6 +52,7 @@ android_test {
         "service-permission.stubs.system_server",
         "androidx.test.runner",
         "androidx.test.rules",
+        "junit-params",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "servicestests-utils",
