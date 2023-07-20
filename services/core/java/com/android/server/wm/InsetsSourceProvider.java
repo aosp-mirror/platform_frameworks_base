@@ -81,6 +81,7 @@ class InsetsSourceProvider {
     private boolean mIsLeashReadyForDispatching;
     private final Rect mSourceFrame = new Rect();
     private final Rect mLastSourceFrame = new Rect();
+    private final Rect mLastContainerBounds = new Rect();
     private @NonNull Insets mInsetsHint = Insets.NONE;
     private @Flags int mFlagsFromFrameProvider;
     private @Flags int mFlagsFromServer;
@@ -278,9 +279,29 @@ class InsetsSourceProvider {
         // visible. (i.e. No surface, pending insets that were given during layout, etc..)
         if (mServerVisible) {
             mSource.setFrame(mSourceFrame);
+            updateInsetsHint();
         } else {
             mSource.setFrame(0, 0, 0, 0);
         }
+    }
+
+    // To be called when mSourceFrame or the window container bounds is changed.
+    private void updateInsetsHint() {
+        if (!mControllable || !mServerVisible) {
+            return;
+        }
+        final Rect bounds = mWindowContainer.getBounds();
+        if (mSourceFrame.equals(mLastSourceFrame) && bounds.equals(mLastContainerBounds)) {
+            return;
+        }
+        mLastSourceFrame.set(mSourceFrame);
+        mLastContainerBounds.set(bounds);
+        mInsetsHint = mSource.calculateInsets(bounds, true /* ignoreVisibility */);
+    }
+
+    @VisibleForTesting
+    Insets getInsetsHint() {
+        return mInsetsHint;
     }
 
     /** @return A new source computed by the specified window frame in the given display frames. */
@@ -338,15 +359,9 @@ class InsetsSourceProvider {
                     mSetLeashPositionConsumer.accept(t);
                 }
             }
-            if (mServerVisible && !mLastSourceFrame.equals(mSource.getFrame())) {
-                final Insets insetsHint = mSource.calculateInsets(
-                        mWindowContainer.getBounds(), true /* ignoreVisibility */);
-                if (!insetsHint.equals(mControl.getInsetsHint())) {
-                    changed = true;
-                    mControl.setInsetsHint(insetsHint);
-                    mInsetsHint = insetsHint;
-                }
-                mLastSourceFrame.set(mSource.getFrame());
+            if (!mControl.getInsetsHint().equals(mInsetsHint)) {
+                mControl.setInsetsHint(mInsetsHint);
+                changed = true;
             }
             if (changed) {
                 mStateController.notifyControlChanged(mControlTarget);
@@ -586,6 +601,11 @@ class InsetsSourceProvider {
         if (mControl != null) {
             pw.print(prefix + "mControl=");
             mControl.dump("", pw);
+        }
+        if (mControllable) {
+            pw.print(prefix + "mInsetsHint=");
+            pw.print(mInsetsHint);
+            pw.println();
         }
         pw.print(prefix);
         pw.print("mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);

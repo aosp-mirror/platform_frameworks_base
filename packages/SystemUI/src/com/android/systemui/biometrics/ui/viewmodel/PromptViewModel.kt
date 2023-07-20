@@ -204,6 +204,7 @@ constructor(
             }
             .distinctUntilChanged()
 
+    private val history = PromptHistoryImpl()
     private var messageJob: Job? = null
 
     /**
@@ -214,13 +215,13 @@ constructor(
      * is set (or via [showHelp] when not set) after the error is dismissed.
      *
      * The error is ignored if the user has already authenticated or if [suppressIf] is true given
-     * the currently showing [PromptMessage].
+     * the currently showing [PromptMessage] and [PromptHistory].
      */
     suspend fun showTemporaryError(
         message: String,
         messageAfterError: String,
         authenticateAfterError: Boolean,
-        suppressIf: (PromptMessage) -> Boolean = { false },
+        suppressIf: (PromptMessage, PromptHistory) -> Boolean = { _, _ -> false },
         hapticFeedback: Boolean = true,
         failedModality: BiometricModality = BiometricModality.None,
     ) = coroutineScope {
@@ -230,7 +231,9 @@ constructor(
 
         _canTryAgainNow.value = supportsRetry(failedModality)
 
-        if (suppressIf(_message.value)) {
+        val suppress = suppressIf(_message.value, history)
+        history.failure(failedModality)
+        if (suppress) {
             return@coroutineScope
         }
 

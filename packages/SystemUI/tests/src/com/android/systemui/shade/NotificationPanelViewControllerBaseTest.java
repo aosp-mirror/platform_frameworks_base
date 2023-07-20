@@ -370,7 +370,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mScreenOffAnimationController,
                 mKeyguardLogger,
                 mFeatureFlags,
-                mInteractionJankMonitor));
+                mInteractionJankMonitor,
+                mDumpManager));
 
         when(mAuthController.isUdfpsEnrolled(anyInt())).thenReturn(false);
         when(mHeadsUpCallback.getContext()).thenReturn(mContext);

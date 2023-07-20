@@ -115,3 +115,14 @@ java_library {
         "android.test.runner",
     ],
 }
+
+filegroup {
+    name: "extended-mockito-rule-sources",
+    srcs: [
+        "src/com/android/server/ExtendedMockitoRule.java",
+        "src/com/android/server/Visitor.java",
+    ],
+    visibility: [
+        "//frameworks/base/services/tests/displayservicetests",
+    ],
+}

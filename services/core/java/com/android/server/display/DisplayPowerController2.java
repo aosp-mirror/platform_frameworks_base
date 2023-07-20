@@ -550,7 +550,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mBrightnessThrottler = createBrightnessThrottlerLocked();
 
         mBrightnessRangeController = new BrightnessRangeController(hbmController,
-                modeChangeCallback);
+                modeChangeCallback, mDisplayDeviceConfig);
 
         mDisplayBrightnessController =
                 new DisplayBrightnessController(context, null,
@@ -1947,8 +1947,17 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             if (!reportOnly && mPowerState.getScreenState() != state
                     && readyToUpdateDisplayState()) {
                 Trace.traceCounter(Trace.TRACE_TAG_POWER, "ScreenState", state);
-                // TODO(b/153319140) remove when we can get this from the above trace invocation
-                SystemProperties.set("debug.tracing.screen_state", String.valueOf(state));
+
+                String propertyKey = "debug.tracing.screen_state";
+                String propertyValue = String.valueOf(state);
+                try {
+                    // TODO(b/153319140) remove when we can get this from the above trace invocation
+                    SystemProperties.set(propertyKey, propertyValue);
+                } catch (RuntimeException e) {
+                    Slog.e(mTag, "Failed to set a system property: key=" + propertyKey
+                            + " value=" + propertyValue + " " + e.getMessage());
+                }
+
                 mPowerState.setScreenState(state);
                 // Tell battery stats about the transition.
                 noteScreenState(state);
@@ -2023,8 +2032,17 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
         if (mScreenBrightnessRampAnimator.animateTo(target, sdrTarget, rate)) {
             Trace.traceCounter(Trace.TRACE_TAG_POWER, "TargetScreenBrightness", (int) target);
-            // TODO(b/153319140) remove when we can get this from the above trace invocation
-            SystemProperties.set("debug.tracing.screen_brightness", String.valueOf(target));
+
+            String propertyKey = "debug.tracing.screen_brightness";
+            String propertyValue = String.valueOf(target);
+            try {
+                // TODO(b/153319140) remove when we can get this from the above trace invocation
+                SystemProperties.set(propertyKey, propertyValue);
+            } catch (RuntimeException e) {
+                Slog.e(mTag, "Failed to set a system property: key=" + propertyKey
+                        + " value=" + propertyValue + " " + e.getMessage());
+            }
+
             noteScreenBrightness(target);
         }
     }

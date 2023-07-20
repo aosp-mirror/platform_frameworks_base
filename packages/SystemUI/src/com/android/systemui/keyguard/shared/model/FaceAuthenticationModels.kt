@@ -23,7 +23,10 @@ import android.os.SystemClock.elapsedRealtime
  * Authentication status provided by
  * [com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository]
  */
-sealed class FaceAuthenticationStatus
+sealed class FaceAuthenticationStatus(
+    // present to break equality check if the same error occurs repeatedly.
+    val createdAt: Long = elapsedRealtime()
+)
 
 /** Success authentication status. */
 data class SuccessFaceAuthenticationStatus(val successResult: FaceManager.AuthenticationResult) :
@@ -43,8 +46,6 @@ object FailedFaceAuthenticationStatus : FaceAuthenticationStatus()
 data class ErrorFaceAuthenticationStatus(
     val msgId: Int,
     val msg: String? = null,
-    // present to break equality check if the same error occurs repeatedly.
-    val createdAt: Long = elapsedRealtime()
 ) : FaceAuthenticationStatus() {
     /**
      * Method that checks if [msgId] is a lockout error. A lockout error means that face
@@ -63,7 +64,21 @@ data class ErrorFaceAuthenticationStatus(
     fun isHardwareError() =
         msgId == FaceManager.FACE_ERROR_HW_UNAVAILABLE ||
             msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS
+
+    companion object {
+        /**
+         * Error message that is created when cancel confirmation is not received from FaceManager
+         * after we request for a cancellation of face auth.
+         */
+        fun cancelNotReceivedError() = ErrorFaceAuthenticationStatus(-1, "")
+    }
 }
 
 /** Face detection success message. */
-data class FaceDetectionStatus(val sensorId: Int, val userId: Int, val isStrongBiometric: Boolean)
+data class FaceDetectionStatus(
+    val sensorId: Int,
+    val userId: Int,
+    val isStrongBiometric: Boolean,
+    // present to break equality check if the same error occurs repeatedly.
+    val createdAt: Long = elapsedRealtime()
+)

@@ -51,6 +51,7 @@ android_test {
         "services.core",
         "androidx.test.runner",
         "androidx.test.rules",
+        "junit-params",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "servicestests-utils",

@@ -44,6 +44,7 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
@@ -385,7 +386,10 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             detectionCallback.value.onFaceDetected(1, 1, true)
 
-            assertThat(detectStatus()).isEqualTo(FaceDetectionStatus(1, 1, true))
+            val status = detectStatus()!!
+            assertThat(status.sensorId).isEqualTo(1)
+            assertThat(status.userId).isEqualTo(1)
+            assertThat(status.isStrongBiometric).isEqualTo(true)
         }
 
     @Test
@@ -448,6 +452,29 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
             underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
             faceAuthenticateIsCalled()
+        }
+
+    @Test
+    fun multipleCancelCallsShouldNotCauseMultipleCancellationStatusBeingEmitted() =
+        testScope.runTest {
+            initCollectors()
+            allPreconditionsToRunFaceAuthAreTrue()
+            val emittedValues by collectValues(underTest.authenticationStatus)
+
+            underTest.authenticate(FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER)
+            underTest.cancel()
+            advanceTimeBy(100)
+            underTest.cancel()
+
+            advanceTimeBy(DeviceEntryFaceAuthRepositoryImpl.DEFAULT_CANCEL_SIGNAL_TIMEOUT)
+            runCurrent()
+            advanceTimeBy(DeviceEntryFaceAuthRepositoryImpl.DEFAULT_CANCEL_SIGNAL_TIMEOUT)
+            runCurrent()
+
+            assertThat(emittedValues.size).isEqualTo(1)
+            assertThat(emittedValues.first())
+                .isInstanceOf(ErrorFaceAuthenticationStatus::class.java)
+            assertThat((emittedValues.first() as ErrorFaceAuthenticationStatus).msgId).isEqualTo(-1)
         }
 
     @Test

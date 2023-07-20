@@ -99,7 +99,7 @@ public class EnterDesktopTaskTransitionHandlerTest {
         final int taskId = 1;
         WindowContainerTransaction wct = new WindowContainerTransaction();
         doReturn(mToken).when(mTransitions)
-                .startTransition(Transitions.TRANSIT_START_MOVE_TO_DESKTOP_MODE, wct,
+                .startTransition(Transitions.TRANSIT_START_DRAG_TO_DESKTOP_MODE, wct,
                         mEnterDesktopTaskTransitionHandler);
         doReturn(taskId).when(mMoveToDesktopAnimator).getTaskId();
 
@@ -108,7 +108,7 @@ public class EnterDesktopTaskTransitionHandlerTest {
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FREEFORM);
-        TransitionInfo info = createTransitionInfo(Transitions.TRANSIT_START_MOVE_TO_DESKTOP_MODE,
+        TransitionInfo info = createTransitionInfo(Transitions.TRANSIT_START_DRAG_TO_DESKTOP_MODE,
                 change);
 
 
@@ -121,7 +121,7 @@ public class EnterDesktopTaskTransitionHandlerTest {
 
     @Test
     public void testTransitEnterDesktopModeAnimation() throws Throwable {
-        final int transitionType = Transitions.TRANSIT_FINALIZE_MOVE_TO_DESKTOP_MODE;
+        final int transitionType = Transitions.TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE;
         final int taskId = 1;
         WindowContainerTransaction wct = new WindowContainerTransaction();
         doReturn(mToken).when(mTransitions)
@@ -132,7 +132,7 @@ public class EnterDesktopTaskTransitionHandlerTest {
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FREEFORM);
         change.setEndAbsBounds(new Rect(0, 0, 1, 1));
         TransitionInfo info = createTransitionInfo(
-                Transitions.TRANSIT_FINALIZE_MOVE_TO_DESKTOP_MODE, change);
+                Transitions.TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE, change);
 
         runOnUiThread(() -> {
             try {

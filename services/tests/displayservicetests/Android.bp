@@ -7,19 +7,12 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-// Include all test java files.
-filegroup {
-    name: "displayservicetests-sources",
-    srcs: [
-        "src/**/*.java",
-    ],
-}
-
 android_test {
     name: "DisplayServiceTests",
 
     srcs: [
         "src/**/*.java",
+        ":extended-mockito-rule-sources",
     ],
 
     libs: [
@@ -28,14 +21,15 @@ android_test {
 
     static_libs: [
         "androidx.test.ext.junit",
-        "display-core-libs",
         "frameworks-base-testutils",
         "junit",
         "junit-params",
+        "mockingservicestests-utils-mockito",
         "platform-compat-test-rules",
         "platform-test-annotations",
         "services.core",
         "servicestests-utils",
+        "testables",
     ],
 
     defaults: [
@@ -55,11 +49,4 @@ android_test {
     optimize: {
         enabled: false,
     },
-}
-
-java_library {
-    name: "display-core-libs",
-    srcs: [
-        "src/com/android/server/display/TestUtils.java",
-    ],
 }

@@ -27,6 +27,7 @@ import android.testing.AndroidTestingRunner;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ClockConfig;
 import com.android.systemui.plugins.ClockController;
@@ -62,6 +63,8 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private InteractionJankMonitor mInteractionJankMonitor;
 
+    @Mock private DumpManager mDumpManager;
+
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
 
@@ -82,7 +85,8 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
                 mScreenOffAnimationController,
                 mKeyguardLogger,
                 mFeatureFlags,
-                mInteractionJankMonitor) {
+                mInteractionJankMonitor,
+                mDumpManager) {
                     @Override
                     void setProperty(
                             AnimatableProperty property,
@@ -169,5 +173,13 @@ public class KeyguardStatusViewControllerTest extends SysuiTestCase {
         mController.setSplitShadeEnabled(false);
         verify(mKeyguardClockSwitchController, times(1)).setSplitShadeEnabled(false);
         verify(mKeyguardClockSwitchController, times(0)).setSplitShadeEnabled(true);
+    }
+
+    @Test
+    public void correctlyDump() {
+        mController.onInit();
+        verify(mDumpManager).registerDumpable(mController);
+        mController.onDestroy();
+        verify(mDumpManager, times(1)).unregisterDumpable(KeyguardStatusViewController.TAG);
     }
 }

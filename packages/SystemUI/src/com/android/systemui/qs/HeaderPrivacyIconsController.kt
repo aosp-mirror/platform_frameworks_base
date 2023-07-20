@@ -26,7 +26,7 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.shade.ShadeModule.Companion.SHADE_HEADER
+import com.android.systemui.shade.ShadeViewProviderModule.Companion.SHADE_HEADER
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import javax.inject.Named
 
