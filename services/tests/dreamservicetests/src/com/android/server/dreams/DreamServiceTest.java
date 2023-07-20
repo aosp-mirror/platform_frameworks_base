@@ -36,13 +36,13 @@ import org.junit.runner.RunWith;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DreamServiceTest {
-    private static final String TEST_PACKAGE_NAME = "com.android.frameworks.servicestests";
+    private static final String TEST_PACKAGE_NAME = "com.android.frameworks.dreamservicetests";
 
     @Test
     public void testMetadataParsing() throws PackageManager.NameNotFoundException {
         final String testDreamClassName = "com.android.server.dreams.TestDreamService";
         final String testSettingsActivity =
-                "com.android.frameworks.servicestests/.TestDreamSettingsActivity";
+                "com.android.frameworks.dreamservicetests/.TestDreamSettingsActivity";
         final DreamService.DreamMetadata metadata = getDreamMetadata(testDreamClassName);
 
         assertThat(metadata.settingsActivity).isEqualTo(

@@ -44,6 +44,7 @@ import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.service.dreams.IDreamService;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -231,6 +232,7 @@ public class DreamControllerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 293109503)
     public void serviceDisconnect_resetsScreenTimeout() throws RemoteException {
         // Start dream.
         mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
@@ -250,6 +252,7 @@ public class DreamControllerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 293109503)
     public void binderDied_resetsScreenTimeout() throws RemoteException {
         // Start dream.
         mDreamController.startDream(mToken, mDreamName, false /*isPreview*/, false /*doze*/,
