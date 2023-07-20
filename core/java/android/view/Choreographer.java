@@ -34,6 +34,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.TraceNameSupplier;
 import android.util.Log;
 import android.util.TimeUtils;
 import android.view.animation.AnimationUtils;
@@ -1319,7 +1320,7 @@ public final class Choreographer {
     }
 
     private final class FrameDisplayEventReceiver extends DisplayEventReceiver
-            implements Runnable {
+            implements Runnable, TraceNameSupplier {
         private boolean mHavePendingVsync;
         private long mTimestampNanos;
         private int mFrame;
@@ -1376,6 +1377,14 @@ public final class Choreographer {
         public void run() {
             mHavePendingVsync = false;
             doFrame(mTimestampNanos, mFrame, mLastVsyncEventData);
+        }
+
+        @androidx.annotation.NonNull
+        @Override
+        public String getTraceName() {
+            // Returning just a simple name.
+            // More detailed logging happens in onVsync() for TRACE_TAG_VIEW.
+            return "FrameDisplayEventReceiver";
         }
     }
 
