@@ -70,12 +70,12 @@ class WindowContextListenerController {
 
     /**
      * @see #registerWindowContainerListener(WindowProcessController, IBinder, WindowContainer, int,
-     * int, Bundle, boolean)
+     * Bundle, boolean)
      */
     void registerWindowContainerListener(@NonNull WindowProcessController wpc,
-            @NonNull IBinder clientToken, @NonNull WindowContainer<?> container, int ownerUid,
+            @NonNull IBinder clientToken, @NonNull WindowContainer<?> container,
             @WindowType int type, @Nullable Bundle options) {
-        registerWindowContainerListener(wpc, clientToken, container, ownerUid, type, options,
+        registerWindowContainerListener(wpc, clientToken, container, type, options,
                 true /* shouDispatchConfigWhenRegistering */);
     }
 
@@ -89,7 +89,6 @@ class WindowContextListenerController {
      * @param wpc the process that we should send the window configuration change to
      * @param clientToken the token to associate with the listener
      * @param container the {@link WindowContainer} which the listener is going to listen to.
-     * @param ownerUid the caller UID
      * @param type the window type
      * @param options a bundle used to pass window-related options.
      * @param shouDispatchConfigWhenRegistering {@code true} to indicate the current
@@ -97,12 +96,12 @@ class WindowContextListenerController {
      *                registering the {@link WindowContextListenerImpl}
      */
     void registerWindowContainerListener(@NonNull WindowProcessController wpc,
-            @NonNull IBinder clientToken, @NonNull WindowContainer<?> container, int ownerUid,
+            @NonNull IBinder clientToken, @NonNull WindowContainer<?> container,
             @WindowType int type, @Nullable Bundle options,
             boolean shouDispatchConfigWhenRegistering) {
         WindowContextListenerImpl listener = mListeners.get(clientToken);
         if (listener == null) {
-            listener = new WindowContextListenerImpl(wpc, clientToken, container, ownerUid, type,
+            listener = new WindowContextListenerImpl(wpc, clientToken, container, type,
                     options);
             listener.register(shouDispatchConfigWhenRegistering);
         } else {
@@ -160,9 +159,9 @@ class WindowContextListenerController {
         if (callerCanManageAppTokens) {
             return true;
         }
-        if (callingUid != listener.mOwnerUid) {
+        if (callingUid != listener.getUid()) {
             throw new UnsupportedOperationException("Uid mismatch. Caller uid is " + callingUid
-                    + ", while the listener's owner is from " + listener.mOwnerUid);
+                    + ", while the listener's owner is from " + listener.getUid());
         }
         return true;
     }
@@ -208,7 +207,6 @@ class WindowContextListenerController {
         private final WindowProcessController mWpc;
         @NonNull
         private final IWindowToken mClientToken;
-        private final int mOwnerUid;
         @NonNull
         private WindowContainer<?> mContainer;
         /**
@@ -228,11 +226,10 @@ class WindowContextListenerController {
 
         private WindowContextListenerImpl(@NonNull WindowProcessController wpc,
                 @NonNull IBinder clientToken, @NonNull WindowContainer<?> container,
-                int ownerUid, @WindowType int type, @Nullable Bundle options) {
+                @WindowType int type, @Nullable Bundle options) {
             mWpc = Objects.requireNonNull(wpc);
             mClientToken = IWindowToken.Stub.asInterface(clientToken);
             mContainer = Objects.requireNonNull(container);
-            mOwnerUid = ownerUid;
             mType = type;
             mOptions = options;
 
@@ -250,6 +247,10 @@ class WindowContextListenerController {
         @VisibleForTesting
         WindowContainer<?> getWindowContainer() {
             return mContainer;
+        }
+
+        int getUid() {
+            return mWpc.mUid;
         }
 
         private void updateContainer(@NonNull WindowContainer<?> newContainer) {

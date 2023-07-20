@@ -2766,8 +2766,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayArea<?> da = dc.findAreaForWindowType(type, options,
                         callerCanManageAppTokens, false /* roundedCornerOverlay */);
                 mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
-                        da, callingUid, type, options,
-                        false /* shouDispatchConfigWhenRegistering */);
+                        da, type, options, false /* shouDispatchConfigWhenRegistering */);
                 return da.getConfiguration();
             }
         } finally {
@@ -2798,7 +2797,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // registration in DisplayContent#onParentChanged at DisplayContent initialization.
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc == null) {
-                    if (Binder.getCallingPid() != MY_PID) {
+                    if (callingPid != MY_PID) {
                         throw new WindowManager.InvalidDisplayException(
                                 "attachWindowContextToDisplayContent: trying to attach to a"
                                         + " non-existing display:" + displayId);
@@ -2809,7 +2808,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
-                        dc, callingUid, INVALID_WINDOW_TYPE, null /* options */,
+                        dc, INVALID_WINDOW_TYPE, null /* options */,
                         false /* shouDispatchConfigWhenRegistering */);
                 return dc.getConfiguration();
             }
@@ -2858,7 +2857,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
                 mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
-                        windowToken, callingUid, windowToken.windowType, windowToken.mOptions);
+                        windowToken, windowToken.windowType, windowToken.mOptions);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
