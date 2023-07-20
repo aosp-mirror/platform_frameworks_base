@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard
 
+import android.app.admin.DevicePolicyManager
 import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.content.pm.ProviderInfo
@@ -39,6 +40,7 @@ import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffor
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -51,6 +53,7 @@ import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.any
@@ -59,8 +62,8 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -86,9 +89,10 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var backgroundHandler: Handler
     @Mock private lateinit var previewSurfacePackage: SurfaceControlViewHost.SurfacePackage
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     private lateinit var underTest: CustomizationProvider
-
     private lateinit var testScope: TestScope
 
     @Before
@@ -99,7 +103,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         whenever(backgroundHandler.looper).thenReturn(TestableLooper.get(this).looper)
 
         underTest = CustomizationProvider()
-        val testDispatcher = StandardTestDispatcher()
+        val testDispatcher = UnconfinedTestDispatcher()
         testScope = TestScope(testDispatcher)
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
@@ -155,32 +159,42 @@ class CustomizationProviderTest : SysuiTestCase() {
                 dumpManager = mock(),
                 userHandle = UserHandle.SYSTEM,
             )
+        val featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
+                set(Flags.LOCKSCREEN_CUSTOM_CLOCKS, true)
+                set(Flags.REVAMPED_WALLPAPER_UI, true)
+                set(Flags.WALLPAPER_FULLSCREEN_PREVIEW, true)
+                set(Flags.FACE_AUTH_REFACTOR, true)
+            }
         underTest.interactor =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor =
                     KeyguardInteractor(
                         repository = FakeKeyguardRepository(),
+                        commandQueue = commandQueue,
+                        featureFlags = featureFlags,
+                        bouncerRepository = FakeKeyguardBouncerRepository(),
                     ),
                 registry = mock(),
                 lockPatternUtils = lockPatternUtils,
                 keyguardStateController = keyguardStateController,
                 userTracker = userTracker,
                 activityStarter = activityStarter,
-                featureFlags =
-                    FakeFeatureFlags().apply {
-                        set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
-                        set(Flags.LOCKSCREEN_CUSTOM_CLOCKS, true)
-                        set(Flags.REVAMPED_WALLPAPER_UI, true)
-                    },
+                featureFlags = featureFlags,
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
+                devicePolicyManager = devicePolicyManager,
+                backgroundDispatcher = testDispatcher,
             )
         underTest.previewManager =
             KeyguardRemotePreviewManager(
+                applicationScope = testScope.backgroundScope,
                 previewRendererFactory = previewRendererFactory,
                 mainDispatcher = testDispatcher,
                 backgroundHandler = backgroundHandler,
             )
+        underTest.mainDispatcher = UnconfinedTestDispatcher()
 
         underTest.attachInfoForTesting(
             context,

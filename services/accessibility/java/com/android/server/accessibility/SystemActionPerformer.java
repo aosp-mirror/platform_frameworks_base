@@ -391,7 +391,7 @@ public class SystemActionPerformer {
     private boolean takeScreenshot() {
         ScreenshotHelper screenshotHelper = (mScreenshotHelperSupplier != null)
                 ? mScreenshotHelperSupplier.get() : new ScreenshotHelper(mContext);
-        screenshotHelper.takeScreenshot(WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+        screenshotHelper.takeScreenshot(
                 WindowManager.ScreenshotSource.SCREENSHOT_ACCESSIBILITY_ACTIONS,
                 new Handler(Looper.getMainLooper()), null);
         return true;

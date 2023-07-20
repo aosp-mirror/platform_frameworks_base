@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.ResultReceiver
+import android.os.UserHandle
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -41,6 +42,7 @@ import com.android.systemui.settings.UserContextProvider
 /** Dialog to select screen recording options */
 class ScreenRecordPermissionDialog(
     context: Context?,
+    private val hostUserHandle: UserHandle,
     private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
@@ -77,6 +79,12 @@ class ScreenRecordPermissionDialog(
                     MediaProjectionAppSelectorActivity.EXTRA_CAPTURE_REGION_RESULT_RECEIVER,
                     CaptureTargetResultReceiver()
                 )
+
+                intent.putExtra(
+                    MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
+                    hostUserHandle
+                )
+
                 val animationController = dialogLaunchAnimator.createActivityLaunchController(v!!)
                 if (animationController == null) {
                     dismiss()
@@ -116,8 +124,9 @@ class ScreenRecordPermissionDialog(
 
     /**
      * Starts screen capture after some countdown
+     *
      * @param captureTarget target to capture (could be e.g. a task) or null to record the whole
-     * screen
+     *   screen
      */
     private fun requestScreenCapture(captureTarget: MediaProjectionCaptureTarget?) {
         val userContext = userContextProvider.userContext

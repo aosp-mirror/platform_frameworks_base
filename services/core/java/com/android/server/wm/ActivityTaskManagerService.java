@@ -4724,6 +4724,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mTaskChangeNotificationController.notifyTaskFocusChanged(prevTask.mTaskId, false);
             }
             mTaskChangeNotificationController.notifyTaskFocusChanged(task.mTaskId, true);
+            mTaskSupervisor.mRecentTasks.add(task);
         }
 
         applyUpdateLockStateLocked(r);
@@ -6008,18 +6009,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public ActivityServiceConnectionsHolder getServiceConnectionsHolder(IBinder token) {
-            synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-                if (r == null) {
-                    return null;
-                }
-                if (r.mServiceConnectionsHolder == null) {
-                    r.mServiceConnectionsHolder = new ActivityServiceConnectionsHolder(
-                            ActivityTaskManagerService.this, r);
-                }
-
-                return r.mServiceConnectionsHolder;
+            final ActivityRecord r = ActivityRecord.forToken(token);
+            if (r == null || !r.inHistory) {
+                return null;
             }
+            return r.getOrCreateServiceConnectionsHolder();
         }
 
         @Override

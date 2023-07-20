@@ -33,14 +33,14 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
     private var isStarted: Boolean
 
     init {
-        setupShader(RippleShader.RippleShape.ELLIPSE)
-        setRippleFill(true)
+        setupShader(RippleShader.RippleShape.CIRCLE)
+        setupRippleFadeParams()
         setSparkleStrength(0f)
-        duration = 3000L
         isStarted = false
     }
 
     fun expandRipple(onAnimationEnd: Runnable? = null) {
+        duration = DEFAULT_DURATION
         isStarted = true
         super.startRipple(onAnimationEnd)
     }
@@ -50,6 +50,7 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         if (!isStarted) {
             return // Ignore if ripple is not started yet.
         }
+        duration = DEFAULT_DURATION
         // Reset all listeners to animator.
         animator.removeAllListeners()
         animator.addListener(object : AnimatorListenerAdapter() {
@@ -71,15 +72,16 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         animator.removeAllUpdateListeners()
 
         // Only show the outline as ripple expands and disappears when animation ends.
-        setRippleFill(false)
+        removeRippleFill()
 
         val startingPercentage = calculateStartingPercentage(newHeight)
+        animator.duration = EXPAND_TO_FULL_DURATION
         animator.addUpdateListener { updateListener ->
             val now = updateListener.currentPlayTime
             val progress = updateListener.animatedValue as Float
-            rippleShader.progress = startingPercentage + (progress * (1 - startingPercentage))
-            rippleShader.distortionStrength = 1 - rippleShader.progress
-            rippleShader.pixelDensity = 1 - rippleShader.progress
+            rippleShader.rawProgress = startingPercentage + (progress * (1 - startingPercentage))
+            rippleShader.distortionStrength = 1 - rippleShader.rawProgress
+            rippleShader.pixelDensity = 1 - rippleShader.rawProgress
             rippleShader.time = now.toFloat()
             invalidate()
         }
@@ -96,8 +98,45 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
     // Calculates the actual starting percentage according to ripple shader progress set method.
     // Check calculations in [RippleShader.progress]
     fun calculateStartingPercentage(newHeight: Float): Float {
-        val ratio = rippleShader.currentHeight / newHeight
+        val ratio = rippleShader.rippleSize.currentHeight / newHeight
         val remainingPercentage = (1 - ratio).toDouble().pow(1 / 3.toDouble()).toFloat()
         return 1 - remainingPercentage
+    }
+
+    private fun setupRippleFadeParams() {
+        with(rippleShader) {
+            // No fade out for the base ring.
+            baseRingFadeParams.fadeOutStart = 1f
+            baseRingFadeParams.fadeOutEnd = 1f
+
+            // No fade in and outs for the center fill, as we always draw it.
+            centerFillFadeParams.fadeInStart = 0f
+            centerFillFadeParams.fadeInEnd = 0f
+            centerFillFadeParams.fadeOutStart = 1f
+            centerFillFadeParams.fadeOutEnd = 1f
+        }
+    }
+
+    private fun removeRippleFill() {
+        with(rippleShader) {
+            // Set back to default because we modified them in [setupRippleFadeParams].
+            baseRingFadeParams.fadeOutStart = RippleShader.DEFAULT_BASE_RING_FADE_OUT_START
+            baseRingFadeParams.fadeOutEnd = RippleShader.DEFAULT_FADE_OUT_END
+
+            centerFillFadeParams.fadeInStart = RippleShader.DEFAULT_FADE_IN_START
+            centerFillFadeParams.fadeInEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_IN_END
+
+            // To avoid a seam showing up, we should match either:
+            // 1. baseRingFadeParams#fadeInEnd and centerFillFadeParams#fadeOutStart
+            // 2. baseRingFadeParams#fadeOutStart and centerFillFadeOutStart
+            // Here we go with 1 to fade in the centerFill faster.
+            centerFillFadeParams.fadeOutStart = baseRingFadeParams.fadeInEnd
+            centerFillFadeParams.fadeOutEnd = RippleShader.DEFAULT_FADE_OUT_END
+        }
+    }
+
+    companion object {
+        const val DEFAULT_DURATION = 333L
+        const val EXPAND_TO_FULL_DURATION = 1000L
     }
 }

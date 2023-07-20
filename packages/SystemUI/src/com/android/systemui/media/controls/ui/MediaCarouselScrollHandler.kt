@@ -57,6 +57,7 @@ class MediaCarouselScrollHandler(
     private val mainExecutor: DelayableExecutor,
     val dismissCallback: () -> Unit,
     private var translationChangedListener: () -> Unit,
+    private var seekBarUpdateListener: (visibleToUser: Boolean) -> Unit,
     private val closeGuts: (immediate: Boolean) -> Unit,
     private val falsingCollector: FalsingCollector,
     private val falsingManager: FalsingManager,
@@ -177,6 +178,12 @@ class MediaCarouselScrollHandler(
 
     /** Whether the media card is visible to user if any */
     var visibleToUser: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                seekBarUpdateListener.invoke(field)
+            }
+        }
 
     /** Whether the quick setting is expanded or not */
     var qsExpanded: Boolean = false

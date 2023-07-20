@@ -46,4 +46,16 @@ constructor(
             { "Chipbar updated. window=$str1 text=$str2 endItem=$str3" }
         )
     }
+
+    fun logSwipeGestureError(id: String?, errorMsg: String) {
+        buffer.log(
+            tag,
+            LogLevel.WARNING,
+            {
+                str1 = id
+                str2 = errorMsg
+            },
+            { "Chipbar swipe gesture detected for incorrect state. id=$str1 error=$str2" }
+        )
+    }
 }

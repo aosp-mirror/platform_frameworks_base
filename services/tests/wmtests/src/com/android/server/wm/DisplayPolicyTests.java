@@ -25,6 +25,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -59,6 +60,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.InsetsSource;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.PrivacyIndicatorBounds;
 import android.view.WindowInsets.Side;
 import android.view.WindowManager;
@@ -82,6 +84,17 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         attrs.format = PixelFormat.OPAQUE;
         attrs.insetsFlags.appearance = hasLightNavBar ? APPEARANCE_LIGHT_NAVIGATION_BARS : 0;
+        return win;
+    }
+
+    private WindowState createDreamWindow() {
+        final WindowState win = createDreamWindow(null, TYPE_BASE_APPLICATION, "dream");
+        final WindowManager.LayoutParams attrs = win.mAttrs;
+        attrs.width = MATCH_PARENT;
+        attrs.height = MATCH_PARENT;
+        attrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        attrs.format = PixelFormat.OPAQUE;
         return win;
     }
 
@@ -380,5 +393,28 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayPolicy.setCanSystemBarsBeShownByUser(true);
         displayPolicy.requestTransientBars(windowState, true);
         verify(controlTarget).showInsets(anyInt(), anyBoolean());
+    }
+
+    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
+    @Test
+    public void testTransientBarsSuppressedOnDreams() {
+        final WindowState win = createDreamWindow();
+
+        ((TestWindowManagerPolicy) mWm.mPolicy).mIsUserSetupComplete = true;
+        win.mAttrs.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+        final InsetsVisibilities insetsVisibilities = new InsetsVisibilities();
+        insetsVisibilities.setVisibility(ITYPE_NAVIGATION_BAR, false);
+        insetsVisibilities.setVisibility(ITYPE_EXTRA_NAVIGATION_BAR, false);
+        win.setRequestedVisibilities(insetsVisibilities);
+
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
+        final InsetsSourceProvider navBarProvider = mNavBarWindow.getControllableInsetProvider();
+        navBarProvider.updateControlForTarget(win, false);
+        navBarProvider.getSource().setVisible(false);
+
+        displayPolicy.setCanSystemBarsBeShownByUser(true);
+        displayPolicy.requestTransientBars(mNavBarWindow, true);
+        assertFalse(mDisplayContent.getInsetsPolicy().isTransient(ITYPE_NAVIGATION_BAR));
     }
 }

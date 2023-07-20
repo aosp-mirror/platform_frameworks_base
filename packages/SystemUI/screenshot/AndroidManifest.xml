@@ -20,6 +20,7 @@
     <application>
         <activity
             android:name="com.android.systemui.testing.screenshot.ScreenshotActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
             android:exported="true"
             android:theme="@style/Theme.SystemUI.Screenshot" />
     </application>

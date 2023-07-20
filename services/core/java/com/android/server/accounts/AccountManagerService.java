@@ -67,6 +67,7 @@ import android.content.pm.Signature;
 import android.content.pm.SigningDetails.CertCapabilities;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Binder;
@@ -1383,7 +1384,13 @@ public class AccountManagerService
     private void purgeOldGrants(UserAccounts accounts) {
         synchronized (accounts.dbLock) {
             synchronized (accounts.cacheLock) {
-                List<Integer> uids = accounts.accountsDb.findAllUidGrants();
+                List<Integer> uids;
+                try {
+                    uids = accounts.accountsDb.findAllUidGrants();
+                } catch (SQLiteCantOpenDatabaseException e) {
+                    Log.w(TAG, "Could not delete grants for user = " + accounts.userId);
+                    return;
+                }
                 for (int uid : uids) {
                     final boolean packageExists = mPackageManager.getPackagesForUid(uid) != null;
                     if (packageExists) {
@@ -1409,7 +1416,13 @@ public class AccountManagerService
                     mPackageManager.getPackageUidAsUser(packageName, accounts.userId);
                 } catch (NameNotFoundException e) {
                     // package does not exist - remove visibility values
-                    accounts.accountsDb.deleteAccountVisibilityForPackage(packageName);
+                    try {
+                        accounts.accountsDb.deleteAccountVisibilityForPackage(packageName);
+                    } catch (SQLiteCantOpenDatabaseException sqlException) {
+                        Log.w(TAG, "Could not delete account visibility for user = "
+                                + accounts.userId, sqlException);
+                        continue;
+                    }
                     synchronized (accounts.dbLock) {
                         synchronized (accounts.cacheLock) {
                             for (Account account : accounts.visibilityCache.keySet()) {
@@ -4894,10 +4907,6 @@ public class AccountManagerService
             if (intent.getClipData() == null) {
                 intent.setClipData(ClipData.newPlainText(null, null));
             }
-            intent.setFlags(intent.getFlags() & ~(Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                    | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION));
             final long bid = Binder.clearCallingIdentity();
             try {
                 PackageManager pm = mContext.getPackageManager();
@@ -4943,7 +4952,19 @@ public class AccountManagerService
             if (intent == null) {
                 return (simulateIntent == null);
             }
-            return intent.filterEquals(simulateIntent);
+            if (!intent.filterEquals(simulateIntent)) {
+                return false;
+            }
+
+            if (intent.getSelector() != simulateIntent.getSelector()) {
+                return false;
+            }
+
+            int prohibitedFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION;
+            return (simulateIntent.getFlags() & prohibitedFlags) == 0;
         }
 
         private boolean isExportedSystemActivity(ActivityInfo activityInfo) {

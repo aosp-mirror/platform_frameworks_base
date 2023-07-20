@@ -23,11 +23,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
+import com.android.systemui.statusbar.pipeline.wifi.shared.WifiInputLogger
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.kotlinArgumentCaptor
 import com.android.systemui.util.mockito.whenever
@@ -47,6 +47,7 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @SmallTest
 class WifiRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var underTest: WifiRepositorySwitcher
@@ -54,7 +55,7 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
     private lateinit var demoImpl: DemoWifiRepository
 
     @Mock private lateinit var demoModeController: DemoModeController
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var logger: WifiInputLogger
     @Mock private lateinit var tableLogger: TableLogBuffer
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var wifiManager: WifiManager

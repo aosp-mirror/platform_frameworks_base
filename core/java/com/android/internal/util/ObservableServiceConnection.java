@@ -165,6 +165,13 @@ public class ObservableServiceConnection<T> implements ServiceConnection {
     }
 
     /**
+     * Executes code on the executor specified at construction.
+     */
+    public void execute(Runnable runnable) {
+        mExecutor.execute(runnable);
+    }
+
+    /**
      * Initiate binding to the service.
      *
      * @return {@code true} if initiating binding succeed, {@code false} if the binding failed or

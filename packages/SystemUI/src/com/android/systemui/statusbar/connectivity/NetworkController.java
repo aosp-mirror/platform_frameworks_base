@@ -47,8 +47,6 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
     void addEmergencyListener(EmergencyListener listener);
     /** */
     void removeEmergencyListener(EmergencyListener listener);
-    /** */
-    boolean hasEmergencyCryptKeeperText();
 
     /** */
     boolean isRadioOn();

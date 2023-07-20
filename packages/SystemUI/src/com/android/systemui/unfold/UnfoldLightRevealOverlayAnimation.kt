@@ -36,6 +36,9 @@ import android.view.SurfaceSession
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.LinearLightRevealEffect
@@ -57,6 +60,7 @@ class UnfoldLightRevealOverlayAnimation
 @Inject
 constructor(
     private val context: Context,
+    private val featureFlags: FeatureFlags,
     private val deviceStateManager: DeviceStateManager,
     private val contentResolver: ContentResolver,
     private val displayManager: DisplayManager,
@@ -65,6 +69,7 @@ constructor(
     @Main private val executor: Executor,
     private val threadFactory: ThreadFactory,
     private val rotationChangeProvider: RotationChangeProvider,
+    private val displayTracker: DisplayTracker
 ) {
 
     private val transitionListener = TransitionListener()
@@ -81,6 +86,8 @@ constructor(
     private var scrimView: LightRevealScrim? = null
     private var isFolded: Boolean = false
     private var isUnfoldHandled: Boolean = true
+    private var overlayAddReason: AddOverlayReason? = null
+    private var isTouchBlocked: Boolean = true
 
     private var currentRotation: Int = context.display!!.rotation
 
@@ -100,7 +107,7 @@ constructor(
                 .setName("unfold-overlay-container")
 
         displayAreaHelper.get().attachToRootDisplayArea(
-            Display.DEFAULT_DISPLAY,
+            displayTracker.defaultDisplayId,
             containerBuilder
         ) { builder ->
             executor.execute {
@@ -158,6 +165,8 @@ constructor(
         ensureInBackground()
         ensureOverlayRemoved()
 
+        overlayAddReason = reason
+
         val newRoot = SurfaceControlViewHost(context, context.display!!, wwm)
         val params = getLayoutParams()
         val newView =
@@ -170,11 +179,7 @@ constructor(
                 .apply {
                     revealEffect = createLightRevealEffect()
                     isScrimOpaqueChangedListener = Consumer {}
-                    revealAmount =
-                        when (reason) {
-                            FOLD -> TRANSPARENT
-                            UNFOLD -> BLACK
-                        }
+                    revealAmount = calculateRevealAmount()
                 }
 
         newRoot.setView(newView, params)
@@ -207,6 +212,31 @@ constructor(
         root = newRoot
     }
 
+    private fun calculateRevealAmount(animationProgress: Float? = null): Float {
+        val overlayAddReason = overlayAddReason ?: UNFOLD
+
+        if (animationProgress == null) {
+            // Animation progress is unknown, calculate the initial value based on the overlay
+            // add reason
+            return when (overlayAddReason) {
+                FOLD -> TRANSPARENT
+                UNFOLD -> BLACK
+            }
+        }
+
+        val showVignetteWhenFolding =
+            featureFlags.isEnabled(Flags.ENABLE_DARK_VIGNETTE_WHEN_FOLDING)
+
+        return if (!showVignetteWhenFolding && overlayAddReason == FOLD) {
+            // Do not darken the content when SHOW_VIGNETTE_WHEN_FOLDING flag is off
+            // and we are folding the device. We still add the overlay to block touches
+            // while the animation is running but the overlay is transparent.
+            TRANSPARENT
+        } else {
+            animationProgress
+        }
+    }
+
     private fun getLayoutParams(): WindowManager.LayoutParams {
         val params: WindowManager.LayoutParams = WindowManager.LayoutParams()
 
@@ -224,13 +254,39 @@ constructor(
         params.layoutInDisplayCutoutMode =
             WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         params.fitInsetsTypes = 0
-        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+
+        val touchFlags =
+            if (isTouchBlocked) {
+                // Touchable by default, so it will block the touches
+                0
+            } else {
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            }
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or touchFlags
         params.setTrustedOverlay()
 
         val packageName: String = context.opPackageName
         params.packageName = packageName
 
         return params
+    }
+
+    private fun updateTouchBlockIfNeeded(progress: Float) {
+        // When unfolding unblock touches a bit earlier than the animation end as the
+        // interpolation has a long tail of very slight movement at the end which should not
+        // affect much the usage of the device
+        val shouldBlockTouches =
+            if (overlayAddReason == UNFOLD) {
+                progress < UNFOLD_BLOCK_TOUCHES_UNTIL_PROGRESS
+            } else {
+                true
+            }
+
+        if (isTouchBlocked != shouldBlockTouches) {
+            isTouchBlocked = shouldBlockTouches
+
+            traceSection("$TAG#relayoutToUpdateTouch") { root?.relayout(getLayoutParams()) }
+        }
     }
 
     private fun createLightRevealEffect(): LightRevealEffect {
@@ -259,7 +315,10 @@ constructor(
     private inner class TransitionListener : TransitionProgressListener {
 
         override fun onTransitionProgress(progress: Float) {
-            executeInBackground { scrimView?.revealAmount = progress }
+            executeInBackground {
+                scrimView?.revealAmount = calculateRevealAmount(progress)
+                updateTouchBlockIfNeeded(progress)
+            }
         }
 
         override fun onTransitionFinished() {
@@ -331,5 +390,7 @@ constructor(
         // constants for revealAmount.
         const val TRANSPARENT = 1f
         const val BLACK = 0f
+
+        private const val UNFOLD_BLOCK_TOUCHES_UNTIL_PROGRESS = 0.8f
     }
 }

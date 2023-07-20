@@ -16,7 +16,9 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.view.InsetsFlags
 import android.view.InsetsVisibilities
+import android.view.ViewDebug
 import android.view.WindowInsetsController.Appearance
 import android.view.WindowInsetsController.Behavior
 import com.android.internal.statusbar.LetterboxDetails
@@ -148,4 +150,20 @@ private data class SystemBarAttributesParams(
 ) {
     val letterboxesArray = letterboxes.toTypedArray()
     val appearanceRegionsArray = appearanceRegions.toTypedArray()
+    override fun toString(): String {
+        val appearanceToString =
+                ViewDebug.flagsToString(InsetsFlags::class.java, "appearance", appearance)
+        return """SystemBarAttributesParams(
+            displayId=$displayId,
+            appearance=$appearanceToString,
+            appearanceRegions=$appearanceRegions,
+            navbarColorManagedByIme=$navbarColorManagedByIme,
+            behavior=$behavior,
+            requestedVisibilities=$requestedVisibilities,
+            packageName='$packageName',
+            letterboxes=$letterboxes,
+            letterboxesArray=${letterboxesArray.contentToString()},
+            appearanceRegionsArray=${appearanceRegionsArray.contentToString()}
+            )""".trimMargin()
+    }
 }

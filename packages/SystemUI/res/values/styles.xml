@@ -251,11 +251,12 @@
 
     <style name="AuthCredentialPatternContainerStyle">
         <item name="android:gravity">center</item>
-        <item name="android:maxHeight">420dp</item>
-        <item name="android:maxWidth">420dp</item>
-        <item name="android:minHeight">200dp</item>
-        <item name="android:minWidth">200dp</item>
-        <item name="android:padding">20dp</item>
+        <item name="android:maxHeight">@dimen/biometric_auth_pattern_view_max_size</item>
+        <item name="android:maxWidth">@dimen/biometric_auth_pattern_view_max_size</item>
+        <item name="android:minHeight">@dimen/biometric_auth_pattern_view_size</item>
+        <item name="android:minWidth">@dimen/biometric_auth_pattern_view_size</item>
+        <item name="android:paddingHorizontal">32dp</item>
+        <item name="android:paddingVertical">20dp</item>
     </style>
 
     <style name="AuthCredentialPinPasswordContainerStyle">
@@ -677,12 +678,31 @@
 
     <style name="MediaPlayer.Recommendation"/>
 
+    <style name="MediaPlayer.Recommendation.Header">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/qs_media_padding</item>
+        <item name="android:layout_marginStart">@dimen/qs_media_padding</item>
+        <item name="android:fontFamily">=@*android:string/config_headlineFontFamilyMedium</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
     <style name="MediaPlayer.Recommendation.AlbumContainer">
         <item name="android:layout_width">@dimen/qs_media_rec_album_size</item>
         <item name="android:layout_height">@dimen/qs_media_rec_album_size</item>
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:layout_marginTop">@dimen/qs_media_padding</item>
         <item name="android:layout_marginBottom">@dimen/qs_media_rec_album_bottom_margin</item>
+    </style>
+
+    <style name="MediaPlayer.Recommendation.AlbumContainer.Updated">
+        <item name="android:layout_width">@dimen/qs_media_rec_album_width</item>
+        <item name="android:minWidth">@dimen/qs_media_rec_album_width</item>
+        <item name="android:minHeight">@dimen/qs_media_rec_album_height_collapsed</item>
+        <item name="android:background">@drawable/qs_media_light_source</item>
+        <item name="android:layout_marginTop">@dimen/qs_media_info_spacing</item>
     </style>
 
     <style name="MediaPlayer.Recommendation.Album">
@@ -816,12 +836,10 @@
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
-    <style name="Theme.UserSwitcherActivity" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+    <style name="Theme.UserSwitcherFullscreenDialog" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
         <item name="android:statusBarColor">@color/user_switcher_fullscreen_bg</item>
         <item name="android:windowBackground">@color/user_switcher_fullscreen_bg</item>
         <item name="android:navigationBarColor">@color/user_switcher_fullscreen_bg</item>
-        <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen -->
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
     </style>
 
     <style name="Theme.CreateUser" parent="@android:style/Theme.DeviceDefault.NoActionBar">

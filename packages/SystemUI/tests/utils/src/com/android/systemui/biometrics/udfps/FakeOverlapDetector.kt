@@ -19,9 +19,10 @@ package com.android.systemui.biometrics.udfps
 import android.graphics.Rect
 
 class FakeOverlapDetector : OverlapDetector {
-    var shouldReturn: Boolean = false
+    var shouldReturn: Map<Int, Boolean> = mapOf()
 
     override fun isGoodOverlap(touchData: NormalizedTouchData, nativeSensorBounds: Rect): Boolean {
-        return shouldReturn
+        return shouldReturn[touchData.pointerId]
+            ?: error("Unexpected PointerId not declared in TestCase currentPointers")
     }
 }

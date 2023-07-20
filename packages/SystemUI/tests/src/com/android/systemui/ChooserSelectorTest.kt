@@ -11,6 +11,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flag
 import com.android.systemui.flags.FlagListenable
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.ReleasedFlag
 import com.android.systemui.flags.UnreleasedFlag
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
@@ -102,7 +103,7 @@ class ChooserSelectorTest : SysuiTestCase() {
     @Test
     fun initialize_enablesUnbundledChooser_whenFlagEnabled() {
         // Arrange
-        whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(true)
+        setFlagMock(true)
 
         // Act
         chooserSelector.start()
@@ -118,7 +119,7 @@ class ChooserSelectorTest : SysuiTestCase() {
     @Test
     fun initialize_disablesUnbundledChooser_whenFlagDisabled() {
         // Arrange
-        whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(false)
+        setFlagMock(false)
 
         // Act
         chooserSelector.start()
@@ -134,7 +135,7 @@ class ChooserSelectorTest : SysuiTestCase() {
     @Test
     fun enablesUnbundledChooser_whenFlagBecomesEnabled() {
         // Arrange
-        whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(false)
+        setFlagMock(false)
         chooserSelector.start()
         verify(mockFeatureFlags).addListener(
                 eq<Flag<*>>(Flags.CHOOSER_UNBUNDLED),
@@ -147,8 +148,8 @@ class ChooserSelectorTest : SysuiTestCase() {
         )
 
         // Act
-        whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(true)
-        flagListener.value.onFlagChanged(TestFlagEvent(Flags.CHOOSER_UNBUNDLED.id))
+        setFlagMock(true)
+        flagListener.value.onFlagChanged(TestFlagEvent(Flags.CHOOSER_UNBUNDLED.name))
 
         // Assert
         verify(mockPackageManager, times(2)).setComponentEnabledSetting(
@@ -161,7 +162,7 @@ class ChooserSelectorTest : SysuiTestCase() {
     @Test
     fun disablesUnbundledChooser_whenFlagBecomesDisabled() {
         // Arrange
-        whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(true)
+        setFlagMock(true)
         chooserSelector.start()
         verify(mockFeatureFlags).addListener(
                 eq<Flag<*>>(Flags.CHOOSER_UNBUNDLED),
@@ -174,8 +175,8 @@ class ChooserSelectorTest : SysuiTestCase() {
         )
 
         // Act
-        whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(false)
-        flagListener.value.onFlagChanged(TestFlagEvent(Flags.CHOOSER_UNBUNDLED.id))
+        setFlagMock(false)
+        flagListener.value.onFlagChanged(TestFlagEvent(Flags.CHOOSER_UNBUNDLED.name))
 
         // Assert
         verify(mockPackageManager, times(2)).setComponentEnabledSetting(
@@ -188,7 +189,7 @@ class ChooserSelectorTest : SysuiTestCase() {
     @Test
     fun doesNothing_whenAnotherFlagChanges() {
         // Arrange
-        whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(false)
+        setFlagMock(false)
         chooserSelector.start()
         verify(mockFeatureFlags).addListener(
                 eq<Flag<*>>(Flags.CHOOSER_UNBUNDLED),
@@ -197,14 +198,18 @@ class ChooserSelectorTest : SysuiTestCase() {
         clearInvocations(mockPackageManager)
 
         // Act
-        whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(false)
-        flagListener.value.onFlagChanged(TestFlagEvent(Flags.CHOOSER_UNBUNDLED.id + 1))
+        flagListener.value.onFlagChanged(TestFlagEvent("other flag"))
 
         // Assert
         verifyZeroInteractions(mockPackageManager)
     }
 
-    private class TestFlagEvent(override val flagId: Int) : FlagListenable.FlagEvent {
+    private fun setFlagMock(enabled: Boolean) {
+        whenever(mockFeatureFlags.isEnabled(any<UnreleasedFlag>())).thenReturn(enabled)
+        whenever(mockFeatureFlags.isEnabled(any<ReleasedFlag>())).thenReturn(enabled)
+    }
+
+    private class TestFlagEvent(override val flagName: String) : FlagListenable.FlagEvent {
         override fun requestNoRestart() {}
     }
 }

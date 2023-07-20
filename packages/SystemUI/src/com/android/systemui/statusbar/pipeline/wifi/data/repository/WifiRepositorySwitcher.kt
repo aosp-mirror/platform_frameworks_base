@@ -23,9 +23,9 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,7 +41,6 @@ import kotlinx.coroutines.flow.stateIn
  * or the [WifiRepositoryImpl]'s prod implementation, based on the current demo mode value. In this
  * way, downstream clients can all consist of real implementations and not care about which
  * repository is responsible for the data. Graphically:
- *
  * ```
  * RealRepository
  *                 │

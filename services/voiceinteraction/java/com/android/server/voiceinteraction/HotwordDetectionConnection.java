@@ -55,6 +55,7 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPH
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED_FROM_RESTART;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECT_UNEXPECTED_CALLBACK;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__SERVICE_CRASH;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1152,6 +1153,11 @@ final class HotwordDetectionConnection {
                     Slog.w(TAG, "Failed to report onError status: " + e);
                 }
             }
+            // Can improve to log exit reason if needed
+            HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                    mDetectorType,
+                    HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__SERVICE_CRASH,
+                    mVoiceInteractionServiceUid);
         }
 
         @Override

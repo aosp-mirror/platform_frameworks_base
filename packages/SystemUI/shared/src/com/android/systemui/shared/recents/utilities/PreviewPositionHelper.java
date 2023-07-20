@@ -33,8 +33,6 @@ public class PreviewPositionHelper {
      */
     public static final int STAGE_POSITION_BOTTOM_OR_RIGHT = 1;
 
-    // Contains the portion of the thumbnail that is unclipped when fullscreen progress = 1.
-    private final RectF mClippedInsets = new RectF();
     private final Matrix mMatrix = new Matrix();
     private boolean mIsOrientationChanged;
     private SplitBounds mSplitBounds;
@@ -62,7 +60,7 @@ public class PreviewPositionHelper {
      */
     public void updateThumbnailMatrix(Rect thumbnailBounds, ThumbnailData thumbnailData,
             int canvasWidth, int canvasHeight, int screenWidthPx, int screenHeightPx,
-            int taskbarSize, boolean isTablet,
+            int taskbarSize, boolean isLargeScreen,
             int currentRotation, boolean isRtl) {
         boolean isRotated = false;
         boolean isOrientationDifferent;
@@ -70,40 +68,13 @@ public class PreviewPositionHelper {
         int thumbnailRotation = thumbnailData.rotation;
         int deltaRotate = getRotationDelta(currentRotation, thumbnailRotation);
         RectF thumbnailClipHint = new RectF();
-
-        float scaledTaskbarSize;
-        float canvasScreenRatio;
-        if (mSplitBounds != null) {
-            if (mSplitBounds.appsStackedVertically) {
-                if (mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT) {
-                    // Top app isn't cropped at all by taskbar
-                    canvasScreenRatio = 0;
-                } else {
-                    // Same as fullscreen ratio
-                    canvasScreenRatio = (float) canvasWidth / screenWidthPx;
-                }
-            } else {
-                // For landscape, scale the width
-                float taskPercent = mDesiredStagePosition == STAGE_POSITION_TOP_OR_LEFT
-                        ? mSplitBounds.leftTaskPercent
-                        : (1 - (mSplitBounds.leftTaskPercent + mSplitBounds.dividerWidthPercent));
-                // Scale landscape width to that of actual screen
-                float fullscreenTaskWidth = screenWidthPx * taskPercent;
-                canvasScreenRatio = canvasWidth / fullscreenTaskWidth;
-            }
-        } else {
-            canvasScreenRatio = (float) canvasWidth / screenWidthPx;
-        }
-        scaledTaskbarSize = taskbarSize * canvasScreenRatio;
-        thumbnailClipHint.bottom = isTablet ? scaledTaskbarSize : 0;
-
         float scale = thumbnailData.scale;
         final float thumbnailScale;
 
         // Landscape vs portrait change.
         // Note: Disable rotation in grid layout.
         boolean windowingModeSupportsRotation =
-                thumbnailData.windowingMode == WINDOWING_MODE_FULLSCREEN && !isTablet;
+                thumbnailData.windowingMode == WINDOWING_MODE_FULLSCREEN && !isLargeScreen;
         isOrientationDifferent = isOrientationChange(deltaRotate)
                 && windowingModeSupportsRotation;
         if (canvasWidth == 0 || canvasHeight == 0 || scale == 0) {
@@ -116,10 +87,8 @@ public class PreviewPositionHelper {
 
             float surfaceWidth = thumbnailBounds.width() / scale;
             float surfaceHeight = thumbnailBounds.height() / scale;
-            float availableWidth = surfaceWidth
-                    - (thumbnailClipHint.left + thumbnailClipHint.right);
-            float availableHeight = surfaceHeight
-                    - (thumbnailClipHint.top + thumbnailClipHint.bottom);
+            float availableWidth = surfaceWidth;
+            float availableHeight = surfaceHeight;
 
             float canvasAspect = canvasWidth / (float) canvasHeight;
             float availableAspect = isRotated
@@ -210,8 +179,6 @@ public class PreviewPositionHelper {
             setThumbnailRotation(deltaRotate, thumbnailBounds);
         }
 
-        mClippedInsets.set(0, 0, 0, scaledTaskbarSize);
-
         mMatrix.postScale(thumbnailScale, thumbnailScale);
         mIsOrientationChanged = isOrientationDifferent;
     }
@@ -249,9 +216,5 @@ public class PreviewPositionHelper {
                 break;
         }
         mMatrix.postTranslate(translateX, translateY);
-    }
-
-    public RectF getClippedInsets() {
-        return mClippedInsets;
     }
 }

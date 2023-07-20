@@ -65,14 +65,14 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.ListenerSet;
 
-import dagger.Lazy;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+
+import dagger.Lazy;
 
 /**
  * Class for handling remote input state over a set of notifications. This class handles things
@@ -465,8 +465,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         riv.getController().setRemoteInput(input);
         riv.getController().setRemoteInputs(inputs);
         riv.getController().setEditedSuggestionInfo(editedSuggestionInfo);
-        ViewGroup parent = view.getParent() != null ? (ViewGroup) view.getParent() : null;
-        riv.focusAnimated(parent);
+        riv.focusAnimated();
         if (userMessageContent != null) {
             riv.setEditTextContent(userMessageContent);
         }

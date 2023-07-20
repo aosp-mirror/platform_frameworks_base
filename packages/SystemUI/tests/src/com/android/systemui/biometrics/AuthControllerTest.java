@@ -25,6 +25,7 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWA
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +34,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -49,6 +51,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -166,6 +169,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
     @Captor
     private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefullnessObserverCaptor;
+    @Mock
+    private Resources mResources;
 
     private TestableContext mContextSpy;
     private Execution mExecution;
@@ -739,7 +744,7 @@ public class AuthControllerTest extends SysuiTestCase {
     public void testForwardsDozeEvents() throws RemoteException {
         when(mStatusBarStateController.isDozing()).thenReturn(true);
         when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
-        mAuthController.setBiometicContextListener(mContextListener);
+        mAuthController.setBiometricContextListener(mContextListener);
 
         mStatusBarStateListenerCaptor.getValue().onDozingChanged(true);
         mStatusBarStateListenerCaptor.getValue().onDozingChanged(false);
@@ -754,7 +759,7 @@ public class AuthControllerTest extends SysuiTestCase {
     public void testForwardsWakeEvents() throws RemoteException {
         when(mStatusBarStateController.isDozing()).thenReturn(false);
         when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
-        mAuthController.setBiometicContextListener(mContextListener);
+        mAuthController.setBiometricContextListener(mContextListener);
 
         mWakefullnessObserverCaptor.getValue().onStartedGoingToSleep();
         mWakefullnessObserverCaptor.getValue().onFinishedGoingToSleep();
@@ -877,6 +882,25 @@ public class AuthControllerTest extends SysuiTestCase {
                 mAuthController.rotateToCurrentOrientation(
                         new Point(fpDefaultLocation), displayInfo)
         );
+    }
+
+    @Test
+    public void testUpdateFingerprintLocation_defaultPointChanges_whenConfigChanges() {
+        when(mContextSpy.getResources()).thenReturn(mResources);
+
+        doReturn(500).when(mResources)
+                .getDimensionPixelSize(eq(com.android.systemui.R.dimen
+                        .physical_fingerprint_sensor_center_screen_location_y));
+        mAuthController.onConfigurationChanged(null /* newConfig */);
+
+        final Point firstFpLocation = mAuthController.getFingerprintSensorLocation();
+
+        doReturn(1000).when(mResources)
+                .getDimensionPixelSize(eq(com.android.systemui.R.dimen
+                        .physical_fingerprint_sensor_center_screen_location_y));
+        mAuthController.onConfigurationChanged(null /* newConfig */);
+
+        assertNotSame(firstFpLocation, mAuthController.getFingerprintSensorLocation());
     }
 
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {

@@ -44,6 +44,9 @@ import javax.inject.Inject;
 
 /** Quick settings tile: QR Code Scanner **/
 public class QRCodeScannerTile extends QSTileImpl<QSTile.State> {
+
+    public static final String TILE_SPEC = "qr_code_scanner";
+
     private static final String TAG = "QRCodeScanner";
 
     private final CharSequence mLabel = mContext.getString(R.string.qr_code_scanner_title);

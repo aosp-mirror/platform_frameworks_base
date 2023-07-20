@@ -48,7 +48,7 @@ class RippleAnimation(private val config: RippleAnimationConfig) {
         animator.addUpdateListener { updateListener ->
             val now = updateListener.currentPlayTime
             val progress = updateListener.animatedValue as Float
-            rippleShader.progress = progress
+            rippleShader.rawProgress = progress
             rippleShader.distortionStrength = if (config.shouldDistort) 1 - progress else 0f
             rippleShader.time = now.toFloat()
         }
@@ -66,11 +66,28 @@ class RippleAnimation(private val config: RippleAnimationConfig) {
     fun isPlaying(): Boolean = animator.isRunning
 
     private fun applyConfigToShader() {
-        rippleShader.setCenter(config.centerX, config.centerY)
-        rippleShader.setMaxSize(config.maxWidth, config.maxHeight)
-        rippleShader.rippleFill = config.shouldFillRipple
-        rippleShader.pixelDensity = config.pixelDensity
-        rippleShader.color = ColorUtils.setAlphaComponent(config.color, config.opacity)
-        rippleShader.sparkleStrength = config.sparkleStrength
+        with(rippleShader) {
+            setCenter(config.centerX, config.centerY)
+            rippleSize.setMaxSize(config.maxWidth, config.maxHeight)
+            pixelDensity = config.pixelDensity
+            color = ColorUtils.setAlphaComponent(config.color, config.opacity)
+            sparkleStrength = config.sparkleStrength
+
+            assignFadeParams(baseRingFadeParams, config.baseRingFadeParams)
+            assignFadeParams(sparkleRingFadeParams, config.sparkleRingFadeParams)
+            assignFadeParams(centerFillFadeParams, config.centerFillFadeParams)
+        }
+    }
+
+    private fun assignFadeParams(
+        destFadeParams: RippleShader.FadeParams,
+        srcFadeParams: RippleShader.FadeParams?
+    ) {
+        srcFadeParams?.let {
+            destFadeParams.fadeInStart = it.fadeInStart
+            destFadeParams.fadeInEnd = it.fadeInEnd
+            destFadeParams.fadeOutStart = it.fadeOutStart
+            destFadeParams.fadeOutEnd = it.fadeOutEnd
+        }
     }
 }

@@ -100,9 +100,9 @@ constructor(
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState {
         return when {
-            !walletController.isWalletEnabled ->
+            !walletController.walletClient.isWalletServiceAvailable ->
                 KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice
-            walletController.walletClient.tileIcon == null || queryCards().isEmpty() -> {
+            !walletController.isWalletEnabled || queryCards().isEmpty() -> {
                 val componentName =
                     walletController.walletClient.createWalletSettingsIntent().toComponentName()
                 val actionText =
@@ -128,7 +128,7 @@ constructor(
                     actionComponentName = componentName,
                 )
             }
-            else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default
+            else -> KeyguardQuickAffordanceConfig.PickerScreenState.Default()
         }
     }
 

@@ -64,7 +64,7 @@ import kotlin.jvm.functions.Function1;
 public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewController<T>
         implements Dumpable{
     private static final String TAG = "QSPanelControllerBase";
-    protected final QSTileHost mHost;
+    protected final QSHost mHost;
     private final QSCustomizerController mQsCustomizerController;
     private final boolean mUsingMediaPlayer;
     protected final MediaHost mMediaHost;
@@ -91,27 +91,30 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             new QSPanel.OnConfigurationChangedListener() {
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
-                    mQSLogger.logOnConfigurationChanged(
-                        /* lastOrientation= */ mLastOrientation,
-                        /* newOrientation= */ newConfig.orientation,
-                        /* containerName= */ mView.getDumpableTag());
-
-                    boolean previousSplitShadeState = mShouldUseSplitNotificationShade;
+                    final boolean previousSplitShadeState = mShouldUseSplitNotificationShade;
+                    final int previousOrientation = mLastOrientation;
                     mShouldUseSplitNotificationShade =
-                        LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                            LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
                     mLastOrientation = newConfig.orientation;
+
+                    mQSLogger.logOnConfigurationChanged(
+                        /* oldOrientation= */ previousOrientation,
+                        /* newOrientation= */ mLastOrientation,
+                        /* oldShouldUseSplitShade= */ previousSplitShadeState,
+                        /* newShouldUseSplitShade= */ mShouldUseSplitNotificationShade,
+                        /* containerName= */ mView.getDumpableTag());
 
                     switchTileLayoutIfNeeded();
                     onConfigurationChanged();
                     if (previousSplitShadeState != mShouldUseSplitNotificationShade) {
-                        onSplitShadeChanged();
+                        onSplitShadeChanged(mShouldUseSplitNotificationShade);
                     }
                 }
             };
 
     protected void onConfigurationChanged() { }
 
-    protected void onSplitShadeChanged() { }
+    protected void onSplitShadeChanged(boolean shouldUseSplitNotificationShade) { }
 
     private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
         if (mMediaVisibilityChangedListener != null) {
@@ -128,7 +131,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     protected QSPanelControllerBase(
             T view,
-            QSTileHost host,
+            QSHost host,
             QSCustomizerController qsCustomizerController,
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             MediaHost mediaHost,
@@ -372,18 +375,18 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         if (mUsingHorizontalLayout) {
             // Only height remaining
             parameters.getDisappearSize().set(0.0f, 0.4f);
-            // Disappearing on the right side on the bottom
-            parameters.getGonePivot().set(1.0f, 1.0f);
+            // Disappearing on the right side on the top
+            parameters.getGonePivot().set(1.0f, 0.0f);
             // translating a bit horizontal
             parameters.getContentTranslationFraction().set(0.25f, 1.0f);
             parameters.setDisappearEnd(0.6f);
         } else {
             // Only width remaining
             parameters.getDisappearSize().set(1.0f, 0.0f);
-            // Disappearing on the bottom
-            parameters.getGonePivot().set(0.0f, 1.0f);
+            // Disappearing on the top
+            parameters.getGonePivot().set(0.0f, 0.0f);
             // translating a bit vertical
-            parameters.getContentTranslationFraction().set(0.0f, 1.05f);
+            parameters.getContentTranslationFraction().set(0.0f, 1f);
             parameters.setDisappearEnd(0.95f);
         }
         parameters.setFadeStartPosition(0.95f);

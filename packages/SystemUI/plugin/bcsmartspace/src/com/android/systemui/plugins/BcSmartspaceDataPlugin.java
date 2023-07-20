@@ -50,16 +50,24 @@ public interface BcSmartspaceDataPlugin extends Plugin {
     String TAG = "BcSmartspaceDataPlugin";
 
     /** Register a listener to get Smartspace data. */
-    void registerListener(SmartspaceTargetListener listener);
+    default void registerListener(SmartspaceTargetListener listener) {
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
+    }
 
     /** Unregister a listener. */
-    void unregisterListener(SmartspaceTargetListener listener);
+    default void unregisterListener(SmartspaceTargetListener listener) {
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
+    }
 
     /** Register a SmartspaceEventNotifier. */
-    default void registerSmartspaceEventNotifier(SmartspaceEventNotifier notifier) {}
+    default void registerSmartspaceEventNotifier(SmartspaceEventNotifier notifier) {
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
+    }
 
     /** Push a SmartspaceTargetEvent to the SmartspaceEventNotifier. */
-    default void notifySmartspaceEvent(SmartspaceTargetEvent event) {}
+    default void notifySmartspaceEvent(SmartspaceTargetEvent event) {
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
+    }
 
     /** Allows for notifying the SmartspaceSession of SmartspaceTargetEvents. */
     interface SmartspaceEventNotifier {
@@ -72,16 +80,20 @@ public interface BcSmartspaceDataPlugin extends Plugin {
      * will be responsible for correctly setting the LayoutParams
      */
     default SmartspaceView getView(ViewGroup parent) {
-        return null;
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
     }
 
     /**
      * As the smartspace view becomes available, allow listeners to receive an event.
      */
-    default void addOnAttachStateChangeListener(View.OnAttachStateChangeListener listener) { }
+    default void addOnAttachStateChangeListener(View.OnAttachStateChangeListener listener) {
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
+    }
 
     /** Updates Smartspace data and propagates it to any listeners. */
-    void onTargetsAvailable(List<SmartspaceTarget> targets);
+    default void onTargetsAvailable(List<SmartspaceTarget> targets) {
+        throw new UnsupportedOperationException("Not implemented by " + getClass());
+    }
 
     /** Provides Smartspace data to registered listeners. */
     interface SmartspaceTargetListener {
@@ -94,15 +106,16 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void registerDataProvider(BcSmartspaceDataPlugin plugin);
 
         /**
+         * Sets {@link BcSmartspaceConfigPlugin}.
+         */
+        default void registerConfigProvider(BcSmartspaceConfigPlugin configProvider) {
+            throw new UnsupportedOperationException("Not implemented by " + getClass());
+        }
+
+        /**
          * Primary color for unprotected text
          */
         void setPrimaryTextColor(int color);
-
-        /**
-         * When the view is displayed on Dream, set the flag to true, immediately after the view is
-         * created.
-         */
-        void setIsDreaming(boolean isDreaming);
 
         /**
          * Set the UI surface for the cards. Should be called immediately after the view is created.
@@ -133,28 +146,38 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         /**
          * Set or clear Do Not Disturb information.
          */
-        void setDnd(@Nullable Drawable image, @Nullable String description);
+        default void setDnd(@Nullable Drawable image, @Nullable String description) {
+            throw new UnsupportedOperationException("Not implemented by " + getClass());
+        }
 
         /**
          * Set or clear next alarm information
          */
-        void setNextAlarm(@Nullable Drawable image, @Nullable String description);
+        default void setNextAlarm(@Nullable Drawable image, @Nullable String description) {
+            throw new UnsupportedOperationException("Not implemented by " + getClass());
+        }
 
         /**
          * Set or clear device media playing
          */
-        void setMediaTarget(@Nullable SmartspaceTarget target);
+        default void setMediaTarget(@Nullable SmartspaceTarget target) {
+            throw new UnsupportedOperationException("Not implemented by " + getClass());
+        }
 
         /**
          * Get the index of the currently selected page.
          */
-        int getSelectedPage();
+        default int getSelectedPage() {
+            throw new UnsupportedOperationException("Not implemented by " + getClass());
+        }
 
         /**
          * Return the top padding value from the currently visible card, or 0 if there is no current
          * card.
          */
-        int getCurrentCardTopPadding();
+        default int getCurrentCardTopPadding() {
+            throw new UnsupportedOperationException("Not implemented by " + getClass());
+        }
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */

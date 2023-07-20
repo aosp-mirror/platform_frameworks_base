@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -94,7 +95,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     DisplayArea(WindowManagerService wms, Type type, String name, int featureId) {
         super(wms);
         // TODO(display-area): move this up to ConfigurationContainer
-        mOrientation = SCREEN_ORIENTATION_UNSET;
+        setOverrideOrientation(SCREEN_ORIENTATION_UNSET);
         mType = type;
         mName = name;
         mFeatureId = featureId;
@@ -147,7 +148,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @ScreenOrientation
     int getOrientation(int candidate) {
         final int orientation = super.getOrientation(candidate);
-        if (getIgnoreOrientationRequest(orientation)) {
+        if (shouldIgnoreOrientationRequest(orientation)) {
             // In all the other case, mLastOrientationSource will be reassigned to a new value
             mLastOrientationSource = null;
             return SCREEN_ORIENTATION_UNSET;
@@ -157,7 +158,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     boolean handlesOrientationChangeFromDescendant(@ScreenOrientation int orientation) {
-        return !getIgnoreOrientationRequest(orientation)
+        return !shouldIgnoreOrientationRequest(orientation)
                 && super.handlesOrientationChangeFromDescendant(orientation);
     }
 
@@ -166,8 +167,9 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         // If this is set to ignore the orientation request, we don't propagate descendant
         // orientation request.
         final int orientation = requestingContainer != null
-                ? requestingContainer.mOrientation : SCREEN_ORIENTATION_UNSET;
-        return !getIgnoreOrientationRequest(orientation)
+                ? requestingContainer.getOverrideOrientation()
+                : SCREEN_ORIENTATION_UNSET;
+        return !shouldIgnoreOrientationRequest(orientation)
                 && super.onDescendantOrientationChanged(requestingContainer);
     }
 
@@ -234,8 +236,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     /**
      * @return {@value true} if we need to ignore the orientation in input.
      */
-    // TODO(b/262366204): Rename getIgnoreOrientationRequest to shouldIgnoreOrientationRequest
-    boolean getIgnoreOrientationRequest(@ScreenOrientation int orientation) {
+    boolean shouldIgnoreOrientationRequest(@ScreenOrientation int orientation) {
         // We always respect orientation request for ActivityInfo.SCREEN_ORIENTATION_LOCKED
         // ActivityInfo.SCREEN_ORIENTATION_NOSENSOR.
         // Main use case why this is important is Camera apps that rely on those
@@ -245,7 +246,22 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
                 || orientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
             return false;
         }
-        return getIgnoreOrientationRequest();
+        return getIgnoreOrientationRequest()
+                && !shouldRespectOrientationRequestDueToPerAppOverride();
+    }
+
+    private boolean shouldRespectOrientationRequestDueToPerAppOverride() {
+        if (mDisplayContent == null) {
+            return false;
+        }
+        ActivityRecord activity = mDisplayContent.topRunningActivity(
+                /* considerKeyguardState= */ true);
+        return activity != null && activity.getTaskFragment() != null
+                // Checking TaskFragment rather than ActivityRecord to ensure that transition
+                // between fullscreen and PiP would work well. Checking TaskFragment rather than
+                // Task to ensure that Activity Embedding is excluded.
+                && activity.getTaskFragment().getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && activity.mLetterboxUiController.isOverrideRespectRequestedOrientationEnabled();
     }
 
     boolean getIgnoreOrientationRequest() {

@@ -151,17 +151,6 @@ class WindowStateAnimator {
 
     int mAttrType;
 
-    /**
-     * Handles surface changes synchronized to after the client has drawn the surface. This
-     * transaction is currently used to reparent the old surface children to the new surface once
-     * the client has completed drawing to the new surface.
-     * This transaction is also used to merge transactions parceled in by the client. The client
-     * uses the transaction to update the relative z of its children from the old parent surface
-     * to the new parent surface once window manager reparents its children.
-     */
-    private final SurfaceControl.Transaction mPostDrawTransaction =
-            new SurfaceControl.Transaction();
-
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mWmService;
 
@@ -217,8 +206,7 @@ class WindowStateAnimator {
         }
     }
 
-    boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction,
-            boolean forceApplyNow) {
+    boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction) {
         final boolean startingWindow =
                 mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
         if (startingWindow) {
@@ -240,14 +228,7 @@ class WindowStateAnimator {
         }
 
         if (postDrawTransaction != null) {
-            // If there is no surface, the last draw was for the previous surface. We don't want to
-            // wait until the new surface is shown and instead just apply the transaction right
-            // away.
-            if (mLastHidden && mDrawState != NO_SURFACE && !forceApplyNow) {
-                mPostDrawTransaction.merge(postDrawTransaction);
-            } else {
-                mWin.getSyncTransaction().merge(postDrawTransaction);
-            }
+            mWin.getSyncTransaction().merge(postDrawTransaction);
             layoutNeeded = true;
         }
 
@@ -547,7 +528,6 @@ class WindowStateAnimator {
         if (!shown)
             return false;
 
-        t.merge(mPostDrawTransaction);
         return true;
     }
 
@@ -714,10 +694,6 @@ class WindowStateAnimator {
     }
 
     void destroySurface(SurfaceControl.Transaction t) {
-        // Since the SurfaceControl is getting torn down, it's safe to just clean up any
-        // pending transactions that were in mPostDrawTransaction, as well.
-        t.merge(mPostDrawTransaction);
-
         try {
             if (mSurfaceController != null) {
                 mSurfaceController.destroy(t);

@@ -827,7 +827,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
                     final long sessionStart = mBatteryUsageStatsStore
                             .getLastBatteryUsageStatsBeforeResetAtomPullTimestamp();
-                    final long sessionEnd = mStats.getStartClockTime();
+                    final long sessionEnd;
+                    synchronized (mStats) {
+                        sessionEnd = mStats.getStartClockTime();
+                    }
                     final BatteryUsageStatsQuery queryBeforeReset =
                             new BatteryUsageStatsQuery.Builder()
                                     .setMaxStatsAgeMs(0)

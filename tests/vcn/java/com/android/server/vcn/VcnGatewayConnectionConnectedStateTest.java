@@ -42,6 +42,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -343,6 +344,33 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
 
         // Verify revalidation is triggered on VCN network
         verify(mConnMgr).reportNetworkConnectivity(eq(mNetworkAgent.getNetwork()), eq(false));
+    }
+
+    @Test
+    public void testMigrationHandleFailure() throws Exception {
+        triggerChildOpened();
+        mTestLooper.dispatchAll();
+        assertEquals(mIkeConnectionInfo, mGatewayConnection.getIkeConnectionInfo());
+
+        mGatewayConnection
+                .getUnderlyingNetworkControllerCallback()
+                .onSelectedUnderlyingNetworkChanged(TEST_UNDERLYING_NETWORK_RECORD_2);
+
+        final IkeSessionConnectionInfo newIkeConnectionInfo =
+                new IkeSessionConnectionInfo(
+                        TEST_ADDR_V4, TEST_ADDR_V4_2, TEST_UNDERLYING_NETWORK_RECORD_2.network);
+        getIkeSessionCallback().onIkeSessionConnectionInfoChanged(newIkeConnectionInfo);
+        getChildSessionCallback()
+                .onIpSecTransformsMigrated(makeDummyIpSecTransform(), makeDummyIpSecTransform());
+
+        doThrow(new IllegalArgumentException("testMigrationHandleFailure"))
+                .when(mIpSecSvc)
+                .setNetworkForTunnelInterface(anyInt(), any(), any());
+
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mDisconnectingState, mGatewayConnection.getCurrentState());
+        verify(mIkeSession).close();
     }
 
     private void triggerChildOpened() {

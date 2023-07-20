@@ -419,16 +419,16 @@ public class DisplayWhiteBalanceController implements
         float ambientBrightness = mBrightnessFilter.getEstimate(time);
         mLatestAmbientBrightness = ambientBrightness;
 
-        if (ambientColorTemperature != -1.0f &&
-                mLowLightAmbientBrightnessToBiasSpline != null) {
+        if (ambientColorTemperature != -1.0f && ambientBrightness != -1.0f
+                && mLowLightAmbientBrightnessToBiasSpline != null) {
             float bias = mLowLightAmbientBrightnessToBiasSpline.interpolate(ambientBrightness);
             ambientColorTemperature =
                     bias * ambientColorTemperature + (1.0f - bias)
                     * mLowLightAmbientColorTemperature;
             mLatestLowLightBias = bias;
         }
-        if (ambientColorTemperature != -1.0f &&
-                mHighLightAmbientBrightnessToBiasSpline != null) {
+        if (ambientColorTemperature != -1.0f && ambientBrightness != -1.0f
+                && mHighLightAmbientBrightnessToBiasSpline != null) {
             float bias = mHighLightAmbientBrightnessToBiasSpline.interpolate(ambientBrightness);
             ambientColorTemperature =
                     (1.0f - bias) * ambientColorTemperature + bias

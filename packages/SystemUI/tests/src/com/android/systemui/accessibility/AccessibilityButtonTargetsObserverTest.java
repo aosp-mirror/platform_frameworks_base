@@ -21,14 +21,16 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import android.os.UserHandle;
+import android.app.ActivityManager;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.UserTracker;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -42,10 +44,13 @@ import org.mockito.junit.MockitoRule;
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class AccessibilityButtonTargetsObserverTest extends SysuiTestCase {
+    private static final int MY_USER_ID = ActivityManager.getCurrentUser();
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
+    @Mock
+    private UserTracker mUserTracker;
     @Mock
     private AccessibilityButtonTargetsObserver.TargetsChangedListener mListener;
 
@@ -55,7 +60,9 @@ public class AccessibilityButtonTargetsObserverTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mAccessibilityButtonTargetsObserver = new AccessibilityButtonTargetsObserver(mContext);
+        when(mUserTracker.getUserId()).thenReturn(MY_USER_ID);
+        mAccessibilityButtonTargetsObserver = new AccessibilityButtonTargetsObserver(mContext,
+                mUserTracker);
     }
 
     @Test
@@ -63,7 +70,7 @@ public class AccessibilityButtonTargetsObserverTest extends SysuiTestCase {
         mAccessibilityButtonTargetsObserver.addListener(mListener);
         Settings.Secure.putStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS,
-                UserHandle.USER_CURRENT);
+                MY_USER_ID);
 
         mAccessibilityButtonTargetsObserver.mContentObserver.onChange(false);
 
@@ -76,7 +83,7 @@ public class AccessibilityButtonTargetsObserverTest extends SysuiTestCase {
         mAccessibilityButtonTargetsObserver.removeListener(mListener);
         Settings.Secure.putStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS,
-                UserHandle.USER_CURRENT);
+                MY_USER_ID);
 
         mAccessibilityButtonTargetsObserver.mContentObserver.onChange(false);
 
@@ -87,7 +94,7 @@ public class AccessibilityButtonTargetsObserverTest extends SysuiTestCase {
     public void getCurrentAccessibilityButtonTargets_expectedValue() {
         Settings.Secure.putStringForUser(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, TEST_A11Y_BTN_TARGETS,
-                UserHandle.USER_CURRENT);
+                MY_USER_ID);
 
         final String actualValue =
                 mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();

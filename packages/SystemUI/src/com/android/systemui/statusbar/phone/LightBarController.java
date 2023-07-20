@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
@@ -38,6 +37,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.io.PrintWriter;
@@ -94,7 +94,8 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             DarkIconDispatcher darkIconDispatcher,
             BatteryController batteryController,
             NavigationModeController navModeController,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            DisplayTracker displayTracker) {
         mDarkIconColor = ctx.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightIconColor = ctx.getColor(R.color.light_mode_icon_color_single_tone);
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
@@ -104,7 +105,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             mNavigationMode = mode;
         });
 
-        if (ctx.getDisplayId() == DEFAULT_DISPLAY) {
+        if (ctx.getDisplayId() == displayTracker.getDefaultDisplayId()) {
             dumpManager.registerDumpable(getClass().getSimpleName(), this);
         }
     }
@@ -317,24 +318,27 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         private final BatteryController mBatteryController;
         private final NavigationModeController mNavModeController;
         private final DumpManager mDumpManager;
+        private final DisplayTracker mDisplayTracker;
 
         @Inject
         public Factory(
                 DarkIconDispatcher darkIconDispatcher,
                 BatteryController batteryController,
                 NavigationModeController navModeController,
-                DumpManager dumpManager) {
+                DumpManager dumpManager,
+                DisplayTracker displayTracker) {
 
             mDarkIconDispatcher = darkIconDispatcher;
             mBatteryController = batteryController;
             mNavModeController = navModeController;
             mDumpManager = dumpManager;
+            mDisplayTracker = displayTracker;
         }
 
         /** Create an {@link LightBarController} */
         public LightBarController create(Context context) {
             return new LightBarController(context, mDarkIconDispatcher, mBatteryController,
-                    mNavModeController, mDumpManager);
+                    mNavModeController, mDumpManager, mDisplayTracker);
         }
     }
 }

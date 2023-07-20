@@ -55,10 +55,25 @@ public class IllustrationPreference extends Preference {
 
     private int mMaxHeight = SIZE_UNSPECIFIED;
     private int mImageResId;
+    private boolean mCacheComposition = true;
     private boolean mIsAutoScale;
     private Uri mImageUri;
     private Drawable mImageDrawable;
     private View mMiddleGroundView;
+    private OnBindListener mOnBindListener;
+
+    private boolean mLottieDynamicColor;
+
+    /**
+     * Interface to listen in on when {@link #onBindViewHolder(PreferenceViewHolder)} occurs.
+     */
+    public interface OnBindListener {
+        /**
+         * Called when when {@link #onBindViewHolder(PreferenceViewHolder)} occurs.
+         * @param animationView the animation view for this preference.
+         */
+        void onBind(LottieAnimationView animationView);
+    }
 
     private final Animatable2.AnimationCallback mAnimationCallback =
             new Animatable2.AnimationCallback() {
@@ -119,6 +134,7 @@ public class IllustrationPreference extends Preference {
         lp.width = screenWidth < screenHeight ? screenWidth : screenHeight;
         illustrationFrame.setLayoutParams(lp);
 
+        illustrationView.setCacheComposition(mCacheComposition);
         handleImageWithAnimation(illustrationView);
         handleImageFrameMaxHeight(backgroundView, illustrationView);
 
@@ -133,6 +149,21 @@ public class IllustrationPreference extends Preference {
         if (IS_ENABLED_LOTTIE_ADAPTIVE_COLOR) {
             ColorUtils.applyDynamicColors(getContext(), illustrationView);
         }
+
+        if (mLottieDynamicColor) {
+            LottieColorUtils.applyDynamicColors(getContext(), illustrationView);
+        }
+
+        if (mOnBindListener != null) {
+            mOnBindListener.onBind(illustrationView);
+        }
+    }
+
+    /**
+     * Sets a listener to be notified when the views are binded.
+     */
+    public void setOnBindListener(OnBindListener listener) {
+        mOnBindListener = listener;
     }
 
     /**
@@ -237,6 +268,21 @@ public class IllustrationPreference extends Preference {
             mMaxHeight = maxHeight;
             notifyChanged();
         }
+    }
+
+    /**
+     * Sets the lottie illustration apply dynamic color.
+     */
+    public void applyDynamicColor() {
+        mLottieDynamicColor = true;
+        notifyChanged();
+    }
+
+    /**
+     * Return if the lottie illustration apply dynamic color or not.
+     */
+    public boolean isApplyDynamicColor() {
+        return mLottieDynamicColor;
     }
 
     private void resetImageResourceCache() {
@@ -380,9 +426,17 @@ public class IllustrationPreference extends Preference {
 
         mIsAutoScale = false;
         if (attrs != null) {
-            final TypedArray a = context.obtainStyledAttributes(attrs,
+            TypedArray a = context.obtainStyledAttributes(attrs,
                     R.styleable.LottieAnimationView, 0 /*defStyleAttr*/, 0 /*defStyleRes*/);
             mImageResId = a.getResourceId(R.styleable.LottieAnimationView_lottie_rawRes, 0);
+            mCacheComposition = a.getBoolean(
+                    R.styleable.LottieAnimationView_lottie_cacheComposition, true);
+
+            a = context.obtainStyledAttributes(attrs,
+                    R.styleable.IllustrationPreference, 0 /*defStyleAttr*/, 0 /*defStyleRes*/);
+            mLottieDynamicColor = a.getBoolean(R.styleable.IllustrationPreference_dynamicColor,
+                    false);
+
             a.recycle();
         }
     }

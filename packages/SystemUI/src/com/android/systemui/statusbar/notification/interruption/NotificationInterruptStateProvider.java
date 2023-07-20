@@ -31,6 +31,10 @@ public interface NotificationInterruptStateProvider {
      */
     enum FullScreenIntentDecision {
         /**
+         * Full screen intents are disabled.
+         */
+        NO_FSI_DISABLED(false),
+        /**
          * No full screen intent included, so there is nothing to show.
          */
         NO_FULL_SCREEN_INTENT(false),
@@ -54,6 +58,12 @@ public interface NotificationInterruptStateProvider {
          * FSI even while the device was unlocked.
          */
         NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR(false),
+        /**
+         * Notification should not FSI due to having suppressive BubbleMetadata. This blocks a
+         * potentially malicious use of flags that previously allowed apps to escalate a HUN to an
+         * FSI even while the device was unlocked.
+         */
+        NO_FSI_SUPPRESSIVE_BUBBLE_METADATA(false),
         /**
          * Device screen is off, so the FSI should launch.
          */

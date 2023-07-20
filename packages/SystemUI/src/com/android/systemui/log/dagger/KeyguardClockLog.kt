@@ -23,3 +23,15 @@ import javax.inject.Qualifier
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 annotation class KeyguardClockLog
+
+/** A [com.android.systemui.plugins.log.LogBuffer] for small keyguard clock logs. */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class KeyguardSmallClockLog
+
+/** A [com.android.systemui.plugins.log.LogBuffer] for large keyguard clock logs. */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class KeyguardLargeClockLog

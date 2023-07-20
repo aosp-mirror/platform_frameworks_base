@@ -24,9 +24,11 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController
+import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
@@ -45,6 +47,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.anyInt
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
 
@@ -68,10 +71,19 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var viewComponent: SmartspaceViewComponent
 
     @Mock
+    private lateinit var weatherViewComponent: SmartspaceViewComponent
+
+    @Spy
+    private var weatherSmartspaceView: SmartspaceView = TestView(context)
+
+    @Mock
     private lateinit var targetFilter: SmartspaceTargetFilter
 
     @Mock
     private lateinit var plugin: BcSmartspaceDataPlugin
+
+    @Mock
+    private lateinit var weatherPlugin: BcSmartspaceDataPlugin
 
     @Mock
     private lateinit var precondition: SmartspacePrecondition
@@ -87,6 +99,9 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
 
     private lateinit var controller: DreamSmartspaceController
 
+    // TODO(b/272811280): Remove usage of real view
+    private val fakeParent = FrameLayout(context)
+
     /**
      * A class which implements SmartspaceView and extends View. This is mocked to provide the right
      * object inheritance and interface implementation used in DreamSmartspaceController
@@ -94,9 +109,9 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     private class TestView(context: Context?) : View(context), SmartspaceView {
         override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {}
 
-        override fun setPrimaryTextColor(color: Int) {}
+        override fun registerConfigProvider(plugin: BcSmartspaceConfigPlugin?) {}
 
-        override fun setIsDreaming(isDreaming: Boolean) {}
+        override fun setPrimaryTextColor(color: Int) {}
 
         override fun setUiSurface(uiSurface: String) {}
 
@@ -120,13 +135,17 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        `when`(viewComponentFactory.create(any(), eq(plugin), any()))
+        `when`(viewComponentFactory.create(any(), eq(plugin), any(), eq(null)))
                 .thenReturn(viewComponent)
         `when`(viewComponent.getView()).thenReturn(smartspaceView)
+        `when`(viewComponentFactory.create(any(), eq(weatherPlugin), any(), any()))
+            .thenReturn(weatherViewComponent)
+        `when`(weatherViewComponent.getView()).thenReturn(weatherSmartspaceView)
         `when`(smartspaceManager.createSmartspaceSession(any())).thenReturn(session)
 
         controller = DreamSmartspaceController(context, smartspaceManager, execution, uiExecutor,
-                viewComponentFactory, precondition, Optional.of(targetFilter), Optional.of(plugin))
+                viewComponentFactory, precondition, Optional.of(targetFilter), Optional.of(plugin),
+        Optional.of(weatherPlugin))
     }
 
     /**
@@ -167,11 +186,11 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
         `when`(precondition.conditionsMet()).thenReturn(true)
         controller.buildAndConnectView(Mockito.mock(ViewGroup::class.java))
 
-        var stateChangeListener = withArgCaptor<View.OnAttachStateChangeListener> {
-            verify(viewComponentFactory).create(any(), eq(plugin), capture())
+        val stateChangeListener = withArgCaptor<View.OnAttachStateChangeListener> {
+            verify(viewComponentFactory).create(any(), eq(plugin), capture(), eq(null))
         }
 
-        var mockView = Mockito.mock(TestView::class.java)
+        val mockView = Mockito.mock(TestView::class.java)
         `when`(precondition.conditionsMet()).thenReturn(true)
         stateChangeListener.onViewAttachedToWindow(mockView)
 
@@ -181,5 +200,75 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
         stateChangeListener.onViewDetachedFromWindow(mockView)
 
         verify(session).close()
+    }
+
+    /**
+     * Ensures session is created when weather smartspace view is created and attached.
+     */
+    @Test
+    fun testConnectOnWeatherViewCreate() {
+        `when`(precondition.conditionsMet()).thenReturn(true)
+
+        val customView = Mockito.mock(TestView::class.java)
+        val weatherView = controller.buildAndConnectWeatherView(fakeParent, customView)
+        val weatherSmartspaceView = weatherView as SmartspaceView
+        fakeParent.addView(weatherView)
+
+        // Then weather view is created with custom view and the default weatherPlugin.getView
+        // should not be called
+        verify(viewComponentFactory).create(eq(fakeParent), eq(weatherPlugin), any(),
+            eq(customView))
+        verify(weatherPlugin, Mockito.never()).getView(fakeParent)
+
+        // And then session is created
+        controller.stateChangeListener.onViewAttachedToWindow(weatherView)
+        verify(smartspaceManager).createSmartspaceSession(any())
+        verify(weatherSmartspaceView).setPrimaryTextColor(anyInt())
+        verify(weatherSmartspaceView).setDozeAmount(0f)
+    }
+
+    /**
+     * Ensures weather plugin registers target listener when it is added from the controller.
+     */
+    @Test
+    fun testAddListenerInController_registersListenerForWeatherPlugin() {
+        val customView = Mockito.mock(TestView::class.java)
+        `when`(precondition.conditionsMet()).thenReturn(true)
+
+        // Given a session is created
+        val weatherView = controller.buildAndConnectWeatherView(fakeParent, customView)
+        controller.stateChangeListener.onViewAttachedToWindow(weatherView)
+        verify(smartspaceManager).createSmartspaceSession(any())
+
+        // When a listener is added
+        controller.addListenerForWeatherPlugin(listener)
+
+        // Then the listener is registered to the weather plugin only
+        verify(weatherPlugin).registerListener(listener)
+        verify(plugin, Mockito.never()).registerListener(any())
+    }
+
+    /**
+     * Ensures session is closed and weather plugin unregisters the notifier when weather smartspace
+     * view is detached.
+     */
+    @Test
+    fun testDisconnect_emitsEmptyListAndRemovesNotifier() {
+        `when`(precondition.conditionsMet()).thenReturn(true)
+
+        // Given a session is created
+        val customView = Mockito.mock(TestView::class.java)
+        val weatherView = controller.buildAndConnectWeatherView(fakeParent, customView)
+        controller.stateChangeListener.onViewAttachedToWindow(weatherView)
+        verify(smartspaceManager).createSmartspaceSession(any())
+
+        // When view is detached
+        controller.stateChangeListener.onViewDetachedFromWindow(weatherView)
+        // Then the session is closed
+        verify(session).close()
+
+        // And the listener receives an empty list of targets and unregisters the notifier
+        verify(weatherPlugin).onTargetsAvailable(emptyList())
+        verify(weatherPlugin).registerSmartspaceEventNotifier(null)
     }
 }

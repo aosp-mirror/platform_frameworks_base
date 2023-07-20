@@ -159,7 +159,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         underTest.displayView(getState())
         assertThat(fakeWakeLock.isHeld).isTrue()
 
-        underTest.removeView("id", "test reason")
+        underTest.removeView(DEFAULT_ID, "test reason")
 
         assertThat(fakeWakeLock.isHeld).isFalse()
     }
@@ -175,6 +175,8 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
     @Test
     fun displayView_twiceWithDifferentIds_oldViewRemovedNewViewAdded() {
+        val listener = registerListener()
+
         underTest.displayView(
             ViewInfo(
                 name = "name",
@@ -199,10 +201,15 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         assertThat(windowParamsCaptor.allValues[0].title).isEqualTo("First Fake Window Title")
         assertThat(windowParamsCaptor.allValues[1].title).isEqualTo("Second Fake Window Title")
         verify(windowManager).removeView(viewCaptor.allValues[0])
+        // Since the controller is still storing the older view in case it'll get re-displayed
+        // later, the listener shouldn't be notified
+        assertThat(listener.permanentlyRemovedIds).isEmpty()
     }
 
     @Test
     fun displayView_viewDoesNotDisappearsBeforeTimeout() {
+        val listener = registerListener()
+
         val state = getState()
         underTest.displayView(state)
         reset(windowManager)
@@ -210,10 +217,13 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         fakeClock.advanceTime(TIMEOUT_MS - 1)
 
         verify(windowManager, never()).removeView(any())
+        assertThat(listener.permanentlyRemovedIds).isEmpty()
     }
 
     @Test
     fun displayView_viewDisappearsAfterTimeout() {
+        val listener = registerListener()
+
         val state = getState()
         underTest.displayView(state)
         reset(windowManager)
@@ -221,10 +231,13 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         fakeClock.advanceTime(TIMEOUT_MS + 1)
 
         verify(windowManager).removeView(any())
+        assertThat(listener.permanentlyRemovedIds).containsExactly(DEFAULT_ID)
     }
 
     @Test
     fun displayView_calledAgainBeforeTimeout_timeoutReset() {
+        val listener = registerListener()
+
         // First, display the view
         val state = getState()
         underTest.displayView(state)
@@ -239,10 +252,13 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
         // Verify we didn't hide the view
         verify(windowManager, never()).removeView(any())
+        assertThat(listener.permanentlyRemovedIds).isEmpty()
     }
 
     @Test
     fun displayView_calledAgainBeforeTimeout_eventuallyTimesOut() {
+        val listener = registerListener()
+
         // First, display the view
         val state = getState()
         underTest.displayView(state)
@@ -255,6 +271,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         fakeClock.advanceTime(TIMEOUT_MS + 1)
 
         verify(windowManager).removeView(any())
+        assertThat(listener.permanentlyRemovedIds).containsExactly(DEFAULT_ID)
     }
 
     @Test
@@ -271,25 +288,9 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun viewUpdatedWithNewOnViewTimeoutRunnable_newRunnableUsed() {
-        var runnable1Run = false
-        underTest.displayView(ViewInfo(name = "name", id = "id1", windowTitle = "1")) {
-            runnable1Run = true
-        }
-
-        var runnable2Run = false
-        underTest.displayView(ViewInfo(name = "name", id = "id1", windowTitle = "1")) {
-            runnable2Run = true
-        }
-
-        fakeClock.advanceTime(TIMEOUT_MS + 1)
-
-        assertThat(runnable1Run).isFalse()
-        assertThat(runnable2Run).isTrue()
-    }
-
-    @Test
     fun multipleViewsWithDifferentIds_moreRecentReplacesOlder() {
+        val listener = registerListener()
+
         underTest.displayView(
             ViewInfo(
                 name = "name",
@@ -315,10 +316,16 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         assertThat(windowParamsCaptor.allValues[1].title).isEqualTo("Second Fake Window Title")
         verify(windowManager).removeView(viewCaptor.allValues[0])
         verify(configurationController, never()).removeCallback(any())
+
+        // Since the controller is still storing the older view in case it'll get re-displayed
+        // later, the listener shouldn't be notified
+        assertThat(listener.permanentlyRemovedIds).isEmpty()
     }
 
     @Test
-    fun multipleViewsWithDifferentIds_recentActiveViewIsDisplayed() {
+    fun multipleViewsWithDifferentIds_newViewRemoved_previousViewIsDisplayed() {
+        val listener = registerListener()
+
         underTest.displayView(ViewInfo("First name", id = "id1"))
 
         verify(windowManager).addView(any(), any())
@@ -329,24 +336,35 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         verify(windowManager).removeView(any())
         verify(windowManager).addView(any(), any())
         reset(windowManager)
+        assertThat(listener.permanentlyRemovedIds).isEmpty()
 
+        // WHEN the current view is removed
         underTest.removeView("id2", "test reason")
 
+        // THEN it's correctly removed
         verify(windowManager).removeView(any())
+        assertThat(listener.permanentlyRemovedIds).containsExactly("id2")
+
+        // And the previous view is correctly added
         verify(windowManager).addView(any(), any())
         assertThat(underTest.mostRecentViewInfo?.id).isEqualTo("id1")
         assertThat(underTest.mostRecentViewInfo?.name).isEqualTo("First name")
 
+        // WHEN the previous view times out
         reset(windowManager)
         fakeClock.advanceTime(TIMEOUT_MS + 1)
 
+        // THEN it is also removed
         verify(windowManager).removeView(any())
         assertThat(underTest.activeViews.size).isEqualTo(0)
         verify(configurationController).removeCallback(any())
+        assertThat(listener.permanentlyRemovedIds).isEqualTo(listOf("id2", "id1"))
     }
 
     @Test
     fun multipleViewsWithDifferentIds_oldViewRemoved_recentViewIsDisplayed() {
+        val listener = registerListener()
+
         underTest.displayView(ViewInfo("First name", id = "id1"))
 
         verify(windowManager).addView(any(), any())
@@ -361,7 +379,8 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         // WHEN an old view is removed
         underTest.removeView("id1", "test reason")
 
-        // THEN we don't update anything
+        // THEN we don't update anything except the listener
+        assertThat(listener.permanentlyRemovedIds).containsExactly("id1")
         verify(windowManager, never()).removeView(any())
         assertThat(underTest.mostRecentViewInfo?.id).isEqualTo("id2")
         assertThat(underTest.mostRecentViewInfo?.name).isEqualTo("Second name")
@@ -372,10 +391,13 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         verify(windowManager).removeView(any())
         assertThat(underTest.activeViews.size).isEqualTo(0)
         verify(configurationController).removeCallback(any())
+        assertThat(listener.permanentlyRemovedIds).isEqualTo(listOf("id1", "id2"))
     }
 
     @Test
     fun multipleViewsWithDifferentIds_threeDifferentViews_recentActiveViewIsDisplayed() {
+        val listener = registerListener()
+
         underTest.displayView(ViewInfo("First name", id = "id1"))
         underTest.displayView(ViewInfo("Second name", id = "id2"))
         underTest.displayView(ViewInfo("Third name", id = "id3"))
@@ -387,6 +409,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         underTest.removeView("id3", "test reason")
 
         verify(windowManager).removeView(any())
+        assertThat(listener.permanentlyRemovedIds).isEqualTo(listOf("id3"))
         assertThat(underTest.mostRecentViewInfo?.id).isEqualTo("id2")
         assertThat(underTest.mostRecentViewInfo?.name).isEqualTo("Second name")
         verify(configurationController, never()).removeCallback(any())
@@ -395,6 +418,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         underTest.removeView("id2", "test reason")
 
         verify(windowManager).removeView(any())
+        assertThat(listener.permanentlyRemovedIds).isEqualTo(listOf("id3", "id2"))
         assertThat(underTest.mostRecentViewInfo?.id).isEqualTo("id1")
         assertThat(underTest.mostRecentViewInfo?.name).isEqualTo("First name")
         verify(configurationController, never()).removeCallback(any())
@@ -403,6 +427,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         fakeClock.advanceTime(TIMEOUT_MS + 1)
 
         verify(windowManager).removeView(any())
+        assertThat(listener.permanentlyRemovedIds).isEqualTo(listOf("id3", "id2", "id1"))
         assertThat(underTest.activeViews.size).isEqualTo(0)
         verify(configurationController).removeCallback(any())
     }
@@ -438,6 +463,8 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
     @Test
     fun multipleViews_mostRecentViewRemoved_otherViewsTimedOutAndNotDisplayed() {
+        val listener = registerListener()
+
         underTest.displayView(ViewInfo("First name", id = "id1", timeoutMs = 4000))
         fakeClock.advanceTime(1000)
         underTest.displayView(ViewInfo("Second name", id = "id2", timeoutMs = 4000))
@@ -451,10 +478,13 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         verify(windowManager, never()).addView(any(), any())
         assertThat(underTest.activeViews.size).isEqualTo(0)
         verify(configurationController).removeCallback(any())
+        assertThat(listener.permanentlyRemovedIds).containsExactly("id1", "id2", "id3")
     }
 
     @Test
     fun multipleViews_mostRecentViewRemoved_viewWithShortTimeLeftNotDisplayed() {
+        val listener = registerListener()
+
         underTest.displayView(ViewInfo("First name", id = "id1", timeoutMs = 4000))
         fakeClock.advanceTime(1000)
         underTest.displayView(ViewInfo("Second name", id = "id2", timeoutMs = 2500))
@@ -467,10 +497,13 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         verify(windowManager, never()).addView(any(), any())
         assertThat(underTest.activeViews.size).isEqualTo(0)
         verify(configurationController).removeCallback(any())
+        assertThat(listener.permanentlyRemovedIds).containsExactly("id1", "id2")
     }
 
     @Test
     fun lowerThenHigherPriority_higherReplacesLower() {
+        val listener = registerListener()
+
         underTest.displayView(
             ViewInfo(
                 name = "normal",
@@ -499,10 +532,15 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         verify(windowManager).addView(capture(viewCaptor), capture(windowParamsCaptor))
         assertThat(windowParamsCaptor.value.title).isEqualTo("Critical Window Title")
         verify(configurationController, never()).removeCallback(any())
+        // Since the controller is still storing the older view in case it'll get re-displayed
+        // later, the listener shouldn't be notified
+        assertThat(listener.permanentlyRemovedIds).isEmpty()
     }
 
     @Test
     fun lowerThenHigherPriority_lowerPriorityRedisplayed() {
+        val listener = registerListener()
+
         underTest.displayView(
             ViewInfo(
                 name = "normal",
@@ -537,6 +575,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
         // THEN the normal view is re-displayed
         verify(windowManager).removeView(viewCaptor.allValues[1])
+        assertThat(listener.permanentlyRemovedIds).containsExactly("critical")
         verify(windowManager).addView(any(), capture(windowParamsCaptor))
         assertThat(windowParamsCaptor.value.title).isEqualTo("Normal Window Title")
         verify(configurationController, never()).removeCallback(any())
@@ -544,6 +583,8 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
     @Test
     fun lowerThenHigherPriority_lowerPriorityNotRedisplayedBecauseTimedOut() {
+        val listener = registerListener()
+
         underTest.displayView(
             ViewInfo(
                 name = "normal",
@@ -573,6 +614,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         verify(windowManager, never()).addView(any(), any())
         assertThat(underTest.activeViews).isEmpty()
         verify(configurationController).removeCallback(any())
+        assertThat(listener.permanentlyRemovedIds).containsExactly("critical", "normal")
     }
 
     @Test
@@ -609,6 +651,8 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
     @Test
     fun higherThenLowerPriority_lowerEventuallyDisplayed() {
+        val listener = registerListener()
+
         underTest.displayView(
             ViewInfo(
                 name = "critical",
@@ -644,6 +688,7 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
         // THEN the second normal view is displayed
         verify(windowManager).removeView(viewCaptor.value)
+        assertThat(listener.permanentlyRemovedIds).containsExactly("critical")
         verify(windowManager).addView(capture(viewCaptor), capture(windowParamsCaptor))
         assertThat(windowParamsCaptor.value.title).isEqualTo("Normal Window Title")
         assertThat(underTest.activeViews.size).isEqualTo(1)
@@ -652,6 +697,8 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
 
     @Test
     fun higherThenLowerPriority_lowerNotDisplayedBecauseTimedOut() {
+        val listener = registerListener()
+
         underTest.displayView(
             ViewInfo(
                 name = "critical",
@@ -691,10 +738,13 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         verify(windowManager, never()).addView(any(), any())
         assertThat(underTest.activeViews).isEmpty()
         verify(configurationController).removeCallback(any())
+        assertThat(listener.permanentlyRemovedIds).containsExactly("critical", "normal")
     }
 
     @Test
     fun criticalThenNewCritical_newCriticalDisplayed() {
+        val listener = registerListener()
+
         underTest.displayView(
             ViewInfo(
                 name = "critical 1",
@@ -724,10 +774,15 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         assertThat(windowParamsCaptor.value.title).isEqualTo("Critical Window Title 2")
         assertThat(underTest.activeViews.size).isEqualTo(2)
         verify(configurationController, never()).removeCallback(any())
+        // Since the controller is still storing the older view in case it'll get re-displayed
+        // later, the listener shouldn't be notified
+        assertThat(listener.permanentlyRemovedIds).isEmpty()
     }
 
     @Test
     fun normalThenNewNormal_newNormalDisplayed() {
+        val listener = registerListener()
+
         underTest.displayView(
             ViewInfo(
                 name = "normal 1",
@@ -757,6 +812,9 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         assertThat(windowParamsCaptor.value.title).isEqualTo("Normal Window Title 2")
         assertThat(underTest.activeViews.size).isEqualTo(2)
         verify(configurationController, never()).removeCallback(any())
+        // Since the controller is still storing the older view in case it'll get re-displayed
+        // later, the listener shouldn't be notified
+        assertThat(listener.permanentlyRemovedIds).isEmpty()
     }
 
     @Test
@@ -957,25 +1015,103 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun removeView_viewRemovedAndRemovalLogged() {
+    fun removeView_viewRemovedAndRemovalLoggedAndListenerNotified() {
+        val listener = registerListener()
+
         // First, add the view
         underTest.displayView(getState())
 
         // Then, remove it
         val reason = "test reason"
-        val deviceId = "id"
-        underTest.removeView(deviceId, reason)
+        underTest.removeView(DEFAULT_ID, reason)
 
         verify(windowManager).removeView(any())
-        verify(logger).logViewRemoval(deviceId, reason)
+        verify(logger).logViewRemoval(DEFAULT_ID, reason)
         verify(configurationController).removeCallback(any())
+        assertThat(listener.permanentlyRemovedIds).containsExactly(DEFAULT_ID)
     }
 
     @Test
-    fun removeView_noAdd_viewNotRemoved() {
+    fun removeView_noAdd_viewNotRemovedAndListenerNotNotified() {
+        val listener = registerListener()
+
         underTest.removeView("id", "reason")
 
         verify(windowManager, never()).removeView(any())
+        assertThat(listener.permanentlyRemovedIds).isEmpty()
+    }
+
+    @Test
+    fun listenerRegistered_notifiedOnRemoval() {
+        val listener = registerListener()
+        underTest.displayView(getState())
+
+        underTest.removeView(DEFAULT_ID, "reason")
+
+        assertThat(listener.permanentlyRemovedIds).containsExactly(DEFAULT_ID)
+    }
+
+    @Test
+    fun listenerRegistered_notifiedOnTimedOutEvenWhenNotDisplayed() {
+        val listener = registerListener()
+        underTest.displayView(
+            ViewInfo(
+                id = "id1",
+                name = "name1",
+                timeoutMs = 3000,
+            ),
+        )
+
+        // Display a second view
+        underTest.displayView(
+            ViewInfo(
+                id = "id2",
+                name = "name2",
+                timeoutMs = 2500,
+            ),
+        )
+
+        // WHEN the second view times out
+        fakeClock.advanceTime(2501)
+
+        // THEN the listener is notified of both IDs, since id2 timed out and id1 doesn't have
+        // enough time left to be redisplayed
+        assertThat(listener.permanentlyRemovedIds).containsExactly("id1", "id2")
+    }
+
+    @Test
+    fun multipleListeners_allNotified() {
+        val listener1 = registerListener()
+        val listener2 = registerListener()
+        val listener3 = registerListener()
+
+        underTest.displayView(getState())
+
+        underTest.removeView(DEFAULT_ID, "reason")
+
+        assertThat(listener1.permanentlyRemovedIds).containsExactly(DEFAULT_ID)
+        assertThat(listener2.permanentlyRemovedIds).containsExactly(DEFAULT_ID)
+        assertThat(listener3.permanentlyRemovedIds).containsExactly(DEFAULT_ID)
+    }
+
+    @Test
+    fun sameListenerRegisteredMultipleTimes_onlyNotifiedOnce() {
+        val listener = registerListener()
+        underTest.registerListener(listener)
+        underTest.registerListener(listener)
+
+        underTest.displayView(getState())
+
+        underTest.removeView(DEFAULT_ID, "reason")
+
+        assertThat(listener.permanentlyRemovedIds).hasSize(1)
+        assertThat(listener.permanentlyRemovedIds).containsExactly(DEFAULT_ID)
+    }
+
+    private fun registerListener(): Listener {
+        return Listener().also {
+            underTest.registerListener(it)
+        }
     }
 
     private fun getState(name: String = "name") = ViewInfo(name)
@@ -1030,9 +1166,17 @@ class TemporaryViewDisplayControllerTest : SysuiTestCase() {
         override val windowTitle: String = "Window Title",
         override val wakeReason: String = "WAKE_REASON",
         override val timeoutMs: Int = TIMEOUT_MS.toInt(),
-        override val id: String = "id",
+        override val id: String = DEFAULT_ID,
         override val priority: ViewPriority = ViewPriority.NORMAL,
     ) : TemporaryViewInfo()
+
+    inner class Listener : TemporaryViewDisplayController.Listener {
+        val permanentlyRemovedIds = mutableListOf<String>()
+        override fun onInfoPermanentlyRemoved(id: String, reason: String) {
+            permanentlyRemovedIds.add(id)
+        }
+    }
 }
 
 private const val TIMEOUT_MS = 10000L
+private const val DEFAULT_ID = "defaultId"

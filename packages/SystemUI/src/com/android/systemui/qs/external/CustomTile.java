@@ -15,7 +15,6 @@
  */
 package com.android.systemui.qs.external;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
 
 import android.app.PendingIntent;
@@ -63,6 +62,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.settings.DisplayTracker;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -90,6 +90,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private final TileServiceManager mServiceManager;
     private final int mUser;
     private final CustomTileStatePersister mCustomTileStatePersister;
+    private final DisplayTracker mDisplayTracker;
     @Nullable
     private android.graphics.drawable.Icon mDefaultIcon;
     @Nullable
@@ -120,7 +121,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             String action,
             Context userContext,
             CustomTileStatePersister customTileStatePersister,
-            TileServices tileServices
+            TileServices tileServices,
+            DisplayTracker displayTracker
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
@@ -135,6 +137,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mServiceManager = tileServices.getTileWrapper(this);
         mService = mServiceManager.getTileService();
         mCustomTileStatePersister = customTileStatePersister;
+        mDisplayTracker = displayTracker;
     }
 
     @Override
@@ -310,7 +313,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mIsShowingDialog = false;
         try {
             if (DEBUG) Log.d(TAG, "Removing token");
-            mWindowManager.removeWindowToken(mToken, DEFAULT_DISPLAY);
+            mWindowManager.removeWindowToken(mToken, mDisplayTracker.getDefaultDisplayId());
         } catch (RemoteException e) {
         }
     }
@@ -325,7 +328,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             if (listening) {
                 updateDefaultTileAndIcon();
                 refreshState();
-                if (!mServiceManager.isActiveTile()) {
+                if (!mServiceManager.isActiveTile() || !isTileReady()) {
                     mServiceManager.setBindRequested(true);
                     mService.onStartListening();
                 }
@@ -335,7 +338,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
                 if (mIsTokenGranted && !mIsShowingDialog) {
                     try {
                         if (DEBUG) Log.d(TAG, "Removing token");
-                        mWindowManager.removeWindowToken(mToken, DEFAULT_DISPLAY);
+                        mWindowManager.removeWindowToken(mToken,
+                                mDisplayTracker.getDefaultDisplayId());
                     } catch (RemoteException e) {
                     }
                     mIsTokenGranted = false;
@@ -354,7 +358,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         if (mIsTokenGranted) {
             try {
                 if (DEBUG) Log.d(TAG, "Removing token");
-                mWindowManager.removeWindowToken(mToken, DEFAULT_DISPLAY);
+                mWindowManager.removeWindowToken(mToken, mDisplayTracker.getDefaultDisplayId());
             } catch (RemoteException e) {
             }
         }
@@ -398,8 +402,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mViewClicked = view;
         try {
             if (DEBUG) Log.d(TAG, "Adding token");
-            mWindowManager.addWindowToken(mToken, TYPE_QS_DIALOG, DEFAULT_DISPLAY,
-                    null /* options */);
+            mWindowManager.addWindowToken(mToken, TYPE_QS_DIALOG,
+                    mDisplayTracker.getDefaultDisplayId(), null /* options */);
             mIsTokenGranted = true;
         } catch (RemoteException e) {
         }
@@ -566,6 +570,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         final QSLogger mQSLogger;
         final CustomTileStatePersister mCustomTileStatePersister;
         private TileServices mTileServices;
+        final DisplayTracker mDisplayTracker;
 
         Context mUserContext;
         String mSpec = "";
@@ -581,7 +586,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
                 ActivityStarter activityStarter,
                 QSLogger qsLogger,
                 CustomTileStatePersister customTileStatePersister,
-                TileServices tileServices
+                TileServices tileServices,
+                DisplayTracker displayTracker
         ) {
             mQSHostLazy = hostLazy;
             mBackgroundLooper = backgroundLooper;
@@ -593,6 +599,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             mQSLogger = qsLogger;
             mCustomTileStatePersister = customTileStatePersister;
             mTileServices = tileServices;
+            mDisplayTracker = displayTracker;
         }
 
         Builder setSpec(@NonNull String spec) {
@@ -623,7 +630,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
                     action,
                     mUserContext,
                     mCustomTileStatePersister,
-                    mTileServices
+                    mTileServices,
+                    mDisplayTracker
             );
         }
     }
