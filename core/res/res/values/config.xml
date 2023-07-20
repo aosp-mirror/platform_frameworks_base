@@ -2624,6 +2624,17 @@
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
     <bool name="config_dismissDreamOnActivityStart">false</bool>
 
+    <!-- Whether to send a user activity event to PowerManager when a dream quits unexpectedly so
+         that the screen won't immediately shut off.
+
+         When a dream stops unexpectedly, such as due to an app update, if the device has been
+         inactive less than the user's screen timeout, the device goes to keyguard and times out
+         back to dreaming after a few seconds. If the device has been inactive longer, the screen
+         will immediately turn off. With this flag on, the device will go back to keyguard in all
+         scenarios rather than turning off, which gives the device a chance to start dreaming
+         again. -->
+    <bool name="config_resetScreenTimeoutOnUnexpectedDreamExit">false</bool>
+
     <!-- The prefixes of dream component names that are loggable.
          Matched against ComponentName#flattenToString() for dream components.
          If empty, logs "other" for all. -->
