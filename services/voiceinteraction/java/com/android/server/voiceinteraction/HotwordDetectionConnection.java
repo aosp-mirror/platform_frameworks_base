@@ -27,6 +27,7 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPH
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__SERVICE_CRASH;
 
+import android.app.AppOpsManager;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.ChangeId;
@@ -548,13 +549,15 @@ final class HotwordDetectionConnection {
     static final class SoundTriggerCallback extends IRecognitionStatusCallback.Stub {
         private final HotwordDetectionConnection mHotwordDetectionConnection;
         private final IHotwordRecognitionStatusCallback mExternalCallback;
-        private final int mVoiceInteractionServiceUid;
+        private final Identity mVoiceInteractorIdentity;
+        private final Context mContext;
 
-        SoundTriggerCallback(IHotwordRecognitionStatusCallback callback,
-                HotwordDetectionConnection connection, int uid) {
+        SoundTriggerCallback(Context context, IHotwordRecognitionStatusCallback callback,
+                HotwordDetectionConnection connection, Identity voiceInteractorIdentity) {
+            mContext = context;
             mHotwordDetectionConnection = connection;
             mExternalCallback = callback;
-            mVoiceInteractionServiceUid = uid;
+            mVoiceInteractorIdentity = voiceInteractorIdentity;
         }
 
         @Override
@@ -568,15 +571,30 @@ final class HotwordDetectionConnection {
                 HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                         HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP,
                         HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER,
-                        mVoiceInteractionServiceUid);
+                        mVoiceInteractorIdentity.uid);
                 mHotwordDetectionConnection.detectFromDspSource(
                         recognitionEvent, mExternalCallback);
             } else {
-                HotwordMetricsLogger.writeKeyphraseTriggerEvent(
-                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__NORMAL_DETECTOR,
-                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER,
-                        mVoiceInteractionServiceUid);
-                mExternalCallback.onKeyphraseDetected(recognitionEvent, null);
+                // We have to attribute ops here, since we configure all st clients as trusted to
+                // enable a partial exemption.
+                // TODO (b/292012931) remove once trusted uniformly required.
+                int result = mContext.getSystemService(AppOpsManager.class)
+                        .noteOpNoThrow(AppOpsManager.OP_RECORD_AUDIO_HOTWORD,
+                            mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
+                            mVoiceInteractorIdentity.attributionTag,
+                            "Non-HDS keyphrase recognition to VoiceInteractionService");
+
+                if (result != AppOpsManager.MODE_ALLOWED) {
+                    Slog.w(TAG, "onKeyphraseDetected suppressed, permission check returned: "
+                            + result);
+                    mExternalCallback.onRecognitionPaused();
+                } else {
+                    HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__DETECTOR_TYPE__NORMAL_DETECTOR,
+                            HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__KEYPHRASE_TRIGGER,
+                            mVoiceInteractorIdentity.uid);
+                    mExternalCallback.onKeyphraseDetected(recognitionEvent, null);
+                }
             }
         }
 
