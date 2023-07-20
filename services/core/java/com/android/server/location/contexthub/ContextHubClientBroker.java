@@ -185,8 +185,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * True if {@link #mWakeLock} is open for acquisition. It is set to false after the client is
      * unregistered.
      */
-    @GuardedBy("mWakeLock")
-    private boolean mIsWakelockUsable = true;
+    private AtomicBoolean mIsWakelockUsable = new AtomicBoolean(true);
 
     /*
      * Internal interface used to invoke client callbacks.
@@ -529,7 +528,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     @VisibleForTesting
     boolean isWakelockUsable() {
         synchronized (mWakeLock) {
-            return mIsWakelockUsable;
+            return mIsWakelockUsable.get();
         }
     }
 
@@ -1103,10 +1102,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private void acquireWakeLock() {
         Binder.withCleanCallingIdentity(
                 () -> {
-                    synchronized (mWakeLock) {
-                        if (mIsWakelockUsable) {
-                            mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
-                        }
+                    if (mIsWakelockUsable.get()) {
+                        mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
                     }
                 });
     }
@@ -1119,13 +1116,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private void releaseWakeLock() {
         Binder.withCleanCallingIdentity(
                 () -> {
-                    synchronized (mWakeLock) {
-                        if (mWakeLock.isHeld()) {
-                            try {
-                                mWakeLock.release();
-                            } catch (RuntimeException e) {
-                                Log.e(TAG, "Releasing the wakelock fails - ", e);
-                            }
+                    if (mWakeLock.isHeld()) {
+                        try {
+                            mWakeLock.release();
+                        } catch (RuntimeException e) {
+                            Log.e(TAG, "Releasing the wakelock fails - ", e);
                         }
                     }
                 });
@@ -1139,18 +1134,16 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private void releaseWakeLockOnExit() {
         Binder.withCleanCallingIdentity(
                 () -> {
-                    synchronized (mWakeLock) {
-                        mIsWakelockUsable = false;
-                        while (mWakeLock.isHeld()) {
-                            try {
-                                mWakeLock.release();
-                            } catch (RuntimeException e) {
-                                Log.e(
-                                        TAG,
-                                        "Releasing the wakelock for all acquisitions fails - ",
-                                        e);
-                                break;
-                            }
+                    mIsWakelockUsable.set(false);
+                    while (mWakeLock.isHeld()) {
+                        try {
+                            mWakeLock.release();
+                        } catch (RuntimeException e) {
+                            Log.e(
+                                    TAG,
+                                    "Releasing the wakelock for all acquisitions fails - ",
+                                    e);
+                            break;
                         }
                     }
                 });
