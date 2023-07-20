@@ -416,12 +416,6 @@ object Flags {
     // TODO(b/254512502): Tracking Bug
     val MEDIA_SESSION_ACTIONS = unreleasedFlag(901, "media_session_actions")
 
-    // TODO(b/254512726): Tracking Bug
-    val MEDIA_NEARBY_DEVICES = releasedFlag(903, "media_nearby_devices")
-
-    // TODO(b/254512695): Tracking Bug
-    val MEDIA_MUTE_AWAIT = releasedFlag(904, "media_mute_await")
-
     // TODO(b/254512654): Tracking Bug
     @JvmField val DREAM_MEDIA_COMPLICATION = unreleasedFlag(905, "dream_media_complication")
 
@@ -436,9 +430,6 @@ object Flags {
 
     // TODO(b/263272731): Tracking Bug
     val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag(910, "media_ttt_receiver_success_ripple")
-
-    // TODO(b/265813373): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE = releasedFlag(912, "media_ttt_dismiss_gesture")
 
     // TODO(b/266157412): Tracking Bug
     val MEDIA_RETAIN_SESSIONS = unreleasedFlag(913, "media_retain_sessions")
