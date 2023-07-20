@@ -2201,7 +2201,8 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             displaySwapping |= s.isDisplaySleepingAndSwapping();
             ProtoLog.v(WM_DEBUG_STATES, "Stopping %s: nowVisible=%b animating=%b "
                     + "finishing=%s", s, s.nowVisible, animating, s.finishing);
-            if ((!animating && !displaySwapping) || mService.mShuttingDown) {
+            if ((!animating && !displaySwapping) || mService.mShuttingDown
+                    || s.getRootTask().isForceHiddenForPinnedTask()) {
                 if (!processPausingActivities && s.isState(PAUSING)) {
                     // Defer processing pausing activities in this iteration and reschedule
                     // a delayed idle to reprocess it again
