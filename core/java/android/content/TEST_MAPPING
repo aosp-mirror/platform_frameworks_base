@@ -41,11 +41,9 @@
         }
       ],
       "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java", "(/|^)ComponentCallbacksController.java"]
-    }
-  ],
-  "presubmit-large": [
+    },
     {
-      "name": "CtsContentTestCases",
+      "name": "CtsWindowManagerTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"

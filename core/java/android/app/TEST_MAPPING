@@ -238,11 +238,9 @@
             "file_patterns": [
                 "(/|^)DeviceFeature[^/]*", "(/|^)Hdmi[^/]*"
             ]
-        }
-    ],
-    "presubmit-large": [
+        },
         {
-            "name": "CtsContentTestCases",
+            "name": "CtsWindowManagerTestCases",
             "options": [
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
