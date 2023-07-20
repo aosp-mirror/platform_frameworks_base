@@ -183,16 +183,10 @@ object MobileIconBinder {
             }
 
             override fun onIconTintChanged(newTint: Int) {
-                if (viewModel.useDebugColoring) {
-                    return
-                }
                 iconTint.value = newTint
             }
 
             override fun onDecorTintChanged(newTint: Int) {
-                if (viewModel.useDebugColoring) {
-                    return
-                }
                 decorTint.value = newTint
             }
 

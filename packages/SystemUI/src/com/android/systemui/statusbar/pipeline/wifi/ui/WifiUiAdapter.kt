@@ -23,7 +23,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarLocation
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel.Companion.viewModelForLocation
@@ -46,7 +45,6 @@ class WifiUiAdapter
 constructor(
     private val iconController: StatusBarIconController,
     private val wifiViewModel: WifiViewModel,
-    private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) {
     /**
      * Binds the container for all the status bar icons to a view model, so that we inflate the wifi
@@ -60,8 +58,7 @@ constructor(
         statusBarIconGroup: ViewGroup,
         location: StatusBarLocation,
     ): LocationBasedWifiViewModel {
-        val locationViewModel =
-            viewModelForLocation(wifiViewModel, statusBarPipelineFlags, location)
+        val locationViewModel = viewModelForLocation(wifiViewModel, location)
 
         statusBarIconGroup.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
