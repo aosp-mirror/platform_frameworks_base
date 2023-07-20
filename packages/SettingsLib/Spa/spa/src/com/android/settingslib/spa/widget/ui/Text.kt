@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,11 +32,6 @@ import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.toMediumWeight
-
-@Composable
-fun SettingsTitle(title: State<String>, useMediumWeight: Boolean = false) {
-    SettingsTitle(title.value, useMediumWeight)
-}
 
 @Composable
 fun SettingsTitle(title: String, useMediumWeight: Boolean = false) {
@@ -51,14 +45,6 @@ fun SettingsTitle(title: String, useMediumWeight: Boolean = false) {
             }
         },
     )
-}
-
-@Composable
-fun SettingsBody(
-    body: State<String>,
-    maxLines: Int = Int.MAX_VALUE,
-) {
-    SettingsBody(body = body.value, maxLines = maxLines)
 }
 
 @Composable
