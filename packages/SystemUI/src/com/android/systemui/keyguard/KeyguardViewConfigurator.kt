@@ -25,19 +25,24 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
+import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.view.layout.KeyguardLayoutManager
 import com.android.systemui.keyguard.ui.view.layout.KeyguardLayoutManagerCommandListener
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
+import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Binds keyguard views on startup, and also exposes methods to allow rebinding if views change */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class KeyguardViewConfigurator
 @Inject
@@ -51,11 +56,14 @@ constructor(
     private val indicationController: KeyguardIndicationController,
     private val keyguardLayoutManager: KeyguardLayoutManager,
     private val keyguardLayoutManagerCommandListener: KeyguardLayoutManagerCommandListener,
+    private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
+    private val chipbarCoordinator: ChipbarCoordinator,
 ) : CoreStartable {
 
     private var indicationAreaHandle: DisposableHandle? = null
 
     override fun start() {
+        bindKeyguardRootView()
         val notificationPanel =
             notificationShadeWindowView.requireViewById(R.id.notification_panel) as ViewGroup
         bindIndicationArea(notificationPanel)
@@ -115,5 +123,14 @@ constructor(
                 keyguardRootView.removeView(it)
             }
         }
+    }
+
+    private fun bindKeyguardRootView() {
+        KeyguardRootViewBinder.bind(
+            keyguardRootView,
+            featureFlags,
+            occludingAppDeviceEntryMessageViewModel,
+            chipbarCoordinator,
+        )
     }
 }
