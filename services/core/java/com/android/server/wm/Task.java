@@ -4504,6 +4504,10 @@ class Task extends TaskFragment {
         return mForceHiddenFlags != 0;
     }
 
+    boolean isForceHiddenForPinnedTask() {
+        return (mForceHiddenFlags & FLAG_FORCE_HIDDEN_FOR_PINNED_TASK) != 0;
+    }
+
     @Override
     protected boolean isForceTranslucent() {
         return mForceTranslucent;
