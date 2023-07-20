@@ -232,6 +232,12 @@ object Flags {
     val LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP =
         unreleasedFlag(232, "lock_screen_long_press_directly_opens_wallpaper_picker")
 
+    /** Whether page transition animations in the wallpaper picker are enabled */
+    // TODO(b/291710220): Tracking bug.
+    @JvmField
+    val WALLPAPER_PICKER_PAGE_TRANSITIONS =
+        unreleasedFlag(291710220, "wallpaper_picker_page_transitions")
+
     /** Whether to run the new udfps keyguard refactor code. */
     // TODO(b/279440316): Tracking bug.
     @JvmField
