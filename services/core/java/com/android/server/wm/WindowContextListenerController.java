@@ -76,7 +76,7 @@ class WindowContextListenerController {
             @NonNull IBinder clientToken, @NonNull WindowContainer<?> container,
             @WindowType int type, @Nullable Bundle options) {
         registerWindowContainerListener(wpc, clientToken, container, type, options,
-                true /* shouDispatchConfigWhenRegistering */);
+                true /* shouldDispatchConfigWhenRegistering */);
     }
 
     /**
@@ -91,19 +91,19 @@ class WindowContextListenerController {
      * @param container the {@link WindowContainer} which the listener is going to listen to.
      * @param type the window type
      * @param options a bundle used to pass window-related options.
-     * @param shouDispatchConfigWhenRegistering {@code true} to indicate the current
+     * @param shouldDispatchConfigWhenRegistering {@code true} to indicate the current
      *                {@code container}'s config will dispatch to the client side when
      *                registering the {@link WindowContextListenerImpl}
      */
     void registerWindowContainerListener(@NonNull WindowProcessController wpc,
             @NonNull IBinder clientToken, @NonNull WindowContainer<?> container,
             @WindowType int type, @Nullable Bundle options,
-            boolean shouDispatchConfigWhenRegistering) {
+            boolean shouldDispatchConfigWhenRegistering) {
         WindowContextListenerImpl listener = mListeners.get(clientToken);
         if (listener == null) {
             listener = new WindowContextListenerImpl(wpc, clientToken, container, type,
                     options);
-            listener.register(shouDispatchConfigWhenRegistering);
+            listener.register(shouldDispatchConfigWhenRegistering);
         } else {
             updateContainerForWindowContextListener(clientToken, container);
         }

@@ -137,12 +137,14 @@ public class WindowContextController {
      * @see WindowProviderService#attachToWindowToken(IBinder))
      * @see IWindowManager#attachWindowContextToWindowToken
      */
-    public void attachToWindowToken(IBinder windowToken) {
+    public void attachToWindowToken(@NonNull IBinder windowToken) {
         if (mAttachedToDisplayArea != AttachStatus.STATUS_ATTACHED) {
             throw new IllegalStateException("The Window Context should have been attached"
                     + " to a DisplayArea. AttachToDisplayArea:" + mAttachedToDisplayArea);
         }
-        getWindowTokenClientController().attachToWindowToken(mToken, windowToken);
+        if (!getWindowTokenClientController().attachToWindowToken(mToken, windowToken)) {
+            Log.e(TAG, "attachToWindowToken fail");
+        }
     }
 
     /** Detaches the window context from the node it's currently associated with. */

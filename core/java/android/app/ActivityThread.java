@@ -203,6 +203,7 @@ import android.webkit.WebView;
 import android.window.SizeConfigurationBuckets;
 import android.window.SplashScreen;
 import android.window.SplashScreenView;
+import android.window.WindowContextInfo;
 import android.window.WindowProviderService;
 import android.window.WindowTokenClientController;
 
@@ -6248,10 +6249,9 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    public void handleWindowContextConfigurationChanged(@NonNull IBinder clientToken,
-            @NonNull Configuration configuration, int displayId) {
-        WindowTokenClientController.getInstance().onWindowContextConfigurationChanged(clientToken,
-                configuration, displayId);
+    public void handleWindowContextInfoChanged(@NonNull IBinder clientToken,
+            @NonNull WindowContextInfo info) {
+        WindowTokenClientController.getInstance().onWindowContextInfoChanged(clientToken, info);
     }
 
     @Override

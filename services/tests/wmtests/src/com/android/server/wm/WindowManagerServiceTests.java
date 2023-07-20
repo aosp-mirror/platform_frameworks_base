@@ -468,7 +468,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.attachWindowContextToWindowToken(mAppThread, new Binder(), windowToken.token);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(
-                any(), any(), any(), anyInt(), any());
+                any(), any(), any(), anyInt(), any(), anyBoolean());
     }
 
     @Test
@@ -484,9 +484,9 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final IBinder clientToken = new Binder();
         mWm.attachWindowContextToWindowToken(mAppThread, clientToken, windowToken.token);
         final WindowProcessController wpc = mAtm.getProcessController(mAppThread);
-        verify(mWm.mWindowContextListenerController).registerWindowContainerListener(eq(wpc),
-                eq(clientToken), eq(windowToken), eq(TYPE_INPUT_METHOD),
-                eq(windowToken.mOptions));
+        verify(mWm.mWindowContextListenerController).registerWindowContainerListener(wpc,
+                clientToken, windowToken, TYPE_INPUT_METHOD, windowToken.mOptions,
+                false /* shouldDispatchConfigWhenRegistering */);
     }
 
     @Test
@@ -514,7 +514,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
                 new InsetsSourceControl.Array(), new Rect(), new float[1]);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
-                any(), any(), anyInt(), any());
+                any(), any(), anyInt(), any(), anyBoolean());
     }
 
     @Test

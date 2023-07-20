@@ -305,6 +305,7 @@ import android.window.ITaskFpsCallback;
 import android.window.ScreenCapture;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
+import android.window.WindowContextInfo;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -2737,7 +2738,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Nullable
     @Override
-    public Configuration attachWindowContextToDisplayArea(@NonNull IApplicationThread appThread,
+    public WindowContextInfo attachWindowContextToDisplayArea(@NonNull IApplicationThread appThread,
             @NonNull IBinder clientToken, @LayoutParams.WindowType int type, int displayId,
             @Nullable Bundle options) {
         Objects.requireNonNull(appThread);
@@ -2766,8 +2767,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayArea<?> da = dc.findAreaForWindowType(type, options,
                         callerCanManageAppTokens, false /* roundedCornerOverlay */);
                 mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
-                        da, type, options, false /* shouDispatchConfigWhenRegistering */);
-                return da.getConfiguration();
+                        da, type, options, false /* shouldDispatchConfigWhenRegistering */);
+                return new WindowContextInfo(da.getConfiguration(), displayId);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -2776,8 +2777,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Nullable
     @Override
-    public Configuration attachWindowContextToDisplayContent(@NonNull IApplicationThread appThread,
-            @NonNull IBinder clientToken, int displayId) {
+    public WindowContextInfo attachWindowContextToDisplayContent(
+            @NonNull IApplicationThread appThread, @NonNull IBinder clientToken, int displayId) {
         Objects.requireNonNull(appThread);
         Objects.requireNonNull(clientToken);
         final int callingPid = Binder.getCallingPid();
@@ -2809,16 +2810,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
                         dc, INVALID_WINDOW_TYPE, null /* options */,
-                        false /* shouDispatchConfigWhenRegistering */);
-                return dc.getConfiguration();
+                        false /* shouldDispatchConfigWhenRegistering */);
+                return new WindowContextInfo(dc.getConfiguration(), displayId);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
     }
 
+    @Nullable
     @Override
-    public void attachWindowContextToWindowToken(@NonNull IApplicationThread appThread,
+    public WindowContextInfo attachWindowContextToWindowToken(@NonNull IApplicationThread appThread,
             @NonNull IBinder clientToken, @NonNull IBinder token) {
         Objects.requireNonNull(appThread);
         Objects.requireNonNull(clientToken);
@@ -2834,13 +2836,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (wpc == null) {
                     ProtoLog.w(WM_ERROR, "attachWindowContextToWindowToken: calling from"
                             + " non-existing process pid=%d uid=%d", callingPid, callingUid);
-                    return;
+                    return null;
                 }
                 final WindowToken windowToken = mRoot.getWindowToken(token);
                 if (windowToken == null) {
                     ProtoLog.w(WM_ERROR, "Then token:%s is invalid. It might be "
                             + "removed", token);
-                    return;
+                    return null;
                 }
                 final int type = mWindowContextListenerController.getWindowType(clientToken);
                 if (type == INVALID_WINDOW_TYPE) {
@@ -2854,10 +2856,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (!mWindowContextListenerController.assertCallerCanModifyListener(clientToken,
                         callerCanManageAppTokens, callingUid)) {
-                    return;
+                    return null;
                 }
                 mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
-                        windowToken, windowToken.windowType, windowToken.mOptions);
+                        windowToken, windowToken.windowType, windowToken.mOptions,
+                                               false /* shouldDispatchConfigWhenRegistering */);
+                return new WindowContextInfo(windowToken.getConfiguration(),
+                        windowToken.getDisplayContent().getDisplayId());
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

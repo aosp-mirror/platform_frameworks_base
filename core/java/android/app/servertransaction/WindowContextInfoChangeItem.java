@@ -16,8 +16,6 @@
 
 package android.app.servertransaction;
 
-import static android.view.Display.INVALID_DISPLAY;
-
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
@@ -26,6 +24,7 @@ import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.window.WindowContextInfo;
 
 import java.util.Objects;
 
@@ -33,35 +32,33 @@ import java.util.Objects;
  * {@link android.window.WindowContext} configuration change message.
  * @hide
  */
-public class WindowContextConfigurationChangeItem extends ClientTransactionItem {
+public class WindowContextInfoChangeItem extends ClientTransactionItem {
 
     @Nullable
     private IBinder mClientToken;
     @Nullable
-    private Configuration mConfiguration;
-    private int mDisplayId;
+    private WindowContextInfo mInfo;
 
     @Override
     public void execute(@NonNull ClientTransactionHandler client, @NonNull IBinder token,
             @NonNull PendingTransactionActions pendingActions) {
-        client.handleWindowContextConfigurationChanged(mClientToken, mConfiguration, mDisplayId);
+        client.handleWindowContextInfoChanged(mClientToken, mInfo);
     }
 
     // ObjectPoolItem implementation
 
-    private WindowContextConfigurationChangeItem() {}
+    private WindowContextInfoChangeItem() {}
 
     /** Obtains an instance initialized with provided params. */
-    public static WindowContextConfigurationChangeItem obtain(
+    public static WindowContextInfoChangeItem obtain(
             @NonNull IBinder clientToken, @NonNull Configuration config, int displayId) {
-        WindowContextConfigurationChangeItem instance =
-                ObjectPool.obtain(WindowContextConfigurationChangeItem.class);
+        WindowContextInfoChangeItem instance =
+                ObjectPool.obtain(WindowContextInfoChangeItem.class);
         if (instance == null) {
-            instance = new WindowContextConfigurationChangeItem();
+            instance = new WindowContextInfoChangeItem();
         }
         instance.mClientToken = requireNonNull(clientToken);
-        instance.mConfiguration = requireNonNull(config);
-        instance.mDisplayId = displayId;
+        instance.mInfo = new WindowContextInfo(config, displayId);
 
         return instance;
     }
@@ -69,8 +66,7 @@ public class WindowContextConfigurationChangeItem extends ClientTransactionItem 
     @Override
     public void recycle() {
         mClientToken = null;
-        mConfiguration = null;
-        mDisplayId = INVALID_DISPLAY;
+        mInfo = null;
         ObjectPool.recycle(this);
     }
 
@@ -80,25 +76,23 @@ public class WindowContextConfigurationChangeItem extends ClientTransactionItem 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStrongBinder(mClientToken);
-        dest.writeTypedObject(mConfiguration, flags);
-        dest.writeInt(mDisplayId);
+        dest.writeTypedObject(mInfo, flags);
     }
 
     /** Reads from Parcel. */
-    private WindowContextConfigurationChangeItem(@NonNull Parcel in) {
+    private WindowContextInfoChangeItem(@NonNull Parcel in) {
         mClientToken = in.readStrongBinder();
-        mConfiguration = in.readTypedObject(Configuration.CREATOR);
-        mDisplayId = in.readInt();
+        mInfo = in.readTypedObject(WindowContextInfo.CREATOR);
     }
 
-    public static final @NonNull Creator<WindowContextConfigurationChangeItem> CREATOR =
+    public static final @NonNull Creator<WindowContextInfoChangeItem> CREATOR =
             new Creator<>() {
-                public WindowContextConfigurationChangeItem createFromParcel(Parcel in) {
-                    return new WindowContextConfigurationChangeItem(in);
+                public WindowContextInfoChangeItem createFromParcel(Parcel in) {
+                    return new WindowContextInfoChangeItem(in);
                 }
 
-                public WindowContextConfigurationChangeItem[] newArray(int size) {
-                    return new WindowContextConfigurationChangeItem[size];
+                public WindowContextInfoChangeItem[] newArray(int size) {
+                    return new WindowContextInfoChangeItem[size];
                 }
     };
 
@@ -110,26 +104,23 @@ public class WindowContextConfigurationChangeItem extends ClientTransactionItem 
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final WindowContextConfigurationChangeItem other = (WindowContextConfigurationChangeItem) o;
+        final WindowContextInfoChangeItem other = (WindowContextInfoChangeItem) o;
         return Objects.equals(mClientToken, other.mClientToken)
-                && Objects.equals(mConfiguration, other.mConfiguration)
-                && mDisplayId == other.mDisplayId;
+                && Objects.equals(mInfo, other.mInfo);
     }
 
     @Override
     public int hashCode() {
         int result = 17;
         result = 31 * result + Objects.hashCode(mClientToken);
-        result = 31 * result + Objects.hashCode(mConfiguration);
-        result = 31 * result + mDisplayId;
+        result = 31 * result + Objects.hashCode(mInfo);
         return result;
     }
 
     @Override
     public String toString() {
-        return "WindowContextConfigurationChangeItem{clientToken=" + mClientToken
-                + ", config=" + mConfiguration
-                + ", displayId=" + mDisplayId
+        return "WindowContextInfoChangeItem{clientToken=" + mClientToken
+                + ", info=" + mInfo
                 + "}";
     }
 }

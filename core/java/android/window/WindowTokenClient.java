@@ -99,6 +99,13 @@ public class WindowTokenClient extends IWindowToken.Stub {
     @Override
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
         // TODO(b/290876897): No need to post on mHandler after migrating to ClientTransaction
+        postOnConfigurationChanged(newConfig, newDisplayId);
+    }
+
+    /**
+     * Posts an {@link #onConfigurationChanged} to the main thread.
+     */
+    public void postOnConfigurationChanged(@NonNull Configuration newConfig, int newDisplayId) {
         mHandler.post(PooledLambda.obtainRunnable(this::onConfigurationChanged, newConfig,
                 newDisplayId, true /* shouldReportConfigChange */).recycleOnUse());
     }
@@ -161,7 +168,6 @@ public class WindowTokenClient extends IWindowToken.Stub {
                 final WindowContext windowContext = (WindowContext) context;
                 windowContext.dispatchConfigurationChanged(newConfig);
             }
-
 
             if (shouldReportConfigChange && diff != 0
                     && context instanceof WindowProviderService) {

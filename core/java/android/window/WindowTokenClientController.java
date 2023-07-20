@@ -22,10 +22,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
-import android.app.servertransaction.WindowContextConfigurationChangeItem;
+import android.app.servertransaction.WindowContextInfoChangeItem;
 import android.app.servertransaction.WindowContextWindowRemovalItem;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -94,17 +93,17 @@ public class WindowTokenClientController {
      */
     public boolean attachToDisplayArea(@NonNull WindowTokenClient client,
             @WindowType int type, int displayId, @Nullable Bundle options) {
-        final Configuration configuration;
+        final WindowContextInfo info;
         try {
-            configuration = getWindowManagerService().attachWindowContextToDisplayArea(
+            info = getWindowManagerService().attachWindowContextToDisplayArea(
                     mAppThread, client, type, displayId, options);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        if (configuration == null) {
+        if (info == null) {
             return false;
         }
-        onWindowContextTokenAttached(client, displayId, configuration);
+        onWindowContextTokenAttached(client, info, false /* shouldReportConfigChange */);
         return true;
     }
 
@@ -121,16 +120,16 @@ public class WindowTokenClientController {
         if (wms == null) {
             return false;
         }
-        final Configuration configuration;
+        final WindowContextInfo info;
         try {
-            configuration = wms.attachWindowContextToDisplayContent(mAppThread, client, displayId);
+            info = wms.attachWindowContextToDisplayContent(mAppThread, client, displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        if (configuration == null) {
+        if (info == null) {
             return false;
         }
-        onWindowContextTokenAttached(client, displayId, configuration);
+        onWindowContextTokenAttached(client, info, false /* shouldReportConfigChange */);
         return true;
     }
 
@@ -139,19 +138,23 @@ public class WindowTokenClientController {
      *
      * @param client The {@link WindowTokenClient} to attach.
      * @param windowToken the window token to associated with
+     * @return {@code true} if attaching successfully.
      */
-    public void attachToWindowToken(@NonNull WindowTokenClient client,
+    public boolean attachToWindowToken(@NonNull WindowTokenClient client,
             @NonNull IBinder windowToken) {
+        final WindowContextInfo info;
         try {
-            getWindowManagerService().attachWindowContextToWindowToken(
+            info = getWindowManagerService().attachWindowContextToWindowToken(
                     mAppThread, client, windowToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        // We don't report configuration change for now.
-        synchronized (mLock) {
-            mWindowTokenClientMap.put(client.asBinder(), client);
+        if (info == null) {
+            return false;
         }
+        // We currently report configuration for WindowToken after attached.
+        onWindowContextTokenAttached(client, info, true /* shouldReportConfigChange */);
+        return true;
     }
 
     /** Detaches a {@link WindowTokenClient} from associated WindowContainer if there's one. */
@@ -168,21 +171,30 @@ public class WindowTokenClientController {
         }
     }
 
-    private void onWindowContextTokenAttached(@NonNull WindowTokenClient client, int displayId,
-            @NonNull Configuration configuration) {
+    private void onWindowContextTokenAttached(@NonNull WindowTokenClient client,
+            @NonNull WindowContextInfo info, boolean shouldReportConfigChange) {
         synchronized (mLock) {
             mWindowTokenClientMap.put(client.asBinder(), client);
         }
-        client.onConfigurationChanged(configuration, displayId,
-                false /* shouldReportConfigChange */);
+        if (shouldReportConfigChange) {
+            // Should trigger an #onConfigurationChanged callback to the WindowContext. Post the
+            // dispatch in the next loop to prevent the callback from being dispatched before
+            // #onCreate or WindowContext creation..
+            client.postOnConfigurationChanged(info.getConfiguration(), info.getDisplayId());
+        } else {
+            // Apply the config change directly in case users get stale values after WindowContext
+            // creation.
+            client.onConfigurationChanged(info.getConfiguration(), info.getDisplayId(),
+                    false /* shouldReportConfigChange */);
+        }
     }
 
-    /** Called when receives {@link WindowContextConfigurationChangeItem}. */
-    public void onWindowContextConfigurationChanged(@NonNull IBinder clientToken,
-            @NonNull Configuration configuration, int displayId) {
+    /** Called when receives {@link WindowContextInfoChangeItem}. */
+    public void onWindowContextInfoChanged(@NonNull IBinder clientToken,
+            @NonNull WindowContextInfo info) {
         final WindowTokenClient windowTokenClient = getWindowTokenClient(clientToken);
         if (windowTokenClient != null) {
-            windowTokenClient.onConfigurationChanged(configuration, displayId);
+            windowTokenClient.onConfigurationChanged(info.getConfiguration(), info.getDisplayId());
         }
     }
 

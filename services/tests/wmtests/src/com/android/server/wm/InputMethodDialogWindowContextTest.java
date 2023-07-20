@@ -47,6 +47,7 @@ import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.window.WindowContextInfo;
 import android.window.WindowTokenClient;
 
 import com.android.server.inputmethod.InputMethodDialogWindowContext;
@@ -99,7 +100,7 @@ public class InputMethodDialogWindowContextTest extends WindowTestsBase {
             final WindowProcessController wpc = mAtm.getProcessController(appThread);
             mWm.mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
                     dc.getImeContainer(), TYPE_INPUT_METHOD_DIALOG, null /* options */);
-            return dc.getImeContainer().getConfiguration();
+            return new WindowContextInfo(dc.getImeContainer().getConfiguration(), displayId);
         }).when(mIWindowManager).attachWindowContextToDisplayArea(any(), any(),
                 eq(TYPE_INPUT_METHOD_DIALOG), anyInt(), any());
         mDisplayManagerGlobal = DisplayManagerGlobal.getInstance();
