@@ -832,19 +832,12 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    public void getActiveMediaSession_returnActiveSession() {
-        RoutingSessionInfo sysSessionInfo = mock(RoutingSessionInfo.class);
+    public void getRemoteSessions_returnsRemoteSessions() {
         final List<RoutingSessionInfo> infos = new ArrayList<>();
         infos.add(mock(RoutingSessionInfo.class));
-        final List<RoutingSessionInfo> activeSessionInfos = new ArrayList<>();
-        activeSessionInfos.add(sysSessionInfo);
-        activeSessionInfos.addAll(infos);
-
-        mShadowRouter2Manager.setSystemRoutingSession(sysSessionInfo);
         mShadowRouter2Manager.setRemoteSessions(infos);
 
-        assertThat(mInfoMediaManager.getActiveRoutingSessions())
-                .containsExactlyElementsIn(activeSessionInfos);
+        assertThat(mInfoMediaManager.getRemoteSessions()).containsExactlyElementsIn(infos);
     }
 
     @Test

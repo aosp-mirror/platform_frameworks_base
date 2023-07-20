@@ -388,14 +388,12 @@ public class LocalMediaManager implements BluetoothCallback {
      * @param volume the value of volume
      */
     public void adjustSessionVolume(String sessionId, int volume) {
-        final List<RoutingSessionInfo> infos = getActiveMediaSession();
-        for (RoutingSessionInfo info : infos) {
-            if (TextUtils.equals(sessionId, info.getId())) {
-                mInfoMediaManager.adjustSessionVolume(info, volume);
-                return;
-            }
+        RoutingSessionInfo session = mInfoMediaManager.getRoutingSessionById(sessionId);
+        if (session != null) {
+            mInfoMediaManager.adjustSessionVolume(session, volume);
+        } else {
+            Log.w(TAG, "adjustSessionVolume: Unable to find session: " + sessionId);
         }
-        Log.w(TAG, "adjustSessionVolume: Unable to find session: " + sessionId);
     }
 
     /**
@@ -435,12 +433,12 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
-     * Gets the current active session.
+     * Gets the list of remote {@link RoutingSessionInfo routing sessions} known to the system.
      *
-     * @return current active session list{@link android.media.RoutingSessionInfo}
+     * <p>This list does not include any system routing sessions.
      */
-    public List<RoutingSessionInfo> getActiveMediaSession() {
-        return mInfoMediaManager.getActiveRoutingSessions();
+    public List<RoutingSessionInfo> getRemoteRoutingSessions() {
+        return mInfoMediaManager.getRemoteSessions();
     }
 
     /**

@@ -826,13 +826,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     List<RoutingSessionInfo> getActiveRemoteMediaDevices() {
-        final List<RoutingSessionInfo> sessionInfos = new ArrayList<>();
-        for (RoutingSessionInfo info : mLocalMediaManager.getActiveMediaSession()) {
-            if (!info.isSystemSession()) {
-                sessionInfos.add(info);
-            }
-        }
-        return sessionInfos;
+        return new ArrayList<>(mLocalMediaManager.getRemoteRoutingSessions());
     }
 
     void adjustVolume(MediaDevice device, int volume) {

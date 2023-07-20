@@ -154,14 +154,16 @@ public abstract class InfoMediaManager extends MediaManager {
     protected abstract RouteListingPreference getRouteListingPreference();
 
     /**
-     * Returns the list of currently active {@link RoutingSessionInfo routing sessions} known to the
-     * system.
+     * Returns the list of remote {@link RoutingSessionInfo routing sessions} known to the system.
      */
     @NonNull
-    protected abstract List<RoutingSessionInfo> getActiveRoutingSessions();
+    protected abstract List<RoutingSessionInfo> getRemoteSessions();
 
     @NonNull
     protected abstract List<RoutingSessionInfo> getRoutingSessionsForPackage();
+
+    @Nullable
+    protected abstract RoutingSessionInfo getRoutingSessionById(@NonNull String sessionId);
 
     @NonNull
     protected abstract List<MediaRoute2Info> getAllRoutes();
