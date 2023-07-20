@@ -617,6 +617,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Upotreba biometrijske autentifikacije ili zaključavanja zaslona"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Potvrdite da ste to vi"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Upotrijebite svoju biometrijsku autentifikaciju da biste nastavili"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Za nastavak upotrijebite otisak prsta"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Za nastavak se identificirajte licem"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Za nastavak se identificirajte biometrijski ili vjerodajnicom zaključavanja zaslona"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrijski hardver nije dostupan"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentifikacija otkazana"</string>
