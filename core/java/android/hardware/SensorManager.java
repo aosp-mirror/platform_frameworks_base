@@ -872,9 +872,9 @@ public abstract class SensorManager {
 
     /**
      * Flushes the FIFO of all the sensors registered for this listener. If there are events
-     * in the FIFO of the sensor, they are returned as if the maxReportLatency of the FIFO has
+     * in the FIFO of the sensor, they are returned as if the maxReportLantecy of the FIFO has
      * expired. Events are returned in the usual way through the SensorEventListener.
-     * This call doesn't affect the maxReportLatency for this sensor. This call is asynchronous and
+     * This call doesn't affect the maxReportLantecy for this sensor. This call is asynchronous and
      * returns immediately.
      * {@link android.hardware.SensorEventListener2#onFlushCompleted onFlushCompleted} is called
      * after all the events in the batch at the time of calling this method have been delivered
@@ -902,7 +902,7 @@ public abstract class SensorManager {
      * Create a sensor direct channel backed by shared memory wrapped in MemoryFile object.
      *
      * The resulting channel can be used for delivering sensor events to native code, other
-     * processes, GPU/DSP or other co-processors without CPU intervention. This is the recommended
+     * processes, GPU/DSP or other co-processors without CPU intervention. This is the recommanded
      * for high performance sensor applications that use high sensor rates (e.g. greater than 200Hz)
      * and cares about sensor event latency.
      *
@@ -924,7 +924,7 @@ public abstract class SensorManager {
      * Create a sensor direct channel backed by shared memory wrapped in HardwareBuffer object.
      *
      * The resulting channel can be used for delivering sensor events to native code, other
-     * processes, GPU/DSP or other co-processors without CPU intervention. This is the recommended
+     * processes, GPU/DSP or other co-processors without CPU intervention. This is the recommanded
      * for high performance sensor applications that use high sensor rates (e.g. greater than 200Hz)
      * and cares about sensor event latency.
      *
@@ -1334,11 +1334,11 @@ public abstract class SensorManager {
      *        returned by {@link #getRotationMatrix}.
      *
      * @param X
-     *        defines the axis of the new coordinate system that coincide with the X axis of the
+     *        defines the axis of the new cooridinate system that coincide with the X axis of the
      *        original coordinate system.
      *
      * @param Y
-     *        defines the axis of the new coordinate system that coincide with the Y axis of the
+     *        defines the axis of the new cooridinate system that coincide with the Y axis of the
      *        original coordinate system.
      *
      * @param outR
@@ -1826,7 +1826,7 @@ public abstract class SensorManager {
      * This method is used to inject raw sensor data into the HAL.  Call {@link
      * initDataInjection(boolean)} before this method to set the HAL in data injection mode. This
      * method should be called only if a previous call to initDataInjection has been successful and
-     * the HAL and SensorService are already operating in data injection mode.
+     * the HAL and SensorService are already opreating in data injection mode.
      *
      * @param sensor The sensor to inject.
      * @param values Sensor values to inject. The length of this

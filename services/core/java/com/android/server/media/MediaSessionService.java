@@ -41,6 +41,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
@@ -81,7 +82,10 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
+import android.view.Surface;
+import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -107,7 +111,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private static final String TAG = "MediaSessionService";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     // Leave log for key event always.
-    static final boolean DEBUG_KEY_EVENT = true;
+    static final boolean DEBUG_KEY_EVENT = false;
 
     private static final int WAKELOCK_TIMEOUT = 5000;
     private static final int MEDIA_KEY_LISTENER_TIMEOUT = 1000;
@@ -1863,6 +1867,21 @@ public class MediaSessionService extends SystemService implements Monitor {
                     break;
             }
             if (down || up) {
+                final WindowManager windowService = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+                if (windowService != null) {
+                    final int rotation = windowService.getDefaultDisplay().getRotation();
+                    final Configuration config = getContext().getResources().getConfiguration();
+                    final boolean swapKeys = Settings.System.getIntForUser(getContext().getContentResolver(),
+                            Settings.System.SWAP_VOLUME_BUTTONS, 0, UserHandle.USER_CURRENT) == 1;
+
+                    if (swapKeys
+                            && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_180)
+                            && config.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
+                        direction = keyEvent.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP
+                                ? AudioManager.ADJUST_LOWER
+                                : AudioManager.ADJUST_RAISE;
+                    }
+                }
                 int flags = AudioManager.FLAG_FROM_KEY;
                 if (!musicOnly) {
                     // These flags are consistent with the home screen

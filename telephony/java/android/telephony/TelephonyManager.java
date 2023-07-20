@@ -311,31 +311,6 @@ public class TelephonyManager {
     public static final int SRVCC_STATE_HANDOVER_CANCELED  = 3;
 
     /**
-     * Convert srvcc handover state to string.
-     *
-     * @param state The srvcc handover state.
-     * @return The srvcc handover state in string format.
-     *
-     * @hide
-     */
-    public static @NonNull String srvccStateToString(int state) {
-        switch (state) {
-            case TelephonyManager.SRVCC_STATE_HANDOVER_NONE:
-                return "NONE";
-            case TelephonyManager.SRVCC_STATE_HANDOVER_STARTED:
-                return "STARTED";
-            case TelephonyManager.SRVCC_STATE_HANDOVER_COMPLETED:
-                return "COMPLETED";
-            case TelephonyManager.SRVCC_STATE_HANDOVER_FAILED:
-                return "FAILED";
-            case TelephonyManager.SRVCC_STATE_HANDOVER_CANCELED:
-                return "CANCELED";
-            default:
-                return "UNKNOWN(" + state + ")";
-        }
-    }
-
-    /**
      * A UICC card identifier used if the device does not support the operation.
      * For example, {@link #getCardIdForDefaultEuicc()} returns this value if the device has no
      * eUICC, or the eUICC cannot be read.
@@ -2400,6 +2375,47 @@ public class TelephonyManager {
         return getNaiBySubscriberId(getSubId());
     }
 
+    /**
+     * Returns the NAI. Return null if NAI is not available.
+     *
+     * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
+     * restrictions, and apps are recommended to use resettable identifiers (see <a
+     * href="/training/articles/user-data-ids">Best practices for unique identifiers</a>). This
+     * method can be invoked if one of the following requirements is met:
+     * <ul>
+     *     <li>If the calling app has been granted the READ_PRIVILEGED_PHONE_STATE permission; this
+     *     is a privileged permission that can only be granted to apps preloaded on the device.
+     *     <li>If the calling app is the device owner of a fully-managed device, a profile
+     *     owner of an organization-owned device, or their delegates (see {@link
+     *     android.app.admin.DevicePolicyManager#getEnrollmentSpecificId()}).
+     *     <li>If the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     <li>If the calling app is the default SMS role holder (see {@link
+     *     RoleManager#isRoleHeld(String)}).
+     * </ul>
+     *
+     * <p>If the calling app does not meet one of these requirements then this method will behave
+     * as follows:
+     *
+     * <ul>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
+     *     READ_PHONE_STATE permission then null is returned.</li>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
+     *     the READ_PHONE_STATE permission, or if the calling app is targeting API level 29 or
+     *     higher, then a SecurityException is thrown.</li>
+     * </ul>
+     *
+     *  @param slotIndex of which Nai is returned
+     */
+    /** {@hide}*/
+    @UnsupportedAppUsage
+    public String getNai(int slotIndex) {
+        int[] subId = SubscriptionManager.getSubId(slotIndex);
+        if (subId == null) {
+            return null;
+        }
+        return getNaiBySubscriberId(subId[0]);
+    }
+
     private String getNaiBySubscriberId(int subId) {
         try {
             IPhoneSubInfo info = getSubscriberInfoService();
@@ -3529,7 +3545,7 @@ public class TelephonyManager {
                     "state as absent");
             return SIM_STATE_ABSENT;
         }
-        return getSimStateForSlotIndex(slotIndex);
+        return SubscriptionManager.getSimStateForSlotIndex(slotIndex);
     }
 
     /**
@@ -3676,7 +3692,9 @@ public class TelephonyManager {
     @Deprecated
     public @SimState int getSimApplicationState(int physicalSlotIndex) {
         int activePort = getFirstActivePortIndex(physicalSlotIndex);
-        int simState = getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex, activePort));
+        int simState =
+                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
+                        activePort));
         return getSimApplicationStateFromSimState(simState);
     }
 
@@ -3702,7 +3720,9 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public @SimState int getSimApplicationState(int physicalSlotIndex, int portIndex) {
-        int simState = getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex, portIndex));
+        int simState =
+                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
+                        portIndex));
         return getSimApplicationStateFromSimState(simState);
     }
 
@@ -3771,7 +3791,7 @@ public class TelephonyManager {
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public @SimState int getSimState(int slotIndex) {
-        int simState = getSimStateForSlotIndex(slotIndex);
+        int simState = SubscriptionManager.getSimStateForSlotIndex(slotIndex);
         if (simState == SIM_STATE_LOADED) {
             simState = SIM_STATE_READY;
         }
@@ -6110,6 +6130,46 @@ public class TelephonyManager {
         }
     }
 
+    /**
+    * @hide
+    */
+    @UnsupportedAppUsage
+    private IPhoneSubInfo getSubscriberInfo() {
+        return getSubscriberInfoService();
+    }
+
+    /**
+     * Returns the Telephony call state for calls on a specific SIM slot.
+     * <p>
+     * Note: This method considers ONLY telephony/mobile calls, where {@link #getCallState()}
+     * considers the state of calls from other {@link android.telecom.ConnectionService}
+     * implementations.
+     * <p>
+     * Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} for applications
+     * targeting API level 31+ or that the calling application has carrier privileges
+     * (see {@link #hasCarrierPrivileges()}).
+     *
+     * @param slotIndex the SIM slot index to check call state for.
+     * @hide
+     */
+    @RequiresPermission(value = android.Manifest.permission.READ_PHONE_STATE, conditional = true)
+    public @CallState int getCallStateForSlot(int slotIndex) {
+        try {
+            int[] subId = SubscriptionManager.getSubId(slotIndex);
+            ITelephony telephony = getITelephony();
+            if (telephony == null || subId == null || subId.length  == 0) {
+                return CALL_STATE_IDLE;
+            }
+            return telephony.getCallStateForSubscription(subId[0], mContext.getPackageName(),
+                    mContext.getAttributionTag());
+        } catch (RemoteException | NullPointerException ex) {
+            // the phone process is restarting.
+            return CALL_STATE_IDLE;
+        }
+    }
+
+
     /** Data connection activity: No traffic. */
     public static final int DATA_ACTIVITY_NONE = 0x00000000;
     /** Data connection activity: Currently receiving IP PPP traffic. */
@@ -6581,7 +6641,7 @@ public class TelephonyManager {
          * list will be provided. If an error occurs, null will be provided unless the onError
          * callback is overridden.
          *
-         * @param cellInfo a list of {@link CellInfo} or an empty list.
+         * @param cellInfo a list of {@link CellInfo}, an empty list, or null.
          *
          * {@see android.telephony.TelephonyManager#getAllCellInfo getAllCellInfo()}
          */
@@ -8910,7 +8970,7 @@ public class TelephonyManager {
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
      *        they are received by the platform, the user should provide an executor which executes
-     *        tasks one at a time in serial order.
+     *        tasks one at a time in serial order. For example AsyncTask.SERIAL_EXECUTOR.
      * @param callback Returns network scan results or errors.
      * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
      */
@@ -8935,8 +8995,7 @@ public class TelephonyManager {
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges})
-     * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION} if includeLocationData is
-     * set to {@link #INCLUDE_LOCATION_DATA_FINE}.
+     * and {@link android.Manifest.permission#ACCESS_FINE_LOCATION}.
      *
      * If the system-wide location switch is off, apps may still call this API, with the
      * following constraints:
@@ -8950,21 +9009,19 @@ public class TelephonyManager {
      * </ol>
      *
      * @param includeLocationData Specifies if the caller would like to receive
-     * location related information. If this parameter is set to
-     * {@link #INCLUDE_LOCATION_DATA_FINE} then the application will be checked for
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission and available
-     * location related information received during network scan will be sent to the caller.
+     * location related information.
      * @param request Contains all the RAT with bands/channels that need to be scanned.
      * @param executor The executor through which the callback should be invoked. Since the scan
      *        request may trigger multiple callbacks and they must be invoked in the same order as
      *        they are received by the platform, the user should provide an executor which executes
-     *        tasks one at a time in serial order.
+     *        tasks one at a time in serial order. For example AsyncTask.SERIAL_EXECUTOR.
      * @param callback Returns network scan results or errors.
      * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(allOf = {
-            android.Manifest.permission.MODIFY_PHONE_STATE
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION
     })
     public @Nullable NetworkScan requestNetworkScan(
             @IncludeLocationData int includeLocationData,
@@ -9298,8 +9355,7 @@ public class TelephonyManager {
             ALLOWED_NETWORK_TYPES_REASON_USER,
             ALLOWED_NETWORK_TYPES_REASON_POWER,
             ALLOWED_NETWORK_TYPES_REASON_CARRIER,
-            ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G,
-            ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS,
+            ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AllowedNetworkTypesReason {
@@ -9338,24 +9394,14 @@ public class TelephonyManager {
     public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3;
 
     /**
-     * To indicate allowed network type change is requested by an update to the
-     * {@link android.os.UserManager.DISALLOW_CELLULAR_2G} user restriction.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS = 4;
-
-    /**
      * Set the allowed network types of the device and provide the reason triggering the allowed
      * network change.
-     * <p>Requires permission: {@link android.Manifest.permission#MODIFY_PHONE_STATE} or
+     * <p>Requires permission: android.Manifest.MODIFY_PHONE_STATE or
      * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * This can be called for following reasons:
+     * This can be called for following reasons
      * <ol>
-     * <li>Allowed network types control by USER
-     * {@link TelephonyManager#ALLOWED_NETWORK_TYPES_REASON_USER}
+     * <li>Allowed network types control by USER {@link #ALLOWED_NETWORK_TYPES_REASON_USER}
      * <li>Allowed network types control by carrier {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER}
      * </ol>
      * This API will result in allowing an intersection of allowed network types for all reasons,
@@ -9365,13 +9411,7 @@ public class TelephonyManager {
      * @param allowedNetworkTypes The bitmask of allowed network type
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
-     * @throws SecurityException if the caller does not have the required privileges or if the
-     * caller tries to use one of the following security-based reasons without
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} permissions.
-     * <ol>
-     *     <li>{@code TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}</li>
-     *     <li>{@code TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS}</li>
-     * </ol>
+     * @throws SecurityException if the caller does not have the required privileges
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(
@@ -9445,7 +9485,6 @@ public class TelephonyManager {
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_POWER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_CARRIER:
             case TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G:
-            case ALLOWED_NETWORK_TYPES_REASON_USER_RESTRICTIONS:
                 return true;
         }
         return false;
@@ -13932,7 +13971,6 @@ public class TelephonyManager {
     @NonNull
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_CALLING)
     public Map<Integer, List<EmergencyNumber>> getEmergencyNumberList() {
-        Map<Integer, List<EmergencyNumber>> emergencyNumberList = new HashMap<>();
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -13945,7 +13983,7 @@ public class TelephonyManager {
             Log.e(TAG, "getEmergencyNumberList RemoteException", ex);
             ex.rethrowAsRuntimeException();
         }
-        return emergencyNumberList;
+        return Collections.emptyMap();
     }
 
     /**
@@ -16171,12 +16209,7 @@ public class TelephonyManager {
      * the appropriate callback method on the callback object and passes the current (updated)
      * values.
      * <p>
-     * Note: Be aware of the permission requirements stated on the {@link TelephonyCallback}
-     * listeners you implement.  Your application must be granted these permissions in order to
-     * register a {@link TelephonyCallback} which requires them; a {@link SecurityException} will be
-     * thrown if you do not hold the required permissions for all {@link TelephonyCallback}
-     * listeners you implement.
-     * <p>
+     *
      * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
      * applies to the given subId. Otherwise, applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}. To register events for multiple
@@ -17025,71 +17058,5 @@ public class TelephonyManager {
             Log.e(TAG, "Error in isRemovableEsimDefaultEuicc: " + e);
         }
         return false;
-    }
-
-    /**
-     * Returns a constant indicating the state of sim for the slot index.
-     *
-     * @param slotIndex Logical SIM slot index.
-     *
-     * @see TelephonyManager.SimState
-     *
-     * @hide
-     */
-    @SimState
-    public static int getSimStateForSlotIndex(int slotIndex) {
-        try {
-            ITelephony telephony = ITelephony.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getTelephonyServiceRegisterer()
-                            .get());
-            if (telephony != null) {
-                return telephony.getSimStateForSlotIndex(slotIndex);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error in getSimStateForSlotIndex: " + e);
-        }
-        return TelephonyManager.SIM_STATE_UNKNOWN;
-    }
-
-    /**
-     * Convert SIM state into string.
-     *
-     * @param state SIM state.
-     * @return SIM state in string format.
-     *
-     * @hide
-     */
-    @NonNull
-    public static String simStateToString(@SimState int state) {
-        switch (state) {
-            case TelephonyManager.SIM_STATE_UNKNOWN:
-                return "UNKNOWN";
-            case TelephonyManager.SIM_STATE_ABSENT:
-                return "ABSENT";
-            case TelephonyManager.SIM_STATE_PIN_REQUIRED:
-                return "PIN_REQUIRED";
-            case TelephonyManager.SIM_STATE_PUK_REQUIRED:
-                return "PUK_REQUIRED";
-            case TelephonyManager.SIM_STATE_NETWORK_LOCKED:
-                return "NETWORK_LOCKED";
-            case TelephonyManager.SIM_STATE_READY:
-                return "READY";
-            case TelephonyManager.SIM_STATE_NOT_READY:
-                return "NOT_READY";
-            case TelephonyManager.SIM_STATE_PERM_DISABLED:
-                return "PERM_DISABLED";
-            case TelephonyManager.SIM_STATE_CARD_IO_ERROR:
-                return "CARD_IO_ERROR";
-            case TelephonyManager.SIM_STATE_CARD_RESTRICTED:
-                return "CARD_RESTRICTED";
-            case TelephonyManager.SIM_STATE_LOADED:
-                return "LOADED";
-            case TelephonyManager.SIM_STATE_PRESENT:
-                return "PRESENT";
-            default:
-                return "UNKNOWN(" + state + ")";
-        }
     }
 }

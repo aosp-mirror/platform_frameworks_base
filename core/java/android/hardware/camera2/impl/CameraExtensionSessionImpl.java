@@ -114,7 +114,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private boolean mInternalRepeatingRequestEnabled = true;
 
     // Lock to synchronize cross-thread access to device public interface
-    final Object mInterfaceLock;
+    final Object mInterfaceLock = new Object(); // access from this class and Session only!
 
     private static int nativeGetSurfaceFormat(Surface surface) {
         return SurfaceUtils.getSurfaceFormat(surface);
@@ -125,7 +125,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
      */
     @RequiresPermission(android.Manifest.permission.CAMERA)
     public static CameraExtensionSessionImpl createCameraExtensionSession(
-            @NonNull android.hardware.camera2.impl.CameraDeviceImpl cameraDevice,
+            @NonNull CameraDevice cameraDevice,
             @NonNull Context ctx,
             @NonNull ExtensionSessionConfiguration config,
             int sessionId)
@@ -223,7 +223,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             @NonNull IPreviewExtenderImpl previewExtender,
             @NonNull List<Size> previewSizes,
             long extensionClientId,
-            @NonNull android.hardware.camera2.impl.CameraDeviceImpl cameraDevice,
+            @NonNull CameraDevice cameraDevice,
             @Nullable Surface repeatingRequestSurface,
             @Nullable Surface burstCaptureSurface,
             @NonNull StateCallback callback,
@@ -249,7 +249,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         mSupportedRequestKeys = requestKeys;
         mSupportedResultKeys = resultKeys;
         mCaptureResultsSupported = !resultKeys.isEmpty();
-        mInterfaceLock = cameraDevice.mInterfaceLock;
     }
 
     private void initializeRepeatingRequestPipeline() throws RemoteException {
@@ -728,7 +727,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
             if (mExtensionClientId >= 0) {
                 CameraExtensionCharacteristics.unregisterClient(mExtensionClientId);
-                if (mInitialized) {
+                if (mInitialized || (mCaptureSession != null)) {
                     notifyClose = true;
                     CameraExtensionCharacteristics.releaseSession();
                 }
@@ -857,56 +856,46 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private class InitializeSessionHandler extends IInitializeSessionCallback.Stub {
         @Override
         public void onSuccess() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    boolean status = true;
-                    ArrayList<CaptureStageImpl> initialRequestList =
-                            compileInitialRequestList();
-                    if (!initialRequestList.isEmpty()) {
-                        try {
-                            setInitialCaptureRequest(initialRequestList,
-                                    new InitialRequestHandler(
-                                            mRepeatingRequestImageCallback));
-                        } catch (CameraAccessException e) {
-                            Log.e(TAG,
-                                    "Failed to initialize the initial capture "
-                                            + "request!");
-                            status = false;
-                        }
-                    } else {
-                        try {
-                            setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                                    new PreviewRequestHandler(null, null, null,
-                                            mRepeatingRequestImageCallback));
-                        } catch (CameraAccessException | RemoteException e) {
-                            Log.e(TAG,
-                                    "Failed to initialize internal repeating "
-                                            + "request!");
-                            status = false;
-                        }
-
-                    }
-
-                    if (!status) {
-                        notifyConfigurationFailure();
-                    }
+            boolean status = true;
+            ArrayList<CaptureStageImpl> initialRequestList =
+                    compileInitialRequestList();
+            if (!initialRequestList.isEmpty()) {
+                try {
+                    setInitialCaptureRequest(initialRequestList,
+                            new InitialRequestHandler(
+                                    mRepeatingRequestImageCallback));
+                } catch (CameraAccessException e) {
+                    Log.e(TAG,
+                            "Failed to initialize the initial capture "
+                                    + "request!");
+                    status = false;
                 }
-            });
+            } else {
+                try {
+                    setRepeatingRequest(mPreviewExtender.getCaptureStage(),
+                            new PreviewRequestHandler(null, null, null,
+                                    mRepeatingRequestImageCallback));
+                } catch (CameraAccessException | RemoteException e) {
+                    Log.e(TAG,
+                            "Failed to initialize internal repeating "
+                                    + "request!");
+                    status = false;
+                }
+
+            }
+
+            if (!status) {
+                notifyConfigurationFailure();
+            }
         }
 
         @Override
         public void onFailure() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mCaptureSession.close();
-                    Log.e(TAG, "Failed to initialize proxy service session!"
-                            + " This can happen when trying to configure multiple "
-                            + "concurrent extension sessions!");
-                    notifyConfigurationFailure();
-                }
-            });
+            mCaptureSession.close();
+            Log.e(TAG, "Failed to initialize proxy service session!"
+                    + " This can happen when trying to configure multiple "
+                    + "concurrent extension sessions!");
+            notifyConfigurationFailure();
         }
     }
 
@@ -1284,25 +1273,23 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         private void notifyDroppedImages(long timestamp) {
-            synchronized (mInterfaceLock) {
-                Set<Long> timestamps = mImageListenerMap.keySet();
-                ArrayList<Long> removedTs = new ArrayList<>();
-                for (long ts : timestamps) {
-                    if (ts < timestamp) {
-                        Log.e(TAG, "Dropped image with ts: " + ts);
-                        Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(ts);
-                        if (entry.second != null) {
-                            entry.second.onImageDropped(ts);
-                        }
-                        if (entry.first != null) {
-                            entry.first.close();
-                        }
-                        removedTs.add(ts);
+            Set<Long> timestamps = mImageListenerMap.keySet();
+            ArrayList<Long> removedTs = new ArrayList<>();
+            for (long ts : timestamps) {
+                if (ts < timestamp) {
+                    Log.e(TAG, "Dropped image with ts: " + ts);
+                    Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(ts);
+                    if (entry.second != null) {
+                        entry.second.onImageDropped(ts);
                     }
+                    if (entry.first != null) {
+                        entry.first.close();
+                    }
+                    removedTs.add(ts);
                 }
-                for (long ts : removedTs) {
-                    mImageListenerMap.remove(ts);
-                }
+            }
+            for (long ts : removedTs) {
+                mImageListenerMap.remove(ts);
             }
         }
 

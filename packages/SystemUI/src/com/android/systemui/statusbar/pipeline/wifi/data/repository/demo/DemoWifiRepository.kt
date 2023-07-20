@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository.demo
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
+import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -66,7 +66,6 @@ constructor(
     private fun processEvent(event: FakeWifiEventModel) =
         when (event) {
             is FakeWifiEventModel.Wifi -> processEnabledWifiState(event)
-            is FakeWifiEventModel.CarrierMerged -> processCarrierMergedWifiState(event)
             is FakeWifiEventModel.WifiDisabled -> processDisabledWifiState()
         }
 
@@ -80,15 +79,10 @@ constructor(
     private fun processEnabledWifiState(event: FakeWifiEventModel.Wifi) {
         _isWifiEnabled.value = true
         _isWifiDefault.value = true
-        _wifiActivity.value = event.activity.toWifiDataActivityModel()
+        _wifiActivity.value =
+            event.activity?.toWifiDataActivityModel()
+                ?: DataActivityModel(hasActivityIn = false, hasActivityOut = false)
         _wifiNetwork.value = event.toWifiNetworkModel()
-    }
-
-    private fun processCarrierMergedWifiState(event: FakeWifiEventModel.CarrierMerged) {
-        _isWifiEnabled.value = true
-        _isWifiDefault.value = true
-        _wifiActivity.value = event.activity.toWifiDataActivityModel()
-        _wifiNetwork.value = event.toCarrierMergedModel()
     }
 
     private fun FakeWifiEventModel.Wifi.toWifiNetworkModel(): WifiNetworkModel =
@@ -103,14 +97,6 @@ constructor(
             isPasspointAccessPoint = false,
             isOnlineSignUpForPasspointAccessPoint = false,
             passpointProviderFriendlyName = null,
-        )
-
-    private fun FakeWifiEventModel.CarrierMerged.toCarrierMergedModel(): WifiNetworkModel =
-        WifiNetworkModel.CarrierMerged(
-            networkId = DEMO_NET_ID,
-            subscriptionId = subscriptionId,
-            level = level,
-            numberOfLevels = numberOfLevels,
         )
 
     companion object {

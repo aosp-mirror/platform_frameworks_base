@@ -71,9 +71,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     private static final String TAG = "HdmiCecLocalDeviceAudioSystem";
 
     private static final boolean WAKE_ON_HOTPLUG = false;
-    private static final int MAX_CHANNELS = 8;
-    private static final HashMap<Integer, List<Integer>> AUDIO_CODECS_MAP =
-            mapAudioCodecWithAudioFormat();
 
     // Whether the System Audio Control feature is enabled or not. True by default.
     @GuardedBy("mLock")
@@ -229,14 +226,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         super.disableDevice(initiatedByCec, callback);
         assertRunOnServiceThread();
         mService.unregisterTvInputCallback(mTvInputCallback);
-        // Removing actions and invoking the callback is similar to
-        // HdmiCecLocalDevicePlayback#disableDevice and HdmiCecLocalDeviceTv#disableDevice,
-        // with the difference that in those classes only specific actions are removed and
-        // here we remove all actions. We don't expect any issues with removing all actions
-        // at this time, but we have to pay attention in the future.
-        removeAllActions();
-        // Call the callback instantly or else it will be called 5 seconds later.
-        checkIfPendingActionsCleared();
     }
 
     @Override
@@ -496,17 +485,17 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             }
         }
 
-        @AudioCodec int[] audioCodecs = parseAudioCodecs(message.getParams());
+        @AudioCodec int[] audioFormatCodes = parseAudioFormatCodes(message.getParams());
         byte[] sadBytes;
         if (config != null && config.size() > 0) {
-            sadBytes = getSupportedShortAudioDescriptorsFromConfig(config, audioCodecs);
+            sadBytes = getSupportedShortAudioDescriptorsFromConfig(config, audioFormatCodes);
         } else {
             AudioDeviceInfo deviceInfo = getSystemAudioDeviceInfo();
             if (deviceInfo == null) {
                 return Constants.ABORT_UNABLE_TO_DETERMINE;
             }
 
-            sadBytes = getSupportedShortAudioDescriptors(deviceInfo, audioCodecs);
+            sadBytes = getSupportedShortAudioDescriptors(deviceInfo, audioFormatCodes);
         }
 
         if (sadBytes.length == 0) {
@@ -519,12 +508,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
     }
 
-    @VisibleForTesting
-    byte[] getSupportedShortAudioDescriptors(
-            AudioDeviceInfo deviceInfo, @AudioCodec int[] audioCodecs) {
-        ArrayList<byte[]> sads = new ArrayList<>(audioCodecs.length);
-        for (@AudioCodec int audioCodec : audioCodecs) {
-            byte[] sad = getSupportedShortAudioDescriptor(deviceInfo, audioCodec);
+    private byte[] getSupportedShortAudioDescriptors(
+            AudioDeviceInfo deviceInfo, @AudioCodec int[] audioFormatCodes) {
+        ArrayList<byte[]> sads = new ArrayList<>(audioFormatCodes.length);
+        for (@AudioCodec int audioFormatCode : audioFormatCodes) {
+            byte[] sad = getSupportedShortAudioDescriptor(deviceInfo, audioFormatCode);
             if (sad != null) {
                 if (sad.length == 3) {
 
@@ -532,7 +520,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                 } else {
                     HdmiLogger.warning(
                             "Dropping Short Audio Descriptor with length %d for requested codec %x",
-                            sad.length, audioCodec);
+                            sad.length, audioFormatCode);
                 }
             }
         }
@@ -540,7 +528,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     private byte[] getSupportedShortAudioDescriptorsFromConfig(
-            List<DeviceConfig> deviceConfig, @AudioCodec int[] audioCodecs) {
+            List<DeviceConfig> deviceConfig, @AudioCodec int[] audioFormatCodes) {
         DeviceConfig deviceConfigToUse = null;
         String audioDeviceName = SystemProperties.get(
                 Constants.PROPERTY_SYSTEM_AUDIO_MODE_AUDIO_PORT,
@@ -556,13 +544,13 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             return new byte[0];
         }
         HashMap<Integer, byte[]> map = new HashMap<>();
-        ArrayList<byte[]> sads = new ArrayList<>(audioCodecs.length);
+        ArrayList<byte[]> sads = new ArrayList<>(audioFormatCodes.length);
         for (CodecSad codecSad : deviceConfigToUse.supportedCodecs) {
             map.put(codecSad.audioCodec, codecSad.sad);
         }
-        for (int i = 0; i < audioCodecs.length; i++) {
-            if (map.containsKey(audioCodecs[i])) {
-                byte[] sad = map.get(audioCodecs[i]);
+        for (int i = 0; i < audioFormatCodes.length; i++) {
+            if (map.containsKey(audioFormatCodes[i])) {
+                byte[] sad = map.get(audioFormatCodes[i]);
                 if (sad != null && sad.length == 3) {
                     sads.add(sad);
                 }
@@ -584,171 +572,42 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     /**
      * Returns a 3 byte short audio descriptor as described in CEC 1.4 table 29 or null if the
-     * audioCodec is not supported.
+     * audioFormatCode is not supported.
      */
     @Nullable
-    @VisibleForTesting
-    byte[] getSupportedShortAudioDescriptor(
-            AudioDeviceInfo deviceInfo, @AudioCodec int audioCodec) {
-        byte[] shortAudioDescriptor = new byte[3];
-
-        int[] deviceSupportedAudioFormats = deviceInfo.getEncodings();
-        // Return null when audioCodec or device does not support any audio formats.
-        if (!AUDIO_CODECS_MAP.containsKey(audioCodec) || deviceSupportedAudioFormats.length == 0) {
-            return null;
-        }
-        List<Integer> audioCodecSupportedAudioFormats = AUDIO_CODECS_MAP.get(audioCodec);
-
-        for (int supportedAudioFormat : deviceSupportedAudioFormats) {
-            if (audioCodecSupportedAudioFormats.contains(supportedAudioFormat)) {
-                // Initialise the first two bytes of short audio descriptor.
-                shortAudioDescriptor[0] = getFirstByteOfSAD(deviceInfo, audioCodec);
-                shortAudioDescriptor[1] = getSecondByteOfSAD(deviceInfo);
-                switch (audioCodec) {
-                    case Constants.AUDIO_CODEC_NONE: {
-                        return null;
-                    }
-                    case Constants.AUDIO_CODEC_LPCM: {
-                        if (supportedAudioFormat == AudioFormat.ENCODING_PCM_16BIT) {
-                            shortAudioDescriptor[2] = (byte) 0x01;
-                        } else if (supportedAudioFormat
-                                == AudioFormat.ENCODING_PCM_24BIT_PACKED) {
-                            shortAudioDescriptor[2] = (byte) 0x04;
-                        } else {
-                            // Since no bit is reserved for these audio formats in LPCM codec.
-                            shortAudioDescriptor[2] = (byte) 0x00;
-                        }
-                        return shortAudioDescriptor;
-                    }
-                    case Constants.AUDIO_CODEC_DD:
-                    case Constants.AUDIO_CODEC_MPEG1:
-                    case Constants.AUDIO_CODEC_MP3:
-                    case Constants.AUDIO_CODEC_MPEG2:
-                    case Constants.AUDIO_CODEC_AAC:
-                    case Constants.AUDIO_CODEC_DTS: {
-                        shortAudioDescriptor[2] = getThirdSadByteForCodecs2Through8(deviceInfo);
-                        return shortAudioDescriptor;
-                    }
-                    case Constants.AUDIO_CODEC_DDP:
-                    case Constants.AUDIO_CODEC_DTSHD:
-                    case Constants.AUDIO_CODEC_TRUEHD: {
-                        // Default value is 0x0 unless defined by Audio Codec Vendor.
-                        shortAudioDescriptor[2] = (byte) 0x00;
-                        return shortAudioDescriptor;
-                    }
-                    case Constants.AUDIO_CODEC_ATRAC:
-                    case Constants.AUDIO_CODEC_ONEBITAUDIO:
-                    case Constants.AUDIO_CODEC_DST:
-                    case Constants.AUDIO_CODEC_WMAPRO:
-                        // Not supported.
-                    default: {
-                        return null;
-                    }
-                }
+    private byte[] getSupportedShortAudioDescriptor(
+            AudioDeviceInfo deviceInfo, @AudioCodec int audioFormatCode) {
+        switch (audioFormatCode) {
+            case Constants.AUDIO_CODEC_NONE: {
+                return null;
+            }
+            case Constants.AUDIO_CODEC_LPCM: {
+                return getLpcmShortAudioDescriptor(deviceInfo);
+            }
+            // TODO(b/80297701): implement the rest of the codecs
+            case Constants.AUDIO_CODEC_DD:
+            case Constants.AUDIO_CODEC_MPEG1:
+            case Constants.AUDIO_CODEC_MP3:
+            case Constants.AUDIO_CODEC_MPEG2:
+            case Constants.AUDIO_CODEC_AAC:
+            case Constants.AUDIO_CODEC_DTS:
+            case Constants.AUDIO_CODEC_ATRAC:
+            case Constants.AUDIO_CODEC_ONEBITAUDIO:
+            case Constants.AUDIO_CODEC_DDP:
+            case Constants.AUDIO_CODEC_DTSHD:
+            case Constants.AUDIO_CODEC_TRUEHD:
+            case Constants.AUDIO_CODEC_DST:
+            case Constants.AUDIO_CODEC_WMAPRO:
+            default: {
+                return null;
             }
         }
+    }
+
+    @Nullable
+    private byte[] getLpcmShortAudioDescriptor(AudioDeviceInfo deviceInfo) {
+        // TODO(b/80297701): implement
         return null;
-    }
-
-    private static HashMap<Integer, List<Integer>> mapAudioCodecWithAudioFormat() {
-        // Mapping the values of @AudioCodec audio codecs with @AudioFormat audio formats.
-        HashMap<Integer, List<Integer>> audioCodecsMap = new HashMap<Integer, List<Integer>>();
-
-        audioCodecsMap.put(Constants.AUDIO_CODEC_NONE, List.of(AudioFormat.ENCODING_DEFAULT));
-        audioCodecsMap.put(
-                Constants.AUDIO_CODEC_LPCM,
-                List.of(
-                        AudioFormat.ENCODING_PCM_8BIT,
-                        AudioFormat.ENCODING_PCM_16BIT,
-                        AudioFormat.ENCODING_PCM_FLOAT,
-                        AudioFormat.ENCODING_PCM_24BIT_PACKED,
-                        AudioFormat.ENCODING_PCM_32BIT));
-        audioCodecsMap.put(Constants.AUDIO_CODEC_DD, List.of(AudioFormat.ENCODING_AC3));
-        audioCodecsMap.put(Constants.AUDIO_CODEC_MPEG1, List.of(AudioFormat.ENCODING_AAC_HE_V1));
-        audioCodecsMap.put(Constants.AUDIO_CODEC_MPEG2, List.of(AudioFormat.ENCODING_AAC_HE_V2));
-        audioCodecsMap.put(Constants.AUDIO_CODEC_MP3, List.of(AudioFormat.ENCODING_MP3));
-        audioCodecsMap.put(Constants.AUDIO_CODEC_AAC, List.of(AudioFormat.ENCODING_AAC_LC));
-        audioCodecsMap.put(Constants.AUDIO_CODEC_DTS, List.of(AudioFormat.ENCODING_DTS));
-        audioCodecsMap.put(
-                Constants.AUDIO_CODEC_DDP,
-                List.of(AudioFormat.ENCODING_E_AC3, AudioFormat.ENCODING_E_AC3_JOC));
-        audioCodecsMap.put(Constants.AUDIO_CODEC_DTSHD, List.of(AudioFormat.ENCODING_DTS_HD));
-        audioCodecsMap.put(
-                Constants.AUDIO_CODEC_TRUEHD,
-                List.of(AudioFormat.ENCODING_DOLBY_TRUEHD, AudioFormat.ENCODING_DOLBY_MAT));
-
-        return audioCodecsMap;
-    }
-
-    private byte getFirstByteOfSAD(AudioDeviceInfo deviceInfo, @AudioCodec int audioCodec) {
-        byte firstByte = 0;
-        int maxNumberOfChannels = getMaxNumberOfChannels(deviceInfo);
-
-        // Fill bits 0-2 of the first byte.
-        firstByte |= (maxNumberOfChannels - 1);
-
-        // Fill bits 3-6 of the first byte.
-        firstByte |= (audioCodec << 3);
-
-        return firstByte;
-    }
-
-    private byte getSecondByteOfSAD(AudioDeviceInfo deviceInfo) {
-        ArrayList<Integer> samplingRates =
-                new ArrayList<Integer>(Arrays.asList(32, 44, 48, 88, 96, 176, 192));
-
-        // samplingRatesdevicesupports is guaranteed to be not null
-        int[] samplingRatesDeviceSupports = deviceInfo.getSampleRates();
-        if (samplingRatesDeviceSupports.length == 0) {
-            Slog.e(TAG, "Device supports arbitrary rates");
-            // Since device supports arbitrary rates, we will return 0x7f since bit 7 is reserved.
-            return (byte) 0x7f;
-        }
-        byte secondByte = 0;
-        for (int supportedSampleRate : samplingRatesDeviceSupports) {
-            if (samplingRates.contains(supportedSampleRate)) {
-                int index = samplingRates.indexOf(supportedSampleRate);
-                // Setting the bit of a sample rate which is being supported.
-                secondByte |= (1 << index);
-            }
-        }
-
-        return secondByte;
-    }
-
-    /**
-     * Empty array from deviceInfo.getChannelCounts() implies device supports arbitrary channel
-     * counts and hence we assume max channels are supported by the device.
-     */
-    private int getMaxNumberOfChannels(AudioDeviceInfo deviceInfo) {
-        int maxNumberOfChannels = MAX_CHANNELS;
-        int[] channelCounts = deviceInfo.getChannelCounts();
-        if (channelCounts.length != 0) {
-            maxNumberOfChannels = channelCounts[channelCounts.length - 1];
-            maxNumberOfChannels =
-                    (maxNumberOfChannels > MAX_CHANNELS ? MAX_CHANNELS : maxNumberOfChannels);
-        }
-        return maxNumberOfChannels;
-    }
-
-    private byte getThirdSadByteForCodecs2Through8(AudioDeviceInfo deviceInfo) {
-        /*
-         * Here, we are assuming that max bit rate is closely equals to the max sampling rate the
-         * device supports.
-         */
-        int maxSamplingRate = 0;
-        int[] samplingRatesDeviceSupports = deviceInfo.getSampleRates();
-        if (samplingRatesDeviceSupports.length == 0) {
-            maxSamplingRate = 192;
-        } else {
-            for (int sampleRate : samplingRatesDeviceSupports) {
-                if (maxSamplingRate < sampleRate) {
-                    maxSamplingRate = sampleRate;
-                }
-            }
-        }
-
-        return (byte) (maxSamplingRate / 8);
     }
 
     @Nullable
@@ -775,14 +634,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     @AudioCodec
-    private int[] parseAudioCodecs(byte[] params) {
-        @AudioCodec int[] audioCodecs = new int[params.length];
+    private int[] parseAudioFormatCodes(byte[] params) {
+        @AudioCodec int[] audioFormatCodes = new int[params.length];
         for (int i = 0; i < params.length; i++) {
             byte val = params[i];
-            audioCodecs[i] =
-                    val >= 1 && val <= Constants.AUDIO_CODEC_MAX ? val : Constants.AUDIO_CODEC_NONE;
+            audioFormatCodes[i] =
+                val >= 1 && val <= Constants.AUDIO_CODEC_MAX ? val : Constants.AUDIO_CODEC_NONE;
         }
-        return audioCodecs;
+        return audioFormatCodes;
     }
 
     @Override

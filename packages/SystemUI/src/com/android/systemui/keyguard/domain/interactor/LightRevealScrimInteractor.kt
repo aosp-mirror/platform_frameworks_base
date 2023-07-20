@@ -86,8 +86,7 @@ constructor(
                 KeyguardState.DOZING -> false
                 KeyguardState.AOD -> false
                 KeyguardState.DREAMING -> true
-                KeyguardState.ALTERNATE_BOUNCER -> true
-                KeyguardState.PRIMARY_BOUNCER -> true
+                KeyguardState.BOUNCER -> true
                 KeyguardState.LOCKSCREEN -> true
                 KeyguardState.GONE -> true
                 KeyguardState.OCCLUDED -> true

@@ -62,6 +62,11 @@ public class MediaNotificationProcessor {
         // by default we use the dominant palette
         Palette.Swatch dominantSwatch = palette.getDominantSwatch();
         if (dominantSwatch == null) {
+            // try to bring up the muted color of the cover art before going for the white variant
+            Palette.Swatch mutedSwatch = palette.getMutedSwatch();
+            if (mutedSwatch != null) {
+                return mutedSwatch;
+            }
             return new Palette.Swatch(Color.WHITE, 100);
         }
 
@@ -103,10 +108,9 @@ public class MediaNotificationProcessor {
      * @return Builder that generates the {@link Palette} for the media artwork.
      */
     public static Palette.Builder generateArtworkPaletteBuilder(Bitmap artwork) {
-        // for the background we only take the left side of the image to ensure
+        // for the background we only take the full image to ensure
         // a smooth transition
         return Palette.from(artwork)
-                .setRegion(0, 0, artwork.getWidth() / 2, artwork.getHeight())
                 .clearFilters() // we want all colors, red / white / black ones too!
                 .resizeBitmapArea(RESIZE_BITMAP_AREA);
     }

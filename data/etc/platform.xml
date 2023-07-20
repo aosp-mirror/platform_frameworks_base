@@ -212,6 +212,9 @@
     <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE">
         <new-permission name="android.permission.READ_EXTERNAL_STORAGE" />
     </split-permission>
+    <split-permission name="android.permission.READ_PRIVILEGED_PHONE_STATE">
+        <new-permission name="android.permission.READ_PHONE_STATE" />
+    </split-permission>
     <split-permission name="android.permission.READ_CONTACTS"
                       targetSdk="16">
         <new-permission name="android.permission.READ_CALL_LOG" />
@@ -311,6 +314,11 @@
     <allow-in-power-save package="com.android.providers.downloads" />
 
     <!-- These are the standard packages that are white-listed to always have internet
+         access while in power save mode, even if they aren't in the foreground. -->
+    <allow-in-power-save package="com.android.deskclock" />
+    <allow-in-power-save package="com.google.android.deskclock" />
+
+    <!-- These are the standard packages that are white-listed to always have internet
          access while in data mode, even if they aren't in the foreground. -->
     <allow-in-data-usage-save package="com.android.providers.downloads" />
 
@@ -318,6 +326,8 @@
     <allow-in-power-save package="com.android.cellbroadcastreceiver.module" />
     <allow-in-power-save package="com.android.cellbroadcastreceiver" />
     <allow-in-power-save package="com.android.shell" />
+    <allow-in-power-save package="com.android.dialer" />
+    <allow-in-power-save package="android" />
 
     <!-- Emergency app needs to run in the background to reliably provide safety features -->
     <allow-in-power-save package="com.android.emergency" />
@@ -334,4 +344,12 @@
 
     <!-- Allow IMS service entitlement app to schedule jobs to run when app in background. -->
     <allow-in-power-save-except-idle package="com.android.imsserviceentitlement" />
+
+    <allow-in-power-save package="com.google.android.gms"/>
+    
+    <!-- These components were repeatedly being suspended by the packagemanager, but cannot suspend due to privileges.-->
+    <allow-in-power-save-except-idle package="com.android.vending" />
+    <allow-in-power-save-except-idle package="com.android.packageinstaller" />
+    <allow-in-power-save-except-idle package="com.android.permissioncontroller" />
+    <allow-in-power-save-except-idle package="com.android.launcher3" />
 </permissions>

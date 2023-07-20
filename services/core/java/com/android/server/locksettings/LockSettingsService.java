@@ -80,7 +80,6 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -118,7 +117,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -205,7 +203,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String TAG = "LockSettingsService";
     private static final String PERMISSION = ACCESS_KEYGUARD_SECURE_STORAGE;
     private static final String BIOMETRIC_PERMISSION = MANAGE_BIOMETRIC;
-    private static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = false;
 
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
@@ -418,8 +416,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     static class Injector {
 
         protected Context mContext;
-        private ServiceThread mHandlerThread;
-        private Handler mHandler;
 
         public Injector(Context context) {
             mContext = context;
@@ -430,20 +426,14 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         public ServiceThread getServiceThread() {
-            if (mHandlerThread == null) {
-                mHandlerThread = new ServiceThread(TAG,
-                        Process.THREAD_PRIORITY_BACKGROUND,
-                        true /*allowIo*/);
-                mHandlerThread.start();
-            }
-            return mHandlerThread;
+            ServiceThread handlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
+                    true /*allowIo*/);
+            handlerThread.start();
+            return handlerThread;
         }
 
         public Handler getHandler(ServiceThread handlerThread) {
-            if (mHandler == null) {
-                mHandler = new Handler(handlerThread.getLooper());
-            }
-            return mHandler;
+            return new Handler(handlerThread.getLooper());
         }
 
         public LockSettingsStorage getStorage() {
@@ -524,8 +514,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         public RebootEscrowManager getRebootEscrowManager(RebootEscrowManager.Callbacks callbacks,
                 LockSettingsStorage storage) {
-            return new RebootEscrowManager(mContext, callbacks, storage,
-                    getHandler(getServiceThread()));
+            return new RebootEscrowManager(mContext, callbacks, storage);
         }
 
         public boolean hasEnrolledBiometrics(int userId) {
@@ -693,7 +682,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         unlockIntent.setFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        PendingIntent intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
+        PendingIntent intent = PendingIntent.getActivity(
+                mContext, user.getIdentifier(), unlockIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
         Slog.d(TAG, String.format("showing encryption notification, user: %d; reason: %s",

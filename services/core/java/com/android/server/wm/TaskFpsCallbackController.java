@@ -26,8 +26,8 @@ import java.util.HashMap;
 final class TaskFpsCallbackController {
 
     private final Context mContext;
-    private final HashMap<IBinder, Long> mTaskFpsCallbacks;
-    private final HashMap<IBinder, IBinder.DeathRecipient> mDeathRecipients;
+    private final HashMap<ITaskFpsCallback, Long> mTaskFpsCallbacks;
+    private final HashMap<ITaskFpsCallback, IBinder.DeathRecipient> mDeathRecipients;
 
     TaskFpsCallbackController(Context context) {
         mContext = context;
@@ -36,42 +36,32 @@ final class TaskFpsCallbackController {
     }
 
     void registerListener(int taskId, ITaskFpsCallback callback) {
-        if (callback == null) {
-            return;
-        }
-
-        IBinder binder = callback.asBinder();
-        if (mTaskFpsCallbacks.containsKey(binder)) {
+        if (mTaskFpsCallbacks.containsKey(callback)) {
             return;
         }
 
         final long nativeListener = nativeRegister(callback, taskId);
-        mTaskFpsCallbacks.put(binder, nativeListener);
+        mTaskFpsCallbacks.put(callback, nativeListener);
 
         final IBinder.DeathRecipient deathRecipient = () -> unregisterListener(callback);
         try {
-            binder.linkToDeath(deathRecipient, 0);
-            mDeathRecipients.put(binder, deathRecipient);
+            callback.asBinder().linkToDeath(deathRecipient, 0);
+            mDeathRecipients.put(callback, deathRecipient);
         } catch (RemoteException e) {
             // ignore
         }
     }
 
     void unregisterListener(ITaskFpsCallback callback) {
-        if (callback == null) {
+        if (!mTaskFpsCallbacks.containsKey(callback)) {
             return;
         }
 
-        IBinder binder = callback.asBinder();
-        if (!mTaskFpsCallbacks.containsKey(binder)) {
-            return;
-        }
+        callback.asBinder().unlinkToDeath(mDeathRecipients.get(callback), 0);
+        mDeathRecipients.remove(callback);
 
-        binder.unlinkToDeath(mDeathRecipients.get(binder), 0);
-        mDeathRecipients.remove(binder);
-
-        nativeUnregister(mTaskFpsCallbacks.get(binder));
-        mTaskFpsCallbacks.remove(binder);
+        nativeUnregister(mTaskFpsCallbacks.get(callback));
+        mTaskFpsCallbacks.remove(callback);
     }
 
     private static native long nativeRegister(ITaskFpsCallback callback, int taskId);

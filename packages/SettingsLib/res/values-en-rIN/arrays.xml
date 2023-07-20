@@ -63,17 +63,6 @@
     <item msgid="6336372935919715515">"Enabled Filtered"</item>
     <item msgid="2779123106632690576">"Enabled"</item>
   </string-array>
-  <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="195768089203590086">"Leave only ACL headers"</item>
-    <item msgid="2776218217644557831">"Filter A2DP media packets"</item>
-    <item msgid="8163235976612675092">"Filter RFCOMM channel"</item>
-  </string-array>
-  <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="3961868665260627524">"Disable"</item>
-    <item msgid="2505973306504851132">"Fill with string of characters"</item>
-    <item msgid="5883011000629613855">"Leave only header"</item>
-    <item msgid="1051534112762023603">"Fully remove"</item>
-  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (Default)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
@@ -283,11 +272,5 @@
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
   <string-array name="avatar_image_descriptions">
-  </string-array>
-  <string-array name="entries_font_size">
-    <item msgid="9181293769180886675">"Small"</item>
-    <item msgid="1484561228522634915">"Default"</item>
-    <item msgid="4014311587094503943">"Large"</item>
-    <item msgid="2904569270831156685">"Largest"</item>
   </string-array>
 </resources>

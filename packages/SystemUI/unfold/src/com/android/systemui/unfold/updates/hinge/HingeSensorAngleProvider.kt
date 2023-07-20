@@ -20,43 +20,35 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Trace
 import androidx.core.util.Consumer
-import com.android.systemui.unfold.dagger.UnfoldSingleThreadBg
 import java.util.concurrent.Executor
-import javax.inject.Inject
 
-internal class HingeSensorAngleProvider
-@Inject
-constructor(
+internal class HingeSensorAngleProvider(
     private val sensorManager: SensorManager,
-    @UnfoldSingleThreadBg private val singleThreadBgExecutor: Executor
-) : HingeAngleProvider {
+    private val executor: Executor
+) :
+    HingeAngleProvider {
 
     private val sensorListener = HingeAngleSensorListener()
     private val listeners: MutableList<Consumer<Float>> = arrayListOf()
     var started = false
 
-    override fun start() {
-        singleThreadBgExecutor.execute {
-            if (started) return@execute
-            Trace.beginSection("HingeSensorAngleProvider#start")
-            val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_HINGE_ANGLE)
-            sensorManager.registerListener(
-                sensorListener,
-                sensor,
-                SensorManager.SENSOR_DELAY_FASTEST
-            )
-            Trace.endSection()
-
-            started = true
-        }
+    override fun start() = executor.execute {
+        if (started) return@execute
+        Trace.beginSection("HingeSensorAngleProvider#start")
+        val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_HINGE_ANGLE)
+        sensorManager.registerListener(
+            sensorListener,
+            sensor,
+            SensorManager.SENSOR_DELAY_FASTEST
+        )
+        Trace.endSection()
+        started = true
     }
 
-    override fun stop() {
-        singleThreadBgExecutor.execute {
-            if (!started) return@execute
-            sensorManager.unregisterListener(sensorListener)
-            started = false
-        }
+    override fun stop() = executor.execute {
+        if (!started) return@execute
+        sensorManager.unregisterListener(sensorListener)
+        started = false
     }
 
     override fun removeCallback(listener: Consumer<Float>) {

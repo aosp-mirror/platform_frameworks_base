@@ -133,12 +133,13 @@ IncidentReportArgs::readFromParcel(const Parcel* in)
         mSections.insert(section);
     }
 
-    err = in->resizeOutVector<vector<uint8_t>>(&mHeaders);
+    int32_t headerCount;
+    err = in->readInt32(&headerCount);
     if (err != NO_ERROR) {
         return err;
     }
-
-    for (int i=0; i<mHeaders.size(); i++) {
+    mHeaders.resize(headerCount);
+    for (int i=0; i<headerCount; i++) {
         err = in->readByteVector(&mHeaders[i]);
         if (err != NO_ERROR) {
             return err;

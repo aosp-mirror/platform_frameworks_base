@@ -193,7 +193,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         initUI();
     }
 
-    @SuppressWarnings("MissingSuperCall") // TODO: Fix me
     @Override
     protected void onNewIntent(Intent intent) {
         // Handle another incoming request (while we are not done with the original - mRequest -

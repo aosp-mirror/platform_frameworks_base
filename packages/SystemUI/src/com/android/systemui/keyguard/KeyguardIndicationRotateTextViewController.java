@@ -24,7 +24,6 @@ import android.text.TextUtils;
 
 import androidx.annotation.IntDef;
 
-import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -65,7 +64,6 @@ public class KeyguardIndicationRotateTextViewController extends
             2000L + KeyguardIndicationTextView.Y_IN_DURATION;
 
     private final StatusBarStateController mStatusBarStateController;
-    private final KeyguardLogger mLogger;
     private final float mMaxAlpha;
     private final ColorStateList mInitialTextColorState;
 
@@ -87,8 +85,7 @@ public class KeyguardIndicationRotateTextViewController extends
     public KeyguardIndicationRotateTextViewController(
             KeyguardIndicationTextView view,
             @Main DelayableExecutor executor,
-            StatusBarStateController statusBarStateController,
-            KeyguardLogger logger
+            StatusBarStateController statusBarStateController
     ) {
         super(view);
         mMaxAlpha = view.getAlpha();
@@ -96,7 +93,6 @@ public class KeyguardIndicationRotateTextViewController extends
         mInitialTextColorState = mView != null
                 ? mView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         mStatusBarStateController = statusBarStateController;
-        mLogger = logger;
         init();
     }
 
@@ -126,8 +122,12 @@ public class KeyguardIndicationRotateTextViewController extends
             return;
         }
         long minShowDuration = getMinVisibilityMillis(mIndicationMessages.get(mCurrIndicationType));
+        final boolean hasPreviousIndication = mIndicationMessages.get(type) != null;
         final boolean hasNewIndication = newIndication != null
                 && !TextUtils.isEmpty(newIndication.getMessage());
+
+        mView.setAnimationsEnabled(!hasPreviousIndication);
+
         if (!hasNewIndication) {
             mIndicationMessages.remove(type);
             mIndicationQueue.removeIf(x -> x == type);
@@ -263,8 +263,6 @@ public class KeyguardIndicationRotateTextViewController extends
         mLastIndicationSwitch = SystemClock.uptimeMillis();
         if (!TextUtils.equals(previousMessage, mCurrMessage)
                 || previousIndicationType != mCurrIndicationType) {
-            mLogger.logKeyguardSwitchIndication(type,
-                    mCurrMessage != null ? mCurrMessage.toString() : null);
             mView.switchIndication(mIndicationMessages.get(type));
         }
 
@@ -358,10 +356,9 @@ public class KeyguardIndicationRotateTextViewController extends
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardIndicationRotatingTextViewController:");
-        pw.println("    currentTextViewMessage=" + mView.getText());
-        pw.println("    currentStoredMessage=" + mView.getMessage());
+        pw.println("    currentMessage=" + mView.getText());
         pw.println("    dozing:" + mIsDozing);
-        pw.println("    queue:" + mIndicationQueue);
+        pw.println("    queue:" + mIndicationQueue.toString());
         pw.println("    showNextIndicationRunnable:" + mShowNextIndicationRunnable);
 
         if (hasIndications()) {
@@ -405,40 +402,4 @@ public class KeyguardIndicationRotateTextViewController extends
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface IndicationType{}
-
-    /**
-     * Get human-readable string representation of the indication type.
-     */
-    public static String indicationTypeToString(@IndicationType int type) {
-        switch (type) {
-            case INDICATION_TYPE_NONE:
-                return "none";
-            case INDICATION_TYPE_DISCLOSURE:
-                return "disclosure";
-            case INDICATION_TYPE_OWNER_INFO:
-                return "owner_info";
-            case INDICATION_TYPE_LOGOUT:
-                return "logout";
-            case INDICATION_TYPE_BATTERY:
-                return "battery";
-            case INDICATION_TYPE_ALIGNMENT:
-                return "alignment";
-            case INDICATION_TYPE_TRANSIENT:
-                return "transient";
-            case INDICATION_TYPE_TRUST:
-                return "trust";
-            case INDICATION_TYPE_PERSISTENT_UNLOCK_MESSAGE:
-                return "persistent_unlock_message";
-            case INDICATION_TYPE_USER_LOCKED:
-                return "user_locked";
-            case INDICATION_TYPE_REVERSE_CHARGING:
-                return "reverse_charging";
-            case INDICATION_TYPE_BIOMETRIC_MESSAGE:
-                return "biometric_message";
-            case INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP:
-                return "biometric_message_followup";
-            default:
-                return "unknown[" + type + "]";
-        }
-    }
 }

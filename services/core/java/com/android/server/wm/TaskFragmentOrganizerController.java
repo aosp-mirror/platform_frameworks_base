@@ -540,12 +540,9 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         synchronized (mGlobalLock) {
             final TaskFragmentOrganizerState organizerState =
                     mTaskFragmentOrganizerState.get(organizer.asBinder());
-            if (organizerState == null) {
-                Slog.e(TAG, "TaskFragmentOrganizer has been unregistered or died when trying"
-                        + " to play animation on its organized windows.");
-                return null;
-            }
-            return organizerState.mRemoteAnimationDefinition;
+            return organizerState != null
+                    ? organizerState.mRemoteAnimationDefinition
+                    : null;
         }
     }
 

@@ -23,7 +23,6 @@ import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
-import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,9 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -54,7 +51,6 @@ constructor(
     interactor: MobileIconsInteractor,
     private val iconController: StatusBarIconController,
     private val iconsViewModelFactory: MobileIconsViewModel.Factory,
-    private val logger: MobileViewLogger,
     @Application private val scope: CoroutineScope,
     private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) : CoreStartable {
@@ -71,16 +67,10 @@ constructor(
      * NOTE: this should go away as the view presenter learns more about this data pipeline
      */
     private val mobileSubIdsState: StateFlow<List<Int>> =
-        mobileSubIds
-            .distinctUntilChanged()
-            .onEach { logger.logUiAdapterSubIdsUpdated(it) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
+        mobileSubIds.stateIn(scope, SharingStarted.WhileSubscribed(), listOf())
 
     /** In order to keep the logs tame, we will reuse the same top-level mobile icons view model */
     val mobileIconsViewModel = iconsViewModelFactory.create(mobileSubIdsState)
-
-    private var isCollecting: Boolean = false
-    private var lastValue: List<Int>? = null
 
     override fun start() {
         // Only notify the icon controller if we want to *render* the new icons.
@@ -89,18 +79,8 @@ constructor(
         // get the logging data without rendering.
         if (statusBarPipelineFlags.useNewMobileIcons()) {
             scope.launch {
-                isCollecting = true
-                mobileSubIds.collectLatest {
-                    logger.logUiAdapterSubIdsSentToIconController(it)
-                    lastValue = it
-                    iconController.setNewMobileIconSubIds(it)
-                }
+                mobileSubIds.collectLatest { iconController.setNewMobileIconSubIds(it) }
             }
         }
-    }
-
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("isCollecting=$isCollecting")
-        pw.println("Last values sent to icon controller: $lastValue")
     }
 }

@@ -25,7 +25,6 @@ import android.media.AudioSystem;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
-import android.media.PlayerBase;
 import android.media.SoundPool;
 import android.os.Environment;
 import android.os.Handler;
@@ -47,7 +46,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * A helper class for managing sound effects loading / unloading
@@ -109,14 +107,11 @@ class SoundEffectsHelper {
     private final int[] mEffects = new int[AudioManager.NUM_SOUND_EFFECTS]; // indexes in mResources
     private SoundPool mSoundPool;
     private SoundPoolLoader mSoundPoolLoader;
-    /** callback to provide handle to the player of the sound effects */
-    private final Consumer<PlayerBase> mPlayerAvailableCb;
 
-    SoundEffectsHelper(Context context, Consumer<PlayerBase> playerAvailableCb) {
+    SoundEffectsHelper(Context context) {
         mContext = context;
         mSfxAttenuationDb = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_soundEffectVolumeDb);
-        mPlayerAvailableCb = playerAvailableCb;
         startWorker();
     }
 
@@ -192,7 +187,6 @@ class SoundEffectsHelper {
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .build())
                 .build();
-        mPlayerAvailableCb.accept(mSoundPool);
         loadSoundAssets();
 
         mSoundPoolLoader = new SoundPoolLoader();

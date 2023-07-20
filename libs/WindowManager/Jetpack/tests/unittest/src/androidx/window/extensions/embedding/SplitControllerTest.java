@@ -34,11 +34,8 @@ import static androidx.window.extensions.embedding.EmbeddingTestUtils.SPLIT_ATTR
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.TEST_TAG;
-import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActivityBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActivityInfoWithMinDimensions;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createMockTaskFragmentInfo;
-import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPairRuleBuilder;
-import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitPlaceholderRuleBuilder;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.createTestTaskContainer;
 import static androidx.window.extensions.embedding.EmbeddingTestUtils.getSplitBounds;
@@ -435,7 +432,7 @@ public class SplitControllerTest {
     @Test
     public void testResolveStartActivityIntent_withoutLaunchingActivity() {
         final Intent intent = new Intent();
-        final ActivityRule expandRule = createActivityBuilder(r -> false, i -> i == intent)
+        final ActivityRule expandRule = new ActivityRule.Builder(r -> false, i -> i == intent)
                 .setShouldAlwaysExpand(true)
                 .build();
         mSplitController.setEmbeddingRules(Collections.singleton(expandRule));
@@ -1173,7 +1170,7 @@ public class SplitControllerTest {
 
     @Test
     public void testHasSamePresentation() {
-        SplitPairRule splitRule1 = createSplitPairRuleBuilder(
+        SplitPairRule splitRule1 = new SplitPairRule.Builder(
                 activityPair -> true,
                 activityIntentPair -> true,
                 windowMetrics -> true)
@@ -1181,7 +1178,7 @@ public class SplitControllerTest {
                 .setFinishPrimaryWithSecondary(DEFAULT_FINISH_PRIMARY_WITH_SECONDARY)
                 .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
                 .build();
-        SplitPairRule splitRule2 = createSplitPairRuleBuilder(
+        SplitPairRule splitRule2 = new SplitPairRule.Builder(
                 activityPair -> true,
                 activityIntentPair -> true,
                 windowMetrics -> true)
@@ -1194,7 +1191,7 @@ public class SplitControllerTest {
                 SplitController.haveSamePresentation(splitRule1, splitRule2,
                         new WindowMetrics(TASK_BOUNDS, WindowInsets.CONSUMED)));
 
-        splitRule2 = createSplitPairRuleBuilder(
+        splitRule2 = new SplitPairRule.Builder(
                 activityPair -> true,
                 activityIntentPair -> true,
                 windowMetrics -> true)
@@ -1358,7 +1355,7 @@ public class SplitControllerTest {
 
     /** Setups a rule to always expand the given intent. */
     private void setupExpandRule(@NonNull Intent expandIntent) {
-        final ActivityRule expandRule = createActivityBuilder(r -> false, expandIntent::equals)
+        final ActivityRule expandRule = new ActivityRule.Builder(r -> false, expandIntent::equals)
                 .setShouldAlwaysExpand(true)
                 .build();
         mSplitController.setEmbeddingRules(Collections.singleton(expandRule));
@@ -1366,7 +1363,7 @@ public class SplitControllerTest {
 
     /** Setups a rule to always expand the given activity. */
     private void setupExpandRule(@NonNull Activity expandActivity) {
-        final ActivityRule expandRule = createActivityBuilder(expandActivity::equals, i -> false)
+        final ActivityRule expandRule = new ActivityRule.Builder(expandActivity::equals, i -> false)
                 .setShouldAlwaysExpand(true)
                 .build();
         mSplitController.setEmbeddingRules(Collections.singleton(expandRule));
@@ -1374,7 +1371,7 @@ public class SplitControllerTest {
 
     /** Setups a rule to launch placeholder for the given activity. */
     private void setupPlaceholderRule(@NonNull Activity primaryActivity) {
-        final SplitRule placeholderRule = createSplitPlaceholderRuleBuilder(PLACEHOLDER_INTENT,
+        final SplitRule placeholderRule = new SplitPlaceholderRule.Builder(PLACEHOLDER_INTENT,
                 primaryActivity::equals, i -> false, w -> true)
                 .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
                 .build();

@@ -24,14 +24,18 @@ public class MainActivity extends Activity implements OnItemClickListener {
     static final String KEY_NAME = "name";
     static final String KEY_CLASS = "clazz";
 
-    static final ArrayList<Map<String, ?>> SAMPLES = new ArrayList<>();
-    static {
-        for (int i = 1; i < 25; i++) {
-            Map<String, Object> sample = new HashMap<String, Object>();
-            sample.put(KEY_NAME, "List Item: " + i);
-            SAMPLES.add(sample);
-        }
+    static Map<String,?> make(String name) {
+        Map<String,Object> ret = new HashMap<String,Object>();
+        ret.put(KEY_NAME, name);
+        return ret;
     }
+
+    @SuppressWarnings("serial")
+    static final ArrayList<Map<String,?>> SAMPLES = new ArrayList<Map<String,?>>() {{
+        for (int i = 1; i < 25; i++) {
+            add(make("List Item: " + i));
+        }
+    }};
 
     Handler mHandler = new Handler();
 

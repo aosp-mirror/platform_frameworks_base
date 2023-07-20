@@ -17,6 +17,9 @@
 
 <resources>
     <!-- Material next state on color-->
+    <color name="settingslib_thumb_on_color">@color/settingslib_state_on_color</color>
+
+    <!-- Material next state on color-->
     <color name="settingslib_state_on_color">@android:color/system_accent1_100</color>
 
     <!-- Material next state off color-->

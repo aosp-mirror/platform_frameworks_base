@@ -34,4 +34,5 @@ public class AndroidRuntimeException extends RuntimeException {
     public AndroidRuntimeException(Exception cause) {
         super(cause);
     }
-}
+};
+

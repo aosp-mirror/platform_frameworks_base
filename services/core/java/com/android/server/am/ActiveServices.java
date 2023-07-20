@@ -148,6 +148,7 @@ import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.BoostFramework;
 import android.util.EventLog;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -175,6 +176,7 @@ import com.android.server.SystemService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.uri.NeededUriGrants;
+import com.android.server.wm.ActivityRecord;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 
 import java.io.FileDescriptor;
@@ -249,6 +251,12 @@ public final class ActiveServices {
     // Maximum number of services that we allow to start in the background
     // at the same time.
     final int mMaxStartingBackground;
+
+   //mPerf Object
+   public static BoostFramework mPerf = new BoostFramework();
+
+    // Flag to reschedule the services during app launch. Disable by default.
+    private static boolean SERVICE_RESCHEDULE = false;
 
     /**
      * Master service bookkeeping, keyed by user number.
@@ -328,6 +336,9 @@ public final class ActiveServices {
 
     /** Amount of time to allow a last ANR message to exist before freeing the memory. */
     static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
+
+    private final boolean isLowRamDevice =
+            SystemProperties.getBoolean("ro.config.low_ram", false);
 
     String mLastAnrDump;
 
@@ -568,6 +579,9 @@ public final class ActiveServices {
                 ? maxBg : ActivityManager.isLowRamDeviceStatic() ? 1 : 8;
 
         final IBinder b = ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
+
+        if(mPerf != null)
+            SERVICE_RESCHEDULE = Boolean.parseBoolean(mPerf.perfGetProp("ro.vendor.qti.am.reschedule_service", "false"));
     }
 
     void systemServicesReady() {
@@ -797,10 +811,12 @@ public final class ActiveServices {
             final int allowed = mAm.getAppStartModeLOSP(r.appInfo.uid, r.packageName,
                     r.appInfo.targetSdkVersion, callingPid, false, false, forcedStandby);
             if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
+		/*
                 Slog.w(TAG, "Background start not allowed: service "
                         + service + " to " + r.shortInstanceName
                         + " from pid=" + callingPid + " uid=" + callingUid
                         + " pkg=" + callingPackage + " startFg?=" + fgRequired);
+		*/
                 if (allowed == ActivityManager.APP_START_MODE_DELAYED || forceSilentAbort) {
                     // In this case we are silently disabling the app, to disrupt as
                     // little as possible existing apps.
@@ -3738,6 +3754,14 @@ public final class ActiveServices {
                         r.pendingStarts.add(0, si);
                         long dur = SystemClock.uptimeMillis() - si.deliveredTime;
                         dur *= 2;
+                        if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
+                            Slog.w(TAG,"Can add more delay !!!"
+                               +" si.deliveredTime "+si.deliveredTime
+                               +" dur "+dur
+                               +" si.deliveryCount "+si.deliveryCount
+                               +" si.doneExecutingCount "+si.doneExecutingCount
+                               +" allowCancel "+allowCancel);
+                        }
                         if (minDuration < dur) minDuration = dur;
                         if (resetTime < dur) resetTime = dur;
                     } else {
@@ -3761,6 +3785,13 @@ public final class ActiveServices {
             }
 
             r.totalRestartCount++;
+            if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
+                Slog.w(TAG,"r.name "+r.name+" N "+N+" minDuration "+minDuration
+                       +" resetTime "+resetTime+" now "+now
+                       +" r.restartDelay "+r.restartDelay
+                       +" r.restartTime+resetTime "+(r.restartTime+resetTime)
+                       +" allowCancel "+allowCancel);
+            }
             if (r.restartDelay == 0) {
                 r.restartCount++;
                 r.restartDelay = minDuration;
@@ -3786,6 +3817,14 @@ public final class ActiveServices {
 
             if (isServiceRestartBackoffEnabledLocked(r.packageName)) {
                 r.nextRestartTime = r.mEarliestRestartTime = now + r.restartDelay;
+                if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
+                    Slog.w(TAG,"r.name "+r.name+" N "+N+" minDuration "+minDuration
+                          +" resetTime "+resetTime+" now "+now
+                          +" r.restartDelay "+r.restartDelay
+                          +" r.restartTime+resetTime "+(r.restartTime+resetTime)
+                          +" r.nextRestartTime "+r.nextRestartTime
+                          +" allowCancel "+allowCancel);
+                }
 
                 if (inRestarting) {
                     // Take it out of the list temporarily for easier maintenance of the list.
@@ -3889,6 +3928,15 @@ public final class ActiveServices {
         r.nextRestartTime = now + r.restartDelay;
         Slog.w(TAG, scheduling + " restart of crashed service "
                 + r.shortInstanceName + " in " + r.restartDelay + "ms for " + reason);
+
+        if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
+            for (int i=mRestartingServices.size()-1; i>=0; i--) {
+                ServiceRecord r2 = mRestartingServices.get(i);
+                Slog.w(TAG,"Restarting list - i "+i+" r2.nextRestartTime "
+                           +r2.nextRestartTime+" r2.name "+r2.name);
+            }
+        }
+
         EventLog.writeEvent(EventLogTags.AM_SCHEDULE_SERVICE_RESTART,
                 r.userId, r.shortInstanceName, r.restartDelay);
     }
@@ -4062,8 +4110,31 @@ public final class ActiveServices {
             return;
         }
         try {
-            bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true, false,
-                    false, true);
+            if(SERVICE_RESCHEDULE) {
+                boolean shouldDelay = false;
+                ActivityRecord top_rc = mAm.mTaskSupervisor.getTopResumedActivity();
+
+                boolean isPersistent
+                        = !((r.serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0);
+                if(top_rc != null) {
+                    if(top_rc.launching && !r.shortInstanceName.contains(top_rc.packageName)
+                            && !isPersistent && r.isForeground == false) {
+                        shouldDelay = true;
+                    }
+                }
+                if(!shouldDelay) {
+                    bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true, false, false, true);
+                } else {
+                    if (DEBUG_DELAYED_SERVICE) {
+                        Slog.v(TAG, "Reschedule service restart due to app launch"
+                              +" r.shortInstanceName "+r.shortInstanceName+" r.app = "+r.app);
+                    }
+                    r.resetRestartCounter();
+                    scheduleServiceRestartLocked(r, true);
+                }
+            } else {
+                bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true, false, false, true);
+            }
         } catch (TransactionTooLargeException e) {
             // Ignore, it's been logged and nothing upstack cares.
         } finally {
@@ -4400,6 +4471,7 @@ public final class ActiveServices {
                     app.mState.getReportedProcState());
             r.postNotification();
             created = true;
+
         } catch (DeadObjectException e) {
             Slog.w(TAG, "Application dead when creating service " + r);
             mAm.appDiedLocked(app, "Died when creating service");
@@ -4413,7 +4485,12 @@ public final class ActiveServices {
                 // Cleanup.
                 if (newService) {
                     psr.stopService(r);
-                    r.setProcess(null, null, 0, null);
+                    r.app = null;
+                    if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
+                    Slog.w(TAG, " Failed to create Service !!!! ."
+                           +"This will introduce huge delay...  "
+                           +r.shortInstanceName + " in " + r.restartDelay + "ms");
+                    }
                 }
 
                 // Retry.
@@ -4594,7 +4671,6 @@ public final class ActiveServices {
     private void bringDownServiceLocked(ServiceRecord r, boolean enqueueOomAdj) {
         //Slog.i(TAG, "Bring down service:");
         //r.dump("  ");
-
         // Report to all of the connections that the service is no longer
         // available.
         ArrayMap<IBinder, ArrayList<ConnectionRecord>> connections = r.getConnections();

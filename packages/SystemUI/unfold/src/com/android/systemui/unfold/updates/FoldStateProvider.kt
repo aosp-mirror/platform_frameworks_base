@@ -31,9 +31,8 @@ interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
     val isFinishedOpening: Boolean
 
     interface FoldUpdatesListener {
-        @JvmDefault fun onHingeAngleUpdate(@FloatRange(from = 0.0, to = 180.0) angle: Float) {}
-        @JvmDefault fun onFoldUpdate(@FoldUpdate update: Int) {}
-        @JvmDefault fun onUnfoldedScreenAvailable() {}
+        fun onHingeAngleUpdate(@FloatRange(from = 0.0, to = 180.0) angle: Float)
+        fun onFoldUpdate(@FoldUpdate update: Int)
     }
 
     @IntDef(
@@ -41,6 +40,7 @@ interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
             [
                 FOLD_UPDATE_START_OPENING,
                 FOLD_UPDATE_START_CLOSING,
+                FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE,
                 FOLD_UPDATE_FINISH_HALF_OPEN,
                 FOLD_UPDATE_FINISH_FULL_OPEN,
                 FOLD_UPDATE_FINISH_CLOSED])
@@ -50,6 +50,7 @@ interface FoldStateProvider : CallbackController<FoldUpdatesListener> {
 
 const val FOLD_UPDATE_START_OPENING = 0
 const val FOLD_UPDATE_START_CLOSING = 1
-const val FOLD_UPDATE_FINISH_HALF_OPEN = 2
-const val FOLD_UPDATE_FINISH_FULL_OPEN = 3
-const val FOLD_UPDATE_FINISH_CLOSED = 4
+const val FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE = 2
+const val FOLD_UPDATE_FINISH_HALF_OPEN = 3
+const val FOLD_UPDATE_FINISH_FULL_OPEN = 4
+const val FOLD_UPDATE_FINISH_CLOSED = 5

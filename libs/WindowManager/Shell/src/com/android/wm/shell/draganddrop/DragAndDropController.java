@@ -36,7 +36,6 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_U
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import android.content.ClipDescription;
-import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -59,9 +58,9 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ExternalMainThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -71,7 +70,7 @@ import java.util.ArrayList;
  * Handles the global drag and drop handling for the Shell.
  */
 public class DragAndDropController implements DisplayController.OnDisplaysChangedListener,
-        View.OnDragListener, ComponentCallbacks2 {
+        View.OnDragListener, ConfigurationChangeListener {
 
     private static final String TAG = DragAndDropController.class.getSimpleName();
 
@@ -120,6 +119,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         mMainExecutor.executeDelayed(() -> {
             mDisplayController.addDisplayWindowListener(this);
         }, 0);
+        mShellController.addConfigurationChangeListener(this);
     }
 
     /**
@@ -180,7 +180,6 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         try {
             wm.addView(rootView, layoutParams);
             addDisplayDropTarget(displayId, context, wm, rootView, dragLayout);
-            context.registerComponentCallbacks(this);
         } catch (WindowManager.InvalidDisplayException e) {
             Slog.w(TAG, "Unable to add view for display id: " + displayId);
         }
@@ -210,7 +209,6 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         if (pd == null) {
             return;
         }
-        pd.context.unregisterComponentCallbacks(this);
         pd.wm.removeViewImmediate(pd.rootView);
         mDisplayDropTargets.remove(displayId);
     }
@@ -330,29 +328,18 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         return mimeTypes;
     }
 
-    // Note: Component callbacks are always called on the main thread of the process
-    @ExternalMainThread
+    @Override
+    public void onThemeChanged() {
+        for (int i = 0; i < mDisplayDropTargets.size(); i++) {
+            mDisplayDropTargets.get(i).dragLayout.onThemeChange();
+        }
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        mMainExecutor.execute(() -> {
-            for (int i = 0; i < mDisplayDropTargets.size(); i++) {
-                mDisplayDropTargets.get(i).dragLayout.onConfigChanged(newConfig);
-            }
-        });
-    }
-
-    // Note: Component callbacks are always called on the main thread of the process
-    @ExternalMainThread
-    @Override
-    public void onTrimMemory(int level) {
-        // Do nothing
-    }
-
-    // Note: Component callbacks are always called on the main thread of the process
-    @ExternalMainThread
-    @Override
-    public void onLowMemory() {
-        // Do nothing
+        for (int i = 0; i < mDisplayDropTargets.size(); i++) {
+            mDisplayDropTargets.get(i).dragLayout.onConfigChanged(newConfig);
+        }
     }
 
     private static class PerDisplay {

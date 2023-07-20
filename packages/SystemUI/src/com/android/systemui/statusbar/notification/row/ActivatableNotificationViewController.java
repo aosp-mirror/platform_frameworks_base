@@ -109,7 +109,7 @@ public class ActivatableNotificationViewController
                 return true;
             }
             if (ev.getAction() == MotionEvent.ACTION_UP) {
-                mView.setLastActionUpTime(ev.getEventTime());
+                mView.setLastActionUpTime(SystemClock.uptimeMillis());
             }
             // With a11y, just do nothing.
             if (mAccessibilityManager.isTouchExplorationEnabled()) {

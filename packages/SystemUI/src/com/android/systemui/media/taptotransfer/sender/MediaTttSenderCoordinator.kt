@@ -23,20 +23,17 @@ import android.view.View
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.CoreStartable
-import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.taptotransfer.MediaTttFlags
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.temporarydisplay.TemporaryViewDisplayController
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarEndItem
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
-import java.io.PrintWriter
 import javax.inject.Inject
 
 /**
@@ -50,15 +47,12 @@ constructor(
     private val chipbarCoordinator: ChipbarCoordinator,
     private val commandQueue: CommandQueue,
     private val context: Context,
-    private val dumpManager: DumpManager,
-    private val logger: MediaTttSenderLogger,
+    @MediaTttSenderLogger private val logger: MediaTttLogger<ChipbarInfo>,
     private val mediaTttFlags: MediaTttFlags,
     private val uiEventLogger: MediaTttSenderUiEventLogger,
-) : CoreStartable, Dumpable {
+) : CoreStartable {
 
-    // Since the media transfer display is similar to a heads-up notification, use the same timeout.
-    private val defaultTimeout = context.resources.getInteger(R.integer.heads_up_notification_decay)
-
+    private var displayedState: ChipStateSender? = null
     // A map to store current chip state per id.
     private var stateMap: MutableMap<String, ChipStateSender> = mutableMapOf()
 
@@ -80,7 +74,6 @@ constructor(
     override fun start() {
         if (mediaTttFlags.isMediaTttEnabled()) {
             commandQueue.addCallback(commandQueueCallbacks)
-            dumpManager.registerNormalDumpable(this)
         }
     }
 
@@ -98,42 +91,42 @@ constructor(
             return
         }
 
-        val currentStateForId: ChipStateSender? = stateMap[routeInfo.id]
-        if (!ChipStateSender.isValidStateTransition(currentStateForId, chipState)) {
+        val currentState = stateMap[routeInfo.id]
+        if (!ChipStateSender.isValidStateTransition(currentState, chipState)) {
             // ChipStateSender.FAR_FROM_RECEIVER is the default state when there is no state.
             logger.logInvalidStateTransitionError(
-                currentState = currentStateForId?.name ?: ChipStateSender.FAR_FROM_RECEIVER.name,
+                currentState = currentState?.name ?: ChipStateSender.FAR_FROM_RECEIVER.name,
                 chipState.name
             )
             return
         }
         uiEventLogger.logSenderStateChange(chipState)
 
+        stateMap.put(routeInfo.id, chipState)
         if (chipState == ChipStateSender.FAR_FROM_RECEIVER) {
-            // Return early if we're not displaying a chip for this ID anyway
-            if (currentStateForId == null) return
+            // No need to store the state since it is the default state
+            stateMap.remove(routeInfo.id)
+            // Return early if we're not displaying a chip anyway
+            val currentDisplayedState = displayedState ?: return
 
             val removalReason = ChipStateSender.FAR_FROM_RECEIVER.name
             if (
-                currentStateForId.transferStatus == TransferStatus.IN_PROGRESS ||
-                    currentStateForId.transferStatus == TransferStatus.SUCCEEDED
+                currentDisplayedState.transferStatus == TransferStatus.IN_PROGRESS ||
+                    currentDisplayedState.transferStatus == TransferStatus.SUCCEEDED
             ) {
                 // Don't remove the chip if we're in progress or succeeded, since the user should
                 // still be able to see the status of the transfer.
                 logger.logRemovalBypass(
                     removalReason,
-                    bypassReason = "transferStatus=${currentStateForId.transferStatus.name}"
+                    bypassReason = "transferStatus=${currentDisplayedState.transferStatus.name}"
                 )
                 return
             }
 
-            // No need to store the state since it is the default state
-            removeIdFromStore(routeInfo.id, reason = removalReason)
+            displayedState = null
             chipbarCoordinator.removeView(routeInfo.id, removalReason)
         } else {
-            stateMap[routeInfo.id] = chipState
-            logger.logStateMap(stateMap)
-            chipbarCoordinator.registerListener(displayListener)
+            displayedState = chipState
             chipbarCoordinator.displayView(
                 createChipbarInfo(
                     chipState,
@@ -142,7 +135,7 @@ constructor(
                     context,
                     logger,
                 )
-            )
+            ) { stateMap.remove(routeInfo.id) }
         }
     }
 
@@ -154,29 +147,16 @@ constructor(
         routeInfo: MediaRoute2Info,
         undoCallback: IUndoMediaTransferCallback?,
         context: Context,
-        logger: MediaTttSenderLogger,
+        logger: MediaTttLogger<ChipbarInfo>,
     ): ChipbarInfo {
         val packageName = routeInfo.clientPackageName
-        val otherDeviceName =
-            if (routeInfo.name.isBlank()) {
-                context.getString(R.string.media_ttt_default_device_type)
-            } else {
-                routeInfo.name.toString()
-            }
-        val icon =
-            MediaTttUtils.getIconInfoFromPackageName(context, packageName, isReceiver = false) {
-                logger.logPackageNotFound(packageName)
-            }
-
-        val timeout =
-            when (chipStateSender.timeoutLength) {
-                TimeoutLength.DEFAULT -> defaultTimeout
-                TimeoutLength.LONG -> 2 * defaultTimeout
-            }
+        val otherDeviceName = routeInfo.name.toString()
 
         return ChipbarInfo(
             // Display the app's icon as the start icon
-            startIcon = icon.toTintedIcon(),
+            startIcon =
+                MediaTttUtils.getIconInfoFromPackageName(context, packageName, logger)
+                    .toTintedIcon(),
             text = chipStateSender.getChipTextString(context, otherDeviceName),
             endItem =
                 when (chipStateSender.endItem) {
@@ -197,10 +177,9 @@ constructor(
                     }
                 },
             vibrationEffect = chipStateSender.transferStatus.vibrationEffect,
-            allowSwipeToDismiss = true,
             windowTitle = MediaTttUtils.WINDOW_TITLE_SENDER,
             wakeReason = MediaTttUtils.WAKE_REASON_SENDER,
-            timeoutMs = timeout,
+            timeoutMs = chipStateSender.timeout,
             id = routeInfo.id,
             priority = ViewPriority.NORMAL,
         )
@@ -240,22 +219,5 @@ constructor(
             Text.Resource(R.string.media_transfer_undo),
             onClickListener,
         )
-    }
-
-    private val displayListener =
-        TemporaryViewDisplayController.Listener { id, reason -> removeIdFromStore(id, reason) }
-
-    private fun removeIdFromStore(id: String, reason: String) {
-        logger.logStateMapRemoval(id, reason)
-        stateMap.remove(id)
-        logger.logStateMap(stateMap)
-        if (stateMap.isEmpty()) {
-            chipbarCoordinator.unregisterListener(displayListener)
-        }
-    }
-
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("Current sender states:")
-        pw.println(stateMap.toString())
     }
 }

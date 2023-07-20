@@ -36,8 +36,6 @@ import com.android.systemui.backup.BackupHelper
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
-import com.android.systemui.controls.panels.AuthorizedPanelsRepository
-import com.android.systemui.controls.panels.SelectedComponentRepository
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.SysUISingleton
@@ -56,17 +54,15 @@ import javax.inject.Inject
 
 @SysUISingleton
 class ControlsControllerImpl @Inject constructor (
-        private val context: Context,
-        @Background private val executor: DelayableExecutor,
-        private val uiController: ControlsUiController,
-        private val selectedComponentRepository: SelectedComponentRepository,
-        private val bindingController: ControlsBindingController,
-        private val listingController: ControlsListingController,
-        private val userFileManager: UserFileManager,
-        private val userTracker: UserTracker,
-        private val authorizedPanelsRepository: AuthorizedPanelsRepository,
-        optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
-        dumpManager: DumpManager,
+    private val context: Context,
+    @Background private val executor: DelayableExecutor,
+    private val uiController: ControlsUiController,
+    private val bindingController: ControlsBindingController,
+    private val listingController: ControlsListingController,
+    private val userFileManager: UserFileManager,
+    private val userTracker: UserTracker,
+    optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
+    dumpManager: DumpManager,
 ) : Dumpable, ControlsController {
 
     companion object {
@@ -123,13 +119,16 @@ class ControlsControllerImpl @Inject constructor (
         userChanging = false
     }
 
-    override fun changeUser(newUser: UserHandle) {
-        userChanging = true
-        if (currentUser == newUser) {
-            userChanging = false
-            return
+    private val userTrackerCallback = object : UserTracker.Callback {
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            userChanging = true
+            val newUserHandle = UserHandle.of(newUser)
+            if (currentUser == newUserHandle) {
+                userChanging = false
+                return
+            }
+            setValuesForUser(newUserHandle)
         }
-        setValuesForUser(newUser)
     }
 
     @VisibleForTesting
@@ -230,6 +229,7 @@ class ControlsControllerImpl @Inject constructor (
         dumpManager.registerDumpable(javaClass.name, this)
         resetFavorites()
         userChanging = false
+        userTracker.addCallback(userTrackerCallback, executor)
         context.registerReceiver(
             restoreFinishedReceiver,
             IntentFilter(BackupHelper.ACTION_RESTORE_FINISHED),
@@ -241,6 +241,7 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     fun destroy() {
+        userTracker.removeCallback(userTrackerCallback)
         context.unregisterReceiver(restoreFinishedReceiver)
         listingController.removeCallback(listingCallback)
     }
@@ -248,11 +249,6 @@ class ControlsControllerImpl @Inject constructor (
     private fun resetFavorites() {
         Favorites.clear()
         Favorites.load(persistenceWrapper.readFavorites())
-        // After loading favorites, add the package names of any apps with favorites to the list
-        // of authorized panels. That way, if the user has previously favorited controls for an app,
-        // that panel will be authorized.
-        authorizedPanelsRepository.addAuthorizedPanels(
-                Favorites.getAllStructures().map { it.componentName.packageName }.toSet())
     }
 
     private fun confirmAvailability(): Boolean {
@@ -481,10 +477,6 @@ class ControlsControllerImpl @Inject constructor (
         bindingController.unsubscribe()
     }
 
-    override fun bindComponentForPanel(componentName: ComponentName) {
-        bindingController.bindServiceForPanel(componentName)
-    }
-
     override fun addFavorite(
         componentName: ComponentName,
         structureName: CharSequence,
@@ -493,22 +485,9 @@ class ControlsControllerImpl @Inject constructor (
         if (!confirmAvailability()) return
         executor.execute {
             if (Favorites.addFavorite(componentName, structureName, controlInfo)) {
-                authorizedPanelsRepository.addAuthorizedPanels(setOf(componentName.packageName))
                 persistenceWrapper.storeFavorites(Favorites.getAllStructures())
             }
         }
-    }
-
-    override fun removeFavorites(componentName: ComponentName): Boolean {
-        if (!confirmAvailability()) return false
-
-        executor.execute {
-            if (Favorites.removeStructures(componentName)) {
-                persistenceWrapper.storeFavorites(Favorites.getAllStructures())
-            }
-            authorizedPanelsRepository.removeAuthorizedPanels(setOf(componentName.packageName))
-        }
-        return true
     }
 
     override fun replaceFavoritesForStructure(structureInfo: StructureInfo) {
@@ -570,12 +549,6 @@ class ControlsControllerImpl @Inject constructor (
 
     override fun getPreferredSelection(): SelectedItem {
         return uiController.getPreferredSelectedItem(getFavorites())
-    }
-
-    override fun setPreferredSelection(selectedItem: SelectedItem) {
-        selectedComponentRepository.setSelectedComponent(
-                SelectedComponentRepository.SelectedComponent(selectedItem)
-        )
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
@@ -671,11 +644,10 @@ private object Favorites {
         return true
     }
 
-    fun removeStructures(componentName: ComponentName): Boolean {
+    fun removeStructures(componentName: ComponentName) {
         val newFavMap = favMap.toMutableMap()
-        val removed = newFavMap.remove(componentName) != null
+        newFavMap.remove(componentName)
         favMap = newFavMap
-        return removed
     }
 
     fun addFavorite(

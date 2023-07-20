@@ -83,7 +83,8 @@ public class ReduceBrightColorsController implements
                     if (mListeners.size() > 0) {
                         mSecureSettings.unregisterContentObserver(mContentObserver);
                         mSecureSettings.registerContentObserverForUser(
-                                Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
+                                Settings.Secure.getUriFor(
+                                        Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED),
                                 false, mContentObserver, newUser);
                     }
                 }
@@ -99,7 +100,8 @@ public class ReduceBrightColorsController implements
                 mListeners.add(listener);
                 if (mListeners.size() == 1) {
                     mSecureSettings.registerContentObserverForUser(
-                            Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
+                            Settings.Secure.getUriFor(
+                                    Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED),
                             false, mContentObserver, mUserTracker.getUserId());
                 }
             }

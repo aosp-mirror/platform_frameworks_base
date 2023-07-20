@@ -196,6 +196,12 @@ class ContextImpl extends Context {
     private static final String XATTR_INODE_CACHE = "user.inode_cache";
     private static final String XATTR_INODE_CODE_CACHE = "user.inode_code_cache";
 
+    private static final Set<String> LINEAR_MOTOR_VIBRATOR_WHITELIST = Set.of(
+        "com.oneplus.camera",
+        "com.oneplus.gallery",
+        "com.oplus.camera"
+    );
+
     /**
      * Map from package name, to preference name, to cached preferences.
      */
@@ -1094,7 +1100,7 @@ class ContextImpl extends Context {
                 && (options == null
                         || ActivityOptions.fromBundle(options).getLaunchTaskId() == -1)) {
             throw new AndroidRuntimeException(
-                    "Calling startActivity() from outside of an Activity"
+                    "Calling startActivity() from outside of an Activity "
                             + " context requires the FLAG_ACTIVITY_NEW_TASK flag."
                             + " Is this really what you want?");
         }
@@ -1128,7 +1134,7 @@ class ContextImpl extends Context {
     public int startActivitiesAsUser(Intent[] intents, Bundle options, UserHandle userHandle) {
         if ((intents[0].getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
             throw new AndroidRuntimeException(
-                    "Calling startActivities() from outside of an Activity"
+                    "Calling startActivities() from outside of an Activity "
                     + " context requires the FLAG_ACTIVITY_NEW_TASK flag on first Intent."
                     + " Is this really what you want?");
         }
@@ -1142,7 +1148,7 @@ class ContextImpl extends Context {
         warnIfCallingFromSystemProcess();
         if ((intents[0].getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) == 0) {
             throw new AndroidRuntimeException(
-                    "Calling startActivities() from outside of an Activity"
+                    "Calling startActivities() from outside of an Activity "
                     + " context requires the FLAG_ACTIVITY_NEW_TASK flag on first Intent."
                     + " Is this really what you want?");
         }
@@ -2102,6 +2108,12 @@ class ContextImpl extends Context {
 
     @Override
     public Object getSystemService(String name) {
+        if (Context.LINEARMOTOR_VIBRATOR_SERVICE.equals(name)) {
+            if (!LINEAR_MOTOR_VIBRATOR_WHITELIST.contains(getPackageName())) {
+                Log.w(TAG, "LinearMotorVibrator is unsupported for external use");
+                return null;
+            }
+        }
         if (vmIncorrectContextUseEnabled()) {
             // Check incorrect Context usage.
             if (WINDOW_SERVICE.equals(name) && !isUiContext()) {
@@ -2490,8 +2502,8 @@ class ContextImpl extends Context {
      */
     private void warnIfCallingFromSystemProcess() {
         if (Process.myUid() == Process.SYSTEM_UID) {
-            Slog.w(TAG, "Calling a method in the system process without a qualified user: "
-                    + Debug.getCallers(5));
+            //Slog.w(TAG, "Calling a method in the system process without a qualified user: "
+                    //+ Debug.getCallers(5));
         }
     }
 

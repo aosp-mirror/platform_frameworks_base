@@ -38,7 +38,6 @@ import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaDeviceData
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.pipeline.RESUME_MEDIA_TIMEOUT
-import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -93,7 +92,6 @@ class MediaResumeListenerTest : SysuiTestCase() {
     @Mock private lateinit var mockContext: Context
     @Mock private lateinit var pendingIntent: PendingIntent
     @Mock private lateinit var dumpManager: DumpManager
-    @Mock private lateinit var mediaFlags: MediaFlags
 
     @Captor lateinit var callbackCaptor: ArgumentCaptor<ResumeMediaBrowser.Callback>
     @Captor lateinit var actionCaptor: ArgumentCaptor<Runnable>
@@ -136,7 +134,6 @@ class MediaResumeListenerTest : SysuiTestCase() {
         whenever(mockContext.packageManager).thenReturn(context.packageManager)
         whenever(mockContext.contentResolver).thenReturn(context.contentResolver)
         whenever(mockContext.userId).thenReturn(context.userId)
-        whenever(mediaFlags.isRemoteResumeAllowed()).thenReturn(false)
 
         executor = FakeExecutor(clock)
         resumeListener =
@@ -149,8 +146,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 tunerService,
                 resumeBrowserFactory,
                 dumpManager,
-                clock,
-                mediaFlags,
+                clock
             )
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
@@ -192,8 +188,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 tunerService,
                 resumeBrowserFactory,
                 dumpManager,
-                clock,
-                mediaFlags,
+                clock
             )
         listener.setManager(mediaDataManager)
         verify(broadcastDispatcher, never())
@@ -249,32 +244,6 @@ class MediaResumeListenerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnLoad_localCast_remoteResumeAllowed_doesCheck() {
-        // If local cast media is allowed to resume
-        whenever(mediaFlags.isRemoteResumeAllowed()).thenReturn(true)
-
-        // When media data is loaded that has not been checked yet, and is a local cast
-        val dataCast = data.copy(playbackLocation = MediaData.PLAYBACK_CAST_LOCAL)
-        resumeListener.onMediaDataLoaded(KEY, null, dataCast)
-
-        // Then we report back to the manager
-        verify(mediaDataManager).setResumeAction(KEY, null)
-    }
-
-    @Test
-    fun testOnLoad_remoteCast_remoteResumeAllowed_doesCheck() {
-        // If local cast media is allowed to resume
-        whenever(mediaFlags.isRemoteResumeAllowed()).thenReturn(true)
-
-        // When media data is loaded that has not been checked yet, and is a remote cast
-        val dataRcn = data.copy(playbackLocation = MediaData.PLAYBACK_CAST_REMOTE)
-        resumeListener.onMediaDataLoaded(KEY, null, dataRcn)
-
-        // Then we do not take action
-        verify(mediaDataManager, never()).setResumeAction(any(), any())
-    }
-
-    @Test
     fun testOnLoad_checksForResume_hasService() {
         setUpMbsWithValidResolveInfo()
 
@@ -310,25 +279,6 @@ class MediaResumeListenerTest : SysuiTestCase() {
         // Then we should not check it again
         verify(resumeBrowser, never()).testConnection()
         verify(mediaDataManager, never()).setResumeAction(KEY, null)
-    }
-
-    @Test
-    fun testOnLoadTwice_onlyChecksOnce() {
-        // When data is first loaded,
-        setUpMbsWithValidResolveInfo()
-        resumeListener.onMediaDataLoaded(KEY, null, data)
-
-        // We notify the manager to set a null action
-        verify(mediaDataManager).setResumeAction(KEY, null)
-
-        // If we then get another update from the app before the first check completes
-        assertThat(executor.numPending()).isEqualTo(1)
-        var dataWithCheck = data.copy(hasCheckedForResume = true)
-        resumeListener.onMediaDataLoaded(KEY, null, dataWithCheck)
-
-        // We do not try to start another check
-        assertThat(executor.numPending()).isEqualTo(1)
-        verify(mediaDataManager).setResumeAction(KEY, null)
     }
 
     @Test
@@ -411,7 +361,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 assertThat(result.size).isEqualTo(3)
                 assertThat(result[2].toLong()).isEqualTo(currentTime)
             }
-        verify(sharedPrefsEditor).apply()
+        verify(sharedPrefsEditor, times(1)).apply()
     }
 
     @Test
@@ -439,8 +389,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 tunerService,
                 resumeBrowserFactory,
                 dumpManager,
-                clock,
-                mediaFlags,
+                clock
             )
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
@@ -451,8 +400,8 @@ class MediaResumeListenerTest : SysuiTestCase() {
         resumeListener.userUnlockReceiver.onReceive(mockContext, intent)
 
         // We add its resume controls
-        verify(resumeBrowser).findRecentMedia()
-        verify(mediaDataManager)
+        verify(resumeBrowser, times(1)).findRecentMedia()
+        verify(mediaDataManager, times(1))
             .addResumptionControls(anyInt(), any(), any(), any(), any(), any(), eq(PACKAGE_NAME))
     }
 
@@ -472,8 +421,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 tunerService,
                 resumeBrowserFactory,
                 dumpManager,
-                clock,
-                mediaFlags,
+                clock
             )
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
@@ -515,8 +463,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 tunerService,
                 resumeBrowserFactory,
                 dumpManager,
-                clock,
-                mediaFlags,
+                clock
             )
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
@@ -535,7 +482,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 assertThat(result.size).isEqualTo(3)
                 assertThat(result[2].toLong()).isEqualTo(currentTime)
             }
-        verify(sharedPrefsEditor).apply()
+        verify(sharedPrefsEditor, times(1)).apply()
     }
 
     @Test

@@ -39,11 +39,10 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
-import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +54,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class QRCodeScannerTileTest extends SysuiTestCase {
     @Mock
-    private QSHost mHost;
+    private QSTileHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
@@ -89,12 +88,6 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
                 mController);
 
         mTile.initialize();
-        mTestableLooper.processAllMessages();
-    }
-
-    @After
-    public void tearDown() {
-        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 

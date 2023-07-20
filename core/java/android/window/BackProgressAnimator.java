@@ -16,10 +16,8 @@
 
 package android.window;
 
-import android.annotation.NonNull;
 import android.util.FloatProperty;
 
-import com.android.internal.dynamicanimation.animation.DynamicAnimation;
 import com.android.internal.dynamicanimation.animation.SpringAnimation;
 import com.android.internal.dynamicanimation.animation.SpringForce;
 
@@ -42,7 +40,7 @@ public class BackProgressAnimator {
     private final SpringAnimation mSpring;
     private ProgressCallback mCallback;
     private float mProgress = 0;
-    private BackMotionEvent mLastBackEvent;
+    private BackEvent mLastBackEvent;
     private boolean mStarted = false;
 
     private void setProgress(float progress) {
@@ -84,9 +82,9 @@ public class BackProgressAnimator {
     /**
      * Sets a new target position for the back progress.
      *
-     * @param event the {@link BackMotionEvent} containing the latest target progress.
+     * @param event the {@link BackEvent} containing the latest target progress.
      */
-    public void onBackProgressed(BackMotionEvent event) {
+    public void onBackProgressed(BackEvent event) {
         if (!mStarted) {
             return;
         }
@@ -97,11 +95,11 @@ public class BackProgressAnimator {
     /**
      * Starts the back progress animation.
      *
-     * @param event the {@link BackMotionEvent} that started the gesture.
+     * @param event the {@link BackEvent} that started the gesture.
      * @param callback the back callback to invoke for the gesture. It will receive back progress
      *                 dispatches as the progress animation updates.
      */
-    public void onBackStarted(BackMotionEvent event, ProgressCallback callback) {
+    public void onBackStarted(BackEvent event, ProgressCallback callback) {
         reset();
         mLastBackEvent = event;
         mCallback = callback;
@@ -125,34 +123,14 @@ public class BackProgressAnimator {
         mProgress = 0;
     }
 
-    /**
-     * Animate the back progress animation from current progress to start position.
-     * This should be called when back is cancelled.
-     *
-     * @param finishCallback the callback to be invoked when the progress is reach to 0.
-     */
-    public void onBackCancelled(@NonNull Runnable finishCallback) {
-        final DynamicAnimation.OnAnimationEndListener listener =
-                new DynamicAnimation.OnAnimationEndListener() {
-            @Override
-            public void onAnimationEnd(DynamicAnimation animation, boolean canceled, float value,
-                    float velocity) {
-                mSpring.removeEndListener(this);
-                finishCallback.run();
-                reset();
-            }
-        };
-        mSpring.addEndListener(listener);
-        mSpring.animateToFinalPosition(0);
-    }
-
     private void updateProgressValue(float progress) {
         if (mLastBackEvent == null || mCallback == null || !mStarted) {
             return;
         }
         mCallback.onProgressUpdate(
                 new BackEvent(mLastBackEvent.getTouchX(), mLastBackEvent.getTouchY(),
-                        progress / SCALE_FACTOR, mLastBackEvent.getSwipeEdge()));
+                        progress / SCALE_FACTOR, mLastBackEvent.getSwipeEdge(),
+                        mLastBackEvent.getDepartingAnimationTarget()));
     }
 
 }

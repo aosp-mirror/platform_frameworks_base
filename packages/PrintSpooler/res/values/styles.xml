@@ -28,7 +28,7 @@
         <item name="android:layout_marginTop">16dip</item>
         <item name="android:layout_marginBottom">16dip</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:textSize">14sp</item>
     </style>
 </resources>

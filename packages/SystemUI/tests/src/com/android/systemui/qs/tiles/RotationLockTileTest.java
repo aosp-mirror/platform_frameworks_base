@@ -38,7 +38,7 @@ import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -48,7 +48,6 @@ import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.wrapper.RotationPolicyWrapper;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,7 +71,7 @@ public class RotationLockTileTest extends SysuiTestCase {
     @Mock
     private ActivityStarter mActivityStarter;
     @Mock
-    private QSHost mHost;
+    private QSTileHost mHost;
     @Mock
     private MetricsLogger mMetricsLogger;
     @Mock
@@ -137,12 +136,6 @@ public class RotationLockTileTest extends SysuiTestCase {
         enableCameraBasedRotation();
 
         mLockTile.refreshState();
-        mTestableLooper.processAllMessages();
-    }
-
-    @After
-    public void tearDown() {
-        mLockTile.destroy();
         mTestableLooper.processAllMessages();
     }
 

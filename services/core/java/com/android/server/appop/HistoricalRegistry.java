@@ -513,7 +513,7 @@ final class HistoricalRegistry {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
-                    Slog.v(LOG_TAG, "Interaction before persistence initialized");
+                    if (DEBUG) Slog.v(LOG_TAG, "Interaction before persistence initialized");
                     return;
                 }
                 getUpdatedPendingHistoricalOpsMLocked(

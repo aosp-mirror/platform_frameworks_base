@@ -396,17 +396,6 @@ public final class SearchableInfo implements Parcelable {
         private final String mSuggestActionMsg;
         private final String mSuggestActionMsgColumn;
 
-        public static final Parcelable.Creator<ActionKeyInfo> CREATOR =
-                new Parcelable.Creator<ActionKeyInfo>() {
-                    public ActionKeyInfo createFromParcel(Parcel in) {
-                        return new ActionKeyInfo(in);
-                    }
-
-                    public ActionKeyInfo[] newArray(int size) {
-                        return new ActionKeyInfo[size];
-                    }
-                };
-
         /**
          * Create one object using attributeset as input data.
          * @param activityContext runtime context of the activity that the action key information
@@ -535,7 +524,7 @@ public final class SearchableInfo implements Parcelable {
      */
     public static SearchableInfo getActivityMetaData(Context context, ActivityInfo activityInfo,
             int userId) {
-        Context userContext;
+        Context userContext = null;
         try {
             userContext = context.createPackageContextAsUser("system", 0,
                 new UserHandle(userId));
@@ -544,16 +533,17 @@ public final class SearchableInfo implements Parcelable {
             return null;
         }
         // for each component, try to find metadata
-        XmlResourceParser xml = 
-                activityInfo.loadXmlMetaData(userContext.getPackageManager(), MD_LABEL_SEARCHABLE);
-        if (xml == null) {
-            return null;
+        SearchableInfo searchable;
+        try (XmlResourceParser xml = activityInfo.loadXmlMetaData(userContext.getPackageManager(),
+                MD_LABEL_SEARCHABLE)) {
+            if (xml == null) {
+                return null;
+            }
+            ComponentName cName = new ComponentName(activityInfo.packageName, activityInfo.name);
+
+            searchable = getActivityMetaData(userContext, xml, cName);
         }
-        ComponentName cName = new ComponentName(activityInfo.packageName, activityInfo.name);
-        
-        SearchableInfo searchable = getActivityMetaData(userContext, xml, cName);
-        xml.close();
-        
+
         if (DBG) {
             if (searchable != null) {
                 Log.d(LOG_TAG, "Checked " + activityInfo.name

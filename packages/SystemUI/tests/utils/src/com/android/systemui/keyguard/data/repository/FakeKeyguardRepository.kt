@@ -29,7 +29,6 @@ import com.android.systemui.keyguard.shared.model.WakefulnessState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [KeyguardRepository] */
 class FakeKeyguardRepository : KeyguardRepository {
@@ -47,17 +46,11 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _isKeyguardShowing = MutableStateFlow(false)
     override val isKeyguardShowing: Flow<Boolean> = _isKeyguardShowing
 
-    private val _isKeyguardUnlocked = MutableStateFlow(false)
-    override val isKeyguardUnlocked: Flow<Boolean> = _isKeyguardUnlocked
-
     private val _isKeyguardOccluded = MutableStateFlow(false)
     override val isKeyguardOccluded: Flow<Boolean> = _isKeyguardOccluded
 
     private val _isDozing = MutableStateFlow(false)
     override val isDozing: Flow<Boolean> = _isDozing
-
-    private val _isAodAvailable = MutableStateFlow(false)
-    override val isAodAvailable: Flow<Boolean> = _isAodAvailable
 
     private val _isDreaming = MutableStateFlow(false)
     override val isDreaming: Flow<Boolean> = _isDreaming
@@ -87,6 +80,9 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     private val _isUdfpsSupported = MutableStateFlow(false)
 
+    private val _isBouncerShowing = MutableStateFlow(false)
+    override val isBouncerShowing: Flow<Boolean> = _isBouncerShowing
+
     private val _isKeyguardGoingAway = MutableStateFlow(false)
     override val isKeyguardGoingAway: Flow<Boolean> = _isKeyguardGoingAway
 
@@ -101,13 +97,6 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     private val _biometricUnlockSource = MutableStateFlow<BiometricUnlockSource?>(null)
     override val biometricUnlockSource: Flow<BiometricUnlockSource?> = _biometricUnlockSource
-
-    private val _isQuickSettingsVisible = MutableStateFlow(false)
-    override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
-
-    override fun setQuickSettingsVisible(isVisible: Boolean) {
-        _isQuickSettingsVisible.value = isVisible
-    }
 
     override fun isKeyguardShowing(): Boolean {
         return _isKeyguardShowing.value
@@ -137,10 +126,6 @@ class FakeKeyguardRepository : KeyguardRepository {
         _isDozing.value = isDozing
     }
 
-    fun setAodAvailable(isAodAvailable: Boolean) {
-        _isAodAvailable.value = isAodAvailable
-    }
-
     fun setDreamingWithOverlay(isDreaming: Boolean) {
         _isDreamingWithOverlay.value = isDreaming
     }
@@ -151,6 +136,10 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setWakefulnessModel(model: WakefulnessModel) {
         _wakefulnessModel.value = model
+    }
+
+    fun setBouncerShowing(isShowing: Boolean) {
+        _isBouncerShowing.value = isShowing
     }
 
     fun setBiometricUnlockState(state: BiometricUnlockModel) {
@@ -171,10 +160,6 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setDozeTransitionModel(model: DozeTransitionModel) {
         _dozeTransitionModel.value = model
-    }
-
-    fun setStatusBarState(state: StatusBarState) {
-        _statusBarState.value = state
     }
 
     override fun isUdfpsSupported(): Boolean {

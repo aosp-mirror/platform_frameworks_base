@@ -33,17 +33,19 @@ import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 import javax.inject.Inject
 
 private const val TAG = "MediaArtworkProcessor"
-private const val COLOR_ALPHA = (255 * 0.7f).toInt()
-private const val BLUR_RADIUS = 25f
-private const val DOWNSAMPLE = 6
+private const val COLOR_ALPHA = (255 * 0.6f).toInt()
+private const val BLUR_RADIUS = 20f
+private const val DOWNSAMPLE = 5
 
 @SysUISingleton
 class MediaArtworkProcessor @Inject constructor() {
 
     private val mTmpSize = Point()
     private var mArtworkCache: Bitmap? = null
+    private var mDownSample: Int = DOWNSAMPLE
+    //private var mColorAlpha: Int = COLOR_ALPHA
 
-    fun processArtwork(context: Context, artwork: Bitmap): Bitmap? {
+    fun processArtwork(context: Context, artwork: Bitmap, blur_radius: Float): Bitmap? {
         if (mArtworkCache != null) {
             return mArtworkCache
         }
@@ -53,10 +55,11 @@ class MediaArtworkProcessor @Inject constructor() {
         var output: Allocation? = null
         var inBitmap: Bitmap? = null
         try {
+            if (blur_radius < 5f) mDownSample = 2 else mDownSample = DOWNSAMPLE
             @Suppress("DEPRECATION")
             context.display?.getSize(mTmpSize)
             val rect = Rect(0, 0, artwork.width, artwork.height)
-            MathUtils.fitRect(rect, Math.max(mTmpSize.x / DOWNSAMPLE, mTmpSize.y / DOWNSAMPLE))
+            MathUtils.fitRect(rect, Math.max(mTmpSize.x / mDownSample, mTmpSize.y / mDownSample))
             inBitmap = Bitmap.createScaledBitmap(artwork, rect.width(), rect.height(),
                     true /* filter */)
             // Render script blurs only support ARGB_8888, we need a conversion if we got a
@@ -66,31 +69,36 @@ class MediaArtworkProcessor @Inject constructor() {
                 inBitmap = oldIn.copy(Bitmap.Config.ARGB_8888, false /* isMutable */)
                 oldIn.recycle()
             }
-            val outBitmap = Bitmap.createBitmap(inBitmap.width, inBitmap.height,
-                    Bitmap.Config.ARGB_8888)
+            var outBitmap: Bitmap?
+            if (blur_radius >= 1f) {
+                outBitmap = Bitmap.createBitmap(inBitmap.width, inBitmap.height,
+                        Bitmap.Config.ARGB_8888)
 
-            input = Allocation.createFromBitmap(renderScript, inBitmap,
-                    Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_GRAPHICS_TEXTURE)
-            output = Allocation.createFromBitmap(renderScript, outBitmap)
-
-            blur.setRadius(BLUR_RADIUS)
-            blur.setInput(input)
-            blur.forEach(output)
-            output.copyTo(outBitmap)
-
+                input = Allocation.createFromBitmap(renderScript, inBitmap,
+                        Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SHARED)
+                output = Allocation.createFromBitmap(renderScript, outBitmap,
+                        Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SHARED)
+                blur.setRadius(blur_radius)
+                blur.setInput(input)
+                blur.forEach(output)
+                output.copyTo(outBitmap)
+            } else {
+                outBitmap = inBitmap.copy(Bitmap.Config.ARGB_8888, true/*mutable*/)
+            }
             val swatch = MediaNotificationProcessor.findBackgroundSwatch(artwork)
-
             val canvas = Canvas(outBitmap)
-            canvas.drawColor(ColorUtils.setAlphaComponent(swatch.rgb, COLOR_ALPHA))
+            canvas.drawColor(ColorUtils.setAlphaComponent(swatch.rgb, COLOR_ALPHA/*mColorAlpha*/))
             return outBitmap
         } catch (ex: IllegalArgumentException) {
             Log.e(TAG, "error while processing artwork", ex)
             return null
         } finally {
-            input?.destroy()
-            output?.destroy()
-            blur.destroy()
+            if (blur_radius >= 1f) {
+                input?.destroy()
+                output?.destroy()
+            }
             inBitmap?.recycle()
+            blur.destroy()
         }
     }
 

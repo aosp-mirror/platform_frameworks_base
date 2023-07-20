@@ -51,8 +51,6 @@ import java.util.List;
  */
 public abstract class ExpandableView extends FrameLayout implements Dumpable, Roundable {
     private static final String TAG = "ExpandableView";
-    /** whether the dump() for this class should include verbose details */
-    protected static final boolean DUMP_VERBOSE = false;
 
     private RoundableState mRoundableState = null;
     protected OnHeightChangedListener mOnHeightChangedListener;
@@ -451,7 +449,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     protected void updateClipping() {
         if (mClipToActualHeight && shouldClipToActualHeight()) {
             int top = getClipTopAmount();
-            int bottom = Math.max(Math.max(getActualHeight()
+            int bottom = Math.max(Math.max(getActualHeight() + getExtraBottomPadding()
                     - mClipBottomAmount, top), mMinimumHeightForClipping);
             mClipRect.set(Integer.MIN_VALUE, top, Integer.MAX_VALUE, bottom);
             setClipBounds(mClipRect);
@@ -589,6 +587,13 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
 
     public ViewGroup getTransientContainer() {
         return mTransientContainer;
+    }
+
+    /**
+     * @return padding used to alter how much of the view is clipped.
+     */
+    public int getExtraBottomPadding() {
+        return 0;
     }
 
     /**
@@ -819,14 +824,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
             } else {
                 viewState.dump(pw, args);
                 pw.println();
-            }
-            if (DUMP_VERBOSE) {
-                pw.println("mClipTopAmount: " + mClipTopAmount);
-                pw.println("mClipBottomAmount " + mClipBottomAmount);
-                pw.println("mClipToActualHeight: " + mClipToActualHeight);
-                pw.println("mExtraWidthForClipping: " + mExtraWidthForClipping);
-                pw.println("mMinimumHeightForClipping: " + mMinimumHeightForClipping);
-                pw.println("getClipBounds(): " + getClipBounds());
             }
         });
     }

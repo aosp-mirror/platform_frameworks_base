@@ -158,25 +158,15 @@ public class Watchdog implements Dumpable {
     );
 
     public static final String[] AIDL_INTERFACE_PREFIXES_OF_INTEREST = new String[] {
-            "android.hardware.audio.core.IModule/",
-            "android.hardware.audio.core.IConfig/",
             "android.hardware.biometrics.face.IFace/",
             "android.hardware.biometrics.fingerprint.IFingerprint/",
-            "android.hardware.bluetooth.IBluetoothHci/",
-            "android.hardware.camera.provider.ICameraProvider/",
-            "android.hardware.gnss.IGnss/",
-            "android.hardware.graphics.allocator.IAllocator/",
             "android.hardware.graphics.composer3.IComposer/",
-            "android.hardware.health.IHealth/",
             "android.hardware.input.processor.IInputProcessor/",
             "android.hardware.light.ILights/",
-            "android.hardware.neuralnetworks.IDevice/",
             "android.hardware.power.IPower/",
             "android.hardware.power.stats.IPowerStats/",
-            "android.hardware.sensors.ISensors/",
             "android.hardware.vibrator.IVibrator/",
-            "android.hardware.vibrator.IVibratorManager/",
-            "android.system.suspend.ISystemSuspend/",
+            "android.hardware.vibrator.IVibratorManager/"
     };
 
     private static Watchdog sWatchdog;
@@ -850,6 +840,8 @@ public class Watchdog implements Dumpable {
                 Slog.w(TAG, "Restart not allowed: Watchdog is *not* killing the system process");
             } else {
                 Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + subject);
+                // Emergency sync
+                doSysRq('s');
                 WatchdogDiagnostics.diagnoseCheckers(blockedCheckers);
                 Slog.w(TAG, "*** GOODBYE!");
                 if (!Build.IS_USER && isCrashLoopFound()

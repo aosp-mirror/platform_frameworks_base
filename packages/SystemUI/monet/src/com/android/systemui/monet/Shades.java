@@ -49,18 +49,28 @@ public class Shades {
      *
      * @param hue    hue in CAM16 color space
      * @param chroma chroma in CAM16 color space
+     * @param lFactor multiplier of luminance
+     * @param cFactor multiplier of chroma
      * @return shades of a color, as argb integers. Ordered by lightness descending.
      */
-    public static @ColorInt int[] of(float hue, float chroma) {
+    public static @ColorInt int[] of(float hue, float chroma, float lFactor, float cFactor) {
         int[] shades = new int[12];
         // At tone 90 and above, blue and yellow hues can reach a much higher chroma.
         // To preserve a consistent appearance across all hues, use a maximum chroma of 40.
-        shades[0] = ColorUtils.CAMToColor(hue, Math.min(40f, chroma), 99);
-        shades[1] = ColorUtils.CAMToColor(hue, Math.min(40f, chroma), 95);
+        shades[0] = ColorUtils.CAMToColor(hue, Math.min(40f, chroma) * cFactor, 99 * lFactor);
+        shades[1] = ColorUtils.CAMToColor(hue, Math.min(40f, chroma) * cFactor, 95 * lFactor);
         for (int i = 2; i < 12; i++) {
             float lStar = (i == 6) ? MIDDLE_LSTAR : 100 - 10 * (i - 1);
-            shades[i] = ColorUtils.CAMToColor(hue, chroma, lStar);
+            shades[i] = ColorUtils.CAMToColor(hue, chroma * cFactor, lStar * lFactor);
         }
         return shades;
+    }
+
+    public static @ColorInt int[] of(float hue, float chroma) {
+        return of(hue, chroma, 1f);
+    }
+
+    public static @ColorInt int[] of(float hue, float chroma, float lFactor) {
+        return of(hue, chroma, lFactor, 1f);
     }
 }

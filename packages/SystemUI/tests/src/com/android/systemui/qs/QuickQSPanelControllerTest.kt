@@ -50,7 +50,7 @@ import org.mockito.MockitoAnnotations
 class QuickQSPanelControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var quickQSPanel: QuickQSPanel
-    @Mock private lateinit var qsHost: QSHost
+    @Mock private lateinit var qsTileHost: QSTileHost
     @Mock private lateinit var qsCustomizerController: QSCustomizerController
     @Mock private lateinit var mediaHost: MediaHost
     @Mock private lateinit var metricsLogger: MetricsLogger
@@ -58,6 +58,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var tile: QSTile
     @Mock private lateinit var tileLayout: TileLayout
     @Mock private lateinit var tileView: QSTileView
+    @Mock private lateinit var quickQsBrightnessController: QuickQSBrightnessController
     @Captor private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
 
     private val uiEventLogger = UiEventLoggerFake()
@@ -75,12 +76,12 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         whenever(quickQSPanel.isAttachedToWindow).thenReturn(true)
         whenever(quickQSPanel.dumpableTag).thenReturn("")
         whenever(quickQSPanel.resources).thenReturn(mContext.resources)
-        whenever(qsHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
+        whenever(qsTileHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
 
         controller =
             TestQuickQSPanelController(
                 quickQSPanel,
-                qsHost,
+                qsTileHost,
                 qsCustomizerController,
                 /* usingMediaPlayer = */ false,
                 mediaHost,
@@ -88,7 +89,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager)
+                dumpManager,
+                quickQsBrightnessController)
 
         controller.init()
     }
@@ -102,7 +104,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     fun testTileSublistWithFewerTiles_noCrash() {
         whenever(quickQSPanel.numQuickTiles).thenReturn(3)
 
-        whenever(qsHost.tiles).thenReturn(listOf(tile, tile))
+        whenever(qsTileHost.tiles).thenReturn(listOf(tile, tile))
 
         controller.setTiles()
     }
@@ -111,7 +113,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     fun testTileSublistWithTooManyTiles() {
         val limit = 3
         whenever(quickQSPanel.numQuickTiles).thenReturn(limit)
-        whenever(qsHost.tiles).thenReturn(listOf(tile, tile, tile, tile))
+        whenever(qsTileHost.tiles).thenReturn(listOf(tile, tile, tile, tile))
 
         controller.setTiles()
 
@@ -145,9 +147,13 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         verify(mediaHost).expansion = MediaHostState.EXPANDED
     }
 
+    fun testBrightnessVisibilityRefreshedWhenConfigurationChanged() {
+        verify(quickQsBrightnessController).refreshVisibility(anyBoolean())
+    }
+
     class TestQuickQSPanelController(
         view: QuickQSPanel,
-        qsHost: QSHost,
+        qsTileHost: QSTileHost,
         qsCustomizerController: QSCustomizerController,
         usingMediaPlayer: Boolean,
         mediaHost: MediaHost,
@@ -159,7 +165,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     ) :
         QuickQSPanelController(
             view,
-            qsHost,
+            qsTileHost,
             qsCustomizerController,
             usingMediaPlayer,
             mediaHost,

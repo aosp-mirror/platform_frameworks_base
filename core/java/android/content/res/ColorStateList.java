@@ -34,8 +34,10 @@ import android.util.StateSet;
 import android.util.Xml;
 
 import com.android.internal.R;
-import com.android.internal.graphics.ColorUtils;
-import com.android.internal.graphics.cam.Cam;
+import com.android.internal.graphics.color.CieLab;
+import com.android.internal.graphics.color.CieXyzAbs;
+import com.android.internal.graphics.color.Zcam;
+import com.android.internal.graphics.color.ZcamGamut;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -556,8 +558,9 @@ public class ColorStateList extends ComplexColor implements Parcelable {
         final int alpha = MathUtils.constrain((int) (baseAlpha * alphaMod + 0.5f), 0, 255);
 
         if (validLStar) {
-            final Cam baseCam = ColorUtils.colorToCAM(baseColor);
-            baseColor = ColorUtils.CAMToColor(baseCam.getHue(), baseCam.getChroma(), lStar);
+            final Zcam baseZcam = new Zcam(new CieXyzAbs(baseColor));
+            baseZcam.lightness = CieLab.lToZcamJz(lStar);
+            baseColor = ZcamGamut.clipToRgb8(baseZcam);
         }
 
         return (baseColor & 0xFFFFFF) | (alpha << 24);

@@ -168,7 +168,7 @@ public interface KeyguardViewController {
     /**
      * Stop showing the alternate bouncer, if showing.
      */
-    void hideAlternateBouncer(boolean updateScrim);
+    void hideAlternateBouncer(boolean forceUpdateScrim);
 
     // TODO: Deprecate registerStatusBar in KeyguardViewController interface. It is currently
     //  only used for testing purposes in StatusBarKeyguardViewManager, and it prevents us from

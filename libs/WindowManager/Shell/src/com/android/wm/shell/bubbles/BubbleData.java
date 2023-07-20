@@ -17,7 +17,6 @@ package com.android.wm.shell.bubbles;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
-import static com.android.wm.shell.bubbles.Bubble.KEY_APP_BUBBLE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_DATA;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -283,7 +282,7 @@ public class BubbleData {
     }
 
     boolean isShowingOverflow() {
-        return mShowingOverflow && isExpanded();
+        return mShowingOverflow && (isExpanded() || mPositioner.showingInTaskbar());
     }
 
     /**
@@ -685,8 +684,7 @@ public class BubbleData {
         if (bubble.getPendingIntentCanceled()
                 || !(reason == Bubbles.DISMISS_AGED
                 || reason == Bubbles.DISMISS_USER_GESTURE
-                || reason == Bubbles.DISMISS_RELOAD_FROM_DISK)
-                || KEY_APP_BUBBLE.equals(bubble.getKey())) {
+                || reason == Bubbles.DISMISS_RELOAD_FROM_DISK)) {
             return;
         }
         if (DEBUG_BUBBLE_DATA) {

@@ -1,0 +1,5 @@
+<resources>
+    <style name="Theme.DeviceDefault.SystemUI" parent="@*android:Theme.DeviceDefault.SystemUI">
+        <item name="colorSurfaceHeader">@color/surface_header_dark_sysui</item>
+    </style>
+</resources>

@@ -12,11 +12,9 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.fragments.FragmentHostManager
-import com.android.systemui.fragments.FragmentService
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener
-import com.android.systemui.plugins.qs.QS
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -31,7 +29,6 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
-import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.eq
@@ -39,8 +36,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -67,13 +64,11 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var notificationsQSContainer: NotificationsQuickSettingsContainer
     @Mock
-    private lateinit var mShadeHeaderController: ShadeHeaderController
+    private lateinit var largeScreenShadeHeaderController: LargeScreenShadeHeaderController
     @Mock
     private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
     @Mock
-    private lateinit var fragmentService: FragmentService
-    @Mock
-    private lateinit var fragmentHostManager: FragmentHostManager
+    private lateinit var featureFlags: FeatureFlags
     @Captor
     lateinit var navigationModeCaptor: ArgumentCaptor<ModeChangedListener>
     @Captor
@@ -82,8 +77,6 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     lateinit var windowInsetsCallbackCaptor: ArgumentCaptor<Consumer<WindowInsets>>
     @Captor
     lateinit var constraintSetCaptor: ArgumentCaptor<ConstraintSet>
-    @Captor
-    lateinit var attachStateListenerCaptor: ArgumentCaptor<View.OnAttachStateChangeListener>
 
     private lateinit var controller: NotificationsQSContainerController
     private lateinit var navigationModeCallback: ModeChangedListener
@@ -98,17 +91,15 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         mContext.ensureTestableResources()
         whenever(notificationsQSContainer.context).thenReturn(mContext)
         whenever(notificationsQSContainer.resources).thenReturn(mContext.resources)
-        whenever(fragmentService.getFragmentHostManager(any())).thenReturn(fragmentHostManager)
         fakeSystemClock = FakeSystemClock()
         delayableExecutor = FakeExecutor(fakeSystemClock)
-
         controller = NotificationsQSContainerController(
                 notificationsQSContainer,
                 navigationModeController,
                 overviewProxyService,
-                mShadeHeaderController,
+                largeScreenShadeHeaderController,
                 shadeExpansionStateManager,
-                fragmentService,
+                featureFlags,
                 delayableExecutor
         )
 
@@ -123,10 +114,9 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         doNothing().`when`(notificationsQSContainer)
                 .setInsetsChangedListener(windowInsetsCallbackCaptor.capture())
         doNothing().`when`(notificationsQSContainer).applyConstraints(constraintSetCaptor.capture())
-        doNothing().`when`(notificationsQSContainer)
-            .addOnAttachStateChangeListener(attachStateListenerCaptor.capture())
+
         controller.init()
-        attachStateListenerCaptor.value.onViewAttachedToWindow(notificationsQSContainer)
+        controller.onViewAttached()
 
         navigationModeCallback = navigationModeCaptor.value
         taskbarVisibilityCallback = taskbarVisibilityCaptor.value
@@ -392,9 +382,9 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
                 container,
                 navigationModeController,
                 overviewProxyService,
-                mShadeHeaderController,
+                largeScreenShadeHeaderController,
                 shadeExpansionStateManager,
-                fragmentService,
+                featureFlags,
                 delayableExecutor
         )
         controller.updateConstraints()
@@ -424,27 +414,16 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Test
     fun testStartCustomizingWithDuration() {
         controller.setCustomizerShowing(true, 100L)
-        verify(mShadeHeaderController).startCustomizingAnimation(true, 100L)
+        verify(largeScreenShadeHeaderController).startCustomizingAnimation(true, 100L)
     }
 
     @Test
     fun testEndCustomizingWithDuration() {
         controller.setCustomizerShowing(true, 0L) // Only tracks changes
-        reset(mShadeHeaderController)
+        reset(largeScreenShadeHeaderController)
 
         controller.setCustomizerShowing(false, 100L)
-        verify(mShadeHeaderController).startCustomizingAnimation(false, 100L)
-    }
-
-    @Test
-    fun testTagListenerAdded() {
-        verify(fragmentHostManager).addTagListener(eq(QS.TAG), eq(notificationsQSContainer))
-    }
-
-    @Test
-    fun testTagListenerRemoved() {
-        attachStateListenerCaptor.value.onViewDetachedFromWindow(notificationsQSContainer)
-        verify(fragmentHostManager).removeTagListener(eq(QS.TAG), eq(notificationsQSContainer))
+        verify(largeScreenShadeHeaderController).startCustomizingAnimation(false, 100L)
     }
 
     private fun disableSplitShade() {

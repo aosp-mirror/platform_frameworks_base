@@ -861,7 +861,7 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
         private static void getLetterBoxBounds(WindowState windowState, Region outRegion) {
             final Rect letterboxInsets = windowState.mActivityRecord.getLetterboxInsets();
-            final Rect nonLetterboxRect = new Rect(windowState.getBounds());
+            final Rect nonLetterboxRect = windowState.getBounds();
 
             nonLetterboxRect.inset(letterboxInsets);
             outRegion.set(windowState.getBounds());

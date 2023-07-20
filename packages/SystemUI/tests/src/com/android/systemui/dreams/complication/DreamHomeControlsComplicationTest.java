@@ -31,13 +31,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.view.LaunchableImageView;
-import com.android.systemui.condition.SelfExecutingMonitor;
 import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.controller.ControlsController;
 import com.android.systemui.controls.controller.StructureInfo;
@@ -46,7 +46,6 @@ import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.complication.dagger.DreamHomeControlsComplicationComponent;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.shared.condition.Monitor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -88,7 +87,10 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     private ArgumentCaptor<ControlsListingController.ControlsListingCallback> mCallbackCaptor;
 
     @Mock
-    private LaunchableImageView mHomeControlsView;
+    private View mView;
+
+    @Mock
+    private ImageView mHomeControlsView;
 
     @Mock
     private ActivityStarter mActivityStarter;
@@ -98,8 +100,6 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
 
     @Captor
     private ArgumentCaptor<DreamOverlayStateController.Callback> mStateCallbackCaptor;
-
-    private Monitor mMonitor;
 
     @Before
     public void setup() {
@@ -111,8 +111,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
         when(mControlsComponent.getControlsListingController()).thenReturn(
                 Optional.of(mControlsListingController));
         when(mControlsComponent.getVisibility()).thenReturn(AVAILABLE);
-
-        mMonitor = SelfExecutingMonitor.createInstance();
+        when(mView.findViewById(R.id.home_controls_chip)).thenReturn(mHomeControlsView);
     }
 
     @Test
@@ -127,7 +126,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceNotAvailable_noFavorites_doNotAddComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent);
         registrant.start();
 
         setHaveFavorites(false);
@@ -140,7 +139,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceAvailable_noFavorites_doNotAddComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent);
         registrant.start();
 
         setHaveFavorites(false);
@@ -153,7 +152,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceAvailable_noFavorites_panel_addComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent);
         registrant.start();
 
         setHaveFavorites(false);
@@ -166,7 +165,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceNotAvailable_haveFavorites_doNotAddComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent);
         registrant.start();
 
         setHaveFavorites(true);
@@ -179,7 +178,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceAvailable_haveFavorites_addComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent);
         registrant.start();
 
         setHaveFavorites(true);
@@ -192,7 +191,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_checkAvailabilityWhenDreamOverlayBecomesActive() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent, mMonitor);
+                        mDreamOverlayStateController, mControlsComponent);
         registrant.start();
 
         setServiceAvailable(true);
@@ -218,7 +217,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void testClick_logsUiEvent() {
         final DreamHomeControlsComplication.DreamHomeControlsChipViewController viewController =
                 new DreamHomeControlsComplication.DreamHomeControlsChipViewController(
-                        mHomeControlsView,
+                        mView,
                         mActivityStarter,
                         mContext,
                         mControlsComponent,

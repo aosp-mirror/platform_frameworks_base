@@ -43,7 +43,7 @@
   </string-array>
   <string-array name="tile_states_cell">
     <item msgid="1235899788959500719">"No disponible"</item>
-    <item msgid="2074416252859094119">"Desactivadas"</item>
+    <item msgid="2074416252859094119">"Desactivado"</item>
     <item msgid="287997784730044767">"Activado"</item>
   </string-array>
   <string-array name="tile_states_battery">
@@ -175,10 +175,5 @@
     <item msgid="6184819793571079513">"No disponible"</item>
     <item msgid="8014986104355098744">"Desactivado"</item>
     <item msgid="5966994759929723339">"Activado"</item>
-  </string-array>
-  <string-array name="tile_states_font_scaling">
-    <item msgid="3173069902082305985">"No disponible"</item>
-    <item msgid="2478289035899842865">"Desactivado"</item>
-    <item msgid="5137565285664080143">"Activado"</item>
   </string-array>
 </resources>

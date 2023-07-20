@@ -48,8 +48,8 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -266,19 +266,15 @@ public class AudioTrack extends PlayerBase
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public static final int ENCAPSULATION_MODE_HANDLE = 2;
 
-    /**
-     * Enumeration of metadata types permitted for use by
+    /* Enumeration of metadata types permitted for use by
      * encapsulation mode audio streams.
-     * @hide
      */
-    @IntDef(prefix = {"ENCAPSULATION_METADATA_TYPE_"},
-            value =
-                    {
-                            ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
-                            ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
-                            ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
-                            ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT,
-                    })
+    /** @hide */
+    @IntDef(prefix = { "ENCAPSULATION_METADATA_TYPE_" }, value = {
+        ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
+        ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
+        ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncapsulationMetadataType {}
 
@@ -301,45 +297,6 @@ public class AudioTrack extends PlayerBase
      * This metadata is formatted per ETSI TS 101 154 Table E.1: AD_descriptor.
      */
     public static final int ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR = 2;
-
-    /**
-     * Encapsulation metadata type for placement of supplementary audio.
-     *
-     * A 32 bit integer constant, one of {@link #SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL}, {@link
-     * #SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT}, {@link #SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT}.
-     */
-    public static final int ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT = 3;
-
-    /**
-     * Enumeration of supplementary audio placement types.
-     * @hide
-     */
-    @IntDef(prefix = {"SUPPLEMENTARY_AUDIO_PLACEMENT_"},
-            value =
-                    {
-                            SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL,
-                            SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT,
-                            SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT,
-                    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SupplementaryAudioPlacement {}
-    // Important: The SUPPLEMENTARY_AUDIO_PLACEMENT values must be kept in sync with native header
-    // files.
-
-    /**
-     * Supplementary audio placement normal.
-     */
-    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL = 0;
-
-    /**
-     * Supplementary audio placement left.
-     */
-    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT = 1;
-
-    /**
-     * Supplementary audio placement right.
-     */
-    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT = 2;
 
     /* Dual Mono handling is used when a stereo audio stream
      * contains separate audio content on the left and right channels.
@@ -1910,24 +1867,26 @@ public class AudioTrack extends PlayerBase
     }
 
     // General pair map
-    private static final Map<String, Integer> CHANNEL_PAIR_MAP = Map.of(
-            "front", AudioFormat.CHANNEL_OUT_FRONT_LEFT
-                    | AudioFormat.CHANNEL_OUT_FRONT_RIGHT,
-            "back", AudioFormat.CHANNEL_OUT_BACK_LEFT
-                    | AudioFormat.CHANNEL_OUT_BACK_RIGHT,
-            "front of center", AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER
-                    | AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER,
-            "side", AudioFormat.CHANNEL_OUT_SIDE_LEFT | AudioFormat.CHANNEL_OUT_SIDE_RIGHT,
-            "top front", AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT
-                    | AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT,
-            "top back", AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT
-                    | AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT,
-            "top side", AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT
-                    | AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT,
-            "bottom front", AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT
-                    | AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT,
-            "front wide", AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT
-                    | AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT);
+    private static final HashMap<String, Integer> CHANNEL_PAIR_MAP = new HashMap<>() {{
+        put("front", AudioFormat.CHANNEL_OUT_FRONT_LEFT
+                | AudioFormat.CHANNEL_OUT_FRONT_RIGHT);
+        put("back", AudioFormat.CHANNEL_OUT_BACK_LEFT
+                | AudioFormat.CHANNEL_OUT_BACK_RIGHT);
+        put("front of center", AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER
+                | AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER);
+        put("side", AudioFormat.CHANNEL_OUT_SIDE_LEFT
+                | AudioFormat.CHANNEL_OUT_SIDE_RIGHT);
+        put("top front", AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT
+                | AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT);
+        put("top back", AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT
+                | AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT);
+        put("top side", AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT
+                | AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT);
+        put("bottom front", AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT
+                | AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT);
+        put("front wide", AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT
+                | AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT);
+    }};
 
     /**
      * Convenience method to check that the channel configuration (a.k.a channel mask) is supported
@@ -1965,7 +1924,7 @@ public class AudioTrack extends PlayerBase
                 return false;
         }
         // Check all pairs to see that they are matched (front duplicated here).
-        for (Map.Entry<String, Integer> e : CHANNEL_PAIR_MAP.entrySet()) {
+        for (HashMap.Entry<String, Integer> e : CHANNEL_PAIR_MAP.entrySet()) {
             final int positionPair = e.getValue();
             if ((channelConfig & positionPair) != 0
                     && (channelConfig & positionPair) != positionPair) {

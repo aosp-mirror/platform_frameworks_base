@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2017-2021 The Project-Xtended
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+          http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Alert slider proc nodes paths. -->
+    <string name="alert_slider_state_path"></string>
+    <string name="alert_slider_uevent_match_path"></string>
+
+    <!-- Label for area where tiles can be added to the qs panel -->
+    <string name="drag_or_tap_to_add_tiles">Hold &amp; drag or tap to add tiles</string>
+
+    <!-- Advanced reboot -->
+    <string name="reboot_to_recovery_title" translatable="false">Recovery</string>
+    <string name="reboot_to_recovery_message" translatable="false">Rebooting to recovery</string>
+    <string name="reboot_to_bootloader_title" translatable="false">Bootloader</string>
+    <string name="reboot_to_bootloader_message" translatable="false">Rebooting to bootloader...</string>
+    <string name="reboot_to_fastboot_title" translatable="false">Fastboot</string>
+    <string name="reboot_to_fastboot_message" translatable="false">Rebooting to fastboot...</string>
+    <string name="reboot_to_fastbootd_title" translatable="false">FastbootD</string>
+    <string name="reboot_to_fastbootd_message" translatable="false">Rebooting to fastbootD...</string>
+    <string name="reboot_title">Reboot</string>
+    <string name="reboot_message">Rebooting system...</string>
+
+    <!-- Button that copies the url to the log of a crashed application -->
+    <string name="aerr_copy">Copy crash log URL</string>
+    <string name="url_copy_success">URL copied successfully</string>
+    <string name="url_copy_failed">An error occured while uploading the log to stagbin</string>
+
+    <!-- Parallel space badge -->
+    <string name="parallel_space_badge_label">%1$s</string>
+
+   <!-- Settings Restart -->
+   <string name="settings_restart_title">Settings restart required</string>
+   <string name="settings_restart_message">For all changes to take effect, a Settings app restart is required. Restart Settings app now?</string>
+       
+    <!-- SystemUI Restart -->
+    <string name="systemui_restart_title">SystemUI restart required</string>
+    <string name="systemui_restart_message">For all changes to take effect, a SystemUI restart is required. Restart SystemUI now?</string>
+
+    <!-- Assisted GPS -->
+    <string name="location_agps_access_summary">When location is on, <b>download satellite assistance data from the internet</b>, which can greatly improve the GPS startup performance.</string>
+</resources>

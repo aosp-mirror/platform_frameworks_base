@@ -179,7 +179,7 @@ void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
         mNativeSurface->init();
         if (enableTimeout) {
             // TODO: Fix error handling & re-shorten timeout
-            ANativeWindow_setDequeueTimeout(window, 4000_ms);
+            ANativeWindow_setDequeueTimeout(window, 16_ms);
         }
     } else {
         mNativeSurface = nullptr;
@@ -537,7 +537,7 @@ nsecs_t CanvasContext::draw() {
             const auto inputEventId =
                     static_cast<int32_t>(mCurrentFrameInfo->get(FrameInfoIndex::InputEventId));
             native_window_set_frame_timeline_info(
-                    mNativeSurface->getNativeWindow(), frameCompleteNr, vsyncId, inputEventId,
+                    mNativeSurface->getNativeWindow(), vsyncId, inputEventId,
                     mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime));
         }
     }
@@ -791,10 +791,6 @@ SkISize CanvasContext::getNextFrameSize() const {
     size.fWidth = ANativeWindow_getWidth(anw);
     size.fHeight = ANativeWindow_getHeight(anw);
     return size;
-}
-
-const SkM44& CanvasContext::getPixelSnapMatrix() const {
-    return mRenderPipeline->getPixelSnapMatrix();
 }
 
 void CanvasContext::prepareAndDraw(RenderNode* node) {

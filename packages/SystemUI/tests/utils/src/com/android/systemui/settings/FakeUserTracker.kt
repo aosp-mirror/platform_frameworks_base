@@ -22,7 +22,6 @@ import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.test.mock.MockContentResolver
 import com.android.systemui.util.mockito.mock
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
 
 /** A fake [UserTracker] to be used in tests. */
@@ -67,19 +66,8 @@ class FakeUserTracker(
         _userId = _userInfo.id
         _userHandle = UserHandle.of(_userId)
 
-        onUserChanging()
-        onUserChanged()
-    }
-
-    fun onUserChanging(userId: Int = _userId) {
         val copy = callbacks.toList()
-        val latch = CountDownLatch(copy.size)
-        copy.forEach { it.onUserChanging(userId, userContext, latch) }
-    }
-
-    fun onUserChanged(userId: Int = _userId) {
-        val copy = callbacks.toList()
-        copy.forEach { it.onUserChanged(userId, userContext) }
+        copy.forEach { it.onUserChanged(_userId, userContext) }
     }
 
     fun onProfileChanged() {

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2016 The DirtyUnicorns Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <!-- SmartBar icon colors -->
+    <color name="icon_color_default">#fff</color>
+    <color name="icon_color_dark">@android:color/black</color>
+    <color name="icon_color_no_action">@color/icon_color_default</color>
+    <color name="icon_color_settings_panel">@color/icon_color_default</color>
+    <color name="icon_color_notification_panel">@color/icon_color_default</color>
+    <color name="icon_color_screenshot">@color/icon_color_default</color>
+    <color name="icon_color_region_screenshot">@color/icon_color_default</color>
+    <color name="icon_color_screenrecord">@color/icon_color_default</color>
+    <color name="icon_color_expanded_desktop">@color/icon_color_default</color>
+    <color name="icon_color_screen_off">@color/icon_color_default</color>
+    <color name="icon_color_force_close_app">@color/icon_color_default</color>
+    <color name="icon_color_search_assistant">@color/icon_color_default</color>
+    <color name="icon_color_google_assistant">@color/icon_color_default</color>
+    <color name="icon_color_voice_search">@color/icon_color_default</color>
+    <color name="icon_color_in_app_search">@color/icon_color_default</color>
+    <color name="icon_color_flashlight">@color/icon_color_default</color>
+    <color name="icon_color_bluetooth">@color/icon_color_default</color>
+    <color name="icon_color_wifi">@color/icon_color_default</color>
+    <color name="icon_color_hotspot">@color/icon_color_default</color>
+    <color name="icon_color_last_app">@color/icon_color_default</color>
+    <color name="icon_color_overview">@color/icon_color_default</color>
+    <color name="icon_color_power_menu">@color/icon_color_default</color>
+    <color name="icon_color_menu">@color/icon_color_default</color>
+    <color name="icon_color_back">@color/icon_color_default</color>
+    <color name="icon_color_home">@color/icon_color_default</color>
+    <color name="icon_color_ime_switcher">@color/icon_color_default</color>
+    <color name="icon_color_stop_screenpinning">@color/icon_color_default</color>
+    <color name="icon_color_ime_down">@color/icon_color_default</color>
+    <color name="icon_color_ime_left">@color/icon_color_default</color>
+    <color name="icon_color_ime_right">@color/icon_color_default</color>
+    <color name="icon_color_ime_up">@color/icon_color_default</color>
+    <color name="icon_color_volume_panel">@color/icon_color_default</color>
+    <color name="icon_color_clear_notifications">@color/icon_color_default</color>
+    <color name="icon_color_editing_smartbar">@color/icon_color_default</color>
+    <color name="icon_color_split_screen">@color/icon_color_default</color>
+    <color name="icon_color_one_handed_mode">@color/icon_color_default</color>
+
+</resources>

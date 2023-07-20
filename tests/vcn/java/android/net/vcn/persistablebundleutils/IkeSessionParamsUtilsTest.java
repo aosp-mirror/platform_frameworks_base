@@ -16,9 +16,9 @@
 
 package android.net.vcn.persistablebundleutils;
 
-import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_AUTOMATIC_KEEPALIVE_ON_OFF;
 import static android.net.vcn.persistablebundleutils.IkeSessionParamsUtils.IKE_OPTION_AUTOMATIC_ADDRESS_FAMILY_SELECTION;
 import static android.net.vcn.persistablebundleutils.IkeSessionParamsUtils.IKE_OPTION_AUTOMATIC_NATT_KEEPALIVES;
+import static android.net.vcn.persistablebundleutils.IkeSessionParamsUtils.isIkeOptionValid;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 import static android.telephony.TelephonyManager.APPTYPE_USIM;
@@ -160,11 +160,13 @@ public class IkeSessionParamsUtilsTest {
                         .addIkeOption(IkeSessionParams.IKE_OPTION_MOBIKE)
                         .addIkeOption(IkeSessionParams.IKE_OPTION_FORCE_PORT_4500)
                         .addIkeOption(IkeSessionParams.IKE_OPTION_INITIAL_CONTACT)
-                        .addIkeOption(IkeSessionParams.IKE_OPTION_REKEY_MOBILITY)
-                        .addIkeOption(IKE_OPTION_AUTOMATIC_ADDRESS_FAMILY_SELECTION)
-                        .addIkeOption(IKE_OPTION_AUTOMATIC_NATT_KEEPALIVES)
-                        .addIkeOption(IKE_OPTION_AUTOMATIC_KEEPALIVE_ON_OFF);
-
+                        .addIkeOption(IkeSessionParams.IKE_OPTION_REKEY_MOBILITY);
+        if (isIkeOptionValid(IKE_OPTION_AUTOMATIC_ADDRESS_FAMILY_SELECTION)) {
+            builder.addIkeOption(IKE_OPTION_AUTOMATIC_ADDRESS_FAMILY_SELECTION);
+        }
+        if (isIkeOptionValid(IKE_OPTION_AUTOMATIC_NATT_KEEPALIVES)) {
+            builder.addIkeOption(IKE_OPTION_AUTOMATIC_NATT_KEEPALIVES);
+        }
         verifyPersistableBundleEncodeDecodeIsLossless(builder.build());
     }
 

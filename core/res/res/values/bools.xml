@@ -18,6 +18,7 @@
     <bool name="kg_enable_camera_default_widget">true</bool>
     <bool name="kg_center_small_widgets_vertically">false</bool>
     <bool name="kg_top_align_page_shrink_on_bouncer_visible">true</bool>
+    <bool name="kg_wake_on_acquire_start">false</bool>
     <bool name="action_bar_embed_tabs">true</bool>
     <bool name="split_action_bar_is_narrow">true</bool>
     <bool name="preferences_prefer_dual_pane">false</bool>

@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"A vinculación garante acceso aos teus contactos e ao historial de chamadas ao estar conectado"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Non se puido vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Non se puido vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, clave de acceso ou PIN incorrectos."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Non se puido vincular con <xliff:g id="DEVICE_NAME">%1$s</xliff:g> porque a clave de acceso ou o PIN son incorrectos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Non se pode comunicar con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Vinculación rexeitada por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordenador"</string>
@@ -190,7 +190,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ton"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Afecta ao ton da voz sintetizada"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Idioma"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Utilizar o idioma do sistema"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Utiliza o idioma do sistema"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Idioma non seleccionado"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Define a voz específica do idioma para o texto falado"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Escoitar un exemplo"</string>
@@ -582,7 +582,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Engadir"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Novo usuario"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Novo perfil"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Información do usuario"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Información usuario"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Información do perfil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restrinxido, precisarás configurar un bloqueo da pantalla para protexer as túas aplicacións e datos persoais."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Establecer bloqueo"</string>

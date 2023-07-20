@@ -25,6 +25,7 @@ import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.graphics.RectF
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.util.PathParser
 import android.util.TypedValue
@@ -77,10 +78,10 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     // Colors can be configured based on battery level (see res/values/arrays.xml)
     private var colorLevels: IntArray
 
-    private var fillColor: Int = Color.MAGENTA
-    private var backgroundColor: Int = Color.MAGENTA
+    private var fillColor: Int = Color.WHITE
+    private var backgroundColor: Int = Color.WHITE
     // updated whenever level changes
-    private var levelColor: Int = Color.MAGENTA
+    private var levelColor: Int = Color.WHITE
 
     // Dual tone implies that battery level is a clipped overlay over top of the whole shape
     private var dualTone = false
@@ -101,6 +102,12 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         }
 
     var powerSaveEnabled = false
+        set(value) {
+            field = value
+            postInvalidate()
+        }
+
+    var showPercent = false
         set(value) {
             field = value
             postInvalidate()
@@ -150,6 +157,11 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         p.isDither = true
         p.strokeWidth = 0f
         p.style = Paint.Style.FILL_AND_STROKE
+    }
+
+    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
+        p.typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
+        p.textAlign = Paint.Align.CENTER
     }
 
     init {
@@ -247,9 +259,30 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
             // If power save is enabled draw the perimeter path with colorError
             c.drawPath(scaledErrorPerimeter, errorPaint)
             // And draw the plus sign on top of the fill
-            c.drawPath(scaledPlus, errorPaint)
+            if (!showPercent) {
+                c.drawPath(scaledPlus, errorPaint)
+            }
         }
         c.restore()
+
+        if (!charging && batteryLevel < 100 && showPercent) {
+            textPaint.textSize = bounds.height() * 0.38f
+            val textHeight = -textPaint.fontMetrics.ascent
+            val pctX = bounds.width() * 0.5f
+            val pctY = (bounds.height() + textHeight) * 0.5f
+
+            textPaint.color = fillColor
+            c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
+
+            textPaint.color = fillColor.toInt().inv() or 0xFF000000.toInt()
+            c.save()
+            c.clipRect(fillRect.left,
+                    fillRect.top + (fillRect.height() * (1 - fillFraction)),
+                    fillRect.right,
+                    fillRect.bottom)
+            c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
+            c.restore()
+        }
     }
 
     private fun batteryColorForLevel(level: Int): Int {

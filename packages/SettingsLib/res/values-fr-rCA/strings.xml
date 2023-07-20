@@ -37,7 +37,7 @@
     <string name="wifi_security_wep" msgid="1413627788581122366">"WEP"</string>
     <string name="wifi_security_wpa" msgid="1072450904799930636">"WPA-Personal"</string>
     <string name="wifi_security_wpa2" msgid="4038267581230425543">"WPA2-Personal"</string>
-    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personnel"</string>
+    <string name="wifi_security_wpa_wpa2" msgid="946853615482465986">"WPA/WPA2-Personal"</string>
     <string name="wifi_security_eap" msgid="6179633834446852269">"WPA/WPA2/WPA3-Enterprise"</string>
     <string name="wifi_security_eap_wpa" msgid="6189023812330549957">"WPA-Enterprise"</string>
     <string name="wifi_security_eap_wpa_wpa2" msgid="1089879674896108216">"WPA/WPA2-Enterprise"</string>
@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Déconnexion…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Connexion en cours…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Connecté à <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Association en cours…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Association…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Connecté (aucun téléphone) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Connecté (aucun média) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Connecté (aucun accès aux messages) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -109,7 +109,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Pile : <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"G : charge à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>; D : charge à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Actif"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Actif, gauche seulement"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Active, gauche seulement"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Active, droite seulement"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Active, gauche et droite"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Paramètres audio du support"</string>
@@ -401,7 +401,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Afficher ANR arrière-plan"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Afficher le message « L\'application ne répond plus » pour les applications en arrière-plan"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Affich. avertiss. canal notification"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afficher avertiss. à l\'écran quand une appli présente une notif. sans canal valide"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afficher avertiss. à l\'écran quand une app présente une notific. sans canal valide"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forcer l\'autor. d\'applis sur stockage externe"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Rend possible l\'enregistrement de toute application sur un espace de stockage externe, indépendamment des valeurs du fichier manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forcer les activités à être redimensionnables"</string>
@@ -494,7 +494,7 @@
     <string name="disabled" msgid="8017887509554714950">"Désactivée"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Autorisée"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Non autorisée"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Installer les applications inconnues"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Installer applis inconnues"</string>
     <string name="home" msgid="973834627243661438">"Accueil des paramètres"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0 %"</item>
@@ -662,9 +662,9 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Clavier physique"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Sélectionner disposition du clavier"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Par défaut"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Activer l\'écran"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Activation de l\'écran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Autoriser l\'activation de l\'écran"</string>
-    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autorisez une application à activer l\'écran. Lorsque vous accordez cette autorisation, l\'application peut activer l\'écran à tout moment sans que vous lui demandiez."</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autorisez une application à activer l\'écran. Lorsque vous accordez cette autorisation, l\'application peut activer l\'écran à tout moment sans votre volonté explicite."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou changez la sortie, votre diffusion actuelle s\'arrêtera"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

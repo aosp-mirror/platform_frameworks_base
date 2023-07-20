@@ -89,7 +89,7 @@ class BubbleOverflow(
         val colorAccent = res.getColor(typedValue.resourceId, null)
         dotColor = colorAccent
 
-        val shapeColor = res.getColor(android.R.color.system_accent1_1000)
+        val shapeColor = res.getColor(android.R.color.system_accent1_1000, /* theme= */ null)
         overflowBtn?.iconDrawable?.setTint(shapeColor)
 
         val iconFactory = BubbleIconFactory(context)

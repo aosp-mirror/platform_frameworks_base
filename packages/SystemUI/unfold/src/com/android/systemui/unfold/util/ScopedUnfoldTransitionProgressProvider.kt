@@ -47,7 +47,6 @@ constructor(source: UnfoldTransitionProgressProvider? = null) :
     /**
      * Sets the source for the unfold transition progress updates. Replaces current provider if it
      * is already set
-     *
      * @param provider transition provider that emits transition progress updates
      */
     fun setSourceProvider(provider: UnfoldTransitionProgressProvider?) {

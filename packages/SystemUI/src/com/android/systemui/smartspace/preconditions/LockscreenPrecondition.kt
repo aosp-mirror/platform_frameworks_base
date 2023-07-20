@@ -15,6 +15,8 @@
  */
 package com.android.systemui.smartspace.preconditions
 
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.Execution
@@ -22,9 +24,11 @@ import javax.inject.Inject
 
 /**
  * {@link LockscreenPrecondition} covers the conditions that must be met before Smartspace can be
- * used over lockscreen. These conditions include the device being provisioned with a setup user.
+ * used over lockscreen. These conditions include the device being provisioned with a setup user
+ * and the Smartspace feature flag enabled.
  */
 class LockscreenPrecondition @Inject constructor(
+    private val featureFlags: FeatureFlags,
     private val deviceProvisionedController: DeviceProvisionedController,
     private val execution: Execution
 ) : SmartspacePrecondition {
@@ -86,6 +90,6 @@ class LockscreenPrecondition @Inject constructor(
 
     override fun conditionsMet(): Boolean {
         execution.assertIsMainThread()
-        return deviceReady
+        return featureFlags.isEnabled(Flags.SMARTSPACE) && deviceReady
     }
 }

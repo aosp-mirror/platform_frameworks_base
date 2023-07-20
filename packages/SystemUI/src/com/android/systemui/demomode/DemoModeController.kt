@@ -128,6 +128,7 @@ constructor(
      *
      * This is equivalent of creating a listener manually and adding an event handler for the given
      * command, like so:
+     *
      * ```
      * class Demoable {
      *   private val demoHandler = object : DemoMode {

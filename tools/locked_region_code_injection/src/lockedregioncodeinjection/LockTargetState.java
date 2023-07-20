@@ -13,10 +13,9 @@
  */
 package lockedregioncodeinjection;
 
+import java.util.List;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
-
-import java.util.List;
 
 public class LockTargetState extends BasicValue {
     private final List<LockTarget> lockTargets;
@@ -31,11 +30,5 @@ public class LockTargetState extends BasicValue {
 
     public List<LockTarget> getTargets() {
         return lockTargets;
-    }
-
-    @Override
-    public String toString() {
-        return "LockTargetState(" + getType().getDescriptor()
-                + ", " + lockTargets.size() + ")";
     }
 }

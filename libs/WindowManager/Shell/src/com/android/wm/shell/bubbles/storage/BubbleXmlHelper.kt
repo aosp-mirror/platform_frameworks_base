@@ -43,7 +43,6 @@ private const val ATTR_DESIRED_HEIGHT_RES_ID = "hid"
 private const val ATTR_TITLE = "t"
 private const val ATTR_TASK_ID = "tid"
 private const val ATTR_LOCUS = "l"
-private const val ATTR_DISMISSABLE = "d"
 
 /**
  * Writes the bubbles in xml format into given output stream.
@@ -85,7 +84,6 @@ private fun writeXmlEntry(serializer: XmlSerializer, bubble: BubbleEntity) {
         bubble.title?.let { serializer.attribute(null, ATTR_TITLE, it) }
         serializer.attribute(null, ATTR_TASK_ID, bubble.taskId.toString())
         bubble.locus?.let { serializer.attribute(null, ATTR_LOCUS, it) }
-        serializer.attribute(null, ATTR_DISMISSABLE, bubble.isDismissable.toString())
         serializer.endTag(null, TAG_BUBBLE)
     } catch (e: IOException) {
         throw RuntimeException(e)
@@ -144,8 +142,7 @@ private fun readXmlEntry(parser: XmlPullParser): BubbleEntity? {
             parser.getAttributeWithName(ATTR_DESIRED_HEIGHT_RES_ID)?.toInt() ?: return null,
             parser.getAttributeWithName(ATTR_TITLE),
             parser.getAttributeWithName(ATTR_TASK_ID)?.toInt() ?: INVALID_TASK_ID,
-            parser.getAttributeWithName(ATTR_LOCUS),
-            parser.getAttributeWithName(ATTR_DISMISSABLE)?.toBoolean() ?: false
+            parser.getAttributeWithName(ATTR_LOCUS)
     )
 }
 

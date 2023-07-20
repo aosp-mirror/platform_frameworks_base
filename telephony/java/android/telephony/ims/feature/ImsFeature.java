@@ -34,6 +34,7 @@ import com.android.internal.telephony.util.RemoteCallbackListExt;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -84,10 +85,11 @@ public abstract class ImsFeature {
      * Used for logging purposes.
      * @hide
      */
-    public static final Map<Integer, String> FEATURE_LOG_MAP = Map.of(
-            FEATURE_EMERGENCY_MMTEL, "EMERGENCY_MMTEL",
-            FEATURE_MMTEL, "MMTEL",
-            FEATURE_RCS, "RCS");
+    public static final Map<Integer, String> FEATURE_LOG_MAP = new HashMap<Integer, String>() {{
+            put(FEATURE_EMERGENCY_MMTEL, "EMERGENCY_MMTEL");
+            put(FEATURE_MMTEL, "MMTEL");
+            put(FEATURE_RCS, "RCS");
+        }};
 
     /**
      * Integer values defining IMS features that are supported in ImsFeature.
@@ -143,10 +145,11 @@ public abstract class ImsFeature {
      * Used for logging purposes.
      * @hide
      */
-    public static final Map<Integer, String> STATE_LOG_MAP = Map.of(
-            STATE_UNAVAILABLE, "UNAVAILABLE",
-            STATE_INITIALIZING, "INITIALIZING",
-            STATE_READY, "READY");
+    public static final Map<Integer, String> STATE_LOG_MAP = new HashMap<Integer, String>() {{
+            put(STATE_UNAVAILABLE, "UNAVAILABLE");
+            put(STATE_INITIALIZING, "INITIALIZING");
+            put(STATE_READY, "READY");
+        }};
 
     /**
      * Integer values defining the result codes that should be returned from

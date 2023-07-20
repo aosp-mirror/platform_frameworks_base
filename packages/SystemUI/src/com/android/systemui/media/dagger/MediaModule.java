@@ -17,7 +17,8 @@
 package com.android.systemui.media.dagger;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.log.LogBufferFactory;
+import com.android.systemui.log.dagger.MediaTttReceiverLogBuffer;
+import com.android.systemui.log.dagger.MediaTttSenderLogBuffer;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.media.controls.ui.MediaHost;
@@ -28,9 +29,12 @@ import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
-import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogBuffer;
-import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogBuffer;
+import com.android.systemui.media.taptotransfer.common.MediaTttLogger;
+import com.android.systemui.media.taptotransfer.receiver.ChipReceiverInfo;
+import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogger;
+import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogger;
 import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo;
 
 import java.util.Optional;
 
@@ -90,22 +94,22 @@ public interface MediaModule {
         return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
     }
 
-    /** Provides a logging buffer related to the media tap-to-transfer chip on the sender device. */
     @Provides
     @SysUISingleton
-    @MediaTttSenderLogBuffer
-    static LogBuffer provideMediaTttSenderLogBuffer(LogBufferFactory factory) {
-        return factory.create("MediaTttSender", 30);
+    @MediaTttSenderLogger
+    static MediaTttLogger<ChipbarInfo> providesMediaTttSenderLogger(
+            @MediaTttSenderLogBuffer LogBuffer buffer
+    ) {
+        return new MediaTttLogger<>("Sender", buffer);
     }
 
-    /**
-     * Provides a logging buffer related to the media tap-to-transfer chip on the receiver device.
-     */
     @Provides
     @SysUISingleton
-    @MediaTttReceiverLogBuffer
-    static LogBuffer provideMediaTttReceiverLogBuffer(LogBufferFactory factory) {
-        return factory.create("MediaTttReceiver", 20);
+    @MediaTttReceiverLogger
+    static MediaTttLogger<ChipReceiverInfo> providesMediaTttReceiverLogger(
+            @MediaTttReceiverLogBuffer LogBuffer buffer
+    ) {
+        return new MediaTttLogger<>("Receiver", buffer);
     }
 
     /** */

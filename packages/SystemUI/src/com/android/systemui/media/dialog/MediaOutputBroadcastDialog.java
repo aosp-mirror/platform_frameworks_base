@@ -20,8 +20,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
@@ -66,51 +64,11 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     private String mCurrentBroadcastName;
     private String mCurrentBroadcastCode;
     private boolean mIsStopbyUpdateBroadcastCode = false;
-    private TextWatcher mTextWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            // Do nothing
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            // Do nothing
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (mAlertDialog == null || mBroadcastErrorMessage == null) {
-                return;
-            }
-            boolean breakBroadcastCodeRuleTextLengthLessThanMin =
-                    s.length() > 0 && s.length() < BROADCAST_CODE_MIN_LENGTH;
-            boolean breakBroadcastCodeRuleTextLengthMoreThanMax =
-                    s.length() > BROADCAST_CODE_MAX_LENGTH;
-            boolean breakRule = breakBroadcastCodeRuleTextLengthLessThanMin
-                    || breakBroadcastCodeRuleTextLengthMoreThanMax;
-
-            if (breakBroadcastCodeRuleTextLengthLessThanMin) {
-                mBroadcastErrorMessage.setText(
-                        R.string.media_output_broadcast_code_hint_no_less_than_min);
-            } else if (breakBroadcastCodeRuleTextLengthMoreThanMax) {
-                mBroadcastErrorMessage.setText(
-                        R.string.media_output_broadcast_code_hint_no_more_than_max);
-            }
-
-            mBroadcastErrorMessage.setVisibility(breakRule ? View.VISIBLE : View.INVISIBLE);
-            Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            if (positiveBtn != null) {
-                positiveBtn.setEnabled(breakRule ? false : true);
-            }
-        }
-    };
 
     static final int METADATA_BROADCAST_NAME = 0;
     static final int METADATA_BROADCAST_CODE = 1;
 
     private static final int MAX_BROADCAST_INFO_UPDATE = 3;
-    private static final int BROADCAST_CODE_MAX_LENGTH = 16;
-    private static final int BROADCAST_CODE_MIN_LENGTH = 4;
 
     MediaOutputBroadcastDialog(Context context, boolean aboveStatusbar,
             BroadcastSender broadcastSender, MediaOutputController mediaOutputController) {
@@ -261,9 +219,6 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
                 R.layout.media_output_broadcast_update_dialog, null);
         final EditText editText = layout.requireViewById(R.id.broadcast_edit_text);
         editText.setText(editString);
-        if (isBroadcastCode) {
-            editText.addTextChangedListener(mTextWatcher);
-        }
         mBroadcastErrorMessage = layout.requireViewById(R.id.broadcast_error_message);
         mAlertDialog = new Builder(mContext)
                 .setTitle(isBroadcastCode ? R.string.media_output_broadcast_code

@@ -17,7 +17,6 @@
 package android.telephony;
 
 import android.Manifest;
-import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,6 +39,7 @@ import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.data.ApnSetting;
+import android.telephony.data.DataCallResponse;
 import android.telephony.gba.TlsParams;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsReasonInfo;
@@ -53,8 +53,6 @@ import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -1139,6 +1137,27 @@ public class CarrierConfigManager {
     public static final String KEY_DEFAULT_MTU_INT = "default_mtu_int";
 
     /**
+     * The data call retry configuration for different types of APN.
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS =
+            "carrier_data_call_retry_config_strings";
+
+    /**
+     * Delay in milliseconds between trying APN from the pool
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG =
+            "carrier_data_call_apn_delay_default_long";
+
+    /**
+     * Faster delay in milliseconds between trying APN from the pool
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG =
+            "carrier_data_call_apn_delay_faster_long";
+
+    /**
      * Delay in milliseconds for retrying APN after disconnect
      * @hide
      */
@@ -1146,9 +1165,26 @@ public class CarrierConfigManager {
             "carrier_data_call_apn_retry_after_disconnect_long";
 
     /**
-     * Data call setup permanent failure causes by the carrier
+     * The maximum times for telephony to retry data setup on the same APN requested by
+     * network through the data setup response retry timer
+     * {@link DataCallResponse#getRetryDurationMillis()}. This is to prevent that network keeps
+     * asking device to retry data setup forever and causes power consumption issue. For infinite
+     * retring same APN, configure this as 2147483647 (i.e. {@link Integer#MAX_VALUE}).
+     *
+     * Note if network does not suggest any retry timer, frameworks uses the retry configuration
+     * from {@link #KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS}, and the maximum retry times could
+     * be configured there.
+     * @hide
      */
-    @Deprecated
+    public static final String KEY_CARRIER_DATA_CALL_RETRY_NETWORK_REQUESTED_MAX_COUNT_INT =
+            "carrier_data_call_retry_network_requested_max_count_int";
+
+    /**
+     * Data call setup permanent failure causes by the carrier.
+     *
+     * This API key was added in mistake and is not used anymore by the telephony data
+     * frameworks.
+     */
     public static final String KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS =
             "carrier_data_call_permanent_failure_strings";
 
@@ -1165,6 +1201,19 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS =
             "carrier_metered_roaming_apn_types_strings";
 
+    /**
+     * APN types that are not allowed on cellular
+     * @hide
+     */
+    public static final String KEY_CARRIER_WWAN_DISALLOWED_APN_TYPES_STRING_ARRAY =
+            "carrier_wwan_disallowed_apn_types_string_array";
+
+    /**
+     * APN types that are not allowed on IWLAN
+     * @hide
+     */
+    public static final String KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY =
+            "carrier_wlan_disallowed_apn_types_string_array";
     /**
      * CDMA carrier ERI (Enhanced Roaming Indicator) file name
      * @hide
@@ -2073,16 +2122,6 @@ public class CarrierConfigManager {
      * is immediately closed (disabling keep-alive).
      */
     public static final String KEY_MMS_CLOSE_CONNECTION_BOOL = "mmsCloseConnection";
-    /**
-     * Waiting time in milliseconds used before releasing an MMS data call. Not tearing down an MMS
-     * data connection immediately helps to reduce the message delivering latency if messaging
-     * continues between all parties in the conversation since the same data connection can be
-     * reused for further messages.
-     *
-     * This timer will control how long the data call will be kept alive before being torn down.
-     */
-    public static final String KEY_MMS_NETWORK_RELEASE_TIMEOUT_MILLIS_INT =
-            "mms_network_release_timeout_millis_int";
 
     /**
      * The flatten {@link android.content.ComponentName componentName} of the activity that can
@@ -3708,12 +3747,13 @@ public class CarrierConfigManager {
      * NR_SA - NR SA is unmetered for sub-6 frequencies
      * NR_SA_MMWAVE - NR SA is unmetered for mmwave frequencies
      *
-     * Note that this config only applies if an unmetered SubscriptionPlan is set via {@link
-     * SubscriptionManager#setSubscriptionPlans(int, List, long)} or an unmetered override is set
+     * Note that this config only applies if an unmetered SubscriptionPlan is set via
+     * {@link SubscriptionManager#setSubscriptionPlans(int, List)} or an unmetered override is set
      * via {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, int[], long)}
      * or {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, long)}.
      * If neither SubscriptionPlans nor an override are set, then no network types can be unmetered
      * regardless of the value of this config.
+     * TODO: remove other unmetered keys and replace with this
      * @hide
      */
     public static final String KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
@@ -3728,16 +3768,71 @@ public class CarrierConfigManager {
      * NR_SA - NR SA is unmetered when roaming for sub-6 frequencies
      * NR_SA_MMWAVE - NR SA is unmetered when roaming for mmwave frequencies
      *
-     * Note that this config only applies if an unmetered SubscriptionPlan is set via {@link
-     * SubscriptionManager#setSubscriptionPlans(int, List, long)} or an unmetered override is set
+     * Note that this config only applies if an unmetered SubscriptionPlan is set via
+     * {@link SubscriptionManager#setSubscriptionPlans(int, List)} or an unmetered override is set
      * via {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, int[], long)}
      * or {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, long)}.
      * If neither SubscriptionPlans nor an override are set, then no network types can be unmetered
      * when roaming regardless of the value of this config.
+     * TODO: remove KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL and replace with this
      * @hide
      */
     public static final String KEY_ROAMING_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
             "roaming_unmetered_network_types_string_array";
+
+    /**
+     * Whether NR (non-standalone) should be unmetered for all frequencies.
+     * If either {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL} or
+     * {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL} are true, then this value will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_BOOL = "unmetered_nr_nsa_bool";
+
+    /**
+     * Whether NR (non-standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_MMWAVE_BOOL = "unmetered_nr_nsa_mmwave_bool";
+
+    /**
+     * Whether NR (non-standalone) frequencies below 6GHz (sub6) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_SUB6_BOOL = "unmetered_nr_nsa_sub6_bool";
+
+    /**
+     * Whether NR (non-standalone) should be unmetered when the device is roaming.
+     * If false, then the values for {@link #KEY_UNMETERED_NR_NSA_BOOL},
+     * {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL}, {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL},
+     * and unmetered {@link SubscriptionPlan} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL =
+            "unmetered_nr_nsa_when_roaming_bool";
+
+    /**
+     * Whether NR (standalone) should be unmetered for all frequencies.
+     * If either {@link #KEY_UNMETERED_NR_SA_MMWAVE_BOOL} or
+     * {@link #KEY_UNMETERED_NR_SA_SUB6_BOOL} are true, then this value will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_SA_BOOL = "unmetered_nr_sa_bool";
+
+    /**
+     * Whether NR (standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_SA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_SA_MMWAVE_BOOL = "unmetered_nr_sa_mmwave_bool";
+
+    /**
+     * Whether NR (standalone) frequencies below 6GHz (sub6) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_SA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_SA_SUB6_BOOL = "unmetered_nr_sa_sub6_bool";
 
     /**
      * Support ASCII 7-BIT encoding for long SMS. This carrier config is used to enable
@@ -4266,34 +4361,6 @@ public class CarrierConfigManager {
             "data_switch_validation_timeout_long";
 
     /**
-     * The minimum timeout of UDP port 4500 NAT / firewall entries on the Internet PDN of this
-     * carrier network. This will be used by Android platform VPNs to tune IPsec NAT keepalive
-     * interval. If this value is too low to provide uninterrupted inbound connectivity, then
-     * Android system VPNs may indicate to applications that the VPN cannot support long-lived
-     * TCP connections.
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static final String KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT =
-            "min_udp_port_4500_nat_timeout_sec_int";
-
-    /**
-     * The preferred IKE protocol for ESP packets.
-     *
-     * This will be used by Android platform VPNs to select preferred encapsulation type and IP
-     * protocol type. The possible customization values are:
-     *
-     * AUTO IP VERSION and ENCAPSULATION TYPE SELECTION : "0"
-     * IPv4 UDP                                         : "40"
-     * IPv6 ESP                                         : "61"
-     *
-     * See the {@code PREFERRED_IKE_PROTOCOL_} constants in
-     * {@link com.android.server.connectivity.Vpn}.
-     * @hide
-     */
-    public static final String KEY_PREFERRED_IKE_PROTOCOL_INT = "preferred_ike_protocol_int";
-
-    /**
      * Specifies whether the system should prefix the EAP method to the anonymous identity.
      * The following prefix will be added if this key is set to TRUE:
      *   EAP-AKA: "0"
@@ -4420,57 +4487,6 @@ public class CarrierConfigManager {
      */
     public static final String KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY =
             "data_stall_recovery_should_skip_bool_array";
-
-    /**
-     * String array containing the list of names for service numbers provided by carriers. This key
-     * should be used with {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY}. The names provided in
-     * this array will be mapped 1:1 with the numbers provided in the {@link
-     * #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} array.
-     *
-     * <p>The data would be considered valid if and only if:
-     *
-     * <ul>
-     *   <li>The number of items in both the arrays are equal
-     *   <li>The data added to the {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} array is valid.
-     *       See {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} for more information.
-     * </ul>
-     *
-     * <p>Example:
-     *
-     * <pre><code>
-     * <string-array name="carrier_service_name_array" num="2">
-     *   <item value="Police"/>
-     *   <item value="Ambulance"/>
-     * </string-array>
-     * </code></pre>
-     */
-    public static final String KEY_CARRIER_SERVICE_NAME_STRING_ARRAY = "carrier_service_name_array";
-
-    /**
-     * String array containing the list of service numbers provided by carriers. This key should be
-     * used with {@link #KEY_CARRIER_SERVICE_NAME_STRING_ARRAY}. The numbers provided in this array
-     * will be mapped 1:1 with the names provided in the {@link
-     * #KEY_CARRIER_SERVICE_NAME_STRING_ARRAY} array.
-     *
-     * <p>The data would be considered valid if and only if:
-     *
-     * <ul>
-     *   <li>The number of items in both the arrays are equal
-     *   <li>The item added in this key follows a specific format. Either it should be all numbers,
-     *       or "+" followed by all numbers.
-     * </ul>
-     *
-     * <p>Example:
-     *
-     * <pre><code>
-     * <string-array name="carrier_service_number_array" num="2">
-     *   <item value="123"/>
-     *   <item value="+343"/>
-     * </string-array>
-     * </code></pre>
-     */
-    public static final String KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY =
-        "carrier_service_number_array";
 
     /**
      * Configs used by ImsServiceEntitlement.
@@ -4828,30 +4844,9 @@ public class CarrierConfigManager {
      * The max acceptable value of this config is 24 hours.
      *
      * @hide
-     * @deprecated Use {@link #KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG} instead.
      */
-    @Deprecated
     public static final String KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG =
             "data_switch_validation_min_gap_long";
-
-    /**
-     * Data switch validation minimal interval, in milliseconds.
-     *
-     * If a connection to the default (Internet) PDN for the current subscription is validated on
-     * a given operator within a given tracking area, re-validations to that matching operator will
-     * be skipped if they would occur within the specified interval. Instead, the connection will
-     * automatically considered validated.
-     *
-     * If the network was validated within the interval but the latest validation result was false,
-     * the validation will not be skipped. If not set or set to 0, validation will not be skipped.
-     *
-     * The valid range of value is between 0 millisecond and 24 hours, inclusive in both sides. The
-     * default value is 24 hours.
-     *
-     * @see android.net.NetworkCapabilities#NET_CAPABILITY_VALIDATED
-     */
-    public static final String KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG =
-            KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG;
 
     /**
      * A boolean property indicating whether this subscription should be managed as an opportunistic
@@ -7912,16 +7907,6 @@ public class CarrierConfigManager {
         public static final String KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY =
                 KEY_PREFIX + "epdg_address_priority_int_array";
 
-        /**
-         * A priority list of PLMN to be used in EPDG_ADDRESS_PLMN. Possible values are {@link
-         * #EPDG_PLMN_RPLMN}, {@link #EPDG_PLMN_HPLMN}, {@link #EPDG_PLMN_EHPLMN_ALL}, {@link
-         * #EPDG_PLMN_EHPLMN_FIRST}
-         *
-         * @hide
-         */
-        public static final String KEY_EPDG_PLMN_PRIORITY_INT_ARRAY =
-                KEY_PREFIX + "epdg_plmn_priority_int_array";
-
         /** Epdg static IP address or FQDN */
         public static final String KEY_EPDG_STATIC_ADDRESS_STRING =
                 KEY_PREFIX + "epdg_static_address_string";
@@ -8076,14 +8061,6 @@ public class CarrierConfigManager {
         public static final String KEY_SUPPORTS_EAP_AKA_FAST_REAUTH_BOOL =
                 KEY_PREFIX + "supports_eap_aka_fast_reauth_bool";
 
-        /**
-         * Type of IP preference used to prioritize ePDG servers. Possible values are
-         * {@link #EPDG_ADDRESS_IPV4_PREFERRED}, {@link #EPDG_ADDRESS_IPV6_PREFERRED},
-         * {@link #EPDG_ADDRESS_IPV4_ONLY}
-         */
-        public static final String KEY_EPDG_ADDRESS_IP_TYPE_PREFERENCE_INT =
-                KEY_PREFIX + "epdg_address_ip_type_preference_int";
-
         /** @hide */
         @IntDef({AUTHENTICATION_METHOD_EAP_ONLY, AUTHENTICATION_METHOD_CERT})
         public @interface AuthenticationMethodType {}
@@ -8123,36 +8100,6 @@ public class CarrierConfigManager {
         public static final int EPDG_ADDRESS_VISITED_COUNTRY = 4;
 
         /** @hide */
-        @IntDef({
-                EPDG_PLMN_RPLMN,
-                EPDG_PLMN_HPLMN,
-                EPDG_PLMN_EHPLMN_ALL,
-                EPDG_PLMN_EHPLMN_FIRST
-        })
-        public @interface EpdgAddressPlmnType {}
-
-        /**
-         * Use the Registered PLMN
-         * @hide
-         */
-        public static final int EPDG_PLMN_RPLMN = 0;
-        /**
-         * Use the PLMN derived from IMSI
-         * @hide
-         */
-        public static final int EPDG_PLMN_HPLMN = 1;
-        /**
-         * Use all EHPLMN from SIM EF files
-         * @hide
-         */
-        public static final int EPDG_PLMN_EHPLMN_ALL = 2;
-        /**
-         * Use the first EHPLMN from SIM EF files
-         * @hide
-         */
-        public static final int EPDG_PLMN_EHPLMN_FIRST = 3;
-
-        /** @hide */
         @IntDef({ID_TYPE_FQDN, ID_TYPE_RFC822_ADDR, ID_TYPE_KEY_ID})
         public @interface IkeIdType {}
 
@@ -8177,39 +8124,6 @@ public class CarrierConfigManager {
          *     Exchange Protocol Version 2 (IKEv2)</a>
          */
         public static final int ID_TYPE_KEY_ID = 11;
-
-        /** @hide */
-        @IntDef({
-                EPDG_ADDRESS_IPV4_PREFERRED,
-                EPDG_ADDRESS_IPV6_PREFERRED,
-                EPDG_ADDRESS_IPV4_ONLY,
-                EPDG_ADDRESS_IPV6_ONLY,
-                EPDG_ADDRESS_SYSTEM_PREFERRED
-        })
-        public @interface EpdgAddressIpPreference {}
-
-        /** Prioritize IPv4 ePDG addresses. */
-        public static final int EPDG_ADDRESS_IPV4_PREFERRED = 0;
-
-        /** Prioritize IPv6 ePDG addresses */
-        public static final int EPDG_ADDRESS_IPV6_PREFERRED = 1;
-
-        /** Use IPv4 ePDG addresses only. */
-        public static final int EPDG_ADDRESS_IPV4_ONLY = 2;
-
-        /** Use IPv6 ePDG addresses only.
-         * @hide
-         */
-        public static final int EPDG_ADDRESS_IPV6_ONLY = 3;
-
-        /** Follow the priority from DNS resolution results, which are sorted by using RFC6724
-         * algorithm.
-         *
-         * @see <a href="https://tools.ietf.org/html/rfc6724#section-6">RFC 6724, Default Address
-         *     Selection for Internet Protocol Version 6 (IPv6)</a>
-         * @hide
-         */
-        public static final int EPDG_ADDRESS_SYSTEM_PREFERRED = 4;
 
         private Iwlan() {}
 
@@ -8287,12 +8201,6 @@ public class CarrierConfigManager {
             defaults.putIntArray(
                     KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY,
                     new int[] {EPDG_ADDRESS_PLMN, EPDG_ADDRESS_STATIC});
-            defaults.putIntArray(
-                    KEY_EPDG_PLMN_PRIORITY_INT_ARRAY,
-                    new int[]{
-                            EPDG_PLMN_RPLMN,
-                            EPDG_PLMN_HPLMN,
-                            EPDG_PLMN_EHPLMN_ALL});
             defaults.putStringArray(KEY_MCC_MNCS_STRING_ARRAY, new String[] {});
             defaults.putInt(KEY_IKE_LOCAL_ID_TYPE_INT, ID_TYPE_RFC822_ADDR);
             defaults.putInt(KEY_IKE_REMOTE_ID_TYPE_INT, ID_TYPE_FQDN);
@@ -8300,7 +8208,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_EPDG_PCO_ID_IPV6_INT, 0);
             defaults.putInt(KEY_EPDG_PCO_ID_IPV4_INT, 0);
             defaults.putBoolean(KEY_SUPPORTS_EAP_AKA_FAST_REAUTH_BOOL, false);
-            defaults.putInt(KEY_EPDG_ADDRESS_IP_TYPE_PREFERENCE_INT, EPDG_ADDRESS_IPV4_PREFERRED);
+
             return defaults;
         }
     }
@@ -8346,9 +8254,8 @@ public class CarrierConfigManager {
             "carrier_certificate_string_array";
 
     /**
-     * Flag specifying whether the incoming call number and the conference participant number
-     * should be formatted to national number for Japan.
-     * @return {@code true} convert to the national format, {@code false} otherwise.
+     * Flag specifying whether the incoming call number should be formatted to national number
+     * for Japan. @return {@code true} convert to the national format, {@code false} otherwise.
      * e.g. "+819012345678" -> "09012345678"
      * @hide
      */
@@ -8442,6 +8349,7 @@ public class CarrierConfigManager {
      * "1800000, maximum_retries=20" means for those capabilities, retry happens in 2.5s, 3s, 5s,
      * 10s, 15s, 20s, 40s, 1m, 2m, 4m, 10m, 20m, 30m, 30m, 30m, until reaching 20 retries.
      *
+     * // TODO: remove KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS
      * @hide
      */
     public static final String KEY_TELEPHONY_DATA_SETUP_RETRY_RULES_STRING_ARRAY =
@@ -8580,12 +8488,7 @@ public class CarrierConfigManager {
      *
      * Used to trade privacy/security against potentially reduced carrier coverage for some
      * carriers.
-     *
-     * @deprecated Future versions of Android will disallow carriers from hiding this toggle
-     * because disabling 2g is a security feature that users should always have access to at
-     * their discretion.
      */
-    @Deprecated
     public static final String KEY_HIDE_ENABLE_2G = "hide_enable_2g_bool";
 
     /**
@@ -8644,12 +8547,11 @@ public class CarrierConfigManager {
 
     /**
      * Boolean indicating if the VoNR setting is visible in the Call Settings menu.
-     * If this flag is set and VoNR is enabled for this carrier (see {@link #KEY_VONR_ENABLED_BOOL})
-     * the VoNR setting menu will be visible. If {@link #KEY_VONR_ENABLED_BOOL} or
-     * this setting is false, the menu will be gone.
+     * If true, the VoNR setting menu will be visible. If false, the menu will be gone.
      *
-     * Enabled by default.
+     * Disabled by default.
      *
+     * @hide
      */
     public static final String KEY_VONR_SETTING_VISIBILITY_BOOL = "vonr_setting_visibility_bool";
 
@@ -8659,6 +8561,7 @@ public class CarrierConfigManager {
      *
      * Disabled by default.
      *
+     * @hide
      */
     public static final String KEY_VONR_ENABLED_BOOL = "vonr_enabled_bool";
 
@@ -8858,13 +8761,27 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
         sDefaults.putInt(KEY_DEFAULT_MTU_INT, 1500);
+        sDefaults.putStringArray(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS, new String[]{
+                "default:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
+                        + "320000:5000,640000:5000,1280000:5000,1800000:5000",
+                "mms:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
+                        + "320000:5000,640000:5000,1280000:5000,1800000:5000",
+                "ims:max_retries=10, 5000, 5000, 5000",
+                "others:max_retries=3, 5000, 5000, 5000"});
+        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
+        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG, 3000);
+        sDefaults.putInt(KEY_CARRIER_DATA_CALL_RETRY_NETWORK_REQUESTED_MAX_COUNT_INT, 3);
         sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
         sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
         sDefaults.putStringArray(KEY_CARRIER_METERED_APN_TYPES_STRINGS,
-                new String[]{"default", "mms", "dun", "supl", "enterprise"});
+                new String[]{"default", "mms", "dun", "supl"});
         sDefaults.putStringArray(KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS,
-                new String[]{"default", "mms", "dun", "supl", "enterprise"});
+                new String[]{"default", "mms", "dun", "supl"});
+        sDefaults.putStringArray(KEY_CARRIER_WWAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
+                new String[]{""});
+        sDefaults.putStringArray(KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
+                new String[]{""});
         sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
                 new int[] {TelephonyManager.NETWORK_TYPE_CDMA, TelephonyManager.NETWORK_TYPE_1xRTT,
                         TelephonyManager.NETWORK_TYPE_EVDO_0, TelephonyManager.NETWORK_TYPE_EVDO_A,
@@ -8966,7 +8883,6 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_MMS_SMS_TO_MMS_TEXT_LENGTH_THRESHOLD_INT, -1);
         sDefaults.putInt(KEY_MMS_SMS_TO_MMS_TEXT_THRESHOLD_INT, -1);
         sDefaults.putInt(KEY_MMS_SUBJECT_MAX_LENGTH_INT, 40);
-        sDefaults.putInt(KEY_MMS_NETWORK_RELEASE_TIMEOUT_MILLIS_INT, 5 * 1000);
         sDefaults.putString(KEY_MMS_EMAIL_GATEWAY_NUMBER_STRING, "");
         sDefaults.putString(KEY_MMS_HTTP_PARAMS_STRING, "");
         sDefaults.putString(KEY_MMS_NAI_SUFFIX_STRING, "");
@@ -9042,8 +8958,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_INT, 0);
         sDefaults.putBoolean(KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL, false);
         sDefaults.putStringArray(KEY_FILTERED_CNAP_NAMES_STRING_ARRAY, null);
-        sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
-        sDefaults.putBoolean(KEY_SHOW_BLOCKING_PAY_PHONE_OPTION_BOOL, false);
+        sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, true);
+        sDefaults.putBoolean(KEY_SHOW_BLOCKING_PAY_PHONE_OPTION_BOOL, true);
         sDefaults.putBoolean(KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_METERED_NETWORK_FOR_CERT_DOWNLOAD_BOOL, false);
@@ -9093,7 +9009,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL, false);
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
-        sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
+        sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, false);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
         sDefaults.putBoolean(KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL, false);
@@ -9199,6 +9115,13 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[] {
                 "NR_NSA", "NR_NSA_MMWAVE", "NR_SA", "NR_SA_MMWAVE"});
         sDefaults.putStringArray(KEY_ROAMING_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[0]);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_MMWAVE_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_SUB6_BOOL, false);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_WIFI_CALLING_ICON_IN_STATUS_BAR_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_OPP_DATA_AUTO_PROVISIONING_BOOL, false);
@@ -9272,7 +9195,7 @@ public class CarrierConfigManager {
         sDefaults.putAll(Bsf.getDefaults());
         sDefaults.putAll(Iwlan.getDefaults());
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, new String[0]);
-        sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
+         sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
@@ -9280,8 +9203,6 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MMI_TWO_DIGIT_NUMBER_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
-        sDefaults.putInt(KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT, 300);
-        sDefaults.putInt(KEY_PREFERRED_IKE_PROTOCOL_INT, -1);
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
@@ -9293,8 +9214,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_GBA_UA_TLS_CIPHER_SUITE_INT, TlsParams.TLS_NULL_WITH_NULL_NULL);
 
         sDefaults.putBoolean(KEY_SHOW_FORWARDED_NUMBER_BOOL, false);
-        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_INTERVAL_MILLIS_LONG,
-                TimeUnit.DAYS.toMillis(1));
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
         sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
@@ -9315,8 +9235,8 @@ public class CarrierConfigManager {
                         // Permanent fail causes. When setup data call fails with the following
                         // fail causes, telephony data frameworks will stop timer-based retry on
                         // the failed APN until power cycle, APM, or some special events. Note that
-                        // even timer-based retry is not performed, condition-based (RAT changes,
-                        // registration state changes) retry can still happen.
+                        // even though timer-based retry is not performed, condition-based (RAT
+                        // changes, registration state changes) retry can still happen.
                         "permanent_fail_causes=8|27|28|29|30|32|33|35|50|51|111|-5|-6|65537|65538|"
                                 + "-3|65543|65547|2252|2253|2254, retry_interval=2500",
                         "capabilities=mms|supl|cbs, retry_interval=2000",
@@ -9348,7 +9268,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISPLAY_NO_DATA_NOTIFICATION_ON_PERMANENT_FAILURE_BOOL, false);
         sDefaults.putBoolean(KEY_UNTHROTTLE_DATA_RETRY_WHEN_TAC_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_VONR_SETTING_VISIBILITY_BOOL, true);
-        sDefaults.putBoolean(KEY_VONR_ENABLED_BOOL, false);
+        sDefaults.putBoolean(KEY_VONR_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_VONR_ON_BY_DEFAULT_BOOL, true);
         sDefaults.putStringArray(KEY_IWLAN_HANDOVER_POLICY_STRING_ARRAY, new String[]{
                 "source=GERAN|UTRAN|EUTRAN|NGRAN|IWLAN, "
@@ -9360,8 +9280,6 @@ public class CarrierConfigManager {
                 new long[] {180000, 180000, 180000, 180000});
         sDefaults.putBooleanArray(KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY,
                 new boolean[] {false, false, true, false, false});
-        sDefaults.putStringArray(KEY_CARRIER_SERVICE_NAME_STRING_ARRAY, new String[0]);
-        sDefaults.putStringArray(KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY, new String[0]);
     }
 
     /**
@@ -9436,13 +9354,10 @@ public class CarrierConfigManager {
      * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
      * @return A {@link PersistableBundle} containing the config for the given subId, or default
      *         values for an invalid subId.
-     *
-     * @deprecated Use {@link #getConfigForSubId(int, String...)} instead.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     @Nullable
-    @Deprecated
     public PersistableBundle getConfigForSubId(int subId) {
         try {
             ICarrierConfigLoader loader = getICarrierConfigLoader();
@@ -9458,59 +9373,6 @@ public class CarrierConfigManager {
                     + ex.toString());
         }
         return null;
-    }
-
-    /**
-     * Gets the configuration values of the specified keys for a particular subscription.
-     *
-     * <p>If an invalid subId is used, the returned configuration will contain default values for
-     * the specified keys. If the value for the key can't be found, the returned configuration will
-     * filter the key out.
-     *
-     * <p>After using this method to get the configuration bundle,
-     * {@link #isConfigForIdentifiedCarrier(PersistableBundle)} should be called to confirm whether
-     * any carrier specific configuration has been applied.
-     *
-     * <p>Note that on success, the key/value for {@link #KEY_CARRIER_CONFIG_VERSION_STRING} and
-     * {@link #KEY_CARRIER_CONFIG_APPLIED_BOOL} are always in the returned bundle, no matter if they
-     * were explicitly requested.
-     *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}, or the calling app
-     * has carrier privileges on the specified subscription (see
-     * {@link TelephonyManager#hasCarrierPrivileges()}).
-     *
-     * @param subId The subscription ID on which the carrier config should be retrieved.
-     * @param keys  The carrier config keys to retrieve values.
-     * @return A {@link PersistableBundle} with key/value mapping for the specified configuration
-     * on success, or an empty (but never null) bundle on failure (for example, when the calling app
-     * has no permission).
-     */
-    @RequiresPermission(anyOf = {
-            Manifest.permission.READ_PHONE_STATE,
-            "carrier privileges",
-    })
-    @NonNull
-    public PersistableBundle getConfigForSubId(int subId, @NonNull String... keys) {
-        Objects.requireNonNull(keys, "Config keys should be non-null");
-        for (String key : keys) {
-            Objects.requireNonNull(key, "Config key should be non-null");
-        }
-
-        try {
-            ICarrierConfigLoader loader = getICarrierConfigLoader();
-            if (loader == null) {
-                Rlog.w(TAG, "Error getting config for subId " + subId
-                        + " ICarrierConfigLoader is null");
-                throw new IllegalStateException("Carrier config loader is not available.");
-            }
-            return loader.getConfigSubsetForSubIdWithFeature(subId, mContext.getOpPackageName(),
-                    mContext.getAttributionTag(), keys);
-        } catch (RemoteException ex) {
-            Rlog.e(TAG, "Error getting config for subId " + subId + ": " + ex);
-            ex.rethrowAsRuntimeException();
-        }
-        return new PersistableBundle();
     }
 
     /**
@@ -9587,49 +9449,12 @@ public class CarrierConfigManager {
      * has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges()}).
      *
      * @see #getConfigForSubId
-     * @see #getConfig(String...)
-     * @deprecated use {@link #getConfig(String...)} instead.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     @Nullable
-    @Deprecated
     public PersistableBundle getConfig() {
         return getConfigForSubId(SubscriptionManager.getDefaultSubscriptionId());
-    }
-
-    /**
-     * Gets the configuration values of the specified config keys applied for the default
-     * subscription.
-     *
-     * <p>If the value for the key can't be found, the returned bundle will filter the key out.
-     *
-     * <p>After using this method to get the configuration bundle, {@link
-     * #isConfigForIdentifiedCarrier(PersistableBundle)} should be called to confirm whether any
-     * carrier specific configuration has been applied.
-     *
-     * <p>Note that on success, the key/value for {@link #KEY_CARRIER_CONFIG_VERSION_STRING} and
-     * {@link #KEY_CARRIER_CONFIG_APPLIED_BOOL} are always in the returned bundle, no matter if
-     * they were explicitly requested.
-     *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}, or the calling app
-     * has carrier privileges for the default subscription (see
-     * {@link TelephonyManager#hasCarrierPrivileges()}).
-     *
-     * @param keys The config keys to retrieve values
-     * @return A {@link PersistableBundle} with key/value mapping for the specified carrier
-     * configs on success, or an empty (but never null) bundle on failure.
-     * @see #getConfigForSubId(int, String...)
-     * @see SubscriptionManager#getDefaultSubscriptionId()
-     */
-    @RequiresPermission(anyOf = {
-            Manifest.permission.READ_PHONE_STATE,
-            "carrier privileges",
-    })
-    @NonNull
-    public PersistableBundle getConfig(@NonNull String... keys) {
-        return getConfigForSubId(SubscriptionManager.getDefaultSubscriptionId(), keys);
     }
 
     /**
@@ -9709,7 +9534,7 @@ public class CarrierConfigManager {
                 return;
             }
             loader.updateConfigForPhoneId(phoneId, simState);
-        } catch (RemoteException ex) {
+        } catch (RemoteException | IllegalArgumentException ex) {
             Rlog.e(TAG, "Error updating config for phoneId=" + phoneId + ": " + ex.toString());
         }
     }
@@ -9817,86 +9642,5 @@ public class CarrierConfigManager {
         } else if (value instanceof PersistableBundle) {
             configs.putPersistableBundle(key, (PersistableBundle) value);
         }
-    }
-
-    /**
-     * Listener interface to get a notification when the carrier configurations have changed.
-     *
-     * Use this listener to receive timely updates when the carrier configuration changes. System
-     * components should prefer this listener over {@link #ACTION_CARRIER_CONFIG_CHANGED}
-     * whenever possible.
-     *
-     * To register the listener, call
-     * {@link #registerCarrierConfigChangeListener(Executor, CarrierConfigChangeListener)}.
-     * To unregister, call
-     * {@link #unregisterCarrierConfigChangeListener(CarrierConfigChangeListener)}.
-     *
-     * Note that on registration, registrants will NOT receive a notification on last carrier config
-     * change. Only carrier configs change AFTER the registration will be sent to registrants. And
-     * unlike {@link #ACTION_CARRIER_CONFIG_CHANGED}, notification wouldn't send when the device is
-     * unlocked. Registrants only receive the notification when there has been real carrier config
-     * changes.
-     *
-     * @see #registerCarrierConfigChangeListener(Executor, CarrierConfigChangeListener)
-     * @see #unregisterCarrierConfigChangeListener(CarrierConfigChangeListener)
-     * @see #ACTION_CARRIER_CONFIG_CHANGED
-     * @see #getConfig(String...)
-     * @see #getConfigForSubId(int, String...)
-     */
-    public interface CarrierConfigChangeListener {
-        /**
-         * Called when carrier configurations have changed.
-         *
-         * @param logicalSlotIndex  The logical SIM slot index on which to monitor and get
-         *                          notification. It is guaranteed to be valid.
-         * @param subscriptionId    The subscription on the SIM slot. May be
-         *                          {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
-         * @param carrierId         The optional carrier Id, may be
-         *                          {@link TelephonyManager#UNKNOWN_CARRIER_ID}.
-         *                          See {@link TelephonyManager#getSimCarrierId()}.
-         * @param specificCarrierId The optional fine-grained carrierId, may be {@link
-         *                          TelephonyManager#UNKNOWN_CARRIER_ID}. A specific carrierId may
-         *                          be different from the carrierId above in a MVNO scenario. See
-         *                          detail in {@link TelephonyManager#getSimSpecificCarrierId()}.
-         */
-        void onCarrierConfigChanged(int logicalSlotIndex, int subscriptionId, int carrierId,
-                int specificCarrierId);
-    }
-
-    /**
-     * Register a {@link CarrierConfigChangeListener} to get a notification when carrier
-     * configurations have changed.
-     *
-     * @param executor The executor on which the listener will be called.
-     * @param listener The CarrierConfigChangeListener called when carrier configs has changed.
-     */
-    public void registerCarrierConfigChangeListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull CarrierConfigChangeListener listener) {
-        Objects.requireNonNull(executor, "Executor should be non-null.");
-        Objects.requireNonNull(listener, "Listener should be non-null.");
-
-        TelephonyRegistryManager trm = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (trm == null) {
-            throw new IllegalStateException("Telephony registry service is null");
-        }
-        trm.addCarrierConfigChangedListener(executor, listener);
-    }
-
-    /**
-     * Unregister the {@link CarrierConfigChangeListener} to stop notification on carrier
-     * configurations change.
-     *
-     * @param listener The CarrierConfigChangeListener which was registered with method
-     * {@link #registerCarrierConfigChangeListener(Executor, CarrierConfigChangeListener)}.
-     */
-    public void unregisterCarrierConfigChangeListener(
-            @NonNull CarrierConfigChangeListener listener) {
-        Objects.requireNonNull(listener, "Listener should be non-null.");
-
-        TelephonyRegistryManager trm = mContext.getSystemService(TelephonyRegistryManager.class);
-        if (trm == null) {
-            throw new IllegalStateException("Telephony registry service is null");
-        }
-        trm.removeCarrierConfigChangedListener(listener);
     }
 }

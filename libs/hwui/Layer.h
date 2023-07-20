@@ -102,10 +102,6 @@ public:
 
     inline float getMaxLuminanceNits() { return mMaxLuminanceNits; }
 
-    void setBufferFormat(uint32_t format) { mBufferFormat = format; }
-
-    uint32_t getBufferFormat() const { return mBufferFormat; }
-
     void draw(SkCanvas* canvas);
 
 protected:
@@ -172,8 +168,6 @@ private:
      * Max input luminance if the layer is HDR
      */
     float mMaxLuminanceNits = -1;
-
-    uint32_t mBufferFormat = 0;
 
 };  // struct Layer
 

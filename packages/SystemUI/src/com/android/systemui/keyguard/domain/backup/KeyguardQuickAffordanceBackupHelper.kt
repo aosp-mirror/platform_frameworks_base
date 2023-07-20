@@ -29,9 +29,16 @@ class KeyguardQuickAffordanceBackupHelper(
 ) :
     SharedPreferencesBackupHelper(
         context,
-        UserFileManagerImpl.createFile(
-                userId = userId,
-                fileName = KeyguardQuickAffordanceSelectionManager.FILE_NAME,
-            )
-            .getPath()
+        if (UserFileManagerImpl.isPrimaryUser(userId)) {
+            KeyguardQuickAffordanceSelectionManager.FILE_NAME
+        } else {
+            UserFileManagerImpl.secondaryUserFile(
+                    context = context,
+                    fileName = KeyguardQuickAffordanceSelectionManager.FILE_NAME,
+                    directoryName = UserFileManagerImpl.SHARED_PREFS,
+                    userId = userId,
+                )
+                .also { UserFileManagerImpl.ensureParentDirExists(it) }
+                .toString()
+        }
     )

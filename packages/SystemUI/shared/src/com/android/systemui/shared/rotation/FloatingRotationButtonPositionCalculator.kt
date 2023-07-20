@@ -10,8 +10,7 @@ import android.view.Surface
 class FloatingRotationButtonPositionCalculator(
     private val defaultMargin: Int,
     private val taskbarMarginLeft: Int,
-    private val taskbarMarginBottom: Int,
-    private val floatingRotationButtonPositionLeft: Boolean
+    private val taskbarMarginBottom: Int
 ) {
 
     fun calculatePosition(
@@ -19,6 +18,7 @@ class FloatingRotationButtonPositionCalculator(
         taskbarVisible: Boolean,
         taskbarStashed: Boolean
     ): Position {
+
         val isTaskbarSide = currentRotation == Surface.ROTATION_0
             || currentRotation == Surface.ROTATION_90
         val useTaskbarMargin = isTaskbarSide && taskbarVisible && !taskbarStashed
@@ -55,21 +55,11 @@ class FloatingRotationButtonPositionCalculator(
     )
 
     private fun resolveGravity(rotation: Int): Int =
-        if (floatingRotationButtonPositionLeft) {
-            when (rotation) {
-                Surface.ROTATION_0 -> Gravity.BOTTOM or Gravity.LEFT
-                Surface.ROTATION_90 -> Gravity.BOTTOM or Gravity.RIGHT
-                Surface.ROTATION_180 -> Gravity.TOP or Gravity.RIGHT
-                Surface.ROTATION_270 -> Gravity.TOP or Gravity.LEFT
-                else -> throw IllegalArgumentException("Invalid rotation $rotation")
-            }
-        } else {
-            when (rotation) {
-                Surface.ROTATION_0 -> Gravity.BOTTOM or Gravity.RIGHT
-                Surface.ROTATION_90 -> Gravity.TOP or Gravity.RIGHT
-                Surface.ROTATION_180 -> Gravity.TOP or Gravity.LEFT
-                Surface.ROTATION_270 -> Gravity.BOTTOM or Gravity.LEFT
-                else -> throw IllegalArgumentException("Invalid rotation $rotation")
-            }
+        when (rotation) {
+            Surface.ROTATION_0 -> Gravity.BOTTOM or Gravity.LEFT
+            Surface.ROTATION_90 -> Gravity.BOTTOM or Gravity.RIGHT
+            Surface.ROTATION_180 -> Gravity.TOP or Gravity.RIGHT
+            Surface.ROTATION_270 -> Gravity.TOP or Gravity.LEFT
+            else -> throw IllegalArgumentException("Invalid rotation $rotation")
         }
 }

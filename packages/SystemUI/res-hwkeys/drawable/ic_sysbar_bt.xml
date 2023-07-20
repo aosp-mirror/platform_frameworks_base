@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  Copyright (C) 2017 The Dirty Unicorns Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="30.0dp"
+        android:height="30.0dp"
+        android:viewportWidth="96.0"
+        android:viewportHeight="96.0">
+
+    <group>
+        <path
+            android:fillColor="@color/icon_color_bluetooth"
+            android:pathData="M70.7,58.5L70.7,58.5L70.7,58.5c-0.1,0-0.1-0.1-0.2-0.1l-12.5-7l-1.1-0.6C55.8,50.3,55,49.3,55,48
+c0-1.1,0.7-2.1,1.6-2.6l1-0.5l0.4-0.2l12.5-7c0.1,0,0.1-0.1,0.2-0.1l0,0v0C71.5,36.9,72,36,72,35s-0.5-1.9-1.3-2.5v0l0,0
+c-0.2-0.2-0.5-0.3-0.7-0.4L46.1,20.6l0,0C45.5,20.2,44.8,20,44,20c-2.2,0-4,1.8-4,4v13.7L32,33c-1.9-1.1-4.4-0.5-5.5,1.5l-2,3.5
+c-1.1,1.9-0.5,4.4,1.5,5.5l7.9,4.6L26,52.6c-1.9,1.1-2.6,3.6-1.5,5.5l2,3.5c1.1,1.9,3.6,2.6,5.5,1.5l8-4.6V72c0,2.2,1.8,4,4,4
+c0.8,0,1.5-0.2,2.1-0.6l0,0L70,63.8c0.3-0.1,0.5-0.2,0.7-0.4h0C71.5,62.9,72,62,72,61S71.5,59.1,70.7,58.5z" />
+    </group>
+</vector>

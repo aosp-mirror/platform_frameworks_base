@@ -23,8 +23,6 @@ import android.os.UserManager
 import android.provider.Settings
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.util.settings.FakeSettings
@@ -42,7 +40,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
@@ -217,35 +214,6 @@ class UserRepositoryImplTest : SysuiTestCase() {
         assertThat(selectedUserInfo?.id).isEqualTo(1)
     }
 
-    @Test
-    fun userSwitchingInProgress_registersUserTrackerCallback() = runSelfCancelingTest {
-        underTest = create(this)
-
-        underTest.userSwitchingInProgress.launchIn(this)
-        underTest.userSwitchingInProgress.launchIn(this)
-        underTest.userSwitchingInProgress.launchIn(this)
-
-        // Two callbacks registered - one for observing user switching and one for observing the
-        // selected user
-        assertThat(tracker.callbacks.size).isEqualTo(2)
-    }
-
-    @Test
-    fun userSwitchingInProgress_propagatesStateFromUserTracker() = runSelfCancelingTest {
-        underTest = create(this)
-        assertThat(tracker.callbacks.size).isEqualTo(2)
-
-        tracker.onUserChanging(0)
-
-        var mostRecentSwitchingValue = false
-        underTest.userSwitchingInProgress.onEach { mostRecentSwitchingValue = it }.launchIn(this)
-
-        assertThat(mostRecentSwitchingValue).isTrue()
-
-        tracker.onUserChanged(0)
-        assertThat(mostRecentSwitchingValue).isFalse()
-    }
-
     private fun createUserInfo(
         id: Int,
         isGuest: Boolean,
@@ -312,8 +280,6 @@ class UserRepositoryImplTest : SysuiTestCase() {
         }
 
     private fun create(scope: CoroutineScope = TestCoroutineScope()): UserRepositoryImpl {
-        val featureFlags = FakeFeatureFlags()
-        featureFlags.set(FACE_AUTH_REFACTOR, true)
         return UserRepositoryImpl(
             appContext = context,
             manager = manager,
@@ -322,7 +288,6 @@ class UserRepositoryImplTest : SysuiTestCase() {
             backgroundDispatcher = IMMEDIATE,
             globalSettings = globalSettings,
             tracker = tracker,
-            featureFlags = featureFlags,
         )
     }
 

@@ -71,8 +71,8 @@ interface FooterActionsInteractor {
     /**
      * Show the device monitoring dialog, expanded from [expandable] if it's not null.
      *
-     * Important: [quickSettingsContext] *must* be the [Context] associated to the
-     * [Quick Settings fragment][com.android.systemui.qs.QSFragment].
+     * Important: [quickSettingsContext] *must* be the [Context] associated to the [Quick Settings
+     * fragment][com.android.systemui.qs.QSFragment].
      */
     fun showDeviceMonitoringDialog(quickSettingsContext: Context, expandable: Expandable?)
 
@@ -88,8 +88,11 @@ interface FooterActionsInteractor {
     /** Show the settings. */
     fun showSettings(expandable: Expandable)
 
+    /** Show Our Xtensions */
+    fun showXtensions(expandable: Expandable): Boolean
+
     /** Show the user switcher. */
-    fun showUserSwitcher(expandable: Expandable)
+    fun showUserSwitcher(context: Context, expandable: Expandable)
 }
 
 @SysUISingleton
@@ -177,7 +180,25 @@ constructor(
         )
     }
 
-    override fun showUserSwitcher(expandable: Expandable) {
-        userInteractor.showUserSwitcher(expandable)
+    override fun showXtensions(expandable: Expandable): Boolean {
+        if (!deviceProvisionedController.isCurrentUserSetup) {
+            // If user isn't setup just unlock the device and dump them back at SUW.
+            activityStarter.postQSRunnableDismissingKeyguard {}
+            return false
+        }
+
+        metricsLogger.action(MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH)
+        activityStarter.startActivity(
+            Intent("com.android.settings.XTENSIONS_SETTINGS"),
+            true /* dismissShade */,
+            expandable.activityLaunchController(
+                InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON
+            ),
+        )
+        return true
+    }
+
+    override fun showUserSwitcher(context: Context, expandable: Expandable) {
+        userInteractor.showUserSwitcher(context, expandable)
     }
 }

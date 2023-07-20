@@ -140,17 +140,6 @@ package android.media.tv {
 
 }
 
-package android.nfc {
-
-  public final class NfcAdapter {
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean disableNdefPush();
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableNdefPush();
-    method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, int);
-    field public static final int FLAG_NDEF_PUSH_NO_CONFIRM = 1; // 0x1
-  }
-
-}
-
 package android.os {
 
   public class Build {

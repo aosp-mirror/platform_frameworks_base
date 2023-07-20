@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.oemlock.V1_0.IOemLock;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -53,18 +54,15 @@ public class OemLockService extends SystemService {
     private OemLock mOemLock;
 
     public static boolean isHalPresent() {
-        return (VendorLockHidl.getOemLockHalService() != null)
-                || (VendorLockAidl.getOemLockHalService() != null);
+        return VendorLock.getOemLockHalService() != null;
     }
 
     /** Select the OEM lock implementation */
     private static OemLock getOemLock(Context context) {
-        if (VendorLockAidl.getOemLockHalService() != null) {
-            Slog.i(TAG, "Using vendor lock via the HAL(aidl)");
-            return new VendorLockAidl(context);
-        } else if (VendorLockHidl.getOemLockHalService() != null) {
-            Slog.i(TAG, "Using vendor lock via the HAL(hidl)");
-            return new VendorLockHidl(context);
+        final IOemLock oemLockHal = VendorLock.getOemLockHalService();
+        if (oemLockHal != null) {
+            Slog.i(TAG, "Using vendor lock via the HAL");
+            return new VendorLock(context, oemLockHal);
         } else {
             Slog.i(TAG, "Using persistent data block based lock");
             return new PersistentDataBlockLock(context);

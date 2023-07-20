@@ -27,9 +27,11 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.fragments.FragmentService
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.qs.QSContainerController
@@ -47,13 +49,13 @@ import kotlin.reflect.KMutableProperty0
 internal const val INSET_DEBOUNCE_MILLIS = 500L
 
 class NotificationsQSContainerController @Inject constructor(
-        view: NotificationsQuickSettingsContainer,
-        private val navigationModeController: NavigationModeController,
-        private val overviewProxyService: OverviewProxyService,
-        private val shadeHeaderController: ShadeHeaderController,
-        private val shadeExpansionStateManager: ShadeExpansionStateManager,
-        private val fragmentService: FragmentService,
-        @Main private val delayableExecutor: DelayableExecutor
+    view: NotificationsQuickSettingsContainer,
+    private val navigationModeController: NavigationModeController,
+    private val overviewProxyService: OverviewProxyService,
+    private val largeScreenShadeHeaderController: LargeScreenShadeHeaderController,
+    private val shadeExpansionStateManager: ShadeExpansionStateManager,
+    private val featureFlags: FeatureFlags,
+    @Main private val delayableExecutor: DelayableExecutor
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
 
     private var qsExpanded = false
@@ -71,6 +73,8 @@ class NotificationsQSContainerController @Inject constructor(
     private var bottomCutoutInsets = 0
     private var panelMarginHorizontal = 0
     private var topMargin = 0
+
+    private val useCombinedQSHeaders = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
 
     private var isGestureNavigation = true
     private var taskbarVisible = false
@@ -125,7 +129,6 @@ class NotificationsQSContainerController @Inject constructor(
         mView.setInsetsChangedListener(delayedInsetSetter)
         mView.setQSFragmentAttachedListener { qs: QS -> qs.setContainerController(this) }
         mView.setConfigurationChangedListener { updateResources() }
-        fragmentService.getFragmentHostManager(mView).addTagListener(QS.TAG, mView)
     }
 
     override fun onViewDetached() {
@@ -134,7 +137,6 @@ class NotificationsQSContainerController @Inject constructor(
         mView.removeOnInsetsChangedListener()
         mView.removeQSFragmentAttachedListener()
         mView.setConfigurationChangedListener(null)
-        fragmentService.getFragmentHostManager(mView).removeTagListener(QS.TAG, mView)
     }
 
     fun updateResources() {
@@ -149,7 +151,7 @@ class NotificationsQSContainerController @Inject constructor(
         panelMarginHorizontal = resources.getDimensionPixelSize(
                 R.dimen.notification_panel_margin_horizontal)
         topMargin = if (largeScreenShadeHeaderActive) {
-            largeScreenShadeHeaderHeight
+            SystemBarUtils.getStatusBarHeight(context) + resources.getDimensionPixelSize(R.dimen.qqs_margin_top)
         } else {
             resources.getDimensionPixelSize(R.dimen.notification_panel_margin_top)
         }
@@ -179,7 +181,7 @@ class NotificationsQSContainerController @Inject constructor(
     override fun setCustomizerShowing(showing: Boolean, animationDuration: Long) {
         if (showing != isQSCustomizing) {
             isQSCustomizing = showing
-            shadeHeaderController.startCustomizingAnimation(showing, animationDuration)
+            largeScreenShadeHeaderController.startCustomizingAnimation(showing, animationDuration)
             updateBottomSpacing()
         }
     }
@@ -243,9 +245,11 @@ class NotificationsQSContainerController @Inject constructor(
 
     private fun setLargeScreenShadeHeaderConstraints(constraintSet: ConstraintSet) {
         if (largeScreenShadeHeaderActive) {
-            constraintSet.constrainHeight(R.id.split_shade_status_bar, largeScreenShadeHeaderHeight)
+            constraintSet.constrainHeight(R.id.split_shade_status_bar, SystemBarUtils.getStatusBarHeight(context))
         } else {
-            constraintSet.constrainHeight(R.id.split_shade_status_bar, WRAP_CONTENT)
+            if (useCombinedQSHeaders) {
+                constraintSet.constrainHeight(R.id.split_shade_status_bar, WRAP_CONTENT)
+            }
         }
     }
 

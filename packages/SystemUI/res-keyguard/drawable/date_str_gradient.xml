@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle" >
+
+    <gradient
+        android:type="linear"
+        android:startColor="@color/date_style_system_accent"
+        android:endColor="@color/date_style_system_accent_follow"
+        android:angle="45"/>
+
+    <corners
+        android:radius="30dp" />
+
+</shape>

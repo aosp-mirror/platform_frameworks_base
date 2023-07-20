@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Pealkirjata&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Telefoninumbrit pole)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Sisestatud PIN-koodid ei kattu."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Sisestage 4–8-numbriline PIN-kood."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Sisestage 8- või enamanumbriline PUK-kood."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM on PUK-koodiga lukustatud. Avamiseks sisestage PUK-kood."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"SIM-i deblokeerimiseks sisestage PUK2."</string>
+    <string name="needPuk" msgid="7321876090152422918">"SIM-kaart on PUK-lukustatud. Avamiseks sisestage PUK-kood."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Sisestage SIM-kaardi blokeeringu tühistamiseks PUK2-kood."</string>
     <string name="enablePin" msgid="2543771964137091212">"Ebaõnnestus, SIM-i/RUIM-i lukustuse lubamine."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Teil on enne SIM-kaardi lukustumist jäänud veel <xliff:g id="NUMBER_1">%d</xliff:g> katset.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Helistaja ID pole vaikimisi piiratud. Järgmine kõne: pole piiratud"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Teenus pole ette valmistatud."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Helistaja ID seadet ei saa muuta."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Mobiilne andmeside lülitati operaatorile <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Saate seda igal ajal seadetes muuta"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Mobiilne andmesideteenus puudub"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Hädaabikõned pole saadaval"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Häälkõned pole saadaval"</string>
@@ -264,7 +267,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Seaded"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Abi"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Häälabi"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Lukusta"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Lukustamine"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Uus märguanne"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Virtuaalne klaviatuur"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Teil on võimalik jäädvustada seadme sõrmejäljeanduril tehtud liigutused."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Jäädvusta ekraanipilt"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Saab jäädvustada ekraanipildi."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Eelvaade, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"keela või muuda olekuriba"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Võimaldab rakendusel keelata olekuriba või lisada ja eemaldada süsteemiikoone."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"olekuribana kuvamine"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Võimaldab rakendusel hankida eelistatud NFC-makseteenuse teavet (nt registreeritud abi ja marsruudi sihtkoht)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lähiväljaside juhtimine"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Võimaldab rakendusel suhelda lähiväljaside (NFC) märgendite, kaartide ja lugeritega."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Turvaelemendiga tehingu sündmus"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Võimaldab rakendusel võtta vastu teavet tehingute kohta, mis toimuvad turvaelemendi abil."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"keelake ekraanilukk"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Võimaldab rakendusel keelata klahviluku ja muu seotud parooli turvalisuse. Näiteks keelab telefon klahviluku sissetuleva kõne vastuvõtmisel ja lubab klahviluku uuesti, kui kõne on lõpetatud."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ekraaniluku keerukuse taotlemine"</string>
@@ -586,11 +586,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Viga autentimisel"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Ekraaniluku kasutamine"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jätkamiseks sisestage oma ekraanilukk"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Vajutage kindlalt andurile"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Vajutage tugevalt andurile"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Sõrmejälge ei õnnestu tuvastada. Proovige uuesti."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhastage sõrmejäljeandur ja proovige uuesti"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhastage andur ja proovige uuesti"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Vajutage kindlalt andurile"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Vajutage tugevalt andurile"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Sõrm liikus liiga aeglaselt. Proovige uuesti."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Proovige teist sõrmejälge"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liiga ere"</string>
@@ -663,9 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Teie näomudelit ei saa luua. Proovige uuesti."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Tuvastati tumedad prillid. Teie nägu peab olema täielikult nähtaval."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Tuvastati näokate. Nägu peab olema täielikult nähtaval."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Tuvastati nägu kattev ese. Teie nägu peab olema täielikult nähtaval."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nägu ei saa kinnitada. Riistvara pole saadaval."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Proovige näoga avamist uuesti"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Uue näo andmeid ei saa salvestada. Kustutage enne vanad."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Näoga avamise või ekraaniluku kasutamine"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Jätkamiseks kasutage oma nägu"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Jätkamiseks kasutage oma nägu või ekraanilukku"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Midagi läks valesti. Proovige uuesti."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Näoikoon"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"loe sünkroonimisseadeid"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Proovige uuesti"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Ava kõigi funktsioonide ja andmete nägemiseks"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Maksimaalne näoga avamise katsete arv on ületatud"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM-i pole"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Tahvelarvutis pole SIM-i."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Teie Android TV seadmes pole SIM-i."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Telefonis pole SIM-i."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Lisage SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM puudub või pole loetav. Lisage SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"SIM-i ei saa kasutada."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Teie SIM on jäädavalt inaktiveeritud.\n Teise SIM-i saamiseks võtke ühendust oma traadita side teenusepakkujaga."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM-kaarti pole"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Tahvelarvutis pole SIM-kaarti."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Teie Android TV seadmes pole SIM-kaarti."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Telefonis pole SIM-kaarti."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Sisestage SIM-kaart."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-kaart puudub või on loetamatu. Sisestage SIM-kaart."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Kasutamiskõlbmatu SIM-kaart."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM-kaart on jäädavalt keelatud.\n Teise SIM-kaardi saamiseks võtke ühendust oma traadita side teenusepakkujaga."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Eelmine lugu"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Järgmine lugu"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Peata"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Keri edasi"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Ainult hädaabikõned"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Võrk suletud"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM on PUK-koodiga lukustatud."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM-kaart on PUK-lukus."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Vaadake kasutusjuhendit või võtke ühendust klienditeenindusega."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM on lukustatud."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM-i avamine …"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM-kaart on lukus."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM-kaardi avamine ..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Olete oma avamismustrit <xliff:g id="NUMBER_0">%1$d</xliff:g> korda valesti koostanud. \n\nProovige <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundi pärast uuesti."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Olete parooli <xliff:g id="NUMBER_0">%1$d</xliff:g> korda valesti sisestanud. \n\nProovige <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundi pärast uuesti."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Olete PIN-koodi <xliff:g id="NUMBER_0">%1$d</xliff:g> korda valesti sisestanud. \n\nProovige <xliff:g id="NUMBER_1">%2$d</xliff:g> sekundi pärast uuesti."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Saate muuta jaotises Seaded &gt; Rakendused"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Luba alati"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Ära luba"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM on eemaldatud"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Mobiilsidevõrk ei ole saadaval, kuni taaskäivitate seadme koos kehtiva SIM-iga."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM-kaart eemaldatud"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Mobiilsidevõrk ei ole saadaval, kuni sisestate kehtiva SIM-kaardi ja taaskäivitate seadme."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Valmis"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM on lisatud"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM-kaart lisatud"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Mobiilsidevõrku pääsemiseks taaskäivitage seade."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Taaskäivita"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Mobiilsideteenuse aktiveerimine"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Teler"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Doki kõlarid"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Väline seade"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Kõrvaklapid"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Süsteem"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM on nüüd keelatud. Jätkamiseks sisestage PUK-kood. Üksikasju küsige operaatorilt."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Sisestage soovitud PIN-kood"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Kinnitage soovitud PIN-kood"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM-i avamine …"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM-kaardi avamine ..."</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Vale PIN-kood."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Sisestage 4–8-numbriline PIN-kood."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-kood peab koosnema 8 numbrist."</string>
@@ -1688,7 +1684,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"SEES"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"VÄLJAS"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Kas anda teenusele <xliff:g id="SERVICE">%1$s</xliff:g> teie seadme üle täielik kontroll?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täielik kontroll sobib rakendustele, mis pakuvad juurdepääsufunktsioone. Enamiku rakenduste puhul seda ei soovitata."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täielik haldusõigus sobib rakendustele, mis pakuvad juurdepääsufunktsioone. Enamiku rakenduste puhul seda ei soovitata."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekraanikuva vaatamine ja haldamine"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"See saab lugeda kogu ekraanil kuvatud sisu ja kuvada sisu rakenduste peal."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Toimingute vaatamine ja tegemine"</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Kuvamine täisekraanil"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Väljumiseks pühkige ülevalt alla."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Selge"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Pöörake parema vaate jaoks"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Parema vaate jaoks väljuge jagatud ekraanikuvast"</string>
     <string name="done_label" msgid="7283767013231718521">"Valmis"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ringikujuline tunniliugur"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Ringikujuline minutiliugur"</string>
@@ -2102,7 +2096,7 @@
     <string name="mime_type_audio_ext" msgid="2615491023840514797">"<xliff:g id="EXTENSION">%1$s</xliff:g>-helifail"</string>
     <string name="mime_type_video" msgid="7071965726609428150">"Video"</string>
     <string name="mime_type_video_ext" msgid="185438149044230136">"<xliff:g id="EXTENSION">%1$s</xliff:g>-videofail"</string>
-    <string name="mime_type_image" msgid="2134307276151645257">"Pilt"</string>
+    <string name="mime_type_image" msgid="2134307276151645257">"Kujutis"</string>
     <string name="mime_type_image_ext" msgid="5743552697560999471">"<xliff:g id="EXTENSION">%1$s</xliff:g>-kujutisefail"</string>
     <string name="mime_type_compressed" msgid="8737300936080662063">"Arhiiv"</string>
     <string name="mime_type_compressed_ext" msgid="4775627287994475737">"<xliff:g id="EXTENSION">%1$s</xliff:g>-arhiivifail"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tahvelarvuti kaamerale juurde"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Sellele ei pääse voogesituse ajal juurde. Proovige juurde pääseda oma telefonis."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Süsteemi vaikeseade"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"KAART <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

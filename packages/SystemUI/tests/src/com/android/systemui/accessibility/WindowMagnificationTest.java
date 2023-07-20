@@ -45,7 +45,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.Before;
@@ -75,8 +74,6 @@ public class WindowMagnificationTest extends SysuiTestCase {
     private CommandQueue mCommandQueue;
     private WindowMagnification mWindowMagnification;
     private OverviewProxyListener mOverviewProxyListener;
-    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -90,10 +87,10 @@ public class WindowMagnificationTest extends SysuiTestCase {
 
         when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
 
-        mCommandQueue = new CommandQueue(getContext(), new FakeDisplayTracker(getContext()));
+        mCommandQueue = new CommandQueue(getContext());
         mWindowMagnification = new WindowMagnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
-                mSysUiState, mOverviewProxyService, mDisplayTracker);
+                mSysUiState, mOverviewProxyService);
         mWindowMagnification.start();
 
         final ArgumentCaptor<OverviewProxyListener> listenerArgumentCaptor =

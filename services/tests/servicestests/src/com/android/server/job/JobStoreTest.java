@@ -493,16 +493,15 @@ public class JobStoreTest {
      * Helper function to kick a {@link JobInfo} through a persistence cycle and
      * assert that it's unchanged.
      */
-    private void assertPersistedEquals(JobInfo firstInfo) throws Exception {
+    private void assertPersistedEquals(JobInfo first) throws Exception {
         mTaskStoreUnderTest.clear();
-        JobStatus first = JobStatus.createFromJobInfo(firstInfo, SOME_UID, null, -1, null);
-        mTaskStoreUnderTest.add(first);
+        mTaskStoreUnderTest.add(JobStatus.createFromJobInfo(first, SOME_UID, null, -1, null));
         waitForPendingIo();
 
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         final JobStatus second = jobStatusSet.getAllJobs().iterator().next();
-        assertTasksEqual(first.getJob(), second.getJob());
+        assertTasksEqual(first, second.getJob());
     }
 
     /**

@@ -62,6 +62,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A running application service.
@@ -74,6 +75,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     // Maximum number of times it can fail during execution before giving up.
     static final int MAX_DONE_EXECUTING_COUNT = 6;
+
+    static final Set<String> FOREGROUND_NOTIFICATION_BLACKLIST = Set.of(
+        "com.oplus.camera"
+    );
 
     final ActivityManagerService ams;
     final ComponentName name; // service component.
@@ -106,6 +111,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     private final ArrayMap<IBinder, ArrayList<ConnectionRecord>> connections
             = new ArrayMap<IBinder, ArrayList<ConnectionRecord>>();
                             // IBinder -> ConnectionRecord of all bound clients
+
+    final boolean ignoreForegroundNoti;
 
     ProcessRecord app;      // where this service is running or null.
     ProcessRecord isolationHostProc; // process which we've started for this service (used for
@@ -601,6 +608,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;
         packageName = sInfo.applicationInfo.packageName;
+        ignoreForegroundNoti = FOREGROUND_NOTIFICATION_BLACKLIST.contains(packageName);
         this.isSdkSandbox = sdkSandboxProcessName != null;
         this.sdkSandboxClientAppUid = sdkSandboxClientAppUid;
         this.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
@@ -1005,7 +1013,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     }
 
     public void postNotification() {
-        if (isForeground && foregroundNoti != null && app != null) {
+        if (isForeground && foregroundNoti != null && app != null && !ignoreForegroundNoti) {
             final int appUid = appInfo.uid;
             final int appPid = app.getPid();
             // Do asynchronous communication with notification manager to
@@ -1045,6 +1053,12 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                                     ams.mContext.getPackageManager());
                             if (appName == null) {
                                 appName = appInfo.packageName;
+                            }
+                            // If app name is com.oplus.camera, force close/kill the app
+                            if (appName.equals("Camera") && shortInstanceName.contains("oplus")) {
+                                Slog.v(TAG, "Removing bgNotificationPermission to OPlus Camera");
+                                mFgsHasNotificationPermission = false;
+                                return;
                             }
                             Context ctx = null;
                             try {

@@ -32,8 +32,6 @@ interface IWallpaperEngine {
     oneway void setDisplayPadding(in Rect padding);
     @UnsupportedAppUsage
     oneway void setVisibility(boolean visible);
-    oneway void onScreenTurningOn();
-    oneway void onScreenTurnedOn();
     oneway void setInAmbientMode(boolean inAmbientDisplay, long animationDuration);
     @UnsupportedAppUsage
     oneway void dispatchPointer(in MotionEvent event);

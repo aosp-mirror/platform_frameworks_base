@@ -87,12 +87,10 @@ public final class TelephonyDisplayInfo implements Parcelable {
     public static final int OVERRIDE_NETWORK_TYPE_NR_ADVANCED = 5;
 
     @NetworkType
-    private final int mNetworkType;
+    private final  int mNetworkType;
 
     @OverrideNetworkType
-    private final int mOverrideNetworkType;
-
-    private final boolean mIsRoaming;
+    private final  int mOverrideNetworkType;
 
     /**
      * Constructor
@@ -100,37 +98,18 @@ public final class TelephonyDisplayInfo implements Parcelable {
      * @param networkType Current packet-switching cellular network type
      * @param overrideNetworkType The override network type
      *
-     * @deprecated will not use this constructor anymore.
      * @hide
      */
-    @Deprecated
     public TelephonyDisplayInfo(@NetworkType int networkType,
             @OverrideNetworkType int overrideNetworkType) {
-        this(networkType, overrideNetworkType, false);
-    }
-
-    /**
-     * Constructor
-     *
-     * @param networkType Current packet-switching cellular network type
-     * @param overrideNetworkType The override network type
-     * @param isRoaming True if the device is roaming after override.
-     *
-     * @hide
-     */
-    public TelephonyDisplayInfo(@NetworkType int networkType,
-            @OverrideNetworkType int overrideNetworkType,
-            boolean isRoaming) {
         mNetworkType = networkType;
         mOverrideNetworkType = overrideNetworkType;
-        mIsRoaming = isRoaming;
     }
 
     /** @hide */
     public TelephonyDisplayInfo(Parcel p) {
         mNetworkType = p.readInt();
         mOverrideNetworkType = p.readInt();
-        mIsRoaming = p.readBoolean();
     }
 
     /**
@@ -156,25 +135,10 @@ public final class TelephonyDisplayInfo implements Parcelable {
         return mOverrideNetworkType;
     }
 
-    /**
-     * Get device is roaming or not. Note the isRoaming is for market branding or visualization
-     * purposes only. It cannot be treated as the actual roaming device is camped on.
-     *
-     * @return True if the device is registered on roaming network overridden by config.
-     * @see CarrierConfigManager#KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
-     * @see CarrierConfigManager#KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
-     * @see CarrierConfigManager#KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
-     * @see CarrierConfigManager#KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
-     */
-    public boolean isRoaming() {
-        return mIsRoaming;
-    }
-
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mNetworkType);
         dest.writeInt(mOverrideNetworkType);
-        dest.writeBoolean(mIsRoaming);
     }
 
     public static final @NonNull Parcelable.Creator<TelephonyDisplayInfo> CREATOR =
@@ -201,13 +165,12 @@ public final class TelephonyDisplayInfo implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
         TelephonyDisplayInfo that = (TelephonyDisplayInfo) o;
         return mNetworkType == that.mNetworkType
-                && mOverrideNetworkType == that.mOverrideNetworkType
-                && mIsRoaming == that.mIsRoaming;
+                && mOverrideNetworkType == that.mOverrideNetworkType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mNetworkType, mOverrideNetworkType, mIsRoaming);
+        return Objects.hash(mNetworkType, mOverrideNetworkType);
     }
 
     /**
@@ -232,7 +195,6 @@ public final class TelephonyDisplayInfo implements Parcelable {
     @Override
     public String toString() {
         return "TelephonyDisplayInfo {network=" + TelephonyManager.getNetworkTypeName(mNetworkType)
-                + ", overrideNetwork=" + overrideNetworkTypeToString(mOverrideNetworkType)
-                + ", isRoaming=" + mIsRoaming + "}";
+                + ", override=" + overrideNetworkTypeToString(mOverrideNetworkType) + "}";
     }
 }

@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.telephony.AccessNetworkConstants.TransportType;
 import android.telephony.Annotation.NetworkType;
 import android.text.TextUtils;
@@ -184,11 +185,10 @@ public final class NetworkRegistrationInfo implements Parcelable {
     private final int mTransportType;
 
     /**
-     * The true registration state of network, This is not affected by any carrier config or
-     * resource overlay.
+     * The initial registration state
      */
     @RegistrationState
-    private final int mNetworkRegistrationState;
+    private final int mInitialRegistrationState;
 
     /**
      * The registration state that might have been overridden by config
@@ -265,7 +265,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mDomain = domain;
         mTransportType = transportType;
         mRegistrationState = registrationState;
-        mNetworkRegistrationState = registrationState;
+        mInitialRegistrationState = registrationState;
         mRoamingType = (registrationState == REGISTRATION_STATE_ROAMING)
                 ? ServiceState.ROAMING_TYPE_UNKNOWN : ServiceState.ROAMING_TYPE_NOT_ROAMING;
         setAccessNetworkTechnology(accessNetworkTechnology);
@@ -321,7 +321,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mDomain = source.readInt();
         mTransportType = source.readInt();
         mRegistrationState = source.readInt();
-        mNetworkRegistrationState = source.readInt();
+        mInitialRegistrationState = source.readInt();
         mRoamingType = source.readInt();
         mAccessNetworkTechnology = source.readInt();
         mRejectCause = source.readInt();
@@ -348,7 +348,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mDomain = nri.mDomain;
         mTransportType = nri.mTransportType;
         mRegistrationState = nri.mRegistrationState;
-        mNetworkRegistrationState = nri.mNetworkRegistrationState;
+        mInitialRegistrationState = nri.mInitialRegistrationState;
         mRoamingType = nri.mRoamingType;
         mAccessNetworkTechnology = nri.mAccessNetworkTechnology;
         mIsUsingCarrierAggregation = nri.mIsUsingCarrierAggregation;
@@ -401,69 +401,37 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return The registration state. Note this value can be affected by the carrier config
-     * override.
+     * @return The registration state.
      *
-     * @deprecated Use {@link #getNetworkRegistrationState}, which is not affected by any carrier
-     * config or resource overlay, instead.
      * @hide
      */
-    @Deprecated
     @SystemApi
     public @RegistrationState int getRegistrationState() {
         return mRegistrationState;
     }
 
     /**
-     * @return The true registration state of network. (This value is not affected by any carrier
-     * config or resource overlay override).
+     * @return The initial registration state.
      *
      * @hide
      */
-    @SystemApi
-    public @RegistrationState int getNetworkRegistrationState() {
-        return mNetworkRegistrationState;
+    public @RegistrationState int getInitialRegistrationState() {
+        return mInitialRegistrationState;
     }
 
     /**
-     * @return {@code true} if registered on roaming or home network. Note this value can be
-     * affected by the carrier config override.
-     *
-     * @deprecated Use {@link #isNetworkRegistered}, which is not affected by any carrier config or
-     * resource overlay, instead.
+     * @return {@code true} if registered on roaming or home network, {@code false} otherwise.
      */
-    @Deprecated
     public boolean isRegistered() {
         return mRegistrationState == REGISTRATION_STATE_HOME
                 || mRegistrationState == REGISTRATION_STATE_ROAMING;
     }
 
     /**
-     * @return {@code true} if registered on roaming or home network, {@code false} otherwise. (This
-     * value is not affected by any carrier config or resource overlay override).
-     */
-    public boolean isNetworkRegistered() {
-        return mNetworkRegistrationState == REGISTRATION_STATE_HOME
-                || mNetworkRegistrationState == REGISTRATION_STATE_ROAMING;
-    }
-
-    /**
      * @return {@code true} if searching for service, {@code false} otherwise.
-     *
-     * @deprecated Use {@link #isNetworkRegistered}, which is not affected by any carrier config or
-     * resource overlay, instead.
      */
-    @Deprecated
     public boolean isSearching() {
         return mRegistrationState == REGISTRATION_STATE_NOT_REGISTERED_SEARCHING;
-    }
-
-    /**
-     * @return {@code true} if searching for service, {@code false} otherwise. (This value is not
-     * affected by any carrier config or resource overlay override).
-     */
-    public boolean isNetworkSearching() {
-        return mNetworkRegistrationState == REGISTRATION_STATE_NOT_REGISTERED_SEARCHING;
     }
 
     /**
@@ -483,22 +451,10 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return {@code true} if registered on roaming network overridden by config. Note this value
-     * can be affected by the carrier config override.
-     *
-     * @deprecated Use {@link TelephonyDisplayInfo#isRoaming} instead.
+     * @return {@code true} if registered on roaming network, {@code false} otherwise.
      */
-    @Deprecated
     public boolean isRoaming() {
         return mRoamingType != ServiceState.ROAMING_TYPE_NOT_ROAMING;
-    }
-
-    /**
-     * @return {@code true} if registered on roaming network. (This value is not affected by any
-     * carrier config or resource overlay override).
-     */
-    public boolean isNetworkRoaming() {
-        return mNetworkRegistrationState == REGISTRATION_STATE_ROAMING;
     }
 
     /**
@@ -531,8 +487,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return the current network roaming type. Note that this value can be possibly overridden by
-     * the carrier config or resource overlay.
+     * @return the current network roaming type.
      * @hide
      */
     @SystemApi
@@ -568,6 +523,11 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * @hide
      */
     public void setAccessNetworkTechnology(@NetworkType int tech) {
+        // HACK: Force LTE Carrier Aggregation
+        if (SystemProperties.getBoolean("persist.sys.radio.force_lte_ca", false)
+                && tech == TelephonyManager.NETWORK_TYPE_LTE) {
+            mIsUsingCarrierAggregation = true;
+        }
         if (tech == TelephonyManager.NETWORK_TYPE_LTE_CA) {
             // For old device backward compatibility support
             tech = TelephonyManager.NETWORK_TYPE_LTE;
@@ -712,8 +672,8 @@ public final class NetworkRegistrationInfo implements Parcelable {
                 .append(" transportType=").append(
                         AccessNetworkConstants.transportTypeToString(mTransportType))
                 .append(" registrationState=").append(registrationStateToString(mRegistrationState))
-                .append(" networkRegistrationState=")
-                .append(registrationStateToString(mNetworkRegistrationState))
+                .append(" mInitialRegistrationState=")
+                .append(registrationStateToString(mInitialRegistrationState))
                 .append(" roamingType=").append(ServiceState.roamingTypeToString(mRoamingType))
                 .append(" accessNetworkTechnology=")
                 .append(TelephonyManager.getNetworkTypeName(mAccessNetworkTechnology))
@@ -734,7 +694,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDomain, mTransportType, mRegistrationState, mNetworkRegistrationState,
+        return Objects.hash(mDomain, mTransportType, mRegistrationState, mInitialRegistrationState,
                 mRoamingType, mAccessNetworkTechnology, mRejectCause, mEmergencyOnly,
                 mAvailableServices, mCellIdentity, mVoiceSpecificInfo, mDataSpecificInfo, mNrState,
                 mRplmn, mIsUsingCarrierAggregation);
@@ -752,7 +712,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         return mDomain == other.mDomain
                 && mTransportType == other.mTransportType
                 && mRegistrationState == other.mRegistrationState
-                && mNetworkRegistrationState == other.mNetworkRegistrationState
+                && mInitialRegistrationState == other.mInitialRegistrationState
                 && mRoamingType == other.mRoamingType
                 && mAccessNetworkTechnology == other.mAccessNetworkTechnology
                 && mRejectCause == other.mRejectCause
@@ -775,7 +735,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         dest.writeInt(mDomain);
         dest.writeInt(mTransportType);
         dest.writeInt(mRegistrationState);
-        dest.writeInt(mNetworkRegistrationState);
+        dest.writeInt(mInitialRegistrationState);
         dest.writeInt(mRoamingType);
         dest.writeInt(mAccessNetworkTechnology);
         dest.writeInt(mRejectCause);
@@ -872,7 +832,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         private int mTransportType;
 
         @RegistrationState
-        private int mNetworkRegistrationState;
+        private int mInitialRegistrationState;
 
         @NetworkType
         private int mAccessNetworkTechnology;
@@ -900,31 +860,6 @@ public final class NetworkRegistrationInfo implements Parcelable {
          * Default constructor for Builder.
          */
         public Builder() {}
-
-        /**
-         * Builder from the existing {@link NetworkRegistrationInfo}.
-         *
-         * @param nri The network registration info object.
-         * @hide
-         */
-        public Builder(@NonNull NetworkRegistrationInfo nri) {
-            mDomain = nri.mDomain;
-            mTransportType = nri.mTransportType;
-            mNetworkRegistrationState = nri.mNetworkRegistrationState;
-            mAccessNetworkTechnology = nri.mAccessNetworkTechnology;
-            mRejectCause = nri.mRejectCause;
-            mEmergencyOnly = nri.mEmergencyOnly;
-            mAvailableServices = new ArrayList<>(nri.mAvailableServices);
-            mCellIdentity = nri.mCellIdentity;
-            if (nri.mDataSpecificInfo != null) {
-                mDataSpecificRegistrationInfo = new DataSpecificRegistrationInfo(
-                        nri.mDataSpecificInfo);
-            }
-            if (nri.mVoiceSpecificInfo != null) {
-                mVoiceSpecificRegistrationInfo = new VoiceSpecificRegistrationInfo(
-                        nri.mVoiceSpecificInfo);
-            }
-        }
 
         /**
          * Set the network domain.
@@ -958,7 +893,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
          * @return The same instance of the builder.
          */
         public @NonNull Builder setRegistrationState(@RegistrationState int registrationState) {
-            mNetworkRegistrationState = registrationState;
+            mInitialRegistrationState = registrationState;
             return this;
         }
 
@@ -1077,7 +1012,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
          */
         @SystemApi
         public @NonNull NetworkRegistrationInfo build() {
-            return new NetworkRegistrationInfo(mDomain, mTransportType, mNetworkRegistrationState,
+            return new NetworkRegistrationInfo(mDomain, mTransportType, mInitialRegistrationState,
                     mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,
                     mCellIdentity, mRplmn, mVoiceSpecificRegistrationInfo,
                     mDataSpecificRegistrationInfo);

@@ -466,7 +466,7 @@ public class AttentionManagerService extends SystemService {
 
         final ResolveInfo resolveInfo = context.getPackageManager().resolveService(intent, flags);
         if (resolveInfo == null || resolveInfo.serviceInfo == null) {
-            Slog.wtf(LOG_TAG, String.format("Service %s not found in package %s",
+            Slog.v(LOG_TAG, String.format("Service %s not found in package %s",
                     AttentionService.SERVICE_INTERFACE, serviceConfigPackage
             ));
             return null;

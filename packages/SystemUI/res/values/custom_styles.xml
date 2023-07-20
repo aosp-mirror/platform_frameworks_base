@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
+    <style name="Theme.DeviceDefault.SystemUI" parent="@*android:Theme.DeviceDefault.SystemUI">
+        <item name="colorSurfaceHeader">?androidprv:attr/colorSurfaceHeader</item>
+    </style>
+</resources>

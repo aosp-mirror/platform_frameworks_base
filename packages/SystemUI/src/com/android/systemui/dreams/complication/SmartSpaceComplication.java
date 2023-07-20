@@ -17,7 +17,6 @@
 package com.android.systemui.dreams.complication;
 
 import static com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule.DREAM_SMARTSPACE_LAYOUT_PARAMS;
-import static com.android.systemui.dreams.dagger.DreamModule.DREAM_PRETEXT_MONITOR;
 
 import android.content.Context;
 import android.os.Parcelable;
@@ -28,11 +27,7 @@ import android.widget.FrameLayout;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
-import com.android.systemui.shared.condition.Monitor;
-import com.android.systemui.util.condition.ConditionalCoreStartable;
 
 import java.util.List;
 
@@ -66,11 +61,10 @@ public class SmartSpaceComplication implements Complication {
      * {@link CoreStartable} responsbile for registering {@link SmartSpaceComplication} with
      * SystemUI.
      */
-    public static class Registrant extends ConditionalCoreStartable {
+    public static class Registrant implements CoreStartable {
         private final DreamSmartspaceController mSmartSpaceController;
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final SmartSpaceComplication mComplication;
-        private final FeatureFlags mFeatureFlags;
 
         private final BcSmartspaceDataPlugin.SmartspaceTargetListener mSmartspaceListener =
                 new BcSmartspaceDataPlugin.SmartspaceTargetListener() {
@@ -87,22 +81,14 @@ public class SmartSpaceComplication implements Complication {
         public Registrant(
                 DreamOverlayStateController dreamOverlayStateController,
                 SmartSpaceComplication smartSpaceComplication,
-                DreamSmartspaceController smartSpaceController,
-                @Named(DREAM_PRETEXT_MONITOR) Monitor monitor,
-                FeatureFlags featureFlags) {
-            super(monitor);
+                DreamSmartspaceController smartSpaceController) {
             mDreamOverlayStateController = dreamOverlayStateController;
             mComplication = smartSpaceComplication;
             mSmartSpaceController = smartSpaceController;
-            mFeatureFlags = featureFlags;
         }
 
         @Override
-        public void onStart() {
-            if (mFeatureFlags.isEnabled(Flags.HIDE_SMARTSPACE_ON_DREAM_OVERLAY)) {
-                return;
-            }
-
+        public void start() {
             mDreamOverlayStateController.addCallback(new DreamOverlayStateController.Callback() {
                 @Override
                 public void onStateChanged() {

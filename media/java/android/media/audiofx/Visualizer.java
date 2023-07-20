@@ -17,12 +17,19 @@
 package android.media.audiofx;
 
 import android.annotation.NonNull;
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.AttributionSource.ScopedParcelState;
+import android.content.Context;
+import android.media.IAudioService;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcel;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -220,6 +227,28 @@ public class Visualizer {
 
         synchronized (mStateLock) {
             mState = STATE_UNINITIALIZED;
+
+            // if audio service locks us out, stay uninitialized
+            // throw UnsupportedOperationException as caller is required
+            // to catch and handle it
+            boolean isLocked = false;
+            String packageName = "";
+            try {
+                IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+                IAudioService audioService = IAudioService.Stub.asInterface(b);
+                packageName = ActivityThread.currentOpPackageName();
+                if (packageName == null && android.os.Process.SYSTEM_UID == Binder.getCallingUid()) {
+                    packageName = "android";
+                }
+                isLocked = audioService.isVisualizerLocked(packageName);
+            } catch (RemoteException e) {
+                Log.e(TAG,
+                        "Error checking visualizer lock in AudioManager, disabling visualizer lock");
+            }
+            if (isLocked) {
+                throw (new UnsupportedOperationException(packageName
+                        + " is locked out from Visualizer by Pulse"));
+            }
 
             // native initialization
             // TODO b/182469354: make consistent with AudioRecord

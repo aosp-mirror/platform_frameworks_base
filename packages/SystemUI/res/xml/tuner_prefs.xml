@@ -55,6 +55,11 @@
             android:title="@string/quick_settings_camera_label" />
 
         <!-- nfc -->
+        <com.android.systemui.tuner.StatusBarSwitch
+            android:key="nfc"
+            android:persistent="false"
+            android:title="@string/status_bar_nfc" />
+
         <!-- tty -->
         <!-- speakerphone -->
 
@@ -148,10 +153,5 @@
             android:key="plugins"
             android:title="@string/plugins"
             android:fragment="com.android.systemui.tuner.PluginFragment" />
-
-    <!-- Warning, this goes last. -->
-    <Preference
-        android:summary="@string/tuner_persistent_warning"
-        android:selectable="false" />
 
 </PreferenceScreen>

@@ -260,7 +260,7 @@ public class Paint {
 
     // These flags are always set on a new/reset paint, even if flags 0 is passed.
     static final int HIDDEN_DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG
-            | FILTER_BITMAP_FLAG;
+            | FILTER_BITMAP_FLAG | SUBPIXEL_TEXT_FLAG;
 
     /**
      * Font hinter option that disables font hinting.

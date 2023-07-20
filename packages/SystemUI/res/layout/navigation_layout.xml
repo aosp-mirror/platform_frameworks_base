@@ -16,7 +16,7 @@
 
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginStart="@dimen/rounded_corner_content_padding"
@@ -26,6 +26,26 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:id="@+id/horizontal">
+
+    <RelativeLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+        <com.android.systemui.statusbar.policy.BatteryBarController
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:visibility="gone"
+            systemui:viewLocation="3"
+            android:layout_alignParentTop="true" />
+
+        <com.android.systemui.statusbar.policy.BatteryBarController
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:visibility="gone"
+            systemui:viewLocation="4"
+            android:layout_alignParentBottom="true" />
+
+    </RelativeLayout>
 
     <com.android.systemui.navigationbar.buttons.NearestTouchFrame
         android:id="@+id/nav_buttons"
@@ -51,6 +71,12 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:clipToPadding="false"
+            android:clipChildren="false" />
+
+        <FrameLayout
+            android:id="@+id/dpad_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:clipChildren="false" />
 
     </com.android.systemui.navigationbar.buttons.NearestTouchFrame>

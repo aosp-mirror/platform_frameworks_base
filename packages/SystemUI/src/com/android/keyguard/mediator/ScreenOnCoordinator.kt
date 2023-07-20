@@ -73,10 +73,6 @@ class ScreenOnCoordinator @Inject constructor(
     @BinderThread
     fun onScreenTurnedOn() {
         foldAodAnimationController?.onScreenTurnedOn()
-    }
-
-    @BinderThread
-    fun onScreenTurnedOff() {
         pendingTasks.reset()
     }
 }

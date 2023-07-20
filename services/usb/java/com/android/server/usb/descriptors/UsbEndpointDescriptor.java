@@ -79,8 +79,6 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
     private byte mRefresh;
     private byte mSyncAddress;
 
-    private UsbDescriptor mClassSpecificEndpointDescriptor;
-
     public UsbEndpointDescriptor(int length, byte type) {
         super(length, type);
         mHierarchyLevel = 4;
@@ -112,14 +110,6 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
 
     public int getDirection() {
         return mEndpointAddress & UsbEndpointDescriptor.MASK_ENDPOINT_DIRECTION;
-    }
-
-    void setClassSpecificEndpointDescriptor(UsbDescriptor descriptor) {
-        mClassSpecificEndpointDescriptor = descriptor;
-    }
-
-    UsbDescriptor getClassSpecificEndpointDescriptor() {
-        return mClassSpecificEndpointDescriptor;
     }
 
     /**

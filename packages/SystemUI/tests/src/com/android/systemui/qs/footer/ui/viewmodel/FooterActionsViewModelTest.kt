@@ -85,7 +85,13 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                 )
             )
         assertThat(settings.backgroundColor).isEqualTo(R.attr.offStateColor)
-        assertThat(settings.iconTint).isNull()
+        assertThat(settings.iconTint)
+            .isEqualTo(
+                Utils.getColorAttrDefaultColor(
+                    context,
+                    com.android.internal.R.attr.textColorPrimary,
+                ),
+            )
     }
 
     @Test
@@ -110,7 +116,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
             .isEqualTo(
                 Utils.getColorAttrDefaultColor(
                     context,
-                    com.android.internal.R.attr.textColorOnAccent,
+                    com.android.internal.R.attr.textColorPrimaryInverse,
                 ),
             )
     }

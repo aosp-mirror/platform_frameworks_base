@@ -1342,10 +1342,6 @@ int JTuner::shareFrontend(int feId) {
         return (int)Result::INVALID_STATE;
     }
 
-    if (mDemuxClient != NULL) {
-        mDemuxClient->setFrontendDataSourceById(feId);
-    }
-
     mSharedFeId = feId;
     return (int)Result::SUCCESS;
 }

@@ -131,7 +131,6 @@ java_library_static {
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
         "service-permission.stubs.system_server",
-        "service-rkp.stubs.system_server",
         "service-sdksandbox.stubs.system_server",
     ],
 
@@ -142,29 +141,25 @@ java_library_static {
     ],
 
     static_libs: [
-        "android.frameworks.location.altitude-V1-java", // AIDL
+        "time_zone_distro",
+        "time_zone_distro_installer",
         "android.hardware.authsecret-V1.0-java",
-        "android.hardware.boot-V1.0-java", // HIDL
-        "android.hardware.boot-V1.1-java", // HIDL
-        "android.hardware.boot-V1.2-java", // HIDL
-        "android.hardware.boot-V1-java",   // AIDL
+        "android.hardware.boot-V1.0-java",
+        "android.hardware.boot-V1.1-java",
+        "android.hardware.boot-V1.2-java",
         "android.hardware.broadcastradio-V2.0-java",
         "android.hardware.health-V1.0-java", // HIDL
         "android.hardware.health-V2.0-java", // HIDL
         "android.hardware.health-V2.1-java", // HIDL
-        "android.hardware.health-V2-java", // AIDL
+        "android.hardware.health-V1-java", // AIDL
         "android.hardware.health-translate-java",
         "android.hardware.light-V1-java",
-        "android.hardware.security.rkp-V3-java",
         "android.hardware.tv.cec-V1.1-java",
-        "android.hardware.tv.hdmi.cec-V1-java",
-        "android.hardware.tv.hdmi.connection-V1-java",
         "android.hardware.weaver-V1.0-java",
         "android.hardware.biometrics.face-V1.0-java",
         "android.hardware.biometrics.fingerprint-V2.3-java",
         "android.hardware.biometrics.fingerprint-V2-java",
         "android.hardware.oemlock-V1.0-java",
-        "android.hardware.oemlock-V1-java",
         "android.hardware.configstore-V1.1-java",
         "android.hardware.ir-V1-java",
         "android.hardware.rebootescrow-V1-java",
@@ -173,12 +168,12 @@ java_library_static {
         "android.hardware.power-V3-java",
         "android.hidl.manager-V1.2-java",
         "capture_state_listener-aidl-java",
-        "cbor-java",
         "icu4j_calendar_astronomer",
         "netd-client",
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
+        "faceunlock_framework",
     ],
     javac_shard_size: 50,
 }
@@ -215,7 +210,8 @@ genrule {
     name: "services.core.json.gz",
     srcs: [":checked-protolog.json"],
     out: ["services.core.protolog.json.gz"],
-    cmd: "gzip -c < $(in) > $(out)",
+    cmd: "$(location minigzip) -c < $(in) > $(out)",
+    tools: ["minigzip"],
 }
 
 prebuilt_etc {

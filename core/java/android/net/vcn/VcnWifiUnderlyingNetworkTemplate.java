@@ -15,9 +15,6 @@
  */
 package android.net.vcn;
 
-import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
-import static android.net.vcn.VcnUnderlyingNetworkTemplate.MATCH_ANY;
-
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.server.vcn.util.PersistableBundleUtils.STRING_DESERIALIZER;
 import static com.android.server.vcn.util.PersistableBundleUtils.STRING_SERIALIZER;
@@ -26,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.net.NetworkCapabilities;
-import android.net.vcn.VcnUnderlyingNetworkTemplate.MatchCriteria;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
 
@@ -36,7 +32,6 @@ import com.android.server.vcn.util.PersistableBundleUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -165,12 +160,6 @@ public final class VcnWifiUnderlyingNetworkTemplate extends VcnUnderlyingNetwork
     @NonNull
     public Set<String> getSsids() {
         return Collections.unmodifiableSet(mSsids);
-    }
-
-    /** @hide */
-    @Override
-    public Map<Integer, Integer> getCapabilitiesMatchCriteria() {
-        return Collections.singletonMap(NET_CAPABILITY_INTERNET, MATCH_REQUIRED);
     }
 
     /** This class is used to incrementally build VcnWifiUnderlyingNetworkTemplate objects. */

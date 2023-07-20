@@ -62,7 +62,7 @@ import java.nio.FloatBuffer;
  * that belongs to the {@link DisplayPowerController}.
  * </p>
  */
-final class ColorFade {
+final class ColorFade implements ScreenStateAnimator {
     private static final String TAG = "ColorFade";
 
     private static final boolean DEBUG = false;
@@ -668,8 +668,8 @@ final class ColorFade {
                     EGL14.EGL_NONE
             };
             if (isProtected) {
-                eglContextAttribList[2] = EGL_PROTECTED_CONTENT_EXT;
-                eglContextAttribList[3] = EGL14.EGL_TRUE;
+                eglContextAttribList[3] = EGL_PROTECTED_CONTENT_EXT;
+                eglContextAttribList[4] = EGL14.EGL_TRUE;
             }
             mEglContext = EGL14.eglCreateContext(mEglDisplay, mEglConfig, EGL14.EGL_NO_CONTEXT,
                     eglContextAttribList, 0);

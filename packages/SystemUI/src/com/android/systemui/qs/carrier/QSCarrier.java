@@ -133,6 +133,11 @@ public class QSCarrier extends LinearLayout {
                         com.android.settingslib.R.string.not_default_data_content_description));
     }
 
+    public void updateColors(ColorStateList colorStateList) {
+        mMobileRoaming.setImageTintList(colorStateList);
+        mMobileSignal.setImageTintList(colorStateList);
+    }
+
     @VisibleForTesting
     View getRSSIView() {
         return mMobileGroup;

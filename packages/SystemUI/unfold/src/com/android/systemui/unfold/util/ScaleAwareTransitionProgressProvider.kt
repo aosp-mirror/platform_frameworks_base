@@ -79,9 +79,10 @@ constructor(
     companion object {
         fun ContentResolver.areAnimationsEnabled(): Boolean {
             val animationScale =
-                Settings.Global.getString(
+                Settings.Global.getStringForUser(
                         this,
                         Settings.Global.ANIMATOR_DURATION_SCALE,
+                        this.userId
                     )
                     ?.toFloatOrNull()
                     ?: 1f

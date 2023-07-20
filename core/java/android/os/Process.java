@@ -26,7 +26,6 @@ import android.annotation.TestApi;
 import android.annotation.UptimeMillisLong;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build.VERSION_CODES;
-import android.sysprop.MemoryProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -901,21 +900,9 @@ public class Process {
         return isIsolated(myUid());
     }
 
-    /**
-     * @deprecated Use {@link #isIsolatedUid(int)} instead.
-     * {@hide}
-     */
-    @Deprecated
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
-            publicAlternatives = "Use {@link #isIsolatedUid(int)} instead.")
+    /** {@hide} */
+    @UnsupportedAppUsage
     public static final boolean isIsolated(int uid) {
-        return isIsolatedUid(uid);
-    }
-
-    /**
-     * Returns whether the process with the given {@code uid} is an isolated sandbox.
-     */
-    public static final boolean isIsolatedUid(int uid) {
         uid = UserHandle.getAppId(uid);
         return (uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID)
                 || (uid >= FIRST_APP_ZYGOTE_ISOLATED_UID && uid <= LAST_APP_ZYGOTE_ISOLATED_UID);
@@ -1105,6 +1092,31 @@ public class Process {
      */
     @UnsupportedAppUsage
     public static final native void setProcessGroup(int pid, int group)
+            throws IllegalArgumentException, SecurityException;
+
+    /**
+     * Sets the scheduling group for processes in the same cgroup.procs of uid and pid
+     * @hide
+     * @param uid The user identifier of the process to change.
+     * @param pid The identifier of the process to change.
+     * @param group The target group for this process from THREAD_GROUP_*.
+     * @param dex2oat_only is the cgroup apply for all or for dex2oat only.
+     *
+     * @throws IllegalArgumentException Throws IllegalArgumentException if
+     * <var>tid</var> does not exist.
+     * @throws SecurityException Throws SecurityException if your process does
+     * not have permission to modify the given thread, or to use the given
+     * priority.
+     *
+     * group == THREAD_GROUP_DEFAULT means to move all non-background priority
+     * threads to the foreground scheduling group, but to leave background
+     * priority threads alone.  group == THREAD_GROUP_BG_NONINTERACTIVE moves all
+     * threads, regardless of priority, to the background scheduling group.
+     * group == THREAD_GROUP_FOREGROUND is not allowed.
+     *
+     * Always sets cpusets.
+     */
+    public static final native void setCgroupProcsProcessGroup(int uid, int pid, int group, boolean dex2oat_only)
             throws IllegalArgumentException, SecurityException;
 
     /**
@@ -1349,24 +1361,6 @@ public class Process {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static final native void sendSignalQuiet(int pid, int signal);
 
-    /**
-     * @return The advertised memory of the system, as the end user would encounter in a retail
-     * display environment. If the advertised memory is not defined, it returns
-     * {@code getTotalMemory()} rounded.
-     *
-     * @hide
-     */
-    public static final long getAdvertisedMem() {
-        String formatSize = MemoryProperties.memory_ddr_size().orElse("0KB");
-        long memSize = FileUtils.parseSize(formatSize);
-
-        if (memSize <= 0) {
-            return FileUtils.roundStorageSize(getTotalMemory());
-        }
-
-        return memSize;
-    }
-
     /** @hide */
     @UnsupportedAppUsage
     public static final native long getFreeMemory();
@@ -1512,10 +1506,10 @@ public class Process {
      * @return true if this thread belongs to a process
      * @hide
      */
-    public static final boolean isThreadInProcess(int tid, int pid) {
+    public static final boolean isThreadInProcess(int pid, int tid) {
         StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
         try {
-            if (Os.access("/proc/" + tid + "/task/" + pid, OsConstants.F_OK)) {
+            if (Os.access("/proc/" + pid + "/task/" + tid, OsConstants.F_OK)) {
                 return true;
             } else {
                 return false;

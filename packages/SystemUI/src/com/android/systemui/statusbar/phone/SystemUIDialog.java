@@ -45,11 +45,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.util.DialogKt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +68,6 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     private static final boolean DEFAULT_DISMISS_ON_DEVICE_LOCK = true;
 
     private final Context mContext;
-    private final FeatureFlags mFeatureFlags;
     @Nullable private final DismissReceiver mDismissReceiver;
     private final Handler mHandler = new Handler();
     private final SystemUIDialogManager mDialogManager;
@@ -100,23 +96,16 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         // TODO(b/219008720): Remove those calls to Dependency.get by introducing a
         // SystemUIDialogFactory and make all other dialogs create a SystemUIDialog to which we set
         // the content and attach listeners.
-        this(context, theme, dismissOnDeviceLock,
-                Dependency.get(FeatureFlags.class),
-                Dependency.get(SystemUIDialogManager.class),
-                Dependency.get(SysUiState.class),
-                Dependency.get(BroadcastDispatcher.class),
+        this(context, theme, dismissOnDeviceLock, Dependency.get(SystemUIDialogManager.class),
+                Dependency.get(SysUiState.class), Dependency.get(BroadcastDispatcher.class),
                 Dependency.get(DialogLaunchAnimator.class));
     }
 
     public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock,
-            FeatureFlags featureFlags,
-            SystemUIDialogManager dialogManager,
-            SysUiState sysUiState,
-            BroadcastDispatcher broadcastDispatcher,
-            DialogLaunchAnimator dialogLaunchAnimator) {
+            SystemUIDialogManager dialogManager, SysUiState sysUiState,
+            BroadcastDispatcher broadcastDispatcher, DialogLaunchAnimator dialogLaunchAnimator) {
         super(context, theme);
         mContext = context;
-        mFeatureFlags = featureFlags;
 
         applyFlags(this);
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
@@ -140,12 +129,6 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
 
         for (int i = 0; i < mOnCreateRunnables.size(); i++) {
             mOnCreateRunnables.get(i).run();
-        }
-        if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_QS_DIALOG_ANIM)) {
-            DialogKt.registerAnimationOnBackInvoked(
-                    /* dialog = */ this,
-                    /* targetView = */ getWindow().getDecorView()
-            );
         }
     }
 

@@ -93,7 +93,6 @@ static struct configuration_offsets_t {
   jfieldID mScreenWidthDpOffset;
   jfieldID mScreenHeightDpOffset;
   jfieldID mScreenLayoutOffset;
-  jfieldID mUiMode;
 } gConfigurationOffsets;
 
 static struct arraymap_offsets_t {
@@ -1028,11 +1027,10 @@ static jobject ConstructConfigurationObject(JNIEnv* env, const ResTable_config& 
   env->SetIntField(result, gConfigurationOffsets.mScreenWidthDpOffset, config.screenWidthDp);
   env->SetIntField(result, gConfigurationOffsets.mScreenHeightDpOffset, config.screenHeightDp);
   env->SetIntField(result, gConfigurationOffsets.mScreenLayoutOffset, config.screenLayout);
-  env->SetIntField(result, gConfigurationOffsets.mUiMode, config.uiMode);
   return result;
 }
 
-static jobjectArray GetSizeAndUiModeConfigurations(JNIEnv* env, jlong ptr) {
+static jobjectArray NativeGetSizeConfigurations(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
   auto configurations = assetmanager->GetResourceConfigurations(true /*exclude_system*/,
                                                                 false /*exclude_mipmap*/);
@@ -1057,14 +1055,6 @@ static jobjectArray GetSizeAndUiModeConfigurations(JNIEnv* env, jlong ptr) {
     env->DeleteLocalRef(java_configuration);
   }
   return array;
-}
-
-static jobjectArray NativeGetSizeConfigurations(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
-  return GetSizeAndUiModeConfigurations(env, ptr);
-}
-
-static jobjectArray NativeGetSizeAndUiModeConfigurations(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
-  return GetSizeAndUiModeConfigurations(env, ptr);
 }
 
 static jintArray NativeAttributeResolutionStack(
@@ -1497,8 +1487,6 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeGetLocales", "(JZ)[Ljava/lang/String;", (void*)NativeGetLocales},
     {"nativeGetSizeConfigurations", "(J)[Landroid/content/res/Configuration;",
      (void*)NativeGetSizeConfigurations},
-    {"nativeGetSizeAndUiModeConfigurations", "(J)[Landroid/content/res/Configuration;",
-     (void*)NativeGetSizeAndUiModeConfigurations},
 
     // Style attribute related methods.
     {"nativeAttributeResolutionStack", "(JJIII)[I", (void*)NativeAttributeResolutionStack},
@@ -1577,7 +1565,6 @@ int register_android_content_AssetManager(JNIEnv* env) {
       GetFieldIDOrDie(env, configurationClass, "screenHeightDp", "I");
   gConfigurationOffsets.mScreenLayoutOffset =
           GetFieldIDOrDie(env, configurationClass, "screenLayout", "I");
-  gConfigurationOffsets.mUiMode = GetFieldIDOrDie(env, configurationClass, "uiMode", "I");
 
   jclass arrayMapClass = FindClassOrDie(env, "android/util/ArrayMap");
   gArrayMapOffsets.classObject = MakeGlobalRefOrDie(env, arrayMapClass);

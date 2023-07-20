@@ -4,14 +4,13 @@ per-file ContextImpl.java = *
 
 # ActivityManager
 per-file ActivityManager* = file:/services/core/java/com/android/server/am/OWNERS
-per-file *ApplicationStartInfo* = file:/services/core/java/com/android/server/am/OWNERS
 per-file ApplicationErrorReport* = file:/services/core/java/com/android/server/am/OWNERS
 per-file ApplicationExitInfo* = file:/services/core/java/com/android/server/am/OWNERS
 per-file Application.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file ApplicationLoaders.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file ApplicationThreadConstants.java = file:/services/core/java/com/android/server/am/OWNERS
+per-file BroadcastOptions.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file ContentProviderHolder* = file:/services/core/java/com/android/server/am/OWNERS
-per-file *ForegroundService* = file:/services/core/java/com/android/server/am/OWNERS
 per-file IActivityController.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IActivityManager.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IApplicationThread.aidl = file:/services/core/java/com/android/server/am/OWNERS
@@ -30,12 +29,10 @@ per-file ProfilerInfo* = file:/services/core/java/com/android/server/am/OWNERS
 per-file Service* = file:/services/core/java/com/android/server/am/OWNERS
 per-file SystemServiceRegistry.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file *UserSwitchObserver* = file:/services/core/java/com/android/server/am/OWNERS
-per-file *UiAutomation* = file:/services/accessibility/OWNERS
+per-file UiAutomation.java = file:/services/accessibility/OWNERS
 per-file GameManager* = file:/GAME_MANAGER_OWNERS
-per-file GameMode* = file:/GAME_MANAGER_OWNERS
 per-file GameState* = file:/GAME_MANAGER_OWNERS
 per-file IGameManager* = file:/GAME_MANAGER_OWNERS
-per-file IGameMode* = file:/GAME_MANAGER_OWNERS
 
 # ActivityThread
 per-file ActivityThread.java = file:/services/core/java/com/android/server/am/OWNERS
@@ -47,27 +44,16 @@ per-file *Alarm* = file:/apex/jobscheduler/OWNERS
 # AppOps
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
 
-# Backup and Restore
-per-file IBackupAgent.aidl = file:/services/backup/OWNERS
-
-# Broadcasts
-per-file Broadcast* = file:/BROADCASTS_OWNERS
-per-file ReceiverInfo* = file:/BROADCASTS_OWNERS
-
-# KeyguardManager
-per-file KeyguardManager.java = file:/services/core/java/com/android/server/locksettings/OWNERS
-
 # LocaleManager
 per-file *Locale* = file:/services/core/java/com/android/server/locales/OWNERS
 
 # Multiuser
 per-file *User* = file:/MULTIUSER_OWNERS
 
-# Notification, DND, Status bar, UiModeManager
+# Notification, DND, Status bar
 per-file *Notification* = file:/packages/SystemUI/OWNERS
 per-file *Zen* = file:/packages/SystemUI/OWNERS
 per-file *StatusBar* = file:/packages/SystemUI/OWNERS
-per-file *UiModeManager* = file:/packages/SystemUI/OWNERS
 
 # PackageManager
 per-file ApplicationPackageManager.java = file:/services/core/java/com/android/server/pm/OWNERS
@@ -96,6 +82,8 @@ per-file Fragment.java = file:/services/core/java/com/android/server/wm/OWNERS
 per-file *Task* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file Window* = file:/services/core/java/com/android/server/wm/OWNERS
 per-file ConfigurationController.java = file:/services/core/java/com/android/server/wm/OWNERS
+
+# TODO(b/174932174): determine the ownership of KeyguardManager.java
 
 # Zygote
 per-file *Zygote* = file:/ZYGOTE_OWNERS

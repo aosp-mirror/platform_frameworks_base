@@ -317,10 +317,7 @@ public class NotificationManager {
 
     /**
      * Intent that is broadcast when the state of {@link #getEffectsSuppressor()} changes.
-     *
-     * <p>This broadcast is only sent to registered receivers and (starting from
-     * {@link Build.VERSION_CODES#Q}) receivers in packages that have been granted Do Not
-     * Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
+     * This broadcast is only sent to registered receivers.
      *
      * @hide
      */
@@ -340,10 +337,7 @@ public class NotificationManager {
 
     /**
      * Intent that is broadcast when the state of getNotificationPolicy() changes.
-     *
-     * <p>This broadcast is only sent to registered receivers and (starting from
-     * {@link Build.VERSION_CODES#Q}) receivers in packages that have been granted Do Not
-     * Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
+     * This broadcast is only sent to registered receivers.
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_POLICY_CHANGED
@@ -351,10 +345,7 @@ public class NotificationManager {
 
     /**
      * Intent that is broadcast when the state of getCurrentInterruptionFilter() changes.
-     *
-     * <p>This broadcast is only sent to registered receivers and (starting from
-     * {@link Build.VERSION_CODES#Q}) receivers in packages that have been granted Do Not
-     * Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
+     * This broadcast is only sent to registered receivers.
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_INTERRUPTION_FILTER_CHANGED
@@ -2639,6 +2630,26 @@ public class NotificationManager {
             case INTERRUPTION_FILTER_ALARMS: return Global.ZEN_MODE_ALARMS;
             case INTERRUPTION_FILTER_NONE:  return Global.ZEN_MODE_NO_INTERRUPTIONS;
             default: return defValue;
+        }
+    }
+
+    /** @hide */
+    public void forceShowLedLight(int color) {
+        final INotificationManager service = getService();
+        try {
+            service.forceShowLedLight(color);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public void forcePulseLedLight(int color, int onTime, int offTime) {
+        final INotificationManager service = getService();
+        try {
+            service.forcePulseLedLight(color, onTime, offTime);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

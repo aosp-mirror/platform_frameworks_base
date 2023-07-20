@@ -28,7 +28,7 @@ public class TraceInjectionClassVisitor extends ClassVisitor {
     private final TraceInjectionConfiguration mParams;
     public TraceInjectionClassVisitor(ClassVisitor classVisitor,
             TraceInjectionConfiguration params) {
-        super(Opcodes.ASM9, classVisitor);
+        super(Opcodes.ASM7, classVisitor);
         mParams = params;
     }
 

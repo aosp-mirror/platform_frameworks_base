@@ -34,7 +34,7 @@ final class InclusiveFloatRangeValidator implements Validator {
 
     @Override
     public boolean validate(@Nullable String value) {
-        if (value == null) {
+        if (value == null || value.equals("NaN")) {
             return true;
         }
         try {

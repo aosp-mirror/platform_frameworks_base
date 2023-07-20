@@ -1,0 +1,4 @@
+# Bug component: 24949
+# Internal APIs related to APK-based time zone rule updates.
+# Deprecated, deletion tracked by b/148144561
+include /services/core/java/com/android/server/timezone/OWNERS

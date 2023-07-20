@@ -1102,7 +1102,11 @@ public final class Settings implements Watchable, Snappable {
                 pkgSetting.setAppId(sharedUser.mAppId);
             } else {
                 // Clone the setting here for disabled system packages
-                if (disabledPkg != null) {
+                if (disabledPkg != null
+                        && !(disabledPkg.getPath() == null
+                        || !disabledPkg.getPath().exists()
+                        || disabledPkg.getPkg() == null)
+                        && !disabledPkg.hasSharedUser()) {
                     // For disabled packages a new setting is created
                     // from the existing user id. This still has to be
                     // added to list of user id's

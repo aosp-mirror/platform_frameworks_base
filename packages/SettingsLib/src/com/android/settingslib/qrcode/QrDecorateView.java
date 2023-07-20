@@ -98,8 +98,9 @@ public class QrDecorateView extends View {
         if (!isLaidOut()) {
             return;
         }
-        if (mMaskBitmap == null) {
-            mMaskBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+        if(mMaskBitmap == null) {
+            mMaskBitmap = Bitmap.createBitmap(getWidth() > 0 ? getWidth() : 1,
+                    getHeight() > 0 ? getHeight() : 1, Bitmap.Config.ARGB_8888);
             mMaskCanvas = new Canvas(mMaskBitmap);
         }
 
@@ -108,18 +109,19 @@ public class QrDecorateView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mMaskCanvas != null && mMaskBitmap != null) {
-            // Set frame line color.
-            mStrokePaint.setColor(mFocused ? mFocusedCornerColor : mCornerColor);
-            // Draw background color.
-            mMaskCanvas.drawColor(mBackgroundColor);
-            // Draw outer corner.
-            mMaskCanvas.drawRoundRect(mOuterFrame, mRadius, mRadius, mStrokePaint);
-            // Draw inner transparent corner.
-            mMaskCanvas.drawRoundRect(mInnerFrame, mInnerRadius, mInnerRadius, mTransparentPaint);
-
-            canvas.drawBitmap(mMaskBitmap, 0, 0, mBackgroundPaint);
+        if (mMaskCanvas == null || mMaskBitmap == null) {
+            return;
         }
+        // Set frame line color.
+        mStrokePaint.setColor(mFocused ? mFocusedCornerColor : mCornerColor);
+        // Draw background color.
+        mMaskCanvas.drawColor(mBackgroundColor);
+        // Draw outer corner.
+        mMaskCanvas.drawRoundRect(mOuterFrame, mRadius, mRadius, mStrokePaint);
+        // Draw inner transparent corner.
+        mMaskCanvas.drawRoundRect(mInnerFrame, mInnerRadius, mInnerRadius, mTransparentPaint);
+
+        canvas.drawBitmap(mMaskBitmap, 0, 0, mBackgroundPaint);
         super.onDraw(canvas);
     }
 

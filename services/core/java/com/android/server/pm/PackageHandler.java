@@ -281,6 +281,11 @@ final class PackageHandler extends Handler {
                             + " not found. It may be invalid or overridden by verifier");
                     break;
                 }
+                if (state.isIntegrityVerificationComplete()) {
+                    Slog.w(TAG, "Integrity verification with id " + verificationId
+                            + " already complete.");
+                    break;
+                }
 
                 final int response = (Integer) msg.obj;
                 final VerificationParams params = state.getVerificationParams();

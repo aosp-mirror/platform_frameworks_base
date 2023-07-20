@@ -76,8 +76,7 @@ public class TileServiceManager {
         this(tileServices, handler, userTracker, new TileLifecycleManager(handler,
                 tileServices.getContext(), tileServices,
                 new PackageManagerAdapter(tileServices.getContext()), broadcastDispatcher,
-                new Intent(TileService.ACTION_QS_TILE).setComponent(component),
-                userTracker.getUserHandle()));
+                new Intent().setComponent(component), userTracker.getUserHandle()));
     }
 
     @VisibleForTesting

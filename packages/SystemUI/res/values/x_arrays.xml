@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2022 Project-Xtended
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <string-array name="app_exceptions" translatable="false">
+        <item>org.kde.kdeconnect_tp</item>
+        <item>#FF808080</item>
+        <item>com.instagram.android</item>
+        <item>#FF833AB4</item>
+        <item>com.google.android.dialer</item>
+        <item>#FF2162D7</item>
+        <item>com.google.android.youtube</item>
+        <item>#FFDE4B4B</item>
+    </string-array>
+</resources>

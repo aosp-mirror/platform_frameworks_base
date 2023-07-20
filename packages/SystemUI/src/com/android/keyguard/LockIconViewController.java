@@ -429,7 +429,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println(" mStatusBarState: " + StatusBarState.toString(mStatusBarState));
         pw.println(" mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
         pw.println(" mSensorTouchLocation: " + mSensorTouchLocation);
-        pw.println(" mDefaultPaddingPx: " + mDefaultPaddingPx);
 
         if (mView != null) {
             mView.dump(pw, args);
@@ -464,17 +463,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         if (wasUdfpsSupported != mUdfpsSupported || wasUdfpsEnrolled != mUdfpsEnrolled) {
             updateVisibility();
         }
-    }
-
-    /**
-     * @return whether the userUnlockedWithBiometric state changed
-     */
-    private boolean updateUserUnlockedWithBiometric() {
-        final boolean wasUserUnlockedWithBiometric = mUserUnlockedWithBiometric;
-        mUserUnlockedWithBiometric =
-                mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
-                        KeyguardUpdateMonitor.getCurrentUser());
-        return wasUserUnlockedWithBiometric != mUserUnlockedWithBiometric;
     }
 
     private StatusBarStateController.StateListener mStatusBarStateListener =
@@ -514,7 +502,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
                 @Override
                 public void onBiometricsCleared() {
-                    if (updateUserUnlockedWithBiometric()) {
+                    final boolean wasUserUnlockedWithBiometric = mUserUnlockedWithBiometric;
+                    mUserUnlockedWithBiometric =
+                            mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
+                                    KeyguardUpdateMonitor.getCurrentUser());
+                    if (wasUserUnlockedWithBiometric != mUserUnlockedWithBiometric) {
                         updateVisibility();
                     }
                 }
@@ -523,8 +515,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 public void onBiometricRunningStateChanged(boolean running,
                         BiometricSourceType biometricSourceType) {
                     final boolean wasRunningFps = mRunningFPS;
-                    final boolean userUnlockedWithBiometricChanged =
-                            updateUserUnlockedWithBiometric();
+                    final boolean wasUserUnlockedWithBiometric = mUserUnlockedWithBiometric;
+                    mUserUnlockedWithBiometric =
+                            mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
+                                    KeyguardUpdateMonitor.getCurrentUser());
 
                     if (biometricSourceType == FINGERPRINT) {
                         mRunningFPS = running;
@@ -542,7 +536,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         }
                     }
 
-                    if (userUnlockedWithBiometricChanged || wasRunningFps != mRunningFPS) {
+                    if (wasUserUnlockedWithBiometric != mUserUnlockedWithBiometric
+                            || wasRunningFps != mRunningFPS) {
                         updateVisibility();
                     }
                 }
@@ -553,7 +548,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         @Override
         public void onUnlockedChanged() {
             mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
-            updateUserUnlockedWithBiometric();
             updateKeyguardShowing();
             updateVisibility();
         }
@@ -571,7 +565,9 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
             updateKeyguardShowing();
             if (mIsKeyguardShowing) {
-                updateUserUnlockedWithBiometric();
+                mUserUnlockedWithBiometric =
+                    mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
+                        KeyguardUpdateMonitor.getCurrentUser());
             }
             updateVisibility();
         }

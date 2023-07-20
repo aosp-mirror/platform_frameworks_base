@@ -38,7 +38,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -155,7 +155,7 @@ public class PackageManagerServiceUtils {
      * allow 3P apps to trigger internal-only functionality.
      */
     @ChangeId
-    @Disabled  /* Revert enforcement: b/274147456 */
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS = 161252188;
 
     /**
@@ -1307,7 +1307,7 @@ public class PackageManagerServiceUtils {
     }
 
     public static @Nullable File preparePackageParserCache(boolean forEngBuild,
-            boolean isUserDebugBuild, String incrementalVersion) {
+            boolean isUserDebugBuild, String incrementalVersion, boolean isUpgrade) {
         if (!FORCE_PACKAGE_PARSED_CACHE_ENABLED) {
             if (!DEFAULT_PACKAGE_PARSER_CACHE_ENABLED) {
                 return null;
@@ -1334,11 +1334,11 @@ public class PackageManagerServiceUtils {
         // identify cached items. In particular, changing the value of certain
         // feature flags should cause us to invalidate any caches.
         final String cacheName = FORCE_PACKAGE_PARSED_CACHE_ENABLED ? "debug"
-                : PackagePartitions.FINGERPRINT;
+                : SystemProperties.digestOf(String.valueOf(Build.TIME));
 
         // Reconcile cache directories, keeping only what we'd actually use.
         for (File cacheDir : FileUtils.listFilesOrEmpty(cacheBaseDir)) {
-            if (Objects.equals(cacheName, cacheDir.getName())) {
+            if (!isUpgrade && Objects.equals(cacheName, cacheDir.getName())) {
                 Slog.d(TAG, "Keeping known cache " + cacheDir.getName());
             } else {
                 Slog.d(TAG, "Destroying unknown cache " + cacheDir.getName());
@@ -1363,9 +1363,7 @@ public class PackageManagerServiceUtils {
         // NOTE: When no BUILD_NUMBER is set by the build system, it defaults to a build
         // that starts with "eng." to signify that this is an engineering build and not
         // destined for release.
-        if (isUserDebugBuild && incrementalVersion.startsWith("eng.")) {
-            Slog.w(TAG, "Wiping cache directory because the system partition changed.");
-
+        /*if (isUserDebugBuild && incrementalVersion.startsWith("eng.")) {
             // Heuristic: If the /system directory has been modified recently due to an "adb sync"
             // or a regular make, then blow away the cache. Note that mtimes are *NOT* reliable
             // in general and should not be used for production changes. In this specific case,
@@ -1373,10 +1371,11 @@ public class PackageManagerServiceUtils {
             File frameworkDir =
                     new File(Environment.getRootDirectory(), "framework");
             if (cacheDir.lastModified() < frameworkDir.lastModified()) {
+                Slog.w(TAG, "Wiping cache directory because the system partition changed.");
                 FileUtils.deleteContents(cacheBaseDir);
                 cacheDir = FileUtils.createDir(cacheBaseDir, cacheName);
             }
-        }
+        }*/
 
         return cacheDir;
     }

@@ -49,7 +49,6 @@ import javax.inject.Inject;
 /** Quick settings tile: Invert colors **/
 public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
-    public static final String TILE_SPEC = "inversion";
     private final SettingObserver mSetting;
 
     @Inject

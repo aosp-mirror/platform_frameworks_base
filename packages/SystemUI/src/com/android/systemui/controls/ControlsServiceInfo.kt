@@ -28,13 +28,12 @@ import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
-import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.android.settingslib.applications.DefaultAppInfo
 import com.android.systemui.R
 import java.util.Objects
 
-open class ControlsServiceInfo(
+class ControlsServiceInfo(
     private val context: Context,
     val serviceInfo: ServiceInfo
 ) : DefaultAppInfo(
@@ -65,7 +64,7 @@ open class ControlsServiceInfo(
      * [R.array.config_controlsPreferredPackages] can declare activities for use as a panel.
      */
     var panelActivity: ComponentName? = null
-        protected set
+        private set
 
     private var resolved: Boolean = false
 

@@ -62,7 +62,7 @@
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Nije u opsegu"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Automatsko povezivanje nije uspelo"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Nema pristupa internetu"</string>
-    <string name="saved_network" msgid="7143698034077223645">"Čuva <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="7143698034077223645">"Sačuvao/la je <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_to_metered_access_point" msgid="9179693207918156341">"Povezani ste na mrežu sa ograničenjem"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatski povezano preko %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatski povezano preko dobavljača ocene mreže"</string>
@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Otkaži"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Uparivanje omogućava pristup kontaktima i istoriji poziva nakon povezivanja."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Uparivanje sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje sa <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće zbog netačnog PIN-a ili pristupnog koda."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguće zbog netačnog PIN-a ili pristupnog koda."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nije moguće komunicirati sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> je odbio/la uparivanje"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Računar"</string>
@@ -265,7 +265,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, otklanjanje grešaka, programer"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Prečica za izveštaj o greškama"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikazuje dugme u meniju dugmeta za uključivanje za pravljenje izveštaja o greškama"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"Ne gasi ekran"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Ne zaključavaj"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Ekran neće biti u režimu spavanja tokom punjenja"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući snoop evid. za Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Snimi Bluetooth pakete. (Uključite/isključite Bluetooth kada promenite ovo podešavanje)"</string>
@@ -572,7 +572,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Korisnik"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Ograničeni profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Dodajete novog korisnika?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ovaj uređaj možete da delite sa drugim ljudima ako napravite još korisnika. Svaki korisnik ima sopstveni prostor, koji može da prilagođava pomoću aplikacija, pozadine i slično. Korisnici mogu da prilagođavaju i podešavanja uređaja koja utiču na svakoga, poput WiFi-ja.\n\nKada dodate novog korisnika, ta osoba treba da podesi sopstveni prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike. Podešavanja i usluge pristupačnosti ne mogu da se prenose na novog korisnika."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ovaj uređaj možete da delite sa drugim ljudima ako napravite još korisnika. Svaki korisnik ima sopstveni prostor, koji može da prilagođava pomoću aplikacija, pozadine i slično. Korisnici mogu da prilagođavaju i podešavanja uređaja koja utiču na svakoga, poput Wi‑Fi-ja.\n\nKada dodate novog korisnika, ta osoba treba da podesi sopstveni prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike. Podešavanja i usluge pristupačnosti ne mogu da se prenose na novog korisnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kada dodate novog korisnika, ta osoba treba da podesi sopstveni prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Podešavate korisnika?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Ta osoba treba da uzme uređaj i podesi svoj prostor"</string>
@@ -662,7 +662,7 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fizička tastatura"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Odaberite raspored tastature"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Podrazumevano"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Uključivanje ekrana"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Uključite ekran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dozvoli uključivanje ekrana"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dozvoljava aplikaciji da uključi ekran. Ako se omogući, aplikacija može da uključi ekran u bilo kom trenutku bez vaše eksplicitne namere."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Želite da zaustavite emitovanje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

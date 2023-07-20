@@ -16,8 +16,6 @@
 
 package com.android.server.om;
 
-import static com.android.internal.content.om.OverlayConfig.PARTITION_ORDER_FILE_PATH;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -81,8 +79,6 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     return runLookup();
                 case "fabricate":
                     return runFabricate();
-                case "partition-order":
-                    return runPartitionOrder();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -134,9 +130,6 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    Create an overlay from a single resource. Caller must be root. Example:");
         out.println("      fabricate --target android --name LighterGray \\");
         out.println("                android:color/lighter_gray 0x1c 0xffeeeeee");
-        out.println("  partition-order");
-        out.println("    Print the partition order from overlay config and how this order");
-        out.println("    got established, by default or by " + PARTITION_ORDER_FILE_PATH);
     }
 
     private int runList() throws RemoteException {
@@ -234,14 +227,6 @@ final class OverlayManagerShellCommand extends ShellCommand {
         mInterface.commit(new OverlayManagerTransaction.Builder()
                 .setEnabled(overlay, enable, userId)
                 .build());
-        return 0;
-    }
-
-    private int runPartitionOrder() throws RemoteException {
-        final PrintWriter out = getOutPrintWriter();
-        out.println("Partition order (low to high priority): " + mInterface.getPartitionOrder());
-        out.println("Established by " + (mInterface.isDefaultPartitionOrder() ? "default"
-                : PARTITION_ORDER_FILE_PATH));
         return 0;
     }
 

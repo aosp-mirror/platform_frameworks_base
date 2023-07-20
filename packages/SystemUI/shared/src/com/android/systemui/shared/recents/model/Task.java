@@ -133,10 +133,6 @@ public class Task {
             return this.baseIntent.getPackage();
         }
 
-        public int getId() {
-            return id;
-        }
-
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof TaskKey)) {
@@ -309,10 +305,6 @@ public class Task {
 
     public void setLastSnapshotData(ActivityManager.RecentTaskInfo rawTask) {
         lastSnapshotData.set(rawTask.lastSnapshotData);
-    }
-
-    public TaskKey getKey() {
-        return key;
     }
 
     /**

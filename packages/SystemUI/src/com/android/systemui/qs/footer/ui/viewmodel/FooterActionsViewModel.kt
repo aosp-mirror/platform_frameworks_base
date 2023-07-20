@@ -145,9 +145,14 @@ class FooterActionsViewModel(
                 R.drawable.ic_settings,
                 ContentDescription.Resource(R.string.accessibility_quick_settings_settings)
             ),
-            iconTint = null,
+            iconTint =
+                Utils.getColorAttrDefaultColor(
+                    context,
+                    com.android.internal.R.attr.textColorPrimary,
+                ),
             backgroundColor = R.attr.offStateColor,
             this::onSettingsButtonClicked,
+            this::onSettingsButtonLongClicked
         )
 
     /** The model for the power button. */
@@ -162,10 +167,11 @@ class FooterActionsViewModel(
                 iconTint =
                     Utils.getColorAttrDefaultColor(
                         context,
-                        com.android.internal.R.attr.textColorOnAccent,
+                        com.android.internal.R.attr.textColorPrimaryInverse,
                     ),
                 backgroundColor = com.android.internal.R.attr.colorAccent,
                 this::onPowerButtonClicked,
+                this::doNothingLongClick,
             )
         } else {
             null
@@ -196,9 +202,9 @@ class FooterActionsViewModel(
      * Observe the device monitoring dialog requests and show the dialog accordingly. This function
      * will suspend indefinitely and will need to be cancelled to stop observing.
      *
-     * Important: [quickSettingsContext] must be the [Context] associated to the
-     * [Quick Settings fragment][com.android.systemui.qs.QSFragment], and the call to this function
-     * must be cancelled when that fragment is destroyed.
+     * Important: [quickSettingsContext] must be the [Context] associated to the [Quick Settings
+     * fragment][com.android.systemui.qs.QSFragment], and the call to this function must be
+     * cancelled when that fragment is destroyed.
      */
     suspend fun observeDeviceMonitoringDialogRequests(quickSettingsContext: Context) {
         footerActionsInteractor.deviceMonitoringDialogRequests.collect {
@@ -230,7 +236,7 @@ class FooterActionsViewModel(
             return
         }
 
-        footerActionsInteractor.showUserSwitcher(expandable)
+        footerActionsInteractor.showUserSwitcher(context, expandable)
     }
 
     private fun onSettingsButtonClicked(expandable: Expandable) {
@@ -239,6 +245,18 @@ class FooterActionsViewModel(
         }
 
         footerActionsInteractor.showSettings(expandable)
+    }
+
+    private fun onSettingsButtonLongClicked(expandable: Expandable): Boolean {
+        if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+            return false
+        }
+
+        return footerActionsInteractor.showXtensions(expandable)
+    }
+
+    private fun doNothingLongClick(expandable: Expandable): Boolean {
+        return false
     }
 
     private fun onPowerButtonClicked(expandable: Expandable) {
@@ -266,6 +284,7 @@ class FooterActionsViewModel(
             iconTint = null,
             backgroundColor = R.attr.offStateColor,
             onClick = this::onUserSwitcherClicked,
+            onLongClick = this::doNothingLongClick,
         )
     }
 

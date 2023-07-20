@@ -16,4 +16,6 @@
 
 <resources>
     <color name="accent_device_default">@color/accent_device_default_dark</color>
+    <color name="accent_primary_device_default">@color/system_accent1_50</color>
+    <color name="accent_device_default_custom">@color/system_accent2_800</color>
 </resources>

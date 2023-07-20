@@ -21,7 +21,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
-import com.android.systemui.plugins.BcSmartspaceDataPlugin.UI_SURFACE_DREAM
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.smartspace.dagger.SmartspaceViewComponent.SmartspaceViewModule.PLUGIN
 import dagger.BindsInstance
@@ -37,8 +36,7 @@ interface SmartspaceViewComponent {
         fun create(
             @BindsInstance parent: ViewGroup,
             @BindsInstance @Named(PLUGIN) plugin: BcSmartspaceDataPlugin,
-            @BindsInstance onAttachListener: View.OnAttachStateChangeListener,
-            @BindsInstance viewWithCustomLayout: View? = null
+            @BindsInstance onAttachListener: View.OnAttachStateChangeListener
         ): SmartspaceViewComponent
     }
 
@@ -54,15 +52,12 @@ interface SmartspaceViewComponent {
             falsingManager: FalsingManager,
             parent: ViewGroup,
             @Named(PLUGIN) plugin: BcSmartspaceDataPlugin,
-            viewWithCustomLayout: View?,
             onAttachListener: View.OnAttachStateChangeListener
         ):
                 BcSmartspaceDataPlugin.SmartspaceView {
-            val ssView = viewWithCustomLayout
-                    as? BcSmartspaceDataPlugin.SmartspaceView
-                    ?: plugin.getView(parent)
+            val ssView = plugin.getView(parent)
             // Currently, this is only used to provide SmartspaceView on Dream surface.
-            ssView.setUiSurface(UI_SURFACE_DREAM)
+            ssView.setIsDreaming(true)
             ssView.registerDataProvider(plugin)
 
             ssView.setIntentStarter(object : BcSmartspaceDataPlugin.IntentStarter {

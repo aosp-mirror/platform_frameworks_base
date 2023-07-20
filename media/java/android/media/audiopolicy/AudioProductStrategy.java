@@ -22,17 +22,18 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.media.AudioAttributes;
 import android.media.AudioSystem;
+import android.media.MediaRecorder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @hide
@@ -129,7 +130,9 @@ public final class AudioProductStrategy implements Parcelable {
                 return aa;
             }
         }
-        return DEFAULT_ATTRIBUTES;
+        return new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+            .setUsage(AudioAttributes.USAGE_UNKNOWN).build();
     }
 
     /**
@@ -140,7 +143,7 @@ public final class AudioProductStrategy implements Parcelable {
      */
     public static int getLegacyStreamTypeForStrategyWithAudioAttributes(
             @NonNull AudioAttributes audioAttributes) {
-        Objects.requireNonNull(audioAttributes, "AudioAttributes must not be null");
+        Preconditions.checkNotNull(audioAttributes, "AudioAttributes must not be null");
         for (final AudioProductStrategy productStrategy :
                 AudioProductStrategy.getAudioProductStrategies()) {
             if (productStrategy.supportsAudioAttributes(audioAttributes)) {
@@ -158,30 +161,6 @@ public final class AudioProductStrategy implements Parcelable {
             }
         }
         return AudioSystem.STREAM_MUSIC;
-    }
-
-    /**
-     * @hide
-     * @param attributes the {@link AudioAttributes} to identify VolumeGroupId with
-     * @param fallbackOnDefault if set, allows to fallback on the default group (e.g. the group
-     *                          associated to {@link AudioManager#STREAM_MUSIC}).
-     * @return volume group id associated with the given {@link AudioAttributes} if found,
-     *     default volume group id if fallbackOnDefault is set
-     * <p>By convention, the product strategy with default attributes will be associated to the
-     * default volume group (e.g. associated to {@link AudioManager#STREAM_MUSIC})
-     * or {@link AudioVolumeGroup#DEFAULT_VOLUME_GROUP} if not found.
-     */
-    public static int getVolumeGroupIdForAudioAttributes(
-            @NonNull AudioAttributes attributes, boolean fallbackOnDefault) {
-        Objects.requireNonNull(attributes, "attributes must not be null");
-        int volumeGroupId = getVolumeGroupIdForAudioAttributesInt(attributes);
-        if (volumeGroupId != AudioVolumeGroup.DEFAULT_VOLUME_GROUP) {
-            return volumeGroupId;
-        }
-        if (fallbackOnDefault) {
-            return getVolumeGroupIdForAudioAttributesInt(getDefaultAttributes());
-        }
-        return AudioVolumeGroup.DEFAULT_VOLUME_GROUP;
     }
 
     private static List<AudioProductStrategy> initializeAudioProductStrategies() {
@@ -214,8 +193,8 @@ public final class AudioProductStrategy implements Parcelable {
      */
     private AudioProductStrategy(@NonNull String name, int id,
             @NonNull AudioAttributesGroup[] aag) {
-        Objects.requireNonNull(name, "name must not be null");
-        Objects.requireNonNull(aag, "AudioAttributesGroups must not be null");
+        Preconditions.checkNotNull(name, "name must not be null");
+        Preconditions.checkNotNull(aag, "AudioAttributesGroups must not be null");
         mName = name;
         mId = id;
         mAudioAttributesGroups = aag;
@@ -233,21 +212,12 @@ public final class AudioProductStrategy implements Parcelable {
 
     /**
      * @hide
-     * @return the product strategy ID (which is the generalisation of Car Audio Usage / legacy
-     *         routing_strategy linked to {@link AudioAttributes#getUsage()}).
-     */
-    @NonNull public String getName() {
-        return mName;
-    }
-
-    /**
-     * @hide
      * @return first {@link AudioAttributes} associated to this product strategy.
      */
     @SystemApi
     public @NonNull AudioAttributes getAudioAttributes() {
         // We need a choice, so take the first one
-        return mAudioAttributesGroups.length == 0 ? DEFAULT_ATTRIBUTES
+        return mAudioAttributesGroups.length == 0 ? (new AudioAttributes.Builder().build())
                 : mAudioAttributesGroups[0].getAudioAttributes();
     }
 
@@ -274,7 +244,7 @@ public final class AudioProductStrategy implements Parcelable {
      */
     @TestApi
     public int getLegacyStreamTypeForAudioAttributes(@NonNull AudioAttributes aa) {
-        Objects.requireNonNull(aa, "AudioAttributes must not be null");
+        Preconditions.checkNotNull(aa, "AudioAttributes must not be null");
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
             if (aag.supportsAttributes(aa)) {
                 return aag.getStreamType();
@@ -291,7 +261,7 @@ public final class AudioProductStrategy implements Parcelable {
      */
     @SystemApi
     public boolean supportsAudioAttributes(@NonNull AudioAttributes aa) {
-        Objects.requireNonNull(aa, "AudioAttributes must not be null");
+        Preconditions.checkNotNull(aa, "AudioAttributes must not be null");
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
             if (aag.supportsAttributes(aa)) {
                 return true;
@@ -324,21 +294,10 @@ public final class AudioProductStrategy implements Parcelable {
      */
     @TestApi
     public int getVolumeGroupIdForAudioAttributes(@NonNull AudioAttributes aa) {
-        Objects.requireNonNull(aa, "AudioAttributes must not be null");
+        Preconditions.checkNotNull(aa, "AudioAttributes must not be null");
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
             if (aag.supportsAttributes(aa)) {
                 return aag.getVolumeGroupId();
-            }
-        }
-        return AudioVolumeGroup.DEFAULT_VOLUME_GROUP;
-    }
-
-    private static int getVolumeGroupIdForAudioAttributesInt(@NonNull AudioAttributes attributes) {
-        Objects.requireNonNull(attributes, "attributes must not be null");
-        for (AudioProductStrategy productStrategy : getAudioProductStrategies()) {
-            int volumeGroupId = productStrategy.getVolumeGroupIdForAudioAttributes(attributes);
-            if (volumeGroupId != AudioVolumeGroup.DEFAULT_VOLUME_GROUP) {
-                return volumeGroupId;
             }
         }
         return AudioVolumeGroup.DEFAULT_VOLUME_GROUP;
@@ -399,7 +358,8 @@ public final class AudioProductStrategy implements Parcelable {
      * Default attributes, with default source to be aligned with native.
      */
     private static final @NonNull AudioAttributes DEFAULT_ATTRIBUTES =
-            new AudioAttributes.Builder().build();
+            new AudioAttributes.Builder().setCapturePreset(MediaRecorder.AudioSource.DEFAULT)
+                                         .build();
 
     /**
      * @hide
@@ -418,8 +378,8 @@ public final class AudioProductStrategy implements Parcelable {
      */
     private static boolean attributesMatches(@NonNull AudioAttributes refAttr,
             @NonNull AudioAttributes attr) {
-        Objects.requireNonNull(refAttr, "reference AudioAttributes must not be null");
-        Objects.requireNonNull(attr, "requester's AudioAttributes must not be null");
+        Preconditions.checkNotNull(refAttr, "refAttr must not be null");
+        Preconditions.checkNotNull(attr, "attr must not be null");
         String refFormattedTags = TextUtils.join(";", refAttr.getTags());
         String cliFormattedTags = TextUtils.join(";", attr.getTags());
         if (refAttr.equals(DEFAULT_ATTRIBUTES)) {
@@ -469,7 +429,8 @@ public final class AudioProductStrategy implements Parcelable {
 
         public @NonNull AudioAttributes getAudioAttributes() {
             // We need a choice, so take the first one
-            return mAudioAttributes.length == 0 ? DEFAULT_ATTRIBUTES : mAudioAttributes[0];
+            return mAudioAttributes.length == 0 ? (new AudioAttributes.Builder().build())
+                    : mAudioAttributes[0];
         }
 
         /**

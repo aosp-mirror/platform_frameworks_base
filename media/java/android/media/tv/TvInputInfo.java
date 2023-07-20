@@ -946,10 +946,6 @@ public final class TvInputInfo implements Parcelable {
                 id = generateInputId(componentName, mTvInputHardwareInfo);
                 type = sHardwareTypeToTvInputType.get(mTvInputHardwareInfo.getType(), TYPE_TUNER);
                 isHardwareInput = true;
-                if (mTvInputHardwareInfo.getType() == TvInputHardwareInfo.TV_INPUT_TYPE_HDMI) {
-                    mHdmiDeviceInfo = HdmiDeviceInfo.hardwarePort(
-                            HdmiDeviceInfo.PATH_INVALID, mTvInputHardwareInfo.getHdmiPortId());
-                }
             } else {
                 id = generateInputId(componentName);
                 type = TYPE_TUNER;

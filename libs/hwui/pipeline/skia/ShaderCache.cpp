@@ -174,13 +174,14 @@ void set(BlobCache* cache, const void* key, size_t keySize, const void* value, s
 
 void ShaderCache::saveToDiskLocked() {
     ATRACE_NAME("ShaderCache::saveToDiskLocked");
-    if (mInitialized && mBlobCache) {
+    if (mInitialized && mBlobCache && mSavePending) {
         if (mIDHash.size()) {
             auto key = sIDKey;
             set(mBlobCache.get(), &key, sizeof(key), mIDHash.data(), mIDHash.size());
         }
         mBlobCache->writeToFile();
     }
+    mSavePending = false;
 }
 
 void ShaderCache::store(const SkData& key, const SkData& data, const SkString& /*description*/) {
@@ -223,10 +224,10 @@ void ShaderCache::store(const SkData& key, const SkData& data, const SkString& /
     }
     set(bc, key.data(), keySize, value, valueSize);
 
-    if (!mSavePending && mDeferredSaveDelayMs > 0) {
+    if (!mSavePending && mDeferredSaveDelay > 0) {
         mSavePending = true;
         std::thread deferredSaveThread([this]() {
-            usleep(mDeferredSaveDelayMs * 1000);  // milliseconds to microseconds
+            sleep(mDeferredSaveDelay);
             std::lock_guard<std::mutex> lock(mMutex);
             // Store file on disk if there a new shader or Vulkan pipeline cache size changed.
             if (mCacheDirty || mNewPipelineCacheSize != mOldPipelineCacheSize) {
@@ -235,7 +236,6 @@ void ShaderCache::store(const SkData& key, const SkData& data, const SkString& /
                 mTryToStorePipelineCache = false;
                 mCacheDirty = false;
             }
-            mSavePending = false;
         });
         deferredSaveThread.detach();
     }

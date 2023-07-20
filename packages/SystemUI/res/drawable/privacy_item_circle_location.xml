@@ -31,6 +31,6 @@
           android:gravity="center"
           android:width="@dimen/ongoing_appops_dialog_icon_size"
           android:height="@dimen/ongoing_appops_dialog_icon_size"
-          android:drawable="@*android:drawable/perm_group_location"
+          android:drawable="@*android:drawable/stat_sys_location"
     />
 </layer-list>

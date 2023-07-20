@@ -35,6 +35,7 @@
 #include "SkShader.h"
 #include "SkBlendMode.h"
 #include "unicode/uloc.h"
+#include "unicode/ushape.h"
 #include "utils/Blur.h"
 
 #include <hwui/BlurDrawLooper.h>

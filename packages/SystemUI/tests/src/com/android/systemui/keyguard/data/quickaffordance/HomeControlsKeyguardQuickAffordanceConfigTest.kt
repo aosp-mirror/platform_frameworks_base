@@ -17,7 +17,6 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -35,12 +34,13 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(JUnit4::class)
 class HomeControlsKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Mock private lateinit var component: ControlsComponent

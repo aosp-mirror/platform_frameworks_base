@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -79,7 +80,6 @@ import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SystemUIApplication;
-import com.android.systemui.settings.DisplayTracker;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
 
@@ -123,7 +123,6 @@ public class KeyguardService extends Service {
     private final KeyguardLifecyclesDispatcher mKeyguardLifecyclesDispatcher;
     private final ScreenOnCoordinator mScreenOnCoordinator;
     private final ShellTransitions mShellTransitions;
-    private final DisplayTracker mDisplayTracker;
 
     private static int newModeToLegacyMode(int newMode) {
         switch (newMode) {
@@ -287,14 +286,12 @@ public class KeyguardService extends Service {
     public KeyguardService(KeyguardViewMediator keyguardViewMediator,
                            KeyguardLifecyclesDispatcher keyguardLifecyclesDispatcher,
                            ScreenOnCoordinator screenOnCoordinator,
-                           ShellTransitions shellTransitions,
-                           DisplayTracker displayTracker) {
+                           ShellTransitions shellTransitions) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
         mScreenOnCoordinator = screenOnCoordinator;
         mShellTransitions = shellTransitions;
-        mDisplayTracker = displayTracker;
     }
 
     @Override
@@ -331,7 +328,7 @@ public class KeyguardService extends Service {
                         unoccludeAnimationAdapter);
             }
             ActivityTaskManager.getInstance().registerRemoteAnimationsForDisplay(
-                    mDisplayTracker.getDefaultDisplayId(), definition);
+                    DEFAULT_DISPLAY, definition);
             return;
         }
         if (sEnableRemoteKeyguardGoingAwayAnimation) {
@@ -638,7 +635,6 @@ public class KeyguardService extends Service {
             checkPermission();
             mKeyguardViewMediator.onScreenTurnedOff();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_OFF);
-            mScreenOnCoordinator.onScreenTurnedOff();
         }
 
         @Override // Binder interface

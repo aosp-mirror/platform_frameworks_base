@@ -5,9 +5,6 @@
     },
     {
       "name": "CtsAccelerationTestCases"
-    },
-    {
-      "name": "hwui_unit_tests"
     }
   ],
   "imports": [

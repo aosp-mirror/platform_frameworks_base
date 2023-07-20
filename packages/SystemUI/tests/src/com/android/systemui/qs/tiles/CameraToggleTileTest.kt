@@ -35,7 +35,6 @@ import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.google.common.truth.Truth.assertThat
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -89,12 +88,6 @@ class CameraToggleTileTest : SysuiTestCase() {
                 qsLogger,
                 privacyController,
                 keyguardStateController)
-    }
-
-    @After
-    fun tearDown() {
-        tile.destroy()
-        testableLooper.processAllMessages()
     }
 
     @Test

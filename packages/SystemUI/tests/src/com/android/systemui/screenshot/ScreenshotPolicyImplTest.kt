@@ -31,7 +31,6 @@ import android.os.UserManager
 import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.screenshot.ScreenshotPolicy.DisplayContentInfo
-import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
@@ -127,10 +126,8 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
         val userManager = mock<UserManager>()
         val atmService = mock<IActivityTaskManager>()
         val dispatcher = Dispatchers.Unconfined
-        val displayTracker = FakeDisplayTracker(mContext)
 
-        return object : ScreenshotPolicyImpl(context, userManager, atmService, dispatcher,
-                displayTracker) {
+        return object : ScreenshotPolicyImpl(context, userManager, atmService, dispatcher) {
             override suspend fun isManagedProfile(userId: Int) = (userId == MANAGED_PROFILE_USER)
             override suspend fun getAllRootTaskInfosOnDisplay(displayId: Int) = tasks
             override suspend fun isNotificationShadeExpanded() = shadeExpanded

@@ -34,19 +34,9 @@ cc_library_shared {
         "-Wno-error=deprecated-declarations",
         "-Wunused",
         "-Wunreachable-code",
-
-        "-DNAMESPACE_FOR_HASH_FUNCTIONS=farmhash",
     ],
 
     cppflags: ["-Wno-conversion-null"],
-
-    product_variables: {
-        eng: {
-            cflags: ["-DNO_RESET_STACK_PROTECTOR"],
-        },
-    },
-
-    cpp_std: "gnu++20",
 
     srcs: [
         "android_animation_PropertyValuesHolder.cpp",
@@ -60,7 +50,7 @@ cc_library_shared {
         "android_util_XmlBlock.cpp",
         "android_util_jar_StrictJarFile.cpp",
         "com_android_internal_util_VirtualRefBasePtr.cpp",
-        "core_jni_helpers.cpp",
+        "com_android_internal_app_ActivityTrigger.cpp",
         ":deviceproductinfoconstants_aidl",
     ],
 
@@ -88,10 +78,6 @@ cc_library_shared {
     export_include_dirs: [
         ".",
         "include",
-    ],
-
-    defaults: [
-        "latest_android_media_audio_common_types_cpp_target_shared",
     ],
 
     target: {
@@ -254,11 +240,10 @@ cc_library_shared {
                 "libscrypt_static",
                 "libstatssocket_lazy",
                 "libskia",
-                "libtextclassifier_hash_static",
-                "libexpresslog_jni",
             ],
 
             shared_libs: [
+                "android.media.audio.common.types-V1-cpp",
                 "audioclient-types-aidl-cpp",
                 "audioflinger-aidl-cpp",
                 "audiopolicy-types-aidl-cpp",
@@ -266,6 +251,7 @@ cc_library_shared {
                 "av-types-aidl-cpp",
                 "android.hardware.camera.device@3.2",
                 "libandroid_net",
+                "libandroidicu",
                 "libbattery",
                 "libnetdutils",
                 "libmemtrack",
@@ -285,7 +271,6 @@ cc_library_shared {
                 "libpermission",
                 "libsensor",
                 "libinput",
-                "libicu",
                 "libcamera_client",
                 "libcamera_metadata",
                 "libprocinfo",
@@ -338,7 +323,7 @@ cc_library_shared {
             header_libs: [
                 "bionic_libc_platform_headers",
                 "dnsproxyd_protocol_headers",
-                "libtextclassifier_hash_headers",
+                "libandroid_runtime_vm_headers",
             ],
         },
         host: {
@@ -426,4 +411,25 @@ cc_library_shared {
     lto: {
         never: true,
     },
+}
+
+cc_library_headers {
+    name: "libandroid_runtime_vm_headers",
+    host_supported: true,
+    vendor_available: true,
+    // TODO(b/153609531): remove when libbinder is not native_bridge_supported
+    native_bridge_supported: true,
+    // Allow only modules from the following list to create threads that can be
+    // attached to the JVM. This list should be a subset of the dependencies of
+    // libandroid_runtime.
+    visibility: [
+        "//frameworks/native/libs/binder",
+    ],
+    export_include_dirs: ["include_vm"],
+    header_libs: [
+        "jni_headers",
+    ],
+    export_header_lib_headers: [
+        "jni_headers",
+    ],
 }

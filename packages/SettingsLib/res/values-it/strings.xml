@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Disconnessione…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Connessione…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> Connesso"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento in corso…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (telefono escluso)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (contenuti multimediali esclusi)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (nessun accesso ai messaggi)"</string>
@@ -109,8 +109,8 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"S: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Attivo"</string>
-    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Attiva, solo sinistra"</string>
-    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Attiva, solo destra"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Attivo, solo sinistra"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Attivo, solo destra"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Attivo, destra e sinistra"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimediale"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonate"</string>
@@ -223,8 +223,8 @@
     <item msgid="581904787661470707">"Massima velocità"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Scegli profilo"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Personale"</string>
-    <string name="category_work" msgid="4014193632325996115">"Lavoro"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Personali"</string>
+    <string name="category_work" msgid="4014193632325996115">"Di lavoro"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opzioni sviluppatore"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Attiva Opzioni sviluppatore"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Imposta opzioni per lo sviluppo di applicazioni"</string>
@@ -572,7 +572,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utente"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profilo con limitazioni"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Aggiungere un nuovo utente?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. È possibile che i servizi e le impostazioni di accessibilità non vengano trasferiti al nuovo utente."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. I servizi e le impostazioni di accessibilità non potranno essere trasferiti al nuovo utente."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurare l\'utente ora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assicurati che la persona sia disponibile a prendere il dispositivo e configurare il suo spazio"</string>

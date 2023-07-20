@@ -3517,7 +3517,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>An array of mandatory stream combinations which are applicable when device support the
      * 10-bit output capability
      * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
-     * This is an app-readable conversion of the 10 bit output mandatory stream combination
+     * This is an app-readable conversion of the maximum resolution mandatory stream combination
      * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
      * <p>The array of
      * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
@@ -3542,8 +3542,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>An array of mandatory stream combinations which are applicable when device lists
      * {@code PREVIEW_STABILIZATION} in {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES android.control.availableVideoStabilizationModes}.
-     * This is an app-readable conversion of the preview stabilization mandatory stream
-     * combination {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
+     * This is an app-readable conversion of the maximum resolution mandatory stream combination
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
      * <p>The array of
      * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
      * generated according to the documented
@@ -4467,40 +4467,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<android.graphics.Rect[]> SENSOR_OPTICAL_BLACK_REGIONS =
             new Key<android.graphics.Rect[]>("android.sensor.opticalBlackRegions", android.graphics.Rect[].class);
-
-    /**
-     * <p>Whether or not the camera device supports readout timestamp and
-     * onReadoutStarted callback.</p>
-     * <p>If this tag is HARDWARE, the camera device calls onReadoutStarted in addition to the
-     * onCaptureStarted callback for each capture. The timestamp passed into the callback
-     * is the start of camera image readout rather than the start of the exposure. In
-     * addition, the application can configure an
-     * {@link android.hardware.camera2.params.OutputConfiguration } with
-     * TIMESTAMP_BASE_READOUT_SENSOR timestamp base, in which case, the timestamp of the
-     * output surface matches the timestamp from the corresponding onReadoutStarted callback.</p>
-     * <p>The readout timestamp is beneficial for video recording, because the encoder favors
-     * uniform timestamps, and the readout timestamps better reflect the cadence camera sensors
-     * output data.</p>
-     * <p>If this tag is HARDWARE, the camera device produces the start-of-exposure and
-     * start-of-readout together. As a result, the onReadoutStarted is called right after
-     * onCaptureStarted. The difference in start-of-readout and start-of-exposure is the sensor
-     * exposure time, plus certain constant offset. The offset is usually due to camera sensor
-     * level crop, and it remains constant for a given camera sensor mode.</p>
-     * <p><b>Possible values:</b></p>
-     * <ul>
-     *   <li>{@link #SENSOR_READOUT_TIMESTAMP_NOT_SUPPORTED NOT_SUPPORTED}</li>
-     *   <li>{@link #SENSOR_READOUT_TIMESTAMP_HARDWARE HARDWARE}</li>
-     * </ul>
-     *
-     * <p>This key is available on all devices.</p>
-     * @see #SENSOR_READOUT_TIMESTAMP_NOT_SUPPORTED
-     * @see #SENSOR_READOUT_TIMESTAMP_HARDWARE
-     * @hide
-     */
-    @PublicKey
-    @NonNull
-    public static final Key<Integer> SENSOR_READOUT_TIMESTAMP =
-            new Key<Integer>("android.sensor.readoutTimestamp", int.class);
 
     /**
      * <p>List of lens shading modes for {@link CaptureRequest#SHADING_MODE android.shading.mode} that are supported by this camera device.</p>

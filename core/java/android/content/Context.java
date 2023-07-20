@@ -2323,8 +2323,7 @@ public abstract class Context {
     @SystemApi
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable BroadcastOptions options) {
-        sendBroadcastMultiplePermissions(intent, receiverPermissions,
-                (options == null ? null : options.toBundle()));
+       sendBroadcastMultiplePermissions(intent, receiverPermissions, options.toBundle());
     }
 
     /**
@@ -3822,6 +3821,7 @@ public abstract class Context {
             STORAGE_SERVICE,
             STORAGE_STATS_SERVICE,
             WALLPAPER_SERVICE,
+            TIME_ZONE_RULES_MANAGER_SERVICE,
             VIBRATOR_MANAGER_SERVICE,
             VIBRATOR_SERVICE,
             //@hide: STATUS_BAR_SERVICE,
@@ -3933,7 +3933,6 @@ public abstract class Context {
             //@hide: ATTESTATION_VERIFICATION_SERVICE,
             //@hide: SAFETY_CENTER_SERVICE,
             DISPLAY_HASH_SERVICE,
-            VIRTUALIZATION_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -4040,7 +4039,7 @@ public abstract class Context {
      * <p>Note: When implementing this method, keep in mind that new services can be added on newer
      * Android releases, so if you're looking for just the explicit names mentioned above, make sure
      * to return {@code null} when you don't recognize the name &mdash; if you throw a
-     * {@link RuntimeException} exception instead, your app might break on new Android releases.
+     * {@link RuntimeException} exception instead, you're app might break on new Android releases.
      *
      * @param name The name of the desired service.
      *
@@ -5148,14 +5147,6 @@ public abstract class Context {
     public static final String PERMISSION_CHECKER_SERVICE = "permission_checker";
 
     /**
-     * Official published name of the (internal) permission enforcer service.
-     *
-     * @see #getSystemService(String)
-     * @hide
-     */
-    public static final String PERMISSION_ENFORCER_SERVICE = "permission_enforcer";
-
-    /**
      * Use with {@link #getSystemService(String) to retrieve an
      * {@link android.apphibernation.AppHibernationManager}} for
      * communicating with the hibernation service.
@@ -5768,6 +5759,15 @@ public abstract class Context {
     public static final String VR_SERVICE = "vrmanager";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.app.timezone.ITimeZoneRulesManager}.
+     * @hide
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String TIME_ZONE_RULES_MANAGER_SERVICE = "timezone";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.pm.CrossProfileApps} for cross profile operations.
      *
@@ -5920,14 +5920,6 @@ public abstract class Context {
     public static final String FILE_INTEGRITY_SERVICE = "file_integrity";
 
     /**
-     * Binder service for remote key provisioning.
-     *
-     * @see android.frameworks.rkp.IRemoteProvisioning
-     * @hide
-     */
-    public static final String REMOTE_PROVISIONING_SERVICE = "remote_provisioning";
-
-    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.lights.LightsManager} for controlling device lights.
      *
@@ -6069,18 +6061,14 @@ public abstract class Context {
     public static final String AMBIENT_CONTEXT_SERVICE = "ambient_context";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.system.virtualmachine.VirtualMachineManager}.
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link com.oplus.os.LinearmotorVibrator} for accessing linear motor vibrator state.
      *
-     * <p>On devices without {@link PackageManager#FEATURE_VIRTUALIZATION_FRAMEWORK} system feature
-     * the {@link #getSystemService(String)} will return {@code null}.
-     *
-     * @see #getSystemService(String)
-     * @see android.system.virtualmachine.VirtualMachineManager
      * @hide
+     * @see #getSystemService
+     * @see com.oplus.os.LinearmotorVibrator
      */
-    @SystemApi
-    public static final String VIRTUALIZATION_SERVICE = "virtualization";
+    public static final String LINEARMOTOR_VIBRATOR_SERVICE = "linearmotor";
 
     /**
      * Determine whether the given permission is allowed for a particular

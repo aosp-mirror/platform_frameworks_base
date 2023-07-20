@@ -1,5 +1,6 @@
 package com.android.server.wm;
 
+import android.app.ActivityManager;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
@@ -99,6 +100,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.incremental.IncrementalManager;
 import android.util.ArrayMap;
+import android.util.BoostFramework;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -183,6 +185,10 @@ class ActivityMetricsLogger {
 
     private ArtManagerInternal mArtManagerInternal;
     private final StringBuilder mStringBuilder = new StringBuilder();
+
+    public static BoostFramework mUxPerf = new BoostFramework();
+    public static BoostFramework mPerfBoost = new BoostFramework();
+    private static ActivityRecord mLaunchedActivity;
 
     /**
      * Due to the global single concurrent launch sequence, all calls to this observer must be made
@@ -1008,6 +1014,8 @@ class ActivityMetricsLogger {
     private void logAppTransitionFinished(@NonNull TransitionInfo info, boolean isHibernating) {
         if (DEBUG_METRICS) Slog.i(TAG, "logging finished transition " + info);
 
+	mLaunchedActivity = info.mLastLaunchedActivity;
+
         // Take a snapshot of the transition info before sending it to the handler for logging.
         // This will avoid any races with other operations that modify the ActivityRecord.
         final TransitionInfoSnapshot infoSnapshot = new TransitionInfoSnapshot(info);
@@ -1136,7 +1144,47 @@ class ActivityMetricsLogger {
         sb.append(info.launchedActivityShortComponentName);
         sb.append(": ");
         TimeUtils.formatDuration(info.windowsDrawnDelayMs, sb);
+
+        if (mPerfBoost != null) {
+            if (info.processRecord != null) {
+                mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_DRAW, info.packageName,
+                    info.processRecord.getPid(), info.windowsDrawnDelayMs);
+            }
+        }
+
+        if (mUxPerf != null) {
+            if (mUxPerf.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                mUxPerf.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                mUxPerf.perfUXEngine_events(BoostFramework.UXE_EVENT_DISPLAYED_ACT, 0, info.packageName, info.windowsDrawnDelayMs);
+            }
+        }
+
         Log.i(TAG, sb.toString());
+
+        if (mUxPerf !=  null) {
+            int isGame;
+
+            if (ActivityManager.isLowRamDeviceStatic()) {
+                isGame = mLaunchedActivity.isAppInfoGame();
+            } else {
+                isGame = (mUxPerf.perfGetFeedback(BoostFramework.VENDOR_FEEDBACK_WORKLOAD_TYPE,
+                                        mLaunchedActivity.packageName) == BoostFramework.WorkloadType.GAME) ? 1 : 0;
+            }
+            if (mLaunchedActivity.processName != null) {
+                if (!mLaunchedActivity.processName.equals(info.packageName)) {
+                    isGame = 1;
+                }
+            }
+            if (mUxPerf.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                mUxPerf.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                mUxPerf.perfUXEngine_events(BoostFramework.UXE_EVENT_GAME, 0, info.packageName, isGame);
+            }
+        }
+
+        if (mLaunchedActivity.mPerf != null && mLaunchedActivity.perfActivityBoostHandler > 0) {
+            mLaunchedActivity.mPerf.perfLockReleaseHandler(mLaunchedActivity.perfActivityBoostHandler);
+            mLaunchedActivity.perfActivityBoostHandler = -1;
+        }
     }
 
     private void logRecentsAnimationLatency(TransitionInfo info) {

@@ -38,6 +38,4 @@ interface ICarrierConfigLoader {
 
     String getDefaultCarrierServicePackageName();
 
-    PersistableBundle getConfigSubsetForSubIdWithFeature(int subId, String callingPackage,
-                String callingFeatureId, in String[] carrierConfigs);
 }

@@ -530,6 +530,13 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_FLAG_SOFT_SLEEP = 1 << 1;
 
     /**
+     * Force sleep flag: Skip current state check
+     * that allows e.g. to go from aod (doze) to sleep without wake up
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_FLAG_FORCE = 1 << 2;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "BRIGHTNESS_CONSTRAINT_TYPE" }, value = {
@@ -848,6 +855,16 @@ public final class PowerManager {
 
     /**
      * The value to pass as the 'reason' argument to reboot() to reboot into
+     * bootloader mode if you need to get to the choppa (cit)
+     * <p>
+     * Requires {@link android.Manifest.permission#REBOOT}).
+     * </p>
+     * @hide
+     */
+    public static final String REBOOT_BOOTLOADER = "bootloader";
+
+    /**
+     * The value to pass as the 'reason' argument to reboot() to reboot into
      * recovery mode for applying system updates.
      * <p>
      * Requires the {@link android.Manifest.permission#RECOVERY}
@@ -857,6 +874,17 @@ public final class PowerManager {
      * @hide
      */
     public static final String REBOOT_RECOVERY_UPDATE = "recovery-update";
+
+    /**
+     * The value to pass as the 'reason' argument to reboot() to
+     * reboot into fastboot mode
+     * <p>
+     * Requires the permission
+     * {@link android.Manifest.permission#REBOOT}).
+     * </p>
+     * @hide
+     */
+    public static final String REBOOT_FASTBOOT = "fastboot";
 
     /**
      * The value to pass as the 'reason' argument to reboot() when device owner requests a reboot on
@@ -1647,6 +1675,22 @@ public final class PowerManager {
     }
 
     /**
+     * Forces the device to wake up from sleep only if
+     * nothing is blocking the proximity sensor
+     *
+     * @see #wakeUp
+     *
+     * @hide
+     */
+    public void wakeUpWithProximityCheck(long time, @WakeReason int reason, String details) {
+        try {
+            mService.wakeUpWithProximityCheck(time, reason, details, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Forces the device to start napping.
      * <p>
      * If the device is currently awake, starts dreaming, otherwise does nothing.
@@ -1866,17 +1910,20 @@ public final class PowerManager {
     }
 
     /**
-     * Returns true if the platform has auto power save modes (eg. Doze & app standby) enabled.
-     * This doesn't necessarily mean that the individual features are enabled. For example, if this
-     * returns true, Doze might be enabled while app standby buckets remain disabled.
+     * Reboot the device with custom progress meassges.
+     * Will not return if the reboot is successful.
+     * <p>
+     * Requires the {@link android.Manifest.permission#REBOOT} permission.
+     * </p>
+     *
+     * @param reason code to pass to the kernel (e.g., "recovery") to
+     *               request special boot modes, or null.
      * @hide
      */
-    @TestApi
-    public boolean areAutoPowerSaveModesEnabled() {
+    public void advancedReboot(String reason) {
         try {
-            return mService.areAutoPowerSaveModesEnabled();
+            mService.advancedReboot(false, reason, true);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 

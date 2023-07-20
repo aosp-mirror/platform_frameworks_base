@@ -458,6 +458,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             final long origId = Binder.clearCallingIdentity();
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "finishActivity");
             try {
+                r.releaseActivityBoost();
                 final boolean res;
                 final boolean finishWithRootActivity =
                         finishTask == Activity.FINISH_TASK_WITH_ROOT_ACTIVITY;
@@ -696,8 +697,6 @@ class ActivityClientController extends IActivityClientController.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r != null) {
-                    EventLogTags.writeWmSetRequestedOrientation(requestedOrientation,
-                            r.shortComponentName);
                     r.setRequestedOrientation(requestedOrientation);
                 }
             }
@@ -711,8 +710,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
             return r != null
-                    ? r.getOverrideOrientation()
-                    : ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+                    ? r.getRequestedOrientation() : ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
     }
 

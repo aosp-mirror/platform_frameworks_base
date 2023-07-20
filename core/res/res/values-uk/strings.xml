@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"Б"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"ТБ"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"Пб"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Без назви&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Немає номера тел.)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Введені PIN-коди не збігаються."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Введіть PIN, який скл. з 4-8 цифр."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Введіть PUK-код із 8 або більше цифр."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM-карту заблоковано PUK-кодом. Введіть PUK-код, щоб розблокувати її."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Введіть PUK2-код, щоб розблокувати SIM-карту."</string>
+    <string name="needPuk" msgid="7321876090152422918">"SIM-карта заблок. PUK-кодом. Введіть PUK-код, щоб її розблок."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Введ. PUK2, щоб розбл. SIM-карту."</string>
     <string name="enablePin" msgid="2543771964137091212">"Помилка. Увімкніть блокування SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">У вас залишилась <xliff:g id="NUMBER_1">%d</xliff:g> спроба. Після цього SIM-карту буде заблоковано.</item>
@@ -75,8 +80,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Ідентиф. абонента за умовч. не обмеж. Наст. дзвінок: не обмежений"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Службу не ініціалізовано."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ви не можете змінювати налаштування ідентифікатора абонента."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Мобільний Інтернет переключено на <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Цей параметр можна будь-коли змінити в налаштуваннях"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Службу передавання мобільних даних заблоковано"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Екстрені виклики недоступні"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Немає голосової служби"</string>
@@ -224,9 +227,9 @@
     <string name="reboot_to_update_title" msgid="2125818841916373708">"Оновлення системи Android"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Підготовка до оновлення…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Обробка пакета оновлення…"</string>
-    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Перезапуск…"</string>
+    <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Перезавантаження…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Скидання налаштувань"</string>
-    <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезапуск…"</string>
+    <string name="reboot_to_reset_message" msgid="3347690497972074356">"Перезавантаження…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"Вимкнення..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Ваш пристрій буде вимкнено."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Пристрій Android TV буде вимкнено."</string>
@@ -330,7 +333,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Отримувати вміст вікна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Перевіряти вміст вікна, з яким ви взаємодієте."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Увімкнути функцію дослідження дотиком"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Озвучувати елементи, яких торкаються, і здійснювати навігацію екраном за допомогою жестів."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Активувати голосові підказки для елементів, яких торкаються, і користуватися інтерфейсом за допомогою жестів."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Переглядати текст, який ви вводите"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Включає особисті дані, як-от номери кредитних карток і паролі."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Контролювати збільшення екрана"</string>
@@ -341,7 +344,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може фіксувати жести на сканері відбитків пальців."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Робити знімки екрана"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може робити знімки екрана."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g> (попередній перегляд)"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"вимикати чи змін. рядок стану"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозволяє програмі вимикати рядок стану чи додавати та видаляти піктограми системи."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"відображатися як рядок стану"</string>
@@ -553,8 +555,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Подія, пов’язана з транcакцією в Компоненті захисту"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Надає додатку доступ до інформації про транcакції, що відбуваються в Компоненті захисту."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"вимикати блокування екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"запитувати рівень складності блокування екрана"</string>
@@ -628,10 +628,10 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Сталася помилка. Повторіть спробу."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Значок відбитка пальця"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейс-контроль"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Фейсконтроль"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Сталася помилка з фейсконтролем"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Натисніть, щоб видалити свою модель обличчя, а потім знову додайте її"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Налаштування фейс-контролю"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Налаштування фейсконтролю"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Ви зможете розблоковувати телефон, подивившись на нього"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Щоб використовувати фейсконтроль, увімкніть "<b>"Доступ до камери"</b>" в розділі \"Налаштування\" &gt; \"Конфіденційність\""</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Налаштуйте більше способів розблокування"</string>
@@ -665,9 +665,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Не вдається створити модель обличчя. Повторіть спробу."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Виявлено темні окуляри. Обличчя має бути видно повністю."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Обличчя не видно повністю, бо його закриває аксесуар."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Виявлено аксесуар, який закриває обличчя. Обличчя має бути видно повністю."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Не вдається перевірити обличчя. Апаратне забезпечення недоступне."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Скористайтеся фейсконтролем ще раз"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Не вдається зберегти нові дані про обличчя. Видаліть старі."</string>
@@ -685,8 +683,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Використовувати фейсконтроль або дані для розблокування екрана"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Щоб продовжити, скористайтеся фейсконтролем"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Щоб продовжити, скористайтеся фейсконтролем або даними для розблокування екрана"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Сталася помилка. Повторіть спробу."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Значок обличчя"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"читати налаштування синхронізації"</string>
@@ -931,14 +927,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Повторіть спробу"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Розблокуйте, щоб бачити всі функції й дані"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Перевищено максимальну кількість спроб розблокування за допомогою функції \"Фейсконтроль\""</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Немає SIM-карти"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"У планшеті немає SIM-карти."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"У пристрої Android TV немає SIM-карти."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"У телефоні немає SIM-карти."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Додайте SIM-карту."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM-карта відсутня або недоступна для читання. Додайте SIM-карту."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Непридатна SIM-карта."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM-карту деактивовано назавжди.\n Щоб отримати іншу, зверніться до свого постачальника послуг бездротового зв’язку."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Відсутня SIM-карта"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"У пристр. нема SIM-карти."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"До пристрою Android TV не підключено SIM-карту."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"У тел. немає SIM-карти."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Вставте SIM-карту."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-карта відсутня або недоступна для читання. Вставте SIM-карту."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Непридатна SIM-карта."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Вашу SIM-карту вимкнено назавжди.\n Зверніться до свого постачальника послуг бездротового зв’язку, щоб отримати іншу SIM-карту."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Попередня композиція"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Наступна композиція"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Пауза"</string>
@@ -948,10 +944,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Перемотати вперед"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Лише екстрені виклики"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Мережу заблок."</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM-карту заблоковано PUK-кодом."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM-карту заблоковано PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Перегляньте посібник користувача чи зверніться до служби підтримки."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM-карту заблоковано."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Розблокування SIM-карти…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM-карту заблок-но."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Розблокув. SIM-карти…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\nПовторіть спробу через <xliff:g id="NUMBER_1">%2$d</xliff:g> сек."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Пароль неправильно введено стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>.\n\nПовторіть спробу через <xliff:g id="NUMBER_1">%2$d</xliff:g> сек."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"PIN-код неправильно введено стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>.\n\nПовторіть спробу через <xliff:g id="NUMBER_1">%2$d</xliff:g> сек."</string>
@@ -1000,7 +996,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Розгорнути область розблокування."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Розблокування повзунком."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Розблокування ключем."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Фейс-контроль."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Фейсконтроль."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Розблокування PIN-кодом."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"Розблокування SIM-карти PIN-кодом."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"Розблокування SIM-карти PUK-кодом."</string>
@@ -1334,10 +1330,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Можна змінити згодом у Налаштування &gt; Програми"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Завжди дозволяти"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Ніколи не дозволяти"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM-карту вилучено"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Мобільна мережа буде недоступна, доки ви не вставите дійсну SIM-карту й не перезапустите пристрій."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM-карту вилучено"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Мобільна мережа буде недоступна, поки ви не здійсните перезапуск, вставивши дійсну SIM-карту."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Готово"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM-карту додано"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM-карту додано"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Перезапустіть пристрій, щоб отримати доступ до мобільної мережі."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Перезапустити"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Активувати мобільну службу"</string>
@@ -1485,7 +1481,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Ви використовуєте цей додаток у своєму робочому профілі"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Метод введення"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Синхр."</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Доступність"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Спеціальні можливості"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Фоновий мал."</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Змінити фоновий малюнок"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Сервіс читання сповіщень"</string>
@@ -1616,7 +1612,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Телевізор"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Динаміки док-станції"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Зовнішній пристрій"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Навушники"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Система"</string>
@@ -1649,7 +1645,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"Зараз SIM-карту вимкнено. Введіть PUK-код, щоб продовжити. Зв’яжіться з оператором, щоб дізнатися більше."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Введіть потрібний PIN-код"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Підтвердьте потрібний PIN-код"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Розблокування SIM-карти…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Розблокування SIM-карти…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Неправильний PIN-код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Введіть PIN-код із 4–8 цифр."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-код має складатися з 8 цифр."</string>
@@ -1689,8 +1685,8 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вмикати"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"УВІМК."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ВИМК."</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу \"<xliff:g id="SERVICE">%1$s</xliff:g>\" повний доступ до вашого пристрою?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ потрібен додаткам, які підтримують функції доступності, але його не варто відкривати для більшості інших додатків."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу <xliff:g id="SERVICE">%1$s</xliff:g> повний доступ до вашого пристрою?"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати контент поверх інших додатків."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Перегляд і виконання дій"</string>
@@ -1842,8 +1838,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Перегляд на весь екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Щоб вийти, проведіть пальцем зверху вниз."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Оберніть для кращого огляду"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Для кращого огляду вийдіть із режиму розділення екрана"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Вибір годин на циферблаті"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Вибір хвилин на циферблаті"</string>
@@ -1991,7 +1985,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Новини та журнали"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Карти й навігація"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Продуктивність"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Доступність"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Спеціальні можливості"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Пам’ять пристрою"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Налагодження USB"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"години"</string>
@@ -2281,7 +2275,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Розблокуйте мікрофон пристрою"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Розблокуйте камеру пристрою"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Для &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; та всіх додатків і сервісів"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Надати"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Розблокувати"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Конфіденційність датчиків"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Значок додатка"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Зображення фірмової символіки додатка"</string>
@@ -2299,5 +2293,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не вдається отримати доступ до камери планшета з пристрою <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Цей контент недоступний під час потокового передавання. Спробуйте натомість скористатися телефоном."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Налаштування системи за умовчанням"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"КАРТКА <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

@@ -17,10 +17,15 @@
 package com.android.systemui.settings.brightness;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 
 import androidx.annotation.Nullable;
@@ -34,6 +39,7 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
+import java.time.Duration;
 
 /**
  * {@code ViewController} for a {@code BrightnessSliderView}
@@ -49,9 +55,13 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
 
     private Listener mListener;
     private ToggleSlider mMirror;
+    private ImageView mIcon;
     private BrightnessMirrorController mMirrorController;
     private boolean mTracking;
     private final FalsingManager mFalsingManager;
+
+    private Context mContext;
+    private Duration hapticDuration = Duration.ofMillis(3);
 
     private final Gefingerpoken mOnInterceptListener = new Gefingerpoken() {
         @Override
@@ -75,6 +85,7 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             FalsingManager falsingManager) {
         super(brightnessSliderView);
         mFalsingManager = falsingManager;
+        mIcon = mView.findViewById(R.id.brightness_icon);
     }
 
     /**
@@ -84,6 +95,36 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
         return mView;
     }
 
+    public ImageView getIcon() {
+        return mIcon;
+    }
+
+    private void triggerVibration(Context context, boolean tracking) {
+        Vibrator vibrator = context.getSystemService(Vibrator.class);
+        int vibrateIntensity = Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.BRIGHTNESS_SLIDER_HAPTICS_INTENSITY, 1);
+        if (vibrator == null || !tracking || vibrateIntensity == 0) {
+            return;
+        }
+
+            VibrationEffect effect;
+            switch (vibrateIntensity) {
+                case 1:
+                    effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TEXTURE_TICK);
+                    break;
+                case 2:
+                    effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK);
+                    break;
+                case 3:
+                    effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK);
+                    break;
+                default:
+                    effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TEXTURE_TICK);
+                    break;
+            }
+
+        AsyncTask.execute(() -> vibrator.vibrate(effect));
+    }
 
     @Override
     protected void onViewAttached() {
@@ -201,6 +242,8 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
             if (mListener != null) {
                 mListener.onChanged(mTracking, progress, false);
             }
+            mContext = mView.getContext();
+            triggerVibration(mContext, mTracking);
         }
 
         @Override
@@ -215,6 +258,9 @@ public class BrightnessSliderController extends ViewController<BrightnessSliderV
                 mMirrorController.showMirror();
                 mMirrorController.setLocationAndSize(mView);
             }
+            
+            mContext = mView.getContext();
+            triggerVibration(mContext, mTracking);
         }
 
         @Override

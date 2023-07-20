@@ -72,8 +72,8 @@
     <item name="secondary_content_alpha_material_dark" format="float" type="dimen">.7</item>
     <item name="secondary_content_alpha_material_light" format="float" type="dimen">0.60</item>
 
-    <item name="highlight_alpha_material_light" format="float" type="dimen">0.5</item>
-    <item name="highlight_alpha_material_dark" format="float" type="dimen">0.5</item>
+    <item name="highlight_alpha_material_light" format="float" type="dimen">0.10</item>
+    <item name="highlight_alpha_material_dark" format="float" type="dimen">0.10</item>
     <item name="highlight_alpha_material_colored" format="float" type="dimen">0.10</item>
 
     <!-- Primary & accent colors -->

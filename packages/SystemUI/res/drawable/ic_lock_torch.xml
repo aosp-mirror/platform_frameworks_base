@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2015 SlimRoms
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48"
+    android:tint="?android:attr/colorControlNormal">
+
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M18.393
+31.781c-0.001-4.075-0.001-8.151-0.002-12.226-2.907-1.446-4.132-4.899-3.82-7.983
+0.112-0.427 1.002-0.065 1.418-0.185h17.447c0.264 2.983-0.741 6.32-3.45
+7.914-0.719 0.206-0.247 1.096-0.382 1.638v23.066h-11.208c-0.001-4.073
+0-8.157-0.003-12.224zm5.916-4.099c2.117-0.134 3.221-2.955
+1.81-4.505-1.211-1.593-3.997-1.166-4.672 0.72-0.82 1.86 0.83 4.073 2.862
+3.785zm-9.738-21.73v-1.9567h18.867v3.9134h-18.867v-1.9567z" />
+</vector>

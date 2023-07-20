@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:id="@+id/bluetooth_dialog"
+    android:layout_width="@dimen/large_dialog_width"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.SliceView.Panel"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="@dimen/internet_dialog_network_layout_margin"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/bluetooth_dialog_title"
+            android:text="@string/quick_settings_bluetooth_label"
+            android:ellipsize="end"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.InternetDialog"
+            android:textSize="24sp"/>
+
+        <TextView
+            android:id="@+id/bluetooth_dialog_subtitle"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.InternetDialog.Secondary"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="@dimen/internet_dialog_progress_bar_width"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/internet_dialog_network_layout_margin"
+        android:orientation="vertical">
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:background="?androidprv:attr/colorSurfaceVariant"/>
+
+        <ProgressBar
+            android:id="@+id/bluetooth_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            style="@style/TrimmedHorizontalProgressBar"
+            android:indeterminate="true"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/turn_on_bluetooth_layout"
+        style="@style/InternetDialog.Network"
+        android:layout_height="@dimen/internet_dialog_wifi_network_height"
+        android:layout_marginBottom="@dimen/internet_dialog_network_layout_margin"
+        android:background="@drawable/settingslib_switch_bar_bg_on"
+        android:gravity="center"
+        android:clickable="false"
+        android:focusable="false">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="start|center_vertical"
+            android:orientation="vertical"
+            android:clickable="false">
+            <TextView
+                android:id="@+id/bluetooth_toggle_title"
+                android:text="@string/turn_on_bluetooth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start|center_vertical"
+                android:textAppearance="@style/TextAppearance.InternetDialog.Active"
+                android:textSize="16sp"/>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="@dimen/settingslib_switch_track_width"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp">
+            <Switch
+                android:id="@+id/bluetooth_toggle"
+                android:contentDescription="@string/turn_on_bluetooth"
+                android:switchMinWidth="@dimen/settingslib_switch_track_width"
+                android:layout_gravity="center"
+                android:layout_width="@dimen/settingslib_switch_track_width"
+                android:layout_height="match_parent"
+                android:track="@drawable/settingslib_track_selector"
+                android:thumb="@drawable/settingslib_thumb_selector"
+                android:theme="@style/MainSwitch.Settingslib"/>
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:id="@+id/scroll_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/bluetooth_list_layout"
+                android:scrollbars="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never"
+                android:nestedScrollingEnabled="false"/>
+
+            <LinearLayout
+                android:id="@+id/see_all_layout"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical|center_horizontal"
+                android:orientation="horizontal"
+                android:paddingStart="22dp"
+                android:paddingEnd="22dp">
+
+                <FrameLayout
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:clickable="false"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin">
+                    <ImageView
+                        android:id="@+id/arrow_forward"
+                        android:src="@drawable/ic_arrow_forward"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"/>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:orientation="vertical"
+                    android:clickable="false"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/internet_dialog_network_layout_margin">
+                    <TextView
+                        android:text="@string/see_all_networks"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="start|center_vertical"
+                        android:textAppearance="@style/TextAppearance.InternetDialog"
+                        android:textSize="14sp"/>
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/button_layout"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="@dimen/dialog_side_padding"
+                android:layout_marginEnd="@dimen/dialog_side_padding"
+                android:layout_marginBottom="@dimen/dialog_bottom_padding"
+                android:clickable="false"
+                android:focusable="false">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="start|center_vertical"
+                    android:orientation="vertical">
+                    <Button
+                        android:id="@+id/settings_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/controls_media_settings_button"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        style="@style/Widget.Dialog.Button.BorderButton"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_gravity="end|center_vertical">
+                    <Button
+                        android:id="@+id/done_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/inline_done_button"
+                        style="@style/Widget.Dialog.Button"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

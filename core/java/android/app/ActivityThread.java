@@ -29,8 +29,6 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
-import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
-import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
@@ -38,7 +36,6 @@ import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
-import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -50,7 +47,6 @@ import android.app.RemoteServiceException.MissingRequestPasswordComplexityPermis
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
-import android.app.compat.CompatChanges;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -110,8 +106,6 @@ import android.net.ConnectivityManager;
 import android.net.Proxy;
 import android.net.TrafficStats;
 import android.net.Uri;
-import android.nfc.NfcFrameworkInitializer;
-import android.nfc.NfcServiceManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.BluetoothServiceManager;
@@ -164,6 +158,7 @@ import android.system.StructStat;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
+import android.util.BoostFramework;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -200,7 +195,6 @@ import android.window.SplashScreen;
 import android.window.SplashScreenView;
 import android.window.WindowProviderService;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
@@ -208,7 +202,6 @@ import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
-import com.android.internal.os.SafeZipPathValidatorCallback;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.DecorView;
 import com.android.internal.util.ArrayUtils;
@@ -223,7 +216,6 @@ import dalvik.system.AppSpecializationHooks;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
 import dalvik.system.VMRuntime;
-import dalvik.system.ZipPathValidator;
 
 import libcore.io.ForwardingOs;
 import libcore.io.IoUtils;
@@ -269,6 +261,7 @@ public final class ActivityThread extends ClientTransactionHandler
         implements ActivityThreadInternal {
     /** @hide */
     public static final String TAG = "ActivityThread";
+    private static final android.graphics.Bitmap.Config THUMBNAIL_FORMAT = Bitmap.Config.RGB_565;
     static final boolean localLOGV = false;
     static final boolean DEBUG_MESSAGES = false;
     /** @hide */
@@ -370,7 +363,7 @@ public final class ActivityThread extends ClientTransactionHandler
     private final AtomicInteger mNumLaunchingActivities = new AtomicInteger();
     @GuardedBy("mAppThread")
     private int mLastProcessState = PROCESS_STATE_UNKNOWN;
-    final ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
+    ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
     private int mLastSessionId;
     final ArrayMap<IBinder, CreateServiceData> mServicesData = new ArrayMap<>();
     @UnsupportedAppUsage
@@ -566,7 +559,7 @@ public final class ActivityThread extends ClientTransactionHandler
         Configuration createdConfig;
         Configuration overrideConfig;
         // Used for consolidating configs before sending on to Activity.
-        private final Configuration tmpConfig = new Configuration();
+        private Configuration tmpConfig = new Configuration();
         // Callback used for updating activity override config and camera compat control state.
         ViewRootImpl.ActivityConfigCallback activityConfigCallback;
         ActivityClientRecord nextIdle;
@@ -771,7 +764,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
-    static final class ProviderClientRecord {
+    final class ProviderClientRecord {
         final String[] mNames;
         @UnsupportedAppUsage
         final IContentProvider mProvider;
@@ -798,7 +791,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @UnsupportedAppUsage
-        final Intent intent;
+        Intent intent;
         @UnsupportedAppUsage
         ActivityInfo info;
         @UnsupportedAppUsage
@@ -930,7 +923,6 @@ public final class ActivityThread extends ClientTransactionHandler
         int samplingInterval;
         boolean autoStopProfiler;
         boolean streamingOutput;
-        int mClockType;
         boolean profiling;
         boolean handlingProfiling;
         public void setProfiler(ProfilerInfo profilerInfo) {
@@ -957,7 +949,6 @@ public final class ActivityThread extends ClientTransactionHandler
             samplingInterval = profilerInfo.samplingInterval;
             autoStopProfiler = profilerInfo.autoStopProfiler;
             streamingOutput = profilerInfo.streamingOutput;
-            mClockType = profilerInfo.clockType;
         }
         public void startProfiling() {
             if (profileFd == null || profiling) {
@@ -966,8 +957,8 @@ public final class ActivityThread extends ClientTransactionHandler
             try {
                 int bufferSize = SystemProperties.getInt("debug.traceview-buffer-size-mb", 8);
                 VMDebug.startMethodTracing(profileFile, profileFd.getFileDescriptor(),
-                        bufferSize * 1024 * 1024, mClockType, samplingInterval != 0,
-                        samplingInterval, streamingOutput);
+                        bufferSize * 1024 * 1024, 0, samplingInterval != 0, samplingInterval,
+                        streamingOutput);
                 profiling = true;
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Profiling failed on path " + profileFile, e);
@@ -3338,8 +3329,11 @@ public final class ActivityThread extends ClientTransactionHandler
     public void registerOnActivityPausedListener(Activity activity,
             OnActivityPausedListener listener) {
         synchronized (mOnPauseListeners) {
-            ArrayList<OnActivityPausedListener> list =
-                    mOnPauseListeners.computeIfAbsent(activity, k -> new ArrayList<>());
+            ArrayList<OnActivityPausedListener> list = mOnPauseListeners.get(activity);
+            if (list == null) {
+                list = new ArrayList<OnActivityPausedListener>();
+                mOnPauseListeners.put(activity, list);
+            }
             list.add(listener);
         }
     }
@@ -3432,13 +3426,8 @@ public final class ActivityThread extends ClientTransactionHandler
             if (mLastProcessState == processState) {
                 return;
             }
-            // Do not issue a transitional GC if we are transitioning between 2 cached states.
-            // Only update if the state flips between cached and uncached or vice versa
-            if (ActivityManager.isProcStateCached(mLastProcessState)
-                    != ActivityManager.isProcStateCached(processState)) {
-                updateVmProcessState(processState);
-            }
             mLastProcessState = processState;
+            updateVmProcessState(processState);
             if (localLOGV) {
                 Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
                         + (fromIpc ? " (from ipc" : ""));
@@ -3447,16 +3436,12 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     /** Update VM state based on ActivityManager.PROCESS_STATE_* constants. */
-    // Currently ART VM only uses state updates for Transitional GC, and thus
-    // this function initiates a Transitional GC for transitions into Cached apps states.
     private void updateVmProcessState(int processState) {
-        // Only a transition into Cached state should result in a Transitional GC request
-        // to the ART runtime. Update VM state to JANK_IMPERCEPTIBLE in that case.
-        // Note that there are 4 possible cached states currently, all of which are
-        // JANK_IMPERCEPTIBLE from GC point of view.
-        final int state = ActivityManager.isProcStateCached(processState)
-                ? VM_PROCESS_STATE_JANK_IMPERCEPTIBLE
-                : VM_PROCESS_STATE_JANK_PERCEPTIBLE;
+        // TODO: Tune this since things like gmail sync are important background but not jank
+        // perceptible.
+        final int state = processState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                ? VM_PROCESS_STATE_JANK_PERCEPTIBLE
+                : VM_PROCESS_STATE_JANK_IMPERCEPTIBLE;
         VMRuntime.getRuntime().updateProcessState(state);
     }
 
@@ -3817,7 +3802,7 @@ public final class ActivityThread extends ClientTransactionHandler
             return;
         }
         Configuration[] configurations = r.activity.getResources().getSizeConfigurations();
-        if (configurations == null) {
+        if (configurations == null || r.activity.mFinished) {
             return;
         }
         r.mSizeConfigurations = new SizeConfigurationBuckets(configurations);
@@ -4906,12 +4891,13 @@ public final class ActivityThread extends ClientTransactionHandler
                 l.softInputMode = (l.softInputMode
                         & (~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION))
                         | forwardBit;
-                if (r.activity.mVisibleFromClient) {
-                    ViewManager wm = a.getWindowManager();
-                    View decor = r.window.getDecorView();
-                    wm.updateViewLayout(decor, l);
-                }
             }
+
+            if (r.activity.mVisibleFromClient) {
+                ViewManager wm = a.getWindowManager();
+                View decor = r.window.getDecorView();
+                wm.updateViewLayout(decor, l);
+             }
 
             r.activity.mVisibleFromServer = true;
             mNumVisibleActivities++;
@@ -5399,7 +5385,7 @@ public final class ActivityThread extends ClientTransactionHandler
     /** Core implementation of activity destroy call. */
     void performDestroyActivity(ActivityClientRecord r, boolean finishing,
             int configChanges, boolean getNonConfigInstance, String reason) {
-        Class<? extends Activity> activityClass;
+        Class<? extends Activity> activityClass = null;
         if (localLOGV) Slog.v(TAG, "Performing finish of " + r);
         activityClass = r.activity.getClass();
         r.activity.mConfigChangeFlags |= configChanges;
@@ -5901,7 +5887,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final boolean movedToDifferentDisplay = isDifferentDisplay(activity.getDisplayId(),
                 displayId);
         final Configuration currentResConfig = activity.getResources().getConfiguration();
-        final int diff = currentResConfig.diffPublicOnly(newConfig);
+        final int diff = currentResConfig != null ? currentResConfig.diffPublicOnly(newConfig) : 0xffffffff;
         final boolean hasPublicResConfigChange = diff != 0;
         final ActivityClientRecord r = getActivityClient(activityToken);
         // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
@@ -5909,21 +5895,9 @@ public final class ActivityThread extends ClientTransactionHandler
         final boolean shouldUpdateResources = hasPublicResConfigChange
                 || shouldUpdateResources(activityToken, currentResConfig, newConfig,
                 amOverrideConfig, movedToDifferentDisplay, hasPublicResConfigChange);
-
-        // TODO(b/266924897): temporary workaround, remove for U.
-        boolean skipActivityRelaunchWhenDocking = activity.getResources().getBoolean(
-                R.bool.config_skipActivityRelaunchWhenDocking);
-        int handledConfigChanges = activity.mActivityInfo.getRealConfigChanged();
-        if (skipActivityRelaunchWhenDocking && onlyDeskInUiModeChanged(activity.mCurrentConfig,
-                newConfig)) {
-            // If we're not relaunching this activity when docking, we should send the configuration
-            // changed event. Pretend as if the activity is handling uiMode config changes in its
-            // manifest so that we'll report any dock changes.
-            handledConfigChanges |= ActivityInfo.CONFIG_UI_MODE;
-        }
-
         final boolean shouldReportChange = shouldReportChange(activity.mCurrentConfig, newConfig,
-                r != null ? r.mSizeConfigurations : null, handledConfigChanges);
+                r != null ? r.mSizeConfigurations : null,
+                activity.mActivityInfo.getRealConfigChanged());
         // Nothing significant, don't proceed with updating and reporting.
         if (!shouldUpdateResources && !shouldReportChange) {
             return null;
@@ -5967,25 +5941,6 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         return configToReport;
-    }
-
-    /**
-     * Returns true if the uiMode configuration changed, and desk mode
-     * ({@link android.content.res.Configuration#UI_MODE_TYPE_DESK}) was the only change to uiMode.
-     */
-    private boolean onlyDeskInUiModeChanged(Configuration oldConfig, Configuration newConfig) {
-        boolean deskModeChanged = isInDeskUiMode(oldConfig) != isInDeskUiMode(newConfig);
-
-        // UI mode contains fields other than the UI mode type, so determine if any other fields
-        // changed.
-        boolean uiModeOtherFieldsChanged =
-                (oldConfig.uiMode & ~UI_MODE_TYPE_MASK) != (newConfig.uiMode & ~UI_MODE_TYPE_MASK);
-
-        return deskModeChanged && !uiModeOtherFieldsChanged;
-    }
-
-    private static boolean isInDeskUiMode(Configuration config) {
-        return (config.uiMode & UI_MODE_TYPE_MASK) == UI_MODE_TYPE_DESK;
     }
 
     /**
@@ -6510,6 +6465,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage
     private void handleBindApplication(AppBindData data) {
+        long st_bindApp = SystemClock.uptimeMillis();
+        BoostFramework ux_perf = null;
         // Register the UI Thread as a sensitive thread to the runtime.
         VMRuntime.registerSensitiveThread();
         // In the case the stack depth property exists, pass it down to the runtime.
@@ -6528,11 +6485,6 @@ public final class ActivityThread extends ClientTransactionHandler
         // Let libcore handle any compat changes after installing the list of compat changes.
         AppSpecializationHooks.handleCompatChangesBeforeBindingApplication();
 
-        // Initialize the zip path validator callback depending on the targetSdk.
-        // This has to be after AppCompatCallbacks#install() so that the Compat
-        // checks work accordingly.
-        initZipPathValidatorCallback();
-
         mBoundApplication = data;
         mConfigurationController.setConfiguration(data.config);
         mConfigurationController.setCompatConfiguration(data.config);
@@ -6546,7 +6498,6 @@ public final class ActivityThread extends ClientTransactionHandler
             mProfiler.samplingInterval = data.initProfilerInfo.samplingInterval;
             mProfiler.autoStopProfiler = data.initProfilerInfo.autoStopProfiler;
             mProfiler.streamingOutput = data.initProfilerInfo.streamingOutput;
-            mProfiler.mClockType = data.initProfilerInfo.clockType;
             if (data.initProfilerInfo.attachAgentDuringBind) {
                 agent = data.initProfilerInfo.agent;
             }
@@ -6634,10 +6585,17 @@ public final class ActivityThread extends ClientTransactionHandler
         /**
          * Switch this process to density compatibility mode if needed.
          */
-        if ((data.appInfo.flags&ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES)
+        if ((data.appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES)
                 == 0) {
             mDensityCompatMode = true;
             Bitmap.setDefaultDensity(DisplayMetrics.DENSITY_DEFAULT);
+        } else {
+            int overrideDensity = data.appInfo.getOverrideDensity();
+            if(overrideDensity != 0) {
+                Log.d(TAG, "override app density from " + DisplayMetrics.DENSITY_DEVICE + " to " + overrideDensity);
+                mDensityCompatMode = true;
+                Bitmap.setDefaultDensity(overrideDensity);
+            }
         }
         mConfigurationController.updateDefaultDensity(data.config.densityDpi);
 
@@ -6733,6 +6691,15 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+
+        if (!Process.isIsolated()) {
+            final int old_mask = StrictMode.allowThreadDiskWritesMask();
+            try {
+                ux_perf = new BoostFramework(appContext);
+            } finally {
+                 StrictMode.setThreadPolicyMask(old_mask);
+            }
         }
 
         if (!Process.isIsolated()) {
@@ -6861,18 +6828,32 @@ public final class ActivityThread extends ClientTransactionHandler
                 throw e.rethrowFromSystemServer();
             }
         }
-    }
-
-    /**
-     * If targetSDK >= U: set the safe zip path validator callback which disallows dangerous zip
-     * entry names.
-     * Otherwise: clear the callback to the default validation.
-     */
-    private void initZipPathValidatorCallback() {
-        if (CompatChanges.isChangeEnabled(VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL)) {
-            ZipPathValidator.setCallback(new SafeZipPathValidatorCallback());
-        } else {
-            ZipPathValidator.clearCallback();
+        long end_bindApp = SystemClock.uptimeMillis();
+        int bindApp_dur = (int) (end_bindApp - st_bindApp);
+        String pkg_name = null;
+        if (appContext != null) {
+            pkg_name = appContext.getPackageName();
+        }
+        if (ux_perf != null && !Process.isIsolated() && pkg_name != null) {
+            String pkgDir = null;
+            try
+            {
+                String codePath = appContext.getPackageCodePath();
+                pkgDir =  codePath.substring(0, codePath.lastIndexOf('/'));
+            }
+            catch(Exception e)
+            {
+                Slog.e(TAG, "HeavyGameThread () : Exception_1 = " + e);
+            }
+            if (ux_perf.board_first_api_lvl < BoostFramework.VENDOR_T_API_LEVEL &&
+                ux_perf.board_api_lvl < BoostFramework.VENDOR_T_API_LEVEL) {
+                ux_perf.perfUXEngine_events(BoostFramework.UXE_EVENT_BINDAPP, 0,
+                                               pkg_name,
+                                               bindApp_dur,
+                                               pkgDir);
+            } else {
+                ux_perf.perfEvent(BoostFramework.VENDOR_HINT_BINDAPP, pkg_name, 2, bindApp_dur, 0);
+            }
         }
     }
 
@@ -7081,7 +7062,7 @@ public final class ActivityThread extends ClientTransactionHandler
         // Note that we cannot hold the lock while acquiring and installing the
         // provider since it might take a long time to run and it could also potentially
         // be re-entrant in the case where the provider is in the same process.
-        ContentProviderHolder holder;
+        ContentProviderHolder holder = null;
         final ProviderKey key = getGetProviderKey(auth, userId);
         try {
             synchronized (key) {
@@ -7118,9 +7099,9 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         if (holder == null) {
             if (UserManager.get(c).isUserUnlocked(userId)) {
-                Slog.e(TAG, "Failed to find provider info for " + auth);
+                if (DEBUG_MESSAGES) Slog.e(TAG, "Failed to find provider info for " + auth);
             } else {
-                Slog.w(TAG, "Failed to find provider info for " + auth + " (user not unlocked)");
+                if (DEBUG_MESSAGES) Slog.w(TAG, "Failed to find provider info for " + auth + " (user not unlocked)");
             }
             return null;
         }
@@ -7135,7 +7116,11 @@ public final class ActivityThread extends ClientTransactionHandler
     private ProviderKey getGetProviderKey(String auth, int userId) {
         final ProviderKey key = new ProviderKey(auth, userId);
         synchronized (mGetProviderKeys) {
-            ProviderKey lock = mGetProviderKeys.computeIfAbsent(key, k -> k);
+            ProviderKey lock = mGetProviderKeys.get(key);
+            if (lock == null) {
+                lock = key;
+                mGetProviderKeys.put(key, lock);
+            }
             return lock;
         }
     }
@@ -7770,7 +7755,7 @@ public final class ActivityThread extends ClientTransactionHandler
             if (!DEPRECATE_DATA_COLUMNS) return;
 
             // Install interception and make sure it sticks!
-            Os def;
+            Os def = null;
             do {
                 def = Os.getDefault();
             } while (!Os.compareAndSetDefault(def, new AndroidOs(def)));
@@ -7887,7 +7872,7 @@ public final class ActivityThread extends ClientTransactionHandler
                         Files.move(new File(oldPath).toPath(), new File(newPath).toPath(),
                                 StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e2) {
-                        Log.e(TAG, "Rename recovery failed ", e2);
+                        Log.e(TAG, "Rename recovery failed ", e);
                         throw e;
                     }
                 } else {
@@ -7963,7 +7948,6 @@ public final class ActivityThread extends ClientTransactionHandler
         BluetoothFrameworkInitializer.setBluetoothServiceManager(new BluetoothServiceManager());
         BluetoothFrameworkInitializer.setBinderCallsStatsInitializer(context -> {
             BinderCallsStats.startForBluetooth(context); });
-        NfcFrameworkInitializer.setNfcServiceManager(new NfcServiceManager());
     }
 
     private void purgePendingResources() {

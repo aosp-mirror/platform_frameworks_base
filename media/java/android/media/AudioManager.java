@@ -197,6 +197,18 @@ public class AudioManager {
     public static final String ACTION_VOLUME_CHANGED = "android.media.VOLUME_CHANGED_ACTION";
 
     /**
+     * @hide Broadcast intent when the number of volume steps changes
+     * Includes the stream and the new max volume index
+     * Notes:
+     *  - for internal platform use only, do not make public,
+     *
+     * @see #EXTRA_VOLUME_STREAM_TYPE
+     * @see #EXTRA_VOLUME_STEPS_MAX_INDEX
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String VOLUME_STEPS_CHANGED_ACTION = "android.media.VOLUME_STEPS_CHANGED_ACTION";
+
+    /**
      * @hide Broadcast intent when the devices for a particular stream type changes.
      * Includes the stream, the new devices and previous devices.
      * Notes:
@@ -1036,6 +1048,32 @@ public class AudioManager {
         }
     }
 
+    /** @hide */
+    @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int setAppVolume(String packageName, float volume) {
+        return AudioSystem.setAppVolume(packageName, volume);
+    }
+
+    /** @hide */
+    @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int setAppMute(String packageName, boolean mute) {
+        return AudioSystem.setAppMute(packageName, mute);
+    }
+
+    /** @hide */
+    @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public ArrayList<AppVolume> listAppVolumes() {
+        ArrayList<AppVolume> volumes = new ArrayList<AppVolume>();
+        int status = AudioSystem.listAppVolumes(volumes);
+        if (status != AudioManager.SUCCESS) {
+            return new ArrayList<AppVolume>();
+        }
+        return volumes;
+    }
+
     /**
      * Returns the current ringtone mode.
      *
@@ -1142,6 +1180,40 @@ public class AudioManager {
             return service.getStreamMinVolume(streamType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the maximum volume index for a particular stream.
+     *
+     * @param streamType The stream type whose maximum volume index is set.
+     * @param maxVol The maximum volume to set range 7 - 45.
+     * @return The maximum valid volume index for the stream.
+     * @see #setStreamVolume(int)
+     */
+    public void setStreamMaxVolume(int streamType, int maxVol) {
+        IAudioService service = getService();
+        try {
+//            if (mUseMasterVolume) {
+//                // service.setMasterMaxVolume(maxVol);
+//            } else {
+                double previousMax = new Integer(getStreamMaxVolume(streamType)).doubleValue();
+                double previousVolume = new Integer(getStreamVolume(streamType)).doubleValue();
+                double newMax = new Integer(maxVol).doubleValue();
+                double newVolume = Math.floor((newMax / previousMax) * previousVolume);
+
+                service.setStreamMaxVolume(streamType, maxVol);
+
+                Log.i(TAG, "Volume steps for stream " + String.valueOf(streamType) + " set to " +
+                        String.valueOf(maxVol));
+
+                setStreamVolume(streamType, new Double(newVolume).intValue(), 0);
+
+                Log.i(TAG, "Volume adjusted from " + String.valueOf(previousVolume) + " to " +
+                        String.valueOf(newVolume));
+//            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setStreamMaxVolume", e);
         }
     }
 
@@ -1337,8 +1409,12 @@ public class AudioManager {
     public void setVolumeIndexForAttributes(@NonNull AudioAttributes attr, int index, int flags) {
         Preconditions.checkNotNull(attr, "attr must not be null");
         final IAudioService service = getService();
-        int groupId = getVolumeGroupIdForAttributes(attr);
-        setVolumeGroupVolumeIndex(groupId, index, flags);
+        try {
+            service.setVolumeIndexForAttributes(attr, index, flags,
+                    getContext().getOpPackageName(), getContext().getAttributionTag());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1357,8 +1433,11 @@ public class AudioManager {
     public int getVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
         final IAudioService service = getService();
-        int groupId = getVolumeGroupIdForAttributes(attr);
-        return getVolumeGroupVolumeIndex(groupId);
+        try {
+            return service.getVolumeIndexForAttributes(attr);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1375,8 +1454,11 @@ public class AudioManager {
     public int getMaxVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
         final IAudioService service = getService();
-        int groupId = getVolumeGroupIdForAttributes(attr);
-        return getVolumeGroupMaxVolumeIndex(groupId);
+        try {
+            return service.getMaxVolumeIndexForAttributes(attr);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1393,168 +1475,8 @@ public class AudioManager {
     public int getMinVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
         Preconditions.checkNotNull(attr, "attr must not be null");
         final IAudioService service = getService();
-        int groupId = getVolumeGroupIdForAttributes(attr);
-        return getVolumeGroupMinVolumeIndex(groupId);
-    }
-
-    /**
-     * Returns the volume group id associated to the given {@link AudioAttributes}.
-     *
-     * @param attributes The {@link AudioAttributes} to consider.
-     * @return {@link android.media.audiopolicy.AudioVolumeGroup} id supporting the given
-     * {@link AudioAttributes} if found,
-     * {@code android.media.audiopolicy.AudioVolumeGroup.DEFAULT_VOLUME_GROUP} otherwise.
-     * @hide
-     */
-    public int getVolumeGroupIdForAttributes(@NonNull AudioAttributes attributes) {
-        Preconditions.checkNotNull(attributes, "Audio Attributes must not be null");
-        return AudioProductStrategy.getVolumeGroupIdForAudioAttributes(attributes,
-                /* fallbackOnDefault= */ true);
-    }
-
-    /**
-     * Sets the volume index for a particular group associated to given id.
-     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
-     * id supporting the given {@link AudioAttributes}.
-     *
-     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
-     * @param index The volume index to set. See
-     *          {@link #getVolumeGroupMaxVolumeIndex(id)} for the largest valid value
-     *          {@link #getVolumeGroupMinVolumeIndex(id)} for the lowest valid value.
-     * @param flags One or more flags.
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setVolumeGroupVolumeIndex(int groupId, int index, int flags) {
-        final IAudioService service = getService();
         try {
-            service.setVolumeGroupVolumeIndex(groupId, index, flags,
-                    getContext().getOpPackageName(), getContext().getAttributionTag());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns the current volume index for a particular group associated to given id.
-     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
-     * id supporting the given {@link AudioAttributes}.
-     *
-     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
-     * @return The current volume index for the stream.
-     * @hide
-     */
-    @IntRange(from = 0)
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public int getVolumeGroupVolumeIndex(int groupId) {
-        final IAudioService service = getService();
-        try {
-            return service.getVolumeGroupVolumeIndex(groupId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns the maximum volume index for a particular group associated to given id.
-     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
-     * id supporting the given {@link AudioAttributes}.
-     *
-     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
-     * @return The maximum valid volume index for the {@link AudioAttributes}.
-     * @hide
-     */
-    @IntRange(from = 0)
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public int getVolumeGroupMaxVolumeIndex(int groupId) {
-        final IAudioService service = getService();
-        try {
-            return service.getVolumeGroupMaxVolumeIndex(groupId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns the minimum volume index for a particular group associated to given id.
-     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
-     * id supporting the given {@link AudioAttributes}.
-     *
-     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
-     * @return The minimum valid volume index for the {@link AudioAttributes}.
-     * @hide
-     */
-    @IntRange(from = 0)
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public int getVolumeGroupMinVolumeIndex(int groupId) {
-        final IAudioService service = getService();
-        try {
-            return service.getVolumeGroupMinVolumeIndex(groupId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Adjusts the volume of a particular group associated to given id by one step in a direction.
-     * <p> If the volume group is associated to a stream type, it fallbacks on
-     * {@link AudioManager#adjustStreamVolume()} for compatibility reason.
-     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
-     * id supporting the given {@link AudioAttributes}.
-     *
-     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
-     * @param direction The direction to adjust the volume. One of
-     *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
-     *            {@link #ADJUST_SAME}.
-     * @param flags One or more flags.
-     * @throws SecurityException if the adjustment triggers a Do Not Disturb change and the caller
-     * is not granted notification policy access.
-     * @hide
-     */
-    public void adjustVolumeGroupVolume(int groupId, int direction, int flags) {
-        IAudioService service = getService();
-        try {
-            service.adjustVolumeGroupVolume(groupId, direction, flags,
-                    getContext().getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get last audible volume of the group associated to given id before it was muted.
-     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
-     * id supporting the given {@link AudioAttributes}.
-     *
-     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
-     * @return current volume if not muted, volume before muted otherwise.
-     * @hide
-     */
-    @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
-    @IntRange(from = 0)
-    public int getLastAudibleVolumeGroupVolume(int groupId) {
-        IAudioService service = getService();
-        try {
-            return service.getLastAudibleVolumeGroupVolume(groupId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Returns the current mute state for a particular volume group associated to the given id.
-     * <p> Call first in prior {@link getVolumeGroupIdForAttributes} to retrieve the volume group
-     * id supporting the given {@link AudioAttributes}.
-     *
-     * @param groupId of the {@link android.media.audiopolicy.AudioVolumeGroup} to consider.
-     * @return The mute state for the given {@link android.media.audiopolicy.AudioVolumeGroup} id.
-     * @see #adjustAttributesVolume(AudioAttributes, int, int)
-     * @hide
-     */
-    public boolean isVolumeGroupMuted(int groupId) {
-        IAudioService service = getService();
-        try {
-            return service.isVolumeGroupMuted(groupId);
+            return service.getMinVolumeIndexForAttributes(attr);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2481,9 +2403,10 @@ public class AudioManager {
         return AudioSystem.SUCCESS;
     }
 
-    private final Map<Integer, Object> mDevRoleForCapturePresetListeners = Map.of(
-            AudioSystem.DEVICE_ROLE_PREFERRED,
-            new DevRoleListeners<OnPreferredDevicesForCapturePresetChangedListener>());
+    private final Map<Integer, Object> mDevRoleForCapturePresetListeners = new HashMap<>(){{
+            put(AudioSystem.DEVICE_ROLE_PREFERRED,
+                    new DevRoleListeners<OnPreferredDevicesForCapturePresetChangedListener>());
+        }};
 
     private class DevRoleListenerInfo<T> {
         final @NonNull Executor mExecutor;
@@ -3541,19 +3464,6 @@ public class AudioManager {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK)
     public void setA2dpSuspended(boolean enable) {
         AudioSystem.setParameters("A2dpSuspended=" + enable);
-    }
-
-    /**
-     * Suspends the use of LE Audio.
-     *
-     * @param enable {@code true} to suspend le audio, {@code false} to unsuspend
-     *
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK)
-    public void setLeAudioSuspended(boolean enable) {
-        AudioSystem.setParameters("LeAudioSuspended=" + enable);
     }
 
     /**
@@ -6651,17 +6561,15 @@ public class AudioManager {
     // AudioPort implementation
     //
 
-    private static final int AUDIOPORT_GENERATION_INIT = 0;
-    private static Object sAudioPortGenerationLock = new Object();
-    @GuardedBy("sAudioPortGenerationLock")
-    private static int sAudioPortGeneration = AUDIOPORT_GENERATION_INIT;
-    private static ArrayList<AudioPort> sAudioPortsCached = new ArrayList<AudioPort>();
-    private static ArrayList<AudioPort> sPreviousAudioPortsCached = new ArrayList<AudioPort>();
-    private static ArrayList<AudioPatch> sAudioPatchesCached = new ArrayList<AudioPatch>();
+    static final int AUDIOPORT_GENERATION_INIT = 0;
+    static Integer sAudioPortGeneration = new Integer(AUDIOPORT_GENERATION_INIT);
+    static ArrayList<AudioPort> sAudioPortsCached = new ArrayList<AudioPort>();
+    static ArrayList<AudioPort> sPreviousAudioPortsCached = new ArrayList<AudioPort>();
+    static ArrayList<AudioPatch> sAudioPatchesCached = new ArrayList<AudioPatch>();
 
     static int resetAudioPortGeneration() {
         int generation;
-        synchronized (sAudioPortGenerationLock) {
+        synchronized (sAudioPortGeneration) {
             generation = sAudioPortGeneration;
             sAudioPortGeneration = AUDIOPORT_GENERATION_INIT;
         }
@@ -6671,7 +6579,7 @@ public class AudioManager {
     static int updateAudioPortCache(ArrayList<AudioPort> ports, ArrayList<AudioPatch> patches,
                                     ArrayList<AudioPort> previousPorts) {
         sAudioPortEventHandler.init();
-        synchronized (sAudioPortGenerationLock) {
+        synchronized (sAudioPortGeneration) {
 
             if (sAudioPortGeneration == AUDIOPORT_GENERATION_INIT) {
                 int[] patchGeneration = new int[1];
@@ -7132,13 +7040,22 @@ public class AudioManager {
         return codecConfigList;
     }
 
-    private List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio(
-            @AudioSystem.BtOffloadDeviceType int deviceType) {
+    /**
+     * Returns a list of audio formats that corresponds to encoding formats
+     * supported on offload path for Le audio playback.
+     *
+     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
+     * supported for offload Le Audio playback
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio() {
         ArrayList<Integer> formatsList = new ArrayList<>();
         ArrayList<BluetoothLeAudioCodecConfig> leAudioCodecConfigList = new ArrayList<>();
 
         int status = AudioSystem.getHwOffloadFormatsSupportedForBluetoothMedia(
-                deviceType, formatsList);
+                AudioSystem.DEVICE_OUT_BLE_HEADSET, formatsList);
         if (status != AudioManager.SUCCESS) {
             Log.e(TAG, "getHwOffloadEncodingFormatsSupportedForLeAudio failed:" + status);
             return leAudioCodecConfigList;
@@ -7153,34 +7070,6 @@ public class AudioManager {
             }
         }
         return leAudioCodecConfigList;
-    }
-
-    /**
-     * Returns a list of audio formats that corresponds to encoding formats
-     * supported on offload path for Le audio playback.
-     *
-     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
-     * supported for offload Le Audio playback
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @NonNull
-    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio() {
-        return getHwOffloadFormatsSupportedForLeAudio(AudioSystem.DEVICE_OUT_BLE_HEADSET);
-    }
-
-    /**
-     * Returns a list of audio formats that corresponds to encoding formats
-     * supported on offload path for Le Broadcast playback.
-     *
-     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
-     * supported for offload Le Broadcast playback
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @NonNull
-    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeBroadcast() {
-        return getHwOffloadFormatsSupportedForLeAudio(AudioSystem.DEVICE_OUT_BLE_BROADCAST);
     }
 
     // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the
@@ -7870,8 +7759,7 @@ public class AudioManager {
         Objects.requireNonNull(device);
         try {
             if (device.getId() == 0) {
-                Log.w(TAG, "setCommunicationDevice: device not found: " + device);
-                return false;
+                throw new IllegalArgumentException("In valid device: " + device);
             }
             return getService().setCommunicationDevice(mICallBack, device.getId());
         } catch (RemoteException e) {
@@ -8651,67 +8539,17 @@ public class AudioManager {
     }
 
     /**
-     * Returns an {@link AudioHalVersionInfo} indicating the Audio Hal Version. If there is no audio
-     * HAL found, null will be returned.
+     * Returns the audio HAL version in the form MAJOR.MINOR. If there is no audio HAL found, null
+     * will be returned.
      *
-     * @return @see @link #AudioHalVersionInfo The version of Audio HAL.
      * @hide
      */
     @TestApi
-    public static @Nullable AudioHalVersionInfo getHalVersion() {
+    public static @Nullable String getHalVersion() {
         try {
             return getService().getHalVersion();
         } catch (RemoteException e) {
             Log.e(TAG, "Error querying getHalVersion", e);
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Requests if the implementation supports controlling the latency modes
-     * over the Bluetooth A2DP or LE Audio links.
-     *
-     * @return true if supported, false otherwise
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public boolean supportsBluetoothVariableLatency() {
-        try {
-            return getService().supportsBluetoothVariableLatency();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Enables or disables the variable Bluetooth latency control mechanism in the
-     * audio framework and the audio HAL. This does not apply to the latency mode control
-     * on the spatializer output as this is a built-in feature.
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setBluetoothVariableLatencyEnabled(boolean enabled) {
-        try {
-            getService().setBluetoothVariableLatencyEnabled(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Indicates if the variable Bluetooth latency control mechanism is enabled or disabled.
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public boolean isBluetoothVariableLatencyEnabled() {
-        try {
-            return getService().isBluetoothVariableLatencyEnabled();
-        } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }

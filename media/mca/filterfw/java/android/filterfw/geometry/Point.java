@@ -101,9 +101,9 @@ public class Point {
     }
 
     public Point rotated(float radians) {
-        // TODO(renn): Optimize: Keep cache of cos/sin values
-        return new Point((float)(Math.cos(radians) * x - Math.sin(radians) * y),
-                         (float)(Math.sin(radians) * x + Math.cos(radians) * y));
+        double cos = Math.cos(radians);
+        double sin = Math.sin(radians);
+        return new Point((float)(cos * x - sin * y), (float)(sin * x + cos * y));
     }
 
     public Point rotatedAround(Point center, float radians) {

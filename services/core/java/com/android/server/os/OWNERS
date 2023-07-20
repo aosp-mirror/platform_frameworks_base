@@ -1,5 +1,2 @@
 # Bugreporting
 per-file Bugreport* = file:/platform/frameworks/native:/cmds/dumpstate/OWNERS
-
-# NativeTombstone
-per-file NativeTombstone* = gaillard@google.com

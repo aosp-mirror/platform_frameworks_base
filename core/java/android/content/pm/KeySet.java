@@ -29,7 +29,7 @@ import android.os.Parcelable;
  */
 public class KeySet implements Parcelable {
 
-    private final IBinder token;
+    private IBinder token;
 
     /** @hide */
     public KeySet(IBinder token) {

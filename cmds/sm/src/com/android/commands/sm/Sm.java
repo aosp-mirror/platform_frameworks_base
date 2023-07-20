@@ -94,6 +94,8 @@ public final class Sm {
             runBenchmark();
         } else if ("forget".equals(op)) {
             runForget();
+        } else if ("set-emulate-fbe".equals(op)) {
+            runSetEmulateFbe();
         } else if ("get-fbe-mode".equals(op)) {
             runGetFbeMode();
         } else if ("idle-maint".equals(op)) {
@@ -189,9 +191,17 @@ public final class Sm {
         }
     }
 
+    public void runSetEmulateFbe() throws RemoteException {
+        final boolean emulateFbe = Boolean.parseBoolean(nextArg());
+        mSm.setDebugFlags(emulateFbe ? StorageManager.DEBUG_EMULATE_FBE : 0,
+                StorageManager.DEBUG_EMULATE_FBE);
+    }
+
     public void runGetFbeMode() {
-        if (StorageManager.isFileEncrypted()) {
+        if (StorageManager.isFileEncryptedNativeOnly()) {
             System.out.println("native");
+        } else if (StorageManager.isFileEncryptedEmulatedOnly()) {
+            System.out.println("emulated");
         } else {
             System.out.println("none");
         }
@@ -347,6 +357,8 @@ public final class Sm {
         System.err.println("       sm fstrim");
         System.err.println("");
         System.err.println("       sm forget [UUID|all]");
+        System.err.println("");
+        System.err.println("       sm set-emulate-fbe [true|false]");
         System.err.println("");
         System.err.println("       sm start-checkpoint <num-retries>");
         System.err.println("");

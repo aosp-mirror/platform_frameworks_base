@@ -2510,6 +2510,9 @@ interface ITelephony {
     CellIdentity getLastKnownCellIdentity(int subId, String callingPackage,
             String callingFeatureId);
 
+    /** Check if telephony new data stack is enabled. */
+    boolean isUsingNewDataStack();
+
     /**
      *  @return true if the modem service is set successfully, false otherwise.
      */
@@ -2564,11 +2567,4 @@ interface ITelephony {
      * @hide
      */
     boolean isRemovableEsimDefaultEuicc(String callingPackage);
-
-    /**
-     * Get the SIM state for the logical SIM slot index.
-     *
-     * @param slotIndex Logical SIM slot index.
-     */
-    int getSimStateForSlotIndex(int slotIndex);
 }

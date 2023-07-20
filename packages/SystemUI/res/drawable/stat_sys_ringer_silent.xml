@@ -14,8 +14,8 @@ Copyright (C) 2015 The Android Open Source Project
     limitations under the License.
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-        android:insetLeft="3dp"
-        android:insetRight="3dp">
+        android:insetLeft="0.5dp"
+        android:insetRight="0.5dp">
     <vector android:width="18dp"
             android:height="18dp"
             android:viewportWidth="24.0"

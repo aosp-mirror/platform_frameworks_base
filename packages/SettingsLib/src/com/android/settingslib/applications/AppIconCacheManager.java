@@ -30,11 +30,10 @@ import androidx.annotation.VisibleForTesting;
 public class AppIconCacheManager {
     private static final String TAG = "AppIconCacheManager";
     private static final float CACHE_RATIO = 0.1f;
-    @VisibleForTesting
-    static final int MAX_CACHE_SIZE_IN_KB = getMaxCacheInKb();
+    private static final int MAX_CACHE_SIZE_IN_KB = getMaxCacheInKb();
     private static final String DELIMITER = ":";
     private static AppIconCacheManager sAppIconCacheManager;
-    private final LruCache<String, Drawable> mDrawableCache;
+    private LruCache<String, Drawable> mDrawableCache;
 
     private AppIconCacheManager() {
         mDrawableCache = new LruCache<String, Drawable>(MAX_CACHE_SIZE_IN_KB) {
@@ -114,6 +113,14 @@ public class AppIconCacheManager {
     }
 
     /**
+     * Make LruCache testable, DO NOT call this method in production build.
+     */
+    @VisibleForTesting
+    void mockLruCache(LruCache lruCache) {
+        this.mDrawableCache = lruCache;
+    }
+
+    /**
      * Clears as much memory as possible.
      *
      * @see android.content.ComponentCallbacks2#onTrimMemory(int)
@@ -126,7 +133,7 @@ public class AppIconCacheManager {
             }
         } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
                 || level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
-            // Tough time but still affordable, clear half of the cache
+            // tough time but still affordable, clear half of the cache
             if (sAppIconCacheManager != null) {
                 final int maxSize = sAppIconCacheManager.mDrawableCache.maxSize();
                 sAppIconCacheManager.mDrawableCache.trimToSize(maxSize / 2);

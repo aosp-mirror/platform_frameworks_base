@@ -16,11 +16,9 @@ package com.android.systemui.plugins.qs;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.service.quicksettings.Tile;
-import android.text.TextUtils;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -156,7 +154,7 @@ public interface QSTile {
     @ProvidesInterface(version = State.VERSION)
     public static class State {
         public static final int VERSION = 1;
-        public static final int DEFAULT_STATE = Tile.STATE_ACTIVE;
+        public static final int DEFAULT_STATE = Tile.STATE_INACTIVE;
 
         public Icon icon;
         public Supplier<Icon> iconSupplier;
@@ -176,26 +174,6 @@ public interface QSTile {
         @Nullable
         public Drawable sideViewCustomDrawable;
         public String spec;
-
-        /** Get the state text. */
-        public String getStateText(int arrayResId, Resources resources) {
-            if (state == Tile.STATE_UNAVAILABLE || this instanceof QSTile.BooleanState) {
-                String[] array = resources.getStringArray(arrayResId);
-                return array[state];
-            } else {
-                return "";
-            }
-        }
-
-        /** Get the text for secondaryLabel. */
-        public String getSecondaryLabel(String stateText) {
-            // Use a local reference as the value might change from other threads
-            CharSequence localSecondaryLabel = secondaryLabel;
-            if (TextUtils.isEmpty(localSecondaryLabel)) {
-                return stateText;
-            }
-            return localSecondaryLabel.toString();
-        }
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();

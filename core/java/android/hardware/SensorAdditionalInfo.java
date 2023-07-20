@@ -63,7 +63,7 @@ public class SensorAdditionalInfo {
     public final int[] intValues;
 
     /**
-     * Typical values of additional information type. The set of values is subject to extension in
+     * Typical values of additional infomation type. The set of values is subject to extension in
      * newer versions and vendors have the freedom of define their own custom values.
      *
      * @hide

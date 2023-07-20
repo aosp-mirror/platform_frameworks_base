@@ -15,6 +15,7 @@
  */
 package android.hardware.camera2.impl;
 
+import android.app.ActivityThread;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
@@ -28,6 +29,7 @@ import android.hardware.camera2.utils.TaskSingleDrainer;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.Surface;
 
@@ -131,6 +133,18 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             Log.e(TAG, mIdString + "Failed to create capture session; configuration failed");
             mConfigureSuccess = false;
         }
+
+        setSkipUnconfigure();
+    }
+
+    private void setSkipUnconfigure() {
+        String packageName = ActivityThread.currentOpPackageName();
+        List<String> packageList = Arrays.asList(SystemProperties.get(
+                "vendor.camera.skip_unconfigure.packagelist", packageName).split(","));
+
+        if (packageList.contains(packageName)) {
+            mSkipUnconfigure = true;
+        }
     }
 
     @Override
@@ -222,7 +236,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
         } else if (request.isReprocess() && !isReprocessable()) {
             throw new IllegalArgumentException("this capture session cannot handle reprocess " +
                     "requests");
-        } else if (request.isReprocess() && request.getReprocessableSessionId() != mId) {
+        } else if (!mDeviceImpl.isPrivilegedApp() &&
+                request.isReprocess() && request.getReprocessableSessionId() != mId) {
             throw new IllegalArgumentException("capture request was created for another session");
         }
     }
@@ -648,21 +663,6 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
                     final long ident = Binder.clearCallingIdentity();
                     try {
                         executor.execute(() -> callback.onCaptureStarted(
-                                    CameraCaptureSessionImpl.this, request, timestamp,
-                                    frameNumber));
-                    } finally {
-                        Binder.restoreCallingIdentity(ident);
-                    }
-                }
-            }
-
-            @Override
-            public void onReadoutStarted(CameraDevice camera,
-                    CaptureRequest request, long timestamp, long frameNumber) {
-                if ((callback != null) && (executor != null)) {
-                    final long ident = Binder.clearCallingIdentity();
-                    try {
-                        executor.execute(() -> callback.onReadoutStarted(
                                     CameraCaptureSessionImpl.this, request, timestamp,
                                     frameNumber));
                     } finally {

@@ -273,7 +273,7 @@ public class QuickAccessWalletController {
             };
 
             mSecureSettings.registerContentObserverForUser(
-                    Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
+                    Settings.Secure.getUriFor(Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT),
                     false /* notifyForDescendants */,
                     mDefaultPaymentAppObserver,
                     UserHandle.USER_ALL);
@@ -293,7 +293,7 @@ public class QuickAccessWalletController {
             };
 
             mSecureSettings.registerContentObserverForUser(
-                    QuickAccessWalletClientImpl.SETTING_KEY,
+                    Settings.Secure.getUriFor(QuickAccessWalletClientImpl.SETTING_KEY),
                     false /* notifyForDescendants */,
                     mWalletPreferenceObserver,
                     UserHandle.USER_ALL);

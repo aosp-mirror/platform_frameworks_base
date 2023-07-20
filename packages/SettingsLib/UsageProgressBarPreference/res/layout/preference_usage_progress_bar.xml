@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   Copyright (C) 2021 The Android Open Source Project
 
@@ -14,65 +13,79 @@
   See the License for the specific language governing permissions and
   limitations under the License.
   -->
-
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
+    android:layout_gravity="start|center_vertical"
+    android:gravity="start|center_vertical"
     android:orientation="vertical"
-    android:layout_marginStart="?android:attr/listPreferredItemPaddingStart"
-    android:layout_marginEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingBottom="16dp">
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="16dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+	<LinearLayout
+    	  android:layout_width="match_parent"
+    	  android:layout_height="wrap_content"
+    	  android:layout_gravity="start|center_vertical"
+    	  android:layout_marginBottom="8dp"
+    	  android:gravity="start|center_vertical"
+    	  android:paddingHorizontal="8dp"
+    	  android:orientation="horizontal">
+    
         <TextView
             android:id="@+id/usage_summary"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBaseline_toBaselineOf="@id/total_summary"
-            android:ellipsize="marquee"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body1"
-            android:textSize="14sp"
-            android:textAlignment="viewStart"/>
+            android:layout_height="match_parent"
+            android:layout_gravity="start|center_vertical"
+            android:gravity="start|center_vertical"
+            android:includeFontPadding="false"
+            android:paddingStart="8dp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="30sp" />
+
         <TextView
             android:id="@+id/total_summary"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toEndOf="@id/usage_summary"
-            app:layout_constraintEnd_toStartOf="@id/custom_content"
-            android:ellipsize="marquee"
-            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body1"
-            android:textSize="14sp"
-            android:textAlignment="viewEnd"/>
-        <FrameLayout
-            android:id="@+id/custom_content"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="@id/total_summary"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginTop="5dp"
+            android:gravity="end|center_vertical"
+            android:includeFontPadding="false"
+            android:paddingStart="4dp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="13.5sp"/>
 
-    <ProgressBar
-        android:id="@android:id/progress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="100"
-        android:scaleY="1"/>
+        <TextView
+            android:id="@+id/bottom_summary"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginTop="5dp"
+            android:gravity="start|center_vertical"
+            android:includeFontPadding="false"
+            android:paddingStart="4dp"
+            android:textSize="13.5sp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:visibility="visible" />
 
-    <TextView
-        android:id="@+id/bottom_summary"
+    </LinearLayout>
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:visibility="gone"
-        android:ellipsize="marquee"
-        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body1"
-        android:textSize="14sp"/>
+        android:layout_height="50dp"
+        android:paddingHorizontal="8dp"
+        android:layout_gravity="center" >
+            
+        <ProgressBar
+            android:id="@android:id/progress"
+            style="@style/customProgressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:progressDrawable="@drawable/seekbar_drawable"
+            android:indeterminateDrawable="@drawable/seekbar_progress" 
+            />
+
+    </RelativeLayout>
+
 </LinearLayout>

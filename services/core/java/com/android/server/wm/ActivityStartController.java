@@ -98,8 +98,6 @@ public class ActivityStartController {
     /** Whether an {@link ActivityStarter} is currently executing (starting an Activity). */
     private boolean mInExecution = false;
 
-    private final BackgroundActivityStartController mBalController;
-
     /**
      * TODO(b/64750076): Capture information necessary for dump and
      * {@link #postStartActivityProcessingForLastStarter} rather than keeping the entire object
@@ -122,7 +120,6 @@ public class ActivityStartController {
         mFactory.setController(this);
         mPendingRemoteAnimationRegistry = new PendingRemoteAnimationRegistry(service.mGlobalLock,
                 service.mH);
-        mBalController = new BackgroundActivityStartController(mService, mSupervisor);
     }
 
     /**
@@ -237,8 +234,8 @@ public class ActivityStartController {
                     vers = ri.activityInfo.applicationInfo.metaData.getString(
                             Intent.METADATA_SETUP_VERSION);
                 }
-                String lastVers = Settings.Secure.getStringForUser(
-                        resolver, Settings.Secure.LAST_SETUP_SHOWN, resolver.getUserId());
+                String lastVers = Settings.Secure.getString(
+                        resolver, Settings.Secure.LAST_SETUP_SHOWN);
                 if (vers != null && !vers.equals(lastVers)) {
                     intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                     intent.setComponent(new ComponentName(
@@ -672,9 +669,5 @@ public class ActivityStartController {
             pw.print(prefix);
             pw.println("(nothing)");
         }
-    }
-
-    BackgroundActivityStartController getBackgroundActivityLaunchController() {
-        return mBalController;
     }
 }

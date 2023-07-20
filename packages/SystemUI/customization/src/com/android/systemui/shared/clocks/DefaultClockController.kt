@@ -18,22 +18,25 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Rect
 import android.icu.text.NumberFormat
+import android.os.UserHandle
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
+import com.android.internal.util.xtended.XtendedUtils
 import com.android.systemui.customization.R
 import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
-import com.android.systemui.plugins.ClockSettings
 import com.android.systemui.plugins.log.LogBuffer
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
+
+import android.provider.Settings.Secure
 
 private val TAG = DefaultClockController::class.simpleName
 
@@ -44,10 +47,9 @@ private val TAG = DefaultClockController::class.simpleName
  * existing lockscreen clock.
  */
 class DefaultClockController(
-    ctx: Context,
+    val ctx: Context,
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
-    private val settings: ClockSettings?,
 ) : ClockController {
     override val smallClock: DefaultClockFaceController
     override val largeClock: LargeClockFaceController
@@ -57,6 +59,8 @@ class DefaultClockController(
     private val burmeseNumerals = burmeseNf.format(FORMAT_NUMBER.toLong())
     private val burmeseLineSpacing =
         resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale_burmese)
+    private val customClockLineSpacing =
+        resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale_custom)
     private val defaultLineSpacing = resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale)
 
     override val events: DefaultClockEvents
@@ -68,14 +72,12 @@ class DefaultClockController(
         smallClock =
             DefaultClockFaceController(
                 layoutInflater.inflate(R.layout.clock_default_small, parent, false)
-                    as AnimatableClockView,
-                settings?.seedColor
+                    as AnimatableClockView
             )
         largeClock =
             LargeClockFaceController(
                 layoutInflater.inflate(R.layout.clock_default_large, parent, false)
-                    as AnimatableClockView,
-                settings?.seedColor
+                    as AnimatableClockView
             )
         clocks = listOf(smallClock.view, largeClock.view)
 
@@ -89,37 +91,34 @@ class DefaultClockController(
         animations = DefaultClockAnimations(dozeFraction, foldFraction)
         events.onColorPaletteChanged(resources)
         events.onTimeZoneChanged(TimeZone.getDefault())
-        smallClock.events.onTimeTick()
-        largeClock.events.onTimeTick()
+        events.onTimeTick()
+        smallClock.updateColor()
+    }
+
+    override fun setLogBuffer(logBuffer: LogBuffer) {
+        smallClock.view.tag = "smallClockView"
+        largeClock.view.tag = "largeClockView"
+        smallClock.view.logBuffer = logBuffer
+        largeClock.view.logBuffer = logBuffer
     }
 
     open inner class DefaultClockFaceController(
         override val view: AnimatableClockView,
-        var seedColor: Int?,
     ) : ClockFaceController {
 
         // MAGENTA is a placeholder, and will be assigned correctly in initialize
         private var currentColor = Color.MAGENTA
         private var isRegionDark = false
         protected var targetRegion: Rect? = null
-
-        override var logBuffer: LogBuffer?
-            get() = view.logBuffer
-            set(value) {
-                view.logBuffer = value
-            }
+        val Int.dp: Int get() = (this / Resources.getSystem().displayMetrics.density).toInt()
+	val Int.px: Int get() = (this * Resources.getSystem().displayMetrics.density).toInt()
 
         init {
-            if (seedColor != null) {
-                currentColor = seedColor!!
-            }
-            view.setColors(DOZE_COLOR, currentColor)
+            view.setColors(currentColor, currentColor)
         }
 
         override val events =
             object : ClockFaceEvents {
-                override fun onTimeTick() = view.refreshTime()
-
                 override fun onRegionDarknessChanged(isRegionDark: Boolean) {
                     this@DefaultClockFaceController.isRegionDark = isRegionDark
                     updateColor()
@@ -131,21 +130,36 @@ class DefaultClockController(
                 }
 
                 override fun onFontSettingChanged(fontSizePx: Float) {
-                    view.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx)
+	        val largeClockTextSize = Secure.getIntForUser(ctx.getContentResolver(),
+	            Secure.KG_BIG_CLOCK_TEXT_SIZE, 86, UserHandle.USER_CURRENT)
+		val finalLargeClockTextSize = largeClockTextSize.dp
+                setClockFontSize(largeClock.view, finalLargeClockTextSize.px.toFloat() * 2.5f)
                     recomputePadding(targetRegion)
+                }
+
+                fun setClockFontSize(v: AnimatableClockView, fontSizePx: Float) {
+	           v.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx)
                 }
             }
 
         open fun recomputePadding(targetRegion: Rect?) {}
 
         fun updateColor() {
+            val customClockColorEnabled = Secure.getIntForUser(ctx.getContentResolver(),
+                    Secure.KG_CUSTOM_CLOCK_COLOR_ENABLED, 0, UserHandle.USER_CURRENT) != 0
+            val customClockColor = Secure.getIntForUser(ctx.getContentResolver(),
+                    Secure.KG_CUSTOM_CLOCK_COLOR, 0xFFFFFFFF.toInt(), UserHandle.USER_CURRENT)
             val color =
-                if (seedColor != null) {
-                    seedColor!!
-                } else if (isRegionDark) {
-                    resources.getColor(android.R.color.system_accent1_100)
+                if (isRegionDark) {
+                    if (customClockColorEnabled)
+                        customClockColor.toInt()
+                    else
+                        resources.getColor(android.R.color.system_accent1_100)
                 } else {
-                    resources.getColor(android.R.color.system_accent2_600)
+                    if (customClockColorEnabled)
+                        customClockColor.toInt()
+                    else
+                        resources.getColor(android.R.color.system_accent2_600)
                 }
 
             if (currentColor == color) {
@@ -162,8 +176,7 @@ class DefaultClockController(
 
     inner class LargeClockFaceController(
         view: AnimatableClockView,
-        seedColor: Int?,
-    ) : DefaultClockFaceController(view, seedColor) {
+    ) : DefaultClockFaceController(view) {
         override fun recomputePadding(targetRegion: Rect?) {
             // We center the view within the targetRegion instead of within the parent
             // view by computing the difference and adding that to the padding.
@@ -183,6 +196,8 @@ class DefaultClockController(
     }
 
     inner class DefaultClockEvents : ClockEvents {
+        override fun onTimeTick() = clocks.forEach { it.refreshTime() }
+
         override fun onTimeFormatChanged(is24Hr: Boolean) =
             clocks.forEach { it.refreshFormat(is24Hr) }
 
@@ -194,18 +209,12 @@ class DefaultClockController(
             smallClock.updateColor()
         }
 
-        override fun onSeedColorChanged(seedColor: Int?) {
-            largeClock.seedColor = seedColor
-            smallClock.seedColor = seedColor
-
-            largeClock.updateColor()
-            smallClock.updateColor()
-        }
-
         override fun onLocaleChanged(locale: Locale) {
             val nf = NumberFormat.getInstance(locale)
             if (nf.format(FORMAT_NUMBER.toLong()) == burmeseNumerals) {
                 clocks.forEach { it.setLineSpacingScale(burmeseLineSpacing) }
+            } else if (currentClockNeedsMoreSpace()) {
+                clocks.forEach { it.setLineSpacingScale(customClockLineSpacing) }
             } else {
                 clocks.forEach { it.setLineSpacingScale(defaultLineSpacing) }
             }
@@ -274,6 +283,18 @@ class DefaultClockController(
             fraction = newFraction
             return Pair(wasActive != isActive, hasJumped)
         }
+    }
+
+    private fun currentClockNeedsMoreSpace(): Boolean {
+        // The affected clock fonts were entered manually into this array. Maybe there is a more
+        // elegant way, working with an attribute that is transported within the overlay.
+        var lockClockThemes = arrayOf("aclonica", "bariol", "comfortaa", "coolstory", "linotte", "nokiapure", "AlmonteSnow", "AlphaClouds", "AlphaFlowers", "AlphaWood", "Ampad3D2", "BetsyFlanagan", "Brandayolq", "BudmoJiggler", "BunnyRabbits", "CFBadNews", "EditPoints", "EditPointsFilled", "Fibography", "Floorlight", "HotSweat", "Karamuruh", "Klyukin", "LMSClifford", "MonbijouxClownpiece", "NINJAS", "Pinewood", "Romantiques", "Roundheads", "TH3MACHINE", "VTKSDURA3d", "alienleague", "balticbodden", "balticcoast", "balticdune", "balticstorm", "biko", "forta", "frankfrt", "museomod", "mxwasgard", "neon2", "neptuncat", "odibee", "prodeltco", "snowstorm", "tourney", "vg5000", "xtrusion")
+        for (item in lockClockThemes) {
+            if (XtendedUtils.isClockFontEnabled(item)) {
+                return true
+            }
+        }
+        return false
     }
 
     override fun dump(pw: PrintWriter) {

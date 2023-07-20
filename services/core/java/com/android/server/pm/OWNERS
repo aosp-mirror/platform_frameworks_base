@@ -3,6 +3,8 @@ hackbod@google.com
 jsharkey@android.com
 jsharkey@google.com
 narayan@google.com
+svetoslavganov@android.com
+svetoslavganov@google.com
 include /PACKAGE_MANAGER_OWNERS
 
 # apex support
@@ -24,10 +26,16 @@ per-file PackageManagerServiceCompilerMapping.java = file:dex/OWNERS
 per-file PackageUsage.java = file:dex/OWNERS
 
 # multi user / cross profile
-per-file CrossProfile* = file:MULTIUSER_AND_ENTERPRISE_OWNERS
+per-file CrossProfileAppsServiceImpl.java = omakoto@google.com, yamasani@google.com
+per-file CrossProfileAppsService.java = omakoto@google.com, yamasani@google.com
+per-file CrossProfileIntentFilter.java = omakoto@google.com, yamasani@google.com
+per-file CrossProfileIntentResolver.java = omakoto@google.com, yamasani@google.com
 per-file RestrictionsSet.java = file:MULTIUSER_AND_ENTERPRISE_OWNERS
+per-file UserManager* = file:/MULTIUSER_OWNERS
 per-file UserRestriction* = file:MULTIUSER_AND_ENTERPRISE_OWNERS
-per-file User* = file:/MULTIUSER_OWNERS
+per-file UserSystemPackageInstaller* = file:/MULTIUSER_OWNERS
+per-file UserTypeDetails.java = file:/MULTIUSER_OWNERS
+per-file UserTypeFactory.java = file:/MULTIUSER_OWNERS
 
 # security
 per-file KeySetHandle.java = cbrubaker@google.com, nnk@google.com

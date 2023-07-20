@@ -16,13 +16,7 @@
 
 package com.android.systemui.controls.management
 
-import android.app.Dialog
-import android.content.ComponentName
 import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.content.pm.ServiceInfo
-import android.graphics.drawable.Drawable
-import android.os.Bundle
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.window.OnBackInvokedCallback
@@ -31,23 +25,14 @@ import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
 import androidx.test.runner.intercepting.SingleActivityFactory
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
-import com.android.systemui.controls.panels.AuthorizedPanelsRepository
+import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
-import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
-import java.util.function.Consumer
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -56,11 +41,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -77,10 +58,9 @@ class ControlsProviderSelectorActivityTest : SysuiTestCase() {
 
     @Mock lateinit var userTracker: UserTracker
 
-    @Mock lateinit var authorizedPanelsRepository: AuthorizedPanelsRepository
+    @Mock lateinit var uiController: ControlsUiController
 
-    @Mock lateinit var dialogFactory: PanelConfirmationDialogFactory
-
+    private lateinit var controlsProviderSelectorActivity: ControlsProviderSelectorActivity_Factory
     private var latch: CountDownLatch = CountDownLatch(1)
 
     @Mock private lateinit var mockDispatcher: OnBackInvokedDispatcher
@@ -101,8 +81,7 @@ class ControlsProviderSelectorActivityTest : SysuiTestCase() {
                         listingController,
                         controlsController,
                         userTracker,
-                        authorizedPanelsRepository,
-                        dialogFactory,
+                        uiController,
                         mockDispatcher,
                         latch
                     )
@@ -134,99 +113,13 @@ class ControlsProviderSelectorActivityTest : SysuiTestCase() {
         verify(mockDispatcher).unregisterOnBackInvokedCallback(captureCallback.value)
     }
 
-    @Test
-    fun testOnAppSelectedForNonPanelStartsFavoritingActivity() {
-        val info = ControlsServiceInfo(ComponentName("test_pkg", "service"), "", null)
-        activityRule.activity.onAppSelected(info)
-
-        verifyNoMoreInteractions(dialogFactory)
-
-        assertThat(activityRule.activity.lastStartedActivity?.component?.className)
-            .isEqualTo(ControlsFavoritingActivity::class.java.name)
-
-        assertThat(activityRule.activity.triedToFinish).isTrue()
-    }
-
-    @Test
-    fun testOnAppSelectedForPanelTriggersDialog() {
-        val label = "label"
-        val info =
-            ControlsServiceInfo(
-                ComponentName("test_pkg", "service"),
-                label,
-                ComponentName("test_pkg", "activity")
-            )
-
-        val dialog: Dialog = mock()
-        whenever(dialogFactory.createConfirmationDialog(any(), any(), any())).thenReturn(dialog)
-
-        activityRule.activity.onAppSelected(info)
-        verify(dialogFactory).createConfirmationDialog(any(), eq(label), any())
-        verify(dialog).show()
-
-        assertThat(activityRule.activity.triedToFinish).isFalse()
-    }
-
-    @Test
-    fun dialogAcceptAddsPackage() {
-        val label = "label"
-        val info =
-            ControlsServiceInfo(
-                ComponentName("test_pkg", "service"),
-                label,
-                ComponentName("test_pkg", "activity")
-            )
-
-        val dialog: Dialog = mock()
-        whenever(dialogFactory.createConfirmationDialog(any(), any(), any())).thenReturn(dialog)
-
-        activityRule.activity.onAppSelected(info)
-
-        val captor: ArgumentCaptor<Consumer<Boolean>> = argumentCaptor()
-        verify(dialogFactory).createConfirmationDialog(any(), any(), capture(captor))
-
-        captor.value.accept(true)
-
-        val setCaptor: ArgumentCaptor<Set<String>> = argumentCaptor()
-        verify(authorizedPanelsRepository).addAuthorizedPanels(capture(setCaptor))
-        assertThat(setCaptor.value).containsExactly(info.componentName.packageName)
-
-        assertThat(activityRule.activity.triedToFinish).isTrue()
-    }
-
-    @Test
-    fun dialogCancelDoesntAddPackage() {
-        val label = "label"
-        val info =
-            ControlsServiceInfo(
-                ComponentName("test_pkg", "service"),
-                label,
-                ComponentName("test_pkg", "activity")
-            )
-
-        val dialog: Dialog = mock()
-        whenever(dialogFactory.createConfirmationDialog(any(), any(), any())).thenReturn(dialog)
-
-        activityRule.activity.onAppSelected(info)
-
-        val captor: ArgumentCaptor<Consumer<Boolean>> = argumentCaptor()
-        verify(dialogFactory).createConfirmationDialog(any(), any(), capture(captor))
-
-        captor.value.accept(false)
-
-        verify(authorizedPanelsRepository, never()).addAuthorizedPanels(any())
-
-        assertThat(activityRule.activity.triedToFinish).isFalse()
-    }
-
-    class TestableControlsProviderSelectorActivity(
+    public class TestableControlsProviderSelectorActivity(
         executor: Executor,
         backExecutor: Executor,
         listingController: ControlsListingController,
         controlsController: ControlsController,
         userTracker: UserTracker,
-        authorizedPanelsRepository: AuthorizedPanelsRepository,
-        dialogFactory: PanelConfirmationDialogFactory,
+        uiController: ControlsUiController,
         private val mockDispatcher: OnBackInvokedDispatcher,
         private val latch: CountDownLatch
     ) :
@@ -236,50 +129,16 @@ class ControlsProviderSelectorActivityTest : SysuiTestCase() {
             listingController,
             controlsController,
             userTracker,
-            authorizedPanelsRepository,
-            dialogFactory
+            uiController
         ) {
-
-        var lastStartedActivity: Intent? = null
-        var triedToFinish = false
-
         override fun getOnBackInvokedDispatcher(): OnBackInvokedDispatcher {
             return mockDispatcher
-        }
-
-        override fun startActivity(intent: Intent?, options: Bundle?) {
-            lastStartedActivity = intent
         }
 
         override fun onStop() {
             super.onStop()
             // ensures that test runner thread does not proceed until ui thread is done
             latch.countDown()
-        }
-
-        override fun animateExitAndFinish() {
-            // Activity should only be finished from the rule.
-            triedToFinish = true
-        }
-    }
-
-    companion object {
-        private fun ControlsServiceInfo(
-            componentName: ComponentName,
-            label: CharSequence,
-            panelComponentName: ComponentName? = null
-        ): ControlsServiceInfo {
-            val serviceInfo =
-                ServiceInfo().apply {
-                    applicationInfo = ApplicationInfo()
-                    packageName = componentName.packageName
-                    name = componentName.className
-                }
-            return Mockito.spy(ControlsServiceInfo(mock(), serviceInfo)).apply {
-                doReturn(label).`when`(this).loadLabel()
-                doReturn(mock<Drawable>()).`when`(this).loadIcon()
-                doReturn(panelComponentName).`when`(this).panelActivity
-            }
         }
     }
 }

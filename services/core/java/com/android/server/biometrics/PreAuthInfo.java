@@ -42,6 +42,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.android.internal.util.custom.faceunlock.FaceUnlockUtils;
+
 /**
  * Class representing the calling client's request. Additionally, derives/calculates
  * preliminary info that would be useful in helping serve this request. Note that generating
@@ -227,6 +229,9 @@ class PreAuthInfo {
 
     private static boolean isEnabledForApp(BiometricService.SettingObserver settingObserver,
             @BiometricAuthenticator.Modality int modality, int userId) {
+        if (modality == TYPE_FINGERPRINT && FaceUnlockUtils.isFaceUnlockSupported()){
+            return true;
+        }
         return settingObserver.getEnabledForApps(userId);
     }
 

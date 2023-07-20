@@ -287,12 +287,13 @@ public final class OverlayManagerService extends SystemService {
 
             restoreSettings();
 
-            // Wipe all shell overlays on boot, to recover from a potentially broken device
-            String shellPkgName = TextUtils.emptyIfNull(
-                    getContext().getString(android.R.string.config_systemShell));
-            mSettings.removeIf(overlayInfo -> overlayInfo.isFabricated
-                    && shellPkgName.equals(overlayInfo.packageName));
-
+            if (Build.IS_USER) {
+                // Wipe all shell overlays on boot, to recover from a potentially broken device
+                String shellPkgName = TextUtils.emptyIfNull(
+                        getContext().getString(android.R.string.config_systemShell));
+                mSettings.removeIf(overlayInfo -> overlayInfo.isFabricated
+                        && shellPkgName.equals(overlayInfo.packageName));
+            }
             initIfNeeded();
             onSwitchUser(UserHandle.USER_SYSTEM);
 
@@ -877,7 +878,7 @@ public final class OverlayManagerService extends SystemService {
                     }
                     Slog.d(TAG, "commit failed: " + e.getMessage(), e);
                     throw new SecurityException("commit failed"
-                            + (DEBUG || Build.IS_DEBUGGABLE ? ": " + e.getMessage() : ""));
+                            + (DEBUG ? ": " + e.getMessage() : ""));
                 }
             } finally {
                 traceEnd(TRACE_TAG_RRO);
@@ -904,7 +905,7 @@ public final class OverlayManagerService extends SystemService {
                 // non privileged callers, a simple check against the shell UID is sufficient, since
                 // that's the only exception from the other categories. This is enough while OMS
                 // is not a public API, but this will have to be changed if it's ever exposed.
-                if (callingUid == Process.SHELL_UID) {
+                if (callingUid == Process.SHELL_UID && Build.IS_USER) {
                     EventLog.writeEvent(0x534e4554, "202768292", -1, "");
                     throw new IllegalArgumentException("Non-root shell cannot fabricate overlays");
                 }
@@ -1010,9 +1011,7 @@ public final class OverlayManagerService extends SystemService {
                 }
                 opti++;
 
-                if ("-a".equals(opt)) {
-                    // dumpsys will pass in -a; silently ignore it
-                } else if ("-h".equals(opt)) {
+                if ("-h".equals(opt)) {
                     pw.println("dump [-h] [--verbose] [--user USER_ID] [[FIELD] PACKAGE]");
                     pw.println("  Print debugging information about the overlay manager.");
                     pw.println("  With optional parameter PACKAGE, limit output to the specified");
@@ -1109,21 +1108,6 @@ public final class OverlayManagerService extends SystemService {
             int callingUid = Binder.getCallingUid();
             mActorEnforcer.enforceActor(overlayInfo, methodName, callingUid, realUserId);
         }
-
-        /**
-         * @hide
-         */
-        public String getPartitionOrder() {
-            return mImpl.getOverlayConfig().getPartitionOrder();
-        }
-
-        /**
-         * @hide
-         */
-        public boolean isDefaultPartitionOrder() {
-            return mImpl.getOverlayConfig().isDefaultPartitionOrder();
-        }
-
     };
 
     private static final class PackageManagerHelperImpl implements PackageManagerHelper {

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<translate android:duration="@android:integer/config_longAnimTime"
+	android:fromYDelta="0.0" android:toYDelta="100.0%p"
+	xmlns:android="http://schemas.android.com/apk/res/android" />

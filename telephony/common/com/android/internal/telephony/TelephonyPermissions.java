@@ -18,7 +18,6 @@ package com.android.internal.telephony;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.Manifest;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -744,23 +743,11 @@ public final class TelephonyPermissions {
 
     /**
      * Given a list of permissions, check to see if the caller has at least one of them granted. If
-     * not, check to see if the caller has carrier privileges. If the caller does not have any of
+     * not, check to see if the caller has carrier privileges. If the caller does not have any  of
      * these permissions, throw a SecurityException.
      */
     public static void enforceAnyPermissionGrantedOrCarrierPrivileges(Context context, int subId,
             int uid, String message, String... permissions) {
-        enforceAnyPermissionGrantedOrCarrierPrivileges(
-                context, subId, uid, false, message, permissions);
-    }
-
-    /**
-     * Given a list of permissions, check to see if the caller has at least one of them granted. If
-     * not, check to see if the caller has carrier privileges on the specified subscription (or any
-     * subscription if {@code allowCarrierPrivilegeOnAnySub} is {@code true}. If the caller does not
-     * have any of these permissions, throw a {@link SecurityException}.
-     */
-    public static void enforceAnyPermissionGrantedOrCarrierPrivileges(Context context, int subId,
-            int uid, boolean allowCarrierPrivilegeOnAnySub, String message, String... permissions) {
         if (permissions.length == 0) return;
         boolean isGranted = false;
         for (String perm : permissions) {
@@ -771,12 +758,7 @@ public final class TelephonyPermissions {
         }
 
         if (isGranted) return;
-
-        if (allowCarrierPrivilegeOnAnySub) {
-            if (checkCarrierPrivilegeForAnySubId(context, Binder.getCallingUid())) return;
-        } else {
-            if (checkCarrierPrivilegeForSubId(context, subId)) return;
-        }
+        if (checkCarrierPrivilegeForSubId(context, subId)) return;
 
         StringBuilder b = new StringBuilder(message);
         b.append(": Neither user ");
@@ -787,8 +769,7 @@ public final class TelephonyPermissions {
             b.append(" or ");
             b.append(permissions[i]);
         }
-        b.append(" or carrier privileges. subId=" + subId + ", allowCarrierPrivilegeOnAnySub="
-                + allowCarrierPrivilegeOnAnySub);
+        b.append(" or carrier privileges");
         throw new SecurityException(b.toString());
     }
 
@@ -822,36 +803,5 @@ public final class TelephonyPermissions {
                     + packageName + ", uid=" + Binder.getCallingUid());
         }
         return Integer.MAX_VALUE;
-    }
-
-    /**
-     * Check if calling user is associated with the given subscription.
-     * @param context Context
-     * @param subId subscription ID
-     * @param callerUserHandle caller user handle
-     * @return  false if user is not associated with the subscription.
-     */
-    public static boolean checkSubscriptionAssociatedWithUser(@NonNull Context context, int subId,
-            @NonNull UserHandle callerUserHandle) {
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-            // No subscription on device, return true.
-            return true;
-        }
-
-        SubscriptionManager subManager = context.getSystemService(SubscriptionManager.class);
-        final long token = Binder.clearCallingIdentity();
-        try {
-            if ((subManager != null) &&
-                    (!subManager.isSubscriptionAssociatedWithUser(subId, callerUserHandle))) {
-                // If subId is not associated with calling user, return false.
-                Log.e(LOG_TAG,"User[User ID:" + callerUserHandle.getIdentifier()
-                        + "] is not associated with Subscription ID:" + subId);
-                return false;
-
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-        return true;
     }
 }

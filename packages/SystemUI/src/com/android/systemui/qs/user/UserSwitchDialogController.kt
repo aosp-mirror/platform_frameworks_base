@@ -36,7 +36,6 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.statusbar.phone.SystemUIDialog
-import com.android.systemui.user.ui.dialog.DialogShowerImpl
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -128,6 +127,19 @@ class UserSwitchDialogController @VisibleForTesting constructor(
 
             uiEventLogger.log(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN)
             adapter.injectDialogShower(DialogShowerImpl(this, dialogLaunchAnimator))
+        }
+    }
+
+    private class DialogShowerImpl(
+        private val animateFrom: Dialog,
+        private val dialogLaunchAnimator: DialogLaunchAnimator
+    ) : DialogInterface by animateFrom, DialogShower {
+        override fun showDialog(dialog: Dialog, cuj: DialogCuj) {
+            dialogLaunchAnimator.showFromDialog(
+                dialog,
+                animateFrom = animateFrom,
+                cuj
+            )
         }
     }
 

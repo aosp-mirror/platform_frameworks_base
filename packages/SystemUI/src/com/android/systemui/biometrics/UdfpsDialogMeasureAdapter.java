@@ -19,7 +19,6 @@ package com.android.systemui.biometrics;
 import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -29,7 +28,6 @@ import android.view.Surface;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 import android.widget.FrameLayout;
@@ -107,10 +105,9 @@ public class UdfpsDialogMeasureAdapter {
         final int buttonBarHeight = getViewHeightPx(R.id.button_bar);
         final int dialogMargin = getDialogMarginPx();
         final int displayHeight = getMaximumWindowBounds(windowMetrics).height();
-        final Insets navbarInsets = getNavbarInsets(windowMetrics);
         mBottomSpacerHeight = calculateBottomSpacerHeightForPortrait(
                 mSensorProps, displayHeight, textIndicatorHeight, buttonBarHeight,
-                dialogMargin, navbarInsets.bottom, scaleFactor);
+                dialogMargin, scaleFactor);
 
         // Go through each of the children and do the custom measurement.
         int totalHeight = 0;
@@ -196,18 +193,15 @@ public class UdfpsDialogMeasureAdapter {
         final int topSpacerHeight = getViewHeightPx(R.id.space_above_icon);
         final int textIndicatorHeight = getViewHeightPx(R.id.indicator);
         final int buttonBarHeight = getViewHeightPx(R.id.button_bar);
-
-        final Insets navbarInsets = getNavbarInsets(windowMetrics);
         final int bottomSpacerHeight = calculateBottomSpacerHeightForLandscape(titleHeight,
                 subtitleHeight, descriptionHeight, topSpacerHeight, textIndicatorHeight,
-                buttonBarHeight, navbarInsets.bottom);
+                buttonBarHeight);
 
         // Find the spacer width needed to horizontally align the icon with the sensor.
         final int displayWidth = getMaximumWindowBounds(windowMetrics).width();
         final int dialogMargin = getDialogMarginPx();
-        final int horizontalInset = navbarInsets.left + navbarInsets.right;
         final int horizontalSpacerWidth = calculateHorizontalSpacerWidthForLandscape(
-                mSensorProps, displayWidth, dialogMargin, horizontalInset, scaleFactor);
+                mSensorProps, displayWidth, dialogMargin, scaleFactor);
 
         final int sensorDiameter = getSensorDiameter(scaleFactor);
         final int remeasuredWidth = sensorDiameter + 2 * horizontalSpacerWidth;
@@ -272,13 +266,6 @@ public class UdfpsDialogMeasureAdapter {
     }
 
     @NonNull
-    private static Insets getNavbarInsets(@Nullable WindowMetrics windowMetrics) {
-        return windowMetrics != null
-                ? windowMetrics.getWindowInsets().getInsets(WindowInsets.Type.navigationBars())
-                : Insets.NONE;
-    }
-
-    @NonNull
     private static Rect getMaximumWindowBounds(@Nullable WindowMetrics windowMetrics) {
         return windowMetrics != null ? windowMetrics.getBounds() : new Rect();
     }
@@ -291,7 +278,7 @@ public class UdfpsDialogMeasureAdapter {
     static int calculateBottomSpacerHeightForPortrait(
             @NonNull FingerprintSensorPropertiesInternal sensorProperties, int displayHeightPx,
             int textIndicatorHeightPx, int buttonBarHeightPx, int dialogMarginPx,
-            int navbarBottomInsetPx, float scaleFactor) {
+            float scaleFactor) {
         final SensorLocationInternal location = sensorProperties.getLocation();
         final int sensorDistanceFromBottom = displayHeightPx
                 - (int) (scaleFactor * location.sensorLocationY)
@@ -300,14 +287,12 @@ public class UdfpsDialogMeasureAdapter {
         final int spacerHeight = sensorDistanceFromBottom
                 - textIndicatorHeightPx
                 - buttonBarHeightPx
-                - dialogMarginPx
-                - navbarBottomInsetPx;
+                - dialogMarginPx;
 
         if (DEBUG) {
             Log.d(TAG, "Display height: " + displayHeightPx
                     + ", Distance from bottom: " + sensorDistanceFromBottom
                     + ", Bottom margin: " + dialogMarginPx
-                    + ", Navbar bottom inset: " + navbarBottomInsetPx
                     + ", Bottom spacer height (portrait): " + spacerHeight
                     + ", Scale Factor: " + scaleFactor);
         }
@@ -322,7 +307,7 @@ public class UdfpsDialogMeasureAdapter {
     @VisibleForTesting
     static int calculateBottomSpacerHeightForLandscape(int titleHeightPx, int subtitleHeightPx,
             int descriptionHeightPx, int topSpacerHeightPx, int textIndicatorHeightPx,
-            int buttonBarHeightPx, int navbarBottomInsetPx) {
+            int buttonBarHeightPx) {
 
         final int dialogHeightAboveIcon = titleHeightPx
                 + subtitleHeightPx
@@ -332,8 +317,7 @@ public class UdfpsDialogMeasureAdapter {
         final int dialogHeightBelowIcon = textIndicatorHeightPx + buttonBarHeightPx;
 
         final int bottomSpacerHeight = dialogHeightAboveIcon
-                - dialogHeightBelowIcon
-                - navbarBottomInsetPx;
+                - dialogHeightBelowIcon;
 
         if (DEBUG) {
             Log.d(TAG, "Title height: " + titleHeightPx
@@ -342,7 +326,6 @@ public class UdfpsDialogMeasureAdapter {
                     + ", Top spacer height: " + topSpacerHeightPx
                     + ", Text indicator height: " + textIndicatorHeightPx
                     + ", Button bar height: " + buttonBarHeightPx
-                    + ", Navbar bottom inset: " + navbarBottomInsetPx
                     + ", Bottom spacer height (landscape): " + bottomSpacerHeight);
         }
 
@@ -357,21 +340,19 @@ public class UdfpsDialogMeasureAdapter {
     @VisibleForTesting
     static int calculateHorizontalSpacerWidthForLandscape(
             @NonNull FingerprintSensorPropertiesInternal sensorProperties, int displayWidthPx,
-            int dialogMarginPx, int navbarHorizontalInsetPx, float scaleFactor) {
+            int dialogMarginPx, float scaleFactor) {
         final SensorLocationInternal location = sensorProperties.getLocation();
         final int sensorDistanceFromEdge = displayWidthPx
                 - (int) (scaleFactor * location.sensorLocationY)
                 - (int) (scaleFactor * location.sensorRadius);
 
         final int horizontalPadding = sensorDistanceFromEdge
-                - dialogMarginPx
-                - navbarHorizontalInsetPx;
+                - dialogMarginPx;
 
         if (DEBUG) {
             Log.d(TAG, "Display width: " + displayWidthPx
                     + ", Distance from edge: " + sensorDistanceFromEdge
                     + ", Dialog margin: " + dialogMarginPx
-                    + ", Navbar horizontal inset: " + navbarHorizontalInsetPx
                     + ", Horizontal spacer width (landscape): " + horizontalPadding
                     + ", Scale Factor: " + scaleFactor);
         }

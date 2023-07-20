@@ -18,7 +18,9 @@
           "exclude-filter": "com.android.server.usage.StorageStatsServiceTest"
         }
       ]
-    },
+    }
+  ],
+  "presubmit-large": [
     {
       "name": "CtsUsageStatsTestCases",
       "options": [

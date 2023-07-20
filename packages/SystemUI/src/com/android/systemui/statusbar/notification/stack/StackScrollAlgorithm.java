@@ -29,9 +29,6 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
-import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.LegacySourceType;
@@ -138,6 +135,7 @@ public class StackScrollAlgorithm {
                                   AmbientState ambientState) {
         for (ExpandableView view : algorithmState.visibleChildren) {
             final ViewState viewState = view.getViewState();
+
             final boolean isHunGoingToShade = ambientState.isShadeExpanded()
                     && view == ambientState.getTrackedHeadsUpRow();
 
@@ -150,14 +148,9 @@ public class StackScrollAlgorithm {
             } else if (ambientState.isExpansionChanging()) {
                 // Adjust alpha for shade open & close.
                 float expansion = ambientState.getExpansionFraction();
-                if (ambientState.isBouncerInTransit()) {
-                    viewState.setAlpha(
-                            BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion));
-                } else if (view instanceof FooterView) {
-                    viewState.setAlpha(interpolateFooterAlpha(ambientState));
-                } else {
-                    viewState.setAlpha(interpolateNotificationContentAlpha(ambientState));
-                }
+                viewState.setAlpha(ambientState.isBouncerInTransit()
+                        ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion)
+                        : ShadeInterpolation.getContentAlpha(expansion));
             }
 
             // For EmptyShadeView if on keyguard, we need to control the alpha to create
@@ -187,28 +180,6 @@ public class StackScrollAlgorithm {
                 }
             }
         }
-    }
-
-    private float interpolateFooterAlpha(AmbientState ambientState) {
-        float expansion = ambientState.getExpansionFraction();
-        FeatureFlags flags = ambientState.getFeatureFlags();
-        if (ambientState.isSmallScreen()
-                || !flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
-            return ShadeInterpolation.getContentAlpha(expansion);
-        }
-        LargeScreenShadeInterpolator interpolator = ambientState.getLargeScreenShadeInterpolator();
-        return interpolator.getNotificationFooterAlpha(expansion);
-    }
-
-    private float interpolateNotificationContentAlpha(AmbientState ambientState) {
-        float expansion = ambientState.getExpansionFraction();
-        FeatureFlags flags = ambientState.getFeatureFlags();
-        if (ambientState.isSmallScreen()
-                || !flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
-            return ShadeInterpolation.getContentAlpha(expansion);
-        }
-        LargeScreenShadeInterpolator interpolator = ambientState.getLargeScreenShadeInterpolator();
-        return interpolator.getNotificationContentAlpha(expansion);
     }
 
     /**
@@ -899,8 +870,7 @@ public class StackScrollAlgorithm {
         }
 
         for (int i = childCount - 1; i >= 0; i--) {
-            childrenOnTop = updateChildZValue(i, childrenOnTop,
-                    algorithmState, ambientState, i == topHunIndex);
+            updateChildZValue(i, algorithmState, ambientState, i == topHunIndex);
         }
     }
 
@@ -910,42 +880,34 @@ public class StackScrollAlgorithm {
      *
      * @param isTopHun      Whether the child is a top HUN. A top HUN means a HUN that shows on the
      *                      vertically top of screen. Top HUNs should have drop shadows
-     * @param childrenOnTop It is greater than 0 when there's an existing HUN that is elevated
-     * @return childrenOnTop The decimal part represents the fraction of the elevated HUN's height
-     *                      that overlaps with QQS Panel. The integer part represents the count of
-     *                      previous HUNs whose Z positions are greater than 0.
      */
-    protected float updateChildZValue(int i, float childrenOnTop,
-                                      StackScrollAlgorithmState algorithmState,
-                                      AmbientState ambientState,
-                                      boolean isTopHun) {
+    protected void updateChildZValue(int i,
+                                     StackScrollAlgorithmState algorithmState,
+                                     AmbientState ambientState,
+                                     boolean isTopHun) {
         ExpandableView child = algorithmState.visibleChildren.get(i);
         ExpandableViewState childViewState = child.getViewState();
         float baseZ = ambientState.getBaseZHeight();
+
+        // Handles HUN shadow when Shade is opened
 
         if (child.mustStayOnScreen() && !childViewState.headsUpIsVisible
                 && !ambientState.isDozingAndNotPulsing(child)
                 && childViewState.getYTranslation() < ambientState.getTopPadding()
                 + ambientState.getStackTranslation()) {
+            // Handles HUN shadow when Shade is opened, and AmbientState.mScrollY > 0
+            // Calculate the HUN's z-value based on its overlapping fraction with QQS Panel.
+            // When scrolling down shade to make HUN back to in-position in Notification Panel,
+            // the overlapFraction goes to 0, and the pinned HUN's shadows hides gradually.
+            float overlap = ambientState.getTopPadding()
+                    + ambientState.getStackTranslation() - childViewState.getYTranslation();
 
-            if (childrenOnTop != 0.0f) {
-                // To elevate the later HUN over previous HUN when multiple HUNs exist
-                childrenOnTop++;
-            } else {
-                // Handles HUN shadow when Shade is opened, and AmbientState.mScrollY > 0
-                // Calculate the HUN's z-value based on its overlapping fraction with QQS Panel.
-                // When scrolling down shade to make HUN back to in-position in Notification Panel,
-                // The overlapping fraction goes to 0, and shadows hides gradually.
-                float overlap = ambientState.getTopPadding()
-                        + ambientState.getStackTranslation() - childViewState.getYTranslation();
-                // To prevent over-shadow during HUN entry
-                childrenOnTop += Math.min(
-                        1.0f,
-                        overlap / childViewState.height
-                );
+            if (childViewState.height > 0) { // To avoid 0/0 problems
+                // To prevent over-shadow
+                float overlapFraction = MathUtils.saturate(overlap / childViewState.height);
+                childViewState.setZTranslation(baseZ
+                        + overlapFraction * mPinnedZTranslationExtra);
             }
-            childViewState.setZTranslation(baseZ
-                    + childrenOnTop * mPinnedZTranslationExtra);
         } else if (isTopHun) {
             // In case this is a new view that has never been measured before, we don't want to
             // elevate if we are currently expanded more than the notification
@@ -972,15 +934,15 @@ public class StackScrollAlgorithm {
             childViewState.setZTranslation(baseZ);
         }
 
-        // While HUN is showing and Shade is closed: headerVisibleAmount stays 0, shadow stays.
+        // Handles HUN shadow when shade is closed.
+        // While shade is closed, and during HUN's entry: headerVisibleAmount stays 0, shadow stays.
+        // While shade is closed, and HUN is showing: headerVisibleAmount stays 0, shadow stays.
         // During HUN-to-Shade (eg. dragging down HUN to open Shade): headerVisibleAmount goes
         // gradually from 0 to 1, shadow hides gradually.
         // Header visibility is a deprecated concept, we are using headerVisibleAmount only because
         // this value nicely goes from 0 to 1 during the HUN-to-Shade process.
-
         childViewState.setZTranslation(childViewState.getZTranslation()
                 + (1.0f - child.getHeaderVisibleAmount()) * mPinnedZTranslationExtra);
-        return childrenOnTop;
     }
 
     public void setIsExpanded(boolean isExpanded) {

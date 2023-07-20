@@ -95,7 +95,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private RecyclerView mDevicesRecyclerView;
     private LinearLayout mDeviceListLayout;
     private LinearLayout mCastAppLayout;
-    private LinearLayout mMediaMetadataSectionLayout;
     private Button mDoneButton;
     private Button mStopButton;
     private Button mAppButton;
@@ -241,7 +240,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
         mHeaderIcon = mDialogView.requireViewById(R.id.header_icon);
         mDevicesRecyclerView = mDialogView.requireViewById(R.id.list_result);
-        mMediaMetadataSectionLayout = mDialogView.requireViewById(R.id.media_metadata_section);
         mDeviceListLayout = mDialogView.requireViewById(R.id.device_list);
         mDoneButton = mDialogView.requireViewById(R.id.done);
         mStopButton = mDialogView.requireViewById(R.id.stop);
@@ -257,17 +255,21 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mDevicesRecyclerView.setLayoutManager(mLayoutManager);
         mDevicesRecyclerView.setAdapter(mAdapter);
         mDevicesRecyclerView.setHasFixedSize(false);
+        // Init header icon
+        mHeaderIcon.setOnClickListener(v -> onHeaderIconClick());
         // Init bottom buttons
         mDoneButton.setOnClickListener(v -> dismiss());
         mStopButton.setOnClickListener(v -> {
             mMediaOutputController.releaseSession();
             dismiss();
         });
-        mAppButton.setOnClickListener(v -> mMediaOutputController.tryToLaunchMediaApplication());
-        if (mMediaOutputController.isAdvancedLayoutSupported()) {
-            mMediaMetadataSectionLayout.setOnClickListener(
-                    v -> mMediaOutputController.tryToLaunchMediaApplication());
-        }
+        mAppButton.setOnClickListener(v -> {
+            mBroadcastSender.closeSystemDialogs();
+            if (mMediaOutputController.getAppLaunchIntent() != null) {
+                mContext.startActivity(mMediaOutputController.getAppLaunchIntent());
+            }
+            dismiss();
+        });
     }
 
     @Override
@@ -558,7 +560,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     @Override
     public void dismissDialog() {
-        mBroadcastSender.closeSystemDialogs();
+        dismiss();
     }
 
     void onHeaderIconClick() {

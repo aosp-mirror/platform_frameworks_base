@@ -208,7 +208,6 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.CREATE_USERS" />
-    <uses-permission android:name="android.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION" />
     <uses-permission android:name="android.permission.QUERY_USERS" />
     <uses-permission android:name="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
@@ -356,9 +355,6 @@
 
     <!-- Permission needed to test wallpaper dimming -->
     <uses-permission android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT" />
-
-    <!-- Permission needed to test wallpaper read methods -->
-    <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />
 
     <!-- Permission required to test ContentResolver caching. -->
     <uses-permission android:name="android.permission.CACHE_CONTENT" />
@@ -509,12 +505,6 @@
     <!-- Permissions needed for CTS test - CtsLocaleManagerTestCases -->
     <uses-permission android:name="android.permission.READ_APP_SPECIFIC_LOCALES" />
 
-    <!-- Permissions used for manual testing of time detection behavior. -->
-    <uses-permission android:name="android.permission.SUGGEST_MANUAL_TIME" />
-    <uses-permission android:name="android.permission.SUGGEST_TELEPHONY_TIME" />
-    <uses-permission android:name="android.permission.SUGGEST_NETWORK_TIME" />
-    <uses-permission android:name="android.permission.SUGGEST_GNSS_TIME" />
-
     <!-- Permission required for CTS test - android.server.biometrics -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
@@ -556,8 +546,6 @@
     <!-- Permission needed for CTS test - ConcurrencyTest#testP2pExternalApprover
          P2P external approver API sets require MANAGE_WIFI_NETWORK_SELECTION permission. -->
     <uses-permission android:name="android.permission.MANAGE_WIFI_NETWORK_SELECTION" />
-    <!-- Permission needed for CTS test - ConcurrencyTest#testP2pSetWfdInfo -->
-    <uses-permission android:name="android.permission.CONFIGURE_WIFI_DISPLAY" />
 
     <!-- Permission required for CTS tests to enable/disable rate limiting toasts. -->
     <uses-permission android:name="android.permission.MANAGE_TOAST_RATE_LIMITING" />
@@ -581,6 +569,11 @@
 
     <!-- Permission required for CTS test - PeopleManagerTest -->
     <uses-permission android:name="android.permission.READ_PEOPLE_DATA" />
+
+    <!-- Permissions required for CTS test - TrustTestCases -->
+    <uses-permission android:name="android.permission.PROVIDE_TRUST_AGENT" />
+    <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
+    <uses-permission android:name="android.permission.TRUST_LISTENER" />
 
     <!-- Permission required for CTS test - CtsTaskFpsCallbackTestCases -->
     <uses-permission android:name="android.permission.ACCESS_FPS_COUNTER" />
@@ -653,7 +646,6 @@
 
     <!-- Permission required to run the `vm` tool which manages on-device virtual machines -->
     <uses-permission android:name="android.permission.MANAGE_VIRTUAL_MACHINE" />
-    <uses-permission android:name="android.permission.USE_CUSTOM_VIRTUAL_MACHINE" />
     <uses-permission android:name="android.permission.DEBUG_VIRTUAL_MACHINE" />
 
     <!-- Permission required to run GtsAssistantTestCases -->
@@ -714,7 +706,7 @@
                 android:resource="@xml/file_provider_paths" />
         </provider>
 
-        <provider
+        <!--<provider
             android:name=".BugreportStorageProvider"
             android:authorities="com.android.shell.documents"
             android:grantUriPermissions="true"
@@ -724,7 +716,7 @@
             <intent-filter>
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
-        </provider>
+        </provider>-->
 
         <provider android:name=".HeapDumpProvider"
                   android:authorities="com.android.shell.heapdump"

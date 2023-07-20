@@ -35,12 +35,5 @@ interface ScreenStatusProvider : CallbackController<ScreenListener> {
          * Called when the screen is starting to be turned on.
          */
         fun onScreenTurningOn()
-
-        /**
-         * Called when the screen is already turned on but it happened before the creation
-         * of the unfold progress provider, so we won't play the actual animation but we treat
-         * the current state of the screen as 'turned on'
-         */
-        fun markScreenAsTurnedOn()
     }
 }

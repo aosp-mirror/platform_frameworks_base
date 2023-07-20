@@ -113,7 +113,7 @@ public class SystemNotificationChannels {
         final NotificationChannel developerImportant = new NotificationChannel(
                 DEVELOPER_IMPORTANT,
                 context.getString(R.string.notification_channel_developer_important),
-                NotificationManager.IMPORTANCE_HIGH);
+                NotificationManager.IMPORTANCE_MIN);
         developer.setBlockable(true);
         channelsList.add(developerImportant);
 
@@ -148,6 +148,7 @@ public class SystemNotificationChannels {
                 VPN,
                 context.getString(R.string.notification_channel_vpn),
                 NotificationManager.IMPORTANCE_LOW);
+        vpn.setBlockable(true);
         channelsList.add(vpn);
 
         final NotificationChannel deviceAdmin = new NotificationChannel(
@@ -172,6 +173,7 @@ public class SystemNotificationChannels {
                 USB,
                 context.getString(R.string.notification_channel_usb),
                 NotificationManager.IMPORTANCE_MIN);
+        usb.setBlockable(true);
         channelsList.add(usb);
 
         NotificationChannel foregroundChannel = new NotificationChannel(

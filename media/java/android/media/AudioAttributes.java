@@ -712,12 +712,6 @@ public final class AudioAttributes implements Parcelable {
      */
     @CapturePolicy
     public int getAllowedCapturePolicy() {
-        if ((mFlags & FLAG_NO_SYSTEM_CAPTURE) == FLAG_NO_SYSTEM_CAPTURE) {
-            return ALLOW_CAPTURE_BY_NONE;
-        }
-        if ((mFlags & FLAG_NO_MEDIA_PROJECTION) == FLAG_NO_MEDIA_PROJECTION) {
-            return ALLOW_CAPTURE_BY_SYSTEM;
-        }
         return ALLOW_CAPTURE_BY_ALL;
     }
 
@@ -1275,10 +1269,7 @@ public final class AudioAttributes implements Parcelable {
                     || (preset == MediaRecorder.AudioSource.VOICE_UPLINK)
                     || (preset == MediaRecorder.AudioSource.VOICE_CALL)
                     || (preset == MediaRecorder.AudioSource.ECHO_REFERENCE)
-                    || (preset == MediaRecorder.AudioSource.ULTRASOUND)
-                    // AUDIO_SOURCE_INVALID is used by convention on default initialized
-                    // audio attributes
-                    || (preset == MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID)) {
+                    || (preset == MediaRecorder.AudioSource.ULTRASOUND)) {
                 mSource = preset;
             } else {
                 setCapturePreset(preset);
@@ -1289,8 +1280,6 @@ public final class AudioAttributes implements Parcelable {
         /**
          * Specifying if haptic should be muted or not when playing audio-haptic coupled data.
          * By default, haptic channels are disabled.
-         * <p>This will be ignored if the caller doesn't have the
-         * {@link android.Manifest.permission#VIBRATE} permission.
          * @param muted true to force muting haptic channels.
          * @return the same Builder instance.
          */
@@ -1436,8 +1425,6 @@ public final class AudioAttributes implements Parcelable {
         return new String("AudioAttributes:"
                 + " usage=" + usageToString()
                 + " content=" + contentTypeToString()
-                + (mSource != MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID
-                    ? " source=" + MediaRecorder.toLogFriendlyAudioSource(mSource) : "")
                 + " flags=0x" + Integer.toHexString(mFlags).toUpperCase()
                 + " tags=" + mFormattedTags
                 + " bundle=" + (mBundle == null ? "null" : mBundle.toString()));
@@ -1773,20 +1760,7 @@ public final class AudioAttributes implements Parcelable {
      * @hide
      */
     public static int capturePolicyToFlags(@CapturePolicy int capturePolicy, int flags) {
-        switch (capturePolicy) {
-            case ALLOW_CAPTURE_BY_NONE:
-                flags |= FLAG_NO_MEDIA_PROJECTION | FLAG_NO_SYSTEM_CAPTURE;
-                break;
-            case ALLOW_CAPTURE_BY_SYSTEM:
-                flags |= FLAG_NO_MEDIA_PROJECTION;
-                flags &= ~FLAG_NO_SYSTEM_CAPTURE;
-                break;
-            case ALLOW_CAPTURE_BY_ALL:
-                flags &= ~FLAG_NO_SYSTEM_CAPTURE & ~FLAG_NO_MEDIA_PROJECTION;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown allow playback capture policy");
-        }
+        flags &= ~FLAG_NO_SYSTEM_CAPTURE & ~FLAG_NO_MEDIA_PROJECTION;
         return flags;
     }
 

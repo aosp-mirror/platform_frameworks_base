@@ -25,7 +25,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QSTileHost;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,19 +42,19 @@ public class TileAdapterTest extends SysuiTestCase {
 
     private TileAdapter mTileAdapter;
     @Mock
-    private QSHost mQSHost;
+    private QSTileHost mQSTileHost;
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         TestableLooper.get(this).runWithLooper(() -> mTileAdapter =
-                new TileAdapter(mContext, mQSHost, new UiEventLoggerFake()));
+                new TileAdapter(mContext, mQSTileHost, new UiEventLoggerFake()));
     }
 
     @Test
     public void testResetNotifiesHost() {
         mTileAdapter.resetTileSpecs(Collections.emptyList());
-        verify(mQSHost).changeTilesByUser(any(), any());
+        verify(mQSTileHost).changeTilesByUser(any(), any());
     }
 }

@@ -108,12 +108,12 @@
   </string-array>
   <string-array name="tile_states_work">
     <item msgid="389523503690414094">"Niedostępny"</item>
-    <item msgid="8045580926543311193">"Wyłączono"</item>
-    <item msgid="4913460972266982499">"Włączono"</item>
+    <item msgid="8045580926543311193">"Wyłączony"</item>
+    <item msgid="4913460972266982499">"Włączony"</item>
   </string-array>
   <string-array name="tile_states_cast">
     <item msgid="6032026038702435350">"Niedostępny"</item>
-    <item msgid="1488620600954313499">"Wyłączone"</item>
+    <item msgid="1488620600954313499">"Wyłączony"</item>
     <item msgid="588467578853244035">"Włączony"</item>
   </string-array>
   <string-array name="tile_states_night">
@@ -133,8 +133,8 @@
   </string-array>
   <string-array name="tile_states_reduce_brightness">
     <item msgid="1839836132729571766">"Niedostępny"</item>
-    <item msgid="4572245614982283078">"Wyłączone"</item>
-    <item msgid="6536448410252185664">"Włączone"</item>
+    <item msgid="4572245614982283078">"Wyłączony"</item>
+    <item msgid="6536448410252185664">"Włączony"</item>
   </string-array>
   <string-array name="tile_states_cameratoggle">
     <item msgid="6680671247180519913">"Niedostępny"</item>
@@ -175,10 +175,5 @@
     <item msgid="6184819793571079513">"Brak dostępu"</item>
     <item msgid="8014986104355098744">"Wyłączono"</item>
     <item msgid="5966994759929723339">"Włączono"</item>
-  </string-array>
-  <string-array name="tile_states_font_scaling">
-    <item msgid="3173069902082305985">"Brak dostępu"</item>
-    <item msgid="2478289035899842865">"Wyłączono"</item>
-    <item msgid="5137565285664080143">"Włączono"</item>
   </string-array>
 </resources>

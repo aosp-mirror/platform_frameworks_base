@@ -1,0 +1,4 @@
+runtime_resource_overlay {
+    name: "NavigationBarModeGesturalOverlayFS",
+    product_specific: true,
+} 

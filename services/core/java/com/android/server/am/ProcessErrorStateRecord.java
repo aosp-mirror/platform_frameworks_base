@@ -28,7 +28,6 @@ import android.app.AnrController;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IncrementalStatesInfo;
@@ -627,11 +626,8 @@ class ProcessErrorStateRecord {
     }
 
     private boolean getShowBackground() {
-        final ContentResolver resolver = mService.mContext.getContentResolver();
-        return Settings.Secure.getIntForUser(resolver,
-            Settings.Secure.ANR_SHOW_BACKGROUND,
-            0,
-            resolver.getUserId()) != 0;
+        return Settings.Secure.getInt(mService.mContext.getContentResolver(),
+                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
     }
 
     /**

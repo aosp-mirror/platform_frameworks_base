@@ -112,7 +112,9 @@ public class FilterFactory {
 
     public Filter createFilterByClass(Class filterClass, String filterName) {
         // Make sure this is a Filter subclass
-        if (!Filter.class.isAssignableFrom(filterClass)) {
+        try {
+            filterClass.asSubclass(Filter.class);
+        } catch (ClassCastException e) {
             throw new IllegalArgumentException("Attempting to allocate class '" + filterClass
                 + "' which is not a subclass of Filter!");
         }

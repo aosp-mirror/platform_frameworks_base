@@ -334,9 +334,6 @@ public interface BiometricFingerprintConstants {
             case FINGERPRINT_ACQUIRED_IMMOBILE:
             case FINGERPRINT_ACQUIRED_TOO_BRIGHT:
             case FINGERPRINT_ACQUIRED_VENDOR:
-                // Disable the UDFPS mode because the image capture has finished. The overlay
-                // can be hidden later, once the authentication result arrives.
-                return true;
             case FINGERPRINT_ACQUIRED_UNKNOWN:
             default:
                 // Keep the UDFPS mode in case of an unknown message.

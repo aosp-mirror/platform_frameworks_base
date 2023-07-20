@@ -72,6 +72,7 @@ filegroup {
         ":framework-keystore-sources",
         ":framework-identity-sources",
         ":framework-location-sources",
+        ":framework-lowpan-sources",
         ":framework-mca-effect-sources",
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
@@ -97,7 +98,7 @@ filegroup {
         // AIDL sources from external directories
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",
-        ":android.hardware.security.keymint-V3-java-source",
+        ":android.hardware.security.keymint-V2-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
         ":android.hardware.tv.tuner-V1-java-source",
         ":android.security.apc-java-source",
@@ -105,8 +106,7 @@ filegroup {
         ":android.security.legacykeystore-java-source",
         ":android.security.maintenance-java-source",
         ":android.security.metrics-java-source",
-        ":android.system.keystore2-V3-java-source",
-        ":android.hardware.cas-V1-java-source",
+        ":android.system.keystore2-V1-java-source",
         ":credstore_aidl",
         ":dumpstate_aidl",
         ":framework_native_aidl",
@@ -170,6 +170,7 @@ java_defaults {
             "identity/java",
             "keystore/java",
             "location/java",
+            "lowpan/java",
             "media/java",
             "media/mca/effect/java",
             "media/mca/filterfw/java",
@@ -197,10 +198,10 @@ java_library {
         "updatable-driver-protos",
         "ota_metadata_proto_java",
         "android.hidl.base-V1.0-java",
-        "android.hardware.cas-V1-java", // AIDL
         "android.hardware.cas-V1.0-java",
         "android.hardware.cas-V1.1-java",
         "android.hardware.cas-V1.2-java",
+        "android.hardware.configstore-V1.1-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.contexthub-V1.1-java",
         "android.hardware.contexthub-V1.2-java",
@@ -245,6 +246,7 @@ java_library {
         "com.android.sysprop.init",
         "com.android.sysprop.localization",
         "PlatformProperties",
+        "vendor.lineage.touch-V1.0-java",
     ],
     sdk_version: "core_platform",
     installable: false,
@@ -260,10 +262,7 @@ filegroup {
 
 java_defaults {
     name: "framework-minus-apex-defaults",
-    defaults: [
-        "framework-aidl-export-defaults",
-        "latest_android_hardware_soundtrigger3_java_static",
-    ],
+    defaults: ["framework-aidl-export-defaults"],
     srcs: [
         ":framework-non-updatable-sources",
         "core/java/**/*.logtags",
@@ -319,7 +318,6 @@ java_defaults {
         "contacts-provider-platform-compat-config",
     ],
     libs: [
-        "androidx.annotation_annotation",
         "app-compat-annotations",
         "ext",
         "framework-updatable-stubs-module_libs_api",
@@ -328,6 +326,8 @@ java_defaults {
     sdk_version: "core_platform",
     static_libs: [
         "android.hardware.common.fmq-V1-java",
+        // TODO(b/184162091)
+        "android.hardware.soundtrigger3-V1-java",
         "bouncycastle-repackaged-unbundled",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
@@ -338,14 +338,12 @@ java_defaults {
         "soundtrigger_middleware-aidl-java",
         "modules-utils-build",
         "modules-utils-preconditions",
-        "modules-utils-statemachine",
         "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
         "modules-utils-uieventlogger-interface",
         "framework-permission-aidl-java",
         "spatializer-aidl-java",
         "audiopolicy-types-aidl-java",
-        "modules-utils-expresslog",
     ],
 }
 
@@ -505,8 +503,9 @@ metalava_framework_docs_args = "" +
     "--hide RequiresPermission " +
     "--hide SdkConstant " +
     "--hide Todo " +
+    "--hide Typo " +
     "--hide UnavailableSymbol " +
-    "--manifest $(location :frameworks-base-core-AndroidManifest.xml) "
+    "--manifest $(location core/res/AndroidManifest.xml) "
 
 packages_to_document = [
     "android",
@@ -531,7 +530,7 @@ filegroup {
         "core/java/**/*.logtags",
         "**/package.html",
     ],
-    visibility: ["//frameworks/base/api"],
+    visibility: ["//visibility:private"],
 }
 
 // Defaults for all stubs that include the non-updatable framework. These defaults do not include
@@ -543,12 +542,14 @@ stubs_defaults {
     sdk_version: "none",
     system_modules: "none",
     java_version: "1.8",
-    arg_files: [":frameworks-base-core-AndroidManifest.xml"],
+    arg_files: ["core/res/AndroidManifest.xml"],
     aidl: {
+        local_include_dirs: [
+            "media/aidl",
+            "telephony/java",
+        ],
         include_dirs: [
             "frameworks/av/aidl",
-            "frameworks/base/media/aidl",
-            "frameworks/base/telephony/java",
             "frameworks/native/libs/permission/aidl",
             "packages/modules/Bluetooth/framework/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
@@ -580,7 +581,7 @@ stubs_defaults {
     annotations_enabled: true,
     previous_api: ":android.api.public.latest",
     merge_annotations_dirs: ["metalava-manual"],
-    defaults_visibility: ["//frameworks/base/api"],
+    defaults_visibility: ["//visibility:private"],
     visibility: ["//frameworks/base/api"],
 }
 
@@ -608,9 +609,12 @@ stubs_defaults {
         // NOTE: The below can be removed once the prebuilt stub contains IKE.
         "sdk_system_current_android.net.ipsec.ike",
     ],
+    defaults_visibility: ["//visibility:private"],
 }
 
 build = [
+    "StubLibraries.bp",
+    "ApiDocs.bp",
     "ProtoLibraries.bp",
     "TestProtoLibraries.bp",
 ]

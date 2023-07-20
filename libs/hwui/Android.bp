@@ -34,7 +34,7 @@ cc_defaults {
         "hwui_static_deps",
         "skia_deps",
         //"hwui_bugreport_font_cache_usage",
-        //"hwui_compile_for_perf",
+        "hwui_compile_for_perf",
         "hwui_lto",
     ],
 
@@ -66,12 +66,8 @@ cc_defaults {
         "external/skia/src/core",
     ],
 
-    product_variables: {
-        eng: {
-            lto: {
-                never: true,
-            },
-        },
+    lto: {
+        thin: true,
     },
 
     target: {
@@ -97,10 +93,6 @@ cc_defaults {
 
 cc_defaults {
     name: "hwui_static_deps",
-    defaults: [
-        "android.hardware.graphics.common-ndk_shared",
-        "android.hardware.graphics.composer3-ndk_shared",
-    ],
     shared_libs: [
         "libbase",
         "libharfbuzz_ng",
@@ -114,7 +106,9 @@ cc_defaults {
     target: {
         android: {
             shared_libs: [
+                "android.hardware.graphics.common-V3-ndk",
                 "android.hardware.graphics.common@1.2",
+                "android.hardware.graphics.composer3-V1-ndk",
                 "liblog",
                 "libcutils",
                 "libutils",
@@ -159,9 +153,7 @@ cc_defaults {
     name: "hwui_compile_for_perf",
     // TODO: Non-arm?
     cflags: [
-        "-fno-omit-frame-pointer",
-        "-marm",
-        "-mapcs",
+        "-O3",
     ],
 }
 
@@ -216,15 +208,6 @@ filegroup {
         "apex/java/**/*.java",
     ],
     path: "apex/java",
-}
-
-java_api_contribution {
-    name: "framework-graphics-public-stubs",
-    api_surface: "public",
-    api_file: "api/current.txt",
-    visibility: [
-        "//build/orchestrator/apis",
-    ],
 }
 
 // ------------------------
@@ -647,7 +630,7 @@ cc_library_static {
 cc_defaults {
     name: "hwui_test_defaults",
     defaults: ["hwui_defaults"],
-    test_suites: ["general-tests"],
+    test_suites: ["device-tests"],
     header_libs: ["libandroid_headers_private"],
     target: {
         android: {
@@ -725,9 +708,6 @@ cc_test {
         "tests/unit/TypefaceTests.cpp",
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/WebViewFunctorManagerTests.cpp",
-    ],
-    data: [
-        ":hwuimicro",
     ],
 }
 

@@ -17,6 +17,6 @@
 */
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="2.5dp"
-    android:insetRight="2.5dp"
+    android:insetLeft="1.0dp"
+    android:insetRight="1.0dp"
     android:drawable="@drawable/ic_data_saver" />

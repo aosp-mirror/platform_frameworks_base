@@ -17,8 +17,6 @@
 package com.android.server.pm;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.verify;
@@ -123,16 +121,22 @@ public class UserDataPreparerTest {
     }
 
     @Test
-    public void testDestroyUserData_De_DoesNotDestroyCe() throws Exception {
-        // Add file in CE storage
+    public void testDestroyUserData() throws Exception {
+        // Add file in CE
         File systemCeDir = mUserDataPreparer.getDataSystemCeDirectory(TEST_USER_ID);
         systemCeDir.mkdirs();
         File ceFile = new File(systemCeDir, "file");
         writeFile(ceFile, "-----" );
-        // Destroy DE storage, then verify that CE storage wasn't destroyed too.
-        mUserDataPreparer.destroyUserData(TEST_USER_ID, StorageManager.FLAG_STORAGE_DE);
+        testDestroyUserData_De();
+        // CE directory should be preserved
         assertEquals(Collections.singletonList(ceFile), Arrays.asList(FileUtils.listFilesOrEmpty(
                 systemCeDir)));
+
+        testDestroyUserData_Ce();
+
+        // Verify that testDir is empty
+        assertEquals(Collections.emptyList(), Arrays.asList(FileUtils.listFilesOrEmpty(
+                mUserDataPreparer.testDir)));
     }
 
     @Test
@@ -151,13 +155,7 @@ public class UserDataPreparerTest {
         verify(mStorageManagerMock).destroyUserStorage(isNull(String.class), eq(TEST_USER_ID),
                         eq(StorageManager.FLAG_STORAGE_DE));
 
-        // systemDir (normal path: /data/system/users/$userId) should have been deleted.
-        assertFalse(systemDir.exists());
-        // systemDeDir (normal path: /data/system_de/$userId) should still exist but be empty, since
-        // UserDataPreparer itself is responsible for deleting the contents of this directory, but
-        // it delegates to StorageManager.destroyUserStorage() for deleting the directory itself.
-        // We've mocked out StorageManager, so StorageManager.destroyUserStorage() will be a no-op.
-        assertTrue(systemDeDir.exists());
+        assertEquals(Collections.emptyList(), Arrays.asList(FileUtils.listFilesOrEmpty(systemDir)));
         assertEquals(Collections.emptyList(), Arrays.asList(FileUtils.listFilesOrEmpty(
                 systemDeDir)));
     }
@@ -175,11 +173,6 @@ public class UserDataPreparerTest {
         verify(mStorageManagerMock).destroyUserStorage(isNull(String.class), eq(TEST_USER_ID),
                 eq(StorageManager.FLAG_STORAGE_CE));
 
-        // systemCeDir (normal path: /data/system_ce/$userId) should still exist but be empty, since
-        // UserDataPreparer itself is responsible for deleting the contents of this directory, but
-        // it delegates to StorageManager.destroyUserStorage() for deleting the directory itself.
-        // We've mocked out StorageManager, so StorageManager.destroyUserStorage() will be a no-op.
-        assertTrue(systemCeDir.exists());
         assertEquals(Collections.emptyList(), Arrays.asList(FileUtils.listFilesOrEmpty(
                 systemCeDir)));
     }
@@ -252,6 +245,11 @@ public class UserDataPreparerTest {
         @Override
         protected File getDataUserDeDirectory(String volumeUuid, int userId) {
             return new File(testDir, "user_de_" + userId);
+        }
+
+        @Override
+        protected boolean isFileEncryptedEmulatedOnly() {
+            return false;
         }
     }
 

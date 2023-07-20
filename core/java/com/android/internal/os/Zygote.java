@@ -178,14 +178,7 @@ public final class Zygote {
      * GWP-ASan is activated unconditionally (but still, only a small subset of
      * allocations is protected).
      */
-    public static final int GWP_ASAN_LEVEL_ALWAYS = 2 << 21;
-
-    /**
-     * GWP-ASan's `gwpAsanMode` manifest flag was unspecified. Currently, this
-     * means GWP_ASAN_LEVEL_LOTTERY for system apps, and GWP_ASAN_LEVEL_NONE for
-     * non-system apps.
-     */
-    public static final int GWP_ASAN_LEVEL_DEFAULT = 3 << 21;
+    public static final int GWP_ASAN_LEVEL_ALWAYS = 1 << 22;
 
     /** Enable automatic zero-initialization of native heap memory allocations. */
     public static final int NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23;
@@ -194,11 +187,6 @@ public final class Zygote {
      * Enable profiling from system services. This loads profiling related plugins in ART.
      */
     public static final int PROFILEABLE = 1 << 24;
-
-    /**
-     * Enable ptrace.  This is enabled on eng or userdebug builds, or if the app is debuggable.
-     */
-    public static final int DEBUG_ENABLE_PTRACE = 1 << 25;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
@@ -1013,28 +1001,17 @@ public final class Zygote {
     }
 
     /**
-     * This will enable jdwp by default for all apps. It is OK to cache this property
-     * because we expect to reboot the system whenever this property changes
-     */
-    private static final boolean ENABLE_JDWP = SystemProperties.get(
-                          "persist.debug.dalvik.vm.jdwp.enabled").equals("1");
-
-    /**
      * Applies debugger system properties to the zygote arguments.
      *
-     * For eng builds all apps are debuggable. On userdebug and user builds
-     * if persist.debug.dalvik.vm.jdwp.enabled is 1 all apps are
-     * debuggable. Otherwise, the debugger state is specified via the
-     * "--enable-jdwp" flag in the spawn request.
+     * If "ro.debuggable" is "1", all apps are debuggable. Otherwise,
+     * the debugger state is specified via the "--enable-jdwp" flag
+     * in the spawn request.
      *
      * @param args non-null; zygote spawner args
      */
     static void applyDebuggerSystemProperty(ZygoteArguments args) {
-        if (Build.IS_ENG || ENABLE_JDWP) {
-            args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
-        }
         if (RoSystemProperties.DEBUGGABLE) {
-            args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_PTRACE;
+            args.mRuntimeFlags |= Zygote.DEBUG_ENABLE_JDWP;
         }
     }
 
@@ -1362,13 +1339,15 @@ public final class Zygote {
                     ? GWP_ASAN_LEVEL_ALWAYS
                     : GWP_ASAN_LEVEL_NEVER;
         }
+        // If the app does not specify gwpAsanMode, the default behavior is lottery among the
+        // system apps, and disabled for user apps, unless overwritten by the compat feature.
         if (isCompatChangeEnabled(GWP_ASAN, info, platformCompat, 0)) {
             return GWP_ASAN_LEVEL_ALWAYS;
         }
         if ((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
             return GWP_ASAN_LEVEL_LOTTERY;
         }
-        return GWP_ASAN_LEVEL_DEFAULT;
+        return GWP_ASAN_LEVEL_NEVER;
     }
 
     private static boolean enableNativeHeapZeroInit(

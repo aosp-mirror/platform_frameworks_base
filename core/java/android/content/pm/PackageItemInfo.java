@@ -502,6 +502,6 @@ public class PackageItemInfo {
         }
 
         private final Collator   sCollator = Collator.getInstance();
-        private final PackageManager mPM;
+        private PackageManager   mPM;
     }
 }

@@ -110,6 +110,10 @@ public final class InputManager {
     private final ArrayList<InputDeviceListenerDelegate> mInputDeviceListeners =
             new ArrayList<InputDeviceListenerDelegate>();
 
+    private final Object mSmartSwitchLock = new Object();
+    private SmartSwitchChangedListener mSmartSwitchChangedListener;
+    private List<OnSmartSwitchChangedListenerDelegate> mOnSmartSwitchChangedListeners;
+
     // Guarded by mTabletModeLock
     private final Object mTabletModeLock = new Object();
     private TabletModeChangedListener mTabletModeChangedListener;
@@ -168,7 +172,7 @@ public final class InputManager {
      * The <code>android:label</code> attribute specifies a human-readable descriptive
      * label to describe the keyboard layout in the user interface, such as "English (US)".
      * The <code>android:keyboardLayout</code> attribute refers to a
-     * <a href="https://source.android.com/docs/core/interaction/input/key-character-map-files">
+     * <a href="http://source.android.com/tech/input/key-character-map-files.html">
      * key character map</a> resource that defines the keyboard layout.
      * </p>
      */
@@ -527,6 +531,57 @@ public final class InputManager {
         final int numListeners = mInputDeviceListeners.size();
         for (int i = 0; i < numListeners; i++) {
             if (mInputDeviceListeners.get(i).mListener == listener) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /** @hide */
+    public void registerOnSmartSwitchChangedListener(OnSmartSwitchChangedListener listener, Handler handler) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+
+        synchronized (mSmartSwitchLock) {
+            if (mOnSmartSwitchChangedListeners == null) {
+                initializeSmartSwitchListenerLocked();
+            }
+            int idx = findOnSmartSwitchChangedListenerLocked(listener);
+            if (idx < 0) {
+                mOnSmartSwitchChangedListeners.add(new OnSmartSwitchChangedListenerDelegate(listener, handler));
+            }
+        }
+    }
+
+    /** @hide */
+    public void unregisterOnSmartSwitchChangedListener(OnSmartSwitchChangedListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+        synchronized (mSmartSwitchLock) {
+            int idx = findOnSmartSwitchChangedListenerLocked(listener);
+            if (idx >= 0) {
+                mOnSmartSwitchChangedListeners.remove(idx).removeCallbacksAndMessages(null);
+            }
+        }
+    }
+
+    private void initializeSmartSwitchListenerLocked() {
+        final SmartSwitchChangedListener listener = new SmartSwitchChangedListener();
+        try {
+            mIm.registerSmartSwitchChangedListener(listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+        mSmartSwitchChangedListener = listener;
+        mOnSmartSwitchChangedListeners = new ArrayList();
+    }
+
+    private int findOnSmartSwitchChangedListenerLocked(OnSmartSwitchChangedListener listener) {
+        int N = mOnSmartSwitchChangedListeners.size();
+        for (int i = 0; i < N; i++) {
+            if (mOnSmartSwitchChangedListeners.get(i).mListener == listener) {
                 return i;
             }
         }
@@ -1536,6 +1591,15 @@ public final class InputManager {
     }
 
 
+    private void onSmartSwitchChanged(long whenNanos, boolean smartSwitchState) {
+        synchronized (mSmartSwitchLock) {
+            int N = mOnSmartSwitchChangedListeners.size();
+            for (int i = 0; i < N; i++) {
+                mOnSmartSwitchChangedListeners.get(i).sendSmartSwitchChanged(whenNanos, smartSwitchState);
+            }
+        }
+    }
+
     private void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
         if (DEBUG) {
             Log.d(TAG, "Received tablet mode changed: "
@@ -1990,6 +2054,45 @@ public final class InputManager {
                 case MSG_DEVICE_CHANGED:
                     mListener.onInputDeviceChanged(msg.arg1);
                     break;
+            }
+        }
+    }
+
+    /** @hide */
+    public interface OnSmartSwitchChangedListener {
+        void onSmartSwitchChanged(long whenNanos, boolean smartSwitchState);
+    }
+
+    private final class SmartSwitchChangedListener extends ISmartSwitchChangedListener.Stub {
+        @Override
+        public void onSmartSwitchChanged(long whenNanos, boolean smartSwitchState) {
+            InputManager.this.onSmartSwitchChanged(whenNanos, smartSwitchState);
+        }
+    }
+
+    private static final class OnSmartSwitchChangedListenerDelegate extends Handler {
+        private static final int MSG_SMART_SWITCH_CHANGED = 0;
+
+        public final OnSmartSwitchChangedListener mListener;
+
+        public OnSmartSwitchChangedListenerDelegate(OnSmartSwitchChangedListener listener, Handler handler) {
+            super(handler != null ? handler.getLooper() : Looper.myLooper());
+            mListener = listener;
+        }
+
+        public void sendSmartSwitchChanged(long whenNanos, boolean smartSwitchState) {
+            SomeArgs args = SomeArgs.obtain();
+            args.argi3 = (int) whenNanos;
+            args.arg1 = (Boolean) smartSwitchState;
+            obtainMessage(MSG_SMART_SWITCH_CHANGED, args).sendToTarget();
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_SMART_SWITCH_CHANGED) {
+                SomeArgs args = (SomeArgs) msg.obj;
+                boolean smartSwitchState = ((boolean) args.arg1);
+                mListener.onSmartSwitchChanged((long) args.argi3, smartSwitchState);
             }
         }
     }

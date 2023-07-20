@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.media.MediaRouter.RouteInfo;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;
@@ -66,9 +67,7 @@ import javax.inject.Inject;
 /** Quick settings tile: Cast **/
 public class CastTile extends QSTileImpl<BooleanState> {
 
-    public static final String TILE_SPEC = "cast";
-
-    private static final String INTERACTION_JANK_TAG = TILE_SPEC;
+    private static final String INTERACTION_JANK_TAG = "cast";
 
     private static final Intent CAST_SETTINGS =
             new Intent(Settings.ACTION_CAST_SETTINGS);
@@ -80,6 +79,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final Callback mCallback = new Callback();
     private boolean mWifiConnected;
     private boolean mHotspotConnected;
+    private static final String WFD_ENABLE = "persist.debug.wfd.enable";
 
     @Inject
     public CastTile(
@@ -295,13 +295,19 @@ public class CastTile extends QSTileImpl<BooleanState> {
                 @Override
                 public void setWifiIndicators(@NonNull WifiIndicators indicators) {
                     // statusIcon.visible has the connected status information
-                    boolean enabledAndConnected = indicators.enabled
-                            && (indicators.qsIcon == null ? false : indicators.qsIcon.visible);
-                    if (enabledAndConnected != mWifiConnected) {
-                        mWifiConnected = enabledAndConnected;
-                        // Hotspot is not connected, so changes here should update
-                        if (!mHotspotConnected) {
+                    if(SystemProperties.getBoolean(WFD_ENABLE, false)) {
+                        if(indicators.enabled != mWifiConnected) {
+                            mWifiConnected = indicators.enabled;
                             refreshState();
+                        }
+                    } else {
+                        boolean enabledAndConnected = indicators.enabled && indicators.qsIcon.visible;
+                        if (enabledAndConnected != mWifiConnected) {
+                            mWifiConnected = enabledAndConnected;
+                            // Hotspot is not connected, so changes here should update
+                            if (!mHotspotConnected) {
+                                refreshState();
+                            }
                         }
                     }
                 }

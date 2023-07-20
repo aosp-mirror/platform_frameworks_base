@@ -74,8 +74,6 @@ public class CachedBluetoothDeviceTest {
     @Mock
     private HearingAidProfile mHearingAidProfile;
     @Mock
-    private LeAudioProfile mLeAudioProfile;
-    @Mock
     private BluetoothDevice mDevice;
     @Mock
     private BluetoothDevice mSubDevice;
@@ -94,74 +92,13 @@ public class CachedBluetoothDeviceTest {
         mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
         when(mDevice.getAddress()).thenReturn(DEVICE_ADDRESS);
         when(mHfpProfile.isProfileReady()).thenReturn(true);
-        when(mHfpProfile.getProfileId()).thenReturn(BluetoothProfile.HEADSET);
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
-        when(mA2dpProfile.getProfileId()).thenReturn(BluetoothProfile.A2DP);
         when(mPanProfile.isProfileReady()).thenReturn(true);
-        when(mPanProfile.getProfileId()).thenReturn(BluetoothProfile.PAN);
         when(mHearingAidProfile.isProfileReady()).thenReturn(true);
-        when(mHearingAidProfile.getProfileId()).thenReturn(BluetoothProfile.HEARING_AID);
-        when(mLeAudioProfile.isProfileReady()).thenReturn(true);
-        when(mLeAudioProfile.getProfileId()).thenReturn(BluetoothProfile.LE_AUDIO);
         mCachedDevice = spy(new CachedBluetoothDevice(mContext, mProfileManager, mDevice));
         mSubCachedDevice = spy(new CachedBluetoothDevice(mContext, mProfileManager, mSubDevice));
         doAnswer((invocation) -> mBatteryLevel).when(mCachedDevice).getBatteryLevel();
         doAnswer((invocation) -> mBatteryLevel).when(mSubCachedDevice).getBatteryLevel();
-    }
-
-    private void testTransitionFromConnectingToDisconnected(
-        LocalBluetoothProfile connectingProfile, LocalBluetoothProfile connectedProfile,
-        int connectionPolicy, String expectedSummary) {
-        // Arrange:
-        // At least one profile has to be connected
-        updateProfileStatus(connectedProfile, BluetoothProfile.STATE_CONNECTED);
-        // Set profile under test to CONNECTING
-        updateProfileStatus(connectingProfile, BluetoothProfile.STATE_CONNECTING);
-        // Set connection policy
-        when(connectingProfile.getConnectionPolicy(mDevice)).thenReturn(connectionPolicy);
-
-        // Act & Assert:
-        //   Get the expected connection summary.
-        updateProfileStatus(connectingProfile, BluetoothProfile.STATE_DISCONNECTED);
-        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(expectedSummary);
-    }
-
-    @Test
-    public void onProfileStateChanged_testConnectingToDisconnected_policyAllowed_problem() {
-        String connectTimeoutString = mContext.getString(R.string.profile_connect_timeout_subtext);
-
-        testTransitionFromConnectingToDisconnected(mA2dpProfile, mLeAudioProfile,
-        BluetoothProfile.CONNECTION_POLICY_ALLOWED, connectTimeoutString);
-        testTransitionFromConnectingToDisconnected(mHearingAidProfile, mLeAudioProfile,
-        BluetoothProfile.CONNECTION_POLICY_ALLOWED, connectTimeoutString);
-        testTransitionFromConnectingToDisconnected(mHfpProfile, mLeAudioProfile,
-        BluetoothProfile.CONNECTION_POLICY_ALLOWED, connectTimeoutString);
-        testTransitionFromConnectingToDisconnected(mLeAudioProfile, mA2dpProfile,
-        BluetoothProfile.CONNECTION_POLICY_ALLOWED, connectTimeoutString);
-    }
-
-    @Test
-    public void onProfileStateChanged_testConnectingToDisconnected_policyForbidden_noProblem() {
-        testTransitionFromConnectingToDisconnected(mA2dpProfile, mLeAudioProfile,
-        BluetoothProfile.CONNECTION_POLICY_FORBIDDEN, null);
-        testTransitionFromConnectingToDisconnected(mHearingAidProfile, mLeAudioProfile,
-        BluetoothProfile.CONNECTION_POLICY_FORBIDDEN, null);
-        testTransitionFromConnectingToDisconnected(mHfpProfile, mLeAudioProfile,
-        BluetoothProfile.CONNECTION_POLICY_FORBIDDEN, null);
-        testTransitionFromConnectingToDisconnected(mLeAudioProfile, mA2dpProfile,
-        BluetoothProfile.CONNECTION_POLICY_FORBIDDEN, null);
-    }
-
-    @Test
-    public void onProfileStateChanged_testConnectingToDisconnected_policyUnknown_noProblem() {
-        testTransitionFromConnectingToDisconnected(mA2dpProfile, mLeAudioProfile,
-        BluetoothProfile.CONNECTION_POLICY_UNKNOWN, null);
-        testTransitionFromConnectingToDisconnected(mHearingAidProfile, mLeAudioProfile,
-        BluetoothProfile.CONNECTION_POLICY_UNKNOWN, null);
-        testTransitionFromConnectingToDisconnected(mHfpProfile, mLeAudioProfile,
-        BluetoothProfile.CONNECTION_POLICY_UNKNOWN, null);
-        testTransitionFromConnectingToDisconnected(mLeAudioProfile, mA2dpProfile,
-        BluetoothProfile.CONNECTION_POLICY_UNKNOWN, null);
     }
 
     @Test

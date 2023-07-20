@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"İptal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Eşleme işlemi, bağlantı kurulduğunda kişilerinize ve çağrı geçmişine erişim izni verir."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN veya şifre anahtarı yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN veya parola yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile iletişim kurulamıyor."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Eşleme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> tarafından reddedildi."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Bilgisayar"</string>
@@ -267,7 +267,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Hata raporu almak için güç menüsünde bir düğme göster"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Uyanık kal"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Şarj edilirken ekran hiçbir zaman uykuya geçmez"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI araştırma günlüğünü etkinleştir"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI araştırmayı etkinleştir"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth paketlerini yakalayın. (Bu ayarı değiştirdikten sonra Bluetooth seçimini değiştirin)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM kilit açma"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Önyükleyicinin kilidinin açılmasına izin ver"</string>
@@ -278,8 +278,8 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"Sahte konum uygulaması: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Ağ işlemleri"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Kablosuz ekran sertifikası"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Kablosuz ayrıntılı günlük kaydını etkinleştir"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Kablosuz ağ taramasını sınırlandır"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Kablosuz Ayrıntılı Günlük Kaydını etkinleştir"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Kablosuz ağ taramasını kısma"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Kablosuz kalıcı olmayan MAC rastgele hale getirme modu"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobil veri her zaman etkin"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering donanım hızlandırıcısı"</string>
@@ -315,7 +315,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Bu mod etkinleştirildiğinde, bu cihaz MAC rastgele hale getirme işlevi açık olan bir ağa her bağlandığında cihazın MAC adresi değişebilir."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sayaçlı"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sayaçsız"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Günlük kaydedici arabellek boyutları"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Günlük Kaydedici arabellek boyutları"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Gün. arabel. başına Gün. Kayd. boyutunu seç"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Günlük kaydedici kalıcı depolama alanı silinsin mi?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Kalıcı günlük kaydediciyle artık izlemediğimizde, cihazınızda bulunan günlük kaydedici verilerini silmemiz gerekmektedir."</string>
@@ -494,7 +494,7 @@
     <string name="disabled" msgid="8017887509554714950">"Devre dışı"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"İzin verildi"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"İzin verilmiyor"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Bilinmeyen uygulamaları yükleme"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Bilinmeyen uygulamaları yükle"</string>
     <string name="home" msgid="973834627243661438">"Ayarlar Ana Sayfası"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"%0"</item>
@@ -530,7 +530,7 @@
     <string name="okay" msgid="949938843324579502">"Tamam"</string>
     <string name="done" msgid="381184316122520313">"Bitti"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmlar ve hatırlatıcılar"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Alarm ve hatırlatıcı ayarlamasına izin ver"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Alarm ve hatırlatıcı ayarlanmasına izin ver"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmlar ve hatırlatıcılar"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Bu uygulamanın alarm kurmasına ve zamana bağlı işlemler programlamasına izin verin. Bu izin, uygulamanın arka planda çalışmasına olanak sağlayarak daha fazla pil harcanmasına neden olabilir.\n\nBu izin verilmezse bu uygulama tarafından programlanmış mevcut alarmlar ve zamana bağlı etkinlikler çalışmaz."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"program, alarm, hatırlatıcı, saat"</string>
@@ -662,14 +662,14 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Fiziksel klavye"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Klavye düzenini seçin"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Varsayılan"</string>
-    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekranı açma"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekranı aç"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Ekranı açmaya izin ver"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Bir uygulamanın ekranı açmasına izin verin. İzin verildiğinde, uygulama sizin belirgin niyetiniz olmadan istediği zaman ekranı açabilir."</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulamasında anons durdurulsun mu?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapar veya çıkışı değiştirirseniz mevcut anonsunuz duraklatılır"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapın"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Çıkışı değiştirme"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Tahmin edilen geri gitme animasyonları"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Tahmin edilen geri gitme için sistem animasyonlarını etkinleştirin"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Tahmine dayalı geri hareketi animasyonları"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Tahmine dayalı geri hareketi için sistem animasyonlarını etkinleştirin"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Bu ayar, tahmine dayalı hareket animasyonu için sistem animasyonlarını etkinleştirir. Her uygulamanın manifest dosyasında enableOnBackInvokedCallback\'in doğru değerine ayarlanması gerekir."</string>
 </resources>

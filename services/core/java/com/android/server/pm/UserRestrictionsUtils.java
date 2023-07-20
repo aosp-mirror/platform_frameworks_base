@@ -147,9 +147,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_WIFI_TETHERING,
             UserManager.DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI,
             UserManager.DISALLOW_WIFI_DIRECT,
-            UserManager.DISALLOW_ADD_WIFI_CONFIG,
-            UserManager.DISALLOW_CELLULAR_2G,
-            UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO
+            UserManager.DISALLOW_ADD_WIFI_CONFIG
     });
 
     public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(
@@ -197,9 +195,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_CHANGE_WIFI_STATE,
             UserManager.DISALLOW_WIFI_TETHERING,
             UserManager.DISALLOW_WIFI_DIRECT,
-            UserManager.DISALLOW_ADD_WIFI_CONFIG,
-            UserManager.DISALLOW_CELLULAR_2G,
-            UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO
+            UserManager.DISALLOW_ADD_WIFI_CONFIG
     );
 
     /**
@@ -238,9 +234,7 @@ public class UserRestrictionsUtils {
                     UserManager.DISALLOW_CHANGE_WIFI_STATE,
                     UserManager.DISALLOW_WIFI_TETHERING,
                     UserManager.DISALLOW_WIFI_DIRECT,
-                    UserManager.DISALLOW_ADD_WIFI_CONFIG,
-                    UserManager.DISALLOW_CELLULAR_2G,
-                    UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO
+                    UserManager.DISALLOW_ADD_WIFI_CONFIG
     );
 
     /**
@@ -779,6 +773,7 @@ public class UserRestrictionsUtils {
             case android.provider.Settings.Secure.DOZE_PICK_UP_GESTURE:
             case android.provider.Settings.Secure.DOZE_PULSE_ON_LONG_PRESS:
             case android.provider.Settings.Secure.DOZE_DOUBLE_TAP_GESTURE:
+            case android.provider.Settings.System.DOZE_ON_CHARGE:
                 if ("0".equals(value)) {
                     return false;
                 }

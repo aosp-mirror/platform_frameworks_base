@@ -36,5 +36,4 @@ parcelable CameraOutputConfig
     int surfaceGroupId;
     String physicalCameraId;
     List<CameraOutputConfig> sharedSurfaceConfigs;
-    boolean isMultiResolutionOutput;
 }

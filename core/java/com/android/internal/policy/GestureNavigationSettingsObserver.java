@@ -18,8 +18,11 @@ package com.android.internal.policy;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BACK_GESTURE_EDGE_WIDTH;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
@@ -29,6 +32,8 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
+import com.android.internal.util.xtended.XtendedUtils;
+
 /**
  * @hide
  */
@@ -36,6 +41,7 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
     private Context mContext;
     private Runnable mOnChangeRunnable;
     private Handler mMainHandler;
+    private IntentFilter mIntentFilter;
 
     public GestureNavigationSettingsObserver(Handler handler, Context context,
             Runnable onChangeRunnable) {
@@ -43,6 +49,9 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
         mMainHandler = handler;
         mContext = context;
         mOnChangeRunnable = onChangeRunnable;
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        mIntentFilter.addDataScheme("package");
     }
 
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
@@ -56,47 +65,123 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
         }
     };
 
-    /**
-     * Registers the observer for all users.
-     */
-    public void register() {
-        ContentResolver r = mContext.getContentResolver();
-        r.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT),
-                false, this, UserHandle.USER_ALL);
-        r.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT),
-                false, this, UserHandle.USER_ALL);
-        r.registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
-                false, this, UserHandle.USER_ALL);
-        DeviceConfig.addOnPropertiesChangedListener(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                runnable -> mMainHandler.post(runnable),
-                mOnPropertiesChangedListener);
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if(action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
+                // Get packageName from Uri
+                String packageName = intent.getData().getSchemeSpecificPart();
+                // If the package is still installed
+                if (XtendedUtils.isPackageInstalled(context, packageName)) {
+                    // it's an application update, we can skip the rest.
+                    return;
+                }
+                // Get package names currently set as default
+                String leftPackageName = Settings.System.getStringForUser(context.getContentResolver(),
+                        Settings.System.LEFT_LONG_BACK_SWIPE_APP_ACTION,
+                        UserHandle.USER_CURRENT);
+                String rightPackageName = Settings.System.getStringForUser(context.getContentResolver(),
+                        Settings.System.RIGHT_LONG_BACK_SWIPE_APP_ACTION,
+                        UserHandle.USER_CURRENT);
+                String verticalLeftPackageName = Settings.System.getStringForUser(context.getContentResolver(),
+                        Settings.System.LEFT_VERTICAL_BACK_SWIPE_APP_ACTION,
+                        UserHandle.USER_CURRENT);
+                String verticalRightPackageName = Settings.System.getStringForUser(context.getContentResolver(),
+                        Settings.System.RIGHT_VERTICAL_BACK_SWIPE_APP_ACTION,
+                        UserHandle.USER_CURRENT);
+                // if the package name equals to some set value
+                if(packageName.equals(leftPackageName)) {
+                    // The short application action has to be reset
+                    resetApplicationAction(true, false);
+                }
+                if (packageName.equals(rightPackageName)) {
+                    // The long application action has to be reset
+                    resetApplicationAction(false, false);
+                }
+                if(packageName.equals(verticalLeftPackageName)) {
+                    // The short application action has to be reset
+                    resetApplicationAction(true, true);
+                }
+                if (packageName.equals(verticalRightPackageName)) {
+                    // The long application action has to be reset
+                    resetApplicationAction(false, true);
+                }
+            }
+        }
+    };
+
+    private void resetApplicationAction(boolean isLeftAction, boolean isVertical) {
+        if (isLeftAction) {
+            // Remove stored values
+            Settings.System.putIntForUser(mContext.getContentResolver(),
+                    isVertical ? Settings.System.LEFT_VERTICAL_BACK_SWIPE_ACTION : Settings.System.LEFT_LONG_BACK_SWIPE_ACTION,
+                    /* no action */ 0,
+                    UserHandle.USER_CURRENT);
+            Settings.System.putStringForUser(mContext.getContentResolver(),
+                    isVertical ? Settings.System.LEFT_VERTICAL_BACK_SWIPE_APP_FR_ACTION : Settings.System.LEFT_LONG_BACK_SWIPE_APP_FR_ACTION,
+                    /* none */ "",
+                    UserHandle.USER_CURRENT);
+        } else {
+            // Remove stored values
+            Settings.System.putIntForUser(mContext.getContentResolver(),
+                    isVertical ? Settings.System.RIGHT_VERTICAL_BACK_SWIPE_ACTION : Settings.System.RIGHT_LONG_BACK_SWIPE_ACTION,
+                    /* no action */ 0,
+                    UserHandle.USER_CURRENT);
+            Settings.System.putStringForUser(mContext.getContentResolver(),
+                    isVertical ? Settings.System.RIGHT_VERTICAL_BACK_SWIPE_APP_FR_ACTION : Settings.System.RIGHT_LONG_BACK_SWIPE_APP_FR_ACTION,
+                    /* none */ "",
+                    UserHandle.USER_CURRENT);
+        }
+        // the observer will trigger EdgeBackGestureHandler.updateCurrentUserResources and update settings there too
     }
 
-    /**
-     * Registers the observer for the calling user.
-     */
-    public void registerForCallingUser() {
+    public void register() {
+        mContext.registerReceiver(mBroadcastReceiver, mIntentFilter);
         ContentResolver r = mContext.getContentResolver();
         r.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT),
-                false, this);
+                false, this, UserHandle.USER_ALL);
         r.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT),
-                false, this);
+                false, this, UserHandle.USER_ALL);
         r.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
-                false, this);
+                false, this, UserHandle.USER_ALL);
+        r.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.BACK_GESTURE_HEIGHT_LEFT),
+                false, this, UserHandle.USER_ALL);
+        r.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.BACK_GESTURE_HEIGHT_RIGHT),
+                false, this, UserHandle.USER_ALL);
+        r.registerContentObserver(Settings.System.getUriFor(Settings.System.BACK_GESTURE_HAPTIC),
+                false, this, UserHandle.USER_ALL);
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 runnable -> mMainHandler.post(runnable),
                 mOnPropertiesChangedListener);
+        r.registerContentObserver(
+                Settings.System.getUriFor(Settings.System.LONG_BACK_SWIPE_TIMEOUT),
+                false, this, UserHandle.USER_ALL);
+        r.registerContentObserver(
+                Settings.System.getUriFor(Settings.System.LEFT_LONG_BACK_SWIPE_ACTION),
+                false, this, UserHandle.USER_ALL);
+        r.registerContentObserver(
+                Settings.System.getUriFor(Settings.System.RIGHT_LONG_BACK_SWIPE_ACTION),
+                false, this, UserHandle.USER_ALL);
+        r.registerContentObserver(
+                Settings.System.getUriFor(Settings.System.BACK_SWIPE_EXTENDED),
+                false, this, UserHandle.USER_ALL);
+        r.registerContentObserver(
+                Settings.System.getUriFor(Settings.System.LEFT_VERTICAL_BACK_SWIPE_ACTION),
+                false, this, UserHandle.USER_ALL);
+        r.registerContentObserver(
+                Settings.System.getUriFor(Settings.System.RIGHT_VERTICAL_BACK_SWIPE_ACTION),
+                false, this, UserHandle.USER_ALL);
     }
 
     public void unregister() {
+        mContext.unregisterReceiver(mBroadcastReceiver);
         mContext.getContentResolver().unregisterContentObserver(this);
         DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
     }
@@ -109,46 +194,21 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
         }
     }
 
-    /**
-     * Returns the left sensitivity for the current user.  To be used in code that runs primarily
-     * in one user's process.
-     */
     public int getLeftSensitivity(Resources userRes) {
-        final float scale = Settings.Secure.getFloatForUser(mContext.getContentResolver(),
-                Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT, 1.0f, UserHandle.USER_CURRENT);
-        return (int) (getUnscaledInset(userRes) * scale);
+        return getSensitivity(userRes, Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT);
     }
 
-    /**
-     * Returns the left sensitivity for the calling user.  To be used in code that runs in a
-     * per-user process.
-     */
-    @SuppressWarnings("NonUserGetterCalled")
-    public int getLeftSensitivityForCallingUser(Resources userRes) {
-        final float scale = Settings.Secure.getFloat(mContext.getContentResolver(),
-                Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT, 1.0f);
-        return (int) (getUnscaledInset(userRes) * scale);
-    }
-
-    /**
-     * Returns the right sensitivity for the current user.  To be used in code that runs primarily
-     * in one user's process.
-     */
     public int getRightSensitivity(Resources userRes) {
-        final float scale = Settings.Secure.getFloatForUser(mContext.getContentResolver(),
-                Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT, 1.0f, UserHandle.USER_CURRENT);
-        return (int) (getUnscaledInset(userRes) * scale);
+        return getSensitivity(userRes, Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT);
     }
 
-    /**
-     * Returns the right sensitivity for the calling user.  To be used in code that runs in a
-     * per-user process.
-     */
-    @SuppressWarnings("NonUserGetterCalled")
-    public int getRightSensitivityForCallingUser(Resources userRes) {
-        final float scale = Settings.Secure.getFloat(mContext.getContentResolver(),
-                Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT, 1.0f);
-        return (int) (getUnscaledInset(userRes) * scale);
+    public boolean getEdgeHaptic() {
+        return Settings.System.getIntForUser(
+               mContext.getContentResolver(), Settings.System.BACK_GESTURE_HAPTIC, 0,
+               UserHandle.USER_CURRENT) == 1 &&
+               Settings.System.getIntForUser(
+                   mContext.getContentResolver(), Settings.System.HAPTIC_FEEDBACK_ENABLED, 0,
+                   UserHandle.USER_CURRENT) == 1;
     }
 
     public boolean areNavigationButtonForcedVisible() {
@@ -156,7 +216,7 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) == 0;
     }
 
-    private float getUnscaledInset(Resources userRes) {
+    private int getSensitivity(Resources userRes, String side) {
         final DisplayMetrics dm = userRes.getDisplayMetrics();
         final float defaultInset = userRes.getDimension(
                 com.android.internal.R.dimen.config_backGestureInset) / dm.density;
@@ -167,6 +227,56 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
                 : defaultInset;
         final float inset = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, backGestureInset,
                 dm);
-        return inset;
+        final float scale = Settings.Secure.getFloatForUser(
+                mContext.getContentResolver(), side, 1.0f, UserHandle.USER_CURRENT);
+        return (int) (inset * scale);
+    }
+
+    public float getLeftHeight() {
+        return Settings.Secure.getFloatForUser(
+                        mContext.getContentResolver(), Settings.Secure.BACK_GESTURE_HEIGHT_LEFT,
+                        1.0f, UserHandle.USER_CURRENT);
+    }
+
+    public float getRightHeight() {
+        return Settings.Secure.getFloatForUser(
+                        mContext.getContentResolver(), Settings.Secure.BACK_GESTURE_HEIGHT_RIGHT,
+                        1.0f, UserHandle.USER_CURRENT);
+    }
+
+    public int getLongSwipeTimeOut() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+            Settings.System.LONG_BACK_SWIPE_TIMEOUT, 2000,
+            UserHandle.USER_CURRENT);
+    }
+
+    public int getLeftLongSwipeAction() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+            Settings.System.LEFT_LONG_BACK_SWIPE_ACTION, 0,
+            UserHandle.USER_CURRENT);
+    }
+
+    public int getRightLongSwipeAction() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+            Settings.System.RIGHT_LONG_BACK_SWIPE_ACTION, 0,
+            UserHandle.USER_CURRENT);
+    }
+
+    public boolean getIsExtendedSwipe() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+            Settings.System.BACK_SWIPE_EXTENDED, 0,
+            UserHandle.USER_CURRENT) != 0;
+    }
+
+    public int getLeftLSwipeAction() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+            Settings.System.LEFT_VERTICAL_BACK_SWIPE_ACTION, 0,
+            UserHandle.USER_CURRENT);
+    }
+
+    public int getRightLSwipeAction() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+            Settings.System.RIGHT_VERTICAL_BACK_SWIPE_ACTION, 0,
+            UserHandle.USER_CURRENT);
     }
 }

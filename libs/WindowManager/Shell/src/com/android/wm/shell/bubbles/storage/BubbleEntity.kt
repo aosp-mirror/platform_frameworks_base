@@ -27,6 +27,5 @@ data class BubbleEntity(
     @DimenRes val desiredHeightResId: Int,
     val title: String? = null,
     val taskId: Int,
-    val locus: String? = null,
-    val isDismissable: Boolean = false
+    val locus: String? = null
 )

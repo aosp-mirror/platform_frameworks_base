@@ -176,6 +176,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             + "app kill for notification test";
 
 
+    /** Define allowed permissions for Android Auto */
+    private ArrayList<String> androidAutoPerms = new ArrayList<String>(
+    Arrays.asList("android.permission.MODIFY_AUDIO_ROUTING", "android.permission.REAL_GET_TASKS", "android.permission.LOCAL_MAC_ADDRESS", "android.permission.MANAGE_USB", "android.permission.MANAGE_USERS", "android.permission.BLUETOOTH_PRIVILEGED", "android.permission.TOGGLE_AUTOMOTIVE_PROJECTION", "android.permission.READ_PHONE_NUMBERS", "android.permission.REQUEST_COMPANION_SELF_MANAGED", "android.permission.ACTIVITY_EMBEDDING", "android.permission.CALL_PRIVILEGED", "android.permission.CHANGE_COMPONENT_ENABLED_STATE", "android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS", "android.permission.CONTROL_INCALL_EXPERIENCE", "android.permission.DUMP", "android.permission.LOCATION_HARDWARE", "android.permission.ENTER_CAR_MODE_PRIORITIZED", "android.permission.MODIFY_DAY_NIGHT_MODE", "android.permission.READ_PRIVILEGED_PHONE_STATE", "android.permission.START_ACTIVITIES_FROM_BACKGROUND", "android.permission.UPDATE_APP_OPS_STATS"));
+    Set<String> GOOGLEAUTOHASH = new ArraySet<>(Arrays.asList("FDB00C43DBDE8B51CB312AA81D3B5FA17713ADB94B28F598D77F8EB89DACEEDF"));
+
+
     private static final long BACKUP_TIMEOUT_MILLIS = SECONDS.toMillis(60);
 
     /** Cap the size of permission trees that 3rd party apps can define; in characters of text */
@@ -962,6 +968,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 return PackageManager.PERMISSION_DENIED;
             }
 
+            if (pkg.getPackageName() == "com.google.android.projection.gearhead") {
+             if(pkg.getSigningDetails().hasAncestorOrSelfWithDigest(GOOGLEAUTOHASH)) {
+                 if (androidAutoPerms.contains(permissionName)) {
+                     return PackageManager.PERMISSION_GRANTED;
+                 }
+             }
+            }
+
             if (checkSinglePermissionInternalLocked(uidState, permissionName, isInstantApp)) {
                 return PackageManager.PERMISSION_GRANTED;
             }
@@ -1409,7 +1423,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             // their permissions as always granted runtime ones since we need
             // to keep the review required permission flag per user while an
             // install permission's state is shared across all users.
-            if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M && bp.isRuntime()) {
+            if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M && bp.isRuntime() &&
+                    !isSpecialRuntimePermission(permName)) {
                 return;
             }
 
@@ -1452,7 +1467,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             + " for package " + packageName);
                 }
 
-                if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M) {
+                if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M &&
+                    !isSpecialRuntimePermission(permName)) {
                     Slog.w(TAG, "Cannot grant runtime permission to a legacy app");
                     return;
                 }
@@ -1598,7 +1614,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             // their permissions as always granted runtime ones since we need
             // to keep the review required permission flag per user while an
             // install permission's state is shared across all users.
-            if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M && bp.isRuntime()) {
+            if (pkg.getTargetSdkVersion() < Build.VERSION_CODES.M && bp.isRuntime() &&
+                    !isSpecialRuntimePermission(permName)) {
                 return;
             }
 
@@ -1805,7 +1822,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
             // If this permission was granted by default or role, make sure it is.
             if ((oldFlags & FLAG_PERMISSION_GRANTED_BY_DEFAULT) != 0
-                    || (oldFlags & FLAG_PERMISSION_GRANTED_BY_ROLE) != 0) {
+                    || (oldFlags & FLAG_PERMISSION_GRANTED_BY_ROLE) != 0
+                    || isSpecialRuntimePermission(permName)) {
                 // PermissionPolicyService will handle the app op for runtime permissions later.
                 grantRuntimePermissionInternal(packageName, permName, false,
                         Process.SYSTEM_UID, userId, delayingPermCallback);
@@ -2518,6 +2536,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
     }
 
+    public static boolean isSpecialRuntimePermission(final String permission) {
+        return Manifest.permission.INTERNET.equals(permission) || Manifest.permission.OTHER_SENSORS.equals(permission);
+    }
+
     /**
      * Restore the permission state for a package.
      *
@@ -2763,28 +2785,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                         mRegistry.addAppOpPermissionPackage(perm, pkg.getPackageName());
                     }
 
-                    boolean shouldGrantNormalPermission = true;
-                    if (bp.isNormal() && !origState.isPermissionGranted(perm)) {
-                        // If this is an existing, non-system package, then
-                        // we can't add any new permissions to it. Runtime
-                        // permissions can be added any time - they are dynamic.
-                        if (!ps.isSystem() && userState.areInstallPermissionsFixed(
-                                ps.getPackageName())) {
-                            // Except...  if this is a permission that was added
-                            // to the platform (note: need to only do this when
-                            // updating the platform).
-                            if (!isCompatPlatformPermissionForPackage(perm, pkg)) {
-                                shouldGrantNormalPermission = false;
-                            }
-                        }
-                    }
-
                     if (DEBUG_PERMISSIONS) {
                         Slog.i(TAG, "Considering granting permission " + perm + " to package "
                                 + pkg.getPackageName());
                     }
 
-                    if ((bp.isNormal() && shouldGrantNormalPermission)
+                    if (bp.isNormal()
                             || (bp.isSignature()
                                     && (!bp.isPrivileged() || CollectionUtils.contains(
                                             isPrivilegedPermissionAllowlisted, permName))
@@ -2879,6 +2885,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                                     if (uidState.grantPermission(bp)) {
                                         wasChanged = true;
                                     }
+                                }
+                            }
+                            if (isSpecialRuntimePermission(permName) &&
+                                    origPermState == null) {
+                                if (uidState.grantPermission(bp)) {
+                                    wasChanged = true;
                                 }
                             }
                         } else {
@@ -3268,7 +3280,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         if (Objects.equals(packageName, PLATFORM_PACKAGE_NAME)) {
             return true;
         }
-        if (!(pkg.isSystem() && pkg.isPrivileged())) {
+        if (!pkg.isPrivileged()) {
             return true;
         }
         if (!mPrivilegedPermissionAllowlistSourcePackageNames
@@ -3646,7 +3658,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             if (shouldGrantPermission) {
                 final int flags = getPermissionFlagsInternal(pkg.getPackageName(), permission,
                         myUid, userId);
-                if (supportsRuntimePermissions) {
+                if (supportsRuntimePermissions || isSpecialRuntimePermission(permission)) {
                     // Installer cannot change immutable permissions.
                     if ((flags & immutableFlags) == 0) {
                         grantRuntimePermissionInternal(pkg.getPackageName(), permission, false,
@@ -4215,6 +4227,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
         boolean changed = false;
 
+        Set<Permission> needsUpdate = null;
         synchronized (mLock) {
             final Iterator<Permission> it = mRegistry.getPermissionTrees().iterator();
             while (it.hasNext()) {
@@ -4232,6 +4245,26 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     Slog.i(TAG, "Removing permission tree " + bp.getName()
                             + " that used to be declared by " + bp.getPackageName());
                     it.remove();
+                }
+                if (needsUpdate == null) {
+                    needsUpdate = new ArraySet<>();
+                }
+                needsUpdate.add(bp);
+            }
+        }
+        if (needsUpdate != null) {
+            for (final Permission bp : needsUpdate) {
+                final AndroidPackage sourcePkg =
+                        mPackageManagerInt.getPackage(bp.getPackageName());
+                final PackageStateInternal sourcePs =
+                        mPackageManagerInt.getPackageStateInternal(bp.getPackageName());
+                synchronized (mLock) {
+                    if (sourcePkg != null && sourcePs != null) {
+                        continue;
+                    }
+                    Slog.w(TAG, "Removing dangling permission tree: " + bp.getName()
+                            + " from package " + bp.getPackageName());
+                    mRegistry.removePermission(bp.getName());
                 }
             }
         }

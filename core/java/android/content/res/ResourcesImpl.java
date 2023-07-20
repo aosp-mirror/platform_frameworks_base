@@ -52,6 +52,7 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.view.DisplayAdjustments;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.GrowingArrayUtils;
 
 import libcore.util.NativeAllocationRegistry;
@@ -159,6 +160,24 @@ public class ResourcesImpl {
     }
 
     /**
+     * Clear the cache when the framework resources packages is changed.
+     *
+     * It's only used in the test initial function instead of regular app behaviors. It doesn't
+     * guarantee the thread-safety so mark this with @VisibleForTesting.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    static void resetDrawableStateCache() {
+        sPreloadedDrawables[0].clear();
+        sPreloadedDrawables[1].clear();
+        sPreloadedColorDrawables.clear();
+        sPreloadedComplexColors.clear();
+
+        synchronized (sSync) {
+            sPreloaded = false;
+        }
+    }
+
+    /**
      * Creates a new ResourcesImpl object with CompatibilityInfo.
      *
      * @param assets Previously created AssetManager.
@@ -201,10 +220,6 @@ public class ResourcesImpl {
 
     Configuration[] getSizeConfigurations() {
         return mAssets.getSizeConfigurations();
-    }
-
-    Configuration[] getSizeAndUiModeConfigurations() {
-        return mAssets.getSizeAndUiModeConfigurations();
     }
 
     CompatibilityInfo getCompatibilityInfo() {

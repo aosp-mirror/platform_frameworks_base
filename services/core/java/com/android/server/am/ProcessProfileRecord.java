@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.ActivityManager.processStateAmToProto;
 
 import android.annotation.IntDef;
 import android.app.IApplicationThread;
@@ -317,6 +318,12 @@ final class ProcessProfileRecord {
                             origBase.setState(ProcessStats.STATE_NOTHING,
                                     tracker.getMemFactorLocked(), SystemClock.uptimeMillis(),
                                     pkgList.getPackageListLocked());
+                            pkgList.forEachPackage((pkgName, holder) ->
+                                    FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
+                                        mApp.uid, mApp.processName, pkgName,
+                                        processStateAmToProto(ProcessStats.STATE_NOTHING),
+                                        holder.appVersion)
+                            );
                         }
                         origBase.makeInactive();
                     }
@@ -355,6 +362,12 @@ final class ProcessProfileRecord {
                         origBase.setState(ProcessStats.STATE_NOTHING,
                                 tracker.getMemFactorLocked(), SystemClock.uptimeMillis(),
                                 pkgList.getPackageListLocked());
+                        pkgList.forEachPackage((pkgName, holder) ->
+                                FrameworkStatsLog.write(FrameworkStatsLog.PROCESS_STATE_CHANGED,
+                                    mApp.uid, mApp.processName, pkgName,
+                                    processStateAmToProto(ProcessStats.STATE_NOTHING),
+                                    holder.appVersion)
+                        );
                     }
                     origBase.makeInactive();
                     setBaseProcessTracker(null);

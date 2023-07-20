@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Tidak bertajuk&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Tiada nombor telefon)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"PIN yang anda taip tidak sepadan."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Taipkan PIN yang mengandungi 4 hingga 8 nombor."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Taipkan PUK yang mempunyai 8 nombor atau lebih panjang."</string>
-    <string name="needPuk" msgid="3503414069503752211">"SIM anda dikunci PUK. Taip kod PUK untuk membuka kunci SIM."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"Taip PUK2 untuk menyahsekat SIM."</string>
+    <string name="needPuk" msgid="7321876090152422918">"Kad SIM anda dikunci PUK. Taipkan kod PUK untuk membuka kuncinya."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"Taipkan PUK2 untuk menyahsekat kad SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Tidak berjaya, dayakan Kunci SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Anda ada <xliff:g id="NUMBER_1">%d</xliff:g> cubaan lagi sebelum SIM dikunci.</item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID pemanggil secara lalainya ditetapkan kepada tidak dihadkan. Panggilan seterusnya: Tidak terhad"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Perkhidmatan yang tidak diuntukkan."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Anda tidak boleh mengubah tetapan ID pemanggil."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Data ditukar kepada <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Anda boleh menukar pilihan ini pada bila-bila masa dalam Tetapan"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Tiada perkhidmatan data mudah alih"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Panggilan kecemasan tidak tersedia"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Tiada perkhidmatan suara"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Boleh menangkap gerak isyarat yang dilakukan pada penderia cap jari peranti."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ambil tangkapan skrin"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Boleh mengambil tangkapan skrin paparan."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Pratonton, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"lumpuhkan atau ubah suai bar status"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Membenarkan apl melumpuhkan bar status atau menambah dan mengalih keluar ikon sistem."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"jadi bar status"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Membenarkan apl mendapatkan maklumat perkhidmatan pembayaran nfc pilihan seperti bantuan berdaftar dan destinasi laluan."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"mengawal Komunikasi Medan Dekat"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Membenarkan apl berkomunikasi dengan teg, kad dan pembaca Komunikasi Medan Dekat (NFC)."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Peristiwa transaksi Unsur Selamat"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Membenarkan apl menerima maklumat tentang transaksi yang berlaku pada Unsur Selamat."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"lumpuhkan kunci skrin anda"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Membenarkan apl melumpuhkan kunci kekunci dan sebarang keselamatan kata laluan yang berkaitan. Sebagai contoh, telefon melumpuhkan kunci kekunci apabila menerima panggilan telefon masuk kemudian mendayakan semula kunci kekunci apabila panggilan selesai."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"minta kerumitan kunci skrin"</string>
@@ -586,17 +586,17 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Ralat semasa membuat pengesahan"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Gunakan kunci skrin"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Masukkan kunci skrin untuk teruskan"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tekan penderia dengan kuat"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tekan dengan kuat pada penderia"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Tidak dapat mengecam cap jari. Cuba lagi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Bersihkan penderia cap jari dan cuba lagi"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Bersihkan penderia dan cuba lagi"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tekan penderia dengan kuat"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tekan dengan kuat pada penderia"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Jari digerakkan terlalu perlahan. Sila cuba lagi."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Cuba cap jari lain"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Terlalu terang"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Penekanan Kuasa dikesan"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Cuba selaraskan"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ubah sedikit kedudukan jari pada setiap percubaan"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Tukar sedikit kedudukan jari anda setiap kali pergerakan dilakukan"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Cap jari tidak dikenali"</string>
@@ -647,15 +647,15 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Gerakkan telefon ke kiri anda"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Gerakkan telefon ke kanan anda"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Sila lihat terus pada peranti anda."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Wajah tidak kelihatan. Pegang telefon pada paras mata."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Gagal mengesan wajah anda. Pegang telefon anda pada paras mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Terlalu bnyk gerakan. Pegang telefon dgn stabil."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Sila daftarkan semula wajah anda."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Tidak dapat mengecam wajah. Cuba lagi."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Tukar sedikit kedudukan kepala anda"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Lihat lebih lurus pada telefon"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Lihat lebih lurus pada telefon"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Lihat lebih lurus pada telefon"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Tanggalkan apa-apa yang menutup wajah anda."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Lihat terus pada telefon anda"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Lihat terus pada telefon anda"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Lihat terus pada telefon anda"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Alih keluar apa-apa yang melindungi wajah anda."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Bersihkan bahagian atas skrin anda, termasuk bar hitam"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -663,9 +663,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Tidak dapat membuat model wajah anda. Cuba lagi."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Cermin mata gelap dikesan. Wajah anda mesti terlihat sepenuhnya."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Pelitup muka dikesan. Wajah anda mesti kelihatan sepenuhnya."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Pelitup muka dikesan. Wajah anda mesti terlihat sepenuhnya."</string>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tdk dpt sahkan wajah. Perkakasan tidak tersedia."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Cuba Buka Kunci Wajah sekali lagi"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Tdk dpt menyimpan data wajah baharu. Padamkan yg lama dahulu."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gunakan kunci wajah atau skrin"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gunakan wajah untuk teruskan"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gunakan wajah atau kunci skrin anda untuk meneruskan"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Kesilapan telah berlaku. Cuba lagi."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Ikon wajah"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"membaca tetapan penyegerakan"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Cuba lagi"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Buka kunci semua ciri dan data"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Telah melepasi had cubaan Buka Kunci Wajah"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Tiada SIM"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Tiada SIM dalam tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Tiada SIM dalam peranti Android TV anda."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Tiada SIM dalam telefon."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Tambah SIM."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM tiada atau tidak boleh dibaca. Tambah SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"SIM tidak boleh digunakan."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM anda telah dinyahaktifkan secara kekal.\n Hubungi penyedia perkhidmatan wayarles anda untuk mendapatkan SIM lain."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Tiada kad SIM"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Tiada kad SIM dalam tablet."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Tiada kad SIM dalam peranti Android TV anda."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Kad SIM tiada dalam telefon."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Masukkan kad SIM."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"Kad SIM tiada atau tidak boleh dibaca. Sila masukkan kad SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Kad SIM tidak boleh digunakan."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Kad SIM anda telah dilumpuhkan secara kekal.\n Hubungi pembekal perkhidmatan wayarles anda untuk mendapatkan kad SIM lain."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Lagu sebelumnya"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Lagu seterusnya"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Jeda"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Mara laju"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Panggilan kecemasan sahaja"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Rangkaian dikunci"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM dikunci PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"Kad SIM dikunci dengan PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Lihat Panduan Pengguna atau hubungi Penjagaan Pelanggan."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM dikunci."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Membuka kunci SIM…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"Kad SIM dikunci."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Membuka kunci kad SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. \n\nSila cuba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> saat."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Anda telah menaip kata laluan yang salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> saat."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Anda telah menaip PIN yang salah sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> saat."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Anda boleh menukar ini nanti dalam Tetapan &gt; Apl"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Sentiasa Benarkan"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Jangan Benarkan"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM dialih keluar"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Rangkaian mudah alih tidak akan tersedia sehingga anda memulakan semula dengan SIM yang sah."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"Kad SIM dikeluarkan"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Rangkaian mudah alih tidak akan tersedia sehingga anda mula semula dengan kad SIM yang sah dimasukkan."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Selesai"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM ditambah"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"Kad SIM ditambah"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Mulakan semula peranti anda untuk mengakses rangkaian mudah alih."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Mulakan semula"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktifkan perkhidmatan mudah alih"</string>
@@ -1390,7 +1386,7 @@
     <string name="show_ime" msgid="6406112007347443383">"Pastikannya pada skrin, semasa papan kekunci fizikal aktif"</string>
     <string name="hardware" msgid="1800597768237606953">"Tunjukkan papan kekunci maya"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurasikan papan kekunci fizikal"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Ketik untuk memilih bahasa dan reka letak"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Ketik untuk memilih bahasa dan susun atur"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Paparkan di atas apl lain"</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Pembesar suara dok"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Peranti Luar"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Fon kepala"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistem"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Hubungi pembawa untuk butiran."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Masukkan kod PIN yang diingini"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Sahkan kod PIN yang diingini"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Membuka kunci SIM…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Membuka kunci kad SIM..."</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Kod PIN salah."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Taipkan PIN yang mengandungi 4 hingga 8 nombor."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Kod PUK mestilah 8 nombor."</string>
@@ -1688,11 +1684,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"HIDUP"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"MATI"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Benarkan <xliff:g id="SERVICE">%1$s</xliff:g> mempunyai kawalan penuh atas peranti anda?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang membantu anda berkaitan dengan keperluan kebolehaksesan tetapi bukan untuk kebanyakan apl."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang membantu anda dengan keperluan kebolehaksesan tetapi bukan untuk kebanyakan apl."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Lihat dan laksanakan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejaki interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejak interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Benarkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketik ciri untuk mula menggunakan ciri itu:"</string>
@@ -1718,7 +1714,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Untuk beralih antara ciri, leret ke atas menggunakan tiga jari dan tahan."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Pembesaran"</string>
     <string name="user_switched" msgid="7249833311585228097">"Pengguna semasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Beralih kepada <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Bertukar kepada <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Log keluar daripada <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Pemilik"</string>
     <string name="guest_name" msgid="8502103277839834324">"Tetamu"</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Melihat skrin penuh"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Untuk keluar, leret dari atas ke bawah."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Faham"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Putar untuk mendapatkan paparan yang lebih baik"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Keluar daripada skrin pisah untuk mendapatkan paparan yang lebih baik"</string>
     <string name="done_label" msgid="7283767013231718521">"Selesai"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Penggelangsar bulatan jam"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Penggelangsar bulatan minit"</string>
@@ -2013,7 +2007,7 @@
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Kemas kini <xliff:g id="TYPE_0">%1$s</xliff:g> dan <xliff:g id="TYPE_1">%2$s</xliff:g> dalam "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Kemas kini item ini dalam "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dan <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Simpan"</string>
-    <string name="autofill_save_no" msgid="9212826374207023544">"Tidak perlu"</string>
+    <string name="autofill_save_no" msgid="9212826374207023544">"Tidak, terima kasih"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Bukan sekarang"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"Jangan"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"Kemas kini"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Tidak dapat mengakses kamera tablet daripada <xliff:g id="DEVICE">%1$s</xliff:g> anda"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Kandungan ini tidak boleh diakses semasa penstriman. Cuba pada telefon anda."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Lalai sistem"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"KAD <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

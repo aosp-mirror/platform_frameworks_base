@@ -21,6 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"килобайт"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
+    <string name="terabyteShort" msgid="1822367128583886496">"TБ"</string>
+    <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Гарчиггүй&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Утасны дугаар байхгүй)"</string>
@@ -43,8 +48,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Таны оруулсан ПИН таарахгүй байна."</string>
     <string name="invalidPin" msgid="7542498253319440408">"4-8 тооноос бүтэх ПИН-г бичнэ үү."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"8-с цөөнгүй тооноос бүтэх PUK-г бичнэ үү."</string>
-    <string name="needPuk" msgid="3503414069503752211">"Таны SIM-г PUK-р түгжсэн байна. Үүний түгжээг тайлахын тулд PUK кодыг бичиж оруулна уу."</string>
-    <string name="needPuk2" msgid="3910763547447344963">"SIM-г блокоос гаргахын тулд PUK2-г бичиж оруулна уу."</string>
+    <string name="needPuk" msgid="7321876090152422918">"SIM картны PUK-түгжигдсэн. Тайлах бол PUK кодыг бичнэ үү."</string>
+    <string name="needPuk2" msgid="7032612093451537186">"SIM картыг блокоос гаргах бол PUK2-г бичнэ үү."</string>
     <string name="enablePin" msgid="2543771964137091212">"Амжилтгүй боллоо, SIM/РҮИМ түгжээг идэвхжүүлнэ үү."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Таны SIM түгжигдэхээс өмнө танд <xliff:g id="NUMBER_1">%d</xliff:g> оролдлого хийх боломж үлдлээ. </item>
@@ -73,8 +78,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Дуудлага хийгчийн ID хязгаарлагдсан. Дараагийн дуудлага: Хязгаарлагдсан"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Үйлчилгээ провишн хийгдээгүй ."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Та дуудлага хийгчийн ID тохиргоог солиж чадахгүй."</string>
-    <string name="auto_data_switch_title" msgid="3286350716870518297">"Өгөгдлийг <xliff:g id="CARRIERDISPLAY">%s</xliff:g> руу шилжүүлсэн"</string>
-    <string name="auto_data_switch_content" msgid="803557715007110959">"Та үүнийг Тохиргооноос хэдийд ч өөрчлөх боломжтой."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Мобайл дата үйлчилгээ алга"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Яаралтай дуудлага боломжтой"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Дуу хоолойны үйлчилгээ алга"</string>
@@ -300,7 +303,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Календарь"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарьд хандах"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарь руу хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"Файлууд"</string>
@@ -339,7 +342,6 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Төхөөрөмжийн хурууны хээ мэдрэгчид зангасан зангааг танина."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Дэлгэцийн зургийг дарах"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Дэлгэцийн зургийг дарах боломжтой."</string>
-    <string name="dream_preview_title" msgid="5570751491996100804">"Урьдчилан үзэх, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"статус самбарыг идэвхгүй болгох болон өөрчлөх"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Апп нь статус самбарыг идэвхгүй болгох эсвэл систем дүрсийг нэмэх, хасах боломжтой."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"статусын хэсэг болох"</string>
@@ -551,8 +553,6 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Бүртгүүлсэн төхөөрөмж болон маршрутын хүрэх цэг зэрэг сонгосон nfc төлбөрийн үйлчилгээний мэдээллийг авахыг аппад зөвшөөрдөг."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ойролцоо талбарын холбоог удирдах"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Апп нь Ойролцоо Талбарын Холболт(NFC) таг, карт, болон уншигчтай холбогдох боломжтой."</string>
-    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Аюулгүй элементийн гүйлгээний үйл явдал"</string>
-    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Аппад Аюулгүй элементэд хийгдэж буй гүйлгээний талаарх мэдээллийг хүлээн авахыг зөвшөөрнө."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"дэлгэцний түгжээг идэвхгүй болгох"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Апп нь түгжээ болон бусад холбоотой нууц үгийн аюулгүй байдлыг идэвхгүй болгох боломжтой. Жишээ нь бол утас нь дуудлага ирэх үед түгжээг идэвхгүй болгох ба дуудлага дуусахад буцаан идэвхтэй болгодог."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"дэлгэцийн түгжээний төвөгтэй байдлын хүсэлт тавих"</string>
@@ -655,7 +655,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Утас руугаа аль болох эгц харна уу"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Утас руугаа аль болох эгц харна уу"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Утас руугаа аль болох эгц харна уу"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Таны нүүрийг далдалж буй аливаа зүйлийг авна уу."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Таны нүүрийг далдалж буй аливаа зүйлийг хасна уу."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Хар хэсэг зэрэг дэлгэцийнхээ дээд хэсгийг цэвэрлэнэ үү"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -664,8 +664,6 @@
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Нүүрний загвар үүсгэж чадсангүй. Дахин оролдоно уу."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Хар шил илэрлээ. Таны нүүр бүтэн харагдах ёстой."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Нүүрний халхавч илэрлээ. Таны нүүр бүтэн харагдах ёстой."</string>
-  <string-array name="face_acquired_vendor">
-  </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Царайг бататгаж чадсангүй. Техник хангамж боломжгүй байна."</string>
     <string name="face_error_timeout" msgid="2598544068593889762">"Царайгаар түгжээ тайлахыг дахин оролдоно уу"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Царайн шинэ өгөгдлийг хадгалж чадсангүй. Эхлээд хуучин өгөгдлийг устгана уу."</string>
@@ -683,8 +681,6 @@
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Царайгаар түгжээ тайлах эсвэл дэлгэцийн түгжээ ашиглах"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Үргэлжлүүлэхийн тулд царайгаа ашиглана уу"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Үргэлжлүүлэхийн тулд царай эсвэл дэлгэцийн түгжээгээ ашиглана уу"</string>
-  <string-array name="face_error_vendor">
-  </string-array>
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Алдаа гарлаа. Дахин оролдоно уу."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Царайны дүрс тэмдэг"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"синк тохиргоог унших"</string>
@@ -929,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Дахин оролдох"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Бүх онцлог, өгөгдлийн түгжээг тайлах"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Царайгаар түгжээ тайлах оролдлогын тоо дээд хэмжээнээс хэтэрсэн"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM байхгүй"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Таблетад SIM байхгүй байна."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Таны Android TV төхөөрөмжид SIM байхгүй байна."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Утсанд SIM байхгүй байна."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"SIM нэмнэ үү."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM дутуу эсвэл үүнийг унших боломжгүй байна. SIM нэмнэ үү."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Ашиглах боломжгүй SIM."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Таны SIM-г бүрмөсөн идэвхгүй болгосон байна.\n Өөр SIM авах бол утасгүй үйлчилгээ үзүүлэгчтэйгээ холбогдоно уу."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM карт байхгүй"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Таблет SIM картгүй."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Таны Android TV төхөөрөмжид SIM карт алга."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Утсанд SIM карт байхгүй."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM картыг оруулна уу."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM карт байхгүй эсвэл унших боломжгүй. SIM карт оруулна уу."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Ашиглах боломжгүй SIM карт."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Таны SIM карт бүрмөсөн идэвхгүй болов.\n Өөр SIM карт авах бол өөрийн утасгүй үйлчилгээний нийлүүлэгчтэй холбогдоно уу."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Өмнөх трек"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Дараагийн трек"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Түр зогсоох"</string>
@@ -946,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Хурдан урагшлуулах"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Зөвхөн яаралтай дуудлага"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Сүлжээ түгжигдсэн"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM-г PUK-р түгжсэн байна."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM карт нь PUK түгжээтэй."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Хэрэглэгчийн зааврыг харах эсвэл Хэрэглэгчдэд Туслах төвтэй холбоо барина уу."</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM-г түгжсэн байна."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM-н түгжээг тайлж байна…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM карт түгжигдсэн."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM картны түгжээг гаргаж байна…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Та нууц үгээ <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Та ПИН кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
@@ -1332,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Та дараа энийг Тохиргоо &gt; Апп дотроос солих боломжтой"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Байнга зөвшөөрөх"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Хэзээ ч зөвшөөрөхгүй"</string>
-    <string name="sim_removed_title" msgid="1349026474932481037">"SIM-г салгасан"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"Таныг хүчинтэй SIM-р дахин эхлүүлэх хүртэл мобайл сүлжээ боломжгүй байх болно."</string>
+    <string name="sim_removed_title" msgid="5387212933992546283">"SIM карт хасагдсан"</string>
+    <string name="sim_removed_message" msgid="9051174064474904617">"Зөв SIM карт хийгээд дахин асаатал та мобайл сүлжээг ашиглах боломжгүй."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Дуусгах"</string>
-    <string name="sim_added_title" msgid="2976783426741012468">"SIM нэмсэн"</string>
+    <string name="sim_added_title" msgid="7930779986759414595">"SIM карт нэмэгдсэн"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Мобайл сүлжээнд хандах бол төхөөрөмжөө дахин асаан уу."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Дахин эхлүүлэх"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Мобайл үйлчилгээг идэвхжүүлэх"</string>
@@ -1501,7 +1497,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Сүлжээ эсвэл VPN тохиргоог өөрчлөх"</string>
     <string name="upload_file" msgid="8651942222301634271">"Файл сонгох"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Сонгосон файл байхгүй"</string>
-    <string name="reset" msgid="3865826612628171429">"Шинэчлэх"</string>
+    <string name="reset" msgid="3865826612628171429">"Бүгдийг цэвэрлэх"</string>
     <string name="submit" msgid="862795280643405865">"Илгээх"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Жолоо барих апп ажиллаж байна"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Жолооны аппаас гарахын тулд товшино уу."</string>
@@ -1614,7 +1610,7 @@
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Tелевиз"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Утас"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Чанга яригчийг суулгах"</string>
-    <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Гадаад төхөөрөмж"</string>
+    <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Чихэвч"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Систем"</string>
@@ -1647,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM идэвхгүй байна. Үргэлжлүүлэх бол PUK кодыг оруулна уу. Дэлгэрэнгүй мэдээллийг оператороос асууна ууу"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Хүссэн ПИН кодоо оруулна уу"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Хүссэн ПИН кодоо дахин оруулна уу"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM-н түгжээг тайлж байна…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM картны түгжээг гаргаж байна…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Буруу ПИН код."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"4-8 тооноос бүтэх ПИН-г бичнэ үү."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK код 8 тоотой байх ёстой."</string>
@@ -1840,8 +1836,6 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Бүтэн дэлгэцээр үзэж байна"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Гарахаар бол дээрээс нь доош нь чирнэ үү."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ойлголоо"</string>
-    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Харагдах байдлыг сайжруулах бол эргүүлнэ үү"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Харагдах байдлыг сайжруулах бол дэлгэцийг хуваах горимоос гарна уу"</string>
     <string name="done_label" msgid="7283767013231718521">"Дууссан"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Цаг гүйлгэгч"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Минут гүйлгэгч"</string>
@@ -2297,5 +2291,4 @@
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с таблетын камерт хандах боломжгүй"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Стримингийн үед үүнд хандах боломжгүй. Оронд нь утас дээрээ туршиж үзнэ үү."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Системийн өгөгдмөл"</string>
-    <string name="default_card_name" msgid="9198284935962911468">"КАРТ <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
 </resources>

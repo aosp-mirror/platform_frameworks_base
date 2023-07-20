@@ -53,7 +53,7 @@ public final class TunnelConnectionParamsUtils {
         if (in.keySet().size() != EXPECTED_BUNDLE_KEY_CNT) {
             throw new IllegalArgumentException(
                     String.format(
-                            "Expect PersistableBundle to have %d element but found: %s",
+                            "Expect PersistableBundle to have %d element but found: %d",
                             EXPECTED_BUNDLE_KEY_CNT, in.keySet()));
         }
 

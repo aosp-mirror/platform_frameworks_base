@@ -56,10 +56,4 @@
             android:importantForAccessibility="auto" />
     </com.android.keyguard.AlphaOptimizedLinearLayout>
 
-    <View
-        android:id="@+id/nav_bar_background"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/navigation_bar_size"
-        android:layout_gravity="bottom"
-        android:background="#ff000000" />
 </merge>

@@ -20,12 +20,11 @@ import android.graphics.Rect
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelector
 import com.android.systemui.mediaprojection.appselector.data.AppIconLoader
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
-import com.android.systemui.mediaprojection.appselector.data.RecentTaskLabelLoader
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskThumbnailLoader
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import dagger.assisted.Assisted
@@ -41,10 +40,9 @@ constructor(
     @Assisted private val root: ViewGroup,
     private val iconLoader: AppIconLoader,
     private val thumbnailLoader: RecentTaskThumbnailLoader,
-    private val labelLoader: RecentTaskLabelLoader,
     private val taskViewSizeProvider: TaskPreviewSizeProvider,
     @MediaProjectionAppSelector private val scope: CoroutineScope
-) : ViewHolder(root), ConfigurationListener, TaskPreviewSizeProvider.TaskPreviewSizeListener {
+) : RecyclerView.ViewHolder(root), ConfigurationListener, TaskPreviewSizeProvider.TaskPreviewSizeListener {
 
     val thumbnailView: MediaProjectionTaskView = root.requireViewById(R.id.task_thumbnail)
     private val iconView: ImageView = root.requireViewById(R.id.task_icon)
@@ -65,10 +63,6 @@ constructor(
                     launch {
                         val icon = iconLoader.loadIcon(task.userId, component)
                         iconView.setImageDrawable(icon)
-                    }
-                    launch {
-                        val label = labelLoader.loadLabel(task.userId, component)
-                        root.contentDescription = label
                     }
                 }
                 launch {
@@ -94,10 +88,10 @@ constructor(
 
     private fun updateThumbnailSize() {
         thumbnailView.layoutParams =
-            thumbnailView.layoutParams.apply {
-                width = taskViewSizeProvider.size.width()
-                height = taskViewSizeProvider.size.height()
-            }
+                thumbnailView.layoutParams.apply {
+                    width = taskViewSizeProvider.size.width()
+                    height = taskViewSizeProvider.size.height()
+                }
     }
 
     @AssistedFactory

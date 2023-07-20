@@ -259,14 +259,14 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         // NOTE: No permissions required
 
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
-            return FileUtils.roundStorageSize(mStorage.getPrimaryStorageSize());
+            return mStorage.getPrimaryStorageSize();
         } else {
             final VolumeInfo vol = mStorage.findVolumeByUuid(volumeUuid);
             if (vol == null) {
                 throw new ParcelableException(
                         new IOException("Failed to find storage device for UUID " + volumeUuid));
             }
-            return FileUtils.roundStorageSize(vol.disk.size);
+            return vol.disk.size;
         }
     }
 

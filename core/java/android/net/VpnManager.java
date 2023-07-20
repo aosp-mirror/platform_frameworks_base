@@ -444,7 +444,7 @@ public class VpnManager {
      * Retrieve the VpnProfileState for the profile provisioned by the calling package.
      *
      * @return the VpnProfileState with current information, or null if there was no profile
-     *         provisioned and started by the calling package.
+     *         provisioned by the calling package.
      */
     @Nullable
     public VpnProfileState getProvisionedVpnProfileState() {
@@ -717,4 +717,17 @@ public class VpnManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+
+    /**
+     * @hide
+     */
+    public VpnProfile[] getAllLegacyVpns() {
+        try {
+            return mService.getAllLegacyVpns();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
 }

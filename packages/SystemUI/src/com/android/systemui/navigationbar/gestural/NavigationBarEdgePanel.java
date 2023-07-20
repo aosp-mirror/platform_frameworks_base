@@ -16,6 +16,8 @@
 
 package com.android.systemui.navigationbar.gestural;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE;
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 
@@ -54,7 +56,6 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.NavigationEdgeBackPlugin;
-import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.statusbar.VibratorHelper;
 
@@ -137,7 +138,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             = new PathInterpolator(1.0f / RUBBER_BAND_AMOUNT_APPEAR, 1.0f, 1.0f, 1.0f);
 
     private final WindowManager mWindowManager;
-    private final VibratorHelper mVibratorHelper;
+    //private final VibratorHelper mVibratorHelper;
 
     /**
      * The paint the arrow is drawn with
@@ -283,17 +284,46 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             };
     private BackCallback mBackCallback;
 
-    @Inject
-    public NavigationBarEdgePanel(
+    /**
+     * Injectable instance to create a new NavigationBarEdgePanel.
+     *
+     * Necessary because we don't have good handling of per-display contexts at the moment. With
+     * this, you can pass in a specific context that knows what display it is in.
+     */
+    public static class Factory {
+        private final LatencyTracker mLatencyTracker;
+        private final VibratorHelper mVibratorHelper;
+        private final Executor mBackgroundExecutor;
+
+        @Inject
+        public Factory(
+                LatencyTracker latencyTracker,
+                VibratorHelper vibratorHelper,
+                @Background Executor backgroundExecutor) {
+            mLatencyTracker = latencyTracker;
+            mBackgroundExecutor = backgroundExecutor;
+            mVibratorHelper = vibratorHelper;
+        }
+
+        public NavigationBarEdgePanel create(Context context) {
+            return new NavigationBarEdgePanel(
+                context,
+                mLatencyTracker,
+                mVibratorHelper,
+                mBackgroundExecutor
+            );
+        }
+    }
+
+    NavigationBarEdgePanel(
             Context context,
             LatencyTracker latencyTracker,
             VibratorHelper vibratorHelper,
-            @Background Executor backgroundExecutor,
-            DisplayTracker displayTracker) {
+            @Background Executor backgroundExecutor) {
         super(context);
 
         mWindowManager = context.getSystemService(WindowManager.class);
-        mVibratorHelper = vibratorHelper;
+//        mVibratorHelper = vibratorHelper;
 
         mDensity = context.getResources().getDisplayMetrics().density;
 
@@ -365,7 +395,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
         setVisibility(GONE);
 
-        boolean isPrimaryDisplay = mContext.getDisplayId() == displayTracker.getDefaultDisplayId();
+        boolean isPrimaryDisplay = mContext.getDisplayId() == DEFAULT_DISPLAY;
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {
                     @Override
@@ -644,11 +674,11 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         }
         mVelocityTracker.computeCurrentVelocity(1000);
         // Only do the extra translation if we're not already flinging
-        boolean isSlow = Math.abs(mVelocityTracker.getXVelocity()) < 500;
-        if (isSlow
-                || SystemClock.uptimeMillis() - mVibrationTime >= GESTURE_DURATION_FOR_CLICK_MS) {
-            mVibratorHelper.vibrate(VibrationEffect.EFFECT_CLICK);
-        }
+//        boolean isSlow = Math.abs(mVelocityTracker.getXVelocity()) < 500;
+//        if (isSlow
+//                || SystemClock.uptimeMillis() - mVibrationTime >= GESTURE_DURATION_FOR_CLICK_MS) {
+//            mVibratorHelper.vibrate(VibrationEffect.EFFECT_CLICK);
+//        }
 
         // Let's also snap the angle a bit
         if (mAngleOffset > -4) {
@@ -743,8 +773,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         // Apply a haptic on drag slop passed
         if (!mDragSlopPassed && touchTranslation > mSwipeTriggerThreshold) {
             mDragSlopPassed = true;
-            mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
-            mVibrationTime = SystemClock.uptimeMillis();
+//            mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
+//            mVibrationTime = SystemClock.uptimeMillis();
 
             // Let's show the arrow and animate it in!
             mDisappearAmount = 0.0f;
@@ -886,7 +916,6 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             // Whenever the trigger back state changes the existing translation animation should be
             // cancelled
             mTranslationAnimation.cancel();
-            mBackCallback.setTriggerBack(mTriggerBack);
         }
     }
 

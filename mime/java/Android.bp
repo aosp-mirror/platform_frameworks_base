@@ -10,8 +10,5 @@ package {
 filegroup {
     name: "framework-mime-sources",
     srcs: ["**/*.java"],
-    visibility: [
-        "//frameworks/base",
-        "//frameworks/base/api",
-    ],
+    visibility: ["//frameworks/base"],
 }

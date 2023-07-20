@@ -51,10 +51,10 @@ public class PhysicalDisplaySwitchTransitionLauncher {
     /**
      *   Called by the DeviceStateManager callback when the state changes.
      */
-    void foldStateChanged(DeviceStateController.DeviceState newDeviceState) {
+    void foldStateChanged(DeviceStateController.FoldState newFoldState) {
         // Ignore transitions to/from half-folded.
-        if (newDeviceState == DeviceStateController.DeviceState.HALF_FOLDED) return;
-        mIsFolded = newDeviceState == DeviceStateController.DeviceState.FOLDED;
+        if (newFoldState == DeviceStateController.FoldState.HALF_FOLDED) return;
+        mIsFolded = newFoldState == DeviceStateController.FoldState.FOLDED;
     }
 
     /**

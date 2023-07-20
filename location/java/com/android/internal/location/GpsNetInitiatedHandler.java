@@ -51,7 +51,7 @@ public class GpsNetInitiatedHandler {
 
     private static final String TAG = "GpsNetInitiatedHandler";
 
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = false;
 
     // string constants for defining data fields in NI Intent
     public static final String NI_INTENT_KEY_NOTIF_ID = "notif_id";

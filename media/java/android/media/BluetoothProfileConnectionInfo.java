@@ -112,10 +112,8 @@ public final class BluetoothProfileConnectionInfo implements Parcelable {
     }
 
     /**
-     * Factory method for <code>BluetoothProfileConnectionInfo</code> for an LE device
-     * Use this method for an input device connection,
-     * or for an output device connection if the connection volume is unknown,
-     * otherwise use {@link #createLeAudioOutputInfo(boolean, int)}.
+     * constructor for le audio info
+     *
      * @param suppressNoisyIntent if true the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY}
      * intent will not be sent.
      *
@@ -128,9 +126,8 @@ public final class BluetoothProfileConnectionInfo implements Parcelable {
     }
 
     /**
+     * @hide
      * Factory method for <code>BluetoothProfileConnectionInfo</code> for an LE output device
-     * Use this method for an output device connection with a volume to be used at connection
-     * time.
      * @param suppressNoisyIntent if true the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY}
      *     intent will not be sent.
      * @param volume the volume index of the device, -1 if unknown or to be ignored

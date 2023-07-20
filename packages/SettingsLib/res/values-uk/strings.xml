@@ -117,7 +117,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Передавання файлів"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Пристрій введення"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Доступ до Інтернету"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Доступ до контактів і історії викликів"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Доступ до контактів та історії дзвінків"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Використовуйте, щоб надсилати контакти й історію викликів"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Надання доступу до Інтернету"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Текстові повідомлення"</string>
@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Скасувати"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Якщо ви під’єднаєте інший пристрій, він матиме доступ до ваших контактів та історії дзвінків."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Не вдалося створити пару з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Не підключено пристрій <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: неправильний PIN-код чи ключ доступу."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Помилка підключення до пристрою <xliff:g id="DEVICE_NAME">%1$s</xliff:g>: неправильний PIN-код чи ключ доступу."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Неможливо зв’язатися з пристроєм <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Створ. пари відхилено <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Комп’ютер"</string>
@@ -387,9 +387,9 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Налагодити непрямокутну обрізку"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Обробка HWUI за профілем"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Увімкнути шари налагодження ГП"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дозволити завантажувати шари налагодження ГП для додатків налагодження"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Увімкнути докладний журнал постачальника"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Включати у звіти про помилки додаткові записи постачальника про пристрій, які можуть містити особисті дані, призводити до надмірного споживання заряду акумулятора та/або використовувати більший обсяг пам\'яті."</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дозвольте завантажувати шари налагодження ГП для додатків налагодження"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Увімкнути докладну реєстрацію постачальника"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Включати у звіти про помилки додаткові записи про постачальника пристрою, які можуть містити особисті дані, призводити до надмірного споживання заряду акумулятора та/або використовувати більший обсяг пам\'яті."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Анімація вікон"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Анімація переходів"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Тривалість анімації"</string>
@@ -572,7 +572,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Користувач"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Профіль з обмеженням"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Додати нового користувача?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Цим пристроєм можуть користуватися кілька людей. Для цього потрібно створити додаткові профілі. Власник профілю може налаштувати його на свій смак: вибрати фоновий малюнок, установити потрібні додатки тощо. Користувачі також можуть налаштовувати певні параметри пристрою (як-от Wi-Fi), які застосовуватимуться до решти профілів.\n\nПісля створення новий профіль потрібно налаштувати.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів. Налаштування й сервіси доступності можуть не передаватися новому користувачеві."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Цим пристроєм можуть користуватися кілька людей. Для цього потрібно створити додаткові профілі. Власник профілю може налаштувати його на свій смак: вибрати фоновий малюнок, установити потрібні додатки тощо. Користувачі також можуть налаштовувати певні параметри пристрою (як-от Wi-Fi), які застосовуватимуться до решти профілів.\n\nПісля створення новий профіль потрібно налаштувати.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів. Налаштування спеціальних можливостей і сервісів можуть не передаватися новому користувачеві."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Користувач має налаштувати свій профіль після створення.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Створити користувача зараз?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Переконайтеся, що користувач може взяти пристрій і налаштувати профіль"</string>
@@ -670,6 +670,6 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Змінити додаток для трансляції на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Змінити аудіовихід"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Анімації з підказками для жесту \"Назад\""</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Увімкнути системну анімацію з підказками для жесту \"Назад\"."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Увімкніть системну анімацію з підказками для жесту \"Назад\"."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Якщо вибрати це налаштування, для жесту \"Назад\" відображатиметься анімація з підказками. У файлі маніфесту атрибуту enableOnBackInvokedCallback додатка потрібно присвоїти значення true."</string>
 </resources>

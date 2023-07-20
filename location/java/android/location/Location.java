@@ -47,15 +47,6 @@ import java.util.StringTokenizer;
  * <p>All locations generated through {@link LocationManager} are guaranteed to have a valid
  * latitude, longitude, timestamp (both Unix epoch time and elapsed realtime since boot), and
  * accuracy. All other parameters are optional.
- *
- * <p class="note">Note that Android provides the ability for applications to submit "mock" or faked
- * locations through {@link LocationManager}, and that these locations can then be received by
- * applications using LocationManager to obtain location information. These locations can be
- * identified via the {@link #isMock()} API. Applications that wish to determine if a given location
- * represents the best estimate of the real position of the device as opposed to a fake location
- * coming from another application or the user should use this API. Keep in mind that the user may
- * have a good reason for mocking their location, and thus apps should generally reject mock
- * locations only when it is essential to their use case that only real locations are accepted.
  */
 public class Location implements Parcelable {
 
@@ -104,8 +95,6 @@ public class Location implements Parcelable {
     private static final int HAS_SPEED_ACCURACY_MASK = 1 << 6;
     private static final int HAS_BEARING_ACCURACY_MASK = 1 << 7;
     private static final int HAS_ELAPSED_REALTIME_UNCERTAINTY_MASK = 1 << 8;
-    private static final int HAS_MSL_ALTITUDE_MASK = 1 << 9;
-    private static final int HAS_MSL_ALTITUDE_ACCURACY_MASK = 1 << 10;
 
     // Cached data to make bearing/distance computations more efficient for the case
     // where distanceTo and bearingTo are called in sequence.  Assume this typically happens
@@ -129,8 +118,6 @@ public class Location implements Parcelable {
     private float mSpeedAccuracyMetersPerSecond;
     private float mBearingDegrees;
     private float mBearingAccuracyDegrees;
-    private double mMslAltitudeMeters;
-    private float mMslAltitudeAccuracyMeters;
 
     private Bundle mExtras = null;
 
@@ -169,8 +156,6 @@ public class Location implements Parcelable {
         mSpeedAccuracyMetersPerSecond = location.mSpeedAccuracyMetersPerSecond;
         mBearingDegrees = location.mBearingDegrees;
         mBearingAccuracyDegrees = location.mBearingAccuracyDegrees;
-        mMslAltitudeMeters = location.mMslAltitudeMeters;
-        mMslAltitudeAccuracyMeters = location.mMslAltitudeAccuracyMeters;
         mExtras = (location.mExtras == null) ? null : new Bundle(location.mExtras);
     }
 
@@ -193,8 +178,6 @@ public class Location implements Parcelable {
         mAltitudeAccuracyMeters = 0;
         mSpeedAccuracyMetersPerSecond = 0;
         mBearingAccuracyDegrees = 0;
-        mMslAltitudeMeters = 0;
-        mMslAltitudeAccuracyMeters = 0;
         mExtras = null;
     }
 
@@ -707,91 +690,6 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Returns the Mean Sea Level altitude of this location in meters.
-     *
-     * <p>This is only valid if {@link #hasMslAltitude()} is true.
-     *
-     * @hide
-     */
-    public @FloatRange double getMslAltitudeMeters() {
-        Preconditions.checkState(hasMslAltitude(),
-                "The Mean Sea Level altitude of this location is not set.");
-        return mMslAltitudeMeters;
-    }
-
-    /**
-     * Sets the Mean Sea Level altitude of this location in meters.
-     *
-     * @hide
-     */
-    public void setMslAltitudeMeters(@FloatRange double mslAltitudeMeters) {
-        mMslAltitudeMeters = mslAltitudeMeters;
-        mFieldsMask |= HAS_MSL_ALTITUDE_MASK;
-    }
-
-    /**
-     * Returns true if this location has a Mean Sea Level altitude, false otherwise.
-     *
-     * @hide
-     */
-    public boolean hasMslAltitude() {
-        return (mFieldsMask & HAS_MSL_ALTITUDE_MASK) != 0;
-    }
-
-    /**
-     * Removes the Mean Sea Level altitude from this location.
-     *
-     * @hide
-     */
-    public void removeMslAltitude() {
-        mFieldsMask &= ~HAS_MSL_ALTITUDE_MASK;
-    }
-
-    /**
-     * Returns the estimated Mean Sea Level altitude accuracy in meters of this location at the 68th
-     * percentile confidence level. This means that there is 68% chance that the true Mean Sea Level
-     * altitude of this location falls within {@link #getMslAltitudeMeters()} +/- this uncertainty.
-     *
-     * <p>This is only valid if {@link #hasMslAltitudeAccuracy()} is true.
-     *
-     * @hide
-     */
-    public @FloatRange(from = 0.0) float getMslAltitudeAccuracyMeters() {
-        Preconditions.checkState(hasMslAltitudeAccuracy(),
-                "The Mean Sea Level altitude accuracy of this location is not set.");
-        return mMslAltitudeAccuracyMeters;
-    }
-
-    /**
-     * Sets the Mean Sea Level altitude accuracy of this location in meters.
-     *
-     * @hide
-     */
-    public void setMslAltitudeAccuracyMeters(
-            @FloatRange(from = 0.0) float mslAltitudeAccuracyMeters) {
-        mMslAltitudeAccuracyMeters = mslAltitudeAccuracyMeters;
-        mFieldsMask |= HAS_MSL_ALTITUDE_ACCURACY_MASK;
-    }
-
-    /**
-     * Returns true if this location has a Mean Sea Level altitude accuracy, false otherwise.
-     *
-     * @hide
-     */
-    public boolean hasMslAltitudeAccuracy() {
-        return (mFieldsMask & HAS_MSL_ALTITUDE_ACCURACY_MASK) != 0;
-    }
-
-    /**
-     * Removes the Mean Sea Level altitude accuracy from this location.
-     *
-     * @hide
-     */
-    public void removeMslAltitudeAccuracy() {
-        mFieldsMask &= ~HAS_MSL_ALTITUDE_ACCURACY_MASK;
-    }
-
-    /**
      * Returns true if this is a mock location. If this location comes from the Android framework,
      * this indicates that the location was provided by a test location provider, and thus may not
      * be related to the actual location of the device.
@@ -941,14 +839,6 @@ public class Location implements Parcelable {
                 && hasBearingAccuracy() == location.hasBearingAccuracy()
                 && (!hasBearingAccuracy() || Float.compare(location.mBearingAccuracyDegrees,
                 mBearingAccuracyDegrees) == 0)
-                && hasMslAltitude() == location.hasMslAltitude()
-                && (!hasMslAltitude() || Double.compare(location.mMslAltitudeMeters,
-                mMslAltitudeMeters)
-                == 0)
-                && hasMslAltitudeAccuracy() == location.hasMslAltitudeAccuracy()
-                && (!hasMslAltitudeAccuracy() || Float.compare(
-                location.mMslAltitudeAccuracyMeters,
-                mMslAltitudeAccuracyMeters) == 0)
                 && Objects.equals(mProvider, location.mProvider)
                 && areExtrasEqual(mExtras, location.mExtras);
     }
@@ -984,12 +874,6 @@ public class Location implements Parcelable {
             s.append(" alt=").append(mAltitudeMeters);
             if (hasVerticalAccuracy()) {
                 s.append(" vAcc=").append(mAltitudeAccuracyMeters);
-            }
-        }
-        if (hasMslAltitude()) {
-            s.append(" mslAlt=").append(mMslAltitudeMeters);
-            if (hasMslAltitudeAccuracy()) {
-                s.append(" mslAltAcc=").append(mMslAltitudeAccuracyMeters);
             }
         }
         if (hasSpeed()) {
@@ -1060,12 +944,6 @@ public class Location implements Parcelable {
             if (l.hasBearingAccuracy()) {
                 l.mBearingAccuracyDegrees = in.readFloat();
             }
-            if (l.hasMslAltitude()) {
-                l.mMslAltitudeMeters = in.readDouble();
-            }
-            if (l.hasMslAltitudeAccuracy()) {
-                l.mMslAltitudeAccuracyMeters = in.readFloat();
-            }
             l.mExtras = Bundle.setDefusable(in.readBundle(), true);
             return l;
         }
@@ -1112,12 +990,6 @@ public class Location implements Parcelable {
         }
         if (hasBearingAccuracy()) {
             parcel.writeFloat(mBearingAccuracyDegrees);
-        }
-        if (hasMslAltitude()) {
-            parcel.writeDouble(mMslAltitudeMeters);
-        }
-        if (hasMslAltitudeAccuracy()) {
-            parcel.writeFloat(mMslAltitudeAccuracyMeters);
         }
         parcel.writeBundle(mExtras);
     }

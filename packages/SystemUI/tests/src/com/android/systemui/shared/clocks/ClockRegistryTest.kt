@@ -18,6 +18,8 @@ package com.android.systemui.shared.clocks
 import android.content.ContentResolver
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.os.Handler
+import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -25,16 +27,13 @@ import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
 import com.android.systemui.plugins.ClockProviderPlugin
-import com.android.systemui.plugins.ClockSettings
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.fail
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
+import org.json.JSONException
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -49,18 +48,18 @@ import org.mockito.junit.MockitoJUnit
 class ClockRegistryTest : SysuiTestCase() {
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
-    private lateinit var dispatcher: CoroutineDispatcher
-    private lateinit var scope: TestScope
-
     @Mock private lateinit var mockContext: Context
     @Mock private lateinit var mockPluginManager: PluginManager
     @Mock private lateinit var mockClock: ClockController
     @Mock private lateinit var mockDefaultClock: ClockController
     @Mock private lateinit var mockThumbnail: Drawable
+    @Mock private lateinit var mockHandler: Handler
     @Mock private lateinit var mockContentResolver: ContentResolver
     private lateinit var fakeDefaultProvider: FakeClockPlugin
     private lateinit var pluginListener: PluginListener<ClockProviderPlugin>
     private lateinit var registry: ClockRegistry
+
+    private var settingValue: String = ""
 
     companion object {
         private fun failFactory(): ClockController {
@@ -80,8 +79,7 @@ class ClockRegistryTest : SysuiTestCase() {
         private val thumbnailCallbacks = mutableMapOf<ClockId, () -> Drawable?>()
 
         override fun getClocks() = metadata
-        override fun createClock(settings: ClockSettings): ClockController =
-            createCallbacks[settings.clockId!!]!!()
+        override fun createClock(id: ClockId): ClockController = createCallbacks[id]!!()
         override fun getClockThumbnail(id: ClockId): Drawable? = thumbnailCallbacks[id]!!()
 
         fun addClock(
@@ -99,9 +97,6 @@ class ClockRegistryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        dispatcher = StandardTestDispatcher()
-        scope = TestScope(dispatcher)
-
         fakeDefaultProvider = FakeClockPlugin()
             .addClock(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME, { mockDefaultClock }, { mockThumbnail })
         whenever(mockContext.contentResolver).thenReturn(mockContentResolver)
@@ -110,22 +105,15 @@ class ClockRegistryTest : SysuiTestCase() {
         registry = object : ClockRegistry(
             mockContext,
             mockPluginManager,
-            scope = scope.backgroundScope,
-            mainDispatcher = dispatcher,
-            bgDispatcher = dispatcher,
+            mockHandler,
             isEnabled = true,
-            handleAllUsers = true,
-            defaultClockProvider = fakeDefaultProvider,
+            userHandle = UserHandle.USER_ALL,
+            defaultClockProvider = fakeDefaultProvider
         ) {
-            override fun querySettings() { }
-            override fun applySettings(value: ClockSettings?) {
-                settings = value
-            }
-            // Unit Test does not validate threading
-            override fun assertMainThread() {}
-            override fun assertNotMainThread() {}
+            override var currentClockId: ClockId
+                get() = settingValue
+                set(value) { settingValue = value }
         }
-        registry.registerListeners()
 
         verify(mockPluginManager)
             .addPluginListener(captor.capture(), eq(ClockProviderPlugin::class.java), eq(true))
@@ -197,16 +185,16 @@ class ClockRegistryTest : SysuiTestCase() {
             .addClock("clock_1", "clock 1")
             .addClock("clock_2", "clock 2")
 
+        settingValue = "clock_3"
         val plugin2 = FakeClockPlugin()
             .addClock("clock_3", "clock 3", { mockClock })
             .addClock("clock_4", "clock 4")
 
-        registry.applySettings(ClockSettings("clock_3", null))
         pluginListener.onPluginConnected(plugin1, mockContext)
         pluginListener.onPluginConnected(plugin2, mockContext)
 
         val clock = registry.createCurrentClock()
-        assertEquals(mockClock, clock)
+        assertEquals(clock, mockClock)
     }
 
     @Test
@@ -215,11 +203,11 @@ class ClockRegistryTest : SysuiTestCase() {
             .addClock("clock_1", "clock 1")
             .addClock("clock_2", "clock 2")
 
+        settingValue = "clock_3"
         val plugin2 = FakeClockPlugin()
             .addClock("clock_3", "clock 3")
             .addClock("clock_4", "clock 4")
 
-        registry.applySettings(ClockSettings("clock_3", null))
         pluginListener.onPluginConnected(plugin1, mockContext)
         pluginListener.onPluginConnected(plugin2, mockContext)
         pluginListener.onPluginDisconnected(plugin2)
@@ -229,98 +217,74 @@ class ClockRegistryTest : SysuiTestCase() {
     }
 
     @Test
-    fun pluginRemoved_clockAndListChanged() {
+    fun pluginRemoved_clockChanged() {
         val plugin1 = FakeClockPlugin()
             .addClock("clock_1", "clock 1")
             .addClock("clock_2", "clock 2")
 
+        settingValue = "clock_3"
         val plugin2 = FakeClockPlugin()
             .addClock("clock_3", "clock 3", { mockClock })
             .addClock("clock_4", "clock 4")
 
+        pluginListener.onPluginConnected(plugin1, mockContext)
+        pluginListener.onPluginConnected(plugin2, mockContext)
 
         var changeCallCount = 0
-        var listChangeCallCount = 0
-        registry.registerClockChangeListener(object : ClockRegistry.ClockChangeListener {
-            override fun onCurrentClockChanged() { changeCallCount++ }
-            override fun onAvailableClocksChanged() { listChangeCallCount++ }
-        })
-
-        registry.applySettings(ClockSettings("clock_3", null))
-        assertEquals(0, changeCallCount)
-        assertEquals(0, listChangeCallCount)
-
-        pluginListener.onPluginConnected(plugin1, mockContext)
-        assertEquals(0, changeCallCount)
-        assertEquals(1, listChangeCallCount)
-
-        pluginListener.onPluginConnected(plugin2, mockContext)
-        assertEquals(1, changeCallCount)
-        assertEquals(2, listChangeCallCount)
+        registry.registerClockChangeListener { changeCallCount++ }
 
         pluginListener.onPluginDisconnected(plugin1)
-        assertEquals(1, changeCallCount)
-        assertEquals(3, listChangeCallCount)
+        assertEquals(0, changeCallCount)
 
         pluginListener.onPluginDisconnected(plugin2)
-        assertEquals(2, changeCallCount)
-        assertEquals(4, listChangeCallCount)
+        assertEquals(1, changeCallCount)
     }
-
 
     @Test
     fun jsonDeserialization_gotExpectedObject() {
-        val expected = ClockSettings("ID", null).apply {
-            metadata.put("appliedTimestamp", 500)
-        }
-        val actual = ClockSettings.deserialize("""{
+        val expected = ClockRegistry.ClockSetting("ID", 500)
+        val actual = ClockRegistry.ClockSetting.deserialize("""{
             "clockId":"ID",
-            "metadata": {
-                "appliedTimestamp":500
-            }
+            "_applied_timestamp":500
         }""")
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonDeserialization_noTimestamp_gotExpectedObject() {
-        val expected = ClockSettings("ID", null)
-        val actual = ClockSettings.deserialize("{\"clockId\":\"ID\"}")
+        val expected = ClockRegistry.ClockSetting("ID", null)
+        val actual = ClockRegistry.ClockSetting.deserialize("{\"clockId\":\"ID\"}")
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonDeserialization_nullTimestamp_gotExpectedObject() {
-        val expected = ClockSettings("ID", null)
-        val actual = ClockSettings.deserialize("""{
+        val expected = ClockRegistry.ClockSetting("ID", null)
+        val actual = ClockRegistry.ClockSetting.deserialize("""{
             "clockId":"ID",
-            "metadata":null
+            "_applied_timestamp":null
         }""")
         assertEquals(expected, actual)
     }
 
-    @Test
-    fun jsonDeserialization_noId_deserializedEmpty() {
-        val expected = ClockSettings(null, null).apply {
-            metadata.put("appliedTimestamp", 500)
-        }
-        val actual = ClockSettings.deserialize("{\"metadata\":{\"appliedTimestamp\":500}}")
+    @Test(expected = JSONException::class)
+    fun jsonDeserialization_noId_threwException() {
+        val expected = ClockRegistry.ClockSetting("ID", 500)
+        val actual = ClockRegistry.ClockSetting.deserialize("{\"_applied_timestamp\":500}")
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonSerialization_gotExpectedString() {
-        val expected = "{\"clockId\":\"ID\",\"metadata\":{\"appliedTimestamp\":500}}"
-        val actual = ClockSettings.serialize(ClockSettings("ID", null).apply {
-            metadata.put("appliedTimestamp", 500)
-        })
+        val expected = "{\"clockId\":\"ID\",\"_applied_timestamp\":500}"
+        val actual = ClockRegistry.ClockSetting.serialize( ClockRegistry.ClockSetting("ID", 500))
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonSerialization_noTimestamp_gotExpectedString() {
-        val expected = "{\"clockId\":\"ID\",\"metadata\":{}}"
-        val actual = ClockSettings.serialize(ClockSettings("ID", null))
+        val expected = "{\"clockId\":\"ID\"}"
+        val actual = ClockRegistry.ClockSetting.serialize( ClockRegistry.ClockSetting("ID", null))
         assertEquals(expected, actual)
     }
 }

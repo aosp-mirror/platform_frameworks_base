@@ -138,7 +138,7 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
                                                uint32_t count, VsyncEventData vsyncEventData) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
+    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking vsync handler.", this);
 
@@ -155,7 +155,7 @@ void NativeDisplayEventReceiver::dispatchHotplug(nsecs_t timestamp, PhysicalDisp
                                                  bool connected) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
+    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking hotplug handler.", this);
         env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchHotplug,
@@ -170,7 +170,7 @@ void NativeDisplayEventReceiver::dispatchModeChanged(nsecs_t timestamp, Physical
                                                      int32_t modeId, nsecs_t) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
+    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking mode changed handler.", this);
         env->CallVoidMethod(receiverObj.get(), gDisplayEventReceiverClassInfo.dispatchModeChanged,
@@ -185,7 +185,7 @@ void NativeDisplayEventReceiver::dispatchFrameRateOverrides(
         nsecs_t timestamp, PhysicalDisplayId displayId, std::vector<FrameRateOverride> overrides) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
 
-    ScopedLocalRef<jobject> receiverObj(env, GetReferent(env, mReceiverWeakGlobal));
+    ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
     if (receiverObj.get()) {
         ALOGV("receiver %p ~ Invoking FrameRateOverride handler.", this);
         const auto frameRateOverrideClass =

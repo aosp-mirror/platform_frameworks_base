@@ -235,14 +235,21 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
 
     /** Adds the magnetic target view to the WindowManager so it's ready to be animated in. */
     public void createOrUpdateDismissTarget() {
-        if (mTargetViewContainer.getParent() == null) {
+        if (!mTargetViewContainer.isAttachedToWindow()) {
             mTargetViewContainer.cancelAnimators();
 
             mTargetViewContainer.setVisibility(View.INVISIBLE);
             mTargetViewContainer.getViewTreeObserver().removeOnPreDrawListener(this);
             mHasDismissTargetSurface = false;
 
-            mWindowManager.addView(mTargetViewContainer, getDismissTargetLayoutParams());
+            try {
+                mWindowManager.addView(mTargetViewContainer, getDismissTargetLayoutParams());
+            } catch (IllegalStateException e) {
+                // This shouldn't happen, but if the target is already added, just update its layout
+                // params.
+                mWindowManager.updateViewLayout(
+                        mTargetViewContainer, getDismissTargetLayoutParams());
+            }
         } else {
             mWindowManager.updateViewLayout(mTargetViewContainer, getDismissTargetLayoutParams());
         }
@@ -299,7 +306,7 @@ public class PipDismissTargetHandler implements ViewTreeObserver.OnPreDrawListen
      * Removes the dismiss target and cancels any pending callbacks to show it.
      */
     public void cleanUpDismissTarget() {
-        if (mTargetViewContainer.getParent() != null) {
+        if (mTargetViewContainer.isAttachedToWindow()) {
             mWindowManager.removeViewImmediate(mTargetViewContainer);
         }
     }

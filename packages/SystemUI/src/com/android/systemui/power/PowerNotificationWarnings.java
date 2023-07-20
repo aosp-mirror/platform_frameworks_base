@@ -68,7 +68,6 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.NotificationChannels;
@@ -176,7 +175,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private ActivityStarter mActivityStarter;
     private final BroadcastSender mBroadcastSender;
     private final UiEventLogger mUiEventLogger;
-    private final UserTracker mUserTracker;
+
     private final Lazy<BatteryController> mBatteryControllerLazy;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
 
@@ -185,8 +184,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     @Inject
     public PowerNotificationWarnings(Context context, ActivityStarter activityStarter,
             BroadcastSender broadcastSender, Lazy<BatteryController> batteryControllerLazy,
-            DialogLaunchAnimator dialogLaunchAnimator, UiEventLogger uiEventLogger,
-            UserTracker userTracker) {
+            DialogLaunchAnimator dialogLaunchAnimator, UiEventLogger uiEventLogger) {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -198,7 +196,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mUseSevereDialog = mContext.getResources().getBoolean(R.bool.config_severe_battery_dialog);
         mUiEventLogger = uiEventLogger;
-        mUserTracker = userTracker;
     }
 
     @Override
@@ -695,7 +692,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         Secure.putIntForUser(
                                 resolver,
                                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
-                                1, mUserTracker.getUserId());
+                                1, UserHandle.USER_CURRENT);
                     });
         } else {
             d.setTitle(R.string.battery_saver_confirmation_title);
@@ -846,8 +843,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 logEvent(BatteryWarningEvents
                         .LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION_SETTINGS);
                 dismissLowBatteryNotification();
-                mContext.startActivityAsUser(mOpenBatterySaverSettings,
-                        mUserTracker.getUserHandle());
+                mContext.startActivityAsUser(mOpenBatterySaverSettings, UserHandle.CURRENT);
             } else if (action.equals(ACTION_START_SAVER)) {
                 logEvent(BatteryWarningEvents
                         .LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION_TURN_ON);

@@ -1081,7 +1081,8 @@ public class MediaPlayer extends PlayerBase
             // Try cached ringtone first since the actual provider may not be
             // encryption aware, or it may be stored on CE media storage
             final int type = RingtoneManager.getDefaultType(uri);
-            final Uri cacheUri = RingtoneManager.getCacheForType(type, context.getUserId());
+            final Uri cacheUri = RingtoneManager.getCacheForType(context, type,
+                    context.getUserId());
             final Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(context, type);
             if (attemptDataSource(resolver, cacheUri)) {
                 return;
@@ -2473,8 +2474,6 @@ public class MediaPlayer extends PlayerBase
      *
      * @see android.media.MediaPlayer#getTrackInfo
      */
-    // The creator needs to be pulic, which requires removing the @UnsupportedAppUsage
-    @SuppressWarnings("ParcelableCreator")
     static public class TrackInfo implements Parcelable {
         /**
          * Gets the track type.
@@ -3531,7 +3530,7 @@ public class MediaPlayer extends PlayerBase
                 return;
 
             case MEDIA_ERROR:
-                Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
+                Log.v(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
                 boolean error_was_handled = false;
                 OnErrorListener onErrorListener = mOnErrorListener;
                 if (onErrorListener != null) {

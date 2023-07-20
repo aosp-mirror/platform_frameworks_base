@@ -20,10 +20,10 @@ import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.PowerManager;
+import android.os.UserHandle;
 import android.text.TextUtils;
 
 import com.android.systemui.doze.dagger.DozeScope;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 
 import java.io.PrintWriter;
@@ -57,7 +57,6 @@ public class DozeSuppressor implements DozeMachine.Part {
     private final AmbientDisplayConfiguration mConfig;
     private final DozeLog mDozeLog;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
-    private final UserTracker mUserTracker;
 
     private boolean mIsCarModeEnabled = false;
 
@@ -66,13 +65,11 @@ public class DozeSuppressor implements DozeMachine.Part {
             DozeHost dozeHost,
             AmbientDisplayConfiguration config,
             DozeLog dozeLog,
-            Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
-            UserTracker userTracker) {
+            Lazy<BiometricUnlockController> biometricUnlockControllerLazy) {
         mDozeHost = dozeHost;
         mConfig = config;
         mDozeLog = dozeLog;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
-        mUserTracker = userTracker;
     }
 
     @Override
@@ -151,7 +148,7 @@ public class DozeSuppressor implements DozeMachine.Part {
 
     private void handleCarModeExited() {
         mDozeLog.traceCarModeEnded();
-        mMachine.requestState(mConfig.alwaysOnEnabled(mUserTracker.getUserId())
+        mMachine.requestState(mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)
                 ? DozeMachine.State.DOZE_AOD : DozeMachine.State.DOZE);
     }
 
@@ -169,7 +166,7 @@ public class DozeSuppressor implements DozeMachine.Part {
             if (mDozeHost.isPowerSaveActive()) {
                 nextState = DozeMachine.State.DOZE;
             } else if (mMachine.getState() == DozeMachine.State.DOZE
-                    && mConfig.alwaysOnEnabled(mUserTracker.getUserId())) {
+                    && mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
                 nextState = DozeMachine.State.DOZE_AOD;
             }
 
@@ -184,7 +181,7 @@ public class DozeSuppressor implements DozeMachine.Part {
             // handles suppression changes, while DozeMachine#transitionPolicy handles gating
             // transitions to DOZE_AOD
             final DozeMachine.State nextState;
-            if (mConfig.alwaysOnEnabled(mUserTracker.getUserId()) && !suppressed) {
+            if (mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT) && !suppressed) {
                 nextState = DozeMachine.State.DOZE_AOD;
             } else {
                 nextState = DozeMachine.State.DOZE;

@@ -77,14 +77,14 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
-    void setForcedDensity(DisplayInfo info, int density, int userId) {
-        if (info.displayId == Display.DEFAULT_DISPLAY) {
+    void setForcedDensity(DisplayContent displayContent, int density, int userId) {
+        if (displayContent.isDefaultDisplay) {
             final String densityString = density == 0 ? "" : Integer.toString(density);
             Settings.Secure.putStringForUser(mService.mContext.getContentResolver(),
                     Settings.Secure.DISPLAY_DENSITY_FORCED, densityString, userId);
         }
 
-        final DisplayInfo displayInfo = info;
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
         overrideSettings.mForcedDensity = density;
@@ -132,7 +132,7 @@ class DisplayWindowSettings {
         // No record is present so use default windowing mode policy.
         if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
             windowingMode = mService.mAtmService.mSupportsFreeformWindowManagement
-                    && (mService.mIsPc || dc.forceDesktopMode())
+                    && (mService.mIsPc || dc.getDisplayId() != Display.DEFAULT_DISPLAY)
                     ? WindowConfiguration.WINDOWING_MODE_FREEFORM
                     : WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
         }
@@ -442,12 +442,11 @@ class DisplayWindowSettings {
                     mRemoveContentMode = other.mRemoveContentMode;
                     changed = true;
                 }
-                if (!Objects.equals(
-                        other.mShouldShowWithInsecureKeyguard, mShouldShowWithInsecureKeyguard)) {
+                if (other.mShouldShowWithInsecureKeyguard != mShouldShowWithInsecureKeyguard) {
                     mShouldShowWithInsecureKeyguard = other.mShouldShowWithInsecureKeyguard;
                     changed = true;
                 }
-                if (!Objects.equals(other.mShouldShowSystemDecors, mShouldShowSystemDecors)) {
+                if (other.mShouldShowSystemDecors != mShouldShowSystemDecors) {
                     mShouldShowSystemDecors = other.mShouldShowSystemDecors;
                     changed = true;
                 }
@@ -459,15 +458,15 @@ class DisplayWindowSettings {
                     mFixedToUserRotation = other.mFixedToUserRotation;
                     changed = true;
                 }
-                if (!Objects.equals(other.mIgnoreOrientationRequest, mIgnoreOrientationRequest)) {
+                if (other.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
                     mIgnoreOrientationRequest = other.mIgnoreOrientationRequest;
                     changed = true;
                 }
-                if (!Objects.equals(other.mIgnoreDisplayCutout, mIgnoreDisplayCutout)) {
+                if (other.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
                     mIgnoreDisplayCutout = other.mIgnoreDisplayCutout;
                     changed = true;
                 }
-                if (!Objects.equals(other.mDontMoveToTop, mDontMoveToTop)) {
+                if (other.mDontMoveToTop != mDontMoveToTop) {
                     mDontMoveToTop = other.mDontMoveToTop;
                     changed = true;
                 }
@@ -523,13 +522,14 @@ class DisplayWindowSettings {
                     mRemoveContentMode = delta.mRemoveContentMode;
                     changed = true;
                 }
-                if (delta.mShouldShowWithInsecureKeyguard != null && !Objects.equals(
-                        delta.mShouldShowWithInsecureKeyguard, mShouldShowWithInsecureKeyguard)) {
+                if (delta.mShouldShowWithInsecureKeyguard != null
+                        && delta.mShouldShowWithInsecureKeyguard
+                        != mShouldShowWithInsecureKeyguard) {
                     mShouldShowWithInsecureKeyguard = delta.mShouldShowWithInsecureKeyguard;
                     changed = true;
                 }
-                if (delta.mShouldShowSystemDecors != null && !Objects.equals(
-                        delta.mShouldShowSystemDecors, mShouldShowSystemDecors)) {
+                if (delta.mShouldShowSystemDecors != null
+                        && delta.mShouldShowSystemDecors != mShouldShowSystemDecors) {
                     mShouldShowSystemDecors = delta.mShouldShowSystemDecors;
                     changed = true;
                 }
@@ -543,18 +543,18 @@ class DisplayWindowSettings {
                     mFixedToUserRotation = delta.mFixedToUserRotation;
                     changed = true;
                 }
-                if (delta.mIgnoreOrientationRequest != null && !Objects.equals(
-                        delta.mIgnoreOrientationRequest, mIgnoreOrientationRequest)) {
+                if (delta.mIgnoreOrientationRequest != null
+                        && delta.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
                     mIgnoreOrientationRequest = delta.mIgnoreOrientationRequest;
                     changed = true;
                 }
-                if (delta.mIgnoreDisplayCutout != null && !Objects.equals(
-                        delta.mIgnoreDisplayCutout, mIgnoreDisplayCutout)) {
+                if (delta.mIgnoreDisplayCutout != null
+                        && delta.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
                     mIgnoreDisplayCutout = delta.mIgnoreDisplayCutout;
                     changed = true;
                 }
-                if (delta.mDontMoveToTop != null && !Objects.equals(
-                        delta.mDontMoveToTop, mDontMoveToTop)) {
+                if (delta.mDontMoveToTop != null
+                        && delta.mDontMoveToTop != mDontMoveToTop) {
                     mDontMoveToTop = delta.mDontMoveToTop;
                     changed = true;
                 }

@@ -126,8 +126,8 @@ public final class SystemServiceManager implements Dumpable {
 
     SystemServiceManager(Context context) {
         mContext = context;
-        mServices = new ArrayList<>();
-        mServiceClassnames = new ArraySet<>();
+        mServices = Collections.synchronizedList(new ArrayList<>());
+        mServiceClassnames = Collections.synchronizedSet(new ArraySet<>());
         // Disable using the thread pool for low ram devices
         sUseLifecycleThreadPool = sUseLifecycleThreadPool
                 && !ActivityManager.isLowRamDeviceStatic();

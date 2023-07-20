@@ -26,7 +26,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -37,7 +36,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.doze.DozeMachine.State;
-import com.android.systemui.settings.UserTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +48,6 @@ import org.mockito.MockitoAnnotations;
 @RunWithLooper
 public class DozeDockHandlerTest extends SysuiTestCase {
     @Mock private DozeMachine mMachine;
-    @Mock private UserTracker mUserTracker;
     private AmbientDisplayConfiguration mConfig;
     private DockManagerFake mDockManagerFake;
     private DozeDockHandler mDockHandler;
@@ -60,10 +57,9 @@ public class DozeDockHandlerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mConfig = DozeConfigurationUtil.createMockConfig();
         mDockManagerFake = spy(new DockManagerFake());
-        mDockHandler = new DozeDockHandler(mConfig, mDockManagerFake, mUserTracker);
+        mDockHandler = new DozeDockHandler(mConfig, mDockManagerFake);
         mDockHandler.setDozeMachine(mMachine);
 
-        when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
         when(mMachine.getState()).thenReturn(State.DOZE_AOD);
         doReturn(true).when(mConfig).alwaysOnEnabled(anyInt());
         mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);

@@ -46,6 +46,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.service.notification.Condition;
@@ -68,7 +69,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.RingerModeLiveData;
 import com.android.systemui.util.RingerModeTracker;
@@ -133,7 +133,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final CaptioningManager mCaptioningManager;
     private final KeyguardManager mKeyguardManager;
     private final ActivityManager mActivityManager;
-    private final UserTracker mUserTracker;
     protected C mCallbacks = new C();
     private final State mState = new State();
     protected final MediaSessionsCallbacks mMediaSessionsCallbacksW;
@@ -181,7 +180,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             CaptioningManager captioningManager,
             KeyguardManager keyguardManager,
             ActivityManager activityManager,
-            UserTracker userTracker,
             DumpManager dumpManager
     ) {
         mContext = context.getApplicationContext();
@@ -211,7 +209,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mCaptioningManager = captioningManager;
         mKeyguardManager = keyguardManager;
         mActivityManager = activityManager;
-        mUserTracker = userTracker;
         dumpManager.registerDumpable("VolumeDialogControllerImpl", this);
 
         boolean accessibilityVolumeStreamActive = accessibilityManager
@@ -374,7 +371,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         if (System.currentTimeMillis() - mLastToggledRingerOn < TOUCH_FEEDBACK_TIMEOUT_MS) {
             try {
                 mAudioService.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD,
-                        mUserTracker.getUserId());
+                        UserHandle.USER_CURRENT);
             } catch (RemoteException e) {
                 // ignore
             }
@@ -516,6 +513,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         updateRingerModeExternalW(mRingerModeObservers.mRingerMode.getValue());
         updateZenModeW();
         updateZenConfig();
+        updateLinkNotificationConfigW();
         updateEffectsSuppressorW(mNoMan.getEffectsSuppressor());
         mCallbacks.onStateChanged(mState);
     }
@@ -567,6 +565,18 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     private static boolean isRinger(int stream) {
         return stream == AudioManager.STREAM_RING || stream == AudioManager.STREAM_NOTIFICATION;
+    }
+
+    private boolean updateLinkNotificationConfigW() {
+        int notifAliasRing = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_alias_ring_notif_stream_types) ? 1 : 0;
+        boolean linkNotificationWithVolume = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.VOLUME_LINK_NOTIFICATION, notifAliasRing) == 1;
+        if (mState.linkedNotification == linkNotificationWithVolume) {
+            return false;
+        }
+        mState.linkedNotification = linkNotificationWithVolume;
+        return true;
     }
 
     private boolean updateEffectsSuppressorW(ComponentName effectsSuppressor) {
@@ -1030,6 +1040,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE);
         private final Uri ZEN_MODE_CONFIG_URI =
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE_CONFIG_ETAG);
+        private final Uri VOLUME_LINK_NOTIFICATION_URI =
+                Settings.Secure.getUriFor(Settings.Secure.VOLUME_LINK_NOTIFICATION);
 
         public SettingObserver(Handler handler) {
             super(handler);
@@ -1038,6 +1050,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         public void init() {
             mContext.getContentResolver().registerContentObserver(ZEN_MODE_URI, false, this);
             mContext.getContentResolver().registerContentObserver(ZEN_MODE_CONFIG_URI, false, this);
+            mContext.getContentResolver().registerContentObserver(VOLUME_LINK_NOTIFICATION_URI,
+                    false, this);
         }
 
         public void destroy() {
@@ -1053,6 +1067,9 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             if (ZEN_MODE_CONFIG_URI.equals(uri)) {
                 changed |= updateZenConfig();
             }
+            if (VOLUME_LINK_NOTIFICATION_URI.equals(uri)) {
+                changed = updateLinkNotificationConfigW();
+            }
 
             if (changed) {
                 mCallbacks.onStateChanged(mState);
@@ -1067,6 +1084,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             filter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
             filter.addAction(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
             filter.addAction(AudioManager.STREAM_MUTE_CHANGED_ACTION);
+            filter.addAction(AudioManager.VOLUME_STEPS_CHANGED_ACTION);
             filter.addAction(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -1107,6 +1125,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 if (D.BUG) Log.d(TAG, "onReceive STREAM_MUTE_CHANGED_ACTION stream=" + stream
                         + " muted=" + muted);
                 changed = updateStreamMuteW(stream, muted);
+            } else if (action.equals(AudioManager.VOLUME_STEPS_CHANGED_ACTION)) {
+                getState();
             } else if (action.equals(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED)) {
                 if (D.BUG) Log.d(TAG, "onReceive ACTION_EFFECTS_SUPPRESSOR_CHANGED");
                 changed = updateEffectsSuppressorW(mNoMan.getEffectsSuppressor());

@@ -43,4 +43,9 @@
     <color name="side_fps_text_color">#EFF1F2</color>
     <color name="side_fps_button_color">#33B9DB</color>
 
+    <!-- Seekbar progress -->
+    <color name="seekbar_progress_thumb">#FF000000</color>
+
+    <color name="qs_translucent_brightness_bg">#0FFFFFFF</color>
+
 </resources>

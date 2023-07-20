@@ -440,16 +440,12 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     /**
      * Represents the event of clicking on a {@link android.view.View} like
      * {@link android.widget.Button}, {@link android.widget.CompoundButton}, etc.
-     * <p>See {@link AccessibilityNodeInfo.AccessibilityAction#ACTION_CLICK} for more
-     * details.
      */
     public static final int TYPE_VIEW_CLICKED = 0x00000001;
 
     /**
      * Represents the event of long clicking on a {@link android.view.View} like
      * {@link android.widget.Button}, {@link android.widget.CompoundButton}, etc.
-     * <p>See {@link AccessibilityNodeInfo.AccessibilityAction#ACTION_LONG_CLICK} for more
-     * details.
      */
     public static final int TYPE_VIEW_LONG_CLICKED = 0x00000002;
 
@@ -567,8 +563,6 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Represents the event of a context click on a {@link android.view.View}.
-     * <p>See {@link AccessibilityNodeInfo.AccessibilityAction#ACTION_CONTEXT_CLICK} for more
-     * details.
      */
     public static final int TYPE_VIEW_CONTEXT_CLICKED = 0x00800000;
 

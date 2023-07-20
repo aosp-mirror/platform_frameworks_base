@@ -105,9 +105,7 @@ static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jo
         std::move(data), std::string_view(fontPath.c_str(), fontPath.size()),
         fontPtr, fontSize, ttcIndex, builder->axes);
     if (minikinFont == nullptr) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-                             "Failed to create internal object. maybe invalid font data. filePath %s",
-                             fontPath.c_str());
+        ALOGE("Failed to create internal object. maybe invalid font data. fontPath %s", fontPath.c_str());
         return 0;
     }
     uint32_t localeListId = minikin::registerLocaleList(langTagStr.c_str());
@@ -460,6 +458,9 @@ std::shared_ptr<minikin::MinikinFont> createMinikinFontSkia(
     args.setVariationDesignPosition({skVariation.data(), static_cast<int>(skVariation.size())});
 
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
+    if (fontData == nullptr) {
+        return nullptr;
+    }
     sk_sp<SkTypeface> face(fm->makeFromStream(std::move(fontData), args));
     if (face == nullptr) {
         return nullptr;

@@ -22,22 +22,20 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import java.util.UUID
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
 /** Fake implementation of [KeyguardTransitionRepository] */
 class FakeKeyguardTransitionRepository : KeyguardTransitionRepository {
 
-    private val _transitions =
-        MutableSharedFlow<TransitionStep>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    private val _transitions = MutableSharedFlow<TransitionStep>()
     override val transitions: SharedFlow<TransitionStep> = _transitions
 
     suspend fun sendTransitionStep(step: TransitionStep) {
         _transitions.emit(step)
     }
 
-    override fun startTransition(info: TransitionInfo, resetIfCanceled: Boolean): UUID? {
+    override fun startTransition(info: TransitionInfo): UUID? {
         return null
     }
 

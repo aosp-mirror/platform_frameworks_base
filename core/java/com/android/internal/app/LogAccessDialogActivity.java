@@ -186,7 +186,8 @@ public class LogAccessDialogActivity extends Activity implements
     private Spannable styleFont(String text) {
         Spannable s = (Spannable) Html.fromHtml(text);
         for (URLSpan span : s.getSpans(0, s.length(), URLSpan.class)) {
-            TypefaceSpan typefaceSpan = new TypefaceSpan("google-sans");
+            TypefaceSpan typefaceSpan = new TypefaceSpan(
+                    getResources().getString(com.android.internal.R.string.config_bodyFontFamily));
             s.setSpan(typefaceSpan, s.getSpanStart(span), s.getSpanEnd(span), 0);
         }
         return s;

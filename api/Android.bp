@@ -31,18 +31,49 @@ bootstrap_go_package {
         "blueprint",
         "soong",
         "soong-android",
-        "soong-bp2build",
         "soong-genrule",
         "soong-java",
     ],
     srcs: ["api.go"],
-    testSrcs: ["api_test.go"],
     pluginFor: ["soong_build"],
+}
+
+python_defaults {
+    name: "python3_version_defaults",
+    version: {
+        py2: {
+            enabled: false,
+        },
+        py3: {
+            enabled: true,
+            embedded_launcher: false,
+        },
+    },
+}
+
+python_binary_host {
+    name: "api_versions_trimmer",
+    srcs: ["api_versions_trimmer.py"],
+    defaults: ["python3_version_defaults"],
+}
+
+python_test_host {
+    name: "api_versions_trimmer_unittests",
+    main: "api_versions_trimmer_unittests.py",
+    srcs: [
+        "api_versions_trimmer_unittests.py",
+        "api_versions_trimmer.py",
+    ],
+    defaults: ["python3_version_defaults"],
+    test_options: {
+        unit_test: true,
+    },
 }
 
 python_binary_host {
     name: "merge_annotation_zips",
     srcs: ["merge_annotation_zips.py"],
+    defaults: ["python3_version_defaults"],
 }
 
 python_test_host {
@@ -52,6 +83,7 @@ python_test_host {
         "merge_annotation_zips.py",
         "merge_annotation_zips_test.py",
     ],
+    defaults: ["python3_version_defaults"],
     test_options: {
         unit_test: true,
     },
@@ -60,14 +92,14 @@ python_test_host {
 metalava_cmd = "$(location metalava)"
 // Silence reflection warnings. See b/168689341
 metalava_cmd += " -J--add-opens=java.base/java.util=ALL-UNNAMED "
-metalava_cmd += " --quiet "
+metalava_cmd += " --quiet --no-banner --format=v2 "
 
 genrule {
     name: "current-api-xml",
     tools: ["metalava"],
     srcs: [":frameworks-base-api-current.txt"],
     out: ["current.api"],
-    cmd: metalava_cmd + "signature-to-jdiff $(in) $(out)",
+    cmd: metalava_cmd + "-convert2xmlnostrip $(in) $(out)",
     visibility: ["//visibility:public"],
 }
 
@@ -94,14 +126,12 @@ combined_apis {
         "framework-sdksandbox",
         "framework-tethering",
         "framework-uwb",
-        "framework-virtualization",
         "framework-wifi",
         "i18n.module.public.api",
     ],
     system_server_classpath: [
         "service-media-s",
         "service-permission",
-        "service-rkp",
         "service-sdksandbox",
     ],
 }
@@ -164,67 +194,6 @@ genrule {
 }
 
 genrule {
-    name: "frameworks-base-api-current.srcjar",
-    tools: ["merge_zips"],
-    out: ["current.srcjar"],
-    cmd: "$(location merge_zips) $(out) $(in)",
-    srcs: [
-        ":api-stubs-docs-non-updatable",
-        ":all-modules-public-stubs-source",
-    ],
-    visibility: ["//visibility:private"], // Used by make module in //development, mind
-}
-
-// This produces the same annotations.zip as framework-doc-stubs, but by using
-// outputs from individual modules instead of all the source code.
-genrule_defaults {
-    name: "sdk-annotations-defaults",
-    out: ["annotations.zip"],
-    tools: [
-        "merge_annotation_zips",
-        "soong_zip",
-    ],
-    cmd: "$(location merge_annotation_zips) $(genDir)/out $(in) && " +
-        "$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out",
-}
-
-genrule {
-    name: "sdk-annotations.zip",
-    defaults: ["sdk-annotations-defaults"],
-    srcs: [
-        ":android-non-updatable-doc-stubs{.annotations.zip}",
-        ":all-modules-public-annotations",
-    ],
-}
-
-genrule {
-    name: "sdk-annotations-system.zip",
-    defaults: ["sdk-annotations-defaults"],
-    srcs: [
-        ":android-non-updatable-doc-stubs-system{.annotations.zip}",
-        ":all-modules-system-annotations",
-    ],
-}
-
-genrule {
-    name: "sdk-annotations-module-lib.zip",
-    defaults: ["sdk-annotations-defaults"],
-    srcs: [
-        ":android-non-updatable-doc-stubs-module-lib{.annotations.zip}",
-        ":all-modules-module-lib-annotations",
-    ],
-}
-
-genrule {
-    name: "sdk-annotations-system-server.zip",
-    defaults: ["sdk-annotations-defaults"],
-    srcs: [
-        ":android-non-updatable-doc-stubs-system-server{.annotations.zip}",
-        ":all-modules-system-server-annotations",
-    ],
-}
-
-genrule {
     name: "combined-removed-dex",
     visibility: [
         "//frameworks/base/boot",
@@ -240,20 +209,3 @@ genrule {
     out: ["combined-removed-dex.txt"],
     cmd: "$(location gen_combined_removed_dex.sh) $(location metalava) $(genDir) $(in) > $(out)",
 }
-
-java_genrule {
-    name: "api_fingerprint",
-    srcs: [
-        ":frameworks-base-api-current.txt",
-        ":frameworks-base-api-system-current.txt",
-        ":frameworks-base-api-module-lib-current.txt",
-        ":frameworks-base-api-system-server-current.txt",
-    ],
-    out: ["api_fingerprint.txt"],
-    cmd: "cat $(in) | md5sum | cut -d' ' -f1 > $(out)",
-}
-
-build = [
-    "ApiDocs.bp",
-    "StubLibraries.bp",
-]

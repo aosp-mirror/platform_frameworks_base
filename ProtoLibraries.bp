@@ -14,6 +14,7 @@
 
 gensrcs {
     name: "framework-javastream-protos",
+    depfile: true,
 
     tools: [
         "aprotoc",
@@ -24,6 +25,7 @@ gensrcs {
     cmd: "mkdir -p $(genDir)/$(in) " +
         "&& $(location aprotoc) " +
         "  --plugin=$(location protoc-gen-javastream) " +
+        "  --dependency_out=$(depfile) " +
         "  --javastream_out=$(genDir)/$(in) " +
         "  -Iexternal/protobuf/src " +
         "  -I . " +
@@ -31,6 +33,7 @@ gensrcs {
         "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
 
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
@@ -39,16 +42,12 @@ gensrcs {
         "libs/incident/**/*.proto",
         ":service-permission-streaming-proto-sources",
     ],
-
-    data: [
-        ":libprotobuf-internal-protos",
-    ],
-
     output_extension: "srcjar",
 }
 
 gensrcs {
     name: "framework-cppstream-protos",
+    depfile: true,
 
     tools: [
         "aprotoc",
@@ -58,22 +57,20 @@ gensrcs {
     cmd: "mkdir -p $(genDir) " +
         "&& $(location aprotoc) " +
         "  --plugin=$(location protoc-gen-cppstream) " +
+        "  --dependency_out=$(depfile) " +
         "  --cppstream_out=$(genDir) " +
         "  -Iexternal/protobuf/src " +
         "  -I . " +
         "  $(in)",
 
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
         ":service-permission-streaming-proto-sources",
-    ],
-
-    data: [
-        ":libprotobuf-internal-protos",
     ],
 
     output_extension: "proto.h",
@@ -83,7 +80,10 @@ gensrcs {
 java_library_host {
     name: "platformprotos",
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
+        ":libstats_atom_enum_protos",
+        ":libstats_atom_message_protos",
         ":libstats_internal_protos",
         ":statsd_internal_protos",
         "cmds/am/proto/instrumentation_data.proto",
@@ -99,8 +99,6 @@ java_library_host {
         ],
         type: "full",
     },
-    // b/267831518: Pin tradefed and dependencies to Java 11.
-    java_version: "11",
     // Protos have lots of MissingOverride and similar.
     errorprone: {
         enabled: false,
@@ -122,6 +120,7 @@ java_library {
     ],
     sdk_version: "9",
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
@@ -144,6 +143,7 @@ java_library {
     },
 
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",
@@ -181,6 +181,7 @@ cc_defaults {
     ],
 
     srcs: [
+        ":framework-connectivity-protos",
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         ":libstats_atom_message_protos",

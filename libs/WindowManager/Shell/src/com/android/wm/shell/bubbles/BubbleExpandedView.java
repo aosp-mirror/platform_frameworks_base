@@ -979,7 +979,7 @@ public class BubbleExpandedView extends LinearLayout {
                     mPointerPos.x = bubbleCenter - (mPointerWidth / 2f);
                 } else {
                     mPointerPos.x = -(getWidth() - mPaddingLeft - bubbleCenter)
-                            + (mPointerWidth / 2f);
+                      + (mPointerWidth / 2f);
                 }
             }
             if (animate) {

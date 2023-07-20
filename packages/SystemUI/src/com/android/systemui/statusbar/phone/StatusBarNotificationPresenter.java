@@ -18,15 +18,21 @@ import static com.android.systemui.statusbar.phone.CentralSurfaces.CLOSE_PANEL_W
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.MULTIUSER_DEBUG;
 
+import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.KeyguardManager;
+import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.view.View;
@@ -40,7 +46,6 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
-import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -70,6 +75,7 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUi
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import java.util.ArrayList;
 import javax.inject.Inject;
 
 @CentralSurfacesComponent.CentralSurfacesScope
@@ -103,7 +109,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     private final IStatusBarService mBarService;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final NotificationListContainer mNotifListContainer;
-    private final QuickSettingsController mQsController;
 
     protected boolean mVrMode;
 
@@ -111,7 +116,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     StatusBarNotificationPresenter(
             Context context,
             NotificationPanelViewController panel,
-            QuickSettingsController quickSettingsController,
             HeadsUpManagerPhone headsUp,
             NotificationShadeWindowView statusBarWindow,
             ActivityStarter activityStarter,
@@ -139,7 +143,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         mActivityStarter = activityStarter;
         mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
-        mQsController = quickSettingsController;
         mHeadsUpManager = headsUp;
         mDynamicPrivacyController = dynamicPrivacyController;
         mKeyguardIndicationController = keyguardIndicationController;
@@ -195,7 +198,7 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
     private void maybeClosePanelForShadeEmptied() {
         if (CLOSE_PANEL_WHEN_EMPTIED
                 && !mNotificationPanel.isTracking()
-                && !mQsController.getExpanded()
+                && !mNotificationPanel.isQsExpanded()
                 && mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED
                 && !isCollapsing()) {
             mStatusBarStateController.setState(StatusBarState.KEYGUARD);

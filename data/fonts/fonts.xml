@@ -234,6 +234,488 @@
     <alias name="fantasy" to="serif" />
     <alias name="ITC Stone Serif" to="serif" />
 
+    <family name="aclonica">
+        <font weight="300" style="normal">Aclonica.ttf</font>
+    </family>
+    <alias name="aclonica-semi-bold" to="aclonica" weight="600" />
+    <alias name="aclonica-bold" to="aclonica" weight="700" />
+    <alias name="times" to="aclonica" />
+    <alias name="times new roman" to="aclonica" />
+    <alias name="palatino" to="aclonica" />
+    <alias name="georgia" to="aclonica" />
+    <alias name="baskerville" to="aclonica" />
+    <alias name="goudy" to="aclonica" />
+    <alias name="fantasy" to="aclonica" />
+    <alias name="ITC Stone Serif" to="aclonica" />
+
+    <family name="amarante">
+        <font weight="300" style="normal">Amarante.ttf</font>
+    </family>
+    <alias name="amarante-semi-bold" to="amarante" weight="600" />
+    <alias name="amarante-bold" to="amarante" weight="700" />
+    <alias name="times" to="amarante" />
+    <alias name="times new roman" to="amarante" />
+    <alias name="palatino" to="amarante" />
+    <alias name="georgia" to="amarante" />
+    <alias name="baskerville" to="amarante" />
+    <alias name="goudy" to="amarante" />
+    <alias name="fantasy" to="amarante" />
+    <alias name="ITC Stone Serif" to="amarante" />
+
+    <family name="antipastopro">
+        <font weight="400" style="normal">AntipastoPro.ttf</font>
+    </family>
+    <alias name="antipastopro-semi-bold" to="antipastopro" weight="600" />
+    <alias name="antipastopro-bold" to="antipastopro" weight="700" />
+    <alias name="times" to="antipastopro" />
+    <alias name="times new roman" to="antipastopro" />
+    <alias name="palatino" to="antipastopro" />
+    <alias name="georgia" to="antipastopro" />
+    <alias name="baskerville" to="antipastopro" />
+    <alias name="goudy" to="antipastopro" />
+    <alias name="fantasy" to="antipastopro" />
+    <alias name="ITC Stone Serif" to="antipastopro" />
+
+    <family name="bariol">
+        <font weight="300" style="normal">Bariol-Regular.ttf</font>
+    </family>
+    <alias name="bariol-semi-bold" to="bariol" weight="600" />
+    <alias name="bariol-bold" to="bariol" weight="700" />
+    <alias name="times" to="bariol" />
+    <alias name="times new roman" to="bariol" />
+    <alias name="palatino" to="bariol" />
+    <alias name="georgia" to="bariol" />
+    <alias name="baskerville" to="bariol" />
+    <alias name="goudy" to="bariol" />
+    <alias name="fantasy" to="bariol" />
+    <alias name="ITC Stone Serif" to="bariol" />
+
+    <family name="cagliostro">
+        <font weight="300" style="normal">Cagliostro-Regular.ttf</font>
+    </family>
+    <alias name="cagliostro-semi-bold" to="cagliostro" weight="600" />
+    <alias name="cagliostro-bold" to="cagliostro" weight="700" />
+    <alias name="times" to="cagliostro" />
+    <alias name="times new roman" to="cagliostro" />
+    <alias name="palatino" to="cagliostro" />
+    <alias name="georgia" to="cagliostro" />
+    <alias name="baskerville" to="cagliostro" />
+    <alias name="goudy" to="cagliostro" />
+    <alias name="fantasy" to="cagliostro" />
+    <alias name="ITC Stone Serif" to="cagliostro" />
+
+    <family name="coolstory">
+        <font weight="300" style="normal">Coolstory-Regular.ttf</font>
+    </family>
+    <alias name="coolstory-semi-bold" to="coolstory" weight="600" />
+    <alias name="coolstory-bold" to="coolstory" weight="700" />
+    <alias name="times" to="coolstory" />
+    <alias name="times new roman" to="coolstory" />
+    <alias name="palatino" to="coolstory" />
+    <alias name="georgia" to="coolstory" />
+    <alias name="baskerville" to="coolstory" />
+    <alias name="goudy" to="coolstory" />
+    <alias name="fantasy" to="coolstory" />
+    <alias name="ITC Stone Serif" to="coolstory" />
+
+    <family name="evolvesans">
+        <font weight="400" style="normal">EvolveSans.ttf</font>
+    </family>
+    <alias name="evolvesans-semi-bold" to="evolvesans" weight="600" />
+    <alias name="evolvesans-bold" to="evolvesans" weight="700" />
+    <alias name="times" to="evolvesans" />
+    <alias name="times new roman" to="evolvesans" />
+    <alias name="palatino" to="evolvesans" />
+    <alias name="georgia" to="evolvesans" />
+    <alias name="baskerville" to="evolvesans" />
+    <alias name="goudy" to="evolvesans" />
+    <alias name="fantasy" to="evolvesans" />
+    <alias name="ITC Stone Serif" to="evolvesans" />
+
+    <family name="googlesansmedium">
+        <font weight="400" style="normal">GoogleSansMedium.ttf</font>
+    </family>
+    <alias name="googlesansmedium-semi-bold" to="googlesansmedium" weight="600" />
+    <alias name="googlesansmedium-bold" to="googlesansmedium" weight="700" />
+    <alias name="times" to="googlesansmedium" />
+    <alias name="times new roman" to="googlesansmedium" />
+    <alias name="palatino" to="googlesansmedium" />
+    <alias name="georgia" to="googlesansmedium" />
+    <alias name="baskerville" to="googlesansmedium" />
+    <alias name="goudy" to="googlesansmedium" />
+    <alias name="fantasy" to="googlesansmedium" />
+    <alias name="ITC Stone Serif" to="googlesansmedium" />
+
+
+    <family name="fucek">
+        <font weight="400" style="normal">Fucek.ttf</font>
+    </family>
+    <alias name="fucek-semi-bold" to="fucek" weight="600" />
+    <alias name="fucek-bold" to="fucek" weight="700" />
+    <alias name="times" to="fucek" />
+    <alias name="times new roman" to="fucek" />
+    <alias name="palatino" to="fucek" />
+    <alias name="georgia" to="fucek" />
+    <alias name="baskerville" to="fucek" />
+    <alias name="goudy" to="fucek" />
+    <alias name="fantasy" to="fucek" />
+    <alias name="ITC Stone Serif" to="fucek" />
+	
+    <family name="lemonmilk">
+        <font weight="400" style="normal">LemonMilk.ttf</font>
+    </family>
+    <alias name="lemonmilk-semi-bold" to="lemonmilk" weight="600" />
+    <alias name="lemonmilk-bold" to="lemonmilk" weight="700" />
+    <alias name="times" to="lemonmilk" />
+    <alias name="times new roman" to="lemonmilk" />
+    <alias name="palatino" to="lemonmilk" />
+    <alias name="georgia" to="lemonmilk" />
+    <alias name="baskerville" to="lemonmilk" />
+    <alias name="goudy" to="lemonmilk" />
+    <alias name="fantasy" to="lemonmilk" />
+    <alias name="ITC Stone Serif" to="lemonmilk" />
+	
+    <family name="oduda">
+        <font weight="400" style="normal">Oduda.ttf</font>
+    </family>
+    <alias name="oduda-semi-bold" to="oduda" weight="600" />
+    <alias name="oduda-bold" to="oduda" weight="700" />
+    <alias name="times" to="oduda" />
+    <alias name="times new roman" to="oduda" />
+    <alias name="palatino" to="oduda" />
+    <alias name="georgia" to="oduda" />
+    <alias name="baskerville" to="oduda" />
+    <alias name="goudy" to="oduda" />
+    <alias name="fantasy" to="oduda" />
+    <alias name="ITC Stone Serif" to="oduda" />
+	
+    <family name="reemkufi">
+        <font weight="400" style="normal">ReemKufi.ttf</font>
+    </family>
+    <alias name="reemkufi-light" to="reemkufi" weight="300" />
+    <alias name="reemkufi-medium" to="reemkufi" weight="500" />
+    <alias name="reemkufi-semi-bold" to="reemkufi" weight="600" />
+    <alias name="reemkufi-bold" to="reemkufi" weight="700" />
+    <alias name="times" to="reemkufi" />
+    <alias name="times new roman" to="reemkufi" />
+    <alias name="palatino" to="reemkufi" />
+    <alias name="georgia" to="reemkufi" />
+    <alias name="baskerville" to="reemkufi" />
+    <alias name="goudy" to="reemkufi" />
+    <alias name="fantasy" to="reemkufi" />
+    <alias name="ITC Stone Serif" to="reemkufi" />
+	
+    <family name="simpleday">
+        <font weight="400" style="normal">SimpleDay.ttf</font>
+    </family>
+    <alias name="simpleday-semi-bold" to="simpleday" weight="600" />
+    <alias name="simpleday-bold" to="simpleday" weight="700" />
+    <alias name="times" to="simpleday" />
+    <alias name="times new roman" to="simpleday" />
+    <alias name="palatino" to="simpleday" />
+    <alias name="georgia" to="simpleday" />
+    <alias name="baskerville" to="simpleday" />
+    <alias name="goudy" to="simpleday" />
+    <alias name="fantasy" to="simpleday" />
+    <alias name="ITC Stone Serif" to="simpleday" />
+
+    <family name="lgsmartgothic">
+        <font weight="300" style="normal">LGSmartGothic.ttf</font>
+    </family>
+    <alias name="lgsmartgothic-semi-bold" to="lgsmartgothic" weight="600" />
+    <alias name="lgsmartgothic-bold" to="lgsmartgothic" weight="700" />
+    <alias name="times" to="lgsmartgothic" />
+    <alias name="times new roman" to="lgsmartgothic" />
+    <alias name="palatino" to="lgsmartgothic" />
+    <alias name="georgia" to="lgsmartgothic" />
+    <alias name="baskerville" to="lgsmartgothic" />
+    <alias name="goudy" to="lgsmartgothic" />
+    <alias name="fantasy" to="lgsmartgothic" />
+    <alias name="ITC Stone Serif" to="lgsmartgothic" />
+
+    <family name="rosemary">
+        <font weight="300" style="normal">Rosemary-Regular.ttf</font>
+    </family>
+    <alias name="rosemary-semi-bold" to="rosemary" weight="600" />
+    <alias name="rosemary-bold" to="rosemary" weight="700" />
+    <alias name="times" to="rosemary" />
+    <alias name="times new roman" to="rosemary" />
+    <alias name="palatino" to="rosemary" />
+    <alias name="georgia" to="rosemary" />
+    <alias name="baskerville" to="rosemary" />
+    <alias name="goudy" to="rosemary" />
+    <alias name="fantasy" to="rosemary" />
+    <alias name="ITC Stone Serif" to="rosemary" />
+
+    <family name="sonysketch">
+        <font weight="300" style="normal">SonySketch.ttf</font>
+    </family>
+    <alias name="sonysketch-semi-bold" to="sonysketch" weight="600" />
+    <alias name="sonysketch-bold" to="sonysketch" weight="700" />
+    <alias name="times" to="sonysketch" />
+    <alias name="times new roman" to="sonysketch" />
+    <alias name="palatino" to="sonysketch" />
+    <alias name="georgia" to="sonysketch" />
+    <alias name="baskerville" to="sonysketch" />
+    <alias name="goudy" to="sonysketch" />
+    <alias name="fantasy" to="sonysketch" />
+    <alias name="ITC Stone Serif" to="sonysketch" />
+
+    <family name="surfer">
+        <font weight="300" style="normal">Surfer.ttf</font>
+    </family>
+    <alias name="surfer-semi-bold" to="surfer" weight="600" />
+    <alias name="surfer-bold" to="surfer" weight="700" />
+    <alias name="times" to="surfer" />
+    <alias name="times new roman" to="surfer" />
+    <alias name="palatino" to="surfer" />
+    <alias name="georgia" to="surfer" />
+    <alias name="baskerville" to="surfer" />
+    <alias name="goudy" to="surfer" />
+    <alias name="fantasy" to="surfer" />
+    <alias name="ITC Stone Serif" to="surfer" />
+
+    <family name="oneplusslate">
+        <font weight="300" style="normal">SlateFromOP-Light.ttf</font>
+        <font weight="400" style="normal">SlateFromOP-Regular.ttf</font>
+    </family>
+    <alias name="oneplusslate-semi-bold" to="oneplusslate" weight="600" />
+    <alias name="oneplusslate-bold" to="oneplusslate" weight="700" />
+    <alias name="times" to="oneplusslate" />
+    <alias name="times new roman" to="oneplusslate" />
+    <alias name="palatino" to="oneplusslate" />
+    <alias name="georgia" to="oneplusslate" />
+    <alias name="baskerville" to="oneplusslate" />
+    <alias name="goudy" to="oneplusslate" />
+    <alias name="fantasy" to="oneplusslate" />
+    <alias name="ITC Stone Serif" to="oneplusslate" />
+
+    <family name="samsungone">
+        <font weight="400" style="normal">SamsungOne.ttf</font>
+    </family>
+    <alias name="samsungone-semi-bold" to="samsungone" weight="600" />
+    <alias name="samsungone-bold" to="samsungone" weight="700" />
+    <alias name="times" to="samsungone" />
+    <alias name="times new roman" to="samsungone" />
+    <alias name="palatino" to="samsungone" />
+    <alias name="georgia" to="samsungone" />
+    <alias name="baskerville" to="samsungone" />
+    <alias name="goudy" to="samsungone" />
+    <alias name="fantasy" to="samsungone" />
+    <alias name="ITC Stone Serif" to="samsungone" />
+
+    <family name="comicsans">
+        <font weight="400" style="normal">Comic_Sans.ttf</font>
+    </family>
+    <alias name="comicsans-semi-bold" to="comicsans" weight="600" />
+    <alias name="comicsans-bold" to="comicsans" weight="700" />
+    <alias name="times" to="comicsans" />
+    <alias name="times new roman" to="comicsans" />
+    <alias name="palatino" to="comicsans" />
+    <alias name="georgia" to="comicsans" />
+    <alias name="baskerville" to="comicsans" />
+    <alias name="goudy" to="comicsans" />
+    <alias name="fantasy" to="comicsans" />
+    <alias name="ITC Stone Serif" to="comicsans" />
+
+    <family name="google-sans">
+        <font weight="400" style="normal">GoogleSans-Regular.ttf</font>
+        <font weight="400" style="italic">GoogleSans-Italic.ttf</font>
+        <font weight="500" style="normal">GoogleSans-Medium.ttf</font>
+        <font weight="500" style="italic">GoogleSans-MediumItalic.ttf</font>
+        <font weight="700" style="normal">GoogleSans-Bold.ttf</font>
+        <font weight="700" style="italic">GoogleSans-BoldItalic.ttf</font>
+    </family>
+
+    <alias name="google-sans-medium" to="google-sans" weight="500" />
+    <alias name="google-sans-semi-bold" to="google-sans" weight="600" />
+    <alias name="google-sans-bold" to="google-sans" weight="700" />
+    <alias name="times" to="google-sans" />
+    <alias name="times new roman" to="google-sans" />
+    <alias name="palatino" to="google-sans" />
+    <alias name="georgia" to="google-sans" />
+    <alias name="baskerville" to="google-sans" />
+    <alias name="goudy" to="google-sans" />
+    <alias name="fantasy" to="google-sans" />
+    <alias name="ITC Stone Serif" to="google-sans" />
+
+    <family name="comfortaa">
+        <font weight="400" style="normal">Comfortaa.ttf</font>
+    </family>
+
+    <alias name="comfortaa-medium" to="comfortaa" weight="500" />
+    <alias name="comfortaa-semi-bold" to="comfortaa" weight="600" />
+    <alias name="comfortaa-bold" to="comfortaa" weight="700" />
+    <alias name="times" to="comfortaa" />
+    <alias name="times new roman" to="comfortaa" />
+    <alias name="palatino" to="comfortaa" />
+    <alias name="georgia" to="comfortaa" />
+    <alias name="baskerville" to="comfortaa" />
+    <alias name="goudy" to="comfortaa" />
+    <alias name="fantasy" to="comfortaa" />
+    <alias name="ITC Stone Serif" to="comfortaa" />
+
+    <family name="exotwo">
+        <font weight="400" style="normal">Exotwo.ttf</font>
+    </family>
+
+    <alias name="exotwo-medium" to="exotwo" weight="500" />
+    <alias name="exotwo-semi-bold" to="exotwo" weight="600" />
+    <alias name="exotwo-bold" to="exotwo" weight="700" />
+    <alias name="times" to="exotwo" />
+    <alias name="times new roman" to="exotwo" />
+    <alias name="palatino" to="exotwo" />
+    <alias name="georgia" to="exotwo" />
+    <alias name="baskerville" to="exotwo" />
+    <alias name="goudy" to="exotwo" />
+    <alias name="fantasy" to="exotwo" />
+    <alias name="ITC Stone Serif" to="exotwo" />
+
+    <family name="storopia">
+        <font weight="400" style="normal">Storopia.ttf</font>
+    </family>
+
+    <alias name="storopia-medium" to="storopia" weight="500" />
+    <alias name="storopia-semi-bold" to="storopia" weight="600" />
+    <alias name="storopia-bold" to="storopia" weight="700" />
+    <alias name="times" to="storopia" />
+    <alias name="times new roman" to="storopia" />
+    <alias name="palatino" to="storopia" />
+    <alias name="georgia" to="storopia" />
+    <alias name="baskerville" to="storopia" />
+    <alias name="goudy" to="storopia" />
+    <alias name="fantasy" to="storopia" />
+    <alias name="ITC Stone Serif" to="storopia" />
+
+    <family name="ubuntu">
+        <font weight="400" style="normal">Ubuntu.ttf</font>
+    </family>
+
+    <alias name="ubuntu-medium" to="ubuntu" weight="500" />
+    <alias name="ubuntu-semi-bold" to="ubuntu" weight="600" />
+    <alias name="ubuntu-bold" to="ubuntu" weight="700" />
+    <alias name="times" to="ubuntu" />
+    <alias name="times new roman" to="ubuntu" />
+    <alias name="palatino" to="ubuntu" />
+    <alias name="georgia" to="ubuntu" />
+    <alias name="baskerville" to="ubuntu" />
+    <alias name="goudy" to="ubuntu" />
+    <alias name="fantasy" to="ubuntu" />
+    <alias name="ITC Stone Serif" to="ubuntu" />
+
+    <family name="nokiapure">
+        <font weight="400" style="normal">Nokia_Pure.ttf</font>
+    </family>
+    <alias name="nokiapure-light" to="nokiapure" weight="300" />
+    <alias name="nokiapure-medium" to="nokiapure" weight="500" />
+    <alias name="nokiapure-semi-bold" to="nokiapure" weight="600" />
+    <alias name="nokiapure-bold" to="nokiapure" weight="700" />
+    <alias name="times" to="nokiapure" />
+    <alias name="times new roman" to="nokiapure" />
+    <alias name="palatino" to="nokiapure" />
+    <alias name="georgia" to="nokiapure" />
+    <alias name="baskerville" to="nokiapure" />
+    <alias name="goudy" to="nokiapure" />
+    <alias name="fantasy" to="nokiapure" />
+    <alias name="ITC Stone Serif" to="nokiapure" />
+
+    <family name="fifa2018">
+        <font weight="400" style="normal">Fifa_2018.ttf</font>
+    </family>
+    <alias name="fifa2018-light" to="fifa2018" weight="300" />
+    <alias name="fifa2018-medium" to="fifa2018" weight="500" />
+    <alias name="fifa2018-semi-bold" to="fifa2018" weight="600" />
+    <alias name="fifa2018-bold" to="fifa2018" weight="700" />
+    <alias name="times" to="fifa2018" />
+    <alias name="times new roman" to="fifa2018" />
+    <alias name="palatino" to="fifa2018" />
+    <alias name="georgia" to="fifa2018" />
+    <alias name="baskerville" to="fifa2018" />
+    <alias name="goudy" to="fifa2018" />
+    <alias name="fantasy" to="fifa2018" />
+    <alias name="ITC Stone Serif" to="fifa2018" />
+
+    <family name="cocon">
+        <font weight="400" style="normal">Cocon.ttf</font>
+    </family>
+    <alias name="cocon-light" to="cocon" weight="300" />
+    <alias name="cocon-medium" to="cocon" weight="500" />
+    <alias name="cocon-semi-bold" to="cocon" weight="600" />
+    <alias name="cocon-bold" to="cocon" weight="700" />
+    <alias name="times" to="cocon" />
+    <alias name="times new roman" to="cocon" />
+    <alias name="palatino" to="cocon" />
+    <alias name="georgia" to="cocon" />
+    <alias name="baskerville" to="cocon" />
+    <alias name="goudy" to="cocon" />
+    <alias name="fantasy" to="cocon" />
+    <alias name="ITC Stone Serif" to="cocon" />
+
+    <family name="quando">
+        <font weight="400" style="normal">Quando.ttf</font>
+    </family>
+    <alias name="quando-light" to="quando" weight="300" />
+    <alias name="quando-medium" to="quando" weight="500" />
+    <alias name="quando-semi-bold" to="quando" weight="600" />
+    <alias name="quando-bold" to="quando" weight="700" />
+    <alias name="times" to="quando" />
+    <alias name="times new roman" to="quando" />
+    <alias name="palatino" to="quando" />
+    <alias name="georgia" to="quando" />
+    <alias name="baskerville" to="quando" />
+    <alias name="goudy" to="quando" />
+    <alias name="fantasy" to="quando" />
+    <alias name="ITC Stone Serif" to="quando" />
+
+    <family name="grandhotel">
+        <font weight="400" style="normal">GrandHotel.ttf</font>
+    </family>
+    <alias name="grandhotel-light" to="grandhotel" weight="300" />
+    <alias name="grandhotel-medium" to="grandhotel" weight="500" />
+    <alias name="grandhotel-semi-bold" to="grandhotel" weight="600" />
+    <alias name="grandhotel-bold" to="grandhotel" weight="700" />
+    <alias name="times" to="grandhotel" />
+    <alias name="times new roman" to="grandhotel" />
+    <alias name="palatino" to="grandhotel" />
+    <alias name="georgia" to="grandhotel" />
+    <alias name="baskerville" to="grandhotel" />
+    <alias name="goudy" to="grandhotel" />
+    <alias name="fantasy" to="grandhotel" />
+    <alias name="ITC Stone Serif" to="grandhotel" />
+
+    <family name="redressed">
+        <font weight="400" style="normal">Redressed.ttf</font>
+    </family>
+    <alias name="redressed-light" to="redressed" weight="300" />
+    <alias name="redressed-medium" to="redressed" weight="500" />
+    <alias name="redressed-semi-bold" to="redressed" weight="600" />
+    <alias name="redressed-bold" to="redressed" weight="700" />
+    <alias name="times" to="redressed" />
+    <alias name="times new roman" to="redressed" />
+    <alias name="palatino" to="redressed" />
+    <alias name="georgia" to="redressed" />
+    <alias name="baskerville" to="redressed" />
+    <alias name="goudy" to="redressed" />
+    <alias name="fantasy" to="redressed" />
+    <alias name="ITC Stone Serif" to="redressed" />
+
+    <family name="nunito">
+        <font weight="400" style="normal">Nunito-Regular.ttf</font>
+        <font weight="700" style="normal">Nunito-Bold.ttf</font>
+    </family>
+    <alias name="nunito-light" to="nunito" weight="300" />
+    <alias name="nunito-medium" to="nunito" weight="500" />
+    <alias name="nunito-semi-bold" to="nunito" weight="600" />
+    <alias name="nunito-bold" to="nunito" weight="700" />
+    <alias name="times" to="nunito" />
+    <alias name="times new roman" to="nunito" />
+    <alias name="palatino" to="nunito" />
+    <alias name="georgia" to="nunito" />
+    <alias name="baskerville" to="nunito" />
+    <alias name="goudy" to="nunito" />
+    <alias name="fantasy" to="nunito" />
+    <alias name="ITC Stone Serif" to="nunito" />
+
     <family name="monospace">
         <font weight="400" style="normal">DroidSansMono.ttf</font>
     </family>
@@ -247,16 +729,13 @@
     <alias name="courier new" to="serif-monospace" />
 
     <family name="casual">
-        <font weight="400" style="normal" postScriptName="ComingSoon-Regular">ComingSoon.ttf</font>
+        <font weight="400" style="normal">ComingSoon.ttf</font>
     </family>
 
     <family name="cursive">
-      <font weight="400" style="normal">DancingScript-Regular.ttf
-        <axis tag="wght" stylevalue="400" />
-      </font>
-      <font weight="700" style="normal">DancingScript-Regular.ttf
-        <axis tag="wght" stylevalue="700" />
-      </font>
+        <font weight="400" style="normal" postScriptName="DancingScript">DancingScript-Regular.ttf
+        </font>
+        <font weight="700" style="normal">DancingScript-Bold.ttf</font>
     </family>
 
     <family name="sans-serif-smallcaps">
@@ -273,100 +752,137 @@
     </family>
     <alias name="source-sans-pro-semi-bold" to="source-sans-pro" weight="600"/>
 
-    <family name="roboto-flex">
-        <font weight="100" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="100" />
-        </font>
-        <font weight="200" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="200" />
-        </font>
-        <font weight="300" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="300" />
-        </font>
-        <font weight="400" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="400" />
-        </font>
-        <font weight="500" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="500" />
-        </font>
-        <font weight="600" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="600" />
-        </font>
-        <font weight="700" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="700" />
-        </font>
-        <font weight="800" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="800" />
-        </font>
-        <font weight="900" style="normal">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="0" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="900" />
-        </font>
-        <font weight="100" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="100" />
-        </font>
-        <font weight="200" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="200" />
-        </font>
-        <font weight="300" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="300" />
-        </font>
-        <font weight="400" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="400" />
-        </font>
-        <font weight="500" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="500" />
-        </font>
-        <font weight="600" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="600" />
-        </font>
-        <font weight="700" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="700" />
-        </font>
-        <font weight="800" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="800" />
-        </font>
-        <font weight="900" style="italic">RobotoFlex-Regular.ttf
-          <axis tag="slnt" stylevalue="-10" />
-          <axis tag="wdth" stylevalue="100" />
-          <axis tag="wght" stylevalue="900" />
-        </font>
+    <!-- All Custom Fonts -->
+    <family name="linotte">
+        <font weight="300" style="normal">Linotte.ttf</font>
+    </family>
+    <family name="gobold-sys">
+	<font weight="300" style="normal">Gobold.ttf</font>
+    </family>
+    <family name="roadrage-sys">
+        <font weight="300" style="normal">RoadRage-Regular.ttf</font>
+    </family>
+    <family name="snowstorm-sys">
+        <font weight="300" style="normal">Snowstorm-Regular.ttf</font>
+    </family>
+    <family name="googlesansmedium-sys">
+        <font weight="400" style="normal">GoogleSansMedium.ttf</font>
+    </family>
+    <family name="neoneon-sys">
+        <font weight="300" style="normal">Neoneon-Regular.ttf</font>
+    </family>
+    <family name="themeable-sys">
+        <font weight="300" style="normal">ThemeableFont-Regular.ttf</font>
+    </family>
+    <family name="samsung-sys">
+	<font weight="300" style="normal">Shamshung.ttf</font>
+    </family>
+    <family name="mexcellent-sys">
+        <font weight="300" style="normal">Mexcellent-Regular.ttf</font>
+    </family>
+    <family name="burnstown-sys">
+        <font weight="300" style="normal">Burnstown-Regular.ttf</font>
+    </family>
+    <family name="dumbledor-sys">
+        <font weight="300" style="normal">Dumbledor-Regular.ttf</font>
+    </family>
+    <family name="phantombold-sys">
+        <font weight="300" style="normal">PhantomBold-Regular.ttf</font>
     </family>
 
     <!-- fallback fonts -->
+    <family>
+        <font weight="100" style="normal">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="0"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="100"/>
+        </font>
+        <font weight="100" style="italic">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="1"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="100"/>
+        </font>
+        <font weight="200" style="normal">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="0"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="200"/>
+        </font>
+        <font weight="200" style="italic">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="1"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="200"/>
+        </font>
+        <font weight="300" style="normal">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="0"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="300"/>
+        </font>
+        <font weight="300" style="italic">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="1"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="300"/>
+        </font>
+        <font weight="400" style="normal">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="0"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="400" style="italic">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="1"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="400"/>
+        </font>
+        <font weight="500" style="normal">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="0"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="500"/>
+        </font>
+        <font weight="500" style="italic">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="1"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="500"/>
+        </font>
+        <font weight="600" style="normal">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="0"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="600"/>
+        </font>
+        <font weight="600" style="italic">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="1"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="600"/>
+        </font>
+        <font weight="700" style="normal">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="0"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="700"/>
+        </font>
+        <font weight="700" style="italic">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="1"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="700"/>
+        </font>
+        <font weight="800" style="normal">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="0"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="800"/>
+        </font>
+        <font weight="800" style="italic">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="1"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="800"/>
+        </font>
+        <font weight="900" style="normal">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="0"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="900"/>
+        </font>
+        <font weight="900" style="italic">RobotoFallback-VF.ttf
+            <axis tag="ital" stylevalue="1"/>
+            <axis tag="wdth" stylevalue="100"/>
+            <axis tag="wght" stylevalue="900"/>
+        </font>
+    </family>
     <family lang="und-Arab" variant="elegant">
         <font weight="400" style="normal" postScriptName="NotoNaskhArabic">
             NotoNaskhArabic-Regular.ttf

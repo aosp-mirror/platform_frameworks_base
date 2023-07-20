@@ -20,13 +20,12 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,16 +39,20 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Parameterized.class)
 @LargeTest
 public class ZipFileReadPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    public static Collection<Object[]> getData() {
+    @Parameters(name = "readBufferSize={0}")
+    public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {{1024}, {16384}, {65536}});
     }
 
     private File mFile;
+
+    @Parameterized.Parameter(0)
+    public int readBufferSize;
 
     @Before
     public void setUp() throws Exception {
@@ -87,8 +90,7 @@ public class ZipFileReadPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
-    public void timeZipFileRead(int readBufferSize) throws Exception {
+    public void timeZipFileRead() throws Exception {
         byte[] readBuffer = new byte[readBufferSize];
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
