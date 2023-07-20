@@ -1780,6 +1780,15 @@ public final class DisplayManager {
          * @hide
          */
         String KEY_USE_NORMAL_BRIGHTNESS_MODE_CONTROLLER = "use_normal_brightness_mode_controller";
+
+        /**
+         * Key for disabling screen wake locks while apps are in cached state.
+         * Read value via {@link android.provider.DeviceConfig#getBoolean(String, String, boolean)}
+         * with {@link android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER} as the namespace.
+         * @hide
+         */
+        String KEY_DISABLE_SCREEN_WAKE_LOCKS_WHILE_CACHED =
+                "disable_screen_wake_locks_while_cached";
     }
 
     /**
