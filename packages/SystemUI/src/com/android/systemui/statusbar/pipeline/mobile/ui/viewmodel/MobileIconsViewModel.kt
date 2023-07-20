@@ -98,7 +98,6 @@ constructor(
         val common = commonViewModelForSub(subId)
         return LocationBasedMobileViewModel.viewModelForLocation(
             common,
-            statusBarPipelineFlags,
             verboseLogger,
             location,
         )

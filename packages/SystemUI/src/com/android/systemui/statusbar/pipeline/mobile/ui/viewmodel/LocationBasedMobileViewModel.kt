@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import android.graphics.Color
 import com.android.systemui.statusbar.phone.StatusBarLocation
-import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.mobile.ui.VerboseMobileViewLogger
 
 /**
@@ -32,24 +31,14 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.VerboseMobileViewLogger
  */
 abstract class LocationBasedMobileViewModel(
     val commonImpl: MobileIconViewModelCommon,
-    statusBarPipelineFlags: StatusBarPipelineFlags,
-    debugTint: Int,
     val locationName: String,
     val verboseLogger: VerboseMobileViewLogger?,
 ) : MobileIconViewModelCommon by commonImpl {
-    val useDebugColoring: Boolean = statusBarPipelineFlags.useDebugColoring()
-
-    val defaultColor: Int =
-        if (useDebugColoring) {
-            debugTint
-        } else {
-            Color.WHITE
-        }
+    val defaultColor: Int = Color.WHITE
 
     companion object {
         fun viewModelForLocation(
             commonImpl: MobileIconViewModelCommon,
-            statusBarPipelineFlags: StatusBarPipelineFlags,
             verboseMobileViewLogger: VerboseMobileViewLogger,
             loc: StatusBarLocation,
         ): LocationBasedMobileViewModel =
@@ -57,39 +46,31 @@ abstract class LocationBasedMobileViewModel(
                 StatusBarLocation.HOME ->
                     HomeMobileIconViewModel(
                         commonImpl,
-                        statusBarPipelineFlags,
                         verboseMobileViewLogger,
                     )
-                StatusBarLocation.KEYGUARD ->
-                    KeyguardMobileIconViewModel(commonImpl, statusBarPipelineFlags)
-                StatusBarLocation.QS -> QsMobileIconViewModel(commonImpl, statusBarPipelineFlags)
+                StatusBarLocation.KEYGUARD -> KeyguardMobileIconViewModel(commonImpl)
+                StatusBarLocation.QS -> QsMobileIconViewModel(commonImpl)
             }
     }
 }
 
 class HomeMobileIconViewModel(
     commonImpl: MobileIconViewModelCommon,
-    statusBarPipelineFlags: StatusBarPipelineFlags,
     verboseMobileViewLogger: VerboseMobileViewLogger,
 ) :
     MobileIconViewModelCommon,
     LocationBasedMobileViewModel(
         commonImpl,
-        statusBarPipelineFlags,
-        debugTint = Color.CYAN,
         locationName = "Home",
         verboseMobileViewLogger,
     )
 
 class QsMobileIconViewModel(
     commonImpl: MobileIconViewModelCommon,
-    statusBarPipelineFlags: StatusBarPipelineFlags,
 ) :
     MobileIconViewModelCommon,
     LocationBasedMobileViewModel(
         commonImpl,
-        statusBarPipelineFlags,
-        debugTint = Color.GREEN,
         locationName = "QS",
         // Only do verbose logging for the Home location.
         verboseLogger = null,
@@ -97,13 +78,10 @@ class QsMobileIconViewModel(
 
 class KeyguardMobileIconViewModel(
     commonImpl: MobileIconViewModelCommon,
-    statusBarPipelineFlags: StatusBarPipelineFlags,
 ) :
     MobileIconViewModelCommon,
     LocationBasedMobileViewModel(
         commonImpl,
-        statusBarPipelineFlags,
-        debugTint = Color.MAGENTA,
         locationName = "Keyguard",
         // Only do verbose logging for the Home location.
         verboseLogger = null,
