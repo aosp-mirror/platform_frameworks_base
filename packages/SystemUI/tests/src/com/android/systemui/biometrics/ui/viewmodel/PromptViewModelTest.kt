@@ -335,7 +335,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     error,
                     messageAfterError = "or me",
                     authenticateAfterError = false,
-                    suppressIf = { _ -> true },
+                    suppressIf = { _, _ -> true },
                 )
             }
         }
@@ -364,7 +364,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
                     error,
                     messageAfterError = "$error $afterSuffix",
                     authenticateAfterError = false,
-                    suppressIf = { currentMessage -> suppress && currentMessage.isError },
+                    suppressIf = { currentMessage, _ -> suppress && currentMessage.isError },
                 )
             }
         }
