@@ -39,10 +39,7 @@ class StackCoordinator @Inject internal constructor(
 
     override fun attach(pipeline: NotifPipeline) {
         pipeline.addOnAfterRenderListListener(::onAfterRenderList)
-        // TODO(b/282865576): This has an issue where it makes changes to some groups without
-        // notifying listeners. To be fixed in QPR, but for now let's comment it out to avoid the
-        // group expansion bug.
-        // groupExpansionManagerImpl.attach(pipeline)
+        groupExpansionManagerImpl.attach(pipeline)
     }
 
     fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
