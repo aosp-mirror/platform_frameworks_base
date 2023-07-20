@@ -20,8 +20,8 @@ import android.graphics.Rect
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.UiObject2
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
-import com.android.wm.shell.flicker.wait
+import com.android.wm.shell.flicker.utils.SYSTEM_UI_PACKAGE_NAME
+import com.android.wm.shell.flicker.utils.wait
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before

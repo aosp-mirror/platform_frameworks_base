@@ -28,7 +28,7 @@ import android.tools.device.traces.parsers.toFlickerComponent
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.wm.shell.flicker.SplitScreenUtils
+import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
