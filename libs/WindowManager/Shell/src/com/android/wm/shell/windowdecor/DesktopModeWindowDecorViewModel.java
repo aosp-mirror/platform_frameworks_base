@@ -197,8 +197,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             @NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change) {
         if (change.getMode() == WindowManager.TRANSIT_CHANGE
-                && (info.getType() == Transitions.TRANSIT_FINALIZE_MOVE_TO_DESKTOP_MODE
-                || info.getType() == Transitions.TRANSIT_CANCEL_ENTERING_DESKTOP_MODE
+                && (info.getType() == Transitions.TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE
+                || info.getType() == Transitions.TRANSIT_CANCEL_DRAG_TO_DESKTOP_MODE
                 || info.getType() == Transitions.TRANSIT_EXIT_DESKTOP_MODE
                 || info.getType() == Transitions.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE)) {
             mWindowDecorByTaskId.get(change.getTaskInfo().taskId)
