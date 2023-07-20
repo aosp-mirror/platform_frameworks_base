@@ -548,7 +548,7 @@ public class PhoneStatusBarPolicy
                 final int iconResId = mUserManager.getUserStatusBarIconResId(userId);
                 // TODO(b/170249807, b/230779281): Handle non-managed-profile String
                 String accessibilityString = getManagedProfileAccessibilityString();
-                mHandler.post(() -> {
+                mMainExecutor.execute(() -> {
                     final boolean showIcon;
                     if (iconResId != Resources.ID_NULL && (!mKeyguardStateController.isShowing()
                             || mKeyguardStateController.isOccluded())) {
@@ -623,6 +623,13 @@ public class PhoneStatusBarPolicy
     @Override
     public void appTransitionStarting(int displayId, long startTime, long duration,
             boolean forced) {
+        if (mDisplayId == displayId) {
+            updateProfileIcon();
+        }
+    }
+
+    @Override
+    public void appTransitionFinished(int displayId) {
         if (mDisplayId == displayId) {
             updateProfileIcon();
         }

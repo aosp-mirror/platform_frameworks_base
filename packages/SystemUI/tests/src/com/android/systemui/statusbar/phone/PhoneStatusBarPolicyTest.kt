@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone
 
 import android.app.AlarmManager
 import android.app.admin.DevicePolicyManager
+import android.app.admin.DevicePolicyResourcesManager
 import android.content.SharedPreferences
 import android.os.UserManager
 import android.telecom.TelecomManager
@@ -49,6 +50,7 @@ import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.RingerModeTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.kotlin.JavaAdapter
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.time.DateFormatUtil
 import com.android.systemui.util.time.FakeSystemClock
@@ -67,6 +69,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.never
@@ -83,6 +86,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
     companion object {
         private const val ALARM_SLOT = "alarm"
         private const val CONNECTED_DISPLAY_SLOT = "connected_display"
+        private const val MANAGED_PROFILE_SLOT = "managed_profile"
     }
 
     @Mock private lateinit var iconController: StatusBarIconController
@@ -104,6 +108,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
     @Mock private lateinit var userManager: UserManager
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var devicePolicyManagerResources: DevicePolicyResourcesManager
     @Mock private lateinit var recordingController: RecordingController
     @Mock private lateinit var telecomManager: TelecomManager
     @Mock private lateinit var sharedPreferences: SharedPreferences
@@ -132,6 +137,12 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             com.android.internal.R.string.status_bar_alarm_clock,
             ALARM_SLOT
         )
+        context.orCreateTestableResources.addOverride(
+            com.android.internal.R.string.status_bar_managed_profile,
+            MANAGED_PROFILE_SLOT
+        )
+        whenever(devicePolicyManager.resources).thenReturn(devicePolicyManagerResources)
+        whenever(devicePolicyManagerResources.getString(anyString(), any())).thenReturn("")
         statusBarPolicy = createStatusBarPolicy()
     }
 
@@ -179,6 +190,32 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         whenever(deviceProvisionedController.isCurrentUserSetup).thenReturn(true)
         statusBarPolicy.onUserSetupChanged()
         verify(iconController).setIconVisibility(ALARM_SLOT, true)
+    }
+
+    @Test
+    fun testAppTransitionFinished_doesNotShowManagedProfileIcon() {
+        whenever(userManager.getUserStatusBarIconResId(anyInt())).thenReturn(0 /* ID_NULL */)
+        whenever(keyguardStateController.isShowing).thenReturn(false)
+        statusBarPolicy.appTransitionFinished(0)
+        // The above call posts to bgExecutor and then back to mainExecutor
+        executor.advanceClockToLast()
+        executor.runAllReady()
+        executor.advanceClockToLast()
+        executor.runAllReady()
+        verify(iconController, never()).setIconVisibility(MANAGED_PROFILE_SLOT, true)
+    }
+
+    @Test
+    fun testAppTransitionFinished_showsManagedProfileIcon() {
+        whenever(userManager.getUserStatusBarIconResId(anyInt())).thenReturn(100)
+        whenever(keyguardStateController.isShowing).thenReturn(false)
+        statusBarPolicy.appTransitionFinished(0)
+        // The above call posts to bgExecutor and then back to mainExecutor
+        executor.advanceClockToLast()
+        executor.runAllReady()
+        executor.advanceClockToLast()
+        executor.runAllReady()
+        verify(iconController).setIconVisibility(MANAGED_PROFILE_SLOT, true)
     }
 
     @Test
