@@ -482,7 +482,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         } catch (FileNotFoundException e) {
             // Missing sessions are okay, probably first boot
-        } catch (IOException | XmlPullParserException e) {
+        } catch (IOException | XmlPullParserException | ArrayIndexOutOfBoundsException e) {
             Slog.wtf(TAG, "Failed reading install sessions", e);
         } finally {
             IoUtils.closeQuietly(fis);
