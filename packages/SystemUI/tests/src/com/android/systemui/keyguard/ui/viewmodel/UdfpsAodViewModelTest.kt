@@ -32,6 +32,8 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,7 +60,9 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
     private lateinit var keyguardRepository: FakeKeyguardRepository
     private lateinit var fakeCommandQueue: FakeCommandQueue
     private lateinit var featureFlags: FakeFeatureFlags
+    private lateinit var shadeRepository: FakeShadeRepository
 
+    @Mock private lateinit var dialogManager: SystemUIDialogManager
     @Mock private lateinit var burnInHelper: BurnInHelperWrapper
 
     @Before
@@ -70,6 +74,7 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
         keyguardRepository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
         fakeCommandQueue = FakeCommandQueue()
+        shadeRepository = FakeShadeRepository()
         featureFlags =
             FakeFeatureFlags().apply {
                 set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
@@ -93,6 +98,8 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
                     bouncerRepository,
                     configRepository,
                 ),
+                shadeRepository,
+                dialogManager,
             )
 
         underTest =

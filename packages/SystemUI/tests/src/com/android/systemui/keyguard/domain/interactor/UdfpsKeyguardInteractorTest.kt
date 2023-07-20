@@ -33,6 +33,9 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.phone.SystemUIDialogManager
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
@@ -46,6 +49,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
@@ -63,19 +67,21 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
     private lateinit var fakeCommandQueue: FakeCommandQueue
     private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var burnInInteractor: BurnInInteractor
+    private lateinit var shadeRepository: FakeShadeRepository
 
     @Mock private lateinit var burnInHelper: BurnInHelperWrapper
+    @Mock private lateinit var dialogManager: SystemUIDialogManager
 
     private lateinit var underTest: UdfpsKeyguardInteractor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
         testScope = TestScope()
         configRepository = FakeConfigurationRepository()
         keyguardRepository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
+        shadeRepository = FakeShadeRepository()
         fakeCommandQueue = FakeCommandQueue()
         featureFlags =
             FakeFeatureFlags().apply {
@@ -102,6 +108,8 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
                     bouncerRepository,
                     configRepository,
                 ),
+                shadeRepository,
+                dialogManager,
             )
     }
 
@@ -140,6 +148,61 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
             assertThat(burnInOffsets?.burnInProgress).isEqualTo(burnInProgress)
             assertThat(burnInOffsets?.burnInYOffset).isEqualTo(burnInYOffset)
             assertThat(burnInOffsets?.burnInXOffset).isEqualTo(burnInXOffset)
+        }
+
+    @Test
+    fun dialogHideAffordances() =
+        testScope.runTest {
+            val dialogHideAffordancesRequest by
+                collectLastValue(underTest.dialogHideAffordancesRequest)
+            runCurrent()
+            val captor = argumentCaptor<SystemUIDialogManager.Listener>()
+            verify(dialogManager).registerListener(captor.capture())
+
+            captor.value.shouldHideAffordances(false)
+            assertThat(dialogHideAffordancesRequest).isEqualTo(false)
+
+            captor.value.shouldHideAffordances(true)
+            assertThat(dialogHideAffordancesRequest).isEqualTo(true)
+
+            captor.value.shouldHideAffordances(false)
+            assertThat(dialogHideAffordancesRequest).isEqualTo(false)
+        }
+
+    @Test
+    fun shadeExpansion_updates() =
+        testScope.runTest {
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            val shadeExpansion by collectLastValue(underTest.shadeExpansion)
+            assertThat(shadeExpansion).isEqualTo(0f)
+
+            shadeRepository.setUdfpsTransitionToFullShadeProgress(.5f)
+            assertThat(shadeExpansion).isEqualTo(.5f)
+
+            shadeRepository.setUdfpsTransitionToFullShadeProgress(.7f)
+            assertThat(shadeExpansion).isEqualTo(.7f)
+
+            shadeRepository.setUdfpsTransitionToFullShadeProgress(.22f)
+            assertThat(shadeExpansion).isEqualTo(.22f)
+
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
+            assertThat(shadeExpansion).isEqualTo(1f)
+        }
+
+    @Test
+    fun qsProgress_updates() =
+        testScope.runTest {
+            val qsProgress by collectLastValue(underTest.qsProgress)
+            assertThat(qsProgress).isEqualTo(0f)
+
+            shadeRepository.setQsExpansion(.22f)
+            assertThat(qsProgress).isEqualTo(.44f)
+
+            shadeRepository.setQsExpansion(.5f)
+            assertThat(qsProgress).isEqualTo(1f)
+
+            shadeRepository.setQsExpansion(.7f)
+            assertThat(qsProgress).isEqualTo(1f)
         }
 
     private fun initializeBurnInOffsets() {
