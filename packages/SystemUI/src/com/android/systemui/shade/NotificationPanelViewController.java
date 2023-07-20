@@ -1169,6 +1169,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void updateViewControllers(KeyguardStatusView keyguardStatusView,
             FrameLayout userAvatarView,
             KeyguardUserSwitcherView keyguardUserSwitcherView) {
+        if (mKeyguardStatusViewController != null) {
+            mKeyguardStatusViewController.onDestroy();
+        }
         // Re-associate the KeyguardStatusViewController
         KeyguardStatusViewComponent statusViewComponent =
                 mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
