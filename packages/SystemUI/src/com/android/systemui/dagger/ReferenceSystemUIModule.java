@@ -43,8 +43,6 @@ import com.android.systemui.rotationlock.RotationLockModule;
 import com.android.systemui.screenshot.ReferenceScreenshotModule;
 import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
-import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyboardShortcutsModule;
@@ -149,9 +147,6 @@ public abstract class ReferenceSystemUIModule {
 
     @Binds
     abstract DockManager bindDockManager(DockManagerImpl dockManager);
-
-    @Binds
-    abstract ShadeController provideShadeController(ShadeControllerImpl shadeController);
 
     @SysUISingleton
     @Provides

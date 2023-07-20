@@ -16,22 +16,18 @@
 
 package com.android.systemui.shade
 
-import com.android.systemui.CoreStartable
-import com.android.systemui.biometrics.AuthRippleController
+import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
 
+/** Fulfills dependencies on the shade with empty implementations for variants with no shade. */
 @Module
-internal abstract class StartShadeModule {
+abstract class ShadeEmptyImplModule {
     @Binds
-    @IntoMap
-    @ClassKey(ShadeController::class)
-    abstract fun bind(shadeController: ShadeController): CoreStartable
+    @SysUISingleton
+    abstract fun bindsShadeViewController(svc: ShadeViewControllerEmptyImpl): ShadeViewController
 
     @Binds
-    @IntoMap
-    @ClassKey(AuthRippleController::class)
-    abstract fun bindAuthRippleController(controller: AuthRippleController): CoreStartable
+    @SysUISingleton
+    abstract fun bindsShadeController(sc: ShadeControllerEmptyImpl): ShadeController
 }
