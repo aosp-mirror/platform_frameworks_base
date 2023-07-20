@@ -21,13 +21,11 @@ import android.content.Context
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
-import com.android.systemui.multishade.ui.viewmodel.MultiShadeViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import com.android.systemui.util.time.SystemClock
 
 /**
  * A facade to interact with Compose, when it is available.
@@ -61,13 +59,6 @@ interface BaseComposeFacade {
         context: Context,
         viewModel: FooterActionsViewModel,
         qsVisibilityLifecycleOwner: LifecycleOwner,
-    ): View
-
-    /** Create a [View] to represent [viewModel] on screen. */
-    fun createMultiShadeView(
-        context: Context,
-        viewModel: MultiShadeViewModel,
-        clock: SystemClock,
     ): View
 
     /** Create a [View] to represent [viewModel] on screen. */
