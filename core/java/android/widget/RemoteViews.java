@@ -786,6 +786,42 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    /**
+     * @hide
+     * @return True if there is a change
+     */
+    public boolean replaceRemoteCollections(int viewId) {
+        boolean isActionReplaced = false;
+        if (mActions != null) {
+            for (int i = 0; i < mActions.size(); i++) {
+                Action action = mActions.get(i);
+                if (action instanceof SetRemoteCollectionItemListAdapterAction itemsAction
+                        && itemsAction.viewId == viewId
+                        && itemsAction.mServiceIntent != null) {
+                    mActions.set(i, new SetRemoteCollectionItemListAdapterAction(itemsAction.viewId,
+                            itemsAction.mServiceIntent));
+                    isActionReplaced = true;
+                } else if (action instanceof ViewGroupActionAdd groupAction
+                        && groupAction.mNestedViews != null) {
+                    isActionReplaced |= groupAction.mNestedViews.replaceRemoteCollections(viewId);
+                }
+            }
+        }
+        if (mSizedRemoteViews != null) {
+            for (int i = 0; i < mSizedRemoteViews.size(); i++) {
+                isActionReplaced |= mSizedRemoteViews.get(i).replaceRemoteCollections(viewId);
+            }
+        }
+        if (mLandscape != null) {
+            isActionReplaced |= mLandscape.replaceRemoteCollections(viewId);
+        }
+        if (mPortrait != null) {
+            isActionReplaced |= mPortrait.replaceRemoteCollections(viewId);
+        }
+
+        return isActionReplaced;
+    }
+
     private static void visitIconUri(Icon icon, @NonNull Consumer<Uri> visitor) {
         if (icon != null && (icon.getType() == Icon.TYPE_URI
                 || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP)) {
@@ -1059,18 +1095,21 @@ public class RemoteViews implements Parcelable, Filter {
 
     private class SetRemoteCollectionItemListAdapterAction extends Action {
         private @NonNull CompletableFuture<RemoteCollectionItems> mItemsFuture;
+        final Intent mServiceIntent;
 
         SetRemoteCollectionItemListAdapterAction(@IdRes int id,
                 @NonNull RemoteCollectionItems items) {
             viewId = id;
             items.setHierarchyRootData(getHierarchyRootData());
             mItemsFuture = CompletableFuture.completedFuture(items);
+            mServiceIntent = null;
         }
 
         SetRemoteCollectionItemListAdapterAction(@IdRes int id, Intent intent) {
             viewId = id;
             mItemsFuture = getItemsFutureFromIntentWithTimeout(intent);
             setHierarchyRootData(getHierarchyRootData());
+            mServiceIntent = intent;
         }
 
         private static CompletableFuture<RemoteCollectionItems> getItemsFutureFromIntentWithTimeout(
@@ -1119,6 +1158,7 @@ public class RemoteViews implements Parcelable, Filter {
             viewId = parcel.readInt();
             mItemsFuture = CompletableFuture.completedFuture(
                     new RemoteCollectionItems(parcel, getHierarchyRootData()));
+            mServiceIntent = parcel.readTypedObject(Intent.CREATOR);
         }
 
         @Override
@@ -1148,6 +1188,7 @@ public class RemoteViews implements Parcelable, Filter {
             dest.writeInt(viewId);
             RemoteCollectionItems items = getCollectionItemsFromFuture(mItemsFuture);
             items.writeToParcel(dest, flags, /* attached= */ true);
+            dest.writeTypedObject(mServiceIntent, flags);
         }
 
         @Override
@@ -4765,13 +4806,21 @@ public class RemoteViews implements Parcelable, Filter {
      *            providing data to the RemoteViewsAdapter
      */
     public void setRemoteAdapter(@IdRes int viewId, Intent intent) {
-        if (AppGlobals.getIntCoreSetting(
-                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION,
-                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION_DEFAULT ? 1 : 0) == 1) {
+        if (isAdapterConversionEnabled()) {
             addAction(new SetRemoteCollectionItemListAdapterAction(viewId, intent));
             return;
         }
         addAction(new SetRemoteViewsAdapterIntent(viewId, intent));
+    }
+
+    /**
+     * @hide
+     * @return True if the remote adapter conversion is enabled
+     */
+    public static boolean isAdapterConversionEnabled() {
+        return AppGlobals.getIntCoreSetting(
+                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION,
+                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION_DEFAULT ? 1 : 0) == 1;
     }
 
     /**
