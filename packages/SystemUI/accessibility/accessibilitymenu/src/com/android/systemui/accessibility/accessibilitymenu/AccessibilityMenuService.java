@@ -260,6 +260,27 @@ public class AccessibilityMenuService extends AccessibilityService
         // Shortcuts are repeatable in a11y menu rather than unique, so use tag ID to handle.
         int viewTag = (int) view.getTag();
 
+        // First check if this was a shortcut which should keep a11y menu visible. If so,
+        // perform the shortcut and return without hiding the UI.
+        if (viewTag == ShortcutId.ID_BRIGHTNESS_UP_VALUE.ordinal()) {
+            adjustBrightness(BRIGHTNESS_UP_INCREMENT_GAMMA);
+            return;
+        } else if (viewTag == ShortcutId.ID_BRIGHTNESS_DOWN_VALUE.ordinal()) {
+            adjustBrightness(BRIGHTNESS_DOWN_INCREMENT_GAMMA);
+            return;
+        } else if (viewTag == ShortcutId.ID_VOLUME_UP_VALUE.ordinal()) {
+            adjustVolume(AudioManager.ADJUST_RAISE);
+            return;
+        } else if (viewTag == ShortcutId.ID_VOLUME_DOWN_VALUE.ordinal()) {
+            adjustVolume(AudioManager.ADJUST_LOWER);
+            return;
+        }
+
+        if (Flags.a11yMenuHideBeforeTakingAction()) {
+            // Hide the a11y menu UI before performing the following shortcut actions.
+            mA11yMenuLayout.hideMenu();
+        }
+
         if (viewTag == ShortcutId.ID_ASSISTANT_VALUE.ordinal()) {
             // Always restart the voice command activity, so that the UI is reloaded.
             startActivityIfIntentIsSafe(
@@ -281,21 +302,11 @@ public class AccessibilityMenuService extends AccessibilityService
             performGlobalActionInternal(GLOBAL_ACTION_NOTIFICATIONS);
         } else if (viewTag == ShortcutId.ID_SCREENSHOT_VALUE.ordinal()) {
             performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT);
-        } else if (viewTag == ShortcutId.ID_BRIGHTNESS_UP_VALUE.ordinal()) {
-            adjustBrightness(BRIGHTNESS_UP_INCREMENT_GAMMA);
-            return;
-        } else if (viewTag == ShortcutId.ID_BRIGHTNESS_DOWN_VALUE.ordinal()) {
-            adjustBrightness(BRIGHTNESS_DOWN_INCREMENT_GAMMA);
-            return;
-        } else if (viewTag == ShortcutId.ID_VOLUME_UP_VALUE.ordinal()) {
-            adjustVolume(AudioManager.ADJUST_RAISE);
-            return;
-        } else if (viewTag == ShortcutId.ID_VOLUME_DOWN_VALUE.ordinal()) {
-            adjustVolume(AudioManager.ADJUST_LOWER);
-            return;
         }
 
-        mA11yMenuLayout.hideMenu();
+        if (!Flags.a11yMenuHideBeforeTakingAction()) {
+            mA11yMenuLayout.hideMenu();
+        }
     }
 
     /**
