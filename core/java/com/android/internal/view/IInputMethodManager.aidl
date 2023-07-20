@@ -114,9 +114,6 @@ interface IInputMethodManager {
     // TODO(Bug 113914148): Consider removing this.
     int getInputMethodWindowVisibleHeight(in IInputMethodClient client);
 
-    oneway void reportVirtualDisplayGeometryAsync(in IInputMethodClient parentClient,
-            int childDisplayId, in @nullable float[] matrixValues);
-
     oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
 
     @EnforcePermission("INTERNAL_SYSTEM_WINDOW")
