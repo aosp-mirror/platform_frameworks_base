@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification
 
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.FlagResolver
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import javax.inject.Inject
@@ -25,12 +23,8 @@ import javax.inject.Inject
 class NotifPipelineFlags
 @Inject
 constructor(
-    private val featureFlags: FeatureFlags,
-    private val sysPropFlags: FlagResolver,
+    private val featureFlags: FeatureFlags
 ) {
     fun isDevLoggingEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
-
-    fun allowDismissOngoing(): Boolean =
-        sysPropFlags.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)
 }
