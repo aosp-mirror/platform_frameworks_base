@@ -214,7 +214,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"መገለጫ ይምረጡ"</string>
     <string name="category_personal" msgid="6236798763159385225">"የግል"</string>
-    <string name="category_work" msgid="4014193632325996115">"ስራ"</string>
+    <string name="category_work" msgid="4014193632325996115">"ሥራ"</string>
     <string name="category_clone" msgid="1554511758987195974">"አባዛ"</string>
     <string name="development_settings_title" msgid="140296922921597393">"የገንቢዎች አማራጮች"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"የገንቢዎች አማራጮችን አንቃ"</string>
@@ -373,7 +373,7 @@
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"የቀኝ-ወደ-ግራ አቀማመጥ አቅጣጫ አስገድድ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ለሁሉም አካባቢዎች የማያ ገፅ አቀማመጥ ከቀኝ-ወደ-ግራ እንዲሆን አስገድድ"</string>
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"የግልፅነት የአሰሳ አሞሌ"</string>
-    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"የአሰሳ አሞሌ የዳራ ቀለምን በነባሪ ግልጽ አድርግ"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"የአሰሳ አሞሌ የዳራ ቀለምን በነባሪ ግልፅ አድርግ"</string>
     <string name="window_blurs" msgid="6831008984828425106">"የመስኮት ደረጃ ብዥታዎችን ፍቀድ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA አስገድድ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA በ OpenGL ES 2.0 መተግበሪያዎች ውስጥ ያንቁ"</string>
@@ -386,7 +386,7 @@
     <string name="window_animation_scale_title" msgid="5236381298376812508">"የ Window እነማ ልኬት ለውጥ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"የእነማ ልኬት ለውጥ ሽግግር"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"እነማ አድራጊ ቆይታ መለኪያ"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ሁለተኛ ማሳያዎችን አስመስለህ ስራ"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"ሁለተኛ ማሳያዎችን አስመስለህ ሥራ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"መተግበሪያዎች"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"እንቅስቃሴዎችን አትጠብቅ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ተጠቃሚው እስኪተወው ድረስ እያንዳንዱን እንቅስቃሴ አስወግድ"</string>
@@ -545,7 +545,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ልክ አሁን"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ይህ ስልክ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ይህ ጡባዊ"</string>
-    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"የመትከያ ድምጽ ማውጫ"</string>
+    <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"የመትከያ ድምፅ ማውጫ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"የውጭ መሣሪያ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"የተገናኘ መሣሪያ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ይህ ስልክ"</string>
