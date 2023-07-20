@@ -21,9 +21,16 @@ import android.content.res.Resources;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Slog;
+import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
 
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Provides the {@link VibrationEffect} and {@link VibrationAttributes} for haptic feedback.
@@ -31,6 +38,8 @@ import java.io.PrintWriter;
  * @hide
  */
 public final class HapticFeedbackVibrationProvider {
+    private static final String TAG = "HapticFeedbackVibrationProvider";
+
     private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
     private static final VibrationAttributes PHYSICAL_EMULATION_VIBRATION_ATTRIBUTES =
@@ -42,15 +51,41 @@ public final class HapticFeedbackVibrationProvider {
     private final boolean mHapticTextHandleEnabled;
     // Vibrator effect for haptic feedback during boot when safe mode is enabled.
     private final VibrationEffect mSafeModeEnabledVibrationEffect;
+    // Haptic feedback vibration customizations specific to the device.
+    // If present and valid, a vibration here will be used for an effect.
+    // Otherwise, the system's default vibration will be used.
+    @Nullable private final SparseArray<VibrationEffect> mHapticCustomizations;
 
     /** @hide */
     public HapticFeedbackVibrationProvider(Resources res, Vibrator vibrator) {
+        this(res, vibrator, loadHapticCustomizations(res));
+    }
+
+    /** @hide */
+    @VisibleForTesting HapticFeedbackVibrationProvider(
+            Resources res,
+            Vibrator vibrator,
+            @Nullable SparseArray<VibrationEffect> hapticCustomizations) {
         mVibrator = vibrator;
         mHapticTextHandleEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_enableHapticTextHandle);
+
+        if (hapticCustomizations != null) {
+            // Clean up the customizations to remove vibrations which may not ever be used due to
+            // Vibrator properties or other device configurations.
+            removeUnsupportedVibrations(hapticCustomizations, vibrator);
+            if (hapticCustomizations.size() == 0) {
+                hapticCustomizations = null;
+            }
+        }
+        mHapticCustomizations = hapticCustomizations;
+
         mSafeModeEnabledVibrationEffect =
-                VibrationSettings.createEffectFromResource(
-                        res, com.android.internal.R.array.config_safeModeEnabledVibePattern);
+                effectHasCustomization(HapticFeedbackConstants.SAFE_MODE_ENABLED)
+                        ? mHapticCustomizations.get(HapticFeedbackConstants.SAFE_MODE_ENABLED)
+                        : VibrationSettings.createEffectFromResource(
+                                res,
+                                com.android.internal.R.array.config_safeModeEnabledVibePattern);
     }
 
     /**
@@ -68,7 +103,7 @@ public final class HapticFeedbackVibrationProvider {
             case HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE:
             case HapticFeedbackConstants.SCROLL_TICK:
             case HapticFeedbackConstants.SEGMENT_TICK:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+                return getVibration(effectId, VibrationEffect.EFFECT_TICK);
 
             case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
                 if (!mHapticTextHandleEnabled) {
@@ -77,13 +112,16 @@ public final class HapticFeedbackVibrationProvider {
                 // fallthrough
             case HapticFeedbackConstants.CLOCK_TICK:
             case HapticFeedbackConstants.SEGMENT_FREQUENT_TICK:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TEXTURE_TICK);
+                return getVibration(effectId, VibrationEffect.EFFECT_TEXTURE_TICK);
 
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
             case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
             case HapticFeedbackConstants.ENTRY_BUMP:
             case HapticFeedbackConstants.DRAG_CROSSING:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TICK, false);
+                return getVibration(
+                        effectId,
+                        VibrationEffect.EFFECT_TICK,
+                        /* fallbackForPredefinedEffect= */ false);
 
             case HapticFeedbackConstants.KEYBOARD_TAP: // == KEYBOARD_PRESS
             case HapticFeedbackConstants.VIRTUAL_KEY:
@@ -93,46 +131,42 @@ public final class HapticFeedbackVibrationProvider {
             case HapticFeedbackConstants.GESTURE_START:
             case HapticFeedbackConstants.SCROLL_ITEM_FOCUS:
             case HapticFeedbackConstants.SCROLL_LIMIT:
-                return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+                return getVibration(effectId, VibrationEffect.EFFECT_CLICK);
 
             case HapticFeedbackConstants.LONG_PRESS:
             case HapticFeedbackConstants.LONG_PRESS_POWER_BUTTON:
             case HapticFeedbackConstants.DRAG_START:
             case HapticFeedbackConstants.EDGE_SQUEEZE:
-                return VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
+                return getVibration(effectId, VibrationEffect.EFFECT_HEAVY_CLICK);
 
             case HapticFeedbackConstants.REJECT:
-                return VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+                return getVibration(effectId, VibrationEffect.EFFECT_DOUBLE_CLICK);
 
             case HapticFeedbackConstants.SAFE_MODE_ENABLED:
                 return mSafeModeEnabledVibrationEffect;
 
             case HapticFeedbackConstants.ASSISTANT_BUTTON:
-                if (mVibrator.areAllPrimitivesSupported(
-                        VibrationEffect.Composition.PRIMITIVE_QUICK_RISE,
-                        VibrationEffect.Composition.PRIMITIVE_TICK)) {
-                    // quiet ramp, short pause, then sharp tick
-                    return VibrationEffect.startComposition()
-                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE, 0.25f)
-                            .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1f, 50)
-                            .compose();
-                }
-                // fallback for devices without composition support
-                return VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
+                return getAssistantButtonVibration();
 
             case HapticFeedbackConstants.GESTURE_THRESHOLD_DEACTIVATE:
-                return getScaledPrimitiveOrElseEffect(
-                        VibrationEffect.Composition.PRIMITIVE_TICK, 0.4f,
+                return getVibration(
+                        effectId,
+                        VibrationEffect.Composition.PRIMITIVE_TICK,
+                        /* primitiveScale= */ 0.4f,
                         VibrationEffect.EFFECT_TEXTURE_TICK);
 
             case HapticFeedbackConstants.TOGGLE_ON:
-                return getScaledPrimitiveOrElseEffect(
-                        VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f,
+                return getVibration(
+                        effectId,
+                        VibrationEffect.Composition.PRIMITIVE_TICK,
+                        /* primitiveScale= */ 0.5f,
                         VibrationEffect.EFFECT_TICK);
 
             case HapticFeedbackConstants.TOGGLE_OFF:
-                return getScaledPrimitiveOrElseEffect(
-                        VibrationEffect.Composition.PRIMITIVE_LOW_TICK, 0.2f,
+                return getVibration(
+                        effectId,
+                        VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
+                        /* primitiveScale= */ 0.2f,
                         VibrationEffect.EFFECT_TEXTURE_TICK);
 
             case HapticFeedbackConstants.NO_HAPTICS:
@@ -181,14 +215,100 @@ public final class HapticFeedbackVibrationProvider {
         pw.print("mHapticTextHandleEnabled="); pw.println(mHapticTextHandleEnabled);
     }
 
-    private VibrationEffect getScaledPrimitiveOrElseEffect(
-            int primitiveId, float scale, int elseEffectId) {
+    private VibrationEffect getVibration(int effectId, int predefinedVibrationEffectId) {
+        return getVibration(
+                effectId, predefinedVibrationEffectId, /* fallbackForPredefinedEffect= */ true);
+    }
+
+    /**
+     * Returns the customized vibration for {@code hapticFeedbackId}, or
+     * {@code predefinedVibrationEffectId} if a customization does not exist for the haptic
+     * feedback.
+     *
+     * <p>If a customization does not exist and the default predefined effect is to be returned,
+     * {@code fallbackForPredefinedEffect} will be used to decide whether or not to fallback
+     * to a generic pattern if the predefined effect is not hardware supported.
+     *
+     * @see VibrationEffect#get(int, boolean)
+     */
+    private VibrationEffect getVibration(
+            int hapticFeedbackId,
+            int predefinedVibrationEffectId,
+            boolean fallbackForPredefinedEffect) {
+        if (effectHasCustomization(hapticFeedbackId)) {
+            return mHapticCustomizations.get(hapticFeedbackId);
+        }
+        return VibrationEffect.get(predefinedVibrationEffectId, fallbackForPredefinedEffect);
+    }
+
+    /**
+     * Returns the customized vibration for {@code hapticFeedbackId}, or some fallback vibration if
+     * a customization does not exist for the ID.
+     *
+     * <p>The fallback will be a primitive composition formed of {@code primitiveId} and
+     * {@code primitiveScale}, if the primitive is supported. Otherwise, it will be a predefined
+     * vibration of {@code elsePredefinedVibrationEffectId}.
+     */
+    private VibrationEffect getVibration(
+            int hapticFeedbackId,
+            int primitiveId,
+            float primitiveScale,
+            int elsePredefinedVibrationEffectId) {
+        if (effectHasCustomization(hapticFeedbackId)) {
+            return mHapticCustomizations.get(hapticFeedbackId);
+        }
         if (mVibrator.areAllPrimitivesSupported(primitiveId)) {
             return VibrationEffect.startComposition()
-                    .addPrimitive(primitiveId, scale)
+                    .addPrimitive(primitiveId, primitiveScale)
                     .compose();
         } else {
-            return VibrationEffect.get(elseEffectId);
+            return VibrationEffect.get(elsePredefinedVibrationEffectId);
+        }
+    }
+
+    private VibrationEffect getAssistantButtonVibration() {
+        if (effectHasCustomization(HapticFeedbackConstants.ASSISTANT_BUTTON)) {
+            return mHapticCustomizations.get(HapticFeedbackConstants.ASSISTANT_BUTTON);
+        }
+        if (mVibrator.areAllPrimitivesSupported(
+                VibrationEffect.Composition.PRIMITIVE_QUICK_RISE,
+                VibrationEffect.Composition.PRIMITIVE_TICK)) {
+            // quiet ramp, short pause, then sharp tick
+            return VibrationEffect.startComposition()
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_RISE, 0.25f)
+                    .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1f, 50)
+                    .compose();
+        }
+        // fallback for devices without composition support
+        return VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
+    }
+
+    private boolean effectHasCustomization(int effectId) {
+        return mHapticCustomizations != null && mHapticCustomizations.contains(effectId);
+    }
+
+    @Nullable
+    private static SparseArray<VibrationEffect> loadHapticCustomizations(Resources res) {
+        try {
+            return HapticFeedbackCustomization.loadVibrations(res);
+        } catch (IOException | HapticFeedbackCustomization.CustomizationParserException e) {
+            Slog.e(TAG, "Unable to load haptic customizations.", e);
+            return null;
+        }
+    }
+
+    private static void removeUnsupportedVibrations(
+            SparseArray<VibrationEffect> customizations, Vibrator vibrator) {
+        Set<Integer> keysToRemove = new HashSet<>();
+        for (int i = 0; i < customizations.size(); i++) {
+            int key = customizations.keyAt(i);
+            if (!vibrator.areVibrationFeaturesSupported(customizations.get(key))) {
+                keysToRemove.add(key);
+            }
+        }
+
+        for (int key : keysToRemove) {
+            customizations.remove(key);
         }
     }
 }
