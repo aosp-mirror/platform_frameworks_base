@@ -697,6 +697,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mTestFlagResolver.setFlagOverride(FSI_FORCE_DEMOTE, false);
         mTestFlagResolver.setFlagOverride(SHOW_STICKY_HUN_FOR_DENIED_FSI, false);
+
+        var checker = mock(TestableNotificationManagerService.ComponentPermissionChecker.class);
+        mService.permissionChecker = checker;
+        when(checker.check(anyString(), anyInt(), anyInt(), anyBoolean()))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
     }
 
     @After
@@ -12166,6 +12171,130 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         inOrder.verify(mService.mZenModeHelper).onUserSwitched(eq(20));
         inOrder.verify(mPreferencesHelper).syncChannelsBypassingDnd();
         inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void isNotificationPolicyAccessGranted_invalidPackage() throws Exception {
+        final String notReal = "NOT REAL";
+        final var checker = mService.permissionChecker;
+
+        when(mPackageManagerClient.getPackageUidAsUser(eq(notReal), anyInt())).thenThrow(
+                PackageManager.NameNotFoundException.class);
+
+        assertThat(mBinderService.isNotificationPolicyAccessGranted(notReal)).isFalse();
+        verify(mPackageManagerClient).getPackageUidAsUser(eq(notReal), anyInt());
+        verify(checker, never()).check(any(), anyInt(), anyInt(), anyBoolean());
+        verify(mConditionProviders, never()).isPackageOrComponentAllowed(eq(notReal), anyInt());
+        verify(mListeners, never()).isComponentEnabledForPackage(any());
+        verify(mDevicePolicyManager, never()).isActiveDeviceOwner(anyInt());
+    }
+
+    @Test
+    public void isNotificationPolicyAccessGranted_hasPermission() throws Exception {
+        final String packageName = "target";
+        final int uid = 123;
+        final var checker = mService.permissionChecker;
+
+        when(mPackageManagerClient.getPackageUidAsUser(eq(packageName), anyInt())).thenReturn(uid);
+        when(checker.check(android.Manifest.permission.MANAGE_NOTIFICATIONS, uid, -1, true))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        assertThat(mBinderService.isNotificationPolicyAccessGranted(packageName)).isTrue();
+        verify(mPackageManagerClient).getPackageUidAsUser(eq(packageName), anyInt());
+        verify(checker).check(android.Manifest.permission.MANAGE_NOTIFICATIONS, uid, -1, true);
+        verify(mConditionProviders, never()).isPackageOrComponentAllowed(eq(packageName), anyInt());
+        verify(mListeners, never()).isComponentEnabledForPackage(any());
+        verify(mDevicePolicyManager, never()).isActiveDeviceOwner(anyInt());
+    }
+
+    @Test
+    public void isNotificationPolicyAccessGranted_isPackageAllowed() throws Exception {
+        final String packageName = "target";
+        final int uid = 123;
+        final var checker = mService.permissionChecker;
+
+        when(mPackageManagerClient.getPackageUidAsUser(eq(packageName), anyInt())).thenReturn(uid);
+        when(mConditionProviders.isPackageOrComponentAllowed(eq(packageName), anyInt()))
+                .thenReturn(true);
+
+        assertThat(mBinderService.isNotificationPolicyAccessGranted(packageName)).isTrue();
+        verify(mPackageManagerClient).getPackageUidAsUser(eq(packageName), anyInt());
+        verify(checker).check(android.Manifest.permission.MANAGE_NOTIFICATIONS, uid, -1, true);
+        verify(mConditionProviders).isPackageOrComponentAllowed(eq(packageName), anyInt());
+        verify(mListeners, never()).isComponentEnabledForPackage(any());
+        verify(mDevicePolicyManager, never()).isActiveDeviceOwner(anyInt());
+    }
+
+    @Test
+    public void isNotificationPolicyAccessGranted_isComponentEnabled() throws Exception {
+        final String packageName = "target";
+        final int uid = 123;
+        final var checker = mService.permissionChecker;
+
+        when(mPackageManagerClient.getPackageUidAsUser(eq(packageName), anyInt())).thenReturn(uid);
+        when(mListeners.isComponentEnabledForPackage(packageName)).thenReturn(true);
+
+        assertThat(mBinderService.isNotificationPolicyAccessGranted(packageName)).isTrue();
+        verify(mPackageManagerClient).getPackageUidAsUser(eq(packageName), anyInt());
+        verify(checker).check(android.Manifest.permission.MANAGE_NOTIFICATIONS, uid, -1, true);
+        verify(mConditionProviders).isPackageOrComponentAllowed(eq(packageName), anyInt());
+        verify(mListeners).isComponentEnabledForPackage(packageName);
+        verify(mDevicePolicyManager, never()).isActiveDeviceOwner(anyInt());
+    }
+
+    @Test
+    public void isNotificationPolicyAccessGranted_isDeviceOwner() throws Exception {
+        final String packageName = "target";
+        final int uid = 123;
+        final var checker = mService.permissionChecker;
+
+        when(mPackageManagerClient.getPackageUidAsUser(eq(packageName), anyInt())).thenReturn(uid);
+        when(mDevicePolicyManager.isActiveDeviceOwner(uid)).thenReturn(true);
+
+        assertThat(mBinderService.isNotificationPolicyAccessGranted(packageName)).isTrue();
+        verify(mPackageManagerClient).getPackageUidAsUser(eq(packageName), anyInt());
+        verify(checker).check(android.Manifest.permission.MANAGE_NOTIFICATIONS, uid, -1, true);
+        verify(mConditionProviders).isPackageOrComponentAllowed(eq(packageName), anyInt());
+        verify(mListeners).isComponentEnabledForPackage(packageName);
+        verify(mDevicePolicyManager).isActiveDeviceOwner(uid);
+    }
+
+    /**
+     * b/292163859
+     */
+    @Test
+    public void isNotificationPolicyAccessGranted_callerIsDeviceOwner() throws Exception {
+        final String packageName = "target";
+        final int uid = 123;
+        final int callingUid = Binder.getCallingUid();
+        final var checker = mService.permissionChecker;
+
+        when(mPackageManagerClient.getPackageUidAsUser(eq(packageName), anyInt())).thenReturn(uid);
+        when(mDevicePolicyManager.isActiveDeviceOwner(callingUid)).thenReturn(true);
+
+        assertThat(mBinderService.isNotificationPolicyAccessGranted(packageName)).isFalse();
+        verify(mPackageManagerClient).getPackageUidAsUser(eq(packageName), anyInt());
+        verify(checker).check(android.Manifest.permission.MANAGE_NOTIFICATIONS, uid, -1, true);
+        verify(mConditionProviders).isPackageOrComponentAllowed(eq(packageName), anyInt());
+        verify(mListeners).isComponentEnabledForPackage(packageName);
+        verify(mDevicePolicyManager).isActiveDeviceOwner(uid);
+        verify(mDevicePolicyManager, never()).isActiveDeviceOwner(callingUid);
+    }
+
+    @Test
+    public void isNotificationPolicyAccessGranted_notGranted() throws Exception {
+        final String packageName = "target";
+        final int uid = 123;
+        final var checker = mService.permissionChecker;
+
+        when(mPackageManagerClient.getPackageUidAsUser(eq(packageName), anyInt())).thenReturn(uid);
+
+        assertThat(mBinderService.isNotificationPolicyAccessGranted(packageName)).isFalse();
+        verify(mPackageManagerClient).getPackageUidAsUser(eq(packageName), anyInt());
+        verify(checker).check(android.Manifest.permission.MANAGE_NOTIFICATIONS, uid, -1, true);
+        verify(mConditionProviders).isPackageOrComponentAllowed(eq(packageName), anyInt());
+        verify(mListeners).isComponentEnabledForPackage(packageName);
+        verify(mDevicePolicyManager).isActiveDeviceOwner(uid);
     }
 
     private static <T extends Parcelable> T parcelAndUnparcel(T source,

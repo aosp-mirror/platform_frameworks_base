@@ -3281,6 +3281,11 @@ public class NotificationManagerService extends SystemService {
         return new MultiRateLimiter.Builder(getContext()).addRateLimits(TOAST_RATE_LIMITS).build();
     }
 
+    protected int checkComponentPermission(String permission, int uid, int owningUid,
+            boolean exported) {
+        return ActivityManager.checkComponentPermission(permission, uid, owningUid, exported);
+    }
+
     @VisibleForTesting
     final IBinder mService = new INotificationManager.Stub() {
         // Toasts
@@ -5238,10 +5243,11 @@ public class NotificationManagerService extends SystemService {
         }
 
         private boolean checkPolicyAccess(String pkg) {
+            final int uid;
             try {
-                int uid = getContext().getPackageManager().getPackageUidAsUser(pkg,
+                uid = getContext().getPackageManager().getPackageUidAsUser(pkg,
                         UserHandle.getCallingUserId());
-                if (PackageManager.PERMISSION_GRANTED == ActivityManager.checkComponentPermission(
+                if (PackageManager.PERMISSION_GRANTED == checkComponentPermission(
                         android.Manifest.permission.MANAGE_NOTIFICATIONS, uid,
                         -1, true)) {
                     return true;
@@ -5252,8 +5258,8 @@ public class NotificationManagerService extends SystemService {
             //TODO(b/169395065) Figure out if this flow makes sense in Device Owner mode.
             return checkPackagePolicyAccess(pkg)
                     || mListeners.isComponentEnabledForPackage(pkg)
-                    || (mDpm != null && (mDpm.isActiveProfileOwner(Binder.getCallingUid())
-                                || mDpm.isActiveDeviceOwner(Binder.getCallingUid())));
+                    || (mDpm != null && (mDpm.isActiveProfileOwner(uid)
+                                || mDpm.isActiveDeviceOwner(uid)));
         }
 
         @Override
