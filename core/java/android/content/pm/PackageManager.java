@@ -1437,6 +1437,16 @@ public abstract class PackageManager {
     public @interface InstallFlags {}
 
     /**
+     * Install flags that can only be used in development workflows (e.g. {@code adb install}).
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "INSTALL_DEVELOPMENT_" }, value = {
+            INSTALL_DEVELOPMENT_FORCE_NON_STAGED_APEX_UPDATE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DevelopmentInstallFlags {}
+
+    /**
      * Flag parameter for {@link #installPackage} to indicate that you want to
      * replace an already installed package, if one exists.
      *
@@ -1645,6 +1655,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FROM_MANAGED_USER_OR_PROFILE = 1 << 26;
+
+    /**
+     * Flag parameter for {@link #installPackage} to force a non-staged update of an APEX. This is
+     * a development-only feature and should not be used on end user devices.
+     *
+     * @hide
+     */
+    public static final int INSTALL_DEVELOPMENT_FORCE_NON_STAGED_APEX_UPDATE = 1;
 
     /** @hide */
     @IntDef(flag = true, value = {

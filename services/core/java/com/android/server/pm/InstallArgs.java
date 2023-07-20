@@ -43,6 +43,7 @@ final class InstallArgs {
     final IPackageInstallObserver2 mObserver;
     // Always refers to PackageManager flags only
     final int mInstallFlags;
+    final int mDevelopmentInstallFlags;
     @NonNull
     final InstallSource mInstallSource;
     final String mVolumeUuid;
@@ -69,8 +70,8 @@ final class InstallArgs {
     @Nullable String[] mInstructionSets;
 
     InstallArgs(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
-            int installFlags, InstallSource installSource, String volumeUuid,
-            UserHandle user, String[] instructionSets, String abiOverride,
+            int installFlags, int developmentInstallFlags, InstallSource installSource,
+            String volumeUuid,  UserHandle user, String[] instructionSets, String abiOverride,
             @NonNull ArrayMap<String, Integer> permissionStates,
             List<String> allowlistedRestrictedPermissions,
             int autoRevokePermissionsMode, String traceMethod, int traceCookie,
@@ -80,6 +81,7 @@ final class InstallArgs {
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
         mInstallFlags = installFlags;
+        mDevelopmentInstallFlags = developmentInstallFlags;
         mObserver = observer;
         mInstallSource = Preconditions.checkNotNull(installSource);
         mVolumeUuid = volumeUuid;
@@ -105,7 +107,7 @@ final class InstallArgs {
      * when cleaning up old installs, or used as a move source.
      */
     InstallArgs(String codePath, String[] instructionSets) {
-        this(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY, null, null,
+        this(OriginInfo.fromNothing(), null, null, 0, 0, InstallSource.EMPTY, null, null,
                 instructionSets, null, new ArrayMap<>(), null, MODE_DEFAULT, null, 0,
                 SigningDetails.UNKNOWN, PackageManager.INSTALL_REASON_UNKNOWN,
                 PackageManager.INSTALL_SCENARIO_DEFAULT, false, DataLoaderType.NONE,

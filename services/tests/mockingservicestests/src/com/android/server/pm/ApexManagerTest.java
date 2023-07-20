@@ -19,6 +19,7 @@ package com.android.server.pm;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -368,10 +369,11 @@ public class ApexManagerTest {
         File finalApex = extractResource("test.rebootles_apex_v2", "test.rebootless_apex_v2.apex");
         ApexInfo newApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
                 /* isFactory= */ false, finalApex);
-        when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
+        when(mApexService.installAndActivatePackage(anyString(), anyBoolean())).thenReturn(
+                newApexInfo);
 
         File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
-        newApexInfo = mApexManager.installPackage(installedApex);
+        newApexInfo = mApexManager.installPackage(installedApex, /* force= */ false);
 
         var newPkg = mockParsePackage(mPackageParser2, newApexInfo);
         assertThat(newPkg.getBaseApkPath()).isEqualTo(finalApex.getAbsolutePath());
@@ -398,10 +400,11 @@ public class ApexManagerTest {
         File finalApex = extractResource("test.rebootles_apex_v2", "test.rebootless_apex_v2.apex");
         ApexInfo newApexInfo = createApexInfo("test.apex_rebootless", 2, /* isActive= */ true,
                 /* isFactory= */ false, finalApex);
-        when(mApexService.installAndActivatePackage(anyString())).thenReturn(newApexInfo);
+        when(mApexService.installAndActivatePackage(anyString(), anyBoolean())).thenReturn(
+                newApexInfo);
 
         File installedApex = extractResource("installed", "test.rebootless_apex_v2.apex");
-        newApexInfo = mApexManager.installPackage(installedApex);
+        newApexInfo = mApexManager.installPackage(installedApex, /* force= */ false);
 
         var newPkg = mockParsePackage(mPackageParser2, newApexInfo);
         assertThat(newPkg.getBaseApkPath()).isEqualTo(finalApex.getAbsolutePath());
@@ -416,13 +419,13 @@ public class ApexManagerTest {
 
     @Test
     public void testInstallPackageBinderCallFails() throws Exception {
-        when(mApexService.installAndActivatePackage(anyString())).thenThrow(
+        when(mApexService.installAndActivatePackage(anyString(), anyBoolean())).thenThrow(
                 new RuntimeException("install failed :("));
 
         File installedApex = extractResource("test.apex_rebootless_v1",
                 "test.rebootless_apex_v1.apex");
         assertThrows(PackageManagerException.class,
-                () -> mApexManager.installPackage(installedApex));
+                () -> mApexManager.installPackage(installedApex, /* force= */ false));
     }
 
     @Test
