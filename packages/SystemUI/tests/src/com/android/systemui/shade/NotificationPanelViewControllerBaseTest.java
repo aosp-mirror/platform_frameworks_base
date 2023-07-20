@@ -371,6 +371,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardLogger,
                 mFeatureFlags,
                 mInteractionJankMonitor,
+                mKeyguardInteractor,
                 mDumpManager));
 
         when(mAuthController.isUdfpsEnrolled(anyInt())).thenReturn(false);

@@ -47,16 +47,15 @@ import com.android.systemui.statusbar.phone.BiometricUnlockController.WakeAndUnl
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
@@ -177,7 +176,7 @@ interface KeyguardRepository {
     val keyguardRootViewVisibility: Flow<KeyguardRootViewVisibilityState>
 
     /** Receive an event for doze time tick */
-    val dozeTimeTick: Flow<Unit>
+    val dozeTimeTick: Flow<Long>
 
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
@@ -248,6 +247,7 @@ constructor(
     private val dreamOverlayCallbackController: DreamOverlayCallbackController,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
+    private val systemClock: SystemClock,
 ) : KeyguardRepository {
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
@@ -398,11 +398,11 @@ constructor(
         _isDozing.value = isDozing
     }
 
-    private val _dozeTimeTick = MutableSharedFlow<Unit>()
-    override val dozeTimeTick = _dozeTimeTick.asSharedFlow()
+    private val _dozeTimeTick = MutableStateFlow<Long>(0)
+    override val dozeTimeTick = _dozeTimeTick.asStateFlow()
 
     override fun dozeTimeTick() {
-        _dozeTimeTick.tryEmit(Unit)
+        _dozeTimeTick.value = systemClock.uptimeMillis()
     }
 
     private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)

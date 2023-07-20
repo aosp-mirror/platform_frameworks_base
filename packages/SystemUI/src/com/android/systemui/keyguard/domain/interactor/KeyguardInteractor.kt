@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
+import com.android.systemui.keyguard.shared.model.ScreenModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
@@ -87,7 +88,7 @@ constructor(
     /** Whether the system is in doze mode. */
     val isDozing: Flow<Boolean> = repository.isDozing
     /** Receive an event for doze time tick */
-    val dozeTimeTick: Flow<Unit> = repository.dozeTimeTick
+    val dozeTimeTick: Flow<Long> = repository.dozeTimeTick
     /** Whether Always-on Display mode is available. */
     val isAodAvailable: Flow<Boolean> = repository.isAodAvailable
     /** Doze transition information. */
@@ -121,6 +122,9 @@ constructor(
 
     /** The device wake/sleep state */
     val wakefulnessModel: StateFlow<WakefulnessModel> = repository.wakefulness
+
+    /** The device screen state */
+    val screenModel: StateFlow<ScreenModel> = repository.screenModel
 
     /**
      * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
