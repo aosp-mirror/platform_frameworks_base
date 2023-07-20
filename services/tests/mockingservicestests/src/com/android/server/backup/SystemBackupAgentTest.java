@@ -83,7 +83,8 @@ public class SystemBackupAgentTest {
                         "slices",
                         "people",
                         "app_locales",
-                        "app_gender");
+                        "app_gender",
+                        "companion");
     }
 
     @Test
@@ -106,7 +107,8 @@ public class SystemBackupAgentTest {
                         "account_manager",
                         "people",
                         "app_locales",
-                        "app_gender");
+                        "app_gender",
+                        "companion");
     }
 
     @Test
@@ -121,7 +123,8 @@ public class SystemBackupAgentTest {
                         "account_sync_settings",
                         "notifications",
                         "permissions",
-                        "app_locales");
+                        "app_locales",
+                        "companion");
     }
 
     @Test
@@ -140,7 +143,8 @@ public class SystemBackupAgentTest {
                         "app_locales",
                         "account_manager",
                         "usage_stats",
-                        "shortcut_manager");
+                        "shortcut_manager",
+                        "companion");
     }
 
     private class TestableSystemBackupAgent extends SystemBackupAgent {
