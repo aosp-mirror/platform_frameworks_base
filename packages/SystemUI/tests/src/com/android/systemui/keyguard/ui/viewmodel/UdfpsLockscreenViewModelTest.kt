@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.wm.shell.animation.Interpolators
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -687,6 +688,62 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
 
             captor.value.shouldHideAffordances(false)
             assertThat(transition?.alpha).isEqualTo(1f)
+        }
+
+    @Test
+    fun occludedToAlternateBouncer() =
+        testScope.runTest {
+            val transition by collectLastValue(underTest.transition)
+            val visible by collectLastValue(underTest.visible)
+
+            // TransitionState.STARTED: occluded -> alternate bouncer
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.OCCLUDED,
+                    to = KeyguardState.ALTERNATE_BOUNCER,
+                    value = 0f,
+                    transitionState = TransitionState.STARTED,
+                    ownerName = "occludedToAlternateBouncer",
+                )
+            )
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(1f)
+            assertThat(transition?.scale).isEqualTo(0f)
+            assertThat(transition?.color).isEqualTo(alternateBouncerColor)
+            assertThat(visible).isTrue()
+
+            // TransitionState.RUNNING: occluded -> alternate bouncer
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.OCCLUDED,
+                    to = KeyguardState.ALTERNATE_BOUNCER,
+                    value = .6f,
+                    transitionState = TransitionState.RUNNING,
+                    ownerName = "occludedToAlternateBouncer",
+                )
+            )
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(1f)
+            assertThat(transition?.scale)
+                .isEqualTo(Interpolators.FAST_OUT_SLOW_IN.getInterpolation(.6f))
+            assertThat(transition?.color).isEqualTo(alternateBouncerColor)
+            assertThat(visible).isTrue()
+
+            // TransitionState.FINISHED: occluded -> alternate bouncer
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.OCCLUDED,
+                    to = KeyguardState.ALTERNATE_BOUNCER,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED,
+                    ownerName = "occludedToAlternateBouncer",
+                )
+            )
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(1f)
+            assertThat(transition?.scale).isEqualTo(1f)
+            assertThat(transition?.color).isEqualTo(alternateBouncerColor)
+            assertThat(visible).isTrue()
         }
 
     private suspend fun givenTransitionToLockscreenFinished() {
