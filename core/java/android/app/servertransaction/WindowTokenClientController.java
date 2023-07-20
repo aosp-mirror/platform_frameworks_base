@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.IWindowManager;
 import android.window.WindowContext;
 import android.window.WindowTokenClient;
@@ -41,6 +42,7 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 public class WindowTokenClientController {
 
+    private static final String TAG = WindowTokenClientController.class.getSimpleName();
     private static WindowTokenClientController sController;
 
     private final Object mLock = new Object();
@@ -61,7 +63,7 @@ public class WindowTokenClientController {
 
     /** Overrides the {@link #getInstance()} for test only. */
     @VisibleForTesting
-    public static void overrideInstance(@NonNull WindowTokenClientController controller) {
+    public static void overrideForTesting(@NonNull WindowTokenClientController controller) {
         synchronized (WindowTokenClientController.class) {
             sController = controller;
         }
@@ -90,7 +92,7 @@ public class WindowTokenClientController {
         if (configuration == null) {
             return false;
         }
-        onWindowContainerTokenAttached(client, displayId, configuration);
+        onWindowContextTokenAttached(client, displayId, configuration);
         return true;
     }
 
@@ -116,7 +118,7 @@ public class WindowTokenClientController {
         if (configuration == null) {
             return false;
         }
-        onWindowContainerTokenAttached(client, displayId, configuration);
+        onWindowContextTokenAttached(client, displayId, configuration);
         return true;
     }
 
@@ -153,12 +155,41 @@ public class WindowTokenClientController {
         }
     }
 
-    private void onWindowContainerTokenAttached(@NonNull WindowTokenClient client, int displayId,
+    private void onWindowContextTokenAttached(@NonNull WindowTokenClient client, int displayId,
             @NonNull Configuration configuration) {
         synchronized (mLock) {
             mWindowTokenClientMap.put(client.asBinder(), client);
         }
         client.onConfigurationChanged(configuration, displayId,
                 false /* shouldReportConfigChange */);
+    }
+
+    /** Called when receives {@link WindowContextConfigurationChangeItem}. */
+    public void onWindowContextConfigurationChanged(@NonNull IBinder clientToken,
+            @NonNull Configuration configuration, int displayId) {
+        final WindowTokenClient windowTokenClient = getWindowTokenClient(clientToken);
+        if (windowTokenClient != null) {
+            windowTokenClient.onConfigurationChanged(configuration, displayId);
+        }
+    }
+
+    /** Called when receives {@link WindowContextWindowRemovalItem}. */
+    public void onWindowContextWindowRemoved(@NonNull IBinder clientToken) {
+        final WindowTokenClient windowTokenClient = getWindowTokenClient(clientToken);
+        if (windowTokenClient != null) {
+            windowTokenClient.onWindowTokenRemoved();
+        }
+    }
+
+    @Nullable
+    private WindowTokenClient getWindowTokenClient(@NonNull IBinder clientToken) {
+        final WindowTokenClient windowTokenClient;
+        synchronized (mLock) {
+            windowTokenClient = mWindowTokenClientMap.get(clientToken);
+        }
+        if (windowTokenClient == null) {
+            Log.w(TAG, "Can't find attached WindowTokenClient for " + clientToken);
+        }
+        return windowTokenClient;
     }
 }

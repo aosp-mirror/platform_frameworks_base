@@ -34,6 +34,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
@@ -181,6 +182,15 @@ public final class WindowManagerGlobal {
                 }
             }
             return sWindowManagerService;
+        }
+    }
+
+    /** Overrides the {@link #getWindowManagerService()} for test only. */
+    @VisibleForTesting
+    public static void overrideWindowManagerServiceForTesting(
+            @NonNull IWindowManager windowManager) {
+        synchronized (WindowManagerGlobal.class) {
+            sWindowManagerService = windowManager;
         }
     }
 

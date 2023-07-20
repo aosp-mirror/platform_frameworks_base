@@ -20,7 +20,6 @@ import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
 
 import android.annotation.AnyThread;
-import android.annotation.BinderThread;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.app.ActivityThread;
@@ -97,9 +96,10 @@ public class WindowTokenClient extends IWindowToken.Stub {
      * @param newConfig the updated {@link Configuration}
      * @param newDisplayId the updated {@link android.view.Display} ID
      */
-    @BinderThread
+    @AnyThread
     @Override
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
+        // TODO(b/290876897): No need to post on mHandler after migrating to ClientTransaction
         mHandler.post(PooledLambda.obtainRunnable(this::onConfigurationChanged, newConfig,
                 newDisplayId, true /* shouldReportConfigChange */).recycleOnUse());
     }
@@ -188,9 +188,10 @@ public class WindowTokenClient extends IWindowToken.Stub {
         }
     }
 
-    @BinderThread
+    @AnyThread
     @Override
     public void onWindowTokenRemoved() {
+        // TODO(b/290876897): No need to post on mHandler after migrating to ClientTransaction
         mHandler.post(PooledLambda.obtainRunnable(
                 WindowTokenClient::onWindowTokenRemovedInner, this).recycleOnUse());
     }
