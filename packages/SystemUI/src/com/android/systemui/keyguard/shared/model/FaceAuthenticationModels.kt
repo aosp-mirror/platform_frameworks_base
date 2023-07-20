@@ -23,29 +23,40 @@ import android.os.SystemClock.elapsedRealtime
  * Authentication status provided by
  * [com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository]
  */
-sealed class FaceAuthenticationStatus(
-    // present to break equality check if the same error occurs repeatedly.
-    val createdAt: Long = elapsedRealtime()
-)
+sealed class FaceAuthenticationStatus
 
 /** Success authentication status. */
-data class SuccessFaceAuthenticationStatus(val successResult: FaceManager.AuthenticationResult) :
-    FaceAuthenticationStatus()
+data class SuccessFaceAuthenticationStatus(
+    val successResult: FaceManager.AuthenticationResult,
+    // present to break equality check if the same error occurs repeatedly.
+    @JvmField val createdAt: Long = elapsedRealtime()
+) : FaceAuthenticationStatus()
 
 /** Face authentication help message. */
-data class HelpFaceAuthenticationStatus(val msgId: Int, val msg: String?) :
-    FaceAuthenticationStatus()
+data class HelpFaceAuthenticationStatus(
+    val msgId: Int,
+    val msg: String?, // present to break equality check if the same error occurs repeatedly.
+    @JvmField val createdAt: Long = elapsedRealtime()
+) : FaceAuthenticationStatus()
 
 /** Face acquired message. */
-data class AcquiredFaceAuthenticationStatus(val acquiredInfo: Int) : FaceAuthenticationStatus()
+data class AcquiredFaceAuthenticationStatus(
+    val acquiredInfo: Int, // present to break equality check if the same error occurs repeatedly.
+    @JvmField val createdAt: Long = elapsedRealtime()
+) : FaceAuthenticationStatus()
 
 /** Face authentication failed message. */
-object FailedFaceAuthenticationStatus : FaceAuthenticationStatus()
+data class FailedFaceAuthenticationStatus(
+    // present to break equality check if the same error occurs repeatedly.
+    @JvmField val createdAt: Long = elapsedRealtime()
+) : FaceAuthenticationStatus()
 
 /** Face authentication error message */
 data class ErrorFaceAuthenticationStatus(
     val msgId: Int,
     val msg: String? = null,
+    // present to break equality check if the same error occurs repeatedly.
+    @JvmField val createdAt: Long = elapsedRealtime()
 ) : FaceAuthenticationStatus() {
     /**
      * Method that checks if [msgId] is a lockout error. A lockout error means that face
@@ -80,5 +91,5 @@ data class FaceDetectionStatus(
     val userId: Int,
     val isStrongBiometric: Boolean,
     // present to break equality check if the same error occurs repeatedly.
-    val createdAt: Long = elapsedRealtime()
+    @JvmField val createdAt: Long = elapsedRealtime()
 )

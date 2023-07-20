@@ -265,7 +265,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             val successResult = successResult()
             authenticationCallback.value.onAuthenticationSucceeded(successResult)
 
-            assertThat(authStatus()).isEqualTo(SuccessFaceAuthenticationStatus(successResult))
+            val response = authStatus() as SuccessFaceAuthenticationStatus
+            assertThat(response.successResult).isEqualTo(successResult)
             assertThat(authenticated()).isTrue()
             assertThat(authRunning()).isFalse()
             assertThat(canFaceAuthRun()).isFalse()
@@ -494,7 +495,9 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             authenticationCallback.value.onAuthenticationHelp(10, "Ignored help msg")
             authenticationCallback.value.onAuthenticationHelp(11, "Ignored help msg")
 
-            assertThat(authStatus()).isEqualTo(HelpFaceAuthenticationStatus(9, "help msg"))
+            val response = authStatus() as HelpFaceAuthenticationStatus
+            assertThat(response.msg).isEqualTo("help msg")
+            assertThat(response.msgId).isEqualTo(response.msgId)
         }
 
     @Test
@@ -550,10 +553,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun authenticateDoesNotRunWhenFpIsLockedOut() =
-        testScope.runTest {
-            testGatingCheckForFaceAuth { deviceEntryFingerprintAuthRepository.setLockedOut(true) }
-        }
+    fun authenticateDoesNotRunWhenFaceIsDisabled() =
+        testScope.runTest { testGatingCheckForFaceAuth { underTest.lockoutFaceAuth() } }
 
     @Test
     fun authenticateDoesNotRunWhenUserIsCurrentlyTrusted() =
@@ -858,6 +859,19 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun disableFaceUnlockLocksOutFaceUnlock() =
+        testScope.runTest {
+            runCurrent()
+            initCollectors()
+            assertThat(underTest.isLockedOut.value).isFalse()
+
+            underTest.lockoutFaceAuth()
+            runCurrent()
+
+            assertThat(underTest.isLockedOut.value).isTrue()
+        }
+
+    @Test
     fun detectDoesNotRunWhenFaceAuthNotSupportedInCurrentPosture() =
         testScope.runTest {
             testGatingCheckForDetect {
@@ -1070,10 +1084,11 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     }
 
     private suspend fun TestScope.allPreconditionsToRunFaceAuthAreTrue() {
+        verify(faceManager, atLeastOnce())
+            .addLockoutResetCallback(faceLockoutResetCallback.capture())
         biometricSettingsRepository.setFaceEnrolled(true)
         biometricSettingsRepository.setIsFaceAuthEnabled(true)
         fakeUserRepository.setUserSwitching(false)
-        deviceEntryFingerprintAuthRepository.setLockedOut(false)
         trustRepository.setCurrentUserTrusted(false)
         keyguardRepository.setKeyguardGoingAway(false)
         keyguardRepository.setWakefulnessModel(
@@ -1087,6 +1102,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         biometricSettingsRepository.setIsUserInLockdown(false)
         fakeUserRepository.setSelectedUserInfo(primaryUser)
         biometricSettingsRepository.setIsFaceAuthSupportedInCurrentPosture(true)
+        faceLockoutResetCallback.value.onLockoutReset(0)
         bouncerRepository.setAlternateVisible(true)
         keyguardRepository.setKeyguardShowing(true)
         runCurrent()

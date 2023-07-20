@@ -38,6 +38,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
@@ -73,6 +74,8 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
     private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     private lateinit var faceAuthRepository: FakeDeviceEntryFaceAuthRepository
+    private lateinit var fakeDeviceEntryFingerprintAuthRepository:
+        FakeDeviceEntryFingerprintAuthRepository
 
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
@@ -94,6 +97,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 )
                 .keyguardTransitionInteractor
 
+        fakeDeviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
         underTest =
             SystemUIKeyguardFaceAuthInteractor(
                 mContext,
@@ -127,6 +131,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 featureFlags,
                 FaceAuthenticationLogger(logcatLogBuffer("faceAuthBuffer")),
                 keyguardUpdateMonitor,
+                fakeDeviceEntryFingerprintAuthRepository
             )
     }
 
@@ -335,4 +340,14 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
             assertThat(faceAuthRepository.runningAuthRequest.value)
                 .isEqualTo(Pair(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_SWIPE_UP_ON_BOUNCER, false))
         }
+
+    @Test
+    fun faceUnlockIsDisabledWhenFpIsLockedOut() = testScope.runTest {
+        underTest.start()
+
+        fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
+        runCurrent()
+
+        assertThat(faceAuthRepository.wasDisabled).isTrue()
+    }
 }

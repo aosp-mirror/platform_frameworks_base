@@ -8,6 +8,7 @@ import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.FaceAuthLog
+import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
 private const val TAG = "DeviceEntryFaceAuthRepositoryLog"
@@ -263,5 +264,9 @@ constructor(
 
     fun watchdogScheduled() {
         logBuffer.log(TAG, DEBUG, "FaceManager Biometric watchdog scheduled.")
+    }
+
+    fun faceLockedOut(@CompileTimeConstant reason: String) {
+        logBuffer.log(TAG, DEBUG, "Face auth has been locked out: $reason")
     }
 }
