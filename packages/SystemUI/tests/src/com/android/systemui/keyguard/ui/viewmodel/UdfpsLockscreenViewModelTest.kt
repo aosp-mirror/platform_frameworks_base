@@ -20,12 +20,26 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.Utils
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.phone.SystemUIDialogManager
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,6 +49,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 /** Tests UDFPS lockscreen view model transitions. */
@@ -48,26 +64,63 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
     private val alternateBouncerColor =
         Utils.getColorAttrDefaultColor(context, alternateBouncerResId)
 
+    @Mock private lateinit var dialogManager: SystemUIDialogManager
+
     private lateinit var underTest: UdfpsLockscreenViewModel
     private lateinit var testScope: TestScope
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
+    private lateinit var configRepository: FakeConfigurationRepository
+    private lateinit var keyguardRepository: FakeKeyguardRepository
+    private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
+    private lateinit var shadeRepository: FakeShadeRepository
+    private lateinit var featureFlags: FakeFeatureFlags
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testScope = TestScope()
         transitionRepository = FakeKeyguardTransitionRepository()
-        val transitionInteractor =
-            KeyguardTransitionInteractor(
-                transitionRepository,
-                testScope.backgroundScope,
+        configRepository = FakeConfigurationRepository()
+        keyguardRepository = FakeKeyguardRepository()
+        bouncerRepository = FakeKeyguardBouncerRepository()
+        shadeRepository = FakeShadeRepository()
+        featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
+                set(Flags.FACE_AUTH_REFACTOR, false)
+            }
+        val keyguardInteractor =
+            KeyguardInteractor(
+                keyguardRepository,
+                commandQueue = mock(),
+                featureFlags,
+                bouncerRepository,
+                configRepository,
             )
+
         underTest =
             UdfpsLockscreenViewModel(
                 context,
                 lockscreenColorResId,
                 alternateBouncerResId,
-                transitionInteractor,
+                KeyguardTransitionInteractor(
+                    transitionRepository,
+                    testScope.backgroundScope,
+                ),
+                UdfpsKeyguardInteractor(
+                    configRepository,
+                    BurnInInteractor(
+                        context,
+                        burnInHelperWrapper = mock(),
+                        testScope.backgroundScope,
+                        configRepository,
+                        FakeSystemClock(),
+                    ),
+                    keyguardInteractor,
+                    shadeRepository,
+                    dialogManager,
+                ),
+                keyguardInteractor,
             )
     }
 
@@ -125,6 +178,7 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val transition by collectLastValue(underTest.transition)
             val visible by collectLastValue(underTest.visible)
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
 
             // TransitionState.STARTED: lockscreen -> AOD
             transitionRepository.sendTransitionStep(
@@ -172,6 +226,56 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
             assertThat(transition?.alpha).isEqualTo(0f)
             assertThat(transition?.scale).isEqualTo(1f)
             assertThat(transition?.color).isEqualTo(lockscreenColor)
+            assertThat(visible).isFalse()
+        }
+
+    @Test
+    fun lockscreenShadeLockedToAod() =
+        testScope.runTest {
+            val transition by collectLastValue(underTest.transition)
+            val visible by collectLastValue(underTest.visible)
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
+
+            // TransitionState.STARTED: lockscreen -> AOD
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                    value = 0f,
+                    transitionState = TransitionState.STARTED,
+                    ownerName = "lockscreenToAod",
+                )
+            )
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(0f)
+            assertThat(visible).isFalse()
+
+            // TransitionState.RUNNING: lockscreen -> AOD
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                    value = .6f,
+                    transitionState = TransitionState.RUNNING,
+                    ownerName = "lockscreenToAod",
+                )
+            )
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(0f)
+            assertThat(visible).isFalse()
+
+            // TransitionState.FINISHED: lockscreen -> AOD
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED,
+                    ownerName = "lockscreenToAod",
+                )
+            )
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(0f)
             assertThat(visible).isFalse()
         }
 
@@ -235,6 +339,7 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val transition by collectLastValue(underTest.transition)
             val visible by collectLastValue(underTest.visible)
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
 
             // TransitionState.STARTED: lockscreen -> alternate bouncer
             transitionRepository.sendTransitionStep(
@@ -398,6 +503,7 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val transition by collectLastValue(underTest.transition)
             val visible by collectLastValue(underTest.visible)
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
 
             // TransitionState.STARTED: lockscreen -> occluded
             transitionRepository.sendTransitionStep(
@@ -502,4 +608,96 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
             assertThat(transition?.color).isEqualTo(lockscreenColor)
             assertThat(visible).isTrue()
         }
+
+    @Test
+    fun qsProgressChange() =
+        testScope.runTest {
+            val transition by collectLastValue(underTest.transition)
+            val visible by collectLastValue(underTest.visible)
+            givenTransitionToLockscreenFinished()
+
+            // qsExpansion = 0f
+            shadeRepository.setQsExpansion(0f)
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(1f)
+            assertThat(visible).isEqualTo(true)
+
+            // qsExpansion = .25
+            shadeRepository.setQsExpansion(.2f)
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(.6f)
+            assertThat(visible).isEqualTo(true)
+
+            // qsExpansion = .5
+            shadeRepository.setQsExpansion(.5f)
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(0f)
+            assertThat(visible).isEqualTo(false)
+
+            // qsExpansion = 1
+            shadeRepository.setQsExpansion(1f)
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(0f)
+            assertThat(visible).isEqualTo(false)
+        }
+
+    @Test
+    fun shadeExpansionChanged() =
+        testScope.runTest {
+            val transition by collectLastValue(underTest.transition)
+            val visible by collectLastValue(underTest.visible)
+            givenTransitionToLockscreenFinished()
+
+            // shadeExpansion = 0f
+            shadeRepository.setUdfpsTransitionToFullShadeProgress(0f)
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(1f)
+            assertThat(visible).isEqualTo(true)
+
+            // shadeExpansion = .2
+            shadeRepository.setUdfpsTransitionToFullShadeProgress(.2f)
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(.8f)
+            assertThat(visible).isEqualTo(true)
+
+            // shadeExpansion = .5
+            shadeRepository.setUdfpsTransitionToFullShadeProgress(.5f)
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(.5f)
+            assertThat(visible).isEqualTo(true)
+
+            // shadeExpansion = 1
+            shadeRepository.setUdfpsTransitionToFullShadeProgress(1f)
+            runCurrent()
+            assertThat(transition?.alpha).isEqualTo(0f)
+            assertThat(visible).isEqualTo(false)
+        }
+
+    @Test
+    fun dialogHideAffordancesRequestChanged() =
+        testScope.runTest {
+            val transition by collectLastValue(underTest.transition)
+            givenTransitionToLockscreenFinished()
+            runCurrent()
+            val captor = argumentCaptor<SystemUIDialogManager.Listener>()
+            Mockito.verify(dialogManager).registerListener(captor.capture())
+
+            captor.value.shouldHideAffordances(true)
+            assertThat(transition?.alpha).isEqualTo(0f)
+
+            captor.value.shouldHideAffordances(false)
+            assertThat(transition?.alpha).isEqualTo(1f)
+        }
+
+    private suspend fun givenTransitionToLockscreenFinished() {
+        transitionRepository.sendTransitionStep(
+            TransitionStep(
+                from = KeyguardState.AOD,
+                to = KeyguardState.LOCKSCREEN,
+                value = 1f,
+                transitionState = TransitionState.FINISHED,
+                ownerName = "givenTransitionToLockscreenFinished",
+            )
+        )
+    }
 }
