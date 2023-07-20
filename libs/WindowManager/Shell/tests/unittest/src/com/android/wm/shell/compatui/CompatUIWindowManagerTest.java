@@ -28,6 +28,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -38,6 +39,7 @@ import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
+import android.util.Pair;
 import android.view.DisplayInfo;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -53,11 +55,16 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 
+import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.function.Consumer;
 
 /**
  * Tests for {@link CompatUIWindowManager}.
@@ -73,20 +80,22 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
 
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
     @Mock private CompatUIController.CompatUICallback mCallback;
+    @Mock private Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnRestartButtonClicked;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private CompatUILayout mLayout;
     @Mock private SurfaceControlViewHost mViewHost;
+    @Mock private CompatUIConfiguration mCompatUIConfiguration;
 
     private CompatUIWindowManager mWindowManager;
+    private TaskInfo mTaskInfo;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        mWindowManager = new CompatUIWindowManager(mContext,
-                createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN),
-                mSyncTransactionQueue, mCallback, mTaskListener,
-                new DisplayLayout(), new CompatUIHintsState());
+        mTaskInfo = createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager = new CompatUIWindowManager(mContext, mTaskInfo, mSyncTransactionQueue,
+                mCallback, mTaskListener, new DisplayLayout(), new CompatUIHintsState(),
+                mCompatUIConfiguration, mOnRestartButtonClicked);
 
         spyOn(mWindowManager);
         doReturn(mLayout).when(mWindowManager).inflateLayout();
@@ -351,14 +360,14 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         mWindowManager.updateVisibility(/* canShow= */ false);
 
         verify(mWindowManager, never()).createLayout(anyBoolean());
-        verify(mLayout).setVisibility(View.GONE);
+        verify(mLayout, atLeastOnce()).setVisibility(View.GONE);
 
         // Show button.
         doReturn(View.GONE).when(mLayout).getVisibility();
         mWindowManager.updateVisibility(/* canShow= */ true);
 
         verify(mWindowManager, never()).createLayout(anyBoolean());
-        verify(mLayout).setVisibility(View.VISIBLE);
+        verify(mLayout, atLeastOnce()).setVisibility(View.VISIBLE);
     }
 
     @Test
@@ -404,7 +413,14 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     public void testOnRestartButtonClicked() {
         mWindowManager.onRestartButtonClicked();
 
-        verify(mCallback).onSizeCompatRestartButtonClicked(TASK_ID);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> restartCaptor =
+                ArgumentCaptor.forClass(Pair.class);
+
+        verify(mOnRestartButtonClicked).accept(restartCaptor.capture());
+        final Pair<TaskInfo, ShellTaskOrganizer.TaskListener> result = restartCaptor.getValue();
+        Assert.assertEquals(mTaskInfo, result.first);
+        Assert.assertEquals(mTaskListener, result.second);
     }
 
     @Test

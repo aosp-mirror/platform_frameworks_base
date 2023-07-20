@@ -30,12 +30,14 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.io.File
+import java.nio.file.Files
 import java.util.concurrent.Executor
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.isNull
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
@@ -61,36 +63,83 @@ class UserFileManagerImplTest : SysuiTestCase() {
             UserFileManagerImpl(context, userManager, broadcastDispatcher, backgroundExecutor)
     }
 
-    @After
-    fun end() {
-        val dir = Environment.buildPath(context.filesDir, UserFileManagerImpl.ID)
-        dir.deleteRecursively()
-    }
-
     @Test
     fun testGetFile() {
         assertThat(userFileManager.getFile(TEST_FILE_NAME, 0).path)
             .isEqualTo("${context.filesDir}/$TEST_FILE_NAME")
         assertThat(userFileManager.getFile(TEST_FILE_NAME, 11).path)
-            .isEqualTo("${context.filesDir}/${UserFileManagerImpl.ID}/11/files/$TEST_FILE_NAME")
+            .isEqualTo("${context.filesDir}/__USER_11_$TEST_FILE_NAME")
     }
 
     @Test
     fun testGetSharedPreferences() {
+        val primarySharedPref = userFileManager.getSharedPreferences(TEST_FILE_NAME, 0, 0)
         val secondarySharedPref = userFileManager.getSharedPreferences(TEST_FILE_NAME, 0, 11)
-        val secondaryUserDir =
-            Environment.buildPath(
-                context.filesDir,
-                UserFileManagerImpl.ID,
-                "11",
-                UserFileManagerImpl.SHARED_PREFS,
-                TEST_FILE_NAME
-            )
 
-        assertThat(secondarySharedPref).isNotNull()
-        assertThat(secondaryUserDir.exists())
-        assertThat(userFileManager.getSharedPreferences(TEST_FILE_NAME, 0, 0))
-            .isNotEqualTo(secondarySharedPref)
+        assertThat(primarySharedPref).isNotEqualTo(secondarySharedPref)
+
+        // Make sure these are different files
+        primarySharedPref.edit().putString("TEST", "ABC").commit()
+        assertThat(secondarySharedPref.getString("TEST", null)).isNull()
+
+        context.deleteSharedPreferences("TEST")
+        context.deleteSharedPreferences("__USER_11_TEST")
+    }
+
+    @Test
+    fun testMigrateFile() {
+        val userId = 12
+        val fileName = "myFile.txt"
+        val fileContents = "TestingFile"
+        val legacyFile =
+            UserFileManagerImpl.createLegacyFile(
+                context,
+                UserFileManagerImpl.FILES,
+                fileName,
+                userId
+            )!!
+
+        // Write file to legacy area
+        Files.createDirectories(legacyFile.getParentFile().toPath())
+        Files.write(legacyFile.toPath(), fileContents.toByteArray())
+        assertThat(legacyFile.exists()).isTrue()
+
+        // getFile() should migrate the legacy file to the new location
+        val file = userFileManager.getFile(fileName, userId)
+        val newContents = String(Files.readAllBytes(file.toPath()))
+
+        assertThat(newContents).isEqualTo(fileContents)
+        assertThat(legacyFile.exists()).isFalse()
+        assertThat(File(context.filesDir, UserFileManagerImpl.ROOT_DIR).exists()).isFalse()
+    }
+
+    @Test
+    fun testMigrateSharedPrefs() {
+        val userId = 13
+        val fileName = "myFile"
+        val contents = "TestingSharedPrefs"
+        val legacyFile =
+            UserFileManagerImpl.createLegacyFile(
+                context,
+                UserFileManagerImpl.SHARED_PREFS,
+                "$fileName.xml",
+                userId
+            )!!
+
+        // Write a valid shared prefs xml file to legacy area
+        val tmpPrefs = context.getSharedPreferences("tmp", Context.MODE_PRIVATE)
+        tmpPrefs.edit().putString(contents, contents).commit()
+        Files.createDirectories(legacyFile.getParentFile().toPath())
+        val tmpFile =
+            Environment.buildPath(context.dataDir, UserFileManagerImpl.SHARED_PREFS, "tmp.xml")
+        tmpFile.renameTo(legacyFile)
+        assertThat(legacyFile.exists()).isTrue()
+
+        // getSharedpreferences() should migrate the legacy file to the new location
+        val prefs = userFileManager.getSharedPreferences(fileName, Context.MODE_PRIVATE, userId)
+        assertThat(prefs.getString(contents, "")).isEqualTo(contents)
+        assertThat(legacyFile.exists()).isFalse()
+        assertThat(File(context.filesDir, UserFileManagerImpl.ROOT_DIR).exists()).isFalse()
     }
 
     @Test
@@ -111,44 +160,14 @@ class UserFileManagerImplTest : SysuiTestCase() {
 
     @Test
     fun testClearDeletedUserData() {
-        val dir = Environment.buildPath(context.filesDir, UserFileManagerImpl.ID, "11", "files")
-        dir.mkdirs()
-        val file =
-            Environment.buildPath(
-                context.filesDir,
-                UserFileManagerImpl.ID,
-                "11",
-                "files",
-                TEST_FILE_NAME
-            )
-        val secondaryUserDir =
-            Environment.buildPath(
-                context.filesDir,
-                UserFileManagerImpl.ID,
-                "11",
-            )
+        val file = userFileManager.getFile(TEST_FILE_NAME, 11)
         file.createNewFile()
-        assertThat(secondaryUserDir.exists()).isTrue()
+
         assertThat(file.exists()).isTrue()
         userFileManager.clearDeletedUserData()
         assertThat(backgroundExecutor.runAllReady()).isGreaterThan(0)
-        verify(userManager).aliveUsers
-        assertThat(secondaryUserDir.exists()).isFalse()
-        assertThat(file.exists()).isFalse()
-    }
+        verify(userManager, atLeastOnce()).aliveUsers
 
-    @Test
-    fun testEnsureParentDirExists() {
-        val file =
-            Environment.buildPath(
-                context.filesDir,
-                UserFileManagerImpl.ID,
-                "11",
-                "files",
-                TEST_FILE_NAME
-            )
-        assertThat(file.parentFile.exists()).isFalse()
-        UserFileManagerImpl.ensureParentDirExists(file)
-        assertThat(file.parentFile.exists()).isTrue()
+        assertThat(file.exists()).isFalse()
     }
 }

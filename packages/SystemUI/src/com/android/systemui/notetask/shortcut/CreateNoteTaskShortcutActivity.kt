@@ -33,8 +33,8 @@ import javax.inject.Inject
  * launched, creating a new shortcut for [CreateNoteTaskShortcutActivity], and will finish.
  *
  * @see <a
- * href="https://developer.android.com/develop/ui/views/launch/shortcuts/creating-shortcuts#custom-pinned">Creating
- * a custom shortcut activity</a>
+ *   href="https://developer.android.com/develop/ui/views/launch/shortcuts/creating-shortcuts#custom-pinned">Creating
+ *   a custom shortcut activity</a>
  */
 internal class CreateNoteTaskShortcutActivity @Inject constructor() : ComponentActivity() {
 
@@ -46,7 +46,7 @@ internal class CreateNoteTaskShortcutActivity @Inject constructor() : ComponentA
                 id = SHORTCUT_ID,
                 shortLabel = getString(R.string.note_task_button_label),
                 intent = LaunchNoteTaskActivity.newIntent(context = this),
-                iconResource = R.drawable.ic_note_task_button,
+                iconResource = R.drawable.ic_note_task_shortcut_widget,
             )
         setResult(Activity.RESULT_OK, intent)
 

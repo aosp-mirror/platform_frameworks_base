@@ -27,8 +27,6 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -201,7 +199,6 @@ public class SplitScreenControllerTests extends ShellTestCase {
         ActivityManager.RunningTaskInfo topRunningTask =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
         doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
-        doReturn(true).when(mStageCoordinator).isValidToEnterSplitScreen(any());
 
         mSplitScreenController.startIntent(pendingIntent, null, SPLIT_POSITION_TOP_OR_LEFT, null);
 
@@ -222,7 +219,6 @@ public class SplitScreenControllerTests extends ShellTestCase {
         ActivityManager.RunningTaskInfo topRunningTask =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, startIntent);
         doReturn(topRunningTask).when(mRecentTasks).getTopRunningTask();
-        doReturn(true).when(mStageCoordinator).isValidToEnterSplitScreen(any());
         // Put the same component into a task in the background
         ActivityManager.RecentTaskInfo sameTaskInfo = new ActivityManager.RecentTaskInfo();
         doReturn(sameTaskInfo).when(mRecentTasks).findTaskInBackground(any());

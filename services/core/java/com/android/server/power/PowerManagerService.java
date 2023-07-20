@@ -5825,6 +5825,17 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
+        public boolean areAutoPowerSaveModesEnabled() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_enableAutoPowerModes);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
         public boolean isPowerSaveMode() {
             final long ident = Binder.clearCallingIdentity();
             try {

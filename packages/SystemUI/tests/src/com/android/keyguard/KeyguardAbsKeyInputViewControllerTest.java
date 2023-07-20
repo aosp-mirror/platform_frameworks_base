@@ -150,4 +150,11 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
                 getContext().getResources().getString(R.string.kg_prompt_reason_restart_password),
                 false);
     }
+
+
+    @Test
+    public void testReset() {
+        mKeyguardAbsKeyInputViewController.reset();
+        verify(mKeyguardMessageAreaController).setMessage("", false);
+    }
 }

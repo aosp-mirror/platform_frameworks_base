@@ -17,36 +17,32 @@
 package com.android.systemui.unfold.updates
 
 import android.content.Context
+import android.hardware.display.DisplayManager
+import android.os.Handler
 import android.os.RemoteException
-import android.view.IRotationWatcher
-import android.view.IWindowManager
-import android.view.Surface.Rotation
 import com.android.systemui.unfold.dagger.UnfoldMain
 import com.android.systemui.unfold.util.CallbackController
-import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
- * Allows to subscribe to rotation changes.
- *
- * This is needed as rotation updates from [IWindowManager] are received in a binder thread, while
- * most of the times we want them in the main one. Updates are provided for the display associated
+ * Allows to subscribe to rotation changes. Updates are provided for the display associated
  * to [context].
  */
 class RotationChangeProvider
 @Inject
 constructor(
-    private val windowManagerInterface: IWindowManager,
+    private val displayManager: DisplayManager,
     private val context: Context,
-    @UnfoldMain private val mainExecutor: Executor,
+    @UnfoldMain private val mainHandler: Handler,
 ) : CallbackController<RotationChangeProvider.RotationListener> {
 
     private val listeners = mutableListOf<RotationListener>()
 
-    private val rotationWatcher = RotationWatcher()
+    private val displayListener = RotationDisplayListener()
+    private var lastRotation: Int? = null
 
     override fun addCallback(listener: RotationListener) {
-        mainExecutor.execute {
+        mainHandler.post {
             if (listeners.isEmpty()) {
                 subscribeToRotation()
             }
@@ -55,17 +51,18 @@ constructor(
     }
 
     override fun removeCallback(listener: RotationListener) {
-        mainExecutor.execute {
+        mainHandler.post {
             listeners -= listener
             if (listeners.isEmpty()) {
                 unsubscribeToRotation()
+                lastRotation = null
             }
         }
     }
 
     private fun subscribeToRotation() {
         try {
-            windowManagerInterface.watchRotation(rotationWatcher, context.displayId)
+            displayManager.registerDisplayListener(displayListener, mainHandler)
         } catch (e: RemoteException) {
             throw e.rethrowFromSystemServer()
         }
@@ -73,7 +70,7 @@ constructor(
 
     private fun unsubscribeToRotation() {
         try {
-            windowManagerInterface.removeRotationWatcher(rotationWatcher)
+            displayManager.unregisterDisplayListener(displayListener)
         } catch (e: RemoteException) {
             throw e.rethrowFromSystemServer()
         }
@@ -82,12 +79,25 @@ constructor(
     /** Gets notified of rotation changes. */
     fun interface RotationListener {
         /** Called once rotation changes. */
-        fun onRotationChanged(@Rotation newRotation: Int)
+        fun onRotationChanged(newRotation: Int)
     }
 
-    private inner class RotationWatcher : IRotationWatcher.Stub() {
-        override fun onRotationChanged(rotation: Int) {
-            mainExecutor.execute { listeners.forEach { it.onRotationChanged(rotation) } }
+    private inner class RotationDisplayListener : DisplayManager.DisplayListener {
+
+        override fun onDisplayChanged(displayId: Int) {
+            val display = context.display ?: return
+
+            if (displayId == display.displayId) {
+                val currentRotation = display.rotation
+                if (lastRotation == null || lastRotation != currentRotation) {
+                    listeners.forEach { it.onRotationChanged(currentRotation) }
+                    lastRotation = currentRotation
+                }
+            }
         }
+
+        override fun onDisplayAdded(displayId: Int) {}
+
+        override fun onDisplayRemoved(displayId: Int) {}
     }
 }

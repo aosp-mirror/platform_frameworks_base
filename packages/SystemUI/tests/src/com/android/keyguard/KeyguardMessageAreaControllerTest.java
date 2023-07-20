@@ -18,12 +18,15 @@ package com.android.keyguard;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -37,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
+@TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     @Mock
@@ -45,14 +49,14 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private KeyguardMessageArea mKeyguardMessageArea;
-
     private KeyguardMessageAreaController mMessageAreaController;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mMessageAreaController = new KeyguardMessageAreaController.Factory(
-                mKeyguardUpdateMonitor, mConfigurationController).create(mKeyguardMessageArea);
+                mKeyguardUpdateMonitor, mConfigurationController).create(
+                mKeyguardMessageArea);
     }
 
     @Test
@@ -86,6 +90,19 @@ public class KeyguardMessageAreaControllerTest extends SysuiTestCase {
     public void testClearsTextField() {
         mMessageAreaController.setMessage("");
         verify(mKeyguardMessageArea).setMessage("", /* animate= */ true);
+    }
+
+    @Test
+    public void testSetMessage_AnnounceForAccessibility() {
+        ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        when(mKeyguardMessageArea.getText()).thenReturn("abc");
+        mMessageAreaController.setMessage("abc");
+
+        verify(mKeyguardMessageArea).setMessage("abc", /* animate= */ true);
+        verify(mKeyguardMessageArea).removeCallbacks(any(Runnable.class));
+        verify(mKeyguardMessageArea).postDelayed(argumentCaptor.capture(), anyLong());
+        argumentCaptor.getValue().run();
+        verify(mKeyguardMessageArea).announceForAccessibility("abc");
     }
 
     @Test

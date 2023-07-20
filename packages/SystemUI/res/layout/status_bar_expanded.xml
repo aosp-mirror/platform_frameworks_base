@@ -26,6 +26,11 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent">
 
+    <com.android.systemui.common.ui.view.LongPressHandlingView
+        android:id="@+id/keyguard_long_press"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <ViewStub
         android:id="@+id/keyguard_qs_user_switch_stub"
         android:layout="@layout/keyguard_qs_user_switch"

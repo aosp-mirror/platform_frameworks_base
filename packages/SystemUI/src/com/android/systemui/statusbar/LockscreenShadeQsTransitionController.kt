@@ -148,7 +148,8 @@ constructor(
               qsDragFraction: $qsTransitionFraction
               qsSquishFraction: $qsSquishTransitionFraction
               isTransitioningToFullShade: $isTransitioningToFullShade
-        """.trimIndent()
+        """
+                .trimIndent()
         )
     }
 

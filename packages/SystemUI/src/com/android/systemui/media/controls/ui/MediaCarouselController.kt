@@ -30,19 +30,27 @@ import android.view.ViewGroup
 import android.view.animation.PathInterpolator
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.android.internal.logging.InstanceId
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.ui.MediaControlPanel.SMARTSPACE_CARD_DISMISS_EVENT
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.controls.util.SmallHash
 import com.android.systemui.plugins.ActivityStarter
@@ -62,6 +70,10 @@ import java.io.PrintWriter
 import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 private const val TAG = "MediaCarouselController"
 private val settingsIntent = Intent().setAction(ACTION_MEDIA_CONTROLS_SETTINGS)
@@ -88,13 +100,16 @@ constructor(
     falsingManager: FalsingManager,
     dumpManager: DumpManager,
     private val logger: MediaUiEventLogger,
-    private val debugLogger: MediaCarouselControllerLogger
+    private val debugLogger: MediaCarouselControllerLogger,
+    private val mediaFlags: MediaFlags,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) : Dumpable {
     /** The current width of the carousel */
     private var currentCarouselWidth: Int = 0
 
     /** The current height of the carousel */
-    private var currentCarouselHeight: Int = 0
+    @VisibleForTesting var currentCarouselHeight: Int = 0
 
     /** Are we currently showing only active players */
     private var currentlyShowingOnlyActive: Boolean = false
@@ -128,14 +143,14 @@ constructor(
     /** The measured height of the carousel */
     private var carouselMeasureHeight: Int = 0
     private var desiredHostState: MediaHostState? = null
-    private val mediaCarousel: MediaScrollView
+    @VisibleForTesting var mediaCarousel: MediaScrollView
     val mediaCarouselScrollHandler: MediaCarouselScrollHandler
     val mediaFrame: ViewGroup
     @VisibleForTesting
     lateinit var settingsButton: View
         private set
     private val mediaContent: ViewGroup
-    @VisibleForTesting val pageIndicator: PageIndicator
+    @VisibleForTesting var pageIndicator: PageIndicator
     private val visualStabilityCallback: OnReorderingAllowedListener
     private var needsReordering: Boolean = false
     private var keysNeedRemoval = mutableSetOf<String>()
@@ -149,36 +164,31 @@ constructor(
                 mediaCarouselScrollHandler.scrollToStart()
             }
         }
-    private var currentlyExpanded = true
+
+    @VisibleForTesting
+    var currentlyExpanded = true
         set(value) {
             if (field != value) {
                 field = value
-                for (player in MediaPlayerData.players()) {
-                    player.setListening(field)
-                }
+                updateSeekbarListening(mediaCarouselScrollHandler.visibleToUser)
             }
         }
 
     companion object {
-        const val ANIMATION_BASE_DURATION = 2200f
-        const val DURATION = 167f
-        const val DETAILS_DELAY = 1067f
-        const val CONTROLS_DELAY = 1400f
-        const val PAGINATION_DELAY = 1900f
-        const val MEDIATITLES_DELAY = 1000f
-        const val MEDIACONTAINERS_DELAY = 967f
         val TRANSFORM_BEZIER = PathInterpolator(0.68F, 0F, 0F, 1F)
-        val REVERSE_BEZIER = PathInterpolator(0F, 0.68F, 1F, 0F)
 
-        fun calculateAlpha(squishinessFraction: Float, delay: Float, duration: Float): Float {
-            val transformStartFraction = delay / ANIMATION_BASE_DURATION
-            val transformDurationFraction = duration / ANIMATION_BASE_DURATION
-            val squishinessToTime = REVERSE_BEZIER.getInterpolation(squishinessFraction)
-            return MathUtils.constrain(
-                (squishinessToTime - transformStartFraction) / transformDurationFraction,
-                0F,
-                1F
-            )
+        fun calculateAlpha(
+            squishinessFraction: Float,
+            startPosition: Float,
+            endPosition: Float
+        ): Float {
+            val transformFraction =
+                MathUtils.constrain(
+                    (squishinessFraction - startPosition) / (endPosition - startPosition),
+                    0F,
+                    1F
+                )
+            return TRANSFORM_BEZIER.getInterpolation(transformFraction)
         }
     }
 
@@ -200,12 +210,24 @@ constructor(
             override fun onConfigChanged(newConfig: Configuration?) {
                 if (newConfig == null) return
                 isRtl = newConfig.layoutDirection == View.LAYOUT_DIRECTION_RTL
-                updatePlayers(recreateMedia = true)
             }
 
             override fun onUiModeChanged() {
                 updatePlayers(recreateMedia = false)
                 inflateSettingsButton()
+            }
+        }
+
+    private val keyguardUpdateMonitorCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onStrongAuthStateChanged(userId: Int) {
+                if (keyguardUpdateMonitor.isUserInLockdown(userId)) {
+                    debugLogger.logCarouselHidden()
+                    hideMediaCarousel()
+                } else if (keyguardUpdateMonitor.isUserUnlocked(userId)) {
+                    debugLogger.logCarouselVisible()
+                    showMediaCarousel()
+                }
             }
         }
 
@@ -231,6 +253,7 @@ constructor(
                 executor,
                 this::onSwipeToDismiss,
                 this::updatePageIndicatorLocation,
+                this::updateSeekbarListening,
                 this::closeGuts,
                 falsingCollector,
                 falsingManager,
@@ -274,7 +297,7 @@ constructor(
                     receivedSmartspaceCardLatency: Int,
                     isSsReactivated: Boolean
                 ) {
-                    debugLogger.logMediaLoaded(key)
+                    debugLogger.logMediaLoaded(key, data.active)
                     if (addOrUpdatePlayer(key, oldKey, data, isSsReactivated)) {
                         // Log card received if a new resumable media card is added
                         MediaPlayerData.getMediaPlayer(key)?.let {
@@ -364,7 +387,7 @@ constructor(
                     data: SmartspaceMediaData,
                     shouldPrioritize: Boolean
                 ) {
-                    debugLogger.logRecommendationLoaded(key)
+                    debugLogger.logRecommendationLoaded(key, data.isActive)
                     // Log the case where the hidden media carousel with the existed inactive resume
                     // media is shown by the Smartspace signal.
                     if (data.isActive) {
@@ -438,7 +461,12 @@ constructor(
                             logSmartspaceImpression(mediaCarouselScrollHandler.qsExpanded)
                         }
                     } else {
-                        onSmartspaceMediaDataRemoved(data.targetId, immediately = true)
+                        if (!mediaFlags.isPersistentSsCardEnabled()) {
+                            // Handle update to inactive as a removal
+                            onSmartspaceMediaDataRemoved(data.targetId, immediately = true)
+                        } else {
+                            addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
+                        }
                     }
                 }
 
@@ -478,6 +506,13 @@ constructor(
                 }
             }
         )
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        mediaCarousel.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // A backup to show media carousel (if available) once the keyguard is gone.
+                listenForAnyStateToGoneKeyguardTransition(this)
+            }
+        }
     }
 
     private fun inflateSettingsButton() {
@@ -507,6 +542,23 @@ constructor(
         return mediaCarousel
     }
 
+    private fun hideMediaCarousel() {
+        mediaCarousel.visibility = View.GONE
+    }
+
+    private fun showMediaCarousel() {
+        mediaCarousel.visibility = View.VISIBLE
+    }
+
+    @VisibleForTesting
+    internal fun listenForAnyStateToGoneKeyguardTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardTransitionInteractor.anyStateToGoneTransition
+                .filter { it.transitionState == TransitionState.FINISHED }
+                .collect { showMediaCarousel() }
+        }
+    }
+
     private fun reorderAllPlayers(
         previousVisiblePlayerKey: MediaPlayerData.MediaSortKey?,
         key: String? = null
@@ -532,6 +584,17 @@ constructor(
                 }
                     ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
             }
+        }
+        // Check postcondition: mediaContent should have the same number of children as there
+        // are
+        // elements in mediaPlayers.
+        if (MediaPlayerData.players().size != mediaContent.childCount) {
+            Log.e(
+                TAG,
+                "Size of players list and number of views in carousel are out of sync. " +
+                    "Players size is ${MediaPlayerData.players().size}. " +
+                    "View count is ${mediaContent.childCount}."
+            )
         }
     }
 
@@ -561,7 +624,9 @@ constructor(
                     )
                 newPlayer.mediaViewHolder?.player?.setLayoutParams(lp)
                 newPlayer.bindPlayer(data, key)
-                newPlayer.setListening(currentlyExpanded)
+                newPlayer.setListening(
+                    mediaCarouselScrollHandler.visibleToUser && currentlyExpanded
+                )
                 MediaPlayerData.addMediaPlayer(
                     key,
                     data,
@@ -608,17 +673,6 @@ constructor(
             updatePageIndicator()
             mediaCarouselScrollHandler.onPlayersChanged()
             mediaFrame.requiresRemeasuring = true
-            // Check postcondition: mediaContent should have the same number of children as there
-            // are
-            // elements in mediaPlayers.
-            if (MediaPlayerData.players().size != mediaContent.childCount) {
-                Log.e(
-                    TAG,
-                    "Size of players list and number of views in carousel are out of sync. " +
-                        "Players size is ${MediaPlayerData.players().size}. " +
-                        "View count is ${mediaContent.childCount}."
-                )
-            }
             return existingPlayer == null
         }
 
@@ -629,7 +683,19 @@ constructor(
     ) =
         traceSection("MediaCarouselController#addSmartspaceMediaRecommendations") {
             if (DEBUG) Log.d(TAG, "Updating smartspace target in carousel")
-            if (MediaPlayerData.getMediaPlayer(key) != null) {
+            MediaPlayerData.getMediaPlayer(key)?.let {
+                if (mediaFlags.isPersistentSsCardEnabled()) {
+                    // The card exists, but could have changed active state, so update for sorting
+                    MediaPlayerData.addMediaRecommendation(
+                        key,
+                        data,
+                        it,
+                        shouldPrioritize,
+                        systemClock,
+                        debugLogger,
+                        update = true,
+                    )
+                }
                 Log.w(TAG, "Skip adding smartspace target in carousel")
                 return
             }
@@ -645,7 +711,11 @@ constructor(
 
             val newRecs = mediaControlPanelFactory.get()
             newRecs.attachRecommendation(
-                RecommendationViewHolder.create(LayoutInflater.from(context), mediaContent)
+                RecommendationViewHolder.create(
+                    LayoutInflater.from(context),
+                    mediaContent,
+                    mediaFlags.isRecommendationCardUpdateEnabled()
+                )
             )
             newRecs.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
             val lp =
@@ -664,7 +734,7 @@ constructor(
                 newRecs,
                 shouldPrioritize,
                 systemClock,
-                debugLogger
+                debugLogger,
             )
             updatePlayerToState(newRecs, noAnimation = true)
             reorderAllPlayers(curVisibleMediaKey)
@@ -717,6 +787,9 @@ constructor(
     private fun updatePlayers(recreateMedia: Boolean) {
         pageIndicator.tintList =
             ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
+        val previousVisibleKey =
+            MediaPlayerData.visiblePlayerKeys()
+                .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
 
         MediaPlayerData.mediaData().forEach { (key, data, isSsMediaRec) ->
             if (isSsMediaRec) {
@@ -741,6 +814,9 @@ constructor(
                     isSsReactivated = isSsReactivated
                 )
             }
+            if (recreateMedia) {
+                reorderAllPlayers(previousVisibleKey)
+            }
         }
     }
 
@@ -760,10 +836,12 @@ constructor(
      * @param startLocation the start location of our state or -1 if this is directly set
      * @param endLocation the ending location of our state.
      * @param progress the progress of the transition between startLocation and endlocation. If
+     *
      * ```
      *                 this is not a guided transformation, this will be 1.0f
      * @param immediately
      * ```
+     *
      * should this state be applied immediately, canceling all animations?
      */
     fun setCurrentState(
@@ -800,7 +878,12 @@ constructor(
         val squishFraction = hostStates[currentEndLocation]?.squishFraction ?: 1.0F
         val endAlpha =
             (if (endIsVisible) 1.0f else 0.0f) *
-                calculateAlpha(squishFraction, PAGINATION_DELAY, DURATION)
+                calculateAlpha(
+                    squishFraction,
+                    (pageIndicator.translationY + pageIndicator.height) /
+                        mediaCarousel.measuredHeight,
+                    1F
+                )
         var alpha = 1.0f
         if (!endIsVisible || !startIsVisible) {
             var progress = currentTransitionProgress
@@ -826,7 +909,15 @@ constructor(
         pageIndicator.translationX = translationX + mediaCarouselScrollHandler.contentTranslation
         val layoutParams = pageIndicator.layoutParams as ViewGroup.MarginLayoutParams
         pageIndicator.translationY =
-            (currentCarouselHeight - pageIndicator.height - layoutParams.bottomMargin).toFloat()
+            (mediaCarousel.measuredHeight - pageIndicator.height - layoutParams.bottomMargin)
+                .toFloat()
+    }
+
+    /** Update listening to seekbar. */
+    private fun updateSeekbarListening(visibleToUser: Boolean) {
+        for (player in MediaPlayerData.players()) {
+            player.setListening(visibleToUser && currentlyExpanded)
+        }
     }
 
     /** Update the dimension of this carousel. */
@@ -994,17 +1085,17 @@ constructor(
      *
      * @param eventId UI event id (e.g. 800 for SMARTSPACE_CARD_SEEN)
      * @param instanceId id to uniquely identify a card, e.g. each headphone generates a new
-     * instanceId
+     *   instanceId
      * @param uid uid for the application that media comes from
      * @param surfaces list of display surfaces the media card is on (e.g. lockscreen, shade) when
-     * the event happened
+     *   the event happened
      * @param interactedSubcardRank the rank for interacted media item for recommendation card, -1
-     * for tapping on card but not on any media item, 0 for first media item, 1 for second, etc.
+     *   for tapping on card but not on any media item, 0 for first media item, 1 for second, etc.
      * @param interactedSubcardCardinality how many media items were shown to the user when there is
-     * user interaction
+     *   user interaction
      * @param rank the rank for media card in the media carousel, starting from 0
      * @param receivedLatencyMillis latency in milliseconds for card received events. E.g. latency
-     * between headphone connection to sysUI displays media recommendation card
+     *   between headphone connection to sysUI displays media recommendation card
      * @param isSwipeToDismiss whether is to log swipe-to-dismiss event
      */
     fun logSmartspaceCardReported(
@@ -1205,17 +1296,18 @@ internal object MediaPlayerData {
         player: MediaControlPanel,
         shouldPrioritize: Boolean,
         clock: SystemClock,
-        debugLogger: MediaCarouselControllerLogger? = null
+        debugLogger: MediaCarouselControllerLogger? = null,
+        update: Boolean = false
     ) {
         shouldPrioritizeSs = shouldPrioritize
         val removedPlayer = removeMediaPlayer(key)
-        if (removedPlayer != null && removedPlayer != player) {
+        if (!update && removedPlayer != null && removedPlayer != player) {
             debugLogger?.logPotentialMemoryLeak(key)
         }
         val sortKey =
             MediaSortKey(
                 isSsMediaRec = true,
-                EMPTY.copy(isPlaying = false),
+                EMPTY.copy(active = data.isActive, isPlaying = false),
                 key,
                 clock.currentTimeMillis(),
                 isSsReactivated = true
@@ -1264,6 +1356,7 @@ internal object MediaPlayerData {
 
     /**
      * Removes media player given the key.
+     *
      * @param isDismissed determines whether the media player is removed from the carousel.
      */
     fun removeMediaPlayer(key: String, isDismissed: Boolean = false) =

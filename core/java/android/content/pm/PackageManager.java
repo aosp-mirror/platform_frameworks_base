@@ -3449,7 +3449,6 @@ public abstract class PackageManager {
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device is capable of communicating with
      * other devices via ultra wideband.
-     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_UWB = "android.hardware.uwb";

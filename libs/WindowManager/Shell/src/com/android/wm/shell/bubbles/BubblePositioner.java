@@ -18,9 +18,6 @@ package com.android.wm.shell.bubbles;
 
 import static android.view.View.LAYOUT_DIRECTION_RTL;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
-
-import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -39,8 +36,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.launcher3.icons.IconNormalizer;
 import com.android.wm.shell.R;
 
-import java.lang.annotation.Retention;
-
 /**
  * Keeps track of display size, configuration, and specific bubble sizes. One place for all
  * placement and positioning calculations to refer to.
@@ -49,15 +44,6 @@ public class BubblePositioner {
     private static final String TAG = BubbleDebugConfig.TAG_WITH_CLASS_NAME
             ? "BubblePositioner"
             : BubbleDebugConfig.TAG_BUBBLES;
-
-    @Retention(SOURCE)
-    @IntDef({TASKBAR_POSITION_NONE, TASKBAR_POSITION_RIGHT, TASKBAR_POSITION_LEFT,
-            TASKBAR_POSITION_BOTTOM})
-    @interface TaskbarPosition {}
-    public static final int TASKBAR_POSITION_NONE = -1;
-    public static final int TASKBAR_POSITION_RIGHT = 0;
-    public static final int TASKBAR_POSITION_LEFT = 1;
-    public static final int TASKBAR_POSITION_BOTTOM = 2;
 
     /** When the bubbles are collapsed in a stack only some of them are shown, this is how many. **/
     public static final int NUM_VISIBLE_WHEN_RESTING = 2;
@@ -108,14 +94,8 @@ public class BubblePositioner {
     private int mOverflowHeight;
     private int mMinimumFlyoutWidthLargeScreen;
 
-    private PointF mPinLocation;
     private PointF mRestingStackPosition;
     private int[] mPaddings = new int[4];
-
-    private boolean mShowingInTaskbar;
-    private @TaskbarPosition int mTaskbarPosition = TASKBAR_POSITION_NONE;
-    private int mTaskbarIconSize;
-    private int mTaskbarSize;
 
     public BubblePositioner(Context context, WindowManager windowManager) {
         mContext = context;
@@ -153,25 +133,9 @@ public class BubblePositioner {
                     + " insets: " + insets
                     + " isLargeScreen: " + mIsLargeScreen
                     + " isSmallTablet: " + mIsSmallTablet
-                    + " bounds: " + bounds
-                    + " showingInTaskbar: " + mShowingInTaskbar);
+                    + " bounds: " + bounds);
         }
         updateInternal(mRotation, insets, bounds);
-    }
-
-    /**
-     * Updates position information to account for taskbar state.
-     *
-     * @param taskbarPosition which position the taskbar is displayed in.
-     * @param showingInTaskbar whether the taskbar is being shown.
-     */
-    public void updateForTaskbar(int iconSize,
-            @TaskbarPosition int taskbarPosition, boolean showingInTaskbar, int taskbarSize) {
-        mShowingInTaskbar = showingInTaskbar;
-        mTaskbarIconSize =  iconSize;
-        mTaskbarPosition = taskbarPosition;
-        mTaskbarSize = taskbarSize;
-        update();
     }
 
     @VisibleForTesting
@@ -232,10 +196,6 @@ public class BubblePositioner {
                 R.dimen.bubbles_flyout_min_width_large_screen);
 
         mMaxBubbles = calculateMaxBubbles();
-
-        if (mShowingInTaskbar) {
-            adjustForTaskbar();
-        }
     }
 
     /**
@@ -260,30 +220,6 @@ public class BubblePositioner {
         return mDefaultMaxBubbles;
     }
 
-    /**
-     * Taskbar insets appear as navigationBar insets, however, unlike navigationBar this should
-     * not inset bubbles UI as bubbles floats above the taskbar. This adjust the available space
-     * and insets to account for the taskbar.
-     */
-    // TODO(b/171559950): When the insets are reported correctly we can remove this logic
-    private void adjustForTaskbar() {
-        // When bar is showing on edges... subtract that inset because we appear on top
-        if (mShowingInTaskbar && mTaskbarPosition != TASKBAR_POSITION_BOTTOM) {
-            WindowInsets metricInsets = mWindowManager.getCurrentWindowMetrics().getWindowInsets();
-            Insets navBarInsets = metricInsets.getInsetsIgnoringVisibility(
-                    WindowInsets.Type.navigationBars());
-            int newInsetLeft = mInsets.left;
-            int newInsetRight = mInsets.right;
-            if (mTaskbarPosition == TASKBAR_POSITION_LEFT) {
-                mPositionRect.left -= navBarInsets.left;
-                newInsetLeft -= navBarInsets.left;
-            } else if (mTaskbarPosition == TASKBAR_POSITION_RIGHT) {
-                mPositionRect.right += navBarInsets.right;
-                newInsetRight -= navBarInsets.right;
-            }
-            mInsets = Insets.of(newInsetLeft, mInsets.top, newInsetRight, mInsets.bottom);
-        }
-    }
 
     /**
      * @return a rect of available screen space accounting for orientation, system bars and cutouts.
@@ -327,14 +263,12 @@ public class BubblePositioner {
      * to the left or right side.
      */
     public boolean showBubblesVertically() {
-        return isLandscape() || mShowingInTaskbar || mIsLargeScreen;
+        return isLandscape() || mIsLargeScreen;
     }
 
     /** Size of the bubble. */
     public int getBubbleSize() {
-        return (mShowingInTaskbar && mTaskbarIconSize > 0)
-                ? mTaskbarIconSize
-                : mBubbleSize;
+        return mBubbleSize;
     }
 
     /** The amount of padding at the top of the screen that the bubbles avoid when being placed. */
@@ -699,9 +633,6 @@ public class BubblePositioner {
 
     /** The position the bubble stack should rest at when collapsed. */
     public PointF getRestingPosition() {
-        if (mPinLocation != null) {
-            return mPinLocation;
-        }
         if (mRestingStackPosition == null) {
             return getDefaultStartPosition();
         }
@@ -713,9 +644,6 @@ public class BubblePositioner {
      * is being shown.
      */
     public PointF getDefaultStartPosition() {
-        if (mPinLocation != null) {
-            return mPinLocation;
-        }
         // Start on the left if we're in LTR, right otherwise.
         final boolean startOnLeft =
                 mContext.getResources().getConfiguration().getLayoutDirection()
@@ -729,7 +657,6 @@ public class BubblePositioner {
                 .getAbsolutePositionInRegion(getAllowableStackPositionRegion(
                         1 /* default starts with 1 bubble */));
     }
-
 
     /**
      * Returns the region that the stack position must stay within. This goes slightly off the left
@@ -748,39 +675,6 @@ public class BubblePositioner {
         allowableRegion.right += mBubbleOffscreenAmount - mBubbleSize;
         allowableRegion.bottom -= imeHeight + bottomPadding + mBubbleSize;
         return allowableRegion;
-    }
-
-    /**
-     * @return whether the bubble stack is pinned to the taskbar.
-     */
-    public boolean showingInTaskbar() {
-        return mShowingInTaskbar;
-    }
-
-    /**
-     * @return the taskbar position if set.
-     */
-    public int getTaskbarPosition() {
-        return mTaskbarPosition;
-    }
-
-    public int getTaskbarSize() {
-        return mTaskbarSize;
-    }
-
-    /**
-     * In some situations bubbles will be pinned to a specific onscreen location. This sets whether
-     * bubbles should be pinned or not.
-     */
-    public void setUsePinnedLocation(boolean usePinnedLocation) {
-        if (usePinnedLocation) {
-            mShowingInTaskbar = true;
-            mPinLocation = new PointF(mPositionRect.right - mBubbleSize,
-                    mPositionRect.bottom - mBubbleSize);
-        } else {
-            mPinLocation = null;
-            mShowingInTaskbar = false;
-        }
     }
 
     /**

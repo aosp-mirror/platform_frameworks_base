@@ -17,11 +17,12 @@
 package com.android.systemui.mediaprojection.appselector.data
 
 import android.annotation.ColorInt
+import android.annotation.UserIdInt
 import android.content.ComponentName
 
 data class RecentTask(
     val taskId: Int,
-    val userId: Int,
+    @UserIdInt val userId: Int,
     val topActivityComponent: ComponentName?,
     val baseIntentComponent: ComponentName?,
     @ColorInt val colorBackground: Int?

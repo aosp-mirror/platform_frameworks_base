@@ -61,6 +61,8 @@ import javax.inject.Inject;
 public class NightDisplayTile extends QSTileImpl<BooleanState> implements
         NightDisplayListener.Callback {
 
+    public static final String TILE_SPEC = "night";
+
     /**
      * Pattern for {@link java.time.format.DateTimeFormatter} used to approximate the time to the
      * nearest hour and add on the AM/PM indicator.

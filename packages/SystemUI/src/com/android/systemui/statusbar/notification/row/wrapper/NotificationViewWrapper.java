@@ -403,4 +403,12 @@ public abstract class NotificationViewWrapper implements TransformableView {
         NotificationFadeAware.setLayerTypeForFaded(getIcon(), faded);
         NotificationFadeAware.setLayerTypeForFaded(getExpandButton(), faded);
     }
+
+    /**
+     * Starts or stops the animations in any drawables contained in this Notification.
+     *
+     * @param running Whether the animations should be set to run.
+     */
+    public void setAnimationsRunning(boolean running) {
+    }
 }

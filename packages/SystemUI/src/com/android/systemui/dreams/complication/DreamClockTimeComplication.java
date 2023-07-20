@@ -18,11 +18,14 @@ package com.android.systemui.dreams.complication;
 
 import static com.android.systemui.dreams.complication.dagger.DreamClockTimeComplicationModule.DREAM_CLOCK_TIME_COMPLICATION_VIEW;
 import static com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule.DREAM_CLOCK_TIME_COMPLICATION_LAYOUT_PARAMS;
+import static com.android.systemui.dreams.dagger.DreamModule.DREAM_PRETEXT_MONITOR;
 
 import android.view.View;
 
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.shared.condition.Monitor;
+import com.android.systemui.util.condition.ConditionalCoreStartable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -60,7 +63,7 @@ public class DreamClockTimeComplication implements Complication {
      * {@link CoreStartable} responsible for registering {@link DreamClockTimeComplication} with
      * SystemUI.
      */
-    public static class Registrant implements CoreStartable {
+    public static class Registrant extends ConditionalCoreStartable {
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final DreamClockTimeComplication mComplication;
 
@@ -70,13 +73,15 @@ public class DreamClockTimeComplication implements Complication {
         @Inject
         public Registrant(
                 DreamOverlayStateController dreamOverlayStateController,
-                DreamClockTimeComplication dreamClockTimeComplication) {
+                DreamClockTimeComplication dreamClockTimeComplication,
+                @Named(DREAM_PRETEXT_MONITOR) Monitor monitor) {
+            super(monitor);
             mDreamOverlayStateController = dreamOverlayStateController;
             mComplication = dreamClockTimeComplication;
         }
 
         @Override
-        public void start() {
+        public void onStart() {
             mDreamOverlayStateController.addComplication(mComplication);
         }
     }

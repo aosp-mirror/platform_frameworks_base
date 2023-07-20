@@ -249,6 +249,19 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
     }
 
     /**
+     * Ensures it updates recent tasks order when the last resumed activity changed.
+     */
+    @Test
+    public void testUpdateRecentTasksForTopResumed() {
+        spyOn(mSupervisor.mRecentTasks);
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final Task task = activity.getTask();
+
+        mAtm.setLastResumedActivityUncheckLocked(activity, "test");
+        verify(mSupervisor.mRecentTasks).add(eq(task));
+    }
+
+    /**
      * Ensures that a trusted display can launch arbitrary activity and an untrusted display can't.
      */
     @Test

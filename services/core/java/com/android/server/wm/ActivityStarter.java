@@ -74,6 +74,8 @@ import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_DEFAULT;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
@@ -130,6 +132,7 @@ import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
+import com.android.server.wm.BackgroundActivityStartController.BalCode;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 import com.android.server.wm.TaskFragment.EmbeddingCheckResult;
 
@@ -171,9 +174,10 @@ class ActivityStarter {
     private int mCallingUid;
     private ActivityOptions mOptions;
 
-    // If it is true, background activity can only be started in an existing task that contains
+    // If it is BAL_BLOCK, background activity can only be started in an existing task that contains
     // an activity with same uid, or if activity starts are enabled in developer options.
-    private boolean mRestrictedBgActivity;
+    @BalCode
+    private int mBalCode;
 
     private int mLaunchMode;
     private boolean mLaunchTaskBehind;
@@ -589,7 +593,7 @@ class ActivityStarter {
         mIntent = starter.mIntent;
         mCallingUid = starter.mCallingUid;
         mOptions = starter.mOptions;
-        mRestrictedBgActivity = starter.mRestrictedBgActivity;
+        mBalCode = starter.mBalCode;
 
         mLaunchTaskBehind = starter.mLaunchTaskBehind;
         mLaunchFlags = starter.mLaunchFlags;
@@ -1020,15 +1024,15 @@ class ActivityStarter {
         ActivityOptions checkedOptions = options != null
                 ? options.getOptions(intent, aInfo, callerApp, mSupervisor) : null;
 
-        boolean restrictedBgActivity = false;
+        @BalCode int balCode = BAL_ALLOW_DEFAULT;
         if (!abort) {
             try {
                 Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER,
                         "shouldAbortBackgroundActivityStart");
                 BackgroundActivityStartController balController =
                         mController.getBackgroundActivityLaunchController();
-                restrictedBgActivity =
-                        balController.shouldAbortBackgroundActivityStart(
+                balCode =
+                        balController.checkBackgroundActivityStart(
                                 callingUid,
                                 callingPid,
                                 callingPackage,
@@ -1216,13 +1220,13 @@ class ActivityStarter {
         WindowProcessController homeProcess = mService.mHomeProcess;
         boolean isHomeProcess = homeProcess != null
                 && aInfo.applicationInfo.uid == homeProcess.mUid;
-        if (!restrictedBgActivity && !isHomeProcess) {
+        if (balCode != BAL_BLOCK && !isHomeProcess) {
             mService.resumeAppSwitches();
         }
 
         mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
                 request.voiceInteractor, startFlags, true /* doResume */, checkedOptions,
-                inTask, inTaskFragment, restrictedBgActivity, intentGrants);
+                inTask, inTaskFragment, balCode, intentGrants);
 
         if (request.outActivity != null) {
             request.outActivity[0] = mLastStartActivityRecord;
@@ -1372,7 +1376,7 @@ class ActivityStarter {
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, Task inTask,
-            TaskFragment inTaskFragment, boolean restrictedBgActivity,
+            TaskFragment inTaskFragment, @BalCode int balCode,
             NeededUriGrants intentGrants) {
         int result = START_CANCELED;
         final Task startedActivityRootTask;
@@ -1392,7 +1396,7 @@ class ActivityStarter {
             try {
                 Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
                 result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
-                        startFlags, doResume, options, inTask, inTaskFragment, restrictedBgActivity,
+                        startFlags, doResume, options, inTask, inTaskFragment, balCode,
                         intentGrants);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
@@ -1539,10 +1543,10 @@ class ActivityStarter {
     int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, Task inTask,
-            TaskFragment inTaskFragment, boolean restrictedBgActivity,
+            TaskFragment inTaskFragment, @BalCode int balCode,
             NeededUriGrants intentGrants) {
         setInitialState(r, options, inTask, inTaskFragment, doResume, startFlags, sourceRecord,
-                voiceSession, voiceInteractor, restrictedBgActivity);
+                voiceSession, voiceInteractor, balCode);
 
         computeLaunchingTaskFlags();
         mIntent.setFlags(mLaunchFlags);
@@ -1778,7 +1782,8 @@ class ActivityStarter {
                 || !targetTask.isUidPresent(mCallingUid)
                 || (LAUNCH_SINGLE_INSTANCE == mLaunchMode && targetTask.inPinnedWindowingMode()));
 
-        if (mRestrictedBgActivity && blockBalInTask && handleBackgroundActivityAbort(r)) {
+        if (mBalCode == BAL_BLOCK && blockBalInTask
+                && handleBackgroundActivityAbort(r)) {
             Slog.e(TAG, "Abort background activity starts from " + mCallingUid);
             return START_ABORTED;
         }
@@ -2175,7 +2180,7 @@ class ActivityStarter {
         mIntent = null;
         mCallingUid = -1;
         mOptions = null;
-        mRestrictedBgActivity = false;
+        mBalCode = BAL_ALLOW_DEFAULT;
 
         mLaunchTaskBehind = false;
         mLaunchFlags = 0;
@@ -2220,7 +2225,7 @@ class ActivityStarter {
     private void setInitialState(ActivityRecord r, ActivityOptions options, Task inTask,
             TaskFragment inTaskFragment, boolean doResume, int startFlags,
             ActivityRecord sourceRecord, IVoiceInteractionSession voiceSession,
-            IVoiceInteractor voiceInteractor, boolean restrictedBgActivity) {
+            IVoiceInteractor voiceInteractor, @BalCode int balCode) {
         reset(false /* clearRequest */);
 
         mStartActivity = r;
@@ -2231,7 +2236,7 @@ class ActivityStarter {
         mSourceRootTask = mSourceRecord != null ? mSourceRecord.getRootTask() : null;
         mVoiceSession = voiceSession;
         mVoiceInteractor = voiceInteractor;
-        mRestrictedBgActivity = restrictedBgActivity;
+        mBalCode = balCode;
 
         mLaunchParams.reset();
 
@@ -2368,7 +2373,7 @@ class ActivityStarter {
 
         mNoAnimation = (mLaunchFlags & FLAG_ACTIVITY_NO_ANIMATION) != 0;
 
-        if (mRestrictedBgActivity && !mService.isBackgroundActivityStartsEnabled()) {
+        if (mBalCode == BAL_BLOCK && !mService.isBackgroundActivityStartsEnabled()) {
             mAvoidMoveToFront = true;
             mDoResume = false;
         }

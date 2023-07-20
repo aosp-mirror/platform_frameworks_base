@@ -224,6 +224,9 @@ public class EnableZenModeDialog {
                     mMetricsLogger.logOnConditionSelected();
                     updateAlarmWarningText(tag.condition);
                 }
+                tag.line1.setStateDescription(
+                        isChecked ? buttonView.getContext().getString(
+                                com.android.internal.R.string.selected) : null);
             }
         });
 

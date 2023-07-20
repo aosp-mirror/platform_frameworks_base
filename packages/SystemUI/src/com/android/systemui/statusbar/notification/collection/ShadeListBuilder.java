@@ -965,8 +965,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
      * filtered out during any of the filtering steps.
      */
     private void annulAddition(ListEntry entry) {
-        // NOTE(b/241229236): Don't clear stableIndex until we fix stability fragility
-        entry.getAttachState().detach(/* includingStableIndex= */ mFlags.isSemiStableSortEnabled());
+        entry.getAttachState().detach();
     }
 
     private void assignSections() {
@@ -986,48 +985,8 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
 
     private void sortListAndGroups() {
         Trace.beginSection("ShadeListBuilder.sortListAndGroups");
-        if (mFlags.isSemiStableSortEnabled()) {
-            sortWithSemiStableSort();
-        } else {
-            sortWithLegacyStability();
-        }
+        sortWithSemiStableSort();
         Trace.endSection();
-    }
-
-    private void sortWithLegacyStability() {
-        // Sort all groups and the top level list
-        for (ListEntry entry : mNotifList) {
-            if (entry instanceof GroupEntry) {
-                GroupEntry parent = (GroupEntry) entry;
-                parent.sortChildren(mGroupChildrenComparator);
-            }
-        }
-        mNotifList.sort(mTopLevelComparator);
-        assignIndexes(mNotifList);
-
-        // Check for suppressed order changes
-        if (!getStabilityManager().isEveryChangeAllowed()) {
-            mForceReorderable = true;
-            boolean isSorted = isShadeSortedLegacy();
-            mForceReorderable = false;
-            if (!isSorted) {
-                getStabilityManager().onEntryReorderSuppressed();
-            }
-        }
-    }
-
-    private boolean isShadeSortedLegacy() {
-        if (!isSorted(mNotifList, mTopLevelComparator)) {
-            return false;
-        }
-        for (ListEntry entry : mNotifList) {
-            if (entry instanceof GroupEntry) {
-                if (!isSorted(((GroupEntry) entry).getChildren(), mGroupChildrenComparator)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     private void sortWithSemiStableSort() {
@@ -1100,29 +1059,16 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                 sectionMemberIndex = 0;
                 currentSection = section;
             }
-            if (mFlags.isStabilityIndexFixEnabled()) {
-                entry.getAttachState().setStableIndex(sectionMemberIndex++);
-                if (entry instanceof GroupEntry) {
-                    final GroupEntry parent = (GroupEntry) entry;
-                    final NotificationEntry summary = parent.getSummary();
-                    if (summary != null) {
-                        summary.getAttachState().setStableIndex(sectionMemberIndex++);
-                    }
-                    for (NotificationEntry child : parent.getChildren()) {
-                        child.getAttachState().setStableIndex(sectionMemberIndex++);
-                    }
+            entry.getAttachState().setStableIndex(sectionMemberIndex++);
+            if (entry instanceof GroupEntry) {
+                final GroupEntry parent = (GroupEntry) entry;
+                final NotificationEntry summary = parent.getSummary();
+                if (summary != null) {
+                    summary.getAttachState().setStableIndex(sectionMemberIndex++);
                 }
-            } else {
-                // This old implementation uses the same index number for the group as the first
-                // child, and fails to assign an index to the summary.  Remove once tested.
-                entry.getAttachState().setStableIndex(sectionMemberIndex);
-                if (entry instanceof GroupEntry) {
-                    final GroupEntry parent = (GroupEntry) entry;
-                    for (NotificationEntry child : parent.getChildren()) {
-                        child.getAttachState().setStableIndex(sectionMemberIndex++);
-                    }
+                for (NotificationEntry child : parent.getChildren()) {
+                    child.getAttachState().setStableIndex(sectionMemberIndex++);
                 }
-                sectionMemberIndex++;
             }
         }
     }
@@ -1272,11 +1218,6 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                 o2.getSectionIndex());
         if (cmp != 0) return cmp;
 
-        cmp = mFlags.isSemiStableSortEnabled() ? 0 : Integer.compare(
-                getStableOrderIndex(o1),
-                getStableOrderIndex(o2));
-        if (cmp != 0) return cmp;
-
         NotifComparator sectionComparator = getSectionComparator(o1, o2);
         if (sectionComparator != null) {
             cmp = sectionComparator.compare(o1, o2);
@@ -1301,12 +1242,7 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
 
 
     private final Comparator<NotificationEntry> mGroupChildrenComparator = (o1, o2) -> {
-        int cmp = mFlags.isSemiStableSortEnabled() ? 0 : Integer.compare(
-                getStableOrderIndex(o1),
-                getStableOrderIndex(o2));
-        if (cmp != 0) return cmp;
-
-        cmp = Integer.compare(
+        int cmp = Integer.compare(
                 o1.getRepresentativeEntry().getRanking().getRank(),
                 o2.getRepresentativeEntry().getRanking().getRank());
         if (cmp != 0) return cmp;
@@ -1316,25 +1252,6 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
                 o2.getRepresentativeEntry().getSbn().getNotification().when);
         return cmp;
     };
-
-    /**
-     * A flag that is set to true when we want to run the comparators as if all reordering is
-     * allowed.  This is used to check if the list is "out of order" after the sort is complete.
-     */
-    private boolean mForceReorderable = false;
-
-    private int getStableOrderIndex(ListEntry entry) {
-        if (mForceReorderable) {
-            // this is used to determine if the list is correctly sorted
-            return -1;
-        }
-        if (getStabilityManager().isEntryReorderingAllowed(entry)) {
-            // let the stability manager constrain or allow reordering
-            return -1;
-        }
-        // NOTE(b/241229236): Can't use cleared section index until we fix stability fragility
-        return entry.getPreviousAttachState().getStableIndex();
-    }
 
     @Nullable
     private Integer getStableOrderRank(ListEntry entry) {

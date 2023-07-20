@@ -23,6 +23,8 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
@@ -33,7 +35,10 @@ import android.widget.LinearLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -46,6 +51,8 @@ import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
 import com.android.systemui.statusbar.pipeline.wifi.ui.WifiUiAdapter;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
@@ -87,6 +94,61 @@ public class StatusBarIconControllerTest extends LeakCheckedTest {
         testCallOnAdd_forManager(manager);
     }
 
+    @Test
+    public void testRemoveIcon_ignoredForNewPipeline() {
+        IconManager manager = mock(IconManager.class);
+
+        // GIVEN the new pipeline is on
+        StatusBarPipelineFlags flags = mock(StatusBarPipelineFlags.class);
+        when(flags.isIconControlledByFlags("test_icon")).thenReturn(true);
+
+        StatusBarIconController iconController = new StatusBarIconControllerImpl(
+                mContext,
+                mock(CommandQueue.class),
+                mock(DemoModeController.class),
+                mock(ConfigurationController.class),
+                mock(TunerService.class),
+                mock(DumpManager.class),
+                mock(StatusBarIconList.class),
+                flags
+        );
+
+        iconController.addIconGroup(manager);
+
+        // WHEN a request to remove a new icon is sent
+        iconController.removeIcon("test_icon", 0);
+
+        // THEN it is not removed for those icons
+        verify(manager, never()).onRemoveIcon(anyInt());
+    }
+
+    @Test
+    public void testRemoveAllIconsForSlot_ignoredForNewPipeline() {
+        IconManager manager = mock(IconManager.class);
+
+        // GIVEN the new pipeline is on
+        StatusBarPipelineFlags flags = mock(StatusBarPipelineFlags.class);
+        when(flags.isIconControlledByFlags("test_icon")).thenReturn(true);
+
+        StatusBarIconController iconController = new StatusBarIconControllerImpl(
+                mContext,
+                mock(CommandQueue.class),
+                mock(DemoModeController.class),
+                mock(ConfigurationController.class),
+                mock(TunerService.class),
+                mock(DumpManager.class),
+                mock(StatusBarIconList.class),
+                flags
+        );
+
+        iconController.addIconGroup(manager);
+
+        // WHEN a request to remove a new icon is sent
+        iconController.removeAllIconsForSlot("test_icon");
+
+        // THEN it is not removed for those icons
+        verify(manager, never()).onRemoveIcon(anyInt());
+    }
 
     private <T extends IconManager & TestableIconManager> void testCallOnAdd_forManager(T manager) {
         StatusBarIconHolder holder = holderForType(TYPE_ICON);

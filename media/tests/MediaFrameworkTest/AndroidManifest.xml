@@ -37,7 +37,6 @@
         </activity>
         <activity android:label="Camera2CtsActivity"
              android:name="Camera2SurfaceViewActivity"
-             android:screenOrientation="landscape"
              android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
     </application>

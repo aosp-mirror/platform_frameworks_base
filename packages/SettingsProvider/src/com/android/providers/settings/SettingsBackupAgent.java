@@ -37,6 +37,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.settings.backup.DeviceSpecificSettings;
 import android.provider.settings.backup.GlobalSettings;
+import android.provider.settings.backup.LargeScreenSettings;
 import android.provider.settings.backup.SecureSettings;
 import android.provider.settings.backup.SystemSettings;
 import android.provider.settings.validators.GlobalSettingsValidators;
@@ -181,6 +182,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             "visible_pattern_enabled";
     private static final String KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS =
             "power_button_instantly_locks";
+    private static final String KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY =
+            "pin_enhanced_privacy";
 
     // Name of the temporary file we use during full backup/restore.  This is
     // stored in the full-backup tarfile as well, so should not be changed.
@@ -708,6 +711,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 out.writeUTF(KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS);
                 out.writeUTF(powerButtonInstantlyLocks ? "1" : "0");
             }
+            if (lockPatternUtils.isPinEnhancedPrivacyEverChosen(userId)) {
+                out.writeUTF(KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY);
+                out.writeUTF(lockPatternUtils.isPinEnhancedPrivacyEnabled(userId) ? "1" : "0");
+            }
             // End marker
             out.writeUTF("");
             out.flush();
@@ -809,6 +816,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (settingsToPreserve.contains(getQualifiedKeyForSetting(key, contentUri))) {
                 Log.i(TAG, "Skipping restore for setting " + key + " as it is marked as "
                         + "preserved");
+                continue;
+            }
+
+            if (LargeScreenSettings.doNotRestoreIfLargeScreenSetting(key, getBaseContext())) {
+                Log.i(TAG, "Skipping restore for setting " + key + " as the target device "
+                        + "is a large screen (i.e tablet or foldable in unfolded state)");
                 continue;
             }
 
@@ -953,6 +966,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                         break;
                     case KEY_LOCK_SETTINGS_POWER_BUTTON_INSTANTLY_LOCKS:
                         lockPatternUtils.setPowerButtonInstantlyLocks("1".equals(value), userId);
+                        break;
+                    case KEY_LOCK_SETTINGS_PIN_ENHANCED_PRIVACY:
+                        lockPatternUtils.setPinEnhancedPrivacyEnabled("1".equals(value), userId);
                         break;
                 }
             }

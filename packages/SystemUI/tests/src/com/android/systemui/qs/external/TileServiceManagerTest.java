@@ -39,7 +39,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.settings.UserTracker;
 
 import org.junit.After;
@@ -61,7 +61,7 @@ public class TileServiceManagerTest extends SysuiTestCase {
     @Mock
     private UserTracker mUserTracker;
     @Mock
-    private QSTileHost mQSTileHost;
+    private QSHost mQSHost;
     @Mock
     private Context mMockContext;
 
@@ -80,7 +80,7 @@ public class TileServiceManagerTest extends SysuiTestCase {
         when(mUserTracker.getUserHandle()).thenReturn(UserHandle.SYSTEM);
 
         when(mTileServices.getContext()).thenReturn(mMockContext);
-        when(mTileServices.getHost()).thenReturn(mQSTileHost);
+        when(mTileServices.getHost()).thenReturn(mQSHost);
         when(mTileLifecycle.getUserId()).thenAnswer(invocation -> mUserTracker.getUserId());
         when(mTileLifecycle.isActiveTile()).thenReturn(false);
 
@@ -98,28 +98,28 @@ public class TileServiceManagerTest extends SysuiTestCase {
 
     @Test
     public void testSetTileAddedIfNotAdded() {
-        when(mQSTileHost.isTileAdded(eq(mComponentName), anyInt())).thenReturn(false);
+        when(mQSHost.isTileAdded(eq(mComponentName), anyInt())).thenReturn(false);
         mTileServiceManager.startLifecycleManagerAndAddTile();
 
-        verify(mQSTileHost).setTileAdded(mComponentName, mUserTracker.getUserId(), true);
+        verify(mQSHost).setTileAdded(mComponentName, mUserTracker.getUserId(), true);
     }
 
     @Test
     public void testNotSetTileAddedIfAdded() {
-        when(mQSTileHost.isTileAdded(eq(mComponentName), anyInt())).thenReturn(true);
+        when(mQSHost.isTileAdded(eq(mComponentName), anyInt())).thenReturn(true);
         mTileServiceManager.startLifecycleManagerAndAddTile();
 
-        verify(mQSTileHost, never()).setTileAdded(eq(mComponentName), anyInt(), eq(true));
+        verify(mQSHost, never()).setTileAdded(eq(mComponentName), anyInt(), eq(true));
     }
 
     @Test
     public void testSetTileAddedCorrectUser() {
         int user = 10;
         when(mUserTracker.getUserId()).thenReturn(user);
-        when(mQSTileHost.isTileAdded(eq(mComponentName), anyInt())).thenReturn(false);
+        when(mQSHost.isTileAdded(eq(mComponentName), anyInt())).thenReturn(false);
         mTileServiceManager.startLifecycleManagerAndAddTile();
 
-        verify(mQSTileHost).setTileAdded(mComponentName, user, true);
+        verify(mQSHost).setTileAdded(mComponentName, user, true);
     }
 
     @Test

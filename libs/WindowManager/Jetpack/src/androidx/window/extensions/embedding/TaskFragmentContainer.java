@@ -141,12 +141,26 @@ class TaskFragmentContainer {
         mToken = new Binder("TaskFragmentContainer");
         mTaskContainer = taskContainer;
         if (pairedPrimaryContainer != null) {
+            // The TaskFragment will be positioned right above the paired container.
             if (pairedPrimaryContainer.getTaskContainer() != taskContainer) {
                 throw new IllegalArgumentException(
                         "pairedPrimaryContainer must be in the same Task");
             }
             final int primaryIndex = taskContainer.mContainers.indexOf(pairedPrimaryContainer);
             taskContainer.mContainers.add(primaryIndex + 1, this);
+        } else if (pendingAppearedActivity != null) {
+            // The TaskFragment will be positioned right above the pending appeared Activity. If any
+            // existing TaskFragment is empty with pending Intent, it is likely that the Activity of
+            // the pending Intent hasn't been created yet, so the new Activity should be below the
+            // empty TaskFragment.
+            int i = taskContainer.mContainers.size() - 1;
+            for (; i >= 0; i--) {
+                final TaskFragmentContainer container = taskContainer.mContainers.get(i);
+                if (!container.isEmpty() || container.getPendingAppearedIntent() == null) {
+                    break;
+                }
+            }
+            taskContainer.mContainers.add(i + 1, this);
         } else {
             taskContainer.mContainers.add(this);
         }
@@ -500,6 +514,8 @@ class TaskFragmentContainer {
         }
 
         if (!shouldFinishDependent) {
+            // Always finish the placeholder when the primary is finished.
+            finishPlaceholderIfAny(wct, presenter);
             return;
         }
 
@@ -524,6 +540,28 @@ class TaskFragmentContainer {
             wct.finishActivity(activity.getActivityToken());
         }
         mActivitiesToFinishOnExit.clear();
+    }
+
+    @GuardedBy("mController.mLock")
+    private void finishPlaceholderIfAny(@NonNull WindowContainerTransaction wct,
+            @NonNull SplitPresenter presenter) {
+        final List<TaskFragmentContainer> containersToRemove = new ArrayList<>();
+        for (TaskFragmentContainer container : mContainersToFinishOnExit) {
+            if (container.mIsFinished) {
+                continue;
+            }
+            final SplitContainer splitContainer = mController.getActiveSplitForContainers(
+                    this, container);
+            if (splitContainer != null && splitContainer.isPlaceholderContainer()
+                    && splitContainer.getSecondaryContainer() == container) {
+                // Remove the placeholder secondary TaskFragment.
+                containersToRemove.add(container);
+            }
+        }
+        mContainersToFinishOnExit.removeAll(containersToRemove);
+        for (TaskFragmentContainer container : containersToRemove) {
+            container.finish(false /* shouldFinishDependent */, presenter, wct, mController);
+        }
     }
 
     boolean isFinished() {

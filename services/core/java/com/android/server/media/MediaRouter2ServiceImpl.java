@@ -608,6 +608,9 @@ class MediaRouter2ServiceImpl {
     /* package */ void updateRunningUserAndProfiles(int newActiveUserId) {
         synchronized (mLock) {
             if (mCurrentActiveUserId != newActiveUserId) {
+                Slog.i(TAG, TextUtils.formatSimple(
+                        "switchUser | user: %d", newActiveUserId));
+
                 mCurrentActiveUserId = newActiveUserId;
                 for (int i = 0; i < mUserRecords.size(); i++) {
                     int userId = mUserRecords.keyAt(i);
@@ -679,6 +682,10 @@ class MediaRouter2ServiceImpl {
         userRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::notifyRouterRegistered,
                         userRecord.mHandler, routerRecord));
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "registerRouter2 | package: %s, uid: %d, pid: %d, router: %d",
+                packageName, uid, pid, routerRecord.mRouterId));
     }
 
     @GuardedBy("mLock")
@@ -688,6 +695,11 @@ class MediaRouter2ServiceImpl {
             Slog.w(TAG, "Ignoring unregistering unknown router2");
             return;
         }
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "unregisterRouter2 | package: %s, router: %d",
+                routerRecord.mPackageName,
+                routerRecord.mRouterId));
 
         UserRecord userRecord = routerRecord.mUserRecord;
         userRecord.mRouterRecords.remove(routerRecord);
@@ -707,6 +719,11 @@ class MediaRouter2ServiceImpl {
         if (routerRecord.mDiscoveryPreference.equals(discoveryRequest)) {
             return;
         }
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "setDiscoveryRequestWithRouter2 | router: %d, discovery request: %s",
+                routerRecord.mRouterId, discoveryRequest.toString()));
+
         routerRecord.mDiscoveryPreference = discoveryRequest;
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::notifyDiscoveryPreferenceChangedToManagers,
@@ -724,6 +741,10 @@ class MediaRouter2ServiceImpl {
         RouterRecord routerRecord = mAllRouterRecords.get(binder);
 
         if (routerRecord != null) {
+            Slog.i(TAG, TextUtils.formatSimple(
+                    "setRouteVolumeWithRouter2 | router: %d, volume: %d",
+                    routerRecord.mRouterId, volume));
+
             routerRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::setRouteVolumeOnHandler,
                             routerRecord.mUserRecord.mHandler,
@@ -804,6 +825,10 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        Slog.i(TAG, TextUtils.formatSimple(
+                "selectRouteWithRouter2 | router: %d, route: %s",
+                routerRecord.mRouterId, route.getId()));
+
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::selectRouteOnHandler,
                         routerRecord.mUserRecord.mHandler,
@@ -819,6 +844,10 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        Slog.i(TAG, TextUtils.formatSimple(
+                "deselectRouteWithRouter2 | router: %d, route: %s",
+                routerRecord.mRouterId, route.getId()));
+
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::deselectRouteOnHandler,
                         routerRecord.mUserRecord.mHandler,
@@ -833,6 +862,10 @@ class MediaRouter2ServiceImpl {
         if (routerRecord == null) {
             return;
         }
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "transferToRouteWithRouter2 | router: %d, route: %s",
+                routerRecord.mRouterId, route.getId()));
 
         String defaultRouteId =
                 routerRecord.mUserRecord.mHandler.mSystemProvider.getDefaultRoute().getId();
@@ -859,6 +892,10 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        Slog.i(TAG, TextUtils.formatSimple(
+                "setSessionVolumeWithRouter2 | router: %d, session: %s, volume: %d",
+                routerRecord.mRouterId,  uniqueSessionId, volume));
+
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::setSessionVolumeOnHandler,
                         routerRecord.mUserRecord.mHandler,
@@ -873,6 +910,10 @@ class MediaRouter2ServiceImpl {
         if (routerRecord == null) {
             return;
         }
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "releaseSessionWithRouter2 | router: %d, session: %s",
+                routerRecord.mRouterId,  uniqueSessionId));
 
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::releaseSessionOnHandler,
@@ -916,6 +957,10 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        Slog.i(TAG, TextUtils.formatSimple(
+                "registerManager | uid: %d, pid: %d, package: %s, user: %d",
+                uid, pid, packageName, userId));
+
         mContext.enforcePermission(Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid,
                 "Must hold MEDIA_CONTENT_CONTROL permission.");
 
@@ -951,6 +996,13 @@ class MediaRouter2ServiceImpl {
             return;
         }
         UserRecord userRecord = managerRecord.mUserRecord;
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "unregisterManager | package: %s, user: %d, manager: %d",
+                managerRecord.mPackageName,
+                userRecord.mUserId,
+                managerRecord.mManagerId));
+
         userRecord.mManagerRecords.remove(managerRecord);
         managerRecord.dispose();
         disposeUserIfNeededLocked(userRecord); // since manager removed from user
@@ -962,6 +1014,10 @@ class MediaRouter2ServiceImpl {
         if (managerRecord == null) {
             return;
         }
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "startScan | manager: %d", managerRecord.mManagerId));
+
         managerRecord.startScan();
     }
 
@@ -971,6 +1027,10 @@ class MediaRouter2ServiceImpl {
         if (managerRecord == null) {
             return;
         }
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "stopScan | manager: %d", managerRecord.mManagerId));
+
         managerRecord.stopScan();
     }
 
@@ -983,6 +1043,10 @@ class MediaRouter2ServiceImpl {
         if (managerRecord == null) {
             return;
         }
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "setRouteVolumeWithManager | manager: %d, route: %s, volume: %d",
+                managerRecord.mManagerId, route.getId(), volume));
 
         long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
         managerRecord.mUserRecord.mHandler.sendMessage(
@@ -998,6 +1062,10 @@ class MediaRouter2ServiceImpl {
         if (managerRecord == null) {
             return;
         }
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "requestCreateSessionWithManager | manager: %d, route: %s",
+                managerRecord.mManagerId, route.getId()));
 
         String packageName = oldSession.getClientPackageName();
 
@@ -1044,6 +1112,10 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        Slog.i(TAG, TextUtils.formatSimple(
+                "selectRouteWithManager | manager: %d, session: %s, route: %s",
+                managerRecord.mManagerId, uniqueSessionId, route.getId()));
+
         // Can be null if the session is system's or RCN.
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterWithSessionLocked(uniqueSessionId);
@@ -1064,6 +1136,10 @@ class MediaRouter2ServiceImpl {
         if (managerRecord == null) {
             return;
         }
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "deselectRouteWithManager | manager: %d, session: %s, route: %s",
+                managerRecord.mManagerId, uniqueSessionId, route.getId()));
 
         // Can be null if the session is system's or RCN.
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
@@ -1086,6 +1162,10 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        Slog.i(TAG, TextUtils.formatSimple(
+                "transferToRouteWithManager | manager: %d, session: %s, route: %s",
+                managerRecord.mManagerId, uniqueSessionId, route.getId()));
+
         // Can be null if the session is system's or RCN.
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterWithSessionLocked(uniqueSessionId);
@@ -1107,6 +1187,10 @@ class MediaRouter2ServiceImpl {
             return;
         }
 
+        Slog.i(TAG, TextUtils.formatSimple(
+                "setSessionVolumeWithManager | manager: %d, session: %s, volume: %d",
+                managerRecord.mManagerId, uniqueSessionId, volume));
+
         long uniqueRequestId = toUniqueRequestId(managerRecord.mManagerId, requestId);
         managerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::setSessionVolumeOnHandler,
@@ -1123,6 +1207,10 @@ class MediaRouter2ServiceImpl {
         if (managerRecord == null) {
             return;
         }
+
+        Slog.i(TAG, TextUtils.formatSimple(
+                "releaseSessionWithManager | manager: %d, session: %s",
+                managerRecord.mManagerId, uniqueSessionId));
 
         RouterRecord routerRecord = managerRecord.mUserRecord.mHandler
                 .findRouterWithSessionLocked(uniqueSessionId);
@@ -1484,6 +1572,24 @@ class MediaRouter2ServiceImpl {
 
             List<IMediaRouter2> routersWithModifyAudioRoutingPermission = getRouters(true);
             List<IMediaRouter2> routersWithoutModifyAudioRoutingPermission = getRouters(false);
+
+            if (!addedRoutes.isEmpty()) {
+                // If routes were added, currentInfo cannot be null.
+                Slog.i(TAG,
+                        toLoggingMessage(
+                                /* source= */ "addProviderRoutes",
+                                currentInfo.getUniqueId(),
+                                (ArrayList) addedRoutes));
+            }
+            if (!removedRoutes.isEmpty()) {
+                // If routes were removed, prevInfo cannot be null.
+                Slog.i(TAG,
+                        toLoggingMessage(
+                                /* source= */ "removeProviderRoutes",
+                                prevInfo.getUniqueId(),
+                                (ArrayList) removedRoutes));
+            }
+
             List<IMediaRouter2Manager> managers = getManagers();
             List<MediaRoute2Info> defaultRoute = new ArrayList<>();
             defaultRoute.add(mSystemProvider.getDefaultRoute());
@@ -1520,6 +1626,16 @@ class MediaRouter2ServiceImpl {
                 } // 'else' is handled as added routes
                 notifyRoutesChangedToManagers(managers, changedRoutes);
             }
+        }
+
+        private static String toLoggingMessage(
+                String source, String providerId, ArrayList<MediaRoute2Info> routes) {
+            String routesString =
+                    routes.stream()
+                            .map(it -> String.format("%s | %s", it.getOriginalId(), it.getName()))
+                            .collect(Collectors.joining(/* delimiter= */ ", "));
+            return TextUtils.formatSimple("%s | provider: %s, routes: [%s]",
+                    source, providerId, routesString);
         }
 
         private int getLastProviderInfoIndex(@NonNull String providerId) {

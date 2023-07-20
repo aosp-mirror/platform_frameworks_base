@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.util.settings.SystemSettings;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -78,6 +79,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     private final DozeParameters mDozeParameters;
     private final DevicePostureController mDevicePostureController;
     private final DozeLog mDozeLog;
+    private final SystemSettings mSystemSettings;
     private final int[] mSensorToBrightness;
     private final int[] mSensorToScrimOpacity;
     private final int mScreenBrightnessDim;
@@ -110,7 +112,8 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
             WakefulnessLifecycle wakefulnessLifecycle,
             DozeParameters dozeParameters,
             DevicePostureController devicePostureController,
-            DozeLog dozeLog) {
+            DozeLog dozeLog,
+            SystemSettings systemSettings) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
@@ -122,6 +125,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         mDozeHost = host;
         mHandler = handler;
         mDozeLog = dozeLog;
+        mSystemSettings = systemSettings;
 
         mScreenBrightnessMinimumDimAmountFloat = context.getResources().getFloat(
                 R.dimen.config_screenBrightnessMinimumDimAmountFloat);
@@ -257,7 +261,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     }
     //TODO: brightnessfloat change usages to float.
     private int clampToUserSetting(int brightness) {
-        int userSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
+        int userSetting = mSystemSettings.getIntForUser(
                 Settings.System.SCREEN_BRIGHTNESS, Integer.MAX_VALUE,
                 UserHandle.USER_CURRENT);
         return Math.min(brightness, userSetting);

@@ -966,6 +966,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                     runSetBooleanFlag(pw, mLetterboxConfiguration
                             ::setIsVerticalReachabilityEnabled);
                     break;
+                case "--isAutomaticReachabilityInBookModeEnabled":
+                    runSetBooleanFlag(pw, mLetterboxConfiguration
+                            ::setIsAutomaticReachabilityInBookModeEnabled);
+                    break;
                 case "--defaultPositionForHorizontalReachability":
                     runSetLetterboxDefaultPositionForHorizontalReachability(pw);
                     break;
@@ -978,6 +982,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                 case "--isSplitScreenAspectRatioForUnresizableAppsEnabled":
                     runSetBooleanFlag(pw, mLetterboxConfiguration
                             ::setIsSplitScreenAspectRatioForUnresizableAppsEnabled);
+                    break;
+                case "--isDisplayAspectRatioEnabledForFixedOrientationLetterbox":
+                    runSetBooleanFlag(pw, mLetterboxConfiguration
+                            ::setIsDisplayAspectRatioEnabledForFixedOrientationLetterbox);
                     break;
                 case "--isTranslucentLetterboxingEnabled":
                     runSetBooleanFlag(pw, mLetterboxConfiguration
@@ -1053,6 +1061,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                     case "isSplitScreenAspectRatioForUnresizableAppsEnabled":
                         mLetterboxConfiguration
                                 .resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+                        break;
+                    case "IsDisplayAspectRatioEnabledForFixedOrientationLetterbox":
+                        mLetterboxConfiguration
+                                .resetIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
                         break;
                     case "isTranslucentLetterboxingEnabled":
                         mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
@@ -1160,10 +1172,12 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
             mLetterboxConfiguration.resetIsHorizontalReachabilityEnabled();
             mLetterboxConfiguration.resetIsVerticalReachabilityEnabled();
+            mLetterboxConfiguration.resetEnabledAutomaticReachabilityInBookMode();
             mLetterboxConfiguration.resetDefaultPositionForHorizontalReachability();
             mLetterboxConfiguration.resetDefaultPositionForVerticalReachability();
             mLetterboxConfiguration.resetIsEducationEnabled();
             mLetterboxConfiguration.resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
+            mLetterboxConfiguration.resetIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
             mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
             mLetterboxConfiguration.resetCameraCompatRefreshEnabled();
             mLetterboxConfiguration.resetCameraCompatRefreshCycleThroughStopEnabled();
@@ -1194,6 +1208,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mLetterboxConfiguration.getIsHorizontalReachabilityEnabled());
             pw.println("Is vertical reachability enabled: "
                     + mLetterboxConfiguration.getIsVerticalReachabilityEnabled());
+            pw.println("Is automatic reachability in book mode enabled: "
+                    + mLetterboxConfiguration.getIsAutomaticReachabilityInBookModeEnabled());
             pw.println("Default position for horizontal reachability: "
                     + LetterboxConfiguration.letterboxHorizontalReachabilityPositionToString(
                             mLetterboxConfiguration.getDefaultPositionForHorizontalReachability()));
@@ -1211,7 +1227,9 @@ public class WindowManagerShellCommand extends ShellCommand {
             pw.println("Is using split screen aspect ratio as aspect ratio for unresizable apps: "
                     + mLetterboxConfiguration
                             .getIsSplitScreenAspectRatioForUnresizableAppsEnabled());
-
+            pw.println("Is using display aspect ratio as aspect ratio for all letterboxed apps: "
+                    + mLetterboxConfiguration
+                            .getIsDisplayAspectRatioEnabledForFixedOrientationLetterbox());
             pw.println("    Is activity \"refresh\" in camera compatibility treatment enabled: "
                     + mLetterboxConfiguration.isCameraCompatRefreshEnabled());
             pw.println("    Refresh using \"stopped -> resumed\" cycle: "

@@ -33,7 +33,9 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.surfaceeffects.ripple.RippleAnimationConfig;
+import com.android.systemui.surfaceeffects.ripple.RippleShader;
 import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape;
 import com.android.systemui.surfaceeffects.ripple.RippleView;
 
@@ -44,10 +46,12 @@ import java.text.NumberFormat;
  */
 final class WirelessChargingLayout extends FrameLayout {
     private static final long CIRCLE_RIPPLE_ANIMATION_DURATION = 1500;
-    private static final long ROUNDED_BOX_RIPPLE_ANIMATION_DURATION = 1750;
+    private static final long ROUNDED_BOX_RIPPLE_ANIMATION_DURATION = 3000;
     private static final int SCRIM_COLOR = 0x4C000000;
     private static final int SCRIM_FADE_DURATION = 300;
     private RippleView mRippleView;
+    // This is only relevant to the rounded box ripple.
+    private RippleShader.SizeAtProgress[] mSizeAtProgressArray;
 
     WirelessChargingLayout(Context context, int transmittingBatteryLevel, int batteryLevel,
             boolean isDozing, RippleShape rippleShape) {
@@ -125,20 +129,23 @@ final class WirelessChargingLayout extends FrameLayout {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(textSizeAnimator, textOpacityAnimator, textFadeAnimator);
 
-        ValueAnimator scrimFadeInAnimator = ObjectAnimator.ofArgb(this,
-                "backgroundColor", Color.TRANSPARENT, SCRIM_COLOR);
-        scrimFadeInAnimator.setDuration(SCRIM_FADE_DURATION);
-        scrimFadeInAnimator.setInterpolator(Interpolators.LINEAR);
-        ValueAnimator scrimFadeOutAnimator = ObjectAnimator.ofArgb(this,
-                "backgroundColor", SCRIM_COLOR, Color.TRANSPARENT);
-        scrimFadeOutAnimator.setDuration(SCRIM_FADE_DURATION);
-        scrimFadeOutAnimator.setInterpolator(Interpolators.LINEAR);
-        scrimFadeOutAnimator.setStartDelay((rippleShape == RippleShape.CIRCLE
-                ? CIRCLE_RIPPLE_ANIMATION_DURATION : ROUNDED_BOX_RIPPLE_ANIMATION_DURATION)
-                - SCRIM_FADE_DURATION);
-        AnimatorSet animatorSetScrim = new AnimatorSet();
-        animatorSetScrim.playTogether(scrimFadeInAnimator, scrimFadeOutAnimator);
-        animatorSetScrim.start();
+        // For large screens docking animation, we don't play the background scrim.
+        if (!Utilities.isLargeScreen(context)) {
+            ValueAnimator scrimFadeInAnimator = ObjectAnimator.ofArgb(this,
+                    "backgroundColor", Color.TRANSPARENT, SCRIM_COLOR);
+            scrimFadeInAnimator.setDuration(SCRIM_FADE_DURATION);
+            scrimFadeInAnimator.setInterpolator(Interpolators.LINEAR);
+            ValueAnimator scrimFadeOutAnimator = ObjectAnimator.ofArgb(this,
+                    "backgroundColor", SCRIM_COLOR, Color.TRANSPARENT);
+            scrimFadeOutAnimator.setDuration(SCRIM_FADE_DURATION);
+            scrimFadeOutAnimator.setInterpolator(Interpolators.LINEAR);
+            scrimFadeOutAnimator.setStartDelay((rippleShape == RippleShape.CIRCLE
+                    ? CIRCLE_RIPPLE_ANIMATION_DURATION : ROUNDED_BOX_RIPPLE_ANIMATION_DURATION)
+                    - SCRIM_FADE_DURATION);
+            AnimatorSet animatorSetScrim = new AnimatorSet();
+            animatorSetScrim.playTogether(scrimFadeInAnimator, scrimFadeOutAnimator);
+            animatorSetScrim.start();
+        }
 
         mRippleView = findViewById(R.id.wireless_charging_ripple);
         mRippleView.setupShader(rippleShape);
@@ -147,7 +154,26 @@ final class WirelessChargingLayout extends FrameLayout {
         if (mRippleView.getRippleShape() == RippleShape.ROUNDED_BOX) {
             mRippleView.setDuration(ROUNDED_BOX_RIPPLE_ANIMATION_DURATION);
             mRippleView.setSparkleStrength(0.22f);
-            mRippleView.setColor(color, 28);
+            mRippleView.setColor(color, 102); // 40% of opacity.
+            mRippleView.setBaseRingFadeParams(
+                    /* fadeInStart = */ 0f,
+                    /* fadeInEnd = */ 0f,
+                    /* fadeOutStart = */ 0.2f,
+                    /* fadeOutEnd= */ 0.47f
+            );
+            mRippleView.setSparkleRingFadeParams(
+                    /* fadeInStart = */ 0f,
+                    /* fadeInEnd = */ 0f,
+                    /* fadeOutStart = */ 0.2f,
+                    /* fadeOutEnd= */ 1f
+            );
+            mRippleView.setCenterFillFadeParams(
+                    /* fadeInStart = */ 0f,
+                    /* fadeInEnd = */ 0f,
+                    /* fadeOutStart = */ 0f,
+                    /* fadeOutEnd= */ 0.2f
+            );
+            mRippleView.setBlur(6.5f, 2.5f);
         } else {
             mRippleView.setDuration(CIRCLE_RIPPLE_ANIMATION_DURATION);
             mRippleView.setColor(color, RippleAnimationConfig.RIPPLE_DEFAULT_ALPHA);
@@ -246,9 +272,7 @@ final class WirelessChargingLayout extends FrameLayout {
             int height = getMeasuredHeight();
             mRippleView.setCenter(width * 0.5f, height * 0.5f);
             if (mRippleView.getRippleShape() == RippleShape.ROUNDED_BOX) {
-                // Those magic numbers are introduced for visual polish. This aspect ratio maps with
-                // the tablet's docking station.
-                mRippleView.setMaxSize(width * 1.36f, height * 1.46f);
+                updateRippleSizeAtProgressList(width, height);
             } else {
                 float maxSize = Math.max(width, height);
                 mRippleView.setMaxSize(maxSize, maxSize);
@@ -256,5 +280,37 @@ final class WirelessChargingLayout extends FrameLayout {
         }
 
         super.onLayout(changed, left, top, right, bottom);
+    }
+
+    private void updateRippleSizeAtProgressList(float width, float height) {
+        if (mSizeAtProgressArray == null) {
+            float maxSize = Math.max(width, height);
+            mSizeAtProgressArray = new RippleShader.SizeAtProgress[] {
+                    // Those magic numbers are introduced for visual polish. It starts from a pill
+                    // shape and expand to a full circle.
+                    new RippleShader.SizeAtProgress(0f, 0f, 0f),
+                    new RippleShader.SizeAtProgress(0.3f, width * 0.4f, height * 0.4f),
+                    new RippleShader.SizeAtProgress(1f, maxSize, maxSize)
+            };
+        } else {
+            // Same multipliers, just need to recompute with the new width and height.
+            RippleShader.SizeAtProgress first = mSizeAtProgressArray[0];
+            first.setT(0f);
+            first.setWidth(0f);
+            first.setHeight(0f);
+
+            RippleShader.SizeAtProgress second = mSizeAtProgressArray[1];
+            second.setT(0.3f);
+            second.setWidth(width * 0.4f);
+            second.setHeight(height * 0.4f);
+
+            float maxSize = Math.max(width, height);
+            RippleShader.SizeAtProgress last = mSizeAtProgressArray[2];
+            last.setT(1f);
+            last.setWidth(maxSize);
+            last.setHeight(maxSize);
+        }
+
+        mRippleView.setSizeAtProgresses(mSizeAtProgressArray);
     }
 }

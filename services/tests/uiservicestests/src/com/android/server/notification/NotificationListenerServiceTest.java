@@ -193,7 +193,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 tweak.isConversation(),
                 tweak.getConversationShortcutInfo(),
                 tweak.getRankingAdjustment(),
-                tweak.isBubble()
+                tweak.isBubble(),
+                tweak.getProposedImportance()
         );
         assertNotEquals(nru, nru2);
     }
@@ -274,7 +275,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                     isConversation(i),
                     getShortcutInfo(i),
                     getRankingAdjustment(i),
-                    isBubble(i)
+                    isBubble(i),
+                    getProposedImportance(i)
             );
             rankings[i] = ranking;
         }
@@ -402,6 +404,10 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         return index % 3 - 1;
     }
 
+    private int getProposedImportance(int index) {
+        return index % 5 - 1;
+    }
+
     private boolean isBubble(int index) {
         return index % 4 == 0;
     }
@@ -443,6 +449,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         assertEquals(comment, a.getConversationShortcutInfo().getId(),
                 b.getConversationShortcutInfo().getId());
         assertActionsEqual(a.getSmartActions(), b.getSmartActions());
+        assertEquals(a.getProposedImportance(), b.getProposedImportance());
     }
 
     private void detailedAssertEquals(RankingMap a, RankingMap b) {

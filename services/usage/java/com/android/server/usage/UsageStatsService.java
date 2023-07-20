@@ -2289,6 +2289,11 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public boolean isAppStandbyEnabled() {
+            return mAppStandby.isAppIdleEnabled();
+        }
+
+        @Override
         public boolean isAppInactive(String packageName, int userId, String callingPackage) {
             final int callingUid = Binder.getCallingUid();
             try {
@@ -3097,6 +3102,11 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void setActiveAdminApps(Set<String> packageNames, int userId) {
             mAppStandby.setActiveAdminApps(packageNames, userId);
+        }
+
+        @Override
+        public void setAdminProtectedPackages(Set<String> packageNames, int userId) {
+            mAppStandby.setAdminProtectedPackages(packageNames, userId);
         }
 
         @Override

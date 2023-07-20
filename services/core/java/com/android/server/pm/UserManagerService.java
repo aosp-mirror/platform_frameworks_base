@@ -91,11 +91,11 @@ import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.stats.devicepolicy.DevicePolicyEnums;
+import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
-import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Slog;
@@ -1762,6 +1762,63 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.preCreated;
         }
+    }
+
+    /**
+     * Returns whether switching users is currently allowed for the provided user.
+     * <p>
+     * Switching users is not allowed in the following cases:
+     * <li>the user is in a phone call</li>
+     * <li>{@link UserManager#DISALLOW_USER_SWITCH} is set</li>
+     * <li>system user hasn't been unlocked yet</li>
+     *
+     * @return A {@link UserManager.UserSwitchabilityResult} flag indicating if the user is
+     * switchable.
+     */
+    public @UserManager.UserSwitchabilityResult int getUserSwitchability(int userId) {
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getUserSwitchability");
+
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("getUserSwitchability-" + userId);
+
+        int flags = UserManager.SWITCHABILITY_STATUS_OK;
+
+        t.traceBegin("TM.isInCall");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
+            if (telecomManager != null && telecomManager.isInCall()) {
+                flags |= UserManager.SWITCHABILITY_STATUS_USER_IN_CALL;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        t.traceEnd();
+
+        t.traceBegin("hasUserRestriction-DISALLOW_USER_SWITCH");
+        if (mLocalService.hasUserRestriction(DISALLOW_USER_SWITCH, userId)) {
+            flags |= UserManager.SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED;
+        }
+        t.traceEnd();
+
+        // System User is always unlocked in Headless System User Mode, so ignore this flag
+        if (!UserManager.isHeadlessSystemUserMode()) {
+            t.traceBegin("getInt-ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED");
+            final boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
+                    mContext.getContentResolver(),
+                    Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
+            t.traceEnd();
+            t.traceBegin("isUserUnlocked-USER_SYSTEM");
+            final boolean systemUserUnlocked = mLocalService.isUserUnlocked(UserHandle.USER_SYSTEM);
+            t.traceEnd();
+
+            if (!allowUserSwitchingWhenSystemUserLocked && !systemUserUnlocked) {
+                flags |= UserManager.SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED;
+            }
+        }
+        t.traceEnd();
+
+        return flags;
     }
 
     @Override
@@ -4974,13 +5031,6 @@ public class UserManagerService extends IUserManager.Stub {
     public void setApplicationRestrictions(String packageName, Bundle restrictions,
             @UserIdInt int userId) {
         checkSystemOrRoot("set application restrictions");
-        String validationResult = validateName(packageName);
-        if (validationResult != null) {
-            if (packageName.contains("../")) {
-                EventLog.writeEvent(0x534e4554, "239701237", -1, "");
-            }
-            throw new IllegalArgumentException("Invalid package name: " + validationResult);
-        }
         if (restrictions != null) {
             restrictions.setDefusable(true);
         }
@@ -5005,39 +5055,6 @@ public class UserManagerService extends IUserManager.Stub {
         changeIntent.setPackage(packageName);
         changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcastAsUser(changeIntent, UserHandle.of(userId));
-    }
-
-    /**
-     * Check if the given name is valid.
-     *
-     * Note: the logic is taken from FrameworkParsingPackageUtils in master, edited to remove
-     * unnecessary parts. Copied here for a security fix.
-     *
-     * @param name The name to check.
-     * @return null if it's valid, error message if not
-     */
-    @VisibleForTesting
-    static String validateName(String name) {
-        final int n = name.length();
-        boolean front = true;
-        for (int i = 0; i < n; i++) {
-            final char c = name.charAt(i);
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-                front = false;
-                continue;
-            }
-            if (!front) {
-                if ((c >= '0' && c <= '9') || c == '_') {
-                    continue;
-                }
-                if (c == '.') {
-                    front = true;
-                    continue;
-                }
-            }
-            return "bad character '" + c + "'";
-        }
-        return null;
     }
 
     private int getUidForPackage(String packageName) {

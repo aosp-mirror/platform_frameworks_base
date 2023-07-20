@@ -39,6 +39,7 @@ public class DebugDrawable extends Drawable {
     private final NotificationPanelView mView;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     private final LockIconViewController mLockIconViewController;
+    private final QuickSettingsController mQsController;
     private final Set<Integer> mDebugTextUsedYPositions;
     private final Paint mDebugPaint;
 
@@ -46,12 +47,14 @@ public class DebugDrawable extends Drawable {
             NotificationPanelViewController notificationPanelViewController,
             NotificationPanelView notificationPanelView,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
-            LockIconViewController lockIconViewController
+            LockIconViewController lockIconViewController,
+            QuickSettingsController quickSettingsController
     ) {
         mNotificationPanelViewController = notificationPanelViewController;
         mView = notificationPanelView;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mLockIconViewController = lockIconViewController;
+        mQsController = quickSettingsController;
         mDebugTextUsedYPositions = new HashSet<>();
         mDebugPaint = new Paint();
     }
@@ -71,12 +74,19 @@ public class DebugDrawable extends Drawable {
                 Color.RED, "getMaxPanelHeight()");
         drawDebugInfo(canvas, (int) mNotificationPanelViewController.getExpandedHeight(),
                 Color.BLUE, "getExpandedHeight()");
-        drawDebugInfo(canvas, mNotificationPanelViewController.calculatePanelHeightQsExpanded(),
+        drawDebugInfo(canvas, mQsController.calculatePanelHeightExpanded(
+                        mNotificationPanelViewController.getClockPositionResult()
+                                .stackScrollerPadding),
                 Color.GREEN, "calculatePanelHeightQsExpanded()");
-        drawDebugInfo(canvas, mNotificationPanelViewController.calculatePanelHeightQsExpanded(),
+        drawDebugInfo(canvas, mQsController.calculatePanelHeightExpanded(
+                        mNotificationPanelViewController.getClockPositionResult()
+                                .stackScrollerPadding),
                 Color.YELLOW, "calculatePanelHeightShade()");
         drawDebugInfo(canvas,
-                (int) mNotificationPanelViewController.calculateNotificationsTopPadding(),
+                (int) mQsController.calculateNotificationsTopPadding(
+                        mNotificationPanelViewController.isExpanding(),
+                        mNotificationPanelViewController.getKeyguardNotificationStaticPadding(),
+                        mNotificationPanelViewController.getExpandedFraction()),
                 Color.MAGENTA, "calculateNotificationsTopPadding()");
         drawDebugInfo(canvas, mNotificationPanelViewController.getClockPositionResult().clockY,
                 Color.GRAY, "mClockPositionResult.clockY");

@@ -15,15 +15,16 @@
  */
 package com.android.systemui.surfaceeffects.ripple
 
-import android.graphics.PointF
 import android.graphics.RuntimeShader
+import android.util.Log
 import android.util.MathUtils
+import androidx.annotation.VisibleForTesting
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.surfaceeffects.shaderutil.SdfShaderLibrary
 import com.android.systemui.surfaceeffects.shaderutil.ShaderUtilLibrary
 
 /**
  * Shader class that renders an expanding ripple effect. The ripple contains three elements:
- *
  * 1. an expanding filled [RippleShape] that appears in the beginning and quickly fades away
  * 2. an expanding ring that appears throughout the effect
  * 3. an expanding ring-shaped area that reveals noise over #2.
@@ -43,11 +44,26 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
     }
     // language=AGSL
     companion object {
+        private val TAG = RippleShader::class.simpleName
+
+        // Default fade in/ out values. The value range is [0,1].
+        const val DEFAULT_FADE_IN_START = 0f
+        const val DEFAULT_FADE_OUT_END = 1f
+
+        const val DEFAULT_BASE_RING_FADE_IN_END = 0.1f
+        const val DEFAULT_BASE_RING_FADE_OUT_START = 0.3f
+
+        const val DEFAULT_SPARKLE_RING_FADE_IN_END = 0.1f
+        const val DEFAULT_SPARKLE_RING_FADE_OUT_START = 0.4f
+
+        const val DEFAULT_CENTER_FILL_FADE_IN_END = 0f
+        const val DEFAULT_CENTER_FILL_FADE_OUT_START = 0f
+        const val DEFAULT_CENTER_FILL_FADE_OUT_END = 0.6f
+
         private const val SHADER_UNIFORMS =
             """
             uniform vec2 in_center;
             uniform vec2 in_size;
-            uniform float in_progress;
             uniform float in_cornerRadius;
             uniform float in_thickness;
             uniform float in_time;
@@ -68,7 +84,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
                 vec2 p_distorted = distort(p, in_time, in_distort_radial, in_distort_xy);
                 float radius = in_size.x * 0.5;
                 float sparkleRing = soften(circleRing(p_distorted-in_center, radius), in_blur);
-                float inside = soften(sdCircle(p_distorted-in_center, radius * 1.2), in_blur);
+                float inside = soften(sdCircle(p_distorted-in_center, radius * 1.25), in_blur);
                 float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
                     * (1.-sparkleRing) * in_fadeSparkle;
 
@@ -85,7 +101,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
             vec4 main(vec2 p) {
                 float sparkleRing = soften(roundedBoxRing(p-in_center, in_size, in_cornerRadius,
                     in_thickness), in_blur);
-                float inside = soften(sdRoundedBox(p-in_center, in_size * 1.2, in_cornerRadius),
+                float inside = soften(sdRoundedBox(p-in_center, in_size * 1.25, in_cornerRadius),
                     in_blur);
                 float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
                     * (1.-sparkleRing) * in_fadeSparkle;
@@ -143,10 +159,25 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
             }
 
         private fun subProgress(start: Float, end: Float, progress: Float): Float {
+            // Avoid division by 0.
+            if (start == end) {
+                // If start and end are the same and progress has exceeded the start/ end point,
+                // treat it as 1, otherwise 0.
+                return if (progress > start) 1f else 0f
+            }
+
             val min = Math.min(start, end)
             val max = Math.max(start, end)
             val sub = Math.min(Math.max(progress, min), max)
             return (sub - start) / (end - start)
+        }
+
+        private fun getFade(fadeParams: FadeParams, rawProgress: Float): Float {
+            val fadeIn = subProgress(fadeParams.fadeInStart, fadeParams.fadeInEnd, rawProgress)
+            val fadeOut =
+                1f - subProgress(fadeParams.fadeOutStart, fadeParams.fadeOutEnd, rawProgress)
+
+            return Math.min(fadeIn, fadeOut)
         }
     }
 
@@ -155,40 +186,49 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
         setFloatUniform("in_center", x, y)
     }
 
-    /** Max width of the ripple. */
-    private var maxSize: PointF = PointF()
-    fun setMaxSize(width: Float, height: Float) {
-        maxSize.x = width
-        maxSize.y = height
-    }
+    /**
+     * Blur multipliers for the ripple.
+     *
+     * <p>It interpolates from [blurStart] to [blurEnd] based on the [progress]. Increase number to
+     * add more blur.
+     */
+    var blurStart: Float = 1.25f
+    var blurEnd: Float = 0.5f
 
-    /** Progress of the ripple. Float value between [0, 1]. */
-    var progress: Float = 0.0f
+    /** Size of the ripple. */
+    val rippleSize = RippleSize()
+
+    /**
+     * Linear progress of the ripple. Float value between [0, 1].
+     *
+     * <p>Note that the progress here is expected to be linear without any curve applied.
+     */
+    var rawProgress: Float = 0.0f
         set(value) {
             field = value
-            setFloatUniform("in_progress", value)
-            val curvedProg = 1 - (1 - value) * (1 - value) * (1 - value)
+            progress = Interpolators.STANDARD.getInterpolation(value)
 
-            currentWidth = maxSize.x * curvedProg
-            currentHeight = maxSize.y * curvedProg
-            setFloatUniform("in_size", /* width= */ currentWidth, /* height= */ currentHeight)
-            setFloatUniform("in_thickness", maxSize.y * curvedProg * 0.5f)
-            // radius should not exceed width and height values.
-            setFloatUniform("in_cornerRadius", Math.min(maxSize.x, maxSize.y) * curvedProg)
+            setFloatUniform("in_fadeSparkle", getFade(sparkleRingFadeParams, value))
+            setFloatUniform("in_fadeRing", getFade(baseRingFadeParams, value))
+            setFloatUniform("in_fadeFill", getFade(centerFillFadeParams, value))
+        }
 
-            setFloatUniform("in_blur", MathUtils.lerp(1.25f, 0.5f, value))
+    /** Progress with Standard easing curve applied. */
+    private var progress: Float = 0.0f
+        set(value) {
+            field = value
 
-            val fadeIn = subProgress(0f, 0.1f, value)
-            val fadeOutNoise = subProgress(0.4f, 1f, value)
-            var fadeOutRipple = 0f
-            var fadeFill = 0f
-            if (!rippleFill) {
-                fadeFill = subProgress(0f, 0.6f, value)
-                fadeOutRipple = subProgress(0.3f, 1f, value)
-            }
-            setFloatUniform("in_fadeSparkle", Math.min(fadeIn, 1 - fadeOutNoise))
-            setFloatUniform("in_fadeFill", 1 - fadeFill)
-            setFloatUniform("in_fadeRing", Math.min(fadeIn, 1 - fadeOutRipple))
+            rippleSize.update(value)
+
+            setFloatUniform("in_size", rippleSize.currentWidth, rippleSize.currentHeight)
+            setFloatUniform("in_thickness", rippleSize.currentHeight * 0.5f)
+            // Corner radius is always max of the min between the current width and height.
+            setFloatUniform(
+                "in_cornerRadius",
+                Math.min(rippleSize.currentWidth, rippleSize.currentHeight)
+            )
+
+            setFloatUniform("in_blur", MathUtils.lerp(blurStart, blurEnd, value))
         }
 
     /** Play time since the start of the effect. */
@@ -220,25 +260,191 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
     var distortionStrength: Float = 0.0f
         set(value) {
             field = value
-            setFloatUniform("in_distort_radial", 75 * progress * value)
+            setFloatUniform("in_distort_radial", 75 * rawProgress * value)
             setFloatUniform("in_distort_xy", 75 * value)
         }
 
+    /**
+     * Pixel density of the screen that the effects are rendered to.
+     *
+     * <p>This value should come from [resources.displayMetrics.density].
+     */
     var pixelDensity: Float = 1.0f
         set(value) {
             field = value
             setFloatUniform("in_pixelDensity", value)
         }
 
+    /** Parameters that are used to fade in/ out of the sparkle ring. */
+    val sparkleRingFadeParams =
+        FadeParams(
+            DEFAULT_FADE_IN_START,
+            DEFAULT_SPARKLE_RING_FADE_IN_END,
+            DEFAULT_SPARKLE_RING_FADE_OUT_START,
+            DEFAULT_FADE_OUT_END
+        )
+
     /**
-     * True if the ripple should stayed filled in as it expands to give a filled-in circle effect.
-     * False for a ring effect.
+     * Parameters that are used to fade in/ out of the base ring.
+     *
+     * <p>Note that the shader draws the sparkle ring on top of the base ring.
      */
-    var rippleFill: Boolean = false
+    val baseRingFadeParams =
+        FadeParams(
+            DEFAULT_FADE_IN_START,
+            DEFAULT_BASE_RING_FADE_IN_END,
+            DEFAULT_BASE_RING_FADE_OUT_START,
+            DEFAULT_FADE_OUT_END
+        )
 
-    var currentWidth: Float = 0f
-        private set
+    /** Parameters that are used to fade in/ out of the center fill. */
+    val centerFillFadeParams =
+        FadeParams(
+            DEFAULT_FADE_IN_START,
+            DEFAULT_CENTER_FILL_FADE_IN_END,
+            DEFAULT_CENTER_FILL_FADE_OUT_START,
+            DEFAULT_CENTER_FILL_FADE_OUT_END
+        )
 
-    var currentHeight: Float = 0f
-        private set
+    /**
+     * Parameters used for fade in and outs of the ripple.
+     *
+     * <p>Note that all the fade in/ outs are "linear" progression.
+     *
+     * ```
+     *          (opacity)
+     *          1
+     *          │
+     * maxAlpha ←       ――――――――――――
+     *          │      /            \
+     *          │     /              \
+     * minAlpha ←――――/                \―――― (alpha change)
+     *          │
+     *          │
+     *          0 ―――↑―――↑―――――――――↑―――↑――――1 (progress)
+     *               fadeIn        fadeOut
+     *               Start & End   Start & End
+     * ```
+     *
+     * <p>If no fade in/ out is needed, set [fadeInStart] and [fadeInEnd] to 0; [fadeOutStart] and
+     * [fadeOutEnd] to 1.
+     */
+    data class FadeParams(
+        /**
+         * The starting point of the fade out which ends at [fadeInEnd], given that the animation
+         * goes from 0 to 1.
+         */
+        var fadeInStart: Float = DEFAULT_FADE_IN_START,
+        /**
+         * The endpoint of the fade in when the fade in starts at [fadeInStart], given that the
+         * animation goes from 0 to 1.
+         */
+        var fadeInEnd: Float,
+        /**
+         * The starting point of the fade out which ends at 1, given that the animation goes from 0
+         * to 1.
+         */
+        var fadeOutStart: Float,
+
+        /** The endpoint of the fade out, given that the animation goes from 0 to 1. */
+        var fadeOutEnd: Float = DEFAULT_FADE_OUT_END,
+    )
+
+    /**
+     * Desired size of the ripple at a point t in [progress].
+     *
+     * <p>Note that [progress] is curved and normalized. Below is an example usage:
+     * SizeAtProgress(t= 0f, width= 0f, height= 0f), SizeAtProgress(t= 0.2f, width= 500f, height=
+     * 700f), SizeAtProgress(t= 1f, width= 100f, height= 300f)
+     *
+     * <p>For simple ripple effects, you will want to use [setMaxSize] as it is translated into:
+     * SizeAtProgress(t= 0f, width= 0f, height= 0f), SizeAtProgress(t= 1f, width= maxWidth, height=
+     * maxHeight)
+     */
+    data class SizeAtProgress(
+        /** Time t in [0,1] progress range. */
+        var t: Float,
+        /** Target width size of the ripple at time [t]. */
+        var width: Float,
+        /** Target height size of the ripple at time [t]. */
+        var height: Float
+    )
+
+    /** Updates and stores the ripple size. */
+    inner class RippleSize {
+        @VisibleForTesting var sizes = mutableListOf<SizeAtProgress>()
+        @VisibleForTesting var currentSizeIndex = 0
+        @VisibleForTesting val initialSize = SizeAtProgress(0f, 0f, 0f)
+
+        var currentWidth: Float = 0f
+            private set
+        var currentHeight: Float = 0f
+            private set
+
+        /**
+         * Sets the max size of the ripple.
+         *
+         * <p>Use this if the ripple shape simply changes linearly.
+         */
+        fun setMaxSize(width: Float, height: Float) {
+            setSizeAtProgresses(initialSize, SizeAtProgress(1f, width, height))
+        }
+
+        /**
+         * Sets the list of [sizes].
+         *
+         * <p>Note that setting this clears the existing sizes.
+         */
+        fun setSizeAtProgresses(vararg sizes: SizeAtProgress) {
+            // Reset everything.
+            this.sizes.clear()
+            currentSizeIndex = 0
+
+            this.sizes.addAll(sizes)
+            this.sizes.sortBy { it.t }
+        }
+
+        /**
+         * Updates the current ripple size based on the progress.
+         *
+         * <p>Should be called when progress updates.
+         */
+        fun update(progress: Float) {
+            val targetIndex = updateTargetIndex(progress)
+            val prevIndex = Math.max(targetIndex - 1, 0)
+
+            val targetSize = sizes[targetIndex]
+            val prevSize = sizes[prevIndex]
+
+            val subProgress = subProgress(prevSize.t, targetSize.t, progress)
+
+            currentWidth = targetSize.width * subProgress + prevSize.width
+            currentHeight = targetSize.height * subProgress + prevSize.height
+        }
+
+        private fun updateTargetIndex(progress: Float): Int {
+            if (sizes.isEmpty()) {
+                // It could be empty on init.
+                if (progress > 0f) {
+                    Log.e(
+                        TAG,
+                        "Did you forget to set the ripple size? Use [setMaxSize] or " +
+                            "[setSizeAtProgresses] before playing the animation."
+                    )
+                }
+                // If there's no size is set, we set everything to 0 and return early.
+                setSizeAtProgresses(initialSize)
+                return currentSizeIndex
+            }
+
+            var candidate = sizes[currentSizeIndex]
+
+            while (progress > candidate.t) {
+                currentSizeIndex = Math.min(currentSizeIndex + 1, sizes.size - 1)
+                candidate = sizes[currentSizeIndex]
+            }
+
+            return currentSizeIndex
+        }
+    }
 }

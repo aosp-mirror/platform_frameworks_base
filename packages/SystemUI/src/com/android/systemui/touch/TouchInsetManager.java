@@ -19,6 +19,7 @@ package com.android.systemui.touch;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
@@ -90,7 +91,9 @@ public class TouchInsetManager {
 
             mTrackedViews.stream().forEach(view -> {
                 final Rect boundaries = new Rect();
-                view.getBoundsOnScreen(boundaries);
+                view.getDrawingRect(boundaries);
+                ((ViewGroup) view.getRootView()).offsetDescendantRectToMyCoords(view, boundaries);
+
                 cumulativeRegion.op(boundaries, Region.Op.UNION);
             });
 

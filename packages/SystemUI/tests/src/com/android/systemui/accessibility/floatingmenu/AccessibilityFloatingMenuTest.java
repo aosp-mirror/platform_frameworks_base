@@ -31,6 +31,7 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -55,6 +56,8 @@ public class AccessibilityFloatingMenuTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private SecureSettings mSecureSettings;
 
     private AccessibilityFloatingMenuView mMenuView;
     private AccessibilityFloatingMenu mMenu;
@@ -69,7 +72,7 @@ public class AccessibilityFloatingMenuTest extends SysuiTestCase {
 
         final Position position = new Position(0, 0);
         mMenuView = new AccessibilityFloatingMenuView(mContext, position);
-        mMenu = new AccessibilityFloatingMenu(mContext, mMenuView);
+        mMenu = new AccessibilityFloatingMenu(mContext, mSecureSettings, mMenuView);
     }
 
     @Test

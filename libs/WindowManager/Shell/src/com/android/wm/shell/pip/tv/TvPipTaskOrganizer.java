@@ -36,6 +36,7 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.PipUtils;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.util.Objects;
@@ -50,6 +51,7 @@ public class TvPipTaskOrganizer extends PipTaskOrganizer {
             @NonNull SyncTransactionQueue syncTransactionQueue,
             @NonNull PipTransitionState pipTransitionState,
             @NonNull PipBoundsState pipBoundsState,
+            @NonNull PipSizeSpecHandler pipSizeSpecHandler,
             @NonNull PipBoundsAlgorithm boundsHandler,
             @NonNull PipMenuController pipMenuController,
             @NonNull PipAnimationController pipAnimationController,
@@ -61,10 +63,11 @@ public class TvPipTaskOrganizer extends PipTaskOrganizer {
             @NonNull PipUiEventLogger pipUiEventLogger,
             @NonNull ShellTaskOrganizer shellTaskOrganizer,
             ShellExecutor mainExecutor) {
-        super(context, syncTransactionQueue, pipTransitionState, pipBoundsState, boundsHandler,
-                pipMenuController, pipAnimationController, surfaceTransactionHelper,
-                pipTransitionController, pipParamsChangedForwarder, splitScreenOptional,
-                displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
+        super(context, syncTransactionQueue, pipTransitionState, pipBoundsState, pipSizeSpecHandler,
+                boundsHandler, pipMenuController, pipAnimationController,
+                surfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
+                splitScreenOptional, displayController, pipUiEventLogger, shellTaskOrganizer,
+                mainExecutor);
     }
 
     @Override

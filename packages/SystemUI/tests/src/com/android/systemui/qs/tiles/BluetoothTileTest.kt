@@ -17,11 +17,12 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.qs.QSTileHost
+import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.BluetoothController
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,7 +41,7 @@ class BluetoothTileTest : SysuiTestCase() {
     @Mock
     private lateinit var qsLogger: QSLogger
     @Mock
-    private lateinit var qsHost: QSTileHost
+    private lateinit var qsHost: QSHost
     @Mock
     private lateinit var metricsLogger: MetricsLogger
     private val falsingManager = FalsingManagerFake()
@@ -76,6 +77,12 @@ class BluetoothTileTest : SysuiTestCase() {
         )
 
         tile.initialize()
+        testableLooper.processAllMessages()
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
         testableLooper.processAllMessages()
     }
 
@@ -135,7 +142,7 @@ class BluetoothTileTest : SysuiTestCase() {
     }
 
     private class FakeBluetoothTile(
-        qsTileHost: QSTileHost,
+        qsHost: QSHost,
         backgroundLooper: Looper,
         mainHandler: Handler,
         falsingManager: FalsingManager,
@@ -145,7 +152,7 @@ class BluetoothTileTest : SysuiTestCase() {
         qsLogger: QSLogger,
         bluetoothController: BluetoothController
     ) : BluetoothTile(
-        qsTileHost,
+        qsHost,
         backgroundLooper,
         mainHandler,
         falsingManager,

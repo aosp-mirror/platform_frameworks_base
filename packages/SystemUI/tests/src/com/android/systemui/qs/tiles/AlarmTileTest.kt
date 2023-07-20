@@ -21,6 +21,7 @@ import com.android.systemui.statusbar.policy.NextAlarmController
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -85,6 +86,12 @@ class AlarmTileTest : SysuiTestCase() {
 
         verify(nextAlarmController).observe(eq(tile), capture(callbackCaptor))
         tile.refreshState()
+        testableLooper.processAllMessages()
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
         testableLooper.processAllMessages()
     }
 

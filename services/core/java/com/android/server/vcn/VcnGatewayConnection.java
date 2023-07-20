@@ -1889,7 +1889,7 @@ public class VcnGatewayConnection extends StateMachine {
                     mIpSecManager.applyTunnelModeTransform(
                             tunnelIface, IpSecManager.DIRECTION_FWD, transform);
                 }
-            } catch (IOException e) {
+            } catch (IOException | IllegalArgumentException e) {
                 logInfo("Transform application failed for network " + token, e);
                 sessionLost(token, e);
             }

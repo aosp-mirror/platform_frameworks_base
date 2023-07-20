@@ -19,9 +19,11 @@ package com.android.systemui.keyguard.data.repository
 
 import android.content.pm.UserInfo
 import android.os.UserHandle
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
@@ -39,23 +41,19 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: KeyguardQuickAffordanceRepository
@@ -65,12 +63,14 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
     private lateinit var userTracker: FakeUserTracker
     private lateinit var client1: FakeCustomizationProviderClient
     private lateinit var client2: FakeCustomizationProviderClient
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
         config1 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_1)
         config2 = FakeKeyguardQuickAffordanceConfig(FakeCustomizationProviderClient.AFFORDANCE_2)
-        val scope = CoroutineScope(IMMEDIATE)
+        val testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
         userTracker = FakeUserTracker()
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
@@ -93,7 +93,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
         client2 = FakeCustomizationProviderClient()
         val remoteUserSelectionManager =
             KeyguardQuickAffordanceRemoteUserSelectionManager(
-                scope = scope,
+                scope = testScope.backgroundScope,
                 userTracker = userTracker,
                 clientFactory =
                     FakeKeyguardQuickAffordanceProviderClientFactory(
@@ -116,14 +116,14 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
         underTest =
             KeyguardQuickAffordanceRepository(
                 appContext = context,
-                scope = scope,
+                scope = testScope.backgroundScope,
                 localUserSelectionManager = localUserSelectionManager,
                 remoteUserSelectionManager = remoteUserSelectionManager,
                 userTracker = userTracker,
                 legacySettingSyncer =
                     KeyguardQuickAffordanceLegacySettingSyncer(
-                        scope = scope,
-                        backgroundDispatcher = IMMEDIATE,
+                        scope = testScope.backgroundScope,
+                        backgroundDispatcher = testDispatcher,
                         secureSettings = FakeSettings(),
                         selectionsManager = localUserSelectionManager,
                     ),
@@ -135,15 +135,14 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
     @Test
     fun setSelections() =
-        runBlocking(IMMEDIATE) {
-            var configsBySlotId: Map<String, List<KeyguardQuickAffordanceConfig>>? = null
-            val job = underTest.selections.onEach { configsBySlotId = it }.launchIn(this)
+        testScope.runTest {
+            val configsBySlotId = collectLastValue(underTest.selections)
             val slotId1 = "slot1"
             val slotId2 = "slot2"
 
             underTest.setSelections(slotId1, listOf(config1.key))
             assertSelections(
-                configsBySlotId,
+                configsBySlotId(),
                 mapOf(
                     slotId1 to listOf(config1),
                 ),
@@ -151,7 +150,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
             underTest.setSelections(slotId2, listOf(config2.key))
             assertSelections(
-                configsBySlotId,
+                configsBySlotId(),
                 mapOf(
                     slotId1 to listOf(config1),
                     slotId2 to listOf(config2),
@@ -161,19 +160,17 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
             underTest.setSelections(slotId1, emptyList())
             underTest.setSelections(slotId2, listOf(config1.key))
             assertSelections(
-                configsBySlotId,
+                configsBySlotId(),
                 mapOf(
                     slotId1 to emptyList(),
                     slotId2 to listOf(config1),
                 ),
             )
-
-            job.cancel()
         }
 
     @Test
     fun getAffordancePickerRepresentations() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             assertThat(underTest.getAffordancePickerRepresentations())
                 .isEqualTo(
                     listOf(
@@ -226,7 +223,7 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
 
     @Test
     fun `selections for secondary user`() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             userTracker.set(
                 userInfos =
                     listOf(
@@ -252,12 +249,10 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
                 affordanceId = FakeCustomizationProviderClient.AFFORDANCE_2,
             )
-            val observed = mutableListOf<Map<String, List<KeyguardQuickAffordanceConfig>>>()
-            val job = underTest.selections.onEach { observed.add(it) }.launchIn(this)
-            yield()
+            val observed = collectLastValue(underTest.selections)
 
             assertSelections(
-                observed = observed.last(),
+                observed = observed(),
                 expected =
                     mapOf(
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START to
@@ -266,8 +261,6 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
                             ),
                     )
             )
-
-            job.cancel()
         }
 
     private fun assertSelections(
@@ -275,15 +268,14 @@ class KeyguardQuickAffordanceRepositoryTest : SysuiTestCase() {
         expected: Map<String, List<KeyguardQuickAffordanceConfig>>,
     ) {
         assertThat(observed).isEqualTo(expected)
-        assertThat(underTest.getSelections())
+        assertThat(underTest.getCurrentSelections())
             .isEqualTo(expected.mapValues { (_, configs) -> configs.map { it.key } })
         expected.forEach { (slotId, configs) ->
-            assertThat(underTest.getSelections(slotId)).isEqualTo(configs)
+            assertThat(underTest.getCurrentSelections(slotId)).isEqualTo(configs)
         }
     }
 
     companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
         private const val SECONDARY_USER_1 = UserHandle.MIN_SECONDARY_USER_ID + 1
         private const val SECONDARY_USER_2 = UserHandle.MIN_SECONDARY_USER_ID + 2
     }

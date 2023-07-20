@@ -424,6 +424,37 @@ public class DisplayManagerServiceTest {
     }
 
     /**
+     * Tests that HighBrightnessModeMetadata is non-null on all display devices.
+     */
+    @Test
+    public void testHighBrightnessModeMetadataNonNull() throws Exception {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        // Add the FakeDisplayDevice
+        FakeDisplayDevice displayDevice = new FakeDisplayDevice("unique_hbm_device");
+        DisplayDeviceInfo displayDeviceInfo = new DisplayDeviceInfo();
+
+        displayDevice.setDisplayDeviceInfo(displayDeviceInfo);
+
+        LogicalDisplay logicalDisplay = new LogicalDisplay(1, 1, displayDevice);
+        HighBrightnessModeMetadata hbmMeta =
+                displayManager.getHighBrightnessModeMetadata(logicalDisplay);
+
+        assertNotNull(hbmMeta);
+
+        // Check is Hbm metadata is correctly added for the display device.
+        String uniqueId = displayDevice.getUniqueId();
+        assertTrue(uniqueId.equals("unique_hbm_device"));
+        assertTrue(displayManager.mHighBrightnessModeMetadataMap.containsKey(uniqueId));
+        HighBrightnessModeMetadata hbmMetaFromMap =
+                displayManager.mHighBrightnessModeMetadataMap.get(uniqueId);
+        assertEquals(hbmMeta, hbmMetaFromMap);
+    }
+
+    /**
      * Tests that we get a Runtime exception when we cannot initialize the default display.
      */
     @Test
@@ -1348,6 +1379,11 @@ public class DisplayManagerServiceTest {
         FakeDisplayDevice() {
             super(null, null, "", mContext);
         }
+
+        FakeDisplayDevice(String uniqueDeviceId) {
+            super(null, null, uniqueDeviceId, mContext);
+        }
+
 
         public void setDisplayDeviceInfo(DisplayDeviceInfo displayDeviceInfo) {
             mDisplayDeviceInfo = displayDeviceInfo;

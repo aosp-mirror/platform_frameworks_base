@@ -20,19 +20,26 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.R;
@@ -40,6 +47,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
@@ -49,25 +57,28 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
  * The shadow's thickness is 20dp when the window is in focus and 5dp when the window isn't.
  */
 public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLinearLayout> {
+    private static final String TAG = "DesktopModeWindowDecoration";
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private final SyncTransactionQueue mSyncQueue;
 
     private View.OnClickListener mOnCaptionButtonClickListener;
     private View.OnTouchListener mOnCaptionTouchListener;
-    private DragResizeCallback mDragResizeCallback;
-
+    private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
+    private DragDetector mDragDetector;
 
     private RelayoutParams mRelayoutParams = new RelayoutParams();
+    private final int mCaptionMenuHeightId = R.dimen.freeform_decor_caption_menu_height;
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
 
     private boolean mDesktopActive;
-
-    private DragDetector mDragDetector;
-
     private AdditionalWindow mHandleMenu;
+    private final int mHandleMenuWidthId = R.dimen.freeform_decor_caption_menu_width;
+    private final int mHandleMenuShadowRadiusId = R.dimen.caption_menu_shadow_radius;
+    private final int mHandleMenuCornerRadiusId = R.dimen.caption_menu_corner_radius;
+    private PointF mHandleMenuPosition = new PointF();
 
     DesktopModeWindowDecoration(
             Context context,
@@ -84,7 +95,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
         mDesktopActive = DesktopModeStatus.isActive(mContext);
-        mDragDetector = new DragDetector(ViewConfiguration.get(context).getScaledTouchSlop());
+    }
+
+    @Override
+    protected Configuration getConfigurationWithOverrides(
+            ActivityManager.RunningTaskInfo taskInfo) {
+        Configuration configuration = taskInfo.getConfiguration();
+        if (DesktopTasksController.isDesktopDensityOverrideSet()) {
+            // Density is overridden for desktop tasks. Keep system density for window decoration.
+            configuration.densityDpi = mContext.getResources().getConfiguration().densityDpi;
+        }
+        return configuration;
     }
 
     void setCaptionListeners(
@@ -94,12 +115,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mOnCaptionTouchListener = onCaptionTouchListener;
     }
 
-    void setDragResizeCallback(DragResizeCallback dragResizeCallback) {
-        mDragResizeCallback = dragResizeCallback;
+    void setDragPositioningCallback(DragPositioningCallback dragPositioningCallback) {
+        mDragPositioningCallback = dragPositioningCallback;
     }
 
-    DragDetector getDragDetector() {
-        return mDragDetector;
+    void setDragDetector(DragDetector dragDetector) {
+        mDragDetector = dragDetector;
+        mDragDetector.setTouchSlop(ViewConfiguration.get(mContext).getScaledTouchSlop());
     }
 
     @Override
@@ -121,38 +143,26 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM;
         final boolean isDragResizeable = isFreeform && taskInfo.isResizeable;
 
-        WindowDecorLinearLayout oldRootView = mResult.mRootView;
+        final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
-        int outsetLeftId = R.dimen.freeform_resize_handle;
-        int outsetTopId = R.dimen.freeform_resize_handle;
-        int outsetRightId = R.dimen.freeform_resize_handle;
-        int outsetBottomId = R.dimen.freeform_resize_handle;
+        final int outsetLeftId = R.dimen.freeform_resize_handle;
+        final int outsetTopId = R.dimen.freeform_resize_handle;
+        final int outsetRightId = R.dimen.freeform_resize_handle;
+        final int outsetBottomId = R.dimen.freeform_resize_handle;
 
         mRelayoutParams.reset();
         mRelayoutParams.mRunningTaskInfo = taskInfo;
         mRelayoutParams.mLayoutResId = R.layout.desktop_mode_window_decor;
         mRelayoutParams.mCaptionHeightId = R.dimen.freeform_decor_caption_height;
-        mRelayoutParams.mCaptionWidthId = R.dimen.freeform_decor_caption_width;
         mRelayoutParams.mShadowRadiusId = shadowRadiusID;
         if (isDragResizeable) {
             mRelayoutParams.setOutsets(outsetLeftId, outsetTopId, outsetRightId, outsetBottomId);
         }
-        final Resources resources = mDecorWindowContext.getResources();
-        final Rect taskBounds = taskInfo.configuration.windowConfiguration.getBounds();
-        final int captionHeight = loadDimensionPixelSize(resources,
-                mRelayoutParams.mCaptionHeightId);
-        final int captionWidth = loadDimensionPixelSize(resources,
-                mRelayoutParams.mCaptionWidthId);
-        final int captionLeft = taskBounds.width() / 2
-                - captionWidth / 2;
-        final int captionTop = taskBounds.top
-                <= captionHeight / 2 ? 0 : -captionHeight / 2;
-        mRelayoutParams.setCaptionPosition(captionLeft, captionTop);
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
-        taskInfo = null; // Clear it just in case we use it accidentally
+        // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
 
         mTaskOrganizer.applyTransaction(wct);
 
@@ -194,15 +204,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mChoreographer,
                     mDisplay.getDisplayId(),
                     mDecorationContainerSurface,
-                    mDragResizeCallback);
+                    mDragPositioningCallback);
         }
 
-        int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext()).getScaledTouchSlop();
+        final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())
+                .getScaledTouchSlop();
         mDragDetector.setTouchSlop(touchSlop);
 
-        int resize_handle = mResult.mRootView.getResources()
+        final int resize_handle = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_handle);
-        int resize_corner = mResult.mRootView.getResources()
+        final int resize_corner = mResult.mRootView.getResources()
                 .getDimensionPixelSize(R.dimen.freeform_resize_corner);
         mDragResizeListener.setGeometry(
                 mResult.mWidth, mResult.mHeight, resize_handle, resize_corner, touchSlop);
@@ -212,40 +223,65 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Sets up listeners when a new root view is created.
      */
     private void setupRootView() {
-        View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
+        final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
         caption.setOnTouchListener(mOnCaptionTouchListener);
-        View close = caption.findViewById(R.id.close_window);
-        close.setOnClickListener(mOnCaptionButtonClickListener);
-        View back = caption.findViewById(R.id.back_button);
-        back.setOnClickListener(mOnCaptionButtonClickListener);
-        View handle = caption.findViewById(R.id.caption_handle);
+        final View handle = caption.findViewById(R.id.caption_handle);
         handle.setOnTouchListener(mOnCaptionTouchListener);
         handle.setOnClickListener(mOnCaptionButtonClickListener);
+        if (DesktopModeStatus.isProto1Enabled()) {
+            final View back = caption.findViewById(R.id.back_button);
+            back.setOnClickListener(mOnCaptionButtonClickListener);
+            final View close = caption.findViewById(R.id.close_window);
+            close.setOnClickListener(mOnCaptionButtonClickListener);
+        }
         updateButtonVisibility();
     }
 
     private void setupHandleMenu() {
-        View menu = mHandleMenu.mWindowViewHost.getView();
-        View fullscreen = menu.findViewById(R.id.fullscreen_button);
+        final View menu = mHandleMenu.mWindowViewHost.getView();
+        final View fullscreen = menu.findViewById(R.id.fullscreen_button);
         fullscreen.setOnClickListener(mOnCaptionButtonClickListener);
-        View desktop = menu.findViewById(R.id.desktop_button);
-        desktop.setOnClickListener(mOnCaptionButtonClickListener);
-        View split = menu.findViewById(R.id.split_screen_button);
+        final View desktop = menu.findViewById(R.id.desktop_button);
+        if (DesktopModeStatus.isProto2Enabled()) {
+            desktop.setOnClickListener(mOnCaptionButtonClickListener);
+        } else if (DesktopModeStatus.isProto1Enabled()) {
+            desktop.setVisibility(View.GONE);
+        }
+        final View split = menu.findViewById(R.id.split_screen_button);
         split.setOnClickListener(mOnCaptionButtonClickListener);
-        View more = menu.findViewById(R.id.more_button);
-        more.setOnClickListener(mOnCaptionButtonClickListener);
+        final View close = menu.findViewById(R.id.close_button);
+        close.setOnClickListener(mOnCaptionButtonClickListener);
+        final View collapse = menu.findViewById(R.id.collapse_menu_button);
+        collapse.setOnClickListener(mOnCaptionButtonClickListener);
+        menu.setOnTouchListener(mOnCaptionTouchListener);
+
+        String packageName = mTaskInfo.baseActivity.getPackageName();
+        PackageManager pm = mContext.getApplicationContext().getPackageManager();
+        // TODO(b/268363572): Use IconProvider or BaseIconCache to set drawable/name.
+        try {
+            ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName,
+                    PackageManager.ApplicationInfoFlags.of(0));
+            final ImageView appIcon = menu.findViewById(R.id.application_icon);
+            appIcon.setImageDrawable(pm.getApplicationIcon(applicationInfo));
+            final TextView appName = menu.findViewById(R.id.application_name);
+            appName.setText(pm.getApplicationLabel(applicationInfo));
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Package not found: " + packageName, e);
+        }
     }
 
     /**
      * Sets caption visibility based on task focus.
-     *
+     * Note: Only applicable to Desktop Proto 1; Proto 2 only closes handle menu on focus loss
      * @param visible whether or not the caption should be visible
      */
     private void setCaptionVisibility(boolean visible) {
-        int v = visible ? View.VISIBLE : View.GONE;
-        View captionView = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
-        captionView.setVisibility(v);
         if (!visible) closeHandleMenu();
+        if (!DesktopModeStatus.isProto1Enabled()) return;
+        final int v = visible ? View.VISIBLE : View.GONE;
+        final View captionView = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
+        captionView.setVisibility(v);
+
     }
 
     /**
@@ -264,25 +300,54 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Show or hide buttons
      */
     void setButtonVisibility(boolean visible) {
-        int visibility = visible ? View.VISIBLE : View.GONE;
-        View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
-        View back = caption.findViewById(R.id.back_button);
-        View close = caption.findViewById(R.id.close_window);
+        final int visibility = visible && DesktopModeStatus.isProto1Enabled()
+                ? View.VISIBLE : View.GONE;
+        final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
+        final View back = caption.findViewById(R.id.back_button);
+        final View close = caption.findViewById(R.id.close_window);
         back.setVisibility(visibility);
         close.setVisibility(visibility);
-        int buttonTintColorRes =
+        final int buttonTintColorRes =
                 mDesktopActive ? R.color.decor_button_dark_color
                         : R.color.decor_button_light_color;
-        ColorStateList buttonTintColor =
+        final ColorStateList buttonTintColor =
                 caption.getResources().getColorStateList(buttonTintColorRes, null /* theme */);
-        View handle = caption.findViewById(R.id.caption_handle);
-        VectorDrawable handleBackground = (VectorDrawable) handle.getBackground();
+        final View handle = caption.findViewById(R.id.caption_handle);
+        final VectorDrawable handleBackground = (VectorDrawable) handle.getBackground();
         handleBackground.setTintList(buttonTintColor);
-        caption.getBackground().setTint(visible ? Color.WHITE : Color.TRANSPARENT);
     }
 
     boolean isHandleMenuActive() {
         return mHandleMenu != null;
+    }
+
+    void setCaptionColor(int captionColor) {
+        if (mResult.mRootView == null) {
+            return;
+        }
+
+        final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
+        final GradientDrawable captionDrawable = (GradientDrawable) caption.getBackground();
+        captionDrawable.setColor(captionColor);
+
+        final int buttonTintColorRes =
+                Color.valueOf(captionColor).luminance() < 0.5
+                        ? R.color.decor_button_light_color
+                        : R.color.decor_button_dark_color;
+        final ColorStateList buttonTintColor =
+                caption.getResources().getColorStateList(buttonTintColorRes, null /* theme */);
+
+        final View handle = caption.findViewById(R.id.caption_handle);
+        final Drawable handleBackground = handle.getBackground();
+        handleBackground.setTintList(buttonTintColor);
+        if (DesktopModeStatus.isProto1Enabled()) {
+            final View back = caption.findViewById(R.id.back_button);
+            final Drawable backBackground = back.getBackground();
+            backBackground.setTintList(buttonTintColor);
+            final View close = caption.findViewById(R.id.close_window);
+            final Drawable closeBackground = close.getBackground();
+            closeBackground.setTintList(buttonTintColor);
+        }
     }
 
     private void closeDragResizeListener() {
@@ -297,16 +362,22 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Create and display handle menu window
      */
     void createHandleMenu() {
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         final Resources resources = mDecorWindowContext.getResources();
-        int x = mRelayoutParams.mCaptionX;
-        int y = mRelayoutParams.mCaptionY;
-        int width = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionWidthId);
-        int height = loadDimensionPixelSize(resources, mRelayoutParams.mCaptionHeightId);
+        final int captionWidth = mTaskInfo.getConfiguration()
+                .windowConfiguration.getBounds().width();
+        final int menuWidth = loadDimensionPixelSize(resources, mHandleMenuWidthId);
+        final int menuHeight = loadDimensionPixelSize(resources, mCaptionMenuHeightId);
+        final int shadowRadius = loadDimensionPixelSize(resources, mHandleMenuShadowRadiusId);
+        final int cornerRadius = loadDimensionPixelSize(resources, mHandleMenuCornerRadiusId);
+
+        final int x = mRelayoutParams.mCaptionX + (captionWidth / 2) - (menuWidth / 2)
+                - mResult.mDecorContainerOffsetX;
+        final int y = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY;
+        mHandleMenuPosition.set(x, y);
         String namePrefix = "Caption Menu";
-        mHandleMenu = addWindow(R.layout.desktop_mode_decor_handle_menu, namePrefix, t,
-                x - mResult.mDecorContainerOffsetX, y - mResult.mDecorContainerOffsetY,
-                width, height);
+        mHandleMenu = addWindow(R.layout.desktop_mode_decor_handle_menu, namePrefix, t, x, y,
+                menuWidth, menuHeight, shadowRadius, cornerRadius);
         mSyncQueue.runInSync(transaction -> {
             transaction.merge(t);
             t.close();
@@ -335,10 +406,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * @param ev the tapped point to compare against
      */
     void closeHandleMenuIfNeeded(MotionEvent ev) {
-        if (isHandleMenuActive()) {
-            if (!checkEventInCaptionView(ev, R.id.desktop_mode_caption)) {
-                closeHandleMenu();
-            }
+        if (!isHandleMenuActive()) return;
+
+        // When this is called before the layout is fully inflated, width will be 0.
+        // Menu is not visible in this scenario, so skip the check if that is the case.
+        if (mHandleMenu.mWindowViewHost.getView().getWidth() == 0) return;
+
+        PointF inputPoint = offsetCaptionLocation(ev);
+        if (!pointInView(mHandleMenu.mWindowViewHost.getView(),
+                inputPoint.x - mHandleMenuPosition.x - mResult.mDecorContainerOffsetX,
+                inputPoint.y - mHandleMenuPosition.y - mResult.mDecorContainerOffsetY)) {
+            closeHandleMenu();
         }
     }
 
@@ -353,8 +431,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * @return the point of the input in local space
      */
     private PointF offsetCaptionLocation(MotionEvent ev) {
-        PointF result = new PointF(ev.getX(), ev.getY());
-        Point positionInParent = mTaskOrganizer.getRunningTaskInfo(mTaskInfo.taskId)
+        final PointF result = new PointF(ev.getX(), ev.getY());
+        final Point positionInParent = mTaskOrganizer.getRunningTaskInfo(mTaskInfo.taskId)
                 .positionInParent;
         result.offset(-mRelayoutParams.mCaptionX, -mRelayoutParams.mCaptionY);
         result.offset(-positionInParent.x, -positionInParent.y);
@@ -370,9 +448,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     private boolean checkEventInCaptionView(MotionEvent ev, int layoutId) {
         if (mResult.mRootView == null) return false;
-        PointF inputPoint = offsetCaptionLocation(ev);
-        View view = mResult.mRootView.findViewById(layoutId);
-        return view != null && view.pointInView(inputPoint.x, inputPoint.y, 0);
+        final PointF inputPoint = offsetCaptionLocation(ev);
+        final View view = mResult.mRootView.findViewById(layoutId);
+        return view != null && pointInView(view, inputPoint.x, inputPoint.y);
     }
 
     boolean checkTouchEventInHandle(MotionEvent ev) {
@@ -389,30 +467,33 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void checkClickEvent(MotionEvent ev) {
         if (mResult.mRootView == null) return;
-        View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
-        PointF inputPoint = offsetCaptionLocation(ev);
         if (!isHandleMenuActive()) {
-            View handle = caption.findViewById(R.id.caption_handle);
-            clickIfPointInView(inputPoint, handle);
+            final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
+            final View handle = caption.findViewById(R.id.caption_handle);
+            clickIfPointInView(new PointF(ev.getX(), ev.getY()), handle);
         } else {
-            View menu = mHandleMenu.mWindowViewHost.getView();
-            View fullscreen = menu.findViewById(R.id.fullscreen_button);
-            if (clickIfPointInView(inputPoint, fullscreen)) return;
-            View desktop = menu.findViewById(R.id.desktop_button);
-            if (clickIfPointInView(inputPoint, desktop)) return;
-            View split = menu.findViewById(R.id.split_screen_button);
-            if (clickIfPointInView(inputPoint, split)) return;
-            View more = menu.findViewById(R.id.more_button);
-            clickIfPointInView(inputPoint, more);
+            final View menu = mHandleMenu.mWindowViewHost.getView();
+            final int captionWidth = mTaskInfo.getConfiguration().windowConfiguration
+                    .getBounds().width();
+            final int menuX = mRelayoutParams.mCaptionX + (captionWidth / 2)
+                    - (menu.getWidth() / 2);
+            final PointF inputPoint = new PointF(ev.getX() - menuX, ev.getY());
+            final View collapse = menu.findViewById(R.id.collapse_menu_button);
+            if (clickIfPointInView(inputPoint, collapse)) return;
         }
     }
 
     private boolean clickIfPointInView(PointF inputPoint, View v) {
-        if (v.pointInView(inputPoint.x - v.getLeft(), inputPoint.y, 0)) {
+        if (pointInView(v, inputPoint.x, inputPoint.y)) {
             mOnCaptionButtonClickListener.onClick(v);
             return true;
         }
         return false;
+    }
+
+    private boolean pointInView(View v, float x, float y) {
+        return v != null && v.getLeft() <= x && v.getRight() >= x
+                && v.getTop() <= y && v.getBottom() >= y;
     }
 
     @Override

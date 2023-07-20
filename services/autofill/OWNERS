@@ -1,1 +1,20 @@
+# Bug component: 351486
+
 include /core/java/android/view/autofill/OWNERS
+
+# co-own by both teams
+per-file Session.java = file:/core/java/android/view/autofill/OWNERS
+per-file Session.java = wangqi@google.com
+per-file AutofillManagerService*. = file:/core/java/android/view/autofill/OWNERS
+per-file Session.java = wangqi@google.com
+per-file AutofillManagerService* = file:/core/java/android/view/autofill/OWNERS
+per-file AutofillManagerService* = wangqi@google.com
+per-file *FillUI* = file:/core/java/android/view/autofill/OWNERS
+per-file *FillUI* = wangqi@google.com
+
+# Bug component: 543785 = per-file *Augmented*
+per-file *Augmented* = file:/core/java/android/service/autofill/augmented/OWNERS
+
+# Bug component: 543785 = per-file *Inline*
+per-file *Inline* = file:/core/java/android/widget/inline/OWNERS
+

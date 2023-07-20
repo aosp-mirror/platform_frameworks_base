@@ -477,7 +477,8 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      */
     public @Nullable CharSequence nonLocalizedDescription;
 
-    private static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
+    private static final ForStringSet sForStringSet =
+            Parcelling.Cache.getOrCreate(ForStringSet.class);
 
     /**
      * A {@link Set} of trusted signing certificate digests. If this permission has the {@link

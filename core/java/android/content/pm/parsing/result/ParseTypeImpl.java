@@ -41,7 +41,7 @@ public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
     public static final boolean DEBUG_THROW_ALL_ERRORS = false;
 
     @NonNull
-    private Callback mCallback;
+    private final Callback mCallback;
 
     private Object mResult;
 

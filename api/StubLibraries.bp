@@ -217,13 +217,17 @@ java_defaults {
 }
 
 java_defaults {
-    name: "android-non-updatable_defaults_stubs_current",
-    libs: ["stub-annotations"],
-    static_libs: ["framework-res-package-jar"], // Export package of framework-res
+    name: "android-non-updatable_defaults",
     sdk_version: "none",
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,
+}
+
+java_defaults {
+    name: "android-non-updatable_from_source_defaults",
+    libs: ["stub-annotations"],
+    static_libs: ["framework-res-package-jar"], // Export package of framework-res
     dist: {
         targets: ["sdk"],
         tag: ".jar",
@@ -233,7 +237,82 @@ java_defaults {
 
 java_library {
     name: "android-non-updatable.stubs",
-    defaults: ["android-non-updatable_defaults_stubs_current"],
+    defaults: ["android-non-updatable_defaults"],
+    static_libs: [
+        "android-non-updatable.stubs.from-source",
+    ],
+    product_variables: {
+        build_from_text_stub: {
+            static_libs: [
+                "android-non-updatable.stubs.from-text",
+            ],
+            exclude_static_libs: [
+                "android-non-updatable.stubs.from-source",
+            ],
+        },
+    },
+}
+
+java_library {
+    name: "android-non-updatable.stubs.system",
+    defaults: ["android-non-updatable_defaults"],
+    static_libs: [
+        "android-non-updatable.stubs.system.from-source",
+    ],
+    product_variables: {
+        build_from_text_stub: {
+            static_libs: [
+                "android-non-updatable.stubs.system.from-text",
+            ],
+            exclude_static_libs: [
+                "android-non-updatable.stubs.system.from-source",
+            ],
+        },
+    },
+}
+
+java_library {
+    name: "android-non-updatable.stubs.module_lib",
+    defaults: ["android-non-updatable_defaults"],
+    static_libs: [
+        "android-non-updatable.stubs.module_lib.from-source",
+    ],
+    product_variables: {
+        build_from_text_stub: {
+            static_libs: [
+                "android-non-updatable.stubs.module_lib.from-text",
+            ],
+            exclude_static_libs: [
+                "android-non-updatable.stubs.module_lib.from-source",
+            ],
+        },
+    },
+}
+
+java_library {
+    name: "android-non-updatable.stubs.test",
+    defaults: ["android-non-updatable_defaults"],
+    static_libs: [
+        "android-non-updatable.stubs.test.from-source",
+    ],
+    product_variables: {
+        build_from_text_stub: {
+            static_libs: [
+                "android-non-updatable.stubs.test.from-text",
+            ],
+            exclude_static_libs: [
+                "android-non-updatable.stubs.test.from-source",
+            ],
+        },
+    },
+}
+
+java_library {
+    name: "android-non-updatable.stubs.from-source",
+    defaults: [
+        "android-non-updatable_defaults",
+        "android-non-updatable_from_source_defaults",
+    ],
     srcs: [":api-stubs-docs-non-updatable"],
     libs: ["all-modules-public-stubs"],
     dist: {
@@ -242,8 +321,11 @@ java_library {
 }
 
 java_library {
-    name: "android-non-updatable.stubs.system",
-    defaults: ["android-non-updatable_defaults_stubs_current"],
+    name: "android-non-updatable.stubs.system.from-source",
+    defaults: [
+        "android-non-updatable_defaults",
+        "android-non-updatable_from_source_defaults",
+    ],
     srcs: [":system-api-stubs-docs-non-updatable"],
     libs: ["all-modules-system-stubs"],
     dist: {
@@ -252,8 +334,11 @@ java_library {
 }
 
 java_library {
-    name: "android-non-updatable.stubs.module_lib",
-    defaults: ["android-non-updatable_defaults_stubs_current"],
+    name: "android-non-updatable.stubs.module_lib.from-source",
+    defaults: [
+        "android-non-updatable_defaults",
+        "android-non-updatable_from_source_defaults",
+    ],
     srcs: [":module-lib-api-stubs-docs-non-updatable"],
     libs: [
         "sdk_module-lib_current_framework-tethering",
@@ -270,8 +355,11 @@ java_library {
 }
 
 java_library {
-    name: "android-non-updatable.stubs.test",
-    defaults: ["android-non-updatable_defaults_stubs_current"],
+    name: "android-non-updatable.stubs.test.from-source",
+    defaults: [
+        "android-non-updatable_defaults",
+        "android-non-updatable_from_source_defaults",
+    ],
     srcs: [":test-api-stubs-docs-non-updatable"],
     libs: ["all-modules-system-stubs"],
     dist: {
@@ -280,7 +368,7 @@ java_library {
 }
 
 java_defaults {
-    name: "non_updatable_api_library_defaults",
+    name: "android-non-updatable_from_text_defaults",
     static_libs: ["framework-res-package-jar"],
     libs: ["stub-annotations"],
 }
@@ -291,8 +379,8 @@ java_api_library {
     api_files: [
         ":non-updatable-current.txt",
     ],
-    defaults: ["non_updatable_api_library_defaults"],
-    dep_api_srcs: "android_stubs_current.from-text",
+    defaults: ["android-non-updatable_from_text_defaults"],
+    full_api_surface_stub: "android_stubs_current.from-text",
 }
 
 java_api_library {
@@ -302,8 +390,8 @@ java_api_library {
         ":non-updatable-current.txt",
         ":non-updatable-system-current.txt",
     ],
-    defaults: ["non_updatable_api_library_defaults"],
-    dep_api_srcs: "android_system_stubs_current.from-text",
+    defaults: ["android-non-updatable_from_text_defaults"],
+    full_api_surface_stub: "android_system_stubs_current.from-text",
 }
 
 java_api_library {
@@ -314,8 +402,8 @@ java_api_library {
         ":non-updatable-system-current.txt",
         ":non-updatable-test-current.txt",
     ],
-    defaults: ["non_updatable_api_library_defaults"],
-    dep_api_srcs: "android_test_stubs_current.from-text",
+    defaults: ["android-non-updatable_from_text_defaults"],
+    full_api_surface_stub: "android_test_stubs_current.from-text",
 }
 
 java_api_library {
@@ -326,8 +414,8 @@ java_api_library {
         ":non-updatable-system-current.txt",
         ":non-updatable-module-lib-current.txt",
     ],
-    defaults: ["non_updatable_api_library_defaults"],
-    dep_api_srcs: "android_module_lib_stubs_current_full.from-text",
+    defaults: ["android-non-updatable_from_text_defaults"],
+    full_api_surface_stub: "android_module_lib_stubs_current_full.from-text",
 }
 
 java_defaults {

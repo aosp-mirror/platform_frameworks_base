@@ -31,6 +31,7 @@ import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.app.TaskInfo.CameraCompatControlState;
 import android.testing.AndroidTestingRunner;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.SurfaceControlViewHost;
 import android.widget.ImageButton;
@@ -45,11 +46,16 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIWindowManager.CompatUIHintsState;
 
+import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.function.Consumer;
 
 /**
  * Tests for {@link CompatUILayout}.
@@ -65,20 +71,22 @@ public class CompatUILayoutTest extends ShellTestCase {
 
     @Mock private SyncTransactionQueue mSyncTransactionQueue;
     @Mock private CompatUIController.CompatUICallback mCallback;
+    @Mock private Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnRestartButtonClicked;
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private SurfaceControlViewHost mViewHost;
+    @Mock private CompatUIConfiguration mCompatUIConfiguration;
 
     private CompatUIWindowManager mWindowManager;
     private CompatUILayout mLayout;
+    private TaskInfo mTaskInfo;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        mWindowManager = new CompatUIWindowManager(mContext,
-                createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN),
-                mSyncTransactionQueue, mCallback, mTaskListener,
-                new DisplayLayout(), new CompatUIHintsState());
+        mTaskInfo = createTaskInfo(/* hasSizeCompat= */ false, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager = new CompatUIWindowManager(mContext, mTaskInfo, mSyncTransactionQueue,
+                mCallback, mTaskListener, new DisplayLayout(), new CompatUIHintsState(),
+                mCompatUIConfiguration, mOnRestartButtonClicked);
 
         mLayout = (CompatUILayout)
                 LayoutInflater.from(mContext).inflate(R.layout.compat_ui_layout, null);
@@ -95,8 +103,15 @@ public class CompatUILayoutTest extends ShellTestCase {
         final ImageButton button = mLayout.findViewById(R.id.size_compat_restart_button);
         button.performClick();
 
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> restartCaptor =
+                ArgumentCaptor.forClass(Pair.class);
+
         verify(mWindowManager).onRestartButtonClicked();
-        verify(mCallback).onSizeCompatRestartButtonClicked(TASK_ID);
+        verify(mOnRestartButtonClicked).accept(restartCaptor.capture());
+        final Pair<TaskInfo, ShellTaskOrganizer.TaskListener> result = restartCaptor.getValue();
+        Assert.assertEquals(mTaskInfo, result.first);
+        Assert.assertEquals(mTaskListener, result.second);
     }
 
     @Test
