@@ -6553,4 +6553,12 @@
          serialization, a default vibration will be used.
          Note that, indefinitely repeating vibrations are not allowed as shutdown vibrations. -->
     <string name="config_defaultShutdownVibrationFile" />
+    <!-- The file path in which custom vibrations are provided for haptic feedbacks.
+         If the device does not specify any such file path here, if the file path specified here
+         does not exist, or if the contents of the file does not make up a valid customization
+         serialization, the system default vibrations for haptic feedback will be used.
+         If the content of the customization file is valid, the system will use the provided
+         vibrations for the customized haptic feedback IDs, and continue to use the system defaults
+         for the non-customized ones. -->
+    <string name="config_hapticFeedbackCustomizationFile" />
 </resources>
