@@ -2805,12 +2805,14 @@
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
     <!-- Whether the device allows users to start in background visible on displays.
-         Should be false for most devices, except automotive vehicle with passenger displays. -->
+         Should be false for all devices in production. Can be enabled only for development use
+         in automotive vehicles with passenger displays. -->
     <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
 
     <!-- Whether the device allows users to start in background visible on the default display.
-         Should be false for most devices, except passenger-only automotive build (i.e., when
-         Android runs in a separate system in the back seat to manage the passenger displays).
+         Should be false for all devices in production. Can be enabled only for development use
+         in passenger-only automotive build (i.e., when Android runs in a separate system in the
+         back seat to manage the passenger displays).
          When set to true, config_multiuserVisibleBackgroundUsers must also be true. -->
     <bool name="config_multiuserVisibleBackgroundUsersOnDefaultDisplay">false</bool>
 
