@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -68,7 +69,7 @@ open class UdfpsLockscreenViewModel(
                         if (visibleInKeyguardState(it.from, statusBarState)) {
                             1f
                         } else {
-                            it.value
+                            Interpolators.FAST_OUT_SLOW_IN.getInterpolation(it.value)
                         },
                     color = getColorAttrDefaultColor(context, alternateBouncerColorResId),
                 )
