@@ -16,11 +16,8 @@
 
 package com.android.systemui.biometrics.data.repository
 
-import android.hardware.biometrics.ComponentInfoInternal
 import android.hardware.biometrics.SensorLocationInternal
-import android.hardware.biometrics.SensorProperties
 import android.hardware.fingerprint.FingerprintManager
-import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
@@ -33,8 +30,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.shareIn
 
 /**
@@ -44,17 +43,22 @@ import kotlinx.coroutines.flow.shareIn
  */
 interface FingerprintPropertyRepository {
 
+    /**
+     * If the repository is initialized or not. Other properties are defaults until this is true.
+     */
+    val isInitialized: Flow<Boolean>
+
     /** The id of fingerprint sensor. */
-    val sensorId: Flow<Int>
+    val sensorId: StateFlow<Int>
 
     /** The security strength of sensor (convenience, weak, strong). */
-    val strength: Flow<SensorStrength>
+    val strength: StateFlow<SensorStrength>
 
     /** The types of fingerprint sensor (rear, ultrasonic, optical, etc.). */
-    val sensorType: Flow<FingerprintSensorType>
+    val sensorType: StateFlow<FingerprintSensorType>
 
     /** The sensor location relative to each physical display. */
-    val sensorLocations: Flow<Map<String, SensorLocationInternal>>
+    val sensorLocations: StateFlow<Map<String, SensorLocationInternal>>
 }
 
 @SysUISingleton
@@ -62,10 +66,10 @@ class FingerprintPropertyRepositoryImpl
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val fingerprintManager: FingerprintManager?
+    private val fingerprintManager: FingerprintManager
 ) : FingerprintPropertyRepository {
 
-    private val props: Flow<FingerprintSensorPropertiesInternal> =
+    override val isInitialized: Flow<Boolean> =
         conflatedCallbackFlow {
                 val callback =
                     object : IFingerprintAuthenticatorsRegisteredCallback.Stub() {
@@ -73,47 +77,45 @@ constructor(
                             sensors: List<FingerprintSensorPropertiesInternal>
                         ) {
                             if (sensors.isNotEmpty()) {
-                                trySendWithFailureLogging(sensors[0], TAG, "initialize properties")
-                            } else {
-                                trySendWithFailureLogging(
-                                    DEFAULT_PROPS,
-                                    TAG,
-                                    "initialize with default properties"
-                                )
+                                setProperties(sensors[0])
+                                trySendWithFailureLogging(true, TAG, "initialize properties")
                             }
                         }
                     }
-                fingerprintManager?.addAuthenticatorsRegisteredCallback(callback)
-                trySendWithFailureLogging(DEFAULT_PROPS, TAG, "initialize with default properties")
+                fingerprintManager.addAuthenticatorsRegisteredCallback(callback)
+                trySendWithFailureLogging(false, TAG, "initial value defaulting to false")
                 awaitClose {}
             }
             .shareIn(scope = applicationScope, started = SharingStarted.Eagerly, replay = 1)
 
-    override val sensorId: Flow<Int> = props.map { it.sensorId }
-    override val strength: Flow<SensorStrength> =
-        props.map { sensorStrengthIntToObject(it.sensorStrength) }
-    override val sensorType: Flow<FingerprintSensorType> =
-        props.map { sensorTypeIntToObject(it.sensorType) }
-    override val sensorLocations: Flow<Map<String, SensorLocationInternal>> =
-        props.map {
-            it.allLocations.associateBy { sensorLocationInternal ->
+    private val _sensorId: MutableStateFlow<Int> = MutableStateFlow(-1)
+    override val sensorId: StateFlow<Int> = _sensorId.asStateFlow()
+
+    private val _strength: MutableStateFlow<SensorStrength> =
+        MutableStateFlow(SensorStrength.CONVENIENCE)
+    override val strength = _strength.asStateFlow()
+
+    private val _sensorType: MutableStateFlow<FingerprintSensorType> =
+        MutableStateFlow(FingerprintSensorType.UNKNOWN)
+    override val sensorType = _sensorType.asStateFlow()
+
+    private val _sensorLocations: MutableStateFlow<Map<String, SensorLocationInternal>> =
+        MutableStateFlow(mapOf("" to SensorLocationInternal.DEFAULT))
+    override val sensorLocations: StateFlow<Map<String, SensorLocationInternal>> =
+        _sensorLocations.asStateFlow()
+
+    private fun setProperties(prop: FingerprintSensorPropertiesInternal) {
+        _sensorId.value = prop.sensorId
+        _strength.value = sensorStrengthIntToObject(prop.sensorStrength)
+        _sensorType.value = sensorTypeIntToObject(prop.sensorType)
+        _sensorLocations.value =
+            prop.allLocations.associateBy { sensorLocationInternal ->
                 sensorLocationInternal.displayId
             }
-        }
+    }
 
     companion object {
         private const val TAG = "FingerprintPropertyRepositoryImpl"
-        private val DEFAULT_PROPS =
-            FingerprintSensorPropertiesInternal(
-                -1 /* sensorId */,
-                SensorProperties.STRENGTH_CONVENIENCE,
-                0 /* maxEnrollmentsPerUser */,
-                listOf<ComponentInfoInternal>(),
-                FingerprintSensorProperties.TYPE_UNKNOWN,
-                false /* halControlsIllumination */,
-                true /* resetLockoutRequiresHardwareAuthToken */,
-                listOf<SensorLocationInternal>(SensorLocationInternal.DEFAULT)
-            )
     }
 }
 
