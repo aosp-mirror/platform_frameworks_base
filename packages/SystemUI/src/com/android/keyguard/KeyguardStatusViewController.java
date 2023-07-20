@@ -40,6 +40,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.VisibleForTesting;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.viewpager.widget.ViewPager;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -365,6 +366,19 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             // Excluding media from the transition on split-shade, as it doesn't transition
             // horizontally properly.
             transition.excludeTarget(R.id.status_view_media_container, true);
+
+            // Exclude smartspace viewpager and its children from the transition.
+            //     - Each step of the transition causes the ViewPager to invoke resize,
+            //     which invokes scrolling to the recalculated position. The scrolling
+            //     actions are congested, resulting in kinky translation, and
+            //     delay in settling to the final position. (http://b/281620564#comment1)
+            //     - Also, the scrolling is unnecessary in the transition. We just want
+            //     the viewpager to stay on the same page.
+            //     - Exclude by Class type instead of resource id, since the resource id
+            //     isn't available for all devices, and probably better to exclude all
+            //     ViewPagers any way.
+            transition.excludeTarget(ViewPager.class, true);
+            transition.excludeChildren(ViewPager.class, true);
         }
 
         transition.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
@@ -397,6 +411,24 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 adapter.setDuration(KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION);
                 adapter.addTarget(clockView);
                 set.addTransition(adapter);
+
+                if (splitShadeEnabled) {
+                    // Exclude smartspace viewpager and its children from the transition set.
+                    //     - This is necessary in addition to excluding them from the
+                    //     ChangeBounds child transition.
+                    //     - Without this, the viewpager is scrolled to the new position
+                    //     (corresponding to its end size) before the size change is realized.
+                    //     Note that the size change is realized at the end of the ChangeBounds
+                    //     transition. With the "prescrolling", the viewpager ends up in a weird
+                    //     position, then recovers smoothly during the transition, and ends at
+                    //     the position for the current page.
+                    //     - Exclude by Class type instead of resource id, since the resource id
+                    //     isn't available for all devices, and probably better to exclude all
+                    //     ViewPagers any way.
+                    set.excludeTarget(ViewPager.class, true);
+                    set.excludeChildren(ViewPager.class, true);
+                }
+
                 set.addListener(mKeyguardStatusAlignmentTransitionListener);
                 TransitionManager.beginDelayedTransition(notifContainerParent, set);
             }
