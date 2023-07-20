@@ -144,7 +144,7 @@ constructor(
         val oldKey: String?,
         val controller: MediaController?,
         val localMediaManager: LocalMediaManager,
-        val muteAwaitConnectionManager: MediaMuteAwaitConnectionManager?
+        val muteAwaitConnectionManager: MediaMuteAwaitConnectionManager,
     ) :
         LocalMediaManager.DeviceCallback,
         MediaController.Callback(),
@@ -180,7 +180,7 @@ constructor(
                 if (!started) {
                     localMediaManager.registerCallback(this)
                     localMediaManager.startScan()
-                    muteAwaitConnectionManager?.startListening()
+                    muteAwaitConnectionManager.startListening()
                     playbackType = controller?.playbackInfo?.playbackType ?: PLAYBACK_TYPE_UNKNOWN
                     playbackVolumeControlId = controller?.playbackInfo?.volumeControlId
                     controller?.registerCallback(this)
@@ -198,7 +198,7 @@ constructor(
                     controller?.unregisterCallback(this)
                     localMediaManager.stopScan()
                     localMediaManager.unregisterCallback(this)
-                    muteAwaitConnectionManager?.stopListening()
+                    muteAwaitConnectionManager.stopListening()
                     configurationController.removeCallback(configListener)
                 }
             }

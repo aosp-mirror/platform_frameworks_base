@@ -70,7 +70,6 @@ import org.junit.runner.RunWith;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -126,7 +125,7 @@ public class MediaOutputBroadcastDialogTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputBroadcastDialog = new MediaOutputBroadcastDialog(mContext, false,

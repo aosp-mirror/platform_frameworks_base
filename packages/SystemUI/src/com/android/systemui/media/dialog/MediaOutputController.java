@@ -100,7 +100,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -178,7 +177,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             lbm, ActivityStarter starter,
             CommonNotifCollection notifCollection,
             DialogLaunchAnimator dialogLaunchAnimator,
-            Optional<NearbyMediaDevicesManager> nearbyMediaDevicesManagerOptional,
+            NearbyMediaDevicesManager nearbyMediaDevicesManager,
             AudioManager audioManager,
             PowerExemptionManager powerExemptionManager,
             KeyguardManager keyGuardManager,
@@ -199,7 +198,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mDialogLaunchAnimator = dialogLaunchAnimator;
-        mNearbyMediaDevicesManager = nearbyMediaDevicesManagerOptional.orElse(null);
+        mNearbyMediaDevicesManager = nearbyMediaDevicesManager;
         mColorItemContent = Utils.getColorStateListDefaultColor(mContext,
                 R.color.media_dialog_item_main_content);
         mColorSeekbarProgress = Utils.getColorStateListDefaultColor(mContext,
@@ -922,7 +921,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     void launchMediaOutputBroadcastDialog(View mediaOutputDialog, BroadcastSender broadcastSender) {
         MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
                 mMediaSessionManager, mLocalBluetoothManager, mActivityStarter,
-                mNotifCollection, mDialogLaunchAnimator, Optional.of(mNearbyMediaDevicesManager),
+                mNotifCollection, mDialogLaunchAnimator, mNearbyMediaDevicesManager,
                 mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags,
                 mUserTracker);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
