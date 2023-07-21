@@ -42,7 +42,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerWhitelistManager;
 import android.os.PowerWhitelistManager.ReasonCode;
-import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
@@ -383,14 +382,6 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             })
     public static BackgroundStartPrivileges getDefaultBackgroundStartPrivileges(
             int callingUid, @Nullable String callingPackage) {
-        if (UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
-            // We temporarily allow BAL for system processes, while we verify that all valid use
-            // cases are opted in explicitly to grant their BAL permission.
-            // Background: In many cases devices are running additional apps that share UID with
-            // the system. If one of these apps targets a lower SDK the change is not active, but
-            // as soon as that app is upgraded (or removed) BAL would be blocked. (b/283138430)
-            return BackgroundStartPrivileges.ALLOW_BAL;
-        }
         boolean isChangeEnabledForApp = callingPackage != null ? CompatChanges.isChangeEnabled(
                 DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER, callingPackage,
                 UserHandle.getUserHandleForUid(callingUid)) : CompatChanges.isChangeEnabled(
