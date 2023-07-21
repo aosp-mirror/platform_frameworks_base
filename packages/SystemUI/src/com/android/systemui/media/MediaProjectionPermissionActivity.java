@@ -330,6 +330,8 @@ public class MediaProjectionPermissionActivity extends Activity
         // Don't send cancel if the user has moved on to the next activity.
         if (!mUserSelectingTask) {
             finish(RECORD_CANCEL, /* projection= */ null);
+        } else {
+            super.finish();
         }
     }
 
