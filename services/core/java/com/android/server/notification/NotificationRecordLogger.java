@@ -30,6 +30,7 @@ import android.app.Person;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
+import android.util.Log;
 
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEvent;
@@ -44,6 +45,8 @@ import java.util.Objects;
  * @hide
  */
 interface NotificationRecordLogger {
+
+    static final String TAG = "NotificationRecordLogger";
 
     // The high-level interface used by clients.
 
@@ -225,50 +228,39 @@ interface NotificationRecordLogger {
                 @NotificationStats.DismissalSurface int surface) {
             // Shouldn't be possible to get a non-dismissed notification here.
             if (surface == NotificationStats.DISMISSAL_NOT_DISMISSED) {
-                if (NotificationManagerService.DBG) {
-                    throw new IllegalArgumentException("Unexpected surface " + surface);
-                }
+                Log.wtf(TAG, "Unexpected surface: " + surface + " with reason " + reason);
                 return INVALID;
             }
-            // Most cancel reasons do not have a meaningful surface. Reason codes map directly
-            // to NotificationCancelledEvent codes.
-            if (surface == NotificationStats.DISMISSAL_OTHER) {
+
+            // User cancels have a meaningful surface, which we differentiate by. See b/149038335
+            // for caveats.
+            if (reason == REASON_CANCEL) {
+                switch (surface) {
+                    case NotificationStats.DISMISSAL_PEEK:
+                        return NOTIFICATION_CANCEL_USER_PEEK;
+                    case NotificationStats.DISMISSAL_AOD:
+                        return NOTIFICATION_CANCEL_USER_AOD;
+                    case NotificationStats.DISMISSAL_SHADE:
+                        return NOTIFICATION_CANCEL_USER_SHADE;
+                    case NotificationStats.DISMISSAL_BUBBLE:
+                        return NOTIFICATION_CANCEL_USER_BUBBLE;
+                    case NotificationStats.DISMISSAL_LOCKSCREEN:
+                        return NOTIFICATION_CANCEL_USER_LOCKSCREEN;
+                    case NotificationStats.DISMISSAL_OTHER:
+                        return NOTIFICATION_CANCEL_USER_OTHER;
+                    default:
+                        Log.wtf(TAG, "Unexpected surface: " + surface + " with reason " + reason);
+                        return INVALID;
+                }
+            } else {
                 if ((REASON_CLICK <= reason) && (reason <= REASON_CLEAR_DATA)) {
                     return NotificationCancelledEvent.values()[reason];
                 }
                 if (reason == REASON_ASSISTANT_CANCEL) {
                     return NotificationCancelledEvent.NOTIFICATION_CANCEL_ASSISTANT;
                 }
-                if (NotificationManagerService.DBG) {
-                    throw new IllegalArgumentException("Unexpected cancel reason " + reason);
-                }
+                Log.wtf(TAG, "Unexpected reason: " + reason + " with surface " + surface);
                 return INVALID;
-            }
-            // User cancels have a meaningful surface, which we differentiate by. See b/149038335
-            // for caveats.
-            if (reason != REASON_CANCEL) {
-                if (NotificationManagerService.DBG) {
-                    throw new IllegalArgumentException("Unexpected cancel with surface " + reason);
-                }
-                return INVALID;
-            }
-            switch (surface) {
-                case NotificationStats.DISMISSAL_PEEK:
-                    return NOTIFICATION_CANCEL_USER_PEEK;
-                case NotificationStats.DISMISSAL_AOD:
-                    return NOTIFICATION_CANCEL_USER_AOD;
-                case NotificationStats.DISMISSAL_SHADE:
-                    return NOTIFICATION_CANCEL_USER_SHADE;
-                case NotificationStats.DISMISSAL_BUBBLE:
-                    return NOTIFICATION_CANCEL_USER_BUBBLE;
-                case NotificationStats.DISMISSAL_LOCKSCREEN:
-                    return NOTIFICATION_CANCEL_USER_LOCKSCREEN;
-                default:
-                    if (NotificationManagerService.DBG) {
-                        throw new IllegalArgumentException("Unexpected surface for user-dismiss "
-                                + reason);
-                    }
-                    return INVALID;
             }
         }
     }
