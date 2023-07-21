@@ -2986,8 +2986,6 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracing.getInstance().triggerServiceDump(
                 "InputMethodService#applyVisibilityInInsetsConsumerIfNecessary", mDumper,
                 null /* icProto */);
-        ImeTracker.forLogging().onProgress(mCurStatsToken,
-                ImeTracker.PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER);
         mPrivOps.applyImeVisibilityAsync(setVisible
                 ? mCurShowInputToken : mCurHideInputToken, setVisible, mCurStatsToken);
     }
