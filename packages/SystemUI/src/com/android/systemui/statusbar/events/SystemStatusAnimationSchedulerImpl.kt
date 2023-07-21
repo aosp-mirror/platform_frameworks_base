@@ -182,19 +182,19 @@ constructor(
         // Set hasPersistentDot to false. If the animationState is anything before ANIMATING_OUT,
         // the disappear animation will not animate into a dot but remove the chip entirely
         hasPersistentDot = false
-        // if we are currently showing a persistent dot, hide it
-        if (animationState.value == SHOWING_PERSISTENT_DOT) notifyHidePersistentDot()
-        // if we are currently animating into a dot, wait for the animation to finish and then hide
-        // the dot
-        if (animationState.value == ANIMATING_OUT) {
-            coroutineScope.launch {
-                withTimeout(DISAPPEAR_ANIMATION_DURATION) {
-                    animationState.first {
-                        it == SHOWING_PERSISTENT_DOT || it == IDLE || it == ANIMATION_QUEUED
-                    }
-                    notifyHidePersistentDot()
-                }
+
+        if (animationState.value == SHOWING_PERSISTENT_DOT) {
+            // if we are currently showing a persistent dot, hide it and update the animationState
+            notifyHidePersistentDot()
+            if (scheduledEvent.value != null) {
+                animationState.value = ANIMATION_QUEUED
+            } else {
+                animationState.value = IDLE
             }
+        } else if (animationState.value == ANIMATING_OUT) {
+            // if we are currently animating out, hide the dot. The animationState will be updated
+            // once the animation has ended in the onAnimationEnd callback
+            notifyHidePersistentDot()
         }
     }
 
@@ -375,14 +375,6 @@ constructor(
     private fun notifyHidePersistentDot(): Animator? {
         Assert.isMainThread()
         val anims: List<Animator> = listeners.mapNotNull { it.onHidePersistentDot() }
-
-        if (animationState.value == SHOWING_PERSISTENT_DOT) {
-            if (scheduledEvent.value != null) {
-                animationState.value = ANIMATION_QUEUED
-            } else {
-                animationState.value = IDLE
-            }
-        }
 
         if (anims.isNotEmpty()) {
             val aSet = AnimatorSet()
