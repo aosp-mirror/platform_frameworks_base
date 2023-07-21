@@ -5543,7 +5543,7 @@ public final class PowerManagerService extends SystemService
         private void recordReferenceLocked(String id) {
             LongArray times = mOpenReferenceTimes.get(id);
             if (times == null) {
-                times = new LongArray();
+                times = new LongArray(2);
                 mOpenReferenceTimes.put(id, times);
             }
             times.add(System.currentTimeMillis());
@@ -5553,6 +5553,9 @@ public final class PowerManagerService extends SystemService
             LongArray times = mOpenReferenceTimes.get(id);
             if (times != null && times.size() > 0) {
                 times.remove(times.size() - 1);
+                if (times.size() == 0) {
+                    mOpenReferenceTimes.remove(id);
+                }
             }
         }
     }
