@@ -43,10 +43,10 @@ import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Easings
+import com.android.compose.modifiers.thenIf
 import com.android.internal.R
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
-import com.android.systemui.compose.modifiers.thenIf
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
