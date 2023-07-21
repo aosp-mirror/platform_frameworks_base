@@ -42,6 +42,7 @@ import android.os.UserHandle;
 import android.power.PowerStatsInternal;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 
@@ -232,18 +233,31 @@ public class PowerStatsService extends SystemService {
                     } else if ("residency".equals(args[1])) {
                         mPowerStatsLogger.writeResidencyDataToFile(fd);
                     }
-                } else if (args.length == 0) {
-                    pw.println("PowerStatsService dumpsys: available PowerEntities");
+                } else {
+                    IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
+                    ipw.println("PowerStatsService dumpsys: available PowerEntities");
                     PowerEntity[] powerEntity = getPowerStatsHal().getPowerEntityInfo();
-                    PowerEntityUtils.dumpsys(powerEntity, pw);
+                    ipw.increaseIndent();
+                    PowerEntityUtils.dumpsys(powerEntity, ipw);
+                    ipw.decreaseIndent();
 
-                    pw.println("PowerStatsService dumpsys: available Channels");
+                    ipw.println("PowerStatsService dumpsys: available Channels");
                     Channel[] channel = getPowerStatsHal().getEnergyMeterInfo();
-                    ChannelUtils.dumpsys(channel, pw);
+                    ipw.increaseIndent();
+                    ChannelUtils.dumpsys(channel, ipw);
+                    ipw.decreaseIndent();
 
-                    pw.println("PowerStatsService dumpsys: available EnergyConsumers");
+                    ipw.println("PowerStatsService dumpsys: available EnergyConsumers");
                     EnergyConsumer[] energyConsumer = getPowerStatsHal().getEnergyConsumerInfo();
-                    EnergyConsumerUtils.dumpsys(energyConsumer, pw);
+                    ipw.increaseIndent();
+                    EnergyConsumerUtils.dumpsys(energyConsumer, ipw);
+                    ipw.decreaseIndent();
+
+                    ipw.println("PowerStatsService dumpsys: PowerStatsLogger stats");
+                    ipw.increaseIndent();
+                    mPowerStatsLogger.dump(ipw);
+                    ipw.decreaseIndent();
+
                 }
             }
         }

@@ -17,6 +17,7 @@
 package com.android.server.powerstats;
 
 import android.content.Context;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.util.FileRotator;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -262,6 +264,53 @@ public class PowerStatsDataStorage {
                     files[i].delete();
                 }
             }
+        } finally {
+            mLock.unlock();
+        }
+    }
+
+    /**
+     * Dump stats about stored data.
+     */
+    public void dump(IndentingPrintWriter ipw) {
+        mLock.lock();
+        try {
+            final int versionDot = mDataStorageFilename.lastIndexOf('.');
+            final String beforeVersionDot = mDataStorageFilename.substring(0, versionDot);
+            final File[] files = mDataStorageDir.listFiles();
+
+            int number = 0;
+            int dataSize = 0;
+            long earliestLogEpochTime = Long.MAX_VALUE;
+            for (int i = 0; i < files.length; i++) {
+                // Check that the stems before the version match.
+                final File file = files[i];
+                final String fileName = file.getName();
+                if (files[i].getName().startsWith(beforeVersionDot)) {
+                    number++;
+                    dataSize += file.length();
+                    final int firstTimeChar = fileName.lastIndexOf('.') + 1;
+                    final int endChar = fileName.lastIndexOf('-');
+                    try {
+                        final Long startTime =
+                                Long.parseLong(fileName.substring(firstTimeChar, endChar));
+                        if (startTime != null && startTime < earliestLogEpochTime) {
+                            earliestLogEpochTime = startTime;
+                        }
+                    } catch (NumberFormatException nfe) {
+                        Slog.e(TAG,
+                            "Failed to extract start time from file : " + fileName, nfe);
+                    }
+                }
+            }
+
+            if (earliestLogEpochTime != Long.MAX_VALUE) {
+                ipw.println("Earliest data time : " + new Date(earliestLogEpochTime));
+            } else {
+                ipw.println("Failed to parse earliest data time!!!");
+            }
+            ipw.println("# files : " + number);
+            ipw.println("Total data size (B) : " + dataSize);
         } finally {
             mLock.unlock();
         }
