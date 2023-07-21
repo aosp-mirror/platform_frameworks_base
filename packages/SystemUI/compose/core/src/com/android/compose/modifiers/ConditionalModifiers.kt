@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.compose.modifiers
+package com.android.compose.modifiers
 
 import androidx.compose.ui.Modifier
 

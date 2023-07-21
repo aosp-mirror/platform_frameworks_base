@@ -75,7 +75,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Easings
 import com.android.compose.grid.VerticalGrid
-import com.android.internal.R.id.image
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.R
 import com.android.systemui.bouncer.ui.viewmodel.ActionButtonAppearance
 import com.android.systemui.bouncer.ui.viewmodel.EnteredKey
@@ -83,7 +83,6 @@ import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
-import com.android.systemui.compose.modifiers.thenIf
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
 import kotlinx.coroutines.async
