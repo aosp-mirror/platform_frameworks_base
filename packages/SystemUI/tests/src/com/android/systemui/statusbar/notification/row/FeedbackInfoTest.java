@@ -41,6 +41,7 @@ import android.app.NotificationChannel;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -60,11 +61,14 @@ import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Locale;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -86,6 +90,8 @@ public class FeedbackInfoTest extends SysuiTestCase {
     private IStatusBarService mStatusBarService;
     @Mock
     private NotificationGutsManager mNotificationGutsManager;
+
+    private Configuration mConfig;
 
     @Before
     public void setUp() throws Exception {
@@ -111,7 +117,15 @@ public class FeedbackInfoTest extends SysuiTestCase {
 
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
+        mConfig = new Configuration(mContext.getResources().getConfiguration());
+        Configuration c2 = new Configuration(mConfig);
+        c2.setLocale(Locale.US);
+        mContext.getResources().updateConfiguration(c2, null);
+    }
 
+    @After
+    public void tearDown() {
+        mContext.getResources().updateConfiguration(mConfig, null);
     }
 
     @Test

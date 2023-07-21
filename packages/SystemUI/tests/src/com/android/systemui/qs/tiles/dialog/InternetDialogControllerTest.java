@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
@@ -90,6 +91,7 @@ import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @SmallTest
@@ -182,6 +184,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private List<WifiEntry> mAccessPoints = new ArrayList<>();
     private List<WifiEntry> mWifiEntries = new ArrayList<>();
 
+    private Configuration mConfig;
+
     @Before
     public void setUp() {
         mStaticMockSession = mockitoSession()
@@ -226,11 +230,17 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mInternetDialogController.mActivityStarter = mActivityStarter;
         mInternetDialogController.mWifiIconInjector = mWifiIconInjector;
         mFlags.set(Flags.QS_SECONDARY_DATA_SUB_INFO, false);
+
+        mConfig = new Configuration(mContext.getResources().getConfiguration());
+        Configuration c2 = new Configuration(mConfig);
+        c2.setLocale(Locale.US);
+        mContext.getResources().updateConfiguration(c2, null);
     }
 
     @After
     public void tearDown() {
         mStaticMockSession.finishMocking();
+        mContext.getResources().updateConfiguration(mConfig, null);
     }
 
     @Test
