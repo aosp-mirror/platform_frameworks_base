@@ -19,11 +19,9 @@
     },
     {
       "name": "CtsOverlayHostTestCases"
-    }
-  ],
-  "presubmit-large": [
+    },
     {
-      "name": "CtsContentTestCases",
+      "name": "CtsResourcesTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
