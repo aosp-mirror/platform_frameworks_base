@@ -63,13 +63,11 @@ final class HsumBootUserInitializer {
 
     /** Whether this device should always have a non-removable MainUser, including at first boot. */
     private final boolean mShouldAlwaysHaveMainUser;
-    /** Whether this device should have a communal profile created at first boot. */
-    private final boolean mShouldAlwaysHaveCommunalProfile;
 
     /** Static factory method for creating a {@link HsumBootUserInitializer} instance. */
     public static @Nullable HsumBootUserInitializer createInstance(ActivityManagerService am,
             PackageManagerService pms, ContentResolver contentResolver,
-            boolean shouldAlwaysHaveMainUser, boolean shouldAlwaysHaveCommunalProfile) {
+            boolean shouldAlwaysHaveMainUser) {
 
         if (!UserManager.isHeadlessSystemUserMode()) {
             return null;
@@ -77,18 +75,17 @@ final class HsumBootUserInitializer {
         return new HsumBootUserInitializer(
                 LocalServices.getService(UserManagerInternal.class),
                 am, pms, contentResolver,
-                shouldAlwaysHaveMainUser, shouldAlwaysHaveCommunalProfile);
+                shouldAlwaysHaveMainUser);
     }
 
     private HsumBootUserInitializer(UserManagerInternal umi, ActivityManagerService am,
             PackageManagerService pms, ContentResolver contentResolver,
-            boolean shouldAlwaysHaveMainUser, boolean shouldAlwaysHaveCommunalProfile) {
+            boolean shouldAlwaysHaveMainUser) {
         mUmi = umi;
         mAms = am;
         mPms = pms;
         mContentResolver = contentResolver;
         mShouldAlwaysHaveMainUser = shouldAlwaysHaveMainUser;
-        mShouldAlwaysHaveCommunalProfile = shouldAlwaysHaveCommunalProfile;
     }
 
     /**
@@ -104,11 +101,6 @@ final class HsumBootUserInitializer {
         if (mShouldAlwaysHaveMainUser) {
             t.traceBegin("createMainUserIfNeeded");
             createMainUserIfNeeded();
-            t.traceEnd();
-        }
-        if (mShouldAlwaysHaveCommunalProfile) {
-            t.traceBegin("createCommunalProfileIfNeeded");
-            createCommunalProfileIfNeeded();
             t.traceEnd();
         }
     }
@@ -134,25 +126,6 @@ final class HsumBootUserInitializer {
         }
     }
 
-    private void createCommunalProfileIfNeeded() {
-        final int communalProfile = mUmi.getCommunalProfileId();
-        if (communalProfile != UserHandle.USER_NULL) {
-            Slogf.d(TAG, "Found existing Communal Profile, userId=%d", communalProfile);
-            return;
-        }
-
-        Slogf.d(TAG, "Creating a new Communal Profile");
-        try {
-            final UserInfo newProfile = mUmi.createUserEvenWhenDisallowed(
-                    /* name= */ null,  // TODO: Create Communal Profile string name
-                    UserManager.USER_TYPE_PROFILE_COMMUNAL,
-                    /* flags= */ 0, /* disallowedPackages= */ null, /* token= */ null);
-            Slogf.i(TAG, "Successfully created Communal Profile, userId=%d", newProfile.id);
-        } catch (UserManager.CheckedUserOperationException e) {
-            Slogf.wtf(TAG, "Communal Profile creation failed", e);
-        }
-    }
-
     /**
      * Put the device into the correct user state: unlock the system and switch to the boot user.
      *
@@ -173,48 +146,6 @@ final class HsumBootUserInitializer {
             t.traceEnd();
         } catch (UserManager.CheckedUserOperationException e) {
             Slogf.wtf(TAG, "Failed to switch to boot user since there isn't one.");
-        }
-    }
-
-    /**
-     * Handles any final initialization once the system is already ready.
-     *
-     * <p>Should only call after {@link ActivityManagerService#systemReady} is completed.
-     */
-    public void postSystemReady(TimingsTraceAndSlog t) {
-        if (mShouldAlwaysHaveCommunalProfile) {
-            startCommunalProfile(t);
-        } else {
-            // As a safeguard, disabling the Communal Profile configuration (or SystemProperty) will
-            // purposefully trigger the removal of the Communal Profile at boot time.
-            removeCommunalProfileIfNeeded();
-        }
-    }
-
-    private void startCommunalProfile(TimingsTraceAndSlog t) {
-        final int communalProfileId = mUmi.getCommunalProfileId();
-        if (communalProfileId != UserHandle.USER_NULL) {
-            Slogf.d(TAG, "Starting the Communal Profile");
-            t.traceBegin("startCommunalProfile-" + communalProfileId);
-            final boolean started = mAms.startProfile(communalProfileId);
-            if (!started) {
-                Slogf.wtf(TAG, "Failed to start communal profile userId=%d", communalProfileId);
-            }
-            t.traceEnd();
-        } else {
-            Slogf.w(TAG, "Cannot start Communal Profile because there isn't one");
-        }
-    }
-
-    private void removeCommunalProfileIfNeeded() {
-        final int communalProfile = mUmi.getCommunalProfileId();
-        if (communalProfile == UserHandle.USER_NULL) {
-            return;
-        }
-        Slogf.d(TAG, "Removing existing Communal Profile, userId=%d", communalProfile);
-        final boolean removeSucceeded = mUmi.removeUserEvenWhenDisallowed(communalProfile);
-        if (!removeSucceeded) {
-            Slogf.e(TAG, "Failed to Communal Profile, userId=%d", communalProfile);
         }
     }
 
