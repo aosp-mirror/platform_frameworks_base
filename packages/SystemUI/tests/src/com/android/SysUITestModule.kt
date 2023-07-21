@@ -16,10 +16,12 @@
 package com.android
 
 import android.content.Context
+import android.content.res.Resources
 import com.android.systemui.FakeSystemUiModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
 import dagger.Module
 import dagger.Provides
 
@@ -35,6 +37,9 @@ class SysUITestModule {
     @Provides fun provideContext(test: SysuiTestCase): Context = test.context
 
     @Provides @Application fun provideAppContext(test: SysuiTestCase): Context = test.context
+
+    @Provides @Main
+    fun provideResources(@Application context: Context): Resources = context.resources
 
     @Provides
     fun provideBroadcastDispatcher(test: SysuiTestCase): BroadcastDispatcher =

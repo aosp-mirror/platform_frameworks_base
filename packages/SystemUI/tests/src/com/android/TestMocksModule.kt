@@ -22,7 +22,9 @@ import android.util.DisplayMetrics
 import com.android.internal.logging.MetricsLogger
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardViewController
 import com.android.systemui.GuestResumeSessionReceiver
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.ScreenLifecycle
@@ -31,6 +33,7 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.dagger.BroadcastDispatcherLog
 import com.android.systemui.log.dagger.SceneFrameworkLog
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.model.SysUiState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -86,6 +89,9 @@ data class TestMocksModule(
     @get:Provides val statusBarStateController: SysuiStatusBarStateController = mock(),
     @get:Provides val statusBarWindowController: StatusBarWindowController = mock(),
     @get:Provides val wakefulnessLifecycle: WakefulnessLifecycle = mock(),
+    @get:Provides val keyguardViewController: KeyguardViewController = mock(),
+    @get:Provides val dialogLaunchAnimator: DialogLaunchAnimator = mock(),
+    @get:Provides val sysuiState: SysUiState = mock(),
 
     // log buffers
     @get:[Provides BroadcastDispatcherLog]
