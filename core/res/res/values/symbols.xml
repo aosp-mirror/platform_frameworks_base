@@ -418,6 +418,7 @@
   <java-symbol type="bool" name="config_localDisplaysMirrorContent" />
   <java-symbol type="bool" name="config_ignoreUdfpsVote" />
   <java-symbol type="bool" name="config_enableProximityService" />
+  <java-symbol type="bool" name="config_enableVirtualDeviceManager" />
   <java-symbol type="array" name="config_localPrivateDisplayPorts" />
   <java-symbol type="integer" name="config_defaultDisplayDefaultColorMode" />
   <java-symbol type="bool" name="config_enableAppWidgetService" />
