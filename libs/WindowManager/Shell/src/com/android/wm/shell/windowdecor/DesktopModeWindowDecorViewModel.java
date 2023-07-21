@@ -407,10 +407,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mDragPointerId = e.getPointerId(0);
                     }
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
-                    mDesktopTasksController.ifPresent(c -> c.onDragPositioningMove(taskInfo,
-                            decoration.mTaskSurface, e.getRawY(dragPointerIdx)));
-                    mDragPositioningCallback.onDragPositioningMove(
+                    final Rect newTaskBounds = mDragPositioningCallback.onDragPositioningMove(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
+                    mDesktopTasksController.ifPresent(c -> c.onDragPositioningMove(taskInfo,
+                            decoration.mTaskSurface, newTaskBounds.top));
                     mIsDragging = true;
                     mShouldClick = false;
                     return true;
@@ -436,10 +436,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     final Point position = new Point(
                             (int) (e.getRawX(dragPointerIdx) - e.getX(dragPointerIdx)),
                             (int) (e.getRawY(dragPointerIdx) - e.getY(dragPointerIdx)));
-                    mDragPositioningCallback.onDragPositioningEnd(
+                    final Rect newTaskBounds = mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mDesktopTasksController.ifPresent(c -> c.onDragPositioningEnd(taskInfo,
-                            position, e.getRawY(), mWindowDecorByTaskId.get(mTaskId)));
+                            position, newTaskBounds.top, mWindowDecorByTaskId.get(mTaskId)));
                     mIsDragging = false;
                     return true;
                 }
