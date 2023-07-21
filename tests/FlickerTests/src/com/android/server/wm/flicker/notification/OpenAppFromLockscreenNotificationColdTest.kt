@@ -17,8 +17,10 @@
 package com.android.server.wm.flicker.notification
 
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.platform.test.rule.SettingOverrideRule
 import android.provider.Settings
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
@@ -106,6 +108,21 @@ open class OpenAppFromLockscreenNotificationColdTest(flicker: LegacyFlickerTest)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        flicker.assertWm {
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry(
+                listOf(
+                    ComponentNameMatcher.SPLASH_SCREEN,
+                    ComponentNameMatcher.SNAPSHOT,
+                    ComponentNameMatcher.SECONDARY_HOME_HANDLE,
+                    Consts.IMAGE_WALLPAPER
+                )
+            )
+        }
+    }
 
     companion object {
         /**
