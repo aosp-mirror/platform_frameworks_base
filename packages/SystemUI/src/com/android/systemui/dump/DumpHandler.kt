@@ -16,12 +16,9 @@
 
 package com.android.systemui.dump
 
-import android.content.Context
 import android.os.SystemClock
 import android.os.Trace
-import com.android.systemui.CoreStartable
 import com.android.systemui.ProtoDumpable
-import com.android.systemui.R
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_CRITICAL
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_NORMAL
 import com.android.systemui.dump.DumpsysEntry.DumpableEntry
@@ -36,7 +33,6 @@ import java.io.FileDescriptor
 import java.io.FileOutputStream
 import java.io.PrintWriter
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * Oversees SystemUI's output during bug reports (and dumpsys in general)
@@ -91,10 +87,9 @@ import javax.inject.Provider
 class DumpHandler
 @Inject
 constructor(
-    private val context: Context,
     private val dumpManager: DumpManager,
     private val logBufferEulogizer: LogBufferEulogizer,
-    private val startables: MutableMap<Class<*>, Provider<CoreStartable>>,
+    private val config: SystemUIConfigDumpable,
 ) {
     /** Dump the diagnostics! Behavior can be controlled via [args]. */
     fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
@@ -148,7 +143,6 @@ constructor(
                 dumpDumpable(target, pw, args.rawArgs)
             }
         }
-        dumpConfig(pw)
     }
 
     private fun dumpNormal(pw: PrintWriter, args: ParsedArgs) {
@@ -267,37 +261,7 @@ constructor(
     }
 
     private fun dumpConfig(pw: PrintWriter) {
-        pw.println("SystemUiServiceComponents configuration:")
-        pw.print("vendor component: ")
-        pw.println(context.resources.getString(R.string.config_systemUIVendorServiceComponent))
-        val services: MutableList<String> =
-            startables.keys.map({ cls: Class<*> -> cls.simpleName }).toMutableList()
-
-        services.add(context.resources.getString(R.string.config_systemUIVendorServiceComponent))
-        dumpServiceList(pw, "global", services.toTypedArray())
-        dumpServiceList(pw, "per-user", R.array.config_systemUIServiceComponentsPerUser)
-    }
-
-    private fun dumpServiceList(pw: PrintWriter, type: String, resId: Int) {
-        val services: Array<String> = context.resources.getStringArray(resId)
-        dumpServiceList(pw, type, services)
-    }
-
-    private fun dumpServiceList(pw: PrintWriter, type: String, services: Array<String>?) {
-        pw.print(type)
-        pw.print(": ")
-        if (services == null) {
-            pw.println("N/A")
-            return
-        }
-        pw.print(services.size)
-        pw.println(" services")
-        for (i in services.indices) {
-            pw.print("  ")
-            pw.print(i)
-            pw.print(": ")
-            pw.println(services[i])
-        }
+        config.dump(pw, arrayOf())
     }
 
     private fun dumpHelp(pw: PrintWriter) {

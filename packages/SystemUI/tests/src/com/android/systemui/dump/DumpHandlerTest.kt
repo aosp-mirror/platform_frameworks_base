@@ -26,10 +26,6 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.google.common.truth.Truth.assertThat
-import java.io.FileDescriptor
-import java.io.PrintWriter
-import java.io.StringWriter
-import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -37,6 +33,10 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.io.FileDescriptor
+import java.io.PrintWriter
+import java.io.StringWriter
+import javax.inject.Provider
 
 @SmallTest
 class DumpHandlerTest : SysuiTestCase() {
@@ -79,14 +79,12 @@ class DumpHandlerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        dumpHandler = DumpHandler(
-            mContext,
-            dumpManager,
-            logBufferEulogizer,
-            mutableMapOf(
-                EmptyCoreStartable::class.java to Provider { EmptyCoreStartable() }
-            ),
+        val config = SystemUIConfigDumpable(
+                dumpManager,
+                mContext,
+                mutableMapOf(EmptyCoreStartable::class.java to Provider { EmptyCoreStartable() }),
         )
+        dumpHandler = DumpHandler(dumpManager, logBufferEulogizer, config)
     }
 
     @Test
