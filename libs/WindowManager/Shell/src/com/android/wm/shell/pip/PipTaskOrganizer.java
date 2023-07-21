@@ -590,7 +590,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 SplitScreenController split = mSplitScreenOptional.get();
                 if (split.isTaskInSplitScreen(mTaskInfo.lastParentTaskIdBeforePip)) {
                     split.prepareExitSplitScreen(wct, split.getStageOfTask(
-                            mTaskInfo.lastParentTaskIdBeforePip));
+                            mTaskInfo.lastParentTaskIdBeforePip),
+                            SplitScreenController.EXIT_REASON_APP_FINISHED);
                 }
             }
             mPipTransitionController.startExitTransition(TRANSIT_EXIT_PIP, wct, destinationBounds);
