@@ -72,7 +72,6 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -518,12 +517,10 @@ class ControlsUiControllerImpl @Inject constructor (
                         ADD_APP_ID
                 ))
             }
-            if (featureFlags.isEnabled(Flags.APP_PANELS_REMOVE_APPS_ALLOWED)) {
-                add(OverflowMenuAdapter.MenuItem(
-                        context.getText(R.string.controls_menu_remove),
-                        REMOVE_APP_ID,
-                ))
-            }
+            add(OverflowMenuAdapter.MenuItem(
+                    context.getText(R.string.controls_menu_remove),
+                    REMOVE_APP_ID,
+            ))
             if (!isPanel) {
                 add(OverflowMenuAdapter.MenuItem(
                         context.getText(R.string.controls_menu_edit),
