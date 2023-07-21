@@ -34,25 +34,33 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
 
+import android.app.ClientTransactionHandler;
 import android.app.IWindowToken;
+import android.app.servertransaction.ClientTransactionItem;
+import android.app.servertransaction.WindowContextInfoChangeItem;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArrayMap;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.window.WindowContextInfo;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 /**
@@ -68,20 +76,52 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
     private static final int TEST_UID = 12345;
     private static final int ANOTHER_UID = 1000;
 
+    @Mock
+    private ClientTransactionHandler mHandler;
+
     private WindowProcessController mWpc;
     private final IBinder mClientToken = new Binder();
     private WindowContainer<?> mContainer;
+    private ArrayMap<IBinder, TestWindowTokenClient> mWindowTokenClientMap;
 
     @Before
     public void setUp() {
+        initMocks(this);
         mController = new WindowContextListenerController();
         mContainer = createTestWindowToken(TYPE_APPLICATION_OVERLAY, mDisplayContent);
         // Make display on to verify configuration propagation.
         mDefaultDisplay.getDisplayInfo().state = STATE_ON;
         mDisplayContent.getDisplayInfo().state = STATE_ON;
+        mWindowTokenClientMap = new ArrayMap<>();
+
         mWpc = mSystemServicesTestRule.addProcess(
                 DEFAULT_COMPONENT_PACKAGE_NAME, DEFAULT_COMPONENT_PACKAGE_NAME, 0 /* pid */,
                 TEST_UID);
+        // Mock the behaviors on ClientTransaction
+        spyOn(mWpc);
+        doAnswer(invocation -> {
+            // Mock ActivityThread
+            final Object[] args = invocation.getArguments();
+            final IBinder clientToken = (IBinder) args[0];
+            final WindowContextInfo info = (WindowContextInfo) args[1];
+            final TestWindowTokenClient client = mWindowTokenClientMap.get(clientToken);
+            if (client != null) {
+                // Can be null for mock client.
+                client.onConfigurationChanged(info.getConfiguration(), info.getDisplayId());
+            }
+            return null;
+        }).when(mHandler).handleWindowContextInfoChanged(any(), any());
+        doAnswer(invocation -> {
+            // Mock WindowProcessController
+            final Object[] args = invocation.getArguments();
+            final ClientTransactionItem item = (ClientTransactionItem) args[0];
+            if (!(item instanceof WindowContextInfoChangeItem)) {
+                return null;
+            }
+            final WindowContextInfoChangeItem infoChangeItem = (WindowContextInfoChangeItem) item;
+            infoChangeItem.execute(mHandler, null, null);
+            return null;
+        }).when(mWpc).scheduleClientTransactionItem(any());
     }
 
     @Test
@@ -304,10 +344,14 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
         assertThat(clientToken.mDisplayId).isEqualTo(mDisplayContent.mDisplayId);
     }
 
-    private static class TestWindowTokenClient extends IWindowToken.Stub {
+    private class TestWindowTokenClient extends IWindowToken.Stub {
         private Configuration mConfiguration;
         private int mDisplayId;
         private boolean mRemoved;
+
+        TestWindowTokenClient() {
+            mWindowTokenClientMap.put(asBinder(), this);
+        }
 
         @Override
         public void onConfigurationChanged(Configuration configuration, int displayId) {

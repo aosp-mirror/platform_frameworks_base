@@ -95,11 +95,10 @@ public class WindowTokenClient extends IWindowToken.Stub {
      * @param newConfig the updated {@link Configuration}
      * @param newDisplayId the updated {@link android.view.Display} ID
      */
-    @AnyThread
+    @MainThread
     @Override
     public void onConfigurationChanged(Configuration newConfig, int newDisplayId) {
-        // TODO(b/290876897): No need to post on mHandler after migrating to ClientTransaction
-        postOnConfigurationChanged(newConfig, newDisplayId);
+        onConfigurationChanged(newConfig, newDisplayId, true /* shouldReportConfigChange */);
     }
 
     /**
@@ -193,16 +192,9 @@ public class WindowTokenClient extends IWindowToken.Stub {
         }
     }
 
-    @AnyThread
+    @MainThread
     @Override
     public void onWindowTokenRemoved() {
-        // TODO(b/290876897): No need to post on mHandler after migrating to ClientTransaction
-        mHandler.post(PooledLambda.obtainRunnable(
-                WindowTokenClient::onWindowTokenRemovedInner, this).recycleOnUse());
-    }
-
-    @MainThread
-    private void onWindowTokenRemovedInner() {
         final Context context = mContextRef.get();
         if (context != null) {
             context.destroy();
