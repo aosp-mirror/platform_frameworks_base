@@ -8169,7 +8169,13 @@ public final class ActiveServices {
                 mAm.getUidStateLocked(r.mRecentCallingUid),
                 mAm.getUidProcessCapabilityLocked(r.mRecentCallingUid),
                 0,
-                0);
+                0,
+                r.mAllowWhileInUsePermissionInFgsReasonNoBinding,
+                r.mAllowWIUInBindService,
+                r.mAllowWIUByBindings,
+                r.mAllowStartForegroundNoBinding,
+                r.mAllowStartInBindService,
+                r.mAllowStartByBindings);
 
         int event = 0;
         if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER) {
