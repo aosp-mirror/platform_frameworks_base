@@ -2705,6 +2705,9 @@
          backlight values -->
     <bool name="config_displayBrightnessBucketsInDoze">false</bool>
 
+    <!-- True to skip the fade animation on display off event -->
+    <bool name="config_displayColorFadeDisabled">false</bool>
+
     <!-- Power Management: Specifies whether to decouple the auto-suspend state of the
          device from the display on/off state.
 
