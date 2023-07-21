@@ -139,6 +139,21 @@ class OpenAppFromLockscreenNotificationWarmTest(flicker: LegacyFlickerTest) :
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        flicker.assertWm {
+            this.visibleWindowsShownMoreThanOneConsecutiveEntry(
+                listOf(
+                    ComponentNameMatcher.SPLASH_SCREEN,
+                    ComponentNameMatcher.SNAPSHOT,
+                    ComponentNameMatcher.SECONDARY_HOME_HANDLE,
+                    Consts.IMAGE_WALLPAPER
+                )
+            )
+        }
+    }
+
     companion object {
         /**
          * Creates the test configurations.
