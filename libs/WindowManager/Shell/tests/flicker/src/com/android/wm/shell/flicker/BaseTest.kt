@@ -21,6 +21,7 @@ import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
+import com.android.wm.shell.flicker.utils.ICommonAssertions
 
 /**
  * Base test class containing common assertions for [ComponentNameMatcher.NAV_BAR],

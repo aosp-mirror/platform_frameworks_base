@@ -33,20 +33,20 @@ import org.junit.Rule
 
 abstract class TransparentBaseAppCompat(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     protected val context: Context = instrumentation.context
-    protected val letterboxTranslucentLauncherApp = LetterboxAppHelper(
-        instrumentation,
-        launcherName = ActivityOptions.LaunchTransparentActivity.LABEL,
-        component = ActivityOptions.LaunchTransparentActivity.COMPONENT.toFlickerComponent()
-    )
-    protected val letterboxTranslucentApp = LetterboxAppHelper(
-        instrumentation,
-        launcherName = ActivityOptions.TransparentActivity.LABEL,
-        component = ActivityOptions.TransparentActivity.COMPONENT.toFlickerComponent()
-    )
+    protected val letterboxTranslucentLauncherApp =
+        LetterboxAppHelper(
+            instrumentation,
+            launcherName = ActivityOptions.LaunchTransparentActivity.LABEL,
+            component = ActivityOptions.LaunchTransparentActivity.COMPONENT.toFlickerComponent()
+        )
+    protected val letterboxTranslucentApp =
+        LetterboxAppHelper(
+            instrumentation,
+            launcherName = ActivityOptions.TransparentActivity.LABEL,
+            component = ActivityOptions.TransparentActivity.COMPONENT.toFlickerComponent()
+        )
 
-    @JvmField
-    @Rule
-    val letterboxRule: LetterboxRule = LetterboxRule()
+    @JvmField @Rule val letterboxRule: LetterboxRule = LetterboxRule()
 
     @Before
     fun before() {
@@ -54,10 +54,7 @@ abstract class TransparentBaseAppCompat(flicker: LegacyFlickerTest) : BaseTest(f
     }
 
     protected fun FlickerTestData.waitAndGetLaunchTransparent(): UiObject2? =
-        device.wait(
-            Until.findObject(By.text("Launch Transparent")),
-            FIND_TIMEOUT
-        )
+        device.wait(Until.findObject(By.text("Launch Transparent")), FIND_TIMEOUT)
 
     protected fun FlickerTestData.goBack() = device.pressBack()
 }

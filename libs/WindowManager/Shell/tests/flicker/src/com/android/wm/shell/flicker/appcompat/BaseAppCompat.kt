@@ -24,11 +24,10 @@ import android.tools.device.flicker.legacy.LegacyFlickerTest
 import com.android.server.wm.flicker.helpers.LetterboxAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.wm.shell.flicker.BaseTest
-import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
-import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
-import com.android.wm.shell.flicker.appWindowKeepVisible
-import com.android.wm.shell.flicker.layerKeepVisible
-
+import com.android.wm.shell.flicker.utils.appWindowIsVisibleAtEnd
+import com.android.wm.shell.flicker.utils.appWindowIsVisibleAtStart
+import com.android.wm.shell.flicker.utils.appWindowKeepVisible
+import com.android.wm.shell.flicker.utils.layerKeepVisible
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
@@ -37,9 +36,7 @@ abstract class BaseAppCompat(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     protected val context: Context = instrumentation.context
     protected val letterboxApp = LetterboxAppHelper(instrumentation)
 
-    @JvmField
-    @Rule
-    val letterboxRule: LetterboxRule = LetterboxRule()
+    @JvmField @Rule val letterboxRule: LetterboxRule = LetterboxRule()
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
