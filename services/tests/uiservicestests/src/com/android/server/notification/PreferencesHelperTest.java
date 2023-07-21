@@ -2478,7 +2478,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger,
                 mAppOpsManager, mStatsEventBuilderFactory, false);
-
+        mHelper.syncChannelsBypassingDnd();
 
         // create notification channel that can bypass dnd, but app is blocked
         // expected result: areChannelsBypassingDnd = false
@@ -2509,6 +2509,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger,
                 mAppOpsManager, mStatsEventBuilderFactory, false);
+        mHelper.syncChannelsBypassingDnd();
 
         // create notification channel that can bypass dnd, but app is blocked
         // expected result: areChannelsBypassingDnd = false
@@ -2533,6 +2534,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger,
                 mAppOpsManager, mStatsEventBuilderFactory, false);
+        mHelper.syncChannelsBypassingDnd();
 
         // create notification channel that can bypass dnd, but app is blocked
         // expected result: areChannelsBypassingDnd = false
@@ -2587,6 +2589,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
                 mPermissionHelper, mPermissionManager, mLogger,
                 mAppOpsManager, mStatsEventBuilderFactory, false);
+        mHelper.syncChannelsBypassingDnd();
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any(), anyInt(), anyBoolean());
         resetZenModeHelper();
