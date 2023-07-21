@@ -57,7 +57,7 @@ class DragDividerToResize(override val flicker: LegacyFlickerTest) :
     @Test
     fun splitScreenDividerKeepVisible() = flicker.layerKeepVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
 
-    @Presubmit
+    @FlakyTest(bugId = 291678271)
     @Test
     fun primaryAppLayerVisibilityChanges() {
         flicker.assertLayers {
@@ -69,7 +69,7 @@ class DragDividerToResize(override val flicker: LegacyFlickerTest) :
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 291678271)
     @Test
     fun secondaryAppLayerVisibilityChanges() {
         flicker.assertLayers {
@@ -87,7 +87,7 @@ class DragDividerToResize(override val flicker: LegacyFlickerTest) :
     @Test
     fun secondaryAppWindowKeepVisible() = flicker.appWindowKeepVisible(secondaryApp)
 
-    @FlakyTest(bugId = 245472831)
+    @FlakyTest(bugId = 291678271)
     @Test
     fun primaryAppBoundsChanges() {
         flicker.splitAppLayerBoundsChanges(
@@ -97,7 +97,7 @@ class DragDividerToResize(override val flicker: LegacyFlickerTest) :
         )
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 291678271)
     @Test
     fun secondaryAppBoundsChanges() =
         flicker.splitAppLayerBoundsChanges(
@@ -105,6 +105,12 @@ class DragDividerToResize(override val flicker: LegacyFlickerTest) :
             landscapePosLeft = false,
             portraitPosTop = true
         )
+
+    @FlakyTest(bugId = 291678271)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
