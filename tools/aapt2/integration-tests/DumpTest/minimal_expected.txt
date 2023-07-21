@@ -1,5 +1,5 @@
 package: name='com.lato.bubblegirl' versionCode='33' versionName='1.0.0' platformBuildVersionName='8.1.0' platformBuildVersionCode='27'
-sdkVersion:'19'
+minSdkVersion:'19'
 targetSdkVersion:'26'
 application-label:'Bubble Girl'
 application-label-ar:'Bubble Girl'
