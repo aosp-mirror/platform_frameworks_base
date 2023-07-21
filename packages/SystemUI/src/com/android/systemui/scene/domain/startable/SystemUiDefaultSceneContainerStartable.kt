@@ -20,14 +20,22 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.model.SysUiState
+import com.android.systemui.model.updateFlags
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -49,12 +57,15 @@ constructor(
     private val authenticationInteractor: AuthenticationInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val featureFlags: FeatureFlags,
+    private val sysUiState: SysUiState,
+    @DisplayId private val displayId: Int,
 ) : CoreStartable {
 
     override fun start() {
         if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
             hydrateVisibility()
             automaticallySwitchScenes()
+            hydrateSystemUiState()
         }
     }
 
@@ -117,6 +128,27 @@ constructor(
                         val isUnlocked = authenticationInteractor.isUnlocked.value
                         switchToScene(if (isUnlocked) SceneKey.Gone else SceneKey.Lockscreen)
                     }
+                }
+        }
+    }
+
+    /** Keeps [SysUiState] up-to-date */
+    private fun hydrateSystemUiState() {
+        applicationScope.launch {
+            sceneInteractor
+                .currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT)
+                .map { it.key }
+                .distinctUntilChanged()
+                .collect { sceneKey ->
+                    sysUiState.updateFlags(
+                        displayId,
+                        SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE to (sceneKey != SceneKey.Gone),
+                        SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED to (sceneKey == SceneKey.Shade),
+                        SYSUI_STATE_QUICK_SETTINGS_EXPANDED to (sceneKey == SceneKey.QuickSettings),
+                        SYSUI_STATE_BOUNCER_SHOWING to (sceneKey == SceneKey.Bouncer),
+                        SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING to
+                            (sceneKey == SceneKey.Lockscreen),
+                    )
                 }
         }
     }
