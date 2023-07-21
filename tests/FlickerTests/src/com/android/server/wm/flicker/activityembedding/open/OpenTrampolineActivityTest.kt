@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.activityembedding
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.Rect
 import android.tools.common.flicker.subject.region.RegionSubject
@@ -161,6 +162,7 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
         }
     }
 
+    @FlakyTest(bugId = 290736037)
     /** Main activity should go from fullscreen to being a split with secondary activity. */
     @Presubmit
     @Test
