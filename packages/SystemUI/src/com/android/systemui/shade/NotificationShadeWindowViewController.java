@@ -31,9 +31,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStub;
-
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
@@ -46,7 +43,6 @@ import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.ui.binder.KeyguardBouncerViewBinder;
 import com.android.systemui.bouncer.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -57,9 +53,6 @@ import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.log.BouncerLogger;
-import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
-import com.android.systemui.multishade.domain.interactor.MultiShadeMotionEventInteractor;
-import com.android.systemui.multishade.ui.view.MultiShadeView;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -83,7 +76,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * Controller for {@link NotificationShadeWindowView}.
@@ -135,7 +127,6 @@ public class NotificationShadeWindowViewController {
                     step.getTransitionState() == TransitionState.RUNNING;
             };
     private final SystemClock mClock;
-    private final @Nullable MultiShadeMotionEventInteractor mMultiShadeMotionEventInteractor;
 
     @Inject
     public NotificationShadeWindowViewController(
@@ -167,9 +158,7 @@ public class NotificationShadeWindowViewController {
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
             FeatureFlags featureFlags,
-            Provider<MultiShadeInteractor> multiShadeInteractorProvider,
             SystemClock clock,
-            Provider<MultiShadeMotionEventInteractor> multiShadeMotionEventInteractorProvider,
             BouncerMessageInteractor bouncerMessageInteractor,
             BouncerLogger bouncerLogger) {
         mLockscreenShadeTransitionController = transitionController;
@@ -218,17 +207,6 @@ public class NotificationShadeWindowViewController {
             unfoldTransitionProgressProvider.ifPresent(
                     progressProvider -> progressProvider.addCallback(
                             mDisableSubpixelTextTransitionListener));
-        }
-        if (ComposeFacade.INSTANCE.isComposeAvailable()
-                && featureFlags.isEnabled(Flags.DUAL_SHADE)) {
-            mMultiShadeMotionEventInteractor = multiShadeMotionEventInteractorProvider.get();
-            final ViewStub multiShadeViewStub = mView.findViewById(R.id.multi_shade_stub);
-            if (multiShadeViewStub != null) {
-                final MultiShadeView multiShadeView = (MultiShadeView) multiShadeViewStub.inflate();
-                multiShadeView.init(multiShadeInteractorProvider.get(), clock);
-            }
-        } else {
-            mMultiShadeMotionEventInteractor = null;
         }
     }
 
@@ -395,10 +373,7 @@ public class NotificationShadeWindowViewController {
                     return true;
                 }
 
-                if (mMultiShadeMotionEventInteractor != null) {
-                    // This interactor is not null only if the dual shade feature is enabled.
-                    return mMultiShadeMotionEventInteractor.shouldIntercept(ev);
-                } else if (mNotificationPanelViewController.isFullyExpanded()
+                if (mNotificationPanelViewController.isFullyExpanded()
                         && mDragDownHelper.isDragDownEnabled()
                         && !mService.isBouncerShowing()
                         && !mStatusBarStateController.isDozing()) {
@@ -428,10 +403,7 @@ public class NotificationShadeWindowViewController {
                     return true;
                 }
 
-                if (mMultiShadeMotionEventInteractor != null) {
-                    // This interactor is not null only if the dual shade feature is enabled.
-                    return mMultiShadeMotionEventInteractor.onTouchEvent(ev, mView.getWidth());
-                } else if (mDragDownHelper.isDragDownEnabled()
+                if (mDragDownHelper.isDragDownEnabled()
                         || mDragDownHelper.isDraggingDown()) {
                     // we still want to finish our drag down gesture when locking the screen
                     return mDragDownHelper.onTouchEvent(ev) || handled;
