@@ -93,6 +93,7 @@ java_defaults {
         "flickerlib-helpers",
         "platform-test-annotations",
         "wm-flicker-common-app-helpers",
+        "wm-shell-flicker-utils",
     ],
     data: [
         ":FlickerTestApp",
