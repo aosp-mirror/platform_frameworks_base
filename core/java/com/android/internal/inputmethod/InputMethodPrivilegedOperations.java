@@ -386,8 +386,12 @@ public final class InputMethodPrivilegedOperations {
             @Nullable ImeTracker.Token statsToken) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
+            ImeTracker.forLogging().onFailed(statsToken,
+                    ImeTracker.PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER);
             return;
         }
+        ImeTracker.forLogging().onProgress(statsToken,
+                ImeTracker.PHASE_IME_APPLY_VISIBILITY_INSETS_CONSUMER);
         try {
             ops.applyImeVisibilityAsync(showOrHideInputToken, setVisible, statsToken);
         } catch (RemoteException e) {
