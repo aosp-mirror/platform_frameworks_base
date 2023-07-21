@@ -1819,6 +1819,12 @@ public final class DisplayManager {
         String KEY_BRIGHTNESS_THROTTLING_DATA = "brightness_throttling_data";
 
         /**
+         * Key for the power throttling data as a String formatted, from the display
+         * device config.
+         */
+        String KEY_POWER_THROTTLING_DATA = "power_throttling_data";
+
+        /**
          * Key for new power controller feature flag. If enabled new DisplayPowerController will
          * be used.
          * Read value via {@link android.provider.DeviceConfig#getBoolean(String, String, boolean)}

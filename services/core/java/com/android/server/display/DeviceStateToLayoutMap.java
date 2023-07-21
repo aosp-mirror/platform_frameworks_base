@@ -135,7 +135,8 @@ class DeviceStateToLayoutMap {
                             leadDisplayAddress,
                             d.getBrightnessThrottlingMapId(),
                             d.getRefreshRateZoneId(),
-                            d.getRefreshRateThermalThrottlingMapId());
+                            d.getRefreshRateThermalThrottlingMapId(),
+                            d.getPowerThrottlingMapId());
                 }
                 layout.postProcessLocked();
             }
