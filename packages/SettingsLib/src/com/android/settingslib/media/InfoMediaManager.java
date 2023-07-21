@@ -82,6 +82,13 @@ public abstract class InfoMediaManager extends MediaManager {
     private static final String TAG = "InfoMediaManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    /** Checked exception that signals the specified package is not present in the system. */
+    public static class PackageNotAvailableException extends Exception {
+        public PackageNotAvailableException(String message) {
+            super(message);
+        }
+    }
+
     protected String mPackageName;
     private MediaDevice mCurrentConnectedDevice;
     private final LocalBluetoothManager mBluetoothManager;
