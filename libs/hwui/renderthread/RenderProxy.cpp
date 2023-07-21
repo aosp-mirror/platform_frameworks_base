@@ -16,7 +16,13 @@
 
 #include "RenderProxy.h"
 
+#include <SkBitmap.h>
+#include <SkImage.h>
+#include <SkPicture.h>
 #include <gui/TraceUtils.h>
+#include <pthread.h>
+#include <ui/GraphicBufferAllocator.h>
+
 #include "DeferredLayerUpdater.h"
 #include "DisplayList.h"
 #include "Properties.h"
@@ -28,12 +34,6 @@
 #include "renderthread/RenderThread.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
-
-#include <SkBitmap.h>
-#include <SkImage.h>
-#include <SkPicture.h>
-
-#include <pthread.h>
 
 namespace android {
 namespace uirenderer {
@@ -323,6 +323,9 @@ void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData, bool reset
             }
         });
     }
+    std::string grallocInfo;
+    GraphicBufferAllocator::getInstance().dump(grallocInfo);
+    dprintf(fd, "%s\n", grallocInfo.c_str());
 }
 
 void RenderProxy::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {
