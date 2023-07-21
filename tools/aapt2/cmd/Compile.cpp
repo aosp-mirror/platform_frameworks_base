@@ -186,7 +186,20 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     // These are created as weak symbols, and are only generated from default
     // configuration
     // strings and plurals.
-    PseudolocaleGenerator pseudolocale_generator;
+    std::string grammatical_gender_values;
+    std::string grammatical_gender_ratio;
+    if (options.pseudo_localize_gender_values) {
+      grammatical_gender_values = options.pseudo_localize_gender_values.value();
+    } else {
+      grammatical_gender_values = "f,m,n";
+    }
+    if (options.pseudo_localize_gender_ratio) {
+      grammatical_gender_ratio = options.pseudo_localize_gender_ratio.value();
+    } else {
+      grammatical_gender_ratio = "1.0";
+    }
+    PseudolocaleGenerator pseudolocale_generator(grammatical_gender_values,
+                                                 grammatical_gender_ratio);
     if (!pseudolocale_generator.Consume(context, &table)) {
       return false;
     }
