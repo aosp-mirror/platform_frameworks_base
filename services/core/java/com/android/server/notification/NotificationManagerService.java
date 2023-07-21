@@ -1020,6 +1020,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         mAssistants.resetDefaultAssistantsIfNecessary();
+        mPreferencesHelper.syncChannelsBypassingDnd();
     }
 
     @VisibleForTesting
@@ -1859,6 +1860,7 @@ public class NotificationManagerService extends SystemService {
                     mConditionProviders.onUserSwitched(userId);
                     mListeners.onUserSwitched(userId);
                     mZenModeHelper.onUserSwitched(userId);
+                    mPreferencesHelper.syncChannelsBypassingDnd();
                 }
                 // assistant is the only thing that cares about managed profiles specifically
                 mAssistants.onUserSwitched(userId);
