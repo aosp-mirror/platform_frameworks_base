@@ -254,11 +254,16 @@ public class SystemUIApplication extends Application implements
         }
 
         for (i = 0; i < mServices.length; i++) {
+            final CoreStartable service = mServices[i];
             if (mBootCompleteCache.isBootComplete()) {
-                notifyBootCompleted(mServices[i]);
+                notifyBootCompleted(service);
             }
 
-            dumpManager.registerDumpable(mServices[i].getClass().getSimpleName(), mServices[i]);
+            if (service.isDumpCritical()) {
+                dumpManager.registerCriticalDumpable(service);
+            } else {
+                dumpManager.registerNormalDumpable(service);
+            }
         }
         mSysUIComponent.getInitController().executePostInitTasks();
         log.traceEnd();
