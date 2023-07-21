@@ -2322,8 +2322,7 @@ public class DisplayModeDirector {
         private final SparseBooleanArray mAuthenticationPossible = new SparseBooleanArray();
 
         public void observe() {
-            StatusBarManagerInternal statusBar =
-                    LocalServices.getService(StatusBarManagerInternal.class);
+            StatusBarManagerInternal statusBar = mInjector.getStatusBarManagerInternal();
             if (statusBar == null) {
                 return;
             }
@@ -2427,10 +2426,9 @@ public class DisplayModeDirector {
 
         public void observe() {
             mDisplayManager = mContext.getSystemService(DisplayManager.class);
-            mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+            mDisplayManagerInternal = mInjector.getDisplayManagerInternal();
 
-            final SensorManagerInternal sensorManager =
-                    LocalServices.getService(SensorManagerInternal.class);
+            final SensorManagerInternal sensorManager = mInjector.getSensorManagerInternal();
             sensorManager.addProximityActiveListener(BackgroundThread.getExecutor(), this);
 
             synchronized (mSensorObserverLock) {
@@ -2547,7 +2545,7 @@ public class DisplayModeDirector {
             synchronized (mLock) {
                 setupHdrRefreshRates(mDefaultDisplayDeviceConfig);
             }
-            mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+            mDisplayManagerInternal = mInjector.getDisplayManagerInternal();
             mInjector.registerDisplayListener(this, mHandler,
                     DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS
                     | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
@@ -2788,6 +2786,12 @@ public class DisplayModeDirector {
         boolean registerThermalServiceListener(IThermalEventListener listener);
 
         boolean supportsFrameRateOverride();
+
+        DisplayManagerInternal getDisplayManagerInternal();
+
+        StatusBarManagerInternal getStatusBarManagerInternal();
+
+        SensorManagerInternal getSensorManagerInternal();
     }
 
     @VisibleForTesting
@@ -2883,6 +2887,21 @@ public class DisplayModeDirector {
         @Override
         public boolean supportsFrameRateOverride() {
             return SurfaceFlingerProperties.enable_frame_rate_override().orElse(true);
+        }
+
+        @Override
+        public DisplayManagerInternal getDisplayManagerInternal() {
+            return LocalServices.getService(DisplayManagerInternal.class);
+        }
+
+        @Override
+        public StatusBarManagerInternal getStatusBarManagerInternal() {
+            return LocalServices.getService(StatusBarManagerInternal.class);
+        }
+
+        @Override
+        public SensorManagerInternal getSensorManagerInternal() {
+            return LocalServices.getService(SensorManagerInternal.class);
         }
 
         private DisplayManager getDisplayManager() {
