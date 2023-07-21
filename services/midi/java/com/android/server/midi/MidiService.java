@@ -1006,7 +1006,7 @@ public class MidiService extends IMidiManager.Stub {
                 for (int i = 0; i < count; i++) {
                     ServiceInfo serviceInfo = resolveInfos.get(i).serviceInfo;
                     if (serviceInfo != null) {
-                        addLegacyPackageDeviceServer(serviceInfo, user.getUserIdentifier());
+                        addUmpPackageDeviceServer(serviceInfo, user.getUserIdentifier());
                     }
                 }
             }
