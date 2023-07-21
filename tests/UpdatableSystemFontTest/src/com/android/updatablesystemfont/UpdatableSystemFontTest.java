@@ -24,7 +24,6 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeTrue;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -36,7 +35,6 @@ import android.graphics.fonts.FontManager;
 import android.graphics.fonts.FontStyle;
 import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.RootPermissionTest;
-import android.security.FileIntegrityManager;
 import android.text.FontConfig;
 import android.util.Log;
 import android.util.Pair;
@@ -139,10 +137,6 @@ public class UpdatableSystemFontTest {
     @Before
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        // Run tests only if updatable system font is enabled.
-        FileIntegrityManager fim = context.getSystemService(FileIntegrityManager.class);
-        assumeTrue(fim != null);
-        assumeTrue(fim.isApkVeritySupported());
         mKeyId = insertCert(CERT_PATH);
         mFontManager = context.getSystemService(FontManager.class);
         expectCommandToSucceed("cmd font clear");
