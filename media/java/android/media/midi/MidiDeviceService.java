@@ -34,15 +34,15 @@ import android.util.Log;
  * <p>To extend this class, you must declare the service in your manifest file with
  * an intent filter with the {@link #SERVICE_INTERFACE} action
  * and meta-data to describe the virtual device.
- For example:</p>
+ * For example:</p>
  * <pre>
  * &lt;service android:name=".VirtualDeviceService"
- *          android:label="&#64;string/service_name">
+ *         android:label="&#64;string/service_name">
  *     &lt;intent-filter>
- *         &lt;action android:name="android.media.midi.MidiDeviceService" />
+ *             &lt;action android:name="android.media.midi.MidiDeviceService" />
  *     &lt;/intent-filter>
- *           &lt;meta-data android:name="android.media.midi.MidiDeviceService"
-                android:resource="@xml/device_info" />
+ *     &lt;meta-data android:name="android.media.midi.MidiDeviceService"
+ *             android:resource="@xml/device_info" />
  * &lt;/service></pre>
  */
 abstract public class MidiDeviceService extends Service {
@@ -114,8 +114,8 @@ abstract public class MidiDeviceService extends Service {
     }
 
     /**
-     * returns the {@link MidiDeviceInfo} instance for this service
-     * @return our MidiDeviceInfo
+     * Returns the {@link MidiDeviceInfo} instance for this service
+     * @return the MidiDeviceInfo of the virtual MIDI device
      */
     public final MidiDeviceInfo getDeviceInfo() {
         return mDeviceInfo;
@@ -123,13 +123,14 @@ abstract public class MidiDeviceService extends Service {
 
     /**
      * Called to notify when an our {@link MidiDeviceStatus} has changed
-     * @param status the number of the port that was opened
+     * @param status the current status of the MIDI device
      */
     public void onDeviceStatusChanged(MidiDeviceStatus status) {
     }
 
     /**
-     * Called to notify when our device has been closed by all its clients
+     * Called to notify when the virtual MIDI device running in this service has been closed by
+     * all its clients
      */
     public void onClose() {
     }

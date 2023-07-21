@@ -48,9 +48,9 @@ import java.util.List;
  * &lt;service android:name=".VirtualDeviceService"
  *         android:label="&#64;string/service_name">
  *     &lt;intent-filter>
- *         &lt;action android:name="android.media.midi.MidiUmpDeviceService" />
+ *             &lt;action android:name="android.media.midi.MidiUmpDeviceService" />
  *     &lt;/intent-filter>
- *         &lt;property android:name="android.media.midi.MidiUmpDeviceService"
+ *     &lt;property android:name="android.media.midi.MidiUmpDeviceService"
  *             android:resource="@xml/device_info" />
  * &lt;/service></pre>
  */
