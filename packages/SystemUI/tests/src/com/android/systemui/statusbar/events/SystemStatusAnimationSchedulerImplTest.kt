@@ -410,15 +410,16 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
 
         // remove persistent dot
         systemStatusAnimationScheduler.removePersistentDot()
-        testScheduler.runCurrent()
+
+        // verify that the onHidePersistentDot callback is invoked
+        verify(listener, times(1)).onHidePersistentDot()
 
         // skip disappear animation
         animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
         testScheduler.runCurrent()
 
-        // verify that animationState changes to IDLE and onHidePersistentDot callback is invoked
+        // verify that animationState changes to IDLE
         assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
-        verify(listener, times(1)).onHidePersistentDot()
     }
 
     @Test
@@ -483,7 +484,6 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
 
         // request removal of persistent dot
         systemStatusAnimationScheduler.removePersistentDot()
-        testScheduler.runCurrent()
 
         // schedule another high priority event while the event is animating out
         createAndScheduleFakePrivacyEvent()
@@ -497,6 +497,42 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
         assertEquals(ANIMATION_QUEUED, systemStatusAnimationScheduler.getAnimationState())
         // also verify that onHidePersistentDot callback is called
         verify(listener, times(1)).onHidePersistentDot()
+    }
+
+    @Test
+    fun testDotIsRemoved_evenIfAnimatorCallbackIsDelayed() = runTest {
+        // Instantiate class under test with TestScope from runTest
+        initializeSystemStatusAnimationScheduler(testScope = this)
+
+        // create and schedule high priority event
+        createAndScheduleFakePrivacyEvent()
+
+        // skip chip animation lifecycle and fast forward to ANIMATING_OUT state
+        fastForwardAnimationToState(ANIMATING_OUT)
+        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+        verify(listener, times(1)).onSystemStatusAnimationTransitionToPersistentDot(any())
+
+        // request removal of persistent dot
+        systemStatusAnimationScheduler.removePersistentDot()
+
+        // verify that the state is still ANIMATING_OUT
+        assertEquals(ANIMATING_OUT, systemStatusAnimationScheduler.getAnimationState())
+
+        // skip disappear animation duration
+        testScheduler.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION + 1)
+        // In an old implementation this would trigger a coroutine timeout causing the
+        // onHidePersistentDot callback to be missed.
+        testScheduler.runCurrent()
+
+        // advance animator time to invoke onAnimationEnd callback
+        animatorTestRule.advanceTimeBy(DISAPPEAR_ANIMATION_DURATION)
+        testScheduler.runCurrent()
+
+        // verify that onHidePersistentDot is invoked despite the animator callback being delayed
+        // (it's invoked more than DISAPPEAR_ANIMATION_DURATION after the dot removal was requested)
+        verify(listener, times(1)).onHidePersistentDot()
+        // verify that animationState is IDLE
+        assertEquals(IDLE, systemStatusAnimationScheduler.getAnimationState())
     }
 
     private fun TestScope.fastForwardAnimationToState(@SystemAnimationState animationState: Int) {
