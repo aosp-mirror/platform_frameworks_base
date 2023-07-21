@@ -33,6 +33,7 @@ import java.io.FileDescriptor
 import java.io.FileOutputStream
 import java.io.PrintWriter
 import javax.inject.Inject
+import kotlin.system.measureTimeMillis
 
 /**
  * Oversees SystemUI's output during bug reports (and dumpsys in general)
@@ -73,6 +74,7 @@ import javax.inject.Inject
  * $ <invocation> dumpables
  * $ <invocation> buffers
  * $ <invocation> tables
+ * $ <invocation> all
  *
  * # Finally, the following will simulate what we dump during the CRITICAL and NORMAL sections of a
  * # bug report:
@@ -124,6 +126,11 @@ constructor(
             "dumpables" -> dumpDumpables(pw, args)
             "buffers" -> dumpBuffers(pw, args)
             "tables" -> dumpTables(pw, args)
+            "all" -> {
+                dumpDumpables(pw, args)
+                dumpBuffers(pw, args)
+                dumpTables(pw, args)
+            }
             "config" -> dumpConfig(pw)
             "help" -> dumpHelp(pw)
             else -> {
@@ -244,21 +251,6 @@ constructor(
             }
             .sortedBy { it.name }
             .minByOrNull { it.name.length }
-
-    private fun dumpDumpable(entry: DumpableEntry, pw: PrintWriter, args: Array<String>) {
-        pw.preamble(entry)
-        entry.dumpable.dump(pw, args)
-    }
-
-    private fun dumpBuffer(entry: LogBufferEntry, pw: PrintWriter, tailLength: Int) {
-        pw.preamble(entry)
-        entry.buffer.dump(pw, tailLength)
-    }
-
-    private fun dumpTableBuffer(buffer: TableLogBufferEntry, pw: PrintWriter, args: Array<String>) {
-        pw.preamble(buffer)
-        buffer.table.dump(pw, args)
-    }
 
     private fun dumpConfig(pw: PrintWriter) {
         config.dump(pw, arrayOf())
@@ -428,31 +420,60 @@ constructor(
                 }
             }
 
-        /**
-         * Zero-arg utility to write a [DumpableEntry] to the given [PrintWriter] in a
-         * dumpsys-appropriate format.
-         */
-        private fun dumpDumpable(entry: DumpableEntry, pw: PrintWriter) {
-            pw.preamble(entry)
-            entry.dumpable.dump(pw, arrayOf())
+        private fun PrintWriter.footer(entry: DumpsysEntry, dumpTimeMillis: Long) {
+            if (entry !is DumpableEntry) return
+            println()
+            print(entry.priority)
+            print(" dump took ")
+            print(dumpTimeMillis)
+            print("ms -- ")
+            print(entry.name)
+            if (entry.priority == DumpPriority.CRITICAL && dumpTimeMillis > 25) {
+                print(" -- warning: individual dump time exceeds 5% of total CRITICAL dump time!")
+            }
+            println()
+        }
+
+        private inline fun PrintWriter.wrapSection(entry: DumpsysEntry, block: () -> Unit) {
+            preamble(entry)
+            val dumpTime = measureTimeMillis(block)
+            footer(entry, dumpTime)
         }
 
         /**
-         * Zero-arg utility to write a [LogBufferEntry] to the given [PrintWriter] in a
+         * Utility to write a [DumpableEntry] to the given [PrintWriter] in a
          * dumpsys-appropriate format.
          */
-        private fun dumpBuffer(entry: LogBufferEntry, pw: PrintWriter) {
-            pw.preamble(entry)
-            entry.buffer.dump(pw, 0)
+        private fun dumpDumpable(
+                entry: DumpableEntry,
+                pw: PrintWriter,
+                args: Array<String> = arrayOf(),
+        ) = pw.wrapSection(entry) {
+            entry.dumpable.dump(pw, args)
         }
 
         /**
-         * Zero-arg utility to write a [TableLogBufferEntry] to the given [PrintWriter] in a
+         * Utility to write a [LogBufferEntry] to the given [PrintWriter] in a
          * dumpsys-appropriate format.
          */
-        private fun dumpTableBuffer(entry: TableLogBufferEntry, pw: PrintWriter) {
-            pw.preamble(entry)
-            entry.table.dump(pw, arrayOf())
+        private fun dumpBuffer(
+                entry: LogBufferEntry,
+                pw: PrintWriter,
+                tailLength: Int = 0,
+        ) = pw.wrapSection(entry) {
+            entry.buffer.dump(pw, tailLength)
+        }
+
+        /**
+         * Utility to write a [TableLogBufferEntry] to the given [PrintWriter] in a
+         * dumpsys-appropriate format.
+         */
+        private fun dumpTableBuffer(
+                entry: TableLogBufferEntry,
+                pw: PrintWriter,
+                args: Array<String> = arrayOf(),
+        ) = pw.wrapSection(entry) {
+            entry.table.dump(pw, args)
         }
 
         /**
