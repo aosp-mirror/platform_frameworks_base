@@ -175,7 +175,7 @@ protected:
                                   const Paint& paint, const SkPath& path, size_t start,
                                   size_t end) override;
 
-    void onFilterPaint(Paint& paint);
+    virtual void onFilterPaint(Paint& paint);
 
     Paint filterPaint(const Paint& src) {
         Paint dst(src);

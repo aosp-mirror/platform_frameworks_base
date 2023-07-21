@@ -129,6 +129,33 @@ TEST(SkiaDisplayList, syncContexts) {
     EXPECT_EQ(counts.destroyed, 1);
 }
 
+TEST(SkiaDisplayList, recordMutableBitmap) {
+    SkiaRecordingCanvas canvas{nullptr, 100, 100};
+    auto bitmap = Bitmap::allocateHeapBitmap(SkImageInfo::Make(
+            10, 20, SkColorType::kN32_SkColorType, SkAlphaType::kPremul_SkAlphaType));
+    EXPECT_FALSE(bitmap->isImmutable());
+    canvas.drawBitmap(*bitmap, 0, 0, nullptr);
+    auto displayList = canvas.finishRecording();
+    ASSERT_EQ(1, displayList->mMutableImages.size());
+    EXPECT_EQ(10, displayList->mMutableImages[0]->width());
+    EXPECT_EQ(20, displayList->mMutableImages[0]->height());
+}
+
+TEST(SkiaDisplayList, recordMutableBitmapInShader) {
+    SkiaRecordingCanvas canvas{nullptr, 100, 100};
+    auto bitmap = Bitmap::allocateHeapBitmap(SkImageInfo::Make(
+            10, 20, SkColorType::kN32_SkColorType, SkAlphaType::kPremul_SkAlphaType));
+    EXPECT_FALSE(bitmap->isImmutable());
+    SkSamplingOptions sampling(SkFilterMode::kLinear, SkMipmapMode::kNone);
+    Paint paint;
+    paint.setShader(bitmap->makeImage()->makeShader(sampling));
+    canvas.drawPaint(paint);
+    auto displayList = canvas.finishRecording();
+    ASSERT_EQ(1, displayList->mMutableImages.size());
+    EXPECT_EQ(10, displayList->mMutableImages[0]->width());
+    EXPECT_EQ(20, displayList->mMutableImages[0]->height());
+}
+
 class ContextFactory : public IContextFactory {
 public:
     virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) override {
