@@ -24,6 +24,15 @@
         {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"}
       ]
+    },
+    {
+      "name": "PowerServiceTests",
+      "options": [
+        {"include-filter": "com.android.server.power"},
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
     }
   ],
   "postsubmit": [
@@ -41,6 +50,14 @@
       "options": [
         {"include-filter": "com.android.server.power"},
         {"exclude-filter": "com.android.server.power.BatteryStatsTests"}
+      ]
+    },
+    {
+      "name": "PowerServiceTests",
+      "options": [
+        {"include-filter": "com.android.server.power"},
+        {"exclude-filter": "com.android.server.power.BatteryStatsTests"},
+        {"exclude-annotation": "org.junit.Ignore"}
       ]
     }
   ]
