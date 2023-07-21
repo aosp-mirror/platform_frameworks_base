@@ -247,7 +247,8 @@ public class CompanionDeviceManagerService extends SystemService {
         mCompanionAppController = new CompanionApplicationController(
                 context, mAssociationStore, mDevicePresenceMonitor);
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
-        mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
+        mSystemDataTransferProcessor = new SystemDataTransferProcessor(this,
+                mPackageManagerInternal, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
         // TODO(b/279663946): move context sync to a dedicated system service
         mCrossDeviceSyncController = new CrossDeviceSyncController(getContext(), mTransportManager);

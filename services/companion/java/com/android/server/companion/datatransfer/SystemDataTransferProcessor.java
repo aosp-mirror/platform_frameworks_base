@@ -37,6 +37,7 @@ import android.companion.datatransfer.SystemDataTransferRequest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,6 +51,7 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.server.companion.AssociationStore;
 import com.android.server.companion.CompanionDeviceManagerService;
+import com.android.server.companion.PackageUtils;
 import com.android.server.companion.PermissionsUtils;
 import com.android.server.companion.transport.CompanionTransportManager;
 
@@ -77,6 +79,7 @@ public class SystemDataTransferProcessor {
             "system_data_transfer_result_receiver";
 
     private final Context mContext;
+    private final PackageManagerInternal mPackageManager;
     private final AssociationStore mAssociationStore;
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private final CompanionTransportManager mTransportManager;
@@ -85,10 +88,12 @@ public class SystemDataTransferProcessor {
     private final ComponentName mCompanionDeviceDataTransferActivity;
 
     public SystemDataTransferProcessor(CompanionDeviceManagerService service,
+            PackageManagerInternal packageManager,
             AssociationStore associationStore,
             SystemDataTransferRequestStore systemDataTransferRequestStore,
             CompanionTransportManager transportManager) {
         mContext = service.getContext();
+        mPackageManager = packageManager;
         mAssociationStore = associationStore;
         mSystemDataTransferRequestStore = systemDataTransferRequestStore;
         mTransportManager = transportManager;
@@ -132,6 +137,11 @@ public class SystemDataTransferProcessor {
      */
     public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
             @UserIdInt int userId, int associationId) {
+        if (PackageUtils.isPackageAllowlisted(mContext, mPackageManager, packageName)) {
+            Slog.i(LOG_TAG, "User consent Intent should be skipped. Returning null.");
+            return null;
+        }
+
         final AssociationInfo association = resolveAssociation(packageName, userId, associationId);
 
         Slog.i(LOG_TAG, "Creating permission sync intent for userId [" + userId
@@ -175,23 +185,29 @@ public class SystemDataTransferProcessor {
         final AssociationInfo association = resolveAssociation(packageName, userId, associationId);
 
         // Check if the request has been consented by the user.
-        List<SystemDataTransferRequest> storedRequests =
-                mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
-                        associationId);
-        boolean hasConsented = false;
-        for (SystemDataTransferRequest storedRequest : storedRequests) {
-            if (storedRequest instanceof PermissionSyncRequest && storedRequest.isUserConsented()) {
-                hasConsented = true;
-                break;
+        if (PackageUtils.isPackageAllowlisted(mContext, mPackageManager, packageName)) {
+            Slog.i(LOG_TAG, "Skip user consent check due to the same OEM package.");
+        } else {
+            List<SystemDataTransferRequest> storedRequests =
+                    mSystemDataTransferRequestStore.readRequestsByAssociationId(userId,
+                            associationId);
+            boolean hasConsented = false;
+            for (SystemDataTransferRequest storedRequest : storedRequests) {
+                if (storedRequest instanceof PermissionSyncRequest
+                        && storedRequest.isUserConsented()) {
+                    hasConsented = true;
+                    break;
+                }
             }
-        }
-        if (!hasConsented) {
-            String message = "User " + userId + " hasn't consented permission sync.";
-            Slog.e(LOG_TAG, message);
-            try {
-                callback.onError(message);
-            } catch (RemoteException ignored) { }
-            return;
+            if (!hasConsented) {
+                String message = "User " + userId + " hasn't consented permission sync.";
+                Slog.e(LOG_TAG, message);
+                try {
+                    callback.onError(message);
+                } catch (RemoteException ignored) {
+                }
+                return;
+            }
         }
 
         // Start permission sync
