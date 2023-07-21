@@ -16,12 +16,24 @@
 
 #define LOG_TAG "UinputCommandDevice"
 
-#include <linux/uinput.h>
+#include "com_android_commands_uinput_Device.h"
 
+#include <android-base/stringprintf.h>
+#include <android/looper.h>
+#include <android_os_Parcel.h>
 #include <fcntl.h>
+#include <input/InputEventLabels.h>
 #include <inttypes.h>
+#include <jni.h>
+#include <linux/uinput.h>
+#include <log/log.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include <time.h>
 #include <unistd.h>
+
 #include <algorithm>
 #include <array>
 #include <cstdio>
@@ -29,19 +41,6 @@
 #include <iterator>
 #include <memory>
 #include <vector>
-
-#include <android/looper.h>
-#include <android_os_Parcel.h>
-#include <jni.h>
-#include <log/log.h>
-#include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedLocalRef.h>
-#include <nativehelper/ScopedPrimitiveArray.h>
-#include <nativehelper/ScopedUtfChars.h>
-
-#include <android-base/stringprintf.h>
-
-#include "com_android_commands_uinput_Device.h"
 
 namespace android {
 namespace uinput {
@@ -307,6 +306,21 @@ static void setAbsInfo(JNIEnv* env, jclass /* clazz */, jint handle, jint axisCo
     ::ioctl(static_cast<int>(handle), UI_ABS_SETUP, &absSetup);
 }
 
+static jint getEvdevEventTypeByLabel(JNIEnv* env, jclass /* clazz */, jstring rawLabel) {
+    ScopedUtfChars label(env, rawLabel);
+    return InputEventLookup::getLinuxEvdevEventTypeByLabel(label.c_str()).value_or(-1);
+}
+
+static jint getEvdevEventCodeByLabel(JNIEnv* env, jclass /* clazz */, jint type, jstring rawLabel) {
+    ScopedUtfChars label(env, rawLabel);
+    return InputEventLookup::getLinuxEvdevEventCodeByLabel(type, label.c_str()).value_or(-1);
+}
+
+static jint getEvdevInputPropByLabel(JNIEnv* env, jclass /* clazz */, jstring rawLabel) {
+    ScopedUtfChars label(env, rawLabel);
+    return InputEventLookup::getLinuxEvdevInputPropByLabel(label.c_str()).value_or(-1);
+}
+
 static JNINativeMethod sMethods[] = {
         {"nativeOpenUinputDevice",
          "(Ljava/lang/String;IIIIILjava/lang/String;"
@@ -316,6 +330,12 @@ static JNINativeMethod sMethods[] = {
         {"nativeConfigure", "(II[I)V", reinterpret_cast<void*>(configure)},
         {"nativeSetAbsInfo", "(IILandroid/os/Parcel;)V", reinterpret_cast<void*>(setAbsInfo)},
         {"nativeCloseUinputDevice", "(J)V", reinterpret_cast<void*>(closeUinputDevice)},
+        {"nativeGetEvdevEventTypeByLabel", "(Ljava/lang/String;)I",
+         reinterpret_cast<void*>(getEvdevEventTypeByLabel)},
+        {"nativeGetEvdevEventCodeByLabel", "(ILjava/lang/String;)I",
+         reinterpret_cast<void*>(getEvdevEventCodeByLabel)},
+        {"nativeGetEvdevInputPropByLabel", "(Ljava/lang/String;)I",
+         reinterpret_cast<void*>(getEvdevInputPropByLabel)},
 };
 
 int register_com_android_commands_uinput_Device(JNIEnv* env) {
