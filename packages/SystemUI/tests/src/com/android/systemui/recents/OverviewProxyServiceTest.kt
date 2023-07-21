@@ -38,6 +38,7 @@ import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.recents.OverviewProxyService.ACTION_QUICKSTEP
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shared.recents.IOverviewProxy
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_WAKEFULNESS_MASK
 import com.android.systemui.shared.system.QuickStepContract.WAKEFULNESS_ASLEEP
@@ -93,6 +94,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     @Mock private lateinit var shellInterface: ShellInterface
     @Mock private lateinit var navBarController: NavigationBarController
     @Mock private lateinit var centralSurfaces: CentralSurfaces
+    @Mock private lateinit var shadeViewController: ShadeViewController
     @Mock private lateinit var navModeController: NavigationModeController
     @Mock private lateinit var statusBarWinController: NotificationShadeWindowController
     @Mock private lateinit var userTracker: UserTracker
@@ -132,6 +134,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 shellInterface,
                 Lazy { navBarController },
                 Lazy { Optional.of(centralSurfaces) },
+                Lazy { shadeViewController },
                 navModeController,
                 statusBarWinController,
                 sysUiState,

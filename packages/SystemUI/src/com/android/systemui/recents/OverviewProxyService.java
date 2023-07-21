@@ -78,7 +78,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenshotRequest;
 import com.android.systemui.Dumpable;
@@ -143,6 +142,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Executor mMainExecutor;
     private final ShellInterface mShellInterface;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    private final Lazy<ShadeViewController> mShadeViewControllerLazy;
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final Lazy<NavigationBarController> mNavBarControllerLazy;
@@ -201,11 +201,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 // TODO move this logic to message queue
                 mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
                     if (event.getActionMasked() == ACTION_DOWN) {
-                        ShadeViewController shadeViewController =
-                                centralSurfaces.getShadeViewController();
-                        if (shadeViewController != null) {
-                            shadeViewController.startExpandLatencyTracking();
-                        }
+                        mShadeViewControllerLazy.get().startExpandLatencyTracking();
                     }
                     mHandler.post(() -> {
                         int action = event.getActionMasked();
@@ -552,8 +548,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             ShellInterface shellInterface,
             Lazy<NavigationBarController> navBarControllerLazy,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            Lazy<ShadeViewController> shadeViewControllerLazy,
             NavigationModeController navModeController,
-            NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
+            NotificationShadeWindowController statusBarWinController,
+            SysUiState sysUiState,
             UserTracker userTracker,
             ScreenLifecycle screenLifecycle,
             WakefulnessLifecycle wakefulnessLifecycle,
@@ -573,6 +571,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mMainExecutor = mainExecutor;
         mShellInterface = shellInterface;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mShadeViewControllerLazy = shadeViewControllerLazy;
         mHandler = new Handler();
         mNavBarControllerLazy = navBarControllerLazy;
         mStatusBarWinController = statusBarWinController;
@@ -677,13 +676,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 mNavBarControllerLazy.get().getDefaultNavigationBar();
         final NavigationBarView navBarView =
                 mNavBarControllerLazy.get().getNavigationBarView(mContext.getDisplayId());
-        final ShadeViewController panelController =
-                mCentralSurfacesOptionalLazy.get()
-                        .map(CentralSurfaces::getShadeViewController)
-                        .orElse(null);
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment
-                    + " navBarView=" + navBarView + " panelController=" + panelController);
+                    + " navBarView=" + navBarView
+                    + " shadeViewController=" + mShadeViewControllerLazy.get());
         }
 
         if (navBarFragment != null) {
@@ -692,9 +688,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         if (navBarView != null) {
             navBarView.updateDisabledSystemUiStateFlags(mSysUiState);
         }
-        if (panelController != null) {
-            panelController.updateSystemUiStateFlags();
-        }
+        mShadeViewControllerLazy.get().updateSystemUiStateFlags();
         if (mStatusBarWinController != null) {
             mStatusBarWinController.notifyStateChangedCallbacks();
         }

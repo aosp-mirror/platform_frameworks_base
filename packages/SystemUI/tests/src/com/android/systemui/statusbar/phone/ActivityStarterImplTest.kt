@@ -30,6 +30,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeController
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -65,6 +66,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock private lateinit var keyguardViewMediator: KeyguardViewMediator
     @Mock private lateinit var shadeController: ShadeController
+    @Mock private lateinit var shadeViewController: ShadeViewController
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var activityLaunchAnimator: ActivityLaunchAnimator
     @Mock private lateinit var lockScreenUserManager: NotificationLockscreenUserManager
@@ -91,6 +93,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
                 Lazy { biometricUnlockController },
                 Lazy { keyguardViewMediator },
                 Lazy { shadeController },
+                Lazy { shadeViewController },
                 Lazy { statusBarKeyguardViewManager },
                 Lazy { notifShadeWindowController },
                 activityLaunchAnimator,

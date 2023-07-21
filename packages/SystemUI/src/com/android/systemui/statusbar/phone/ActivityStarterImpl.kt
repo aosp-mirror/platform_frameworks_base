@@ -45,6 +45,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeController
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -69,6 +70,7 @@ constructor(
     private val biometricUnlockControllerLazy: Lazy<BiometricUnlockController>,
     private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val shadeControllerLazy: Lazy<ShadeController>,
+    private val shadeViewControllerLazy: Lazy<ShadeViewController>,
     private val statusBarKeyguardViewManagerLazy: Lazy<StatusBarKeyguardViewManager>,
     private val notifShadeWindowControllerLazy: Lazy<NotificationShadeWindowController>,
     private val activityLaunchAnimator: ActivityLaunchAnimator,
@@ -896,7 +898,7 @@ constructor(
                 if (dismissShade) {
                     return StatusBarLaunchAnimatorController(
                         animationController,
-                        it.shadeViewController,
+                        shadeViewControllerLazy.get(),
                         shadeControllerLazy.get(),
                         notifShadeWindowControllerLazy.get(),
                         isLaunchForActivity

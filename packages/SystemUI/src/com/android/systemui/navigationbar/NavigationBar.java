@@ -133,6 +133,7 @@ import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.rotation.RotationButton;
@@ -199,6 +200,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final SysUiState mSysUiFlagsContainer;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final ShadeController mShadeController;
+    private final ShadeViewController mShadeViewController;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final OverviewProxyService mOverviewProxyService;
     private final NavigationModeController mNavigationModeController;
@@ -523,6 +525,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     @Inject
     NavigationBar(
             NavigationBarView navigationBarView,
+            ShadeController shadeController,
             NavigationBarFrame navigationBarFrame,
             @Nullable Bundle savedState,
             @DisplayId Context context,
@@ -541,7 +544,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             Optional<Pip> pipOptional,
             Optional<Recents> recentsOptional,
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-            ShadeController shadeController,
+            ShadeViewController shadeViewController,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationShadeDepthController notificationShadeDepthController,
             @Main Handler mainHandler,
@@ -577,6 +580,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mSysUiFlagsContainer = sysUiFlagsContainer;
         mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mShadeController = shadeController;
+        mShadeViewController = shadeViewController;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mOverviewProxyService = overviewProxyService;
         mNavigationModeController = navigationModeController;
@@ -739,8 +743,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         final Display display = mView.getDisplay();
         mView.setComponents(mRecentsOptional);
         if (mCentralSurfacesOptionalLazy.get().isPresent()) {
-            mView.setComponents(
-                    mCentralSurfacesOptionalLazy.get().get().getShadeViewController());
+            mView.setComponents(mShadeViewController);
         }
         mView.setDisabledFlags(mDisabledFlags1, mSysUiFlagsContainer);
         mView.setOnVerticalChangedListener(this::onVerticalChanged);
@@ -1341,9 +1344,10 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private void onVerticalChanged(boolean isVertical) {
-        Optional<CentralSurfaces> cs = mCentralSurfacesOptionalLazy.get();
-        if (cs.isPresent() && cs.get().getShadeViewController() != null) {
-            cs.get().getShadeViewController().setQsScrimEnabled(!isVertical);
+        // This check can probably be safely removed. It only remained to reduce regression
+        // risk for a broad change that removed the CentralSurfaces reference in the if block
+        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
+            mShadeViewController.setQsScrimEnabled(!isVertical);
         }
     }
 
