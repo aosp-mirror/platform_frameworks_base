@@ -94,6 +94,7 @@ import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.CommandQueue;
@@ -467,6 +468,7 @@ public class NavigationBarTest extends SysuiTestCase {
         when(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         return spy(new NavigationBar(
                 mNavigationBarView,
+                mock(ShadeController.class),
                 mNavigationBarFrame,
                 null,
                 context,
@@ -485,7 +487,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 Optional.of(mock(Pip.class)),
                 Optional.of(mock(Recents.class)),
                 () -> Optional.of(mCentralSurfaces),
-                mock(ShadeController.class),
+                mock(ShadeViewController.class),
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationShadeDepthController.class),
                 mHandler,
