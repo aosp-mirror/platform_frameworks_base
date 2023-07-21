@@ -113,9 +113,6 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private final boolean mIsReadOnlyConnection;
     private PreparedStatement mPreparedStatementPool;
 
-    // A lock access to the statement cache.
-    private final Object mCacheLock = new Object();
-    @GuardedBy("mCacheLock")
     private final PreparedStatementCache mPreparedStatementCache;
 
     // The recent operations log.
@@ -596,9 +593,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         mConfiguration.updateParametersFrom(configuration);
 
         // Update prepared statement cache size.
-        synchronized (mCacheLock) {
-            mPreparedStatementCache.resize(configuration.maxSqlCacheSize);
-        }
+        mPreparedStatementCache.resize(configuration.maxSqlCacheSize);
 
         if (foreignKeyModeChanged) {
             setForeignKeyModeFromConfiguration();
@@ -630,12 +625,12 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         mOnlyAllowReadOnlyOperations = readOnly;
     }
 
-    // Called by SQLiteConnectionPool only.
-    // Returns true if the prepared statement cache contains the specified SQL.
+    // Called by SQLiteConnectionPool only to decide if this connection has the desired statement
+    // already prepared.  Returns true if the prepared statement cache contains the specified SQL.
+    // The statement may be stale, but that will be a rare occurrence and affects performance only
+    // a tiny bit, and only when database schema changes.
     boolean isPreparedStatementInCache(String sql) {
-        synchronized (mCacheLock) {
-            return mPreparedStatementCache.get(sql) != null;
-        }
+        return mPreparedStatementCache.get(sql) != null;
     }
 
     /**
@@ -1070,28 +1065,41 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     /**
      * Return a {@link #PreparedStatement}, possibly from the cache.
      */
-    @GuardedBy("mCacheLock")
     private PreparedStatement acquirePreparedStatementLI(String sql) {
         ++mPool.mTotalPrepareStatements;
-        PreparedStatement statement = mPreparedStatementCache.get(sql);
+        PreparedStatement statement = mPreparedStatementCache.getStatement(sql);
+        long seqNum = mPreparedStatementCache.getLastSeqNum();
+
         boolean skipCache = false;
         if (statement != null) {
             if (!statement.mInUse) {
-                statement.mInUse = true;
-                return statement;
+                if (statement.mSeqNum == seqNum) {
+                    // This is a valid statement.  Claim it and return it.
+                    statement.mInUse = true;
+                    return statement;
+                } else {
+                    // This is a stale statement.  Remove it from the cache.  Treat this as if the
+                    // statement was never found, which means we should not skip the cache.
+                    mPreparedStatementCache.remove(sql);
+                    statement = null;
+                    // Leave skipCache == false.
+                }
+            } else {
+                // The statement is already in the cache but is in use (this statement appears to
+                // be not only re-entrant but recursive!).  So prepare a new copy of the statement
+                // but do not cache it.
+                skipCache = true;
             }
-            // The statement is already in the cache but is in use (this statement appears
-            // to be not only re-entrant but recursive!).  So prepare a new copy of the
-            // statement but do not cache it.
-            skipCache = true;
         }
         ++mPool.mTotalPrepareStatementCacheMiss;
-        final long statementPtr = nativePrepareStatement(mConnectionPtr, sql);
+        final long statementPtr = mPreparedStatementCache.createStatement(sql);
+        seqNum = mPreparedStatementCache.getLastSeqNum();
         try {
             final int numParameters = nativeGetParameterCount(mConnectionPtr, statementPtr);
             final int type = DatabaseUtils.getSqlStatementType(sql);
             final boolean readOnly = nativeIsReadOnly(mConnectionPtr, statementPtr);
-            statement = obtainPreparedStatement(sql, statementPtr, numParameters, type, readOnly);
+            statement = obtainPreparedStatement(sql, statementPtr, numParameters, type, readOnly,
+                    seqNum);
             if (!skipCache && isCacheable(type)) {
                 mPreparedStatementCache.put(sql, statement);
                 statement.mInCache = true;
@@ -1112,15 +1120,12 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      * Return a {@link #PreparedStatement}, possibly from the cache.
      */
     PreparedStatement acquirePreparedStatement(String sql) {
-        synchronized (mCacheLock) {
-            return acquirePreparedStatementLI(sql);
-        }
+        return acquirePreparedStatementLI(sql);
     }
 
     /**
      * Release a {@link #PreparedStatement} that was originally supplied by this connection.
      */
-    @GuardedBy("mCacheLock")
     private void releasePreparedStatementLI(PreparedStatement statement) {
         statement.mInUse = false;
         if (statement.mInCache) {
@@ -1148,9 +1153,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
      * Release a {@link #PreparedStatement} that was originally supplied by this connection.
      */
     void releasePreparedStatement(PreparedStatement statement) {
-        synchronized (mCacheLock) {
-            releasePreparedStatementLI(statement);
-        }
+        releasePreparedStatementLI(statement);
     }
 
     private void finalizePreparedStatement(PreparedStatement statement) {
@@ -1327,9 +1330,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         mRecentOperations.dump(printer);
 
         if (verbose) {
-            synchronized (mCacheLock) {
-                mPreparedStatementCache.dump(printer);
-            }
+            mPreparedStatementCache.dump(printer);
         }
     }
 
@@ -1430,7 +1431,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private PreparedStatement obtainPreparedStatement(String sql, long statementPtr,
-            int numParameters, int type, boolean readOnly) {
+            int numParameters, int type, boolean readOnly, long seqNum) {
         PreparedStatement statement = mPreparedStatementPool;
         if (statement != null) {
             mPreparedStatementPool = statement.mPoolNext;
@@ -1444,6 +1445,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         statement.mNumParameters = numParameters;
         statement.mType = type;
         statement.mReadOnly = readOnly;
+        statement.mSeqNum = seqNum;
         return statement;
     }
 
@@ -1461,10 +1463,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         return sql.replaceAll("[\\s]*\\n+[\\s]*", " ");
     }
 
-    void clearPreparedStatementCache() {
-        synchronized (mCacheLock) {
-            mPreparedStatementCache.evictAll();
-        }
+    // Update the database sequence number.  This number is stored in the prepared statement
+    // cache.
+    void setDatabaseSeqNum(long n) {
+        mPreparedStatementCache.setDatabaseSeqNum(n);
     }
 
     /**
@@ -1502,6 +1504,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         // True if the statement is in the cache.
         public boolean mInCache;
 
+        // The database schema ID at the time this statement was created.  The ID is left zero for
+        // statements that are not cached.  This value is meaningful only if mInCache is true.
+        public long mSeqNum;
+
         // True if the statement is in use (currently executing).
         // We need this flag because due to the use of custom functions in triggers, it's
         // possible for SQLite calls to be re-entrant.  Consequently we need to prevent
@@ -1510,8 +1516,39 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private final class PreparedStatementCache extends LruCache<String, PreparedStatement> {
+        // The database sequence number.  This changes every time the database schema changes.
+        private long mDatabaseSeqNum = 0;
+
+        // The database sequence number from the last getStatement() or createStatement()
+        // call. The proper use of this variable depends on the caller being single threaded.
+        private long mLastSeqNum = 0;
+
         public PreparedStatementCache(int size) {
             super(size);
+        }
+
+        public synchronized void setDatabaseSeqNum(long n) {
+            mDatabaseSeqNum = n;
+        }
+
+        // Return the last database sequence number.
+        public long getLastSeqNum() {
+            return mLastSeqNum;
+        }
+
+        // Return a statement from the cache.  Save the database sequence number for the caller.
+        public synchronized PreparedStatement getStatement(String sql) {
+            mLastSeqNum = mDatabaseSeqNum;
+            return get(sql);
+        }
+
+        // Return a new native prepared statement and save the database sequence number for the
+        // caller.  This does not modify the cache in any way.  However, by being synchronized,
+        // callers are guaranteed that the sequence number did not change across the native
+        // preparation step.
+        public synchronized long createStatement(String sql) {
+            mLastSeqNum = mDatabaseSeqNum;
+            return nativePrepareStatement(mConnectionPtr, sql);
         }
 
         @Override
