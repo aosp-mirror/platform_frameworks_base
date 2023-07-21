@@ -206,21 +206,19 @@ int main(int argc, char** argv)
     ProcessState::self()->startThreadPool();
 
     sp<SyncScreenCaptureListener> captureListener = new SyncScreenCaptureListener();
-    status_t result = ScreenshotClient::captureDisplay(*displayIdOpt, captureListener);
-    if (result != NO_ERROR) {
-        close(fd);
-        return 1;
-    }
+    ScreenshotClient::captureDisplay(*displayIdOpt, captureListener);
 
     ScreenCaptureResults captureResults = captureListener->waitForResults();
     if (!captureResults.fenceResult.ok()) {
         close(fd);
+        fprintf(stderr, "Failed to take screenshot. Status: %d\n",
+            fenceStatus(captureResults.fenceResult));
         return 1;
     }
     ui::Dataspace dataspace = captureResults.capturedDataspace;
     sp<GraphicBuffer> buffer = captureResults.buffer;
 
-    result = buffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
+    status_t result = buffer->lock(GraphicBuffer::USAGE_SW_READ_OFTEN, &base);
 
     if (base == nullptr || result != NO_ERROR) {
         String8 reason;
