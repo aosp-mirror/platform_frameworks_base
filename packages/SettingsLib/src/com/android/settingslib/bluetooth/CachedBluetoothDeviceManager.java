@@ -28,6 +28,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -353,16 +354,17 @@ public class CachedBluetoothDeviceManager {
     public synchronized void onDeviceUnpaired(CachedBluetoothDevice device) {
         device.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
         CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(device);
-        final Set<CachedBluetoothDevice> memberDevices = device.getMemberDevice();
+        // Should iterate through the cloned set to avoid ConcurrentModificationException
+        final Set<CachedBluetoothDevice> memberDevices = new HashSet<>(device.getMemberDevice());
         if (!memberDevices.isEmpty()) {
-            // Main device is unpaired, to unpair the member device
+            // Main device is unpaired, also unpair the member devices
             for (CachedBluetoothDevice memberDevice : memberDevices) {
                 memberDevice.unpair();
                 memberDevice.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
                 device.removeMemberDevice(memberDevice);
             }
         } else if (mainDevice != null) {
-            // the member device unpaired, to unpair main device
+            // Member device is unpaired, also unpair the main device
             mainDevice.unpair();
         }
         mainDevice = mHearingAidDeviceManager.findMainDevice(device);
