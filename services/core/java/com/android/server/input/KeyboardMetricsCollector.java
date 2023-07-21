@@ -21,10 +21,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.hardware.input.KeyboardLayout;
 import android.icu.util.ULocale;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -41,9 +41,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -59,6 +57,7 @@ public final class KeyboardMetricsCollector {
 
     @Retention(SOURCE)
     @IntDef(prefix = {"LAYOUT_SELECTION_CRITERIA_"}, value = {
+            LAYOUT_SELECTION_CRITERIA_UNSPECIFIED,
             LAYOUT_SELECTION_CRITERIA_USER,
             LAYOUT_SELECTION_CRITERIA_DEVICE,
             LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD,
@@ -67,23 +66,26 @@ public final class KeyboardMetricsCollector {
     public @interface LayoutSelectionCriteria {
     }
 
+    /** Unspecified layout selection criteria */
+    public static final int LAYOUT_SELECTION_CRITERIA_UNSPECIFIED = 0;
+
     /** Manual selection by user */
-    public static final int LAYOUT_SELECTION_CRITERIA_USER = 0;
+    public static final int LAYOUT_SELECTION_CRITERIA_USER = 1;
 
     /** Auto-detection based on device provided language tag and layout type */
-    public static final int LAYOUT_SELECTION_CRITERIA_DEVICE = 1;
+    public static final int LAYOUT_SELECTION_CRITERIA_DEVICE = 2;
 
     /** Auto-detection based on IME provided language tag and layout type */
-    public static final int LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD = 2;
+    public static final int LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD = 3;
 
     /** Default selection */
-    public static final int LAYOUT_SELECTION_CRITERIA_DEFAULT = 3;
+    public static final int LAYOUT_SELECTION_CRITERIA_DEFAULT = 4;
 
     @VisibleForTesting
-    static final String DEFAULT_LAYOUT = "Default";
+    static final String DEFAULT_LAYOUT_NAME = "Default";
 
     @VisibleForTesting
-    static final String DEFAULT_LANGUAGE_TAG = "None";
+    public static final String DEFAULT_LANGUAGE_TAG = "None";
 
     public enum KeyboardLogEvent {
         UNSPECIFIED(
@@ -536,23 +538,23 @@ public final class KeyboardMetricsCollector {
                             mLayoutSelectionCriteriaList.get(i);
                     InputMethodSubtype imeSubtype = mImeSubtypeList.get(i);
                     String keyboardLanguageTag = mInputDevice.getKeyboardLanguageTag();
-                    keyboardLanguageTag = keyboardLanguageTag == null ? DEFAULT_LANGUAGE_TAG
-                            : keyboardLanguageTag;
+                    keyboardLanguageTag = TextUtils.isEmpty(keyboardLanguageTag)
+                            ? DEFAULT_LANGUAGE_TAG : keyboardLanguageTag;
                     int keyboardLayoutType = KeyboardLayout.LayoutType.getLayoutTypeEnumValue(
                             mInputDevice.getKeyboardLayoutType());
 
                     ULocale pkLocale = imeSubtype.getPhysicalKeyboardHintLanguageTag();
-                    String canonicalizedLanguageTag =
-                            imeSubtype.getCanonicalizedLanguageTag().equals("")
-                            ? DEFAULT_LANGUAGE_TAG : imeSubtype.getCanonicalizedLanguageTag();
                     String imeLanguageTag = pkLocale != null ? pkLocale.toLanguageTag()
-                            : canonicalizedLanguageTag;
+                            : imeSubtype.getCanonicalizedLanguageTag();
+                    imeLanguageTag = TextUtils.isEmpty(imeLanguageTag) ? DEFAULT_LANGUAGE_TAG
+                            : imeLanguageTag;
                     int imeLayoutType = KeyboardLayout.LayoutType.getLayoutTypeEnumValue(
                             imeSubtype.getPhysicalKeyboardHintLayoutType());
 
                     // Sanitize null values
                     String keyboardLayoutName =
-                            selectedLayout == null ? DEFAULT_LAYOUT : selectedLayout.getLabel();
+                            selectedLayout == null ? DEFAULT_LAYOUT_NAME
+                                    : selectedLayout.getLabel();
 
                     configurationList.add(
                             new LayoutConfiguration(keyboardLayoutType, keyboardLanguageTag,
@@ -601,6 +603,8 @@ public final class KeyboardMetricsCollector {
     private static String getStringForSelectionCriteria(
             @LayoutSelectionCriteria int layoutSelectionCriteria) {
         switch (layoutSelectionCriteria) {
+            case LAYOUT_SELECTION_CRITERIA_UNSPECIFIED:
+                return "LAYOUT_SELECTION_CRITERIA_UNSPECIFIED";
             case LAYOUT_SELECTION_CRITERIA_USER:
                 return "LAYOUT_SELECTION_CRITERIA_USER";
             case LAYOUT_SELECTION_CRITERIA_DEVICE:
