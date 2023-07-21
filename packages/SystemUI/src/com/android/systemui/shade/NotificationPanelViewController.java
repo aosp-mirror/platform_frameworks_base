@@ -147,7 +147,6 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -365,7 +364,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private KeyguardBottomAreaView mKeyguardBottomArea;
     private boolean mExpanding;
     private boolean mSplitShadeEnabled;
-    private boolean mDualShadeEnabled;
     /** The bottom padding reserved for elements of the keyguard measuring notifications. */
     private float mKeyguardNotificationBottomPadding;
     /**
@@ -599,7 +597,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
     private final KeyguardViewConfigurator mKeyguardViewConfigurator;
-    private final @Nullable MultiShadeInteractor mMultiShadeInteractor;
     private final CoroutineDispatcher mMainDispatcher;
     private boolean mIsAnyMultiShadeExpanded;
     private boolean mIsOcclusionTransitionRunning = false;
@@ -735,7 +732,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             LockscreenToOccludedTransitionViewModel lockscreenToOccludedTransitionViewModel,
             @Main CoroutineDispatcher mainDispatcher,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
-            Provider<MultiShadeInteractor> multiShadeInteractorProvider,
             DumpManager dumpManager,
             KeyguardLongPressViewModel keyguardLongPressViewModel,
             KeyguardInteractor keyguardInteractor,
@@ -839,8 +835,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mFeatureFlags = featureFlags;
         mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
         mTrackpadGestureFeaturesEnabled = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_FEATURES);
-        mDualShadeEnabled = mFeatureFlags.isEnabled(Flags.DUAL_SHADE);
-        mMultiShadeInteractor = mDualShadeEnabled ? multiShadeInteractorProvider.get() : null;
         mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
         mWakeUpCoordinator = coordinator;
@@ -1078,11 +1072,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
         mNotificationPanelUnfoldAnimationController.ifPresent(controller ->
                 controller.setup(mNotificationContainerParent));
-
-        if (mDualShadeEnabled) {
-            collectFlow(mView, mMultiShadeInteractor.isAnyShadeExpanded(),
-                    mMultiShadeExpansionConsumer, mMainDispatcher);
-        }
 
         // Dreaming->Lockscreen
         collectFlow(mView, mKeyguardTransitionInteractor.getDreamingToLockscreenTransition(),
