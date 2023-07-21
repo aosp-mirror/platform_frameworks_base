@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.scene.domain.startable
 
+import android.view.Display
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -23,17 +26,24 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.model.SysUiState
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(JUnit4::class)
@@ -53,6 +63,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
         utils.keyguardInteractor(
             repository = keyguardRepository,
         )
+    private val sysUiState: SysUiState = mock()
 
     private val underTest =
         SystemUiDefaultSceneContainerStartable(
@@ -61,6 +72,8 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
             authenticationInteractor = authenticationInteractor,
             keyguardInteractor = keyguardInteractor,
             featureFlags = featureFlags,
+            sysUiState = sysUiState,
+            displayId = Display.DEFAULT_DISPLAY,
         )
 
     @Before
@@ -373,6 +386,31 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
             keyguardRepository.setWakefulnessModel(ASLEEP)
 
             assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
+        }
+
+    @Test
+    fun hydrateSystemUiState() =
+        testScope.runTest {
+            underTest.start()
+            runCurrent()
+            clearInvocations(sysUiState)
+
+            listOf(
+                    SceneKey.Gone,
+                    SceneKey.Lockscreen,
+                    SceneKey.Bouncer,
+                    SceneKey.Shade,
+                    SceneKey.QuickSettings,
+                )
+                .forEachIndexed { index, sceneKey ->
+                    sceneInteractor.setCurrentScene(
+                        SceneContainerNames.SYSTEM_UI_DEFAULT,
+                        SceneModel(sceneKey),
+                    )
+                    runCurrent()
+
+                    verify(sysUiState, times(index + 1)).commitUpdate(Display.DEFAULT_DISPLAY)
+                }
         }
 
     private fun prepareState(
