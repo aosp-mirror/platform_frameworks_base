@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.Assert;
 
 import com.google.errorprone.annotations.CompileTimeConstant;
 
@@ -85,6 +86,7 @@ public class KeyguardVisibilityHelper {
             boolean keyguardFadingAway,
             boolean goingToFullShade,
             int oldStatusBarState) {
+        Assert.isMainThread();
         PropertyAnimator.cancelAnimation(mView, AnimatableProperty.ALPHA);
         boolean isOccluded = mKeyguardStateController.isOccluded();
         mKeyguardViewVisibilityAnimating = false;

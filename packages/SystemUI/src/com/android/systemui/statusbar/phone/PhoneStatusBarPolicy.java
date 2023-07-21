@@ -546,7 +546,7 @@ public class PhoneStatusBarPolicy
                 userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
                 boolean isManagedProfile = mUserManager.isManagedProfile(userId);
                 String accessibilityString = getManagedProfileAccessibilityString();
-                mHandler.post(() -> {
+                mMainExecutor.execute(() -> {
                     final boolean showIcon;
                     if (isManagedProfile && (!mKeyguardStateController.isShowing()
                             || mKeyguardStateController.isOccluded())) {
@@ -621,6 +621,13 @@ public class PhoneStatusBarPolicy
     @Override
     public void appTransitionStarting(int displayId, long startTime, long duration,
             boolean forced) {
+        if (mDisplayId == displayId) {
+            updateManagedProfile();
+        }
+    }
+
+    @Override
+    public void appTransitionFinished(int displayId) {
         if (mDisplayId == displayId) {
             updateManagedProfile();
         }

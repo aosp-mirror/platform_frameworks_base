@@ -20,9 +20,9 @@ import android.app.Instrumentation;
 import android.os.RemoteException;
 import android.support.test.uiautomator.UiDevice;
 
+import androidx.annotation.NonNull;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
@@ -35,8 +35,6 @@ import java.io.IOException;
 public class ImeStressTestRule extends TestWatcher {
     private static final String LOCK_SCREEN_OFF_COMMAND = "locksettings set-disabled true";
     private static final String LOCK_SCREEN_ON_COMMAND = "locksettings set-disabled false";
-    private static final String SET_PORTRAIT_MODE_COMMAND = "settings put system user_rotation 0";
-    private static final String SET_LANDSCAPE_MODE_COMMAND = "settings put system user_rotation 1";
     private static final String SIMPLE_IME_ID =
             "com.android.apps.inputmethod.simpleime/.SimpleInputMethodService";
     private static final String ENABLE_IME_COMMAND = "ime enable " + SIMPLE_IME_ID;
@@ -44,8 +42,10 @@ public class ImeStressTestRule extends TestWatcher {
     private static final String DISABLE_IME_COMMAND = "ime disable " + SIMPLE_IME_ID;
     private static final String RESET_IME_COMMAND = "ime reset";
 
-    @NonNull private final Instrumentation mInstrumentation;
-    @NonNull private final UiDevice mUiDevice;
+    @NonNull
+    private final Instrumentation mInstrumentation;
+    @NonNull
+    private final UiDevice mUiDevice;
     // Whether the screen orientation is set to portrait.
     private boolean mIsPortrait;
     // Whether to use a simple test Ime or system default Ime for test.
@@ -105,12 +105,13 @@ public class ImeStressTestRule extends TestWatcher {
     private void setOrientation() {
         try {
             mUiDevice.freezeRotation();
-            executeShellCommand(
-                    mIsPortrait ? SET_PORTRAIT_MODE_COMMAND : SET_LANDSCAPE_MODE_COMMAND);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not set screen orientation.", e);
+            if (mIsPortrait) {
+                mUiDevice.setOrientationNatural();
+            } else {
+                mUiDevice.setOrientationLeft();
+            }
         } catch (RemoteException e) {
-            throw new RuntimeException("Could not freeze rotation.", e);
+            throw new RuntimeException("Could not freeze rotation or set screen orientation.", e);
         }
     }
 
@@ -147,7 +148,8 @@ public class ImeStressTestRule extends TestWatcher {
         }
     }
 
-    private @NonNull String executeShellCommand(@NonNull String cmd) throws IOException {
+    @NonNull
+    private String executeShellCommand(@NonNull String cmd) throws IOException {
         return mUiDevice.executeShellCommand(cmd);
     }
 }

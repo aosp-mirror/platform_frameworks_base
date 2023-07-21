@@ -16,34 +16,51 @@
 package com.android.systemui.shared.shadow
 
 import android.content.Context
+import android.content.res.Resources
+import android.content.res.TypedArray
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.widget.TextClock
 import com.android.systemui.shared.R
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper.ShadowInfo
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper.applyShadows
+import javax.inject.Inject
 import kotlin.math.floor
 
 /** Extension of [TextClock] which draws two shadows on the text (ambient and key shadows) */
+class ResourcesProvider @Inject constructor(private val context: Context) {
+    fun getResources(): Resources {
+        return context.resources
+    }
+
+    fun getBoolean(resourceId: Int): Boolean {
+        return getResources().getBoolean(resourceId)
+    }
+}
+
 class DoubleShadowTextClock
 @JvmOverloads
 constructor(
+    private val resourcesProvider: ResourcesProvider,
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    defStyleRes: Int = 0
+    defStyleRes: Int = 0,
+    attributesInput: TypedArray? = null
 ) : TextClock(context, attrs, defStyleAttr, defStyleRes) {
     private val mAmbientShadowInfo: ShadowInfo
     private val mKeyShadowInfo: ShadowInfo
 
     init {
-        val attributes =
-            context.obtainStyledAttributes(
-                attrs,
-                R.styleable.DoubleShadowTextClock,
-                defStyleAttr,
-                defStyleRes
-            )
+        var attributes: TypedArray =
+            attributesInput
+                ?: context.obtainStyledAttributes(
+                    attrs,
+                    R.styleable.DoubleShadowTextClock,
+                    defStyleAttr,
+                    defStyleRes
+                )
+
         try {
             val keyShadowBlur =
                 attributes.getDimensionPixelSize(R.styleable.DoubleShadowTextClock_keyShadowBlur, 0)
@@ -98,16 +115,27 @@ constructor(
                     0
                 )
             if (removeTextDescent) {
-                setPaddingRelative(
-                    0,
-                    0,
-                    0,
-                    textDescentExtraPadding - floor(paint.fontMetrics.descent.toDouble()).toInt()
-                )
+                val addBottomPaddingToClock =
+                    resourcesProvider.getBoolean(
+                        R.bool.dream_overlay_complication_clock_bottom_padding
+                    )
+                val metrics = paint.fontMetrics
+                val padding =
+                    if (addBottomPaddingToClock) {
+                        textDescentExtraPadding +
+                            floor(metrics.descent.toDouble()).toInt() / paddingDividedOffset
+                    } else {
+                        textDescentExtraPadding - floor(metrics.descent.toDouble()).toInt()
+                    }
+                setPaddingRelative(0, 0, 0, padding)
             }
         } finally {
             attributes.recycle()
         }
+    }
+
+    companion object {
+        private val paddingDividedOffset = 2
     }
 
     public override fun onDraw(canvas: Canvas) {

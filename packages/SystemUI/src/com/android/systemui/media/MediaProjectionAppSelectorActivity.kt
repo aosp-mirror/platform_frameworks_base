@@ -30,6 +30,9 @@ import android.os.IBinder
 import android.os.ResultReceiver
 import android.os.UserHandle
 import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.EmptyStateProvider
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.MyUserIdProvider
@@ -54,7 +57,11 @@ class MediaProjectionAppSelectorActivity(
     /** This is used to override the dependency in a screenshot test */
     @VisibleForTesting
     private val listControllerFactory: ((userHandle: UserHandle) -> ResolverListController)?
-) : ChooserActivity(), MediaProjectionAppSelectorView, MediaProjectionAppSelectorResultHandler {
+) :
+    ChooserActivity(),
+    MediaProjectionAppSelectorView,
+    MediaProjectionAppSelectorResultHandler,
+    LifecycleOwner {
 
     @Inject
     constructor(
@@ -62,6 +69,8 @@ class MediaProjectionAppSelectorActivity(
         activityLauncher: AsyncActivityLauncher
     ) : this(componentFactory, activityLauncher, listControllerFactory = null)
 
+    private val lifecycleRegistry = LifecycleRegistry(this)
+    override val lifecycle = lifecycleRegistry
     private lateinit var configurationController: ConfigurationController
     private lateinit var controller: MediaProjectionAppSelectorController
     private lateinit var recentsViewController: MediaProjectionRecentsViewController
@@ -75,7 +84,9 @@ class MediaProjectionAppSelectorActivity(
     override fun getLayoutResource() = R.layout.media_projection_app_selector
 
     public override fun onCreate(bundle: Bundle?) {
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         component = componentFactory.create(activity = this, view = this, resultHandler = this)
+        component.lifecycleObservers.forEach { lifecycle.addObserver(it) }
 
         // Create a separate configuration controller for this activity as the configuration
         // might be different from the global one
@@ -94,6 +105,26 @@ class MediaProjectionAppSelectorActivity(
 
         super.onCreate(bundle)
         controller.init()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    }
+
+    override fun onPause() {
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        super.onPause()
+    }
+
+    override fun onStop() {
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        super.onStop()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -152,6 +183,8 @@ class MediaProjectionAppSelectorActivity(
     }
 
     override fun onDestroy() {
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        component.lifecycleObservers.forEach { lifecycle.removeObserver(it) }
         // onDestroy is also called when an app is selected, in that case we only want to send
         // RECORD_CONTENT_TASK but not RECORD_CANCEL
         if (!taskSelected) {

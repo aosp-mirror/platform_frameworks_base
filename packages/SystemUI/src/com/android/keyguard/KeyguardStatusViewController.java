@@ -37,6 +37,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -46,7 +47,9 @@ import com.android.app.animation.Interpolators;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.KeyguardClockSwitch.ClockSize;
 import com.android.keyguard.logging.KeyguardLogger;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
@@ -59,14 +62,17 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
 
+import java.io.PrintWriter;
+
 import javax.inject.Inject;
 
 /**
  * Injectable controller for {@link KeyguardStatusView}.
  */
-public class KeyguardStatusViewController extends ViewController<KeyguardStatusView> {
+public class KeyguardStatusViewController extends ViewController<KeyguardStatusView> implements
+        Dumpable {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
-    private static final String TAG = "KeyguardStatusViewController";
+    @VisibleForTesting static final String TAG = "KeyguardStatusViewController";
 
     /**
      * Duration to use for the animator when the keyguard status view alignment changes, and a
@@ -87,6 +93,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final Rect mClipBounds = new Rect();
 
     private Boolean mStatusViewCentered = true;
+
+    private DumpManager mDumpManager;
 
     private final TransitionListenerAdapter mKeyguardStatusAlignmentTransitionListener =
             new TransitionListenerAdapter() {
@@ -113,7 +121,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             ScreenOffAnimationController screenOffAnimationController,
             KeyguardLogger logger,
             FeatureFlags featureFlags,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            DumpManager dumpManager) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
@@ -124,11 +133,13 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 logger.getBuffer());
         mInteractionJankMonitor = interactionJankMonitor;
         mFeatureFlags = featureFlags;
+        mDumpManager = dumpManager;
     }
 
     @Override
     public void onInit() {
         mKeyguardClockSwitchController.init();
+        mDumpManager.registerDumpable(this);
     }
 
     @Override
@@ -141,6 +152,13 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     protected void onViewDetached() {
         mKeyguardUpdateMonitor.removeCallback(mInfoCallback);
         mConfigurationController.removeCallback(mConfigurationListener);
+    }
+
+    /**
+     * Called in notificationPanelViewController to avoid leak
+     */
+    public void onDestroy() {
+        mDumpManager.unregisterDumpable(TAG);
     }
 
     /**
@@ -438,6 +456,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         constraintSet.applyTo(notifContainerParent);
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        mView.dump(pw, args);
     }
 
     @VisibleForTesting
