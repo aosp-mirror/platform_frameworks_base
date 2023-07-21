@@ -113,7 +113,7 @@ TEST_F(AssetManager2Test, FindsResourceFromSingleApkAssets) {
   desired_config.language[1] = 'e';
 
   AssetManager2 assetmanager;
-  assetmanager.SetConfiguration(desired_config);
+  assetmanager.SetConfigurations({desired_config});
   assetmanager.SetApkAssets({basic_assets_});
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
@@ -137,7 +137,7 @@ TEST_F(AssetManager2Test, FindsResourceFromMultipleApkAssets) {
   desired_config.language[1] = 'e';
 
   AssetManager2 assetmanager;
-  assetmanager.SetConfiguration(desired_config);
+  assetmanager.SetConfigurations({desired_config});
   assetmanager.SetApkAssets({basic_assets_, basic_de_fr_assets_});
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
@@ -466,10 +466,10 @@ TEST_F(AssetManager2Test, ResolveDeepIdReference) {
 TEST_F(AssetManager2Test, DensityOverride) {
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets({basic_assets_, basic_xhdpi_assets_, basic_xxhdpi_assets_});
-  assetmanager.SetConfiguration({
+  assetmanager.SetConfigurations({{
     .density = ResTable_config::DENSITY_XHIGH,
     .sdkVersion = 21,
-  });
+  }});
 
   auto value = assetmanager.GetResource(basic::R::string::density, false /*may_be_bag*/);
   ASSERT_TRUE(value.has_value());
@@ -721,7 +721,7 @@ TEST_F(AssetManager2Test, GetLastPathWithoutEnablingReturnsEmpty) {
   ResTable_config desired_config;
 
   AssetManager2 assetmanager;
-  assetmanager.SetConfiguration(desired_config);
+  assetmanager.SetConfigurations({desired_config});
   assetmanager.SetApkAssets({basic_assets_});
   assetmanager.SetResourceResolutionLoggingEnabled(false);
 
@@ -736,7 +736,7 @@ TEST_F(AssetManager2Test, GetLastPathWithoutResolutionReturnsEmpty) {
   ResTable_config desired_config;
 
   AssetManager2 assetmanager;
-  assetmanager.SetConfiguration(desired_config);
+  assetmanager.SetConfigurations({desired_config});
   assetmanager.SetApkAssets({basic_assets_});
 
   auto result = assetmanager.GetLastResourceResolution();
@@ -751,7 +751,7 @@ TEST_F(AssetManager2Test, GetLastPathWithSingleApkAssets) {
 
   AssetManager2 assetmanager;
   assetmanager.SetResourceResolutionLoggingEnabled(true);
-  assetmanager.SetConfiguration(desired_config);
+  assetmanager.SetConfigurations({desired_config});
   assetmanager.SetApkAssets({basic_assets_});
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
@@ -774,7 +774,7 @@ TEST_F(AssetManager2Test, GetLastPathWithMultipleApkAssets) {
 
   AssetManager2 assetmanager;
   assetmanager.SetResourceResolutionLoggingEnabled(true);
-  assetmanager.SetConfiguration(desired_config);
+  assetmanager.SetConfigurations({desired_config});
   assetmanager.SetApkAssets({basic_assets_, basic_de_fr_assets_});
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
@@ -796,7 +796,7 @@ TEST_F(AssetManager2Test, GetLastPathAfterDisablingReturnsEmpty) {
 
   AssetManager2 assetmanager;
   assetmanager.SetResourceResolutionLoggingEnabled(true);
-  assetmanager.SetConfiguration(desired_config);
+  assetmanager.SetConfigurations({desired_config});
   assetmanager.SetApkAssets({basic_assets_});
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
@@ -817,7 +817,7 @@ TEST_F(AssetManager2Test, GetOverlayablesToString) {
 
   AssetManager2 assetmanager;
   assetmanager.SetResourceResolutionLoggingEnabled(true);
-  assetmanager.SetConfiguration(desired_config);
+  assetmanager.SetConfigurations({desired_config});
   assetmanager.SetApkAssets({overlayable_assets_});
 
   const auto map = assetmanager.GetOverlayableMapForPackage(0x7f);

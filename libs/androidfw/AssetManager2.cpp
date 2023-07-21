@@ -91,10 +91,15 @@ struct FindEntryResult {
   StringPoolRef entry_string_ref;
 };
 
-AssetManager2::AssetManager2(ApkAssetsList apk_assets, const ResTable_config& configuration)
-    : configuration_(configuration) {
+AssetManager2::AssetManager2(ApkAssetsList apk_assets, const ResTable_config& configuration) {
+  configurations_.push_back(configuration);
+
   // Don't invalidate caches here as there's nothing cached yet.
   SetApkAssets(apk_assets, false);
+}
+
+AssetManager2::AssetManager2() {
+  configurations_.resize(1);
 }
 
 bool AssetManager2::SetApkAssets(ApkAssetsList apk_assets, bool invalidate_caches) {
@@ -421,9 +426,16 @@ bool AssetManager2::ContainsAllocatedTable() const {
   return false;
 }
 
-void AssetManager2::SetConfiguration(const ResTable_config& configuration) {
-  const int diff = configuration_.diff(configuration);
-  configuration_ = configuration;
+void AssetManager2::SetConfigurations(std::vector<ResTable_config> configurations) {
+  int diff = 0;
+  if (configurations_.size() != configurations.size()) {
+    diff = -1;
+  } else {
+    for (int i = 0; i < configurations_.size(); i++) {
+      diff |= configurations_[i].diff(configurations[i]);
+    }
+  }
+  configurations_ = std::move(configurations);
 
   if (diff) {
     RebuildFilterList();
@@ -620,16 +632,6 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
 
   auto op = StartOperation();
 
-  // Might use this if density_override != 0.
-  ResTable_config density_override_config;
-
-  // Select our configuration or generate a density override configuration.
-  const ResTable_config* desired_config = &configuration_;
-  if (density_override != 0 && density_override != configuration_.density) {
-    density_override_config = configuration_;
-    density_override_config.density = density_override;
-    desired_config = &density_override_config;
-  }
 
   // Retrieve the package group from the package id of the resource id.
   if (UNLIKELY(!is_valid_resid(resid))) {
@@ -648,119 +650,160 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
   }
 
   const PackageGroup& package_group = package_groups_[package_idx];
-  auto result = FindEntryInternal(package_group, type_idx, entry_idx, *desired_config,
-                                  stop_at_first_match, ignore_configuration);
-  if (UNLIKELY(!result.has_value())) {
-    return base::unexpected(result.error());
-  }
+  std::optional<FindEntryResult> final_result;
+  bool final_has_locale = false;
+  bool final_overlaid = false;
+  for (auto & config : configurations_) {
+    // Might use this if density_override != 0.
+    ResTable_config density_override_config;
 
-  bool overlaid = false;
-  if (!stop_at_first_match && !ignore_configuration) {
-    const auto& assets = GetApkAssets(result->cookie);
-    if (!assets) {
-      ALOGE("Found expired ApkAssets #%d for resource ID 0x%08x.", result->cookie, resid);
-      return base::unexpected(std::nullopt);
+    // Select our configuration or generate a density override configuration.
+    const ResTable_config* desired_config = &config;
+    if (density_override != 0 && density_override != config.density) {
+      density_override_config = config;
+      density_override_config.density = density_override;
+      desired_config = &density_override_config;
     }
-    if (!assets->IsLoader()) {
-      for (const auto& id_map : package_group.overlays_) {
-        auto overlay_entry = id_map.overlay_res_maps_.Lookup(resid);
-        if (!overlay_entry) {
-          // No id map entry exists for this target resource.
-          continue;
-        }
-        if (overlay_entry.IsInlineValue()) {
-          // The target resource is overlaid by an inline value not represented by a resource.
-          ConfigDescription best_frro_config;
-          Res_value best_frro_value;
-          bool frro_found = false;
-          for( const auto& [config, value] : overlay_entry.GetInlineValue()) {
-            if ((!frro_found || config.isBetterThan(best_frro_config, desired_config))
-                && config.match(*desired_config)) {
-              frro_found = true;
-              best_frro_config = config;
-              best_frro_value = value;
-            }
-          }
-          if (!frro_found) {
+
+    auto result = FindEntryInternal(package_group, type_idx, entry_idx, *desired_config,
+                                    stop_at_first_match, ignore_configuration);
+    if (UNLIKELY(!result.has_value())) {
+      return base::unexpected(result.error());
+    }
+    bool overlaid = false;
+    if (!stop_at_first_match && !ignore_configuration) {
+      const auto& assets = GetApkAssets(result->cookie);
+      if (!assets) {
+        ALOGE("Found expired ApkAssets #%d for resource ID 0x%08x.", result->cookie, resid);
+        return base::unexpected(std::nullopt);
+      }
+      if (!assets->IsLoader()) {
+        for (const auto& id_map : package_group.overlays_) {
+          auto overlay_entry = id_map.overlay_res_maps_.Lookup(resid);
+          if (!overlay_entry) {
+            // No id map entry exists for this target resource.
             continue;
           }
-          result->entry = best_frro_value;
+          if (overlay_entry.IsInlineValue()) {
+            // The target resource is overlaid by an inline value not represented by a resource.
+            ConfigDescription best_frro_config;
+            Res_value best_frro_value;
+            bool frro_found = false;
+            for( const auto& [config, value] : overlay_entry.GetInlineValue()) {
+              if ((!frro_found || config.isBetterThan(best_frro_config, desired_config))
+                  && config.match(*desired_config)) {
+                frro_found = true;
+                best_frro_config = config;
+                best_frro_value = value;
+              }
+            }
+            if (!frro_found) {
+              continue;
+            }
+            result->entry = best_frro_value;
+            result->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
+            result->cookie = id_map.cookie;
+
+            if (UNLIKELY(logging_enabled)) {
+              last_resolution_.steps.push_back(Resolution::Step{
+                  Resolution::Step::Type::OVERLAID_INLINE, result->cookie, String8()});
+              if (auto path = assets->GetPath()) {
+                const std::string overlay_path = path->data();
+                if (IsFabricatedOverlay(overlay_path)) {
+                  // FRRO don't have package name so we use the creating package here.
+                  String8 frro_name = String8("FRRO");
+                  // Get the first part of it since the expected one should be like
+                  // {overlayPackageName}-{overlayName}-{4 alphanumeric chars}.frro
+                  // under /data/resource-cache/.
+                  const std::string name = overlay_path.substr(overlay_path.rfind('/') + 1);
+                  const size_t end = name.find('-');
+                  if (frro_name.size() != overlay_path.size() && end != std::string::npos) {
+                    frro_name.append(base::StringPrintf(" created by %s",
+                                                        name.substr(0 /* pos */,
+                                                                    end).c_str()).c_str());
+                  }
+                  last_resolution_.best_package_name = frro_name;
+                } else {
+                  last_resolution_.best_package_name = result->package_name->c_str();
+                }
+              }
+              overlaid = true;
+            }
+            continue;
+          }
+
+          auto overlay_result = FindEntry(overlay_entry.GetResourceId(), density_override,
+                                          false /* stop_at_first_match */,
+                                          false /* ignore_configuration */);
+          if (UNLIKELY(IsIOError(overlay_result))) {
+            return base::unexpected(overlay_result.error());
+          }
+          if (!overlay_result.has_value()) {
+            continue;
+          }
+
+          if (!overlay_result->config.isBetterThan(result->config, desired_config)
+              && overlay_result->config.compare(result->config) != 0) {
+            // The configuration of the entry for the overlay must be equal to or better than the
+            // target configuration to be chosen as the better value.
+            continue;
+          }
+
+          result->cookie = overlay_result->cookie;
+          result->entry = overlay_result->entry;
+          result->config = overlay_result->config;
           result->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
-          result->cookie = id_map.cookie;
 
           if (UNLIKELY(logging_enabled)) {
             last_resolution_.steps.push_back(
-                Resolution::Step{Resolution::Step::Type::OVERLAID_INLINE, result->cookie, String8()});
-            if (auto path = assets->GetPath()) {
-              const std::string overlay_path = path->data();
-              if (IsFabricatedOverlay(overlay_path)) {
-                // FRRO don't have package name so we use the creating package here.
-                String8 frro_name = String8("FRRO");
-                // Get the first part of it since the expected one should be like
-                // {overlayPackageName}-{overlayName}-{4 alphanumeric chars}.frro
-                // under /data/resource-cache/.
-                const std::string name = overlay_path.substr(overlay_path.rfind('/') + 1);
-                const size_t end = name.find('-');
-                if (frro_name.size() != overlay_path.size() && end != std::string::npos) {
-                  frro_name.append(base::StringPrintf(" created by %s",
-                                                      name.substr(0 /* pos */,
-                                                                  end).c_str()).c_str());
-                }
-                last_resolution_.best_package_name = frro_name;
-              } else {
-                last_resolution_.best_package_name = result->package_name->c_str();
-              }
-            }
+                Resolution::Step{Resolution::Step::Type::OVERLAID, overlay_result->cookie,
+                                 overlay_result->config.toString()});
+            last_resolution_.best_package_name =
+                overlay_result->package_name->c_str();
             overlaid = true;
           }
-          continue;
-        }
-
-        auto overlay_result = FindEntry(overlay_entry.GetResourceId(), density_override,
-                                        false /* stop_at_first_match */,
-                                        false /* ignore_configuration */);
-        if (UNLIKELY(IsIOError(overlay_result))) {
-          return base::unexpected(overlay_result.error());
-        }
-        if (!overlay_result.has_value()) {
-          continue;
-        }
-
-        if (!overlay_result->config.isBetterThan(result->config, desired_config)
-            && overlay_result->config.compare(result->config) != 0) {
-          // The configuration of the entry for the overlay must be equal to or better than the target
-          // configuration to be chosen as the better value.
-          continue;
-        }
-
-        result->cookie = overlay_result->cookie;
-        result->entry = overlay_result->entry;
-        result->config = overlay_result->config;
-        result->dynamic_ref_table = id_map.overlay_res_maps_.GetOverlayDynamicRefTable();
-
-        if (UNLIKELY(logging_enabled)) {
-          last_resolution_.steps.push_back(
-              Resolution::Step{Resolution::Step::Type::OVERLAID, overlay_result->cookie,
-                               overlay_result->config.toString()});
-          last_resolution_.best_package_name =
-              overlay_result->package_name->c_str();
-          overlaid = true;
         }
       }
+    }
+
+    bool has_locale = false;
+    if (result->config.locale == 0) {
+      if (default_locale_ != 0) {
+        ResTable_config conf;
+        conf.locale = default_locale_;
+        // Since we know conf has a locale and only a locale, match will tell us if that locale
+        // matches
+        has_locale = conf.match(config);
+      }
+    } else {
+      has_locale = true;
+    }
+
+    // if we don't have a result yet
+    if (!final_result ||
+        // or this config is better before the locale than the existing result
+        result->config.isBetterThanBeforeLocale(final_result->config, desired_config) ||
+        // or the existing config isn't better before locale and this one specifies a locale
+        // whereas the existing one doesn't
+        (!final_result->config.isBetterThanBeforeLocale(result->config, desired_config)
+            && has_locale && !final_has_locale)) {
+      final_result = result.value();
+      final_overlaid = overlaid;
+      final_has_locale = has_locale;
     }
   }
 
   if (UNLIKELY(logging_enabled)) {
-    last_resolution_.cookie = result->cookie;
-    last_resolution_.type_string_ref = result->type_string_ref;
-    last_resolution_.entry_string_ref = result->entry_string_ref;
-    last_resolution_.best_config_name = result->config.toString();
-    if (!overlaid) {
-      last_resolution_.best_package_name = result->package_name->c_str();
+    last_resolution_.cookie = final_result->cookie;
+    last_resolution_.type_string_ref = final_result->type_string_ref;
+    last_resolution_.entry_string_ref = final_result->entry_string_ref;
+    last_resolution_.best_config_name = final_result->config.toString();
+    if (!final_overlaid) {
+      last_resolution_.best_package_name = final_result->package_name->c_str();
     }
   }
 
-  return result;
+  return *final_result;
 }
 
 base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
@@ -778,8 +821,10 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
   // If `desired_config` is not the same as the set configuration or the caller will accept a value
   // from any configuration, then we cannot use our filtered list of types since it only it contains
   // types matched to the set configuration.
-  const bool use_filtered = !ignore_configuration && &desired_config == &configuration_;
-
+  const bool use_filtered = !ignore_configuration && std::find_if(
+      configurations_.begin(), configurations_.end(),
+      [&desired_config](auto& value) { return &desired_config == &value; })
+      != configurations_.end();
   const size_t package_count = package_group.packages_.size();
   for (size_t pi = 0; pi < package_count; pi++) {
     const ConfiguredPackage& loaded_package_impl = package_group.packages_[pi];
@@ -934,10 +979,22 @@ std::string AssetManager2::GetLastResourceResolution() const {
   }
 
   std::stringstream log_stream;
-  log_stream << base::StringPrintf("Resolution for 0x%08x %s\n"
-                                   "\tFor config - %s", resid, resource_name_string.c_str(),
-                                   configuration_.toString().c_str());
-
+  if (configurations_.size() == 1) {
+    log_stream << base::StringPrintf("Resolution for 0x%08x %s\n"
+                                     "\tFor config - %s", resid, resource_name_string.c_str(),
+                                     configurations_[0].toString().c_str());
+  } else {
+    ResTable_config conf = configurations_[0];
+    conf.clearLocale();
+    log_stream << base::StringPrintf("Resolution for 0x%08x %s\n\tFor config - %s and locales",
+                                     resid, resource_name_string.c_str(), conf.toString().c_str());
+    char str[40];
+    str[0] = '\0';
+    for(auto iter = configurations_.begin(); iter < configurations_.end(); iter++) {
+      iter->getBcp47Locale(str);
+      log_stream << base::StringPrintf(" %s%s", str, iter < configurations_.end() ? "," : "");
+    }
+  }
   for (const Resolution::Step& step : last_resolution_.steps) {
     constexpr static std::array kStepStrings = {
         "Found initial",
@@ -1427,11 +1484,14 @@ void AssetManager2::RebuildFilterList() {
       package.loaded_package_->ForEachTypeSpec([&](const TypeSpec& type_spec, uint8_t type_id) {
         FilteredConfigGroup* group = nullptr;
         for (const auto& type_entry : type_spec.type_entries) {
-          if (type_entry.config.match(configuration_)) {
-            if (!group) {
-              group = &package.filtered_configs_.editItemAt(type_id - 1);
+          for (auto & config : configurations_) {
+            if (type_entry.config.match(config)) {
+              if (!group) {
+                group = &package.filtered_configs_.editItemAt(type_id - 1);
+              }
+              group->type_entries.push_back(&type_entry);
+              break;
             }
-            group->type_entries.push_back(&type_entry);
           }
         }
       });
