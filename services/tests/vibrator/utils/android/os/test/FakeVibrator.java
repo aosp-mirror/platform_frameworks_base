@@ -18,15 +18,23 @@ package android.os.test;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.vibrator.IVibrator;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorInfo;
 
 /** Fake implementation of {@link Vibrator} for service tests. */
 public final class FakeVibrator extends Vibrator {
+    private final VibratorInfo mVibratorInfo;
 
     public FakeVibrator(Context context) {
+        this(context, /* supportedPrimitives= */ null);
+    }
+
+    public FakeVibrator(Context context, int[] supportedPrimitives) {
         super(context);
+        mVibratorInfo = buildInfoSupportingPrimitives(supportedPrimitives);
     }
 
     @Override
@@ -40,6 +48,11 @@ public final class FakeVibrator extends Vibrator {
     }
 
     @Override
+    public VibratorInfo getInfo() {
+        return mVibratorInfo;
+    }
+
+    @Override
     public void vibrate(int uid, String opPkg, @NonNull VibrationEffect vibe, String reason,
             @NonNull VibrationAttributes attributes) {
     }
@@ -50,5 +63,17 @@ public final class FakeVibrator extends Vibrator {
 
     @Override
     public void cancel(int usageFilter) {
+    }
+
+    private static VibratorInfo buildInfoSupportingPrimitives(int... primitives) {
+        if (primitives == null || primitives.length == 0) {
+            return VibratorInfo.EMPTY_VIBRATOR_INFO;
+        }
+        VibratorInfo.Builder builder = new VibratorInfo.Builder(/* id= */ 1)
+                .setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+        for (int primitive : primitives) {
+            builder.setSupportedPrimitive(primitive, 10);
+        }
+        return builder.build();
     }
 }
