@@ -33,9 +33,10 @@ class BrightnessRangeController {
     private final Runnable mModeChangeCallback;
 
     BrightnessRangeController(HighBrightnessModeController hbmController,
-            Runnable modeChangeCallback) {
+            Runnable modeChangeCallback, DisplayDeviceConfig displayDeviceConfig) {
         mHbmController = hbmController;
         mModeChangeCallback = modeChangeCallback;
+        mNormalBrightnessModeController.resetNbmData(displayDeviceConfig.getLuxThrottlingData());
     }
 
 
