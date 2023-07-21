@@ -1935,7 +1935,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         final ActivityRecord atoken = mActivityRecord;
         if (atoken != null) {
-            return ((!isParentWindowHidden() && atoken.isVisible())
+            final boolean isVisible = isStartingWindowAssociatedToTask()
+                    ? mStartingData.mAssociatedTask.isVisible() : atoken.isVisible();
+            return ((!isParentWindowHidden() && isVisible)
                     || isAnimationRunningSelfOrParent());
         }
         final WallpaperWindowToken wtoken = mToken.asWallpaperToken();
@@ -2330,6 +2332,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // IME surface association. (e.g. Attach IME surface on the display instead of the
             // app when the app bounds being letterboxed.)
             mDisplayContent.updateImeControlTarget(isImeLayeringTarget() /* updateImeParent */);
+            // Fix the starting window to task when Activity has changed.
+            if (mStartingData != null && mStartingData.mAssociatedTask == null
+                    && !mTempConfiguration.windowConfiguration.getBounds().equals(getBounds())) {
+                mStartingData.mResizedFromTransfer = true;
+                // Lock the starting window to task, so it won't resize from transfer anymore.
+                mActivityRecord.associateStartingWindowWithTaskIfNeeded();
+            }
         }
     }
 
@@ -3902,7 +3911,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * LetterboxUiController#shouldShowLetterboxUi} for more context.
      */
     boolean areAppWindowBoundsLetterboxed() {
-        return mActivityRecord != null
+        return mActivityRecord != null && !isStartingWindowAssociatedToTask()
                 && (mActivityRecord.areBoundsLetterboxed() || isLetterboxedForDisplayCutout());
     }
 
