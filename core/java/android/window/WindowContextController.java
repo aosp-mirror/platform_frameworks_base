@@ -135,7 +135,7 @@ public class WindowContextController {
      * {@link #attachToDisplayArea(int, int, Bundle)}.
      *
      * @see WindowProviderService#attachToWindowToken(IBinder))
-     * @see IWindowManager#attachWindowContextToWindowToken(IBinder, IBinder)
+     * @see IWindowManager#attachWindowContextToWindowToken
      */
     public void attachToWindowToken(IBinder windowToken) {
         if (mAttachedToDisplayArea != AttachStatus.STATUS_ATTACHED) {

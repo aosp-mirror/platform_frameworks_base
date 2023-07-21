@@ -49,7 +49,7 @@ import java.lang.ref.WeakReference;
  * {@link Context#getWindowContextToken() the token of non-Activity UI Contexts}.
  *
  * @see WindowContext
- * @see android.view.IWindowManager#attachWindowContextToDisplayArea(IBinder, int, int, Bundle)
+ * @see android.view.IWindowManager#attachWindowContextToDisplayArea
  *
  * @hide
  */

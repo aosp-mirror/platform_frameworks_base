@@ -167,6 +167,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IApplicationThread;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration;
 import android.content.BroadcastReceiver;
@@ -2734,12 +2735,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Nullable
     @Override
-    public Configuration attachWindowContextToDisplayArea(IBinder clientToken, int
-            type, int displayId, Bundle options) {
-        if (clientToken == null) {
-            throw new IllegalArgumentException("clientToken must not be null!");
-        }
+    public Configuration attachWindowContextToDisplayArea(@NonNull IApplicationThread appThread,
+            @NonNull IBinder clientToken, @LayoutParams.WindowType int type, int displayId,
+            @Nullable Bundle options) {
+        Objects.requireNonNull(appThread);
+        Objects.requireNonNull(clientToken);
         final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
                 "attachWindowContextToDisplayArea", false /* printLog */);
         final int callingUid = Binder.getCallingUid();
@@ -2765,8 +2767,48 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Nullable
     @Override
-    public void attachWindowContextToWindowToken(IBinder clientToken, IBinder token) {
+    public Configuration attachWindowContextToDisplayContent(@NonNull IApplicationThread appThread,
+            @NonNull IBinder clientToken, int displayId) {
+        Objects.requireNonNull(appThread);
+        Objects.requireNonNull(clientToken);
+        final int callingUid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                // We use "getDisplayContent" instead of "getDisplayContentOrCreate" because
+                // this method may be called in DisplayPolicy's constructor and may cause
+                // infinite loop. In this scenario, we early return here and switch to do the
+                // registration in DisplayContent#onParentChanged at DisplayContent initialization.
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    if (Binder.getCallingPid() != MY_PID) {
+                        throw new WindowManager.InvalidDisplayException(
+                                "attachWindowContextToDisplayContent: trying to attach to a"
+                                        + " non-existing display:" + displayId);
+                    }
+                    // Early return if this method is invoked from system process.
+                    // See above comments for more detail.
+                    return null;
+                }
+
+                mWindowContextListenerController.registerWindowContainerListener(clientToken, dc,
+                        callingUid, INVALID_WINDOW_TYPE, null /* options */,
+                        false /* shouDispatchConfigWhenRegistering */);
+                return dc.getConfiguration();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void attachWindowContextToWindowToken(@NonNull IApplicationThread appThread,
+            @NonNull IBinder clientToken, @NonNull IBinder token) {
+        Objects.requireNonNull(appThread);
+        Objects.requireNonNull(clientToken);
+        Objects.requireNonNull(token);
         final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
                 "attachWindowContextToWindowToken", false /* printLog */);
         final int callingUid = Binder.getCallingUid();
@@ -2802,9 +2844,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void detachWindowContextFromWindowContainer(IBinder clientToken) {
+    public void detachWindowContext(@NonNull IBinder clientToken) {
+        Objects.requireNonNull(clientToken);
         final boolean callerCanManageAppTokens = checkCallingPermission(MANAGE_APP_TOKENS,
-                "detachWindowContextFromWindowContainer", false /* printLog */);
+                "detachWindowContext", false /* printLog */);
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -2822,40 +2865,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (token != null && token.isFromClient()) {
                     removeWindowToken(token.token, token.getDisplayContent().getDisplayId());
                 }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
-    public Configuration attachToDisplayContent(IBinder clientToken, int displayId) {
-        if (clientToken == null) {
-            throw new IllegalArgumentException("clientToken must not be null!");
-        }
-        final int callingUid = Binder.getCallingUid();
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                // We use "getDisplayContent" instead of "getDisplayContentOrCreate" because
-                // this method may be called in DisplayPolicy's constructor and may cause
-                // infinite loop. In this scenario, we early return here and switch to do the
-                // registration in DisplayContent#onParentChanged at DisplayContent initialization.
-                final DisplayContent dc = mRoot.getDisplayContent(displayId);
-                if (dc == null) {
-                    if (Binder.getCallingPid() != MY_PID) {
-                        throw new WindowManager.InvalidDisplayException("attachToDisplayContent: "
-                                + "trying to attach to a non-existing display:" + displayId);
-                    }
-                    // Early return if this method is invoked from system process.
-                    // See above comments for more detail.
-                    return null;
-                }
-
-                mWindowContextListenerController.registerWindowContainerListener(clientToken, dc,
-                        callingUid, INVALID_WINDOW_TYPE, null /* options */,
-                        false /* shouDispatchConfigWhenRegistering */);
-                return dc.getConfiguration();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
