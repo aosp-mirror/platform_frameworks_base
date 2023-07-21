@@ -676,7 +676,7 @@ public class MediaControlPanel {
                             mLogger.logOpenBroadcastDialog(mUid, mPackageName, mInstanceId);
                             mCurrentBroadcastApp = device.getName().toString();
                             mBroadcastDialogController.createBroadcastDialog(mCurrentBroadcastApp,
-                                    mPackageName, true, mMediaViewHolder.getSeamlessButton());
+                                    mPackageName, mMediaViewHolder.getSeamlessButton());
                         } else {
                             mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
                             mMediaOutputDialogFactory.create(mPackageName, true,

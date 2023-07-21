@@ -65,7 +65,7 @@ public class SystemUIDialogTest extends SysuiTestCase {
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
-    private DialogDelegate<SystemUIDialog> mDelegate;
+    private SystemUIDialog.Delegate mDelegate;
 
     @Before
     public void setup() {

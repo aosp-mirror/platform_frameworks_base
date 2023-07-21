@@ -89,8 +89,9 @@ class ScreenRecordPermissionDialogDelegateTest : SysuiTestCase() {
                 userContextProvider,
                 onStartRecordingClicked,
                 mediaProjectionMetricsLogger,
+                systemUIDialogFactory
             )
-        dialog = systemUIDialogFactory.create(delegate)
+        dialog = delegate.createDialog()
         delegate.onCreate(dialog, savedInstanceState = null)
         whenever(flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)).thenReturn(true)
     }

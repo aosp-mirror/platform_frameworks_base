@@ -21,54 +21,58 @@ import android.app.UiModeManager.ContrastUtils.CONTRAST_LEVEL_MEDIUM
 import android.app.UiModeManager.ContrastUtils.CONTRAST_LEVEL_STANDARD
 import android.app.UiModeManager.ContrastUtils.fromContrastLevel
 import android.app.UiModeManager.ContrastUtils.toContrastLevel
-import android.content.Context
 import android.os.Bundle
 import android.provider.Settings
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.settings.SecureSettings
 import java.util.concurrent.Executor
+import javax.inject.Inject
 
 /** Dialog to select contrast options */
-class ContrastDialog(
-    context: Context?,
+class ContrastDialogDelegate @Inject constructor(
+    private val sysuiDialogFactory : SystemUIDialog.Factory,
     @Main private val mainExecutor: Executor,
     private val uiModeManager: UiModeManager,
     private val userTracker: UserTracker,
     private val secureSettings: SecureSettings,
-) : SystemUIDialog(context), UiModeManager.ContrastChangeListener {
+) : SystemUIDialog.Delegate, UiModeManager.ContrastChangeListener {
+
+    override fun createDialog(): SystemUIDialog {
+        return sysuiDialogFactory.create(this)
+    }
 
     @VisibleForTesting lateinit var contrastButtons: Map<Int, FrameLayout>
     lateinit var dialogView: View
     @VisibleForTesting var initialContrast: Float = fromContrastLevel(CONTRAST_LEVEL_STANDARD)
 
-    public override fun onCreate(savedInstanceState: Bundle?) {
-        dialogView = LayoutInflater.from(context).inflate(R.layout.contrast_dialog, null)
-        setView(dialogView)
+    override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+        dialogView = dialog.layoutInflater.inflate(R.layout.contrast_dialog, null)
+        with(dialog) {
+            setView(dialogView)
 
-        setTitle(R.string.quick_settings_contrast_label)
-        setNeutralButton(R.string.cancel) { _, _ ->
-            secureSettings.putFloatForUser(
-                Settings.Secure.CONTRAST_LEVEL,
-                initialContrast,
-                userTracker.userId
-            )
-            dismiss()
+            setTitle(R.string.quick_settings_contrast_label)
+            setNeutralButton(R.string.cancel) { _, _ ->
+                secureSettings.putFloatForUser(
+                    Settings.Secure.CONTRAST_LEVEL,
+                    initialContrast,
+                    userTracker.userId
+                )
+                dialog.dismiss()
+            }
+            setPositiveButton(com.android.settingslib.R.string.done) { _, _ -> dialog.dismiss() }
         }
-        setPositiveButton(com.android.settingslib.R.string.done) { _, _ -> dismiss() }
-        super.onCreate(savedInstanceState)
-
         contrastButtons =
             mapOf(
-                CONTRAST_LEVEL_STANDARD to requireViewById(R.id.contrast_button_standard),
-                CONTRAST_LEVEL_MEDIUM to requireViewById(R.id.contrast_button_medium),
-                CONTRAST_LEVEL_HIGH to requireViewById(R.id.contrast_button_high)
+                CONTRAST_LEVEL_STANDARD to dialogView.requireViewById(
+                    R.id.contrast_button_standard),
+                CONTRAST_LEVEL_MEDIUM to dialogView.requireViewById(R.id.contrast_button_medium),
+                CONTRAST_LEVEL_HIGH to dialogView.requireViewById(R.id.contrast_button_high)
             )
 
         contrastButtons.forEach { (contrastLevel, contrastButton) ->
@@ -86,11 +90,11 @@ class ContrastDialog(
         highlightContrast(toContrastLevel(initialContrast))
     }
 
-    override fun start() {
+    override fun onStart(dialog: SystemUIDialog) {
         uiModeManager.addContrastChangeListener(mainExecutor, this)
     }
 
-    override fun stop() {
+    override fun onStop(dialog: SystemUIDialog) {
         uiModeManager.removeContrastChangeListener(this)
     }
 

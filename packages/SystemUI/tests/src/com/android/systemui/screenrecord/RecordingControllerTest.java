@@ -328,7 +328,7 @@ public class RecordingControllerTest extends SysuiTestCase {
         }
 
         @Override
-        public SystemUIDialog create(DialogDelegate<SystemUIDialog> delegate) {
+        public SystemUIDialog create(SystemUIDialog.Delegate delegate) {
             SystemUIDialog dialog = super.create(delegate);
             mLastDelegate = delegate;
             mLastCreatedDialog = dialog;
