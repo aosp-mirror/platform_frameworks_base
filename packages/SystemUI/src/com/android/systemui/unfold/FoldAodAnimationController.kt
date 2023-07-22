@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.shade.ShadeFoldAnimator
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.ScreenOffAnimation
@@ -62,7 +63,7 @@ constructor(
     private val keyguardInteractor: Lazy<KeyguardInteractor>,
 ) : CallbackController<FoldAodAnimationStatus>, ScreenOffAnimation, WakefulnessLifecycle.Observer {
 
-    private lateinit var centralSurfaces: CentralSurfaces
+    private lateinit var shadeViewController: ShadeViewController
 
     private var isFolded = false
     private var isFoldHandled = true
@@ -87,8 +88,12 @@ constructor(
         )
     }
 
-    override fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {
-        this.centralSurfaces = centralSurfaces
+    override fun initialize(
+            centralSurfaces: CentralSurfaces,
+            shadeViewController: ShadeViewController,
+            lightRevealScrim: LightRevealScrim,
+    ) {
+        this.shadeViewController = shadeViewController
 
         deviceStateManager.registerCallback(mainExecutor, FoldListener())
         wakefulnessLifecycle.addObserver(this)
@@ -128,7 +133,7 @@ constructor(
     }
 
     private fun getShadeFoldAnimator(): ShadeFoldAnimator =
-        centralSurfaces.shadeViewController.shadeFoldAnimator
+        shadeViewController.shadeFoldAnimator
 
     private fun setAnimationState(playing: Boolean) {
         shouldPlayAnimation = playing

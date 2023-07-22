@@ -60,7 +60,9 @@ class PinBouncerViewModel(
             }
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.Eagerly,
+                // Make sure this is kept as WhileSubscribed or we can run into a bug where the
+                // downstream continues to receive old/stale/cached values.
+                started = SharingStarted.WhileSubscribed(),
                 initialValue = ActionButtonAppearance.Hidden,
             )
 

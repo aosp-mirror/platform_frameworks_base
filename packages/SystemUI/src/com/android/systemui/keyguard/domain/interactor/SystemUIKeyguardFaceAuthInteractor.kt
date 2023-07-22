@@ -143,6 +143,10 @@ constructor(
         runFaceAuth(FaceAuthUiEvent.FACE_AUTH_TRIGGERED_UDFPS_POINTER_DOWN, false)
     }
 
+    override fun onAccessibilityAction() {
+        runFaceAuth(FaceAuthUiEvent.FACE_AUTH_ACCESSIBILITY_ACTION, false)
+    }
+
     override fun registerListener(listener: FaceAuthenticationListener) {
         listeners.add(listener)
     }

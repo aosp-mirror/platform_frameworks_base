@@ -159,9 +159,10 @@ public class PersistentDataBlockService extends SystemService {
 
     private int getAllowedUid() {
         final UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
-        final int mainUserId = umInternal.getMainUserId();
+        int mainUserId = umInternal.getMainUserId();
         if (mainUserId < 0) {
-            return -1;
+            // If main user is not defined. Use the SYSTEM user instead.
+            mainUserId = UserHandle.USER_SYSTEM;
         }
         String allowedPackage = mContext.getResources()
                 .getString(R.string.config_persistentDataPackageName);

@@ -2354,6 +2354,7 @@ public abstract class PackageManager {
             USER_MIN_ASPECT_RATIO_4_3,
             USER_MIN_ASPECT_RATIO_16_9,
             USER_MIN_ASPECT_RATIO_3_2,
+            USER_MIN_ASPECT_RATIO_FULLSCREEN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserMinAspectRatio {}
@@ -2375,8 +2376,9 @@ public abstract class PackageManager {
 
     /**
      * Aspect ratio override code: user forces app to the aspect ratio of the device display size.
-     * This will be the portrait aspect ratio of the device if the app is portrait or the landscape
-     * aspect ratio of the device if the app is landscape.
+     * This will be the portrait aspect ratio of the device if the app has fixed portrait
+     * orientation or the landscape aspect ratio of the device if the app has fixed landscape
+     * orientation.
      *
      * @hide
      */
@@ -2399,6 +2401,12 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int USER_MIN_ASPECT_RATIO_3_2 = 5;
+
+    /**
+     * Aspect ratio override code: user forces app to fullscreen
+     * @hide
+     */
+    public static final int USER_MIN_ASPECT_RATIO_FULLSCREEN = 6;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {

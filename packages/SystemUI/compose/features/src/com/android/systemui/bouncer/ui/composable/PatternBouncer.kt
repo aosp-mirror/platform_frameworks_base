@@ -228,43 +228,45 @@ internal fun PatternBouncer(
                 }
             }
     ) {
-        // Draw lines between dots.
-        selectedDots.forEachIndexed { index, dot ->
-            if (index > 0) {
-                val previousDot = selectedDots[index - 1]
-                val lineFadeOutAnimationProgress = lineFadeOutAnimatables[previousDot]!!.value
-                val startLerp = 1 - lineFadeOutAnimationProgress
-                val from = pixelOffset(previousDot, spacing, verticalOffset)
-                val to = pixelOffset(dot, spacing, verticalOffset)
-                val lerpedFrom =
-                    Offset(
-                        x = from.x + (to.x - from.x) * startLerp,
-                        y = from.y + (to.y - from.y) * startLerp,
+        if (isAnimationEnabled) {
+            // Draw lines between dots.
+            selectedDots.forEachIndexed { index, dot ->
+                if (index > 0) {
+                    val previousDot = selectedDots[index - 1]
+                    val lineFadeOutAnimationProgress = lineFadeOutAnimatables[previousDot]!!.value
+                    val startLerp = 1 - lineFadeOutAnimationProgress
+                    val from = pixelOffset(previousDot, spacing, verticalOffset)
+                    val to = pixelOffset(dot, spacing, verticalOffset)
+                    val lerpedFrom =
+                        Offset(
+                            x = from.x + (to.x - from.x) * startLerp,
+                            y = from.y + (to.y - from.y) * startLerp,
+                        )
+                    drawLine(
+                        start = lerpedFrom,
+                        end = to,
+                        cap = StrokeCap.Round,
+                        alpha = lineFadeOutAnimationProgress * lineAlpha(spacing),
+                        color = lineColor,
+                        strokeWidth = lineStrokeWidth,
                     )
-                drawLine(
-                    start = lerpedFrom,
-                    end = to,
-                    cap = StrokeCap.Round,
-                    alpha = lineFadeOutAnimationProgress * lineAlpha(spacing),
-                    color = lineColor,
-                    strokeWidth = lineStrokeWidth,
-                )
+                }
             }
-        }
 
-        // Draw the line between the most recently-selected dot and the input pointer position.
-        inputPosition?.let { lineEnd ->
-            currentDot?.let { dot ->
-                val from = pixelOffset(dot, spacing, verticalOffset)
-                val lineLength = sqrt((from.y - lineEnd.y).pow(2) + (from.x - lineEnd.x).pow(2))
-                drawLine(
-                    start = from,
-                    end = lineEnd,
-                    cap = StrokeCap.Round,
-                    alpha = lineAlpha(spacing, lineLength),
-                    color = lineColor,
-                    strokeWidth = lineStrokeWidth,
-                )
+            // Draw the line between the most recently-selected dot and the input pointer position.
+            inputPosition?.let { lineEnd ->
+                currentDot?.let { dot ->
+                    val from = pixelOffset(dot, spacing, verticalOffset)
+                    val lineLength = sqrt((from.y - lineEnd.y).pow(2) + (from.x - lineEnd.x).pow(2))
+                    drawLine(
+                        start = from,
+                        end = lineEnd,
+                        cap = StrokeCap.Round,
+                        alpha = lineAlpha(spacing, lineLength),
+                        color = lineColor,
+                        strokeWidth = lineStrokeWidth,
+                    )
+                }
             }
         }
 

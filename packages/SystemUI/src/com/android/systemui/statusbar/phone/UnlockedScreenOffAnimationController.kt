@@ -20,6 +20,7 @@ import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -66,7 +67,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val powerManager: PowerManager,
     private val handler: Handler = Handler()
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
-    private lateinit var mCentralSurfaces: CentralSurfaces
+    private lateinit var centralSurfaces: CentralSurfaces
+    private lateinit var shadeViewController: ShadeViewController
     /**
      * Whether or not [initialize] has been called to provide us with the StatusBar,
      * NotificationPanelViewController, and LightRevealSrim so that we can run the unlocked screen
@@ -126,7 +128,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         lightRevealAnimator.start()
     }
 
-    val animatorDurationScaleObserver = object : ContentObserver(null) {
+    private val animatorDurationScaleObserver = object : ContentObserver(null) {
         override fun onChange(selfChange: Boolean) {
             updateAnimatorDurationScale()
         }
@@ -134,11 +136,13 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
     override fun initialize(
         centralSurfaces: CentralSurfaces,
+        shadeViewController: ShadeViewController,
         lightRevealScrim: LightRevealScrim
     ) {
         this.initialized = true
         this.lightRevealScrim = lightRevealScrim
-        this.mCentralSurfaces = centralSurfaces
+        this.centralSurfaces = centralSurfaces
+        this.shadeViewController = shadeViewController
 
         updateAnimatorDurationScale()
         globalSettings.registerContentObserver(
@@ -198,7 +202,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
                     // Tell the CentralSurfaces to become keyguard for real - we waited on that
                     // since it is slow and would have caused the animation to jank.
-                    mCentralSurfaces.updateIsKeyguard()
+                    centralSurfaces.updateIsKeyguard()
 
                     // Run the callback given to us by the KeyguardVisibilityHelper.
                     after.run()
@@ -251,7 +255,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             // even if we're going from SHADE to SHADE or KEYGUARD to KEYGUARD, since we might have
             // changed parts of the UI (such as showing AOD in the shade) without actually changing
             // the StatusBarState. This ensures that the UI definitely reflects the desired state.
-            mCentralSurfaces.updateIsKeyguard(true /* forceStateChange */)
+            centralSurfaces.updateIsKeyguard(true /* forceStateChange */)
         }
     }
 
@@ -280,7 +284,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
                     // Show AOD. That'll cause the KeyguardVisibilityHelper to call
                     // #animateInKeyguard.
-                    mCentralSurfaces.shadeViewController.showAodUi()
+                    shadeViewController.showAodUi()
                 }
             }, (ANIMATE_IN_KEYGUARD_DELAY * animatorDurationScale).toLong())
 
@@ -328,8 +332,8 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // We currently draw both the light reveal scrim, and the AOD UI, in the shade. If it's
         // already expanded and showing notifications/QS, the animation looks really messy. For now,
         // disable it if the notification panel is expanded.
-        if ((!this::mCentralSurfaces.isInitialized ||
-                mCentralSurfaces.shadeViewController.isPanelExpanded) &&
+        if ((!this::centralSurfaces.isInitialized ||
+                shadeViewController.isPanelExpanded) &&
                 // Status bar might be expanded because we have started
                 // playing the animation already
                 !isAnimationPlaying()

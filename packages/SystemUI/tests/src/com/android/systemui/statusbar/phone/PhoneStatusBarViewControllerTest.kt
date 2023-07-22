@@ -140,8 +140,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Test
     fun handleTouchEventFromStatusBar_viewNotEnabled_returnsTrueAndNoViewEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
-        `when`(centralSurfacesImpl.shadeViewController)
-                .thenReturn(shadeViewController)
         `when`(shadeViewController.isViewEnabled).thenReturn(false)
         val returnVal = view.onTouchEvent(
                 MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
@@ -152,8 +150,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Test
     fun handleTouchEventFromStatusBar_viewNotEnabledButIsMoveEvent_viewReceivesEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
-        `when`(centralSurfacesImpl.shadeViewController)
-                .thenReturn(shadeViewController)
         `when`(shadeViewController.isViewEnabled).thenReturn(false)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_MOVE, 0f, 0f, 0)
 
@@ -165,8 +161,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Test
     fun handleTouchEventFromStatusBar_panelAndViewEnabled_viewReceivesEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
-        `when`(centralSurfacesImpl.shadeViewController)
-                .thenReturn(shadeViewController)
         `when`(shadeViewController.isViewEnabled).thenReturn(true)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 2f, 0)
 
@@ -178,8 +172,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Test
     fun handleTouchEventFromStatusBar_topEdgeTouch_viewNeverReceivesEvent() {
         `when`(centralSurfacesImpl.commandQueuePanelsEnabled).thenReturn(true)
-        `when`(centralSurfacesImpl.shadeViewController)
-                .thenReturn(shadeViewController)
         `when`(shadeViewController.isFullyCollapsed).thenReturn(true)
         val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
 

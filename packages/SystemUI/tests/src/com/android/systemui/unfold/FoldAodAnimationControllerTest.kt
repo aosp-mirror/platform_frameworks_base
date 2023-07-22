@@ -101,7 +101,6 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
         whenever(viewGroup.viewTreeObserver).thenReturn(viewTreeObserver)
         whenever(wakefulnessLifecycle.lastSleepReason)
             .thenReturn(PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD)
-        whenever(centralSurfaces.shadeViewController).thenReturn(shadeViewController)
         whenever(shadeFoldAnimator.startFoldToAodAnimation(any(), any(), any())).then {
             val onActionStarted = it.arguments[0] as Runnable
             onActionStarted.run()
@@ -124,7 +123,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
                         latencyTracker,
                         { keyguardInteractor },
                     )
-                    .apply { initialize(centralSurfaces, lightRevealScrim) }
+                    .apply { initialize(centralSurfaces, shadeViewController, lightRevealScrim) }
 
             verify(deviceStateManager).registerCallback(any(), foldStateListenerCaptor.capture())
 
