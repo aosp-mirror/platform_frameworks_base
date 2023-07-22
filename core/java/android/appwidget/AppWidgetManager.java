@@ -48,9 +48,11 @@ import android.widget.RemoteViews;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.BackgroundThread;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Updates AppWidget state; gets information about installed AppWidget providers and other
@@ -785,7 +787,25 @@ public class AppWidgetManager {
             return;
         }
         try {
-            mService.notifyAppWidgetViewDataChanged(mPackageName, appWidgetIds, viewId);
+            if (RemoteViews.isAdapterConversionEnabled()) {
+                List<CompletableFuture<Void>> updateFutures = new ArrayList<>();
+                for (int i = 0; i < appWidgetIds.length; i++) {
+                    final int widgetId = appWidgetIds[i];
+                    updateFutures.add(CompletableFuture.runAsync(() -> {
+                        try {
+                            RemoteViews views = mService.getAppWidgetViews(mPackageName, widgetId);
+                            if (views.replaceRemoteCollections(viewId)) {
+                                updateAppWidget(widgetId, views);
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error notifying changes in RemoteViews", e);
+                        }
+                    }));
+                }
+                CompletableFuture.allOf(updateFutures.toArray(CompletableFuture[]::new)).join();
+            } else {
+                mService.notifyAppWidgetViewDataChanged(mPackageName, appWidgetIds, viewId);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
