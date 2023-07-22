@@ -26,6 +26,7 @@ import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.View
+import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
 import android.widget.TextView
@@ -331,6 +332,13 @@ object BiometricViewBinder {
                 // dismiss prompt when authenticated and confirmed
                 launch {
                     viewModel.isAuthenticated.collect { authState ->
+                        // Disable background view for cancelling authentication once authenticated,
+                        // and remove from talkback
+                        if (authState.isAuthenticated) {
+                            backgroundView.setOnClickListener(null)
+                            backgroundView.importantForAccessibility =
+                                IMPORTANT_FOR_ACCESSIBILITY_NO
+                        }
                         if (authState.isAuthenticatedAndConfirmed) {
                             view.announceForAccessibility(
                                 view.resources.getString(R.string.biometric_dialog_authenticated)
