@@ -3158,6 +3158,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return false;
         }
 
+        if (isFaceAuthInteractorEnabled()) {
+            return mFaceAuthInteractor.canFaceAuthRun();
+        }
+
         final boolean statusBarShadeLocked = mStatusBarState == StatusBarState.SHADE_LOCKED;
         final boolean awakeKeyguard = isKeyguardVisible() && mDeviceInteractive
                 && !statusBarShadeLocked;
