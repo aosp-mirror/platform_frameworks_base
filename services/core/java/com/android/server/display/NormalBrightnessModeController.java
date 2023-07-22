@@ -21,6 +21,7 @@ import android.os.PowerManager;
 
 import com.android.server.display.DisplayDeviceConfig.BrightnessLimitMapType;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +40,14 @@ class NormalBrightnessModeController {
     boolean onAmbientLuxChange(float ambientLux) {
         mAmbientLux = ambientLux;
         return recalculateMaxBrightness();
+    }
+
+    void dump(PrintWriter pw) {
+        pw.println("NormalBrightnessModeController:");
+        pw.println("  mAutoBrightnessEnabled=" + mAutoBrightnessEnabled);
+        pw.println("  mAmbientLux=" + mAmbientLux);
+        pw.println("  mMaxBrightness=" + mMaxBrightness);
+        pw.println("  mMaxBrightnessLimits=" + mMaxBrightnessLimits);
     }
 
     boolean setAutoBrightnessState(int state) {
