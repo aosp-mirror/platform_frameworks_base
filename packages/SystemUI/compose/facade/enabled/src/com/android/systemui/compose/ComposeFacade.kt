@@ -23,8 +23,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.LifecycleOwner
 import com.android.compose.theme.PlatformTheme
-import com.android.systemui.multishade.ui.composable.MultiShade
-import com.android.systemui.multishade.ui.viewmodel.MultiShadeViewModel
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.compose.FooterActions
@@ -34,7 +32,6 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import com.android.systemui.util.time.SystemClock
 
 /** The Compose facade, when Compose is available. */
 object ComposeFacade : BaseComposeFacade {
@@ -57,23 +54,6 @@ object ComposeFacade : BaseComposeFacade {
     ): View {
         return ComposeView(context).apply {
             setContent { PlatformTheme { FooterActions(viewModel, qsVisibilityLifecycleOwner) } }
-        }
-    }
-
-    override fun createMultiShadeView(
-        context: Context,
-        viewModel: MultiShadeViewModel,
-        clock: SystemClock,
-    ): View {
-        return ComposeView(context).apply {
-            setContent {
-                PlatformTheme {
-                    MultiShade(
-                        viewModel = viewModel,
-                        clock = clock,
-                    )
-                }
-            }
         }
     }
 
