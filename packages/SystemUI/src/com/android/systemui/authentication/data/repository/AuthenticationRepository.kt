@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.authentication.data.repository
 
 import com.android.internal.widget.LockPatternChecker
@@ -29,6 +27,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.user.data.repository.UserRepository
+import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
 import dagger.Binds
 import dagger.Module
@@ -38,16 +37,14 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Defines interface for classes that can access authentication-related application state. */
@@ -156,32 +153,18 @@ constructor(
     }
 
     override val isAutoConfirmEnabled: StateFlow<Boolean> =
-        userRepository.selectedUserInfo
-            .map { it.id }
-            .flatMapLatest { userId ->
-                flow { emit(lockPatternUtils.isAutoPinConfirmEnabled(userId)) }
-                    .flowOn(backgroundDispatcher)
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = false,
-            )
+        refreshingFlow(
+            initialValue = false,
+            getFreshValue = lockPatternUtils::isAutoPinConfirmEnabled,
+        )
 
     override val hintedPinLength: Int = 6
 
     override val isPatternVisible: StateFlow<Boolean> =
-        userRepository.selectedUserInfo
-            .map { it.id }
-            .flatMapLatest { userId ->
-                flow { emit(lockPatternUtils.isVisiblePatternEnabled(userId)) }
-                    .flowOn(backgroundDispatcher)
-            }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = true,
-            )
+        refreshingFlow(
+            initialValue = true,
+            getFreshValue = lockPatternUtils::isVisiblePatternEnabled,
+        )
 
     private val _throttling = MutableStateFlow(AuthenticationThrottlingModel())
     override val throttling: StateFlow<AuthenticationThrottlingModel> = _throttling.asStateFlow()
@@ -275,6 +258,48 @@ constructor(
                 }
             )
         }
+    }
+
+    /**
+     * Returns a [StateFlow] that's automatically kept fresh. The passed-in [getFreshValue] is
+     * invoked on a background thread every time the selected user is changed and every time a new
+     * downstream subscriber is added to the flow.
+     *
+     * Initially, the flow will emit [initialValue] while it refreshes itself in the background by
+     * invoking the [getFreshValue] function and emitting the fresh value when that's done.
+     *
+     * Every time the selected user is changed, the flow will re-invoke [getFreshValue] and emit the
+     * new value.
+     *
+     * Every time a new downstream subscriber is added to the flow it first receives the latest
+     * cached value that's either the [initialValue] or the latest previously fetched value. In
+     * addition, adding a new downstream subscriber also triggers another [getFreshValue] call and a
+     * subsequent emission of that newest value.
+     */
+    private fun <T> refreshingFlow(
+        initialValue: T,
+        getFreshValue: suspend (selectedUserId: Int) -> T,
+    ): StateFlow<T> {
+        val flow = MutableStateFlow(initialValue)
+        applicationScope.launch {
+            combine(
+                    // Emits a value initially and every time the selected user is changed.
+                    userRepository.selectedUserInfo.map { it.id }.distinctUntilChanged(),
+                    // Emits a value only when the number of downstream subscribers of this flow
+                    // increases.
+                    flow.subscriptionCount.pairwise(initialValue = 0).filter { (previous, current)
+                        ->
+                        current > previous
+                    },
+                ) { selectedUserId, _ ->
+                    selectedUserId
+                }
+                .collect { selectedUserId ->
+                    flow.value = withContext(backgroundDispatcher) { getFreshValue(selectedUserId) }
+                }
+        }
+
+        return flow.asStateFlow()
     }
 }
 
