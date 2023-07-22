@@ -616,6 +616,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"बायोमेट्रिक किंवा स्क्रीन लॉक वापरा"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"हे तुम्हीच आहात याची पडताळणी करा"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"पुढे सुरू ठेवण्यासाठी तुमचे बायोमेट्रिक वापरा"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"पुढे सुरू ठेवण्‍यासाठी तुमची फिंगरप्रिंट वापरा"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"पुढे सुरू ठेवण्यासाठी तुमचा चेहरा वापरा"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"पुढे सुरू ठेवण्यासाठी तुमचे बायोमेट्रिक किंवा स्क्रीन लॉक वापरा"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"बायोमेट्रिक हार्डवेअर उपलब्ध नाही"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ऑथेंटिकेशन रद्द केले"</string>

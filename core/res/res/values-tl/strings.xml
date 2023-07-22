@@ -616,6 +616,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Gumamit ng biometrics o lock ng screen"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"I-verify na ikaw ito"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Gamitin ang iyong biometric para magpatuloy"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Gamitin ang iyong fingerprint para magpatuloy"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Gamitin ang iyong mukha para magpatuloy"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Gamitin ang iyong biometric o lock ng screen para magpatuloy"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Walang biometric hardware"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Nakansela ang pag-authenticate"</string>

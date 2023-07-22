@@ -617,6 +617,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"שימוש במידע ביומטרי בנעילת מסך"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"אימות הזהות שלך"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"יש להשתמש במידע ביומטרי כדי להמשיך"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"צריך להשתמש בטביעת האצבע כדי להמשיך"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"צריך להשתמש בזיהוי הפנים כדי להמשיך"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"יש להשתמש במידע הביומטרי או בנעילת המסך כדי להמשיך"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"חומרה ביומטרית לא זמינה"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"האימות בוטל"</string>

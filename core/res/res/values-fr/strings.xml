@@ -617,6 +617,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Utiliser la biométrie ou le verrouillage de l\'écran"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Confirmez votre identité"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Utilisez la biométrie pour continuer"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Utilisez votre empreinte digitale pour continuer"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Utilisez la reconnaissance faciale pour continuer"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Utilisez la biométrie ou le verrouillage de l\'écran pour continuer"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Matériel biométrique indisponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Authentification annulée"</string>
