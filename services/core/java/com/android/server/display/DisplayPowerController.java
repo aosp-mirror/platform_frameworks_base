@@ -666,7 +666,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         HighBrightnessModeController hbmController = createHbmControllerLocked(modeChangeCallback);
 
         mBrightnessRangeController = new BrightnessRangeController(hbmController,
-                modeChangeCallback);
+                modeChangeCallback, mDisplayDeviceConfig);
 
         mBrightnessThrottler = createBrightnessThrottlerLocked();
 
