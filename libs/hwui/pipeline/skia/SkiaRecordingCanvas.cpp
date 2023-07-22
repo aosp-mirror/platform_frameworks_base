@@ -236,6 +236,17 @@ void SkiaRecordingCanvas::handleMutableImages(Bitmap& bitmap, DrawImagePayload& 
     }
 }
 
+void SkiaRecordingCanvas::onFilterPaint(android::Paint& paint) {
+    INHERITED::onFilterPaint(paint);
+    SkShader* shader = paint.getShader();
+    // TODO(b/264559422): This only works for very specifically a BitmapShader.
+    //  It's better than nothing, though
+    SkImage* image = shader ? shader->isAImage(nullptr, nullptr) : nullptr;
+    if (image) {
+        mDisplayList->mMutableImages.push_back(image);
+    }
+}
+
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) {
     auto payload = DrawImagePayload(bitmap);
 
