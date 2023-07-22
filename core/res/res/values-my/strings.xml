@@ -616,6 +616,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"ဇီဝမက်ထရစ်အချက်အလက်များ (သို့) ဖန်သားပြင်လော့ခ်ချခြင်းကို သုံးခြင်း"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"သင်ဖြစ်ကြောင်း အတည်ပြုပါ"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"ရှေ့ဆက်ရန် သင်၏ ဇီဝမက်ထရစ်အချက်အလက်ကို သုံးပါ"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"ရှေ့ဆက်ရန် သင့်လက်ဗွေကို သုံးပါ"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"ရှေ့ဆက်ရန် သင့်မျက်နှာကို သုံးပါ"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"ရှေ့ဆက်ရန် သင်၏ ဇီဝမက်ထရစ်အချက်အလက် (သို့) ဖန်သားပြင်လော့ခ်ကို သုံးပါ"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ဇီဝအချက်အလက်သုံး ကွန်ပျူတာစက်ပစ္စည်း မရရှိနိုင်ပါ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>

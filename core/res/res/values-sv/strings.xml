@@ -616,6 +616,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Använd biometrisk data eller skärmlåset"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifiera din identitet"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Fortsätt med hjälp av din biometriska data"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Fortsätt med hjälp av ditt fingeravtryck"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Fortsätt med hjälp av ditt ansikte"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Fortsätt med hjälp av din biometriska data eller skärmlåset"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk maskinvara är inte tillgänglig"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentiseringen avbröts"</string>
