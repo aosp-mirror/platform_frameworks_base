@@ -16,6 +16,13 @@
 package com.android.systemui.keyguard.shared.model
 
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.shared.model.WakeSleepReason.GESTURE
+import com.android.systemui.keyguard.shared.model.WakeSleepReason.POWER_BUTTON
+import com.android.systemui.keyguard.shared.model.WakeSleepReason.TAP
+import com.android.systemui.keyguard.shared.model.WakefulnessState.ASLEEP
+import com.android.systemui.keyguard.shared.model.WakefulnessState.AWAKE
+import com.android.systemui.keyguard.shared.model.WakefulnessState.STARTING_TO_SLEEP
+import com.android.systemui.keyguard.shared.model.WakefulnessState.STARTING_TO_WAKE
 
 /** Model device wakefulness states. */
 data class WakefulnessModel(
@@ -23,33 +30,31 @@ data class WakefulnessModel(
     val lastWakeReason: WakeSleepReason,
     val lastSleepReason: WakeSleepReason,
 ) {
-    fun isStartingToWake() = state == WakefulnessState.STARTING_TO_WAKE
+    fun isStartingToWake() = state == STARTING_TO_WAKE
 
-    fun isStartingToSleep() = state == WakefulnessState.STARTING_TO_SLEEP
+    fun isStartingToSleep() = state == STARTING_TO_SLEEP
 
-    private fun isAsleep() = state == WakefulnessState.ASLEEP
+    private fun isAsleep() = state == ASLEEP
+
+    private fun isAwake() = state == AWAKE
+
+    fun isStartingToWakeOrAwake() = isStartingToWake() || isAwake()
 
     fun isStartingToSleepOrAsleep() = isStartingToSleep() || isAsleep()
 
     fun isDeviceInteractive() = !isAsleep()
 
-    fun isStartingToWakeOrAwake() = isStartingToWake() || state == WakefulnessState.AWAKE
+    fun isWakingFrom(wakeSleepReason: WakeSleepReason) =
+        isStartingToWake() && lastWakeReason == wakeSleepReason
 
-    fun isStartingToSleepFromPowerButton() =
-        isStartingToSleep() && lastWakeReason == WakeSleepReason.POWER_BUTTON
-
-    fun isWakingFromPowerButton() =
-        isStartingToWake() && lastWakeReason == WakeSleepReason.POWER_BUTTON
+    fun isStartingToSleepFrom(wakeSleepReason: WakeSleepReason) =
+        isStartingToSleep() && lastSleepReason == wakeSleepReason
 
     fun isTransitioningFromPowerButton() =
-        isStartingToSleepFromPowerButton() || isWakingFromPowerButton()
-
-    fun isAwakeFromTap() =
-        state == WakefulnessState.STARTING_TO_WAKE && lastWakeReason == WakeSleepReason.TAP
+        isStartingToSleepFrom(POWER_BUTTON) || isWakingFrom(POWER_BUTTON)
 
     fun isDeviceInteractiveFromTapOrGesture(): Boolean {
-        return isDeviceInteractive() &&
-            (lastWakeReason == WakeSleepReason.TAP || lastWakeReason == WakeSleepReason.GESTURE)
+        return isDeviceInteractive() && (lastWakeReason == TAP || lastWakeReason == GESTURE)
     }
 
     companion object {
