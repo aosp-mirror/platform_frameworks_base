@@ -16,7 +16,12 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
-            "name": "CtsAppOpsTestCases"
+            "name": "CtsAppOpsTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                }
+            ]
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
@@ -263,6 +268,10 @@
         {
             "file_patterns": ["(/|^)ActivityThreadTest.java"],
             "name": "FrameworksCoreTests"
+        },
+        {
+            "file_patterns": ["(/|^)AppOpsManager.java"],
+            "name": "CtsAppOpsTestCases"
         }
     ]
 }

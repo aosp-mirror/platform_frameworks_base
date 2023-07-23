@@ -72,7 +72,7 @@
           "exclude-annotation": "org.junit.Ignore"
         },
         {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
+          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
         },
         {
           "include-filter": "android.permissionui.cts.CameraMicIndicatorsPermissionTest"
@@ -106,6 +106,17 @@
       "options" : [
         {
           "include-filter": "android.platform.tests.NotificationTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      // Permission indicators
+      "name": "CtsPermissionUiTestCases",
+      "options": [
+        {
+          "include-filter": "android.permissionui.cts.CameraMicIndicatorsPermissionTest"
         }
       ]
     }
