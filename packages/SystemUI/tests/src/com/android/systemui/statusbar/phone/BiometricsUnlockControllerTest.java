@@ -542,4 +542,20 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
     }
+
+    private void givenDreamingLocked() {
+        when(mUpdateMonitor.isDreaming()).thenReturn(true);
+        when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
+    }
+    @Test
+    public void onSideFingerprintSuccess_dreaming_unlockNoWake() {
+        when(mAuthController.isSfpsEnrolled(anyInt())).thenReturn(true);
+        when(mWakefulnessLifecycle.getLastWakeReason())
+                .thenReturn(PowerManager.WAKE_REASON_POWER_BUTTON);
+        givenDreamingLocked();
+        mBiometricUnlockController.startWakeAndUnlock(BiometricSourceType.FINGERPRINT, true);
+        verify(mKeyguardViewMediator).onWakeAndUnlocking();
+        // Ensure that the power hasn't been told to wake up yet.
+        verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+    }
 }

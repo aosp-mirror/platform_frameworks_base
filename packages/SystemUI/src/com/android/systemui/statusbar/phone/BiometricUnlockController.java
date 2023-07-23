@@ -462,7 +462,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             Trace.endSection();
         };
 
-        if (mMode != MODE_NONE) {
+        final boolean wakingFromDream = mMode == MODE_WAKE_AND_UNLOCK_FROM_DREAM
+                && !mStatusBarStateController.isDozing();
+
+        if (mMode != MODE_NONE && !wakingFromDream) {
             wakeUp.run();
         }
         switch (mMode) {
