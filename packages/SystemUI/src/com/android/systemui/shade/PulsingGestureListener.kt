@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade
 
+import android.graphics.Point
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.PowerManager
 import android.provider.Settings
@@ -25,6 +26,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -52,6 +54,7 @@ class PulsingGestureListener @Inject constructor(
         private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
         private val statusBarStateController: StatusBarStateController,
         private val shadeLogger: ShadeLogger,
+        private val dozeInteractor: DozeInteractor,
         userTracker: UserTracker,
         tunerService: TunerService,
         dumpManager: DumpManager
@@ -86,6 +89,7 @@ class PulsingGestureListener @Inject constructor(
             shadeLogger.logSingleTapUpFalsingState(proximityIsNotNear, isNotAFalseTap)
             if (proximityIsNotNear && isNotAFalseTap) {
                 shadeLogger.d("Single tap handled, requesting centralSurfaces.wakeUpIfDozing")
+                dozeInteractor.setLastTapToWakePosition(Point(e.x.toInt(), e.y.toInt()))
                 powerInteractor.wakeUpIfDozing("PULSING_SINGLE_TAP", PowerManager.WAKE_REASON_TAP)
             }
             return true
