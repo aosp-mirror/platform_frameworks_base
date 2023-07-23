@@ -2867,6 +2867,18 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public boolean isPackageExemptedFromBroadcastResponseStats(@NonNull String callingPackage,
+                @UserIdInt int userId) {
+            Objects.requireNonNull(callingPackage);
+
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DUMP,
+                    "isPackageExemptedFromBroadcastResponseStats");
+            return mResponseStatsTracker.isPackageExemptedFromBroadcastResponseStats(
+                    callingPackage, UserHandle.of(userId));
+        }
+
+        @Override
         @Nullable
         public String getAppStandbyConstant(@NonNull String key) {
             Objects.requireNonNull(key);

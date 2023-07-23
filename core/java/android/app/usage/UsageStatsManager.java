@@ -1528,6 +1528,22 @@ public final class UsageStatsManager {
         }
     }
 
+    /**
+     * Checks whether the given {@code packageName} is exempted from broadcast response tracking.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    @UserHandleAware
+    public boolean isPackageExemptedFromBroadcastResponseStats(@NonNull String packageName) {
+        try {
+            return mService.isPackageExemptedFromBroadcastResponseStats(packageName,
+                    mContext.getUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     @Nullable

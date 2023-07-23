@@ -292,6 +292,19 @@ class BroadcastResponseStatsTracker {
         }
     }
 
+    boolean isPackageExemptedFromBroadcastResponseStats(@NonNull String packageName,
+            @NonNull UserHandle user) {
+        synchronized (mLock) {
+            if (doesPackageHoldExemptedPermission(packageName, user)) {
+                return true;
+            }
+            if (doesPackageHoldExemptedRole(packageName, user)) {
+                return true;
+            }
+            return false;
+        }
+    }
+
     boolean doesPackageHoldExemptedRole(@NonNull String packageName, @NonNull UserHandle user) {
         final List<String> exemptedRoles = mAppStandby.getBroadcastResponseExemptedRoles();
         synchronized (mLock) {
