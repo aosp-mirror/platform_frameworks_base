@@ -37,6 +37,7 @@ import com.android.keyguard.KeyguardSecurityContainer.UserSwitcherViewMode.UserS
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate
 import com.android.systemui.biometrics.SideFpsController
 import com.android.systemui.biometrics.SideFpsUiRequestSource
 import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants
@@ -123,6 +124,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var viewMediatorCallback: ViewMediatorCallback
     @Mock private lateinit var audioManager: AudioManager
     @Mock private lateinit var userInteractor: UserInteractor
+    @Mock private lateinit var faceAuthAccessibilityDelegate: FaceAuthAccessibilityDelegate
 
     @Captor
     private lateinit var swipeListenerArgumentCaptor:
@@ -224,6 +226,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 mock(),
                 { JavaAdapter(sceneTestUtils.testScope.backgroundScope) },
                 userInteractor,
+                faceAuthAccessibilityDelegate,
             ) {
                 sceneInteractor
             }
@@ -241,6 +244,11 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 any(),
                 eq(falsingA11yDelegate)
             )
+    }
+
+    @Test
+    fun setAccessibilityDelegate() {
+        verify(view).accessibilityDelegate = eq(faceAuthAccessibilityDelegate)
     }
 
     @Test

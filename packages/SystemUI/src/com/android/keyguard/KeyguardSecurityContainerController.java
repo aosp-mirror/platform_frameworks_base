@@ -68,6 +68,7 @@ import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
+import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate;
 import com.android.systemui.biometrics.SideFpsController;
 import com.android.systemui.biometrics.SideFpsUiRequestSource;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
@@ -417,9 +418,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             BouncerMessageInteractor bouncerMessageInteractor,
             Provider<JavaAdapter> javaAdapter,
             UserInteractor userInteractor,
+            FaceAuthAccessibilityDelegate faceAuthAccessibilityDelegate,
             Provider<SceneInteractor> sceneInteractor
     ) {
         super(view);
+        view.setAccessibilityDelegate(faceAuthAccessibilityDelegate);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = keyguardUpdateMonitor;
         mSecurityModel = keyguardSecurityModel;

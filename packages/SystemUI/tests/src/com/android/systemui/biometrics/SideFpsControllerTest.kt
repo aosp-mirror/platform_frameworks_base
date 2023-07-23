@@ -44,6 +44,9 @@ import android.view.View
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
+import android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
 import android.view.WindowMetrics
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -53,14 +56,9 @@ import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
-import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
-import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractorImpl
-import com.android.systemui.biometrics.shared.model.FingerprintSensorType
-import com.android.systemui.biometrics.shared.model.SensorStrength
-import com.android.systemui.biometrics.ui.viewmodel.SideFpsOverlayViewModel
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.dump.DumpManager
@@ -101,7 +99,7 @@ private const val REAR_DISPLAY_MODE_DEVICE_STATE = 3
 @SmallTest
 @RoboPilotTest
 @RunWith(AndroidJUnit4::class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 class SideFpsControllerTest : SysuiTestCase() {
 
     @JvmField @Rule var rule = MockitoJUnit.rule()
@@ -120,8 +118,6 @@ class SideFpsControllerTest : SysuiTestCase() {
     private lateinit var keyguardBouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
     private lateinit var displayStateInteractor: DisplayStateInteractor
-    private lateinit var sideFpsOverlayViewModel: SideFpsOverlayViewModel
-    private val fingerprintRepository = FakeFingerprintPropertyRepository()
 
     private val executor = FakeExecutor(FakeSystemClock())
     private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
@@ -163,15 +159,6 @@ class SideFpsControllerTest : SysuiTestCase() {
                 executor,
                 rearDisplayStateRepository
             )
-        sideFpsOverlayViewModel =
-            SideFpsOverlayViewModel(context, SideFpsOverlayInteractorImpl(fingerprintRepository))
-
-        fingerprintRepository.setProperties(
-            sensorId = 1,
-            strength = SensorStrength.STRONG,
-            sensorType = FingerprintSensorType.REAR,
-            sensorLocations = mapOf("" to SensorLocationInternal("", 2500, 0, 0))
-        )
 
         context.addMockSystemService(DisplayManager::class.java, displayManager)
         context.addMockSystemService(WindowManager::class.java, windowManager)
@@ -278,7 +265,6 @@ class SideFpsControllerTest : SysuiTestCase() {
                 executor,
                 handler,
                 alternateBouncerInteractor,
-                { sideFpsOverlayViewModel },
                 TestCoroutineScope(),
                 dumpManager
             )
@@ -697,6 +683,106 @@ class SideFpsControllerTest : SysuiTestCase() {
         verify(windowManager).removeView(any())
     }
 
+    /**
+     * {@link SideFpsController#updateOverlayParams} calculates indicator placement for ROTATION_0,
+     * and uses RotateUtils.rotateBounds to map to the correct indicator location given the device
+     * rotation. Assuming RotationUtils.rotateBounds works correctly, tests for indicator placement
+     * in other rotations have been omitted.
+     */
+    @Test
+    fun verifiesIndicatorPlacementForXAlignedSensor_0() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.X_ALIGNED,
+            isReverseDefaultRotation = false,
+            { rotation = Surface.ROTATION_0 }
+        ) {
+            sideFpsController.overlayOffsets = sensorLocation
+
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
+
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+            assertThat(overlayViewParamsCaptor.value.x).isEqualTo(sensorLocation.sensorLocationX)
+            assertThat(overlayViewParamsCaptor.value.y).isEqualTo(0)
+        }
+
+    /**
+     * {@link SideFpsController#updateOverlayParams} calculates indicator placement for ROTATION_270
+     * in reverse default rotation. It then uses RotateUtils.rotateBounds to map to the correct
+     * indicator location given the device rotation. Assuming RotationUtils.rotateBounds works
+     * correctly, tests for indicator placement in other rotations have been omitted.
+     */
+    @Test
+    fun verifiesIndicatorPlacementForXAlignedSensor_InReverseDefaultRotation_270() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.X_ALIGNED,
+            isReverseDefaultRotation = true,
+            { rotation = Surface.ROTATION_270 }
+        ) {
+            sideFpsController.overlayOffsets = sensorLocation
+
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
+
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+            assertThat(overlayViewParamsCaptor.value.x).isEqualTo(sensorLocation.sensorLocationX)
+            assertThat(overlayViewParamsCaptor.value.y).isEqualTo(0)
+        }
+
+    /**
+     * {@link SideFpsController#updateOverlayParams} calculates indicator placement for ROTATION_0,
+     * and uses RotateUtils.rotateBounds to map to the correct indicator location given the device
+     * rotation. Assuming RotationUtils.rotateBounds works correctly, tests for indicator placement
+     * in other rotations have been omitted.
+     */
+    @Test
+    fun verifiesIndicatorPlacementForYAlignedSensor_0() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED,
+            isReverseDefaultRotation = false,
+            { rotation = Surface.ROTATION_0 }
+        ) {
+            sideFpsController.overlayOffsets = sensorLocation
+
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
+
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+            assertThat(overlayViewParamsCaptor.value.x).isEqualTo(displayWidth - boundsWidth)
+            assertThat(overlayViewParamsCaptor.value.y).isEqualTo(sensorLocation.sensorLocationY)
+        }
+
+    /**
+     * {@link SideFpsController#updateOverlayParams} calculates indicator placement for ROTATION_270
+     * in reverse default rotation. It then uses RotateUtils.rotateBounds to map to the correct
+     * indicator location given the device rotation. Assuming RotationUtils.rotateBounds works
+     * correctly, tests for indicator placement in other rotations have been omitted.
+     */
+    @Test
+    fun verifiesIndicatorPlacementForYAlignedSensor_InReverseDefaultRotation_270() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED,
+            isReverseDefaultRotation = true,
+            { rotation = Surface.ROTATION_270 }
+        ) {
+            sideFpsController.overlayOffsets = sensorLocation
+
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
+
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+            assertThat(overlayViewParamsCaptor.value.x).isEqualTo(displayWidth - boundsWidth)
+            assertThat(overlayViewParamsCaptor.value.y).isEqualTo(sensorLocation.sensorLocationY)
+        }
+
     @Test
     fun hasSideFpsSensor_withSensorProps_returnsTrue() = testWithDisplay {
         // By default all those tests assume the side fps sensor is available.
@@ -709,6 +795,51 @@ class SideFpsControllerTest : SysuiTestCase() {
 
         assertThat(fingerprintManager.hasSideFpsSensor()).isFalse()
     }
+
+    @Test
+    fun testLayoutParams_isKeyguardDialogType() =
+        testWithDisplay(deviceConfig = DeviceConfig.Y_ALIGNED) {
+            sideFpsController.overlayOffsets = sensorLocation
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
+
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+
+            val lpType = overlayViewParamsCaptor.value.type
+
+            assertThat((lpType and TYPE_KEYGUARD_DIALOG) != 0).isTrue()
+        }
+
+    @Test
+    fun testLayoutParams_hasNoMoveAnimationWindowFlag() =
+        testWithDisplay(deviceConfig = DeviceConfig.Y_ALIGNED) {
+            sideFpsController.overlayOffsets = sensorLocation
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
+
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+
+            val lpFlags = overlayViewParamsCaptor.value.privateFlags
+
+            assertThat((lpFlags and PRIVATE_FLAG_NO_MOVE_ANIMATION) != 0).isTrue()
+        }
+
+    @Test
+    fun testLayoutParams_hasTrustedOverlayWindowFlag() =
+        testWithDisplay(deviceConfig = DeviceConfig.Y_ALIGNED) {
+            sideFpsController.overlayOffsets = sensorLocation
+            sideFpsController.updateOverlayParams(windowManager.defaultDisplay, indicatorBounds)
+            overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+            executor.runAllReady()
+
+            verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+
+            val lpFlags = overlayViewParamsCaptor.value.privateFlags
+
+            assertThat((lpFlags and PRIVATE_FLAG_TRUSTED_OVERLAY) != 0).isTrue()
+        }
 }
 
 private fun insetsForSmallNavbar() = insetsWithBottom(60)

@@ -17,24 +17,16 @@
 package com.android.systemui.biometrics.domain.interactor
 
 import android.hardware.biometrics.SensorLocationInternal
+import android.util.Log
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
 import com.android.systemui.dagger.SysUISingleton
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 
 /** Business logic for SideFps overlay offsets. */
 interface SideFpsOverlayInteractor {
-    /** The displayId of the current display. */
-    val displayId: Flow<String>
 
-    /** The corresponding offsets based on different displayId. */
-    val overlayOffsets: Flow<SensorLocationInternal>
-
-    /** Update the displayId. */
-    fun changeDisplay(displayId: String?)
+    /** Get the corresponding offsets based on different displayId. */
+    fun getOverlayOffsets(displayId: String): SensorLocationInternal
 }
 
 @SysUISingleton
@@ -43,16 +35,14 @@ class SideFpsOverlayInteractorImpl
 constructor(private val fingerprintPropertyRepository: FingerprintPropertyRepository) :
     SideFpsOverlayInteractor {
 
-    private val _displayId: MutableStateFlow<String> = MutableStateFlow("")
-    override val displayId: Flow<String> = _displayId.asStateFlow()
-
-    override val overlayOffsets: Flow<SensorLocationInternal> =
-        combine(displayId, fingerprintPropertyRepository.sensorLocations) { displayId, offsets ->
-            offsets[displayId] ?: SensorLocationInternal.DEFAULT
+    override fun getOverlayOffsets(displayId: String): SensorLocationInternal {
+        val offsets = fingerprintPropertyRepository.sensorLocations.value
+        return if (offsets.containsKey(displayId)) {
+            offsets[displayId]!!
+        } else {
+            Log.w(TAG, "No location specified for display: $displayId")
+            offsets[""]!!
         }
-
-    override fun changeDisplay(displayId: String?) {
-        _displayId.value = displayId ?: ""
     }
 
     companion object {
