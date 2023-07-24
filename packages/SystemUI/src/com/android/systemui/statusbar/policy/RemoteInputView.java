@@ -30,6 +30,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.text.Editable;
 import android.text.SpannedString;
@@ -1032,10 +1033,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
 
         private void hideIme() {
+            Trace.beginSection("RemoteEditText#hideIme");
             final WindowInsetsController insetsController = getWindowInsetsController();
             if (insetsController != null) {
                 insetsController.hide(WindowInsets.Type.ime());
             }
+            Trace.endSection();
         }
 
         private void defocusIfNeeded(boolean animate) {
