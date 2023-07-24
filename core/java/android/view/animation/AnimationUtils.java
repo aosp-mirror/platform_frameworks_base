@@ -32,7 +32,6 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.TimeUtils;
 import android.util.Xml;
-import android.view.Choreographer;
 import android.view.InflateException;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -154,13 +153,7 @@ public class AnimationUtils {
      */
     public static long getExpectedPresentationTimeNanos() {
         AnimationState state = sAnimationState.get();
-        if (state.animationClockLocked) {
-            return state.mExpectedPresentationTimeNanos;
-        }
-        // When this methoed is called outside of a Choreographer callback,
-        // we obtain the value of expectedPresentTimeNanos from the Choreographer.
-        // This helps avoid returning a time that could potentially be earlier than current time.
-        return Choreographer.getInstance().getLatestExpectedPresentTimeNanos();
+        return state.mExpectedPresentationTimeNanos;
     }
 
     /**
