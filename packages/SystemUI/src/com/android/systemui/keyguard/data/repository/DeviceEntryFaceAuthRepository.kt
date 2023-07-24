@@ -102,6 +102,9 @@ interface DeviceEntryFaceAuthRepository {
     /** Whether bypass is currently enabled */
     val isBypassEnabled: Flow<Boolean>
 
+    /** Set whether face authentication should be locked out or not */
+    fun lockoutFaceAuth()
+
     /**
      * Trigger face authentication.
      *
@@ -198,6 +201,10 @@ constructor(
             }
         }
             ?: flowOf(false)
+
+    override fun lockoutFaceAuth() {
+        _isLockedOut.value = true
+    }
 
     private val faceLockoutResetCallback =
         object : FaceManager.LockoutResetCallback() {
@@ -396,7 +403,7 @@ constructor(
     private val faceAuthCallback =
         object : FaceManager.AuthenticationCallback() {
             override fun onAuthenticationFailed() {
-                _authenticationStatus.value = FailedFaceAuthenticationStatus
+                _authenticationStatus.value = FailedFaceAuthenticationStatus()
                 _isAuthenticated.value = false
                 faceAuthLogger.authenticationFailed()
                 onFaceAuthRequestCompleted()
