@@ -40,6 +40,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.ScreenCapture;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -138,8 +139,13 @@ final class ColorFade {
     public static final int MODE_FADE = 2;
 
     public ColorFade(int displayId) {
+        this(displayId, LocalServices.getService(DisplayManagerInternal.class));
+    }
+
+    @VisibleForTesting
+    ColorFade(int displayId, DisplayManagerInternal displayManagerInternal) {
         mDisplayId = displayId;
-        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+        mDisplayManagerInternal = displayManagerInternal;
     }
 
     /**

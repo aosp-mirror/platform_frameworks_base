@@ -25,12 +25,9 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.LocalServices;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,25 +46,13 @@ public class ColorFadeTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        addLocalServiceMock(DisplayManagerInternal.class, mDisplayManagerInternalMock);
         mContext = getInstrumentation().getTargetContext();
-    }
-
-    @After
-    public void tearDown() {
-        LocalServices.removeServiceForTest(DisplayManagerInternal.class);
     }
 
     @Test
     public void testPrepareColorFadeForInvalidDisplay() {
         when(mDisplayManagerInternalMock.getDisplayInfo(eq(DISPLAY_ID))).thenReturn(null);
-        ColorFade colorFade = new ColorFade(DISPLAY_ID);
+        ColorFade colorFade = new ColorFade(DISPLAY_ID, mDisplayManagerInternalMock);
         assertFalse(colorFade.prepare(mContext, ColorFade.MODE_FADE));
     }
-
-    private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
-        LocalServices.removeServiceForTest(clazz);
-        LocalServices.addService(clazz, mock);
-    }
-
 }
