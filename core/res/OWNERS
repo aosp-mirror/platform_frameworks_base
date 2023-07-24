@@ -45,6 +45,10 @@ per-file res/values/config_device_idle.xml = file:/apex/jobscheduler/OWNERS
 # Wear
 per-file res/*-watch/* = file:/WEAR_OWNERS
 
+# Peformance
+per-file res/values/config.xml = file:/PERFORMANCE_OWNERS
+per-file res/values/symbols.xml = file:/PERFORMANCE_OWNERS
+
 # PowerProfile
 per-file res/xml/power_profile.xml = file:/BATTERY_STATS_OWNERS
 per-file res/xml/power_profile_test.xml = file:/BATTERY_STATS_OWNERS
