@@ -1194,6 +1194,15 @@ public class DisplayRotationTests {
     }
 
     @Test
+    public void testIsFixedToUserRotation_displayContentOrientationFixed() throws Exception {
+        mBuilder.build();
+        when(mMockDisplayContent.isDisplayOrientationFixed()).thenReturn(true);
+
+        assertFalse("Display rotation should respect app requested orientation if"
+                + " the display has fixed orientation.", mTarget.isFixedToUserRotation());
+    }
+
+    @Test
     public void testIsFixedToUserRotation_FixedToUserRotationIfNoAutoRotation() throws Exception {
         mBuilder.build();
         mTarget.setFixedToUserRotation(FIXED_TO_USER_ROTATION_IF_NO_AUTO_ROTATION);

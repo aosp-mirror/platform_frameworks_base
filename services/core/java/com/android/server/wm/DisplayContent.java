@@ -6494,6 +6494,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
+     * @return whether the physical display has a fixed orientation and cannot be rotated.
+     */
+    boolean isDisplayOrientationFixed() {
+        return (mDisplayInfo.flags & Display.FLAG_ROTATES_WITH_CONTENT) == 0;
+    }
+
+    /**
      * @return whether AOD is showing on this display
      */
     boolean isAodShowing() {
