@@ -1648,7 +1648,7 @@
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", sécurisé"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"J\'ai oublié le schéma"</string>
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Schéma incorrect."</string>
-    <string name="kg_wrong_password" msgid="2384677900494439426">"Mot de passe incorrect."</string>
+    <string name="kg_wrong_password" msgid="2384677900494439426">"Mot de passe incorrect"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Code PIN incorrect."</string>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Tracez votre schéma"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Saisissez le code PIN de la carte SIM."</string>
