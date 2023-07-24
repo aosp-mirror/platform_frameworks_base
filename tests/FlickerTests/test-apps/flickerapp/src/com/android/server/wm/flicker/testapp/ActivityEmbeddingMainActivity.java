@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.window.embedding.ActivityFilter;
 import androidx.window.embedding.ActivityRule;
 import androidx.window.embedding.EmbeddingAspectRatio;
@@ -151,6 +152,9 @@ public class ActivityEmbeddingMainActivity extends Activity {
     private static LayoutDirection parseLayoutDirection(@NonNull String layoutDirectionStr) {
         if (layoutDirectionStr.equals(LayoutDirection.LEFT_TO_RIGHT.toString())) {
             return LayoutDirection.LEFT_TO_RIGHT;
+        }
+        if (layoutDirectionStr.equals(LayoutDirection.BOTTOM_TO_TOP.toString())) {
+            return LayoutDirection.BOTTOM_TO_TOP;
         }
         if (layoutDirectionStr.equals(LayoutDirection.RIGHT_TO_LEFT.toString())) {
             return LayoutDirection.RIGHT_TO_LEFT;

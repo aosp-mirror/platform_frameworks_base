@@ -22,6 +22,11 @@ import android.app.PictureInPictureParams;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ToggleButton;
+
+import androidx.window.embedding.SplitAttributes;
+import androidx.window.embedding.SplitAttributesCalculatorParams;
+import androidx.window.embedding.SplitController;
 
 /**
  * Activity to be used as the secondary activity to split with
@@ -29,18 +34,41 @@ import android.view.View;
  */
 public class ActivityEmbeddingSecondaryActivity extends Activity {
 
+    private SplitController mSplitController;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_embedding_secondary_activity_layout);
         findViewById(R.id.secondary_activity_layout).setBackgroundColor(Color.YELLOW);
         findViewById(R.id.finish_secondary_activity_button).setOnClickListener(
-              new View.OnClickListener() {
+                new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         finish();
                     }
-            });
+                });
+        mSplitController = SplitController.getInstance(this);
+        final ToggleButton splitRatio = findViewById(R.id.toggle_split_ratio_button);
+        mSplitController.setSplitAttributesCalculator(params -> {
+            return new SplitAttributes.Builder()
+                    .setSplitType(
+                            SplitAttributes.SplitType.ratio(
+                                    splitRatio.isChecked() ? 0.7f : 0.5f)
+                    )
+                    .setLayoutDirection(
+                            params.getDefaultSplitAttributes()
+                                    .getLayoutDirection())
+                    .build();
+        });
+        splitRatio.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // This triggers a recalcuation of splitatributes.
+                        mSplitController.invalidateTopVisibleSplitAttributes();
+                    }
+        });
         findViewById(R.id.secondary_enter_pip_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
