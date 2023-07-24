@@ -939,6 +939,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      * Sets both shelf visibility and its height.
      */
     private void setShelfHeight(boolean visible, int height) {
+        if (mEnablePipKeepClearAlgorithm) {
+            // turn this into Launcher keep clear area registration instead
+            setLauncherKeepClearAreaHeight(visible, height);
+            return;
+        }
         if (!mIsKeyguardShowingOrAnimating) {
             setShelfHeightLocked(visible, height);
         }
