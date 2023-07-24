@@ -253,7 +253,11 @@ public class BatteryStatsHistory {
         public void traceCounter(@NonNull String name, int value) {
             Trace.traceCounter(Trace.TRACE_TAG_POWER, name, value);
             if (mShouldSetProperty) {
-                SystemProperties.set("debug.tracing." + name, Integer.toString(value));
+                try {
+                    SystemProperties.set("debug.tracing." + name, Integer.toString(value));
+                } catch (RuntimeException e) {
+                    Slog.e(TAG, "Failed to set debug.tracing." + name, e);
+                }
             }
         }
 
