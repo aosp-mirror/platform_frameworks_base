@@ -235,9 +235,9 @@
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"O dispositivo Android TV será encerrado."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"As suas visualizações vão ser encerradas."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"O seu telefone será encerrado."</string>
-    <string name="shutdown_confirm_question" msgid="796151167261608447">"Pretende encerrar?"</string>
+    <string name="shutdown_confirm_question" msgid="796151167261608447">"Quer encerrar?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Reiniciar no modo de segurança"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"Pretende reiniciar no modo de segurança? Se sim, irá desativar todas as aplicações de terceiros instaladas. Estas serão restauradas quando reiniciar novamente."</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"Quer reiniciar no modo de segurança? Se sim, irá desativar todas as aplicações de terceiros instaladas. Estas serão restauradas quando reiniciar novamente."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"Recente"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"Não existem aplicações recentes"</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Opções do tablet"</string>
@@ -1068,7 +1068,7 @@
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"Confirmar Navegação"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"Sair desta Página"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"Permanecer nesta Página"</string>
-    <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nTem a certeza de que pretende navegar para outra página?"</string>
+    <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nTem a certeza de que quer navegar para outra página?"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"Preenchimento automático com <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"definir um alarme"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"Permite que a app defina um alarme numa app de despertador instalada. Algumas aplicações de despertador podem não integrar esta funcionalidade."</string>
@@ -1094,8 +1094,8 @@
     <string name="searchview_description_submit" msgid="6771060386117334686">"Enviar consulta"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"Pesquisa por voz"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Ativar Explorar Através do Toque?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> pretende ativar a funcionalidade Explorar Através do Toque. Quando a funcionalidade Explorar Através do Toque estiver ativada, pode ouvir ou visualizar descrições sobre o que está por baixo do seu dedo ou executar gestos para interagir com o tablet."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> pretende ativar a funcionalidade Explorar Através do Toque. Quando a funcionalidade Explorar Através do Toque estiver ativada, pode ouvir ou visualizar descrições sobre o que está por baixo do seu dedo ou executar gestos para interagir com o telemóvel."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quer ativar a funcionalidade Explorar Através do Toque. Quando a funcionalidade Explorar Através do Toque estiver ativada, pode ouvir ou visualizar descrições sobre o que está por baixo do seu dedo ou executar gestos para interagir com o tablet."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> quer ativar a funcionalidade Explorar Através do Toque. Quando a funcionalidade Explorar Através do Toque estiver ativada, pode ouvir ou visualizar descrições sobre o que está por baixo do seu dedo ou executar gestos para interagir com o telemóvel."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Há 1 mês"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Há mais de 1 mês"</string>
     <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{# dia anterior}many{# dias anteriores}other{# dias anteriores}}"</string>
@@ -1233,7 +1233,7 @@
     <string name="force_close" msgid="9035203496368973803">"OK"</string>
     <string name="report" msgid="2149194372340349521">"Relatório"</string>
     <string name="wait" msgid="7765985809494033348">"Esperar"</string>
-    <string name="webpage_unresponsive" msgid="7850879412195273433">"A página deixou de responder. \n \n Pretende fechá-la?"</string>
+    <string name="webpage_unresponsive" msgid="7850879412195273433">"A página deixou de responder. \n \n Quer fechá-la?"</string>
     <string name="launch_warning_title" msgid="6725456009564953595">"Aplicação redirecionada"</string>
     <string name="launch_warning_replace" msgid="3073392976283203402">"<xliff:g id="APP_NAME">%1$s</xliff:g> está agora a ser executado."</string>
     <string name="launch_warning_original" msgid="3332206576800169626">"<xliff:g id="APP_NAME">%1$s</xliff:g> foi originalmente iniciado."</string>
@@ -1276,7 +1276,7 @@
     <string name="dump_heap_notification" msgid="5316644945404825032">"<xliff:g id="PROC">%1$s</xliff:g> excedeu o limite da memória"</string>
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"A captura da área dinâmica para dados do processo <xliff:g id="PROC">%1$s</xliff:g> está pronta."</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"Foi recolhida a captura da área dinâmica para dados. Toque para partilhar."</string>
-    <string name="dump_heap_title" msgid="4367128917229233901">"Pretende partilhar a captura da área dinâmica para dados?"</string>
+    <string name="dump_heap_title" msgid="4367128917229233901">"Quer partilhar a captura da área dinâmica para dados?"</string>
     <string name="dump_heap_text" msgid="1692649033835719336">"O processo <xliff:g id="PROC">%1$s</xliff:g> excedeu o respetivo limite de memória de <xliff:g id="SIZE">%2$s</xliff:g>. Está disponível uma captura da área dinâmica para dados para partilhar com o respetivo programador. Atenção: esta captura da área dinâmica para dados pode conter algumas das suas informações pessoais a que a app tem acesso."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"O processo <xliff:g id="PROC">%1$s</xliff:g> excedeu o respetivo limite de memória de <xliff:g id="SIZE">%2$s</xliff:g>. Está disponível uma captura da área dinâmica para dados para partilhar. Atenção: esta captura da área dinâmica para dados pode conter informações pessoais confidenciais a que o processo tem acesso, que podem incluir coisas que escreveu."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Está disponível uma captura da área dinâmica para dados do processo <xliff:g id="PROC">%1$s</xliff:g> para partilhar. Atenção: esta captura da área dinâmica para dados pode conter informações pessoais confidenciais a que o processo tem acesso, que podem incluir coisas que escreveu."</string>
@@ -1328,7 +1328,7 @@
     <string name="decline" msgid="6490507610282145874">"Recusar"</string>
     <string name="select_character" msgid="3352797107930786979">"Introduzir carácter"</string>
     <string name="sms_control_title" msgid="4748684259903148341">"A enviar mensagens SMS"</string>
-    <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; está a enviar um grande número de mensagens SMS. Pretende autorizar que a app continue a enviar mensagens?"</string>
+    <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; está a enviar um grande número de mensagens SMS. Quer autorizar que a app continue a enviar mensagens?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"Permitir"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Recusar"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; gostaria de enviar uma mensagem para &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
@@ -1390,7 +1390,7 @@
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"É seguro utilizar a porta USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="892863190942660462">"O telemóvel já não deteta líquidos nem resíduos."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="1582531382166919850">"A criar relatório de erro…"</string>
-    <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"Pretende partilhar o relatório de erro?"</string>
+    <string name="share_remote_bugreport_notification_title" msgid="6708897723753334999">"Quer partilhar o relatório de erro?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="3077385149217638550">"A partilhar relatório de erro…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="7325635795739260135">"O seu gestor solicitou um relatório de erro para ajudar na resolução de problemas deste dispositivo. As aplicações e os dados podem ser partilhados."</string>
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"PARTILHAR"</string>
@@ -1406,7 +1406,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Sobrepor a outras apps"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"A app <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras aplicações"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"O <xliff:g id="NAME">%s</xliff:g> sobrepõe-se a outras app"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Se não pretende que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Se não quer que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Desligar"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"A verificar o <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"A rever o conteúdo atual…"</string>
@@ -1482,7 +1482,7 @@
     <string name="dial_number_using" msgid="6060769078933953531">"Marcar número\nutilizando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"Criar contacto\nutilizando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"Uma ou várias das aplicações seguintes solicitam permissão para aceder à sua conta, agora e no futuro."</string>
-    <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Pretende autorizar este pedido?"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"Quer autorizar este pedido?"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"Pedido de acesso"</string>
     <string name="allow" msgid="6195617008611933762">"Permitir"</string>
     <string name="deny" msgid="6632259981847676572">"Recusar"</string>
@@ -1534,7 +1534,7 @@
     <string name="gpsVerifYes" msgid="3719843080744112940">"Sim"</string>
     <string name="gpsVerifNo" msgid="1671201856091564741">"Não"</string>
     <string name="sync_too_many_deletes" msgid="6999440774578705300">"Limite de eliminações excedido"</string>
-    <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Há <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> itens eliminados de <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, conta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. O que pretende fazer?"</string>
+    <string name="sync_too_many_deletes_desc" msgid="7409327940303504440">"Há <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> itens eliminados de <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, conta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. O que quer fazer?"</string>
     <string name="sync_really_delete" msgid="5657871730315579051">"Eliminar os itens"</string>
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Anular as eliminações"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Não fazer nada por agora"</string>
@@ -1688,7 +1688,7 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Aumentar o volume acima do nível recomendado?\n\nOuvir com um volume elevado durante longos períodos poderá ser prejudicial para a sua audição."</string>
     <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Quer continuar a ouvir com um volume elevado?\n\nO volume dos auscultadores está elevado há mais tempo do que o recomendado, o que pode ser prejudicial para a sua audição"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Som alto detetado\n\nO volume dos auscultadores tem estado mais elevado do que o recomendado, o que pode ser prejudicial para a sua audição"</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Pretende utilizar o atalho de acessibilidade?"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Quer utilizar o atalho de acessibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando o atalho está ativado, premir ambos os botões de volume durante 3 segundos inicia uma funcionalidade de acessibilidade."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Ativar o atalho das funcionalidades de acessibilidade?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Manter premidas ambas as teclas de volume durante alguns segundos ativa as funcionalidades de acessibilidade. Estas podem alterar a forma como o seu dispositivo funciona.\n\nFuncionalidades atuais:\n<xliff:g id="SERVICE">%1$s</xliff:g>\npode alterar as funcionalidades selecionadas em Definições &gt; Acessibilidade."</string>
@@ -2021,14 +2021,14 @@
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Não é possível preencher automaticamente o conteúdo"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Sem sugestões do preenchimento automático"</string>
     <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Uma sugestão do preenchimento automático}many{# sugestões de preenchimento automático}other{# sugestões de preenchimento automático}}"</string>
-    <string name="autofill_save_title" msgid="7719802414283739775">"Pretende guardar em "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Pretende guardar <xliff:g id="TYPE">%1$s</xliff:g> em "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Pretende guardar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> em "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"Pretende guardar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> em "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title" msgid="3630695947047069136">"Pretende atualizar em "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Pretende atualizar <xliff:g id="TYPE">%1$s</xliff:g> em "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Pretende atualizar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> em "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Pretende atualizar estes itens em "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
+    <string name="autofill_save_title" msgid="7719802414283739775">"Quer guardar em "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Quer guardar <xliff:g id="TYPE">%1$s</xliff:g> em "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Quer guardar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> em "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"Quer guardar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> em "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="3630695947047069136">"Quer atualizar em "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="5264152633488495704">"Quer atualizar <xliff:g id="TYPE">%1$s</xliff:g> em "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"Quer atualizar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> em "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"Quer atualizar estes itens em "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"Guardar"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"Não, obrigado"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"Agora não"</string>
@@ -2067,7 +2067,7 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DESINSTALAR"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ABRIR MESMO ASSIM"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Aplicação prejudicial detetada"</string>
-    <string name="slices_permission_request" msgid="3677129866636153406">"A app <xliff:g id="APP_0">%1$s</xliff:g> pretende mostrar partes da app <xliff:g id="APP_2">%2$s</xliff:g>."</string>
+    <string name="slices_permission_request" msgid="3677129866636153406">"A app <xliff:g id="APP_0">%1$s</xliff:g> quer mostrar partes da app <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"As chamadas e as notificações vibram."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"É desativado o som das chamadas e das notificações."</string>

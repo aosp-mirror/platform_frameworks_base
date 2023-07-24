@@ -2166,7 +2166,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"पुन्हा सुरू करा"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"कोणतीही कार्य ॲप्स सपोर्ट करत नाहीत"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"कोणतीही वैयक्तिक ॲप्स सपोर्ट करत नाहीत"</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"ऑफिसची प्रोफाइल <xliff:g id="APP">%s</xliff:g> उघडायची आहे का?"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"ऑफिसची प्रोफाइल <xliff:g id="APP">%s</xliff:g> उघडायचे आहे का?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"वैयक्तिक प्रोफाइल <xliff:g id="APP">%s</xliff:g> मध्ये उघडायची आहे का?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"ऑफिसची प्रोफाइल <xliff:g id="APP">%s</xliff:g> मध्ये उघडायची आहे का?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"work app मधून कॉल करायचा आहे का?"</string>
