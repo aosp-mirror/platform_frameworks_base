@@ -16,6 +16,7 @@
 
 package com.android.systemui.dump
 
+import android.icu.text.SimpleDateFormat
 import android.os.SystemClock
 import android.os.Trace
 import com.android.systemui.ProtoDumpable
@@ -32,6 +33,7 @@ import java.io.BufferedOutputStream
 import java.io.FileDescriptor
 import java.io.FileOutputStream
 import java.io.PrintWriter
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.system.measureTimeMillis
 
@@ -106,6 +108,8 @@ constructor(
                 return
             }
 
+        pw.print("Dump starting: ")
+        pw.println(DATE_FORMAT.format(System.currentTimeMillis()))
         when {
             parsedArgs.dumpPriority == PRIORITY_ARG_CRITICAL -> dumpCritical(pw, parsedArgs)
             parsedArgs.dumpPriority == PRIORITY_ARG_NORMAL && !parsedArgs.proto -> {
@@ -488,6 +492,7 @@ constructor(
     }
 }
 
+private val DATE_FORMAT = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
 private val PRIORITY_OPTIONS = arrayOf(PRIORITY_ARG_CRITICAL, PRIORITY_ARG_NORMAL)
 
 private val COMMANDS =
