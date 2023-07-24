@@ -265,6 +265,11 @@ class SystemEventChipAnimationController @Inject constructor(
                 // not animating then [prepareChipAnimation] will take care of it for us
                 currentAnimatedView?.let {
                     updateChipBounds(it, newContentArea)
+                    // Since updateCurrentAnimatedView can only be called during an animation, we
+                    // have to create a dummy animator here to apply the new chip bounds
+                    val animator = ValueAnimator.ofInt(0, 1).setDuration(0)
+                    animator.addUpdateListener { updateCurrentAnimatedView() }
+                    animator.start()
                 }
             }
         })
