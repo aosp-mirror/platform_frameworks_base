@@ -242,9 +242,20 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 return false;
             }
 
+            // Abort if no space to split.
+            final SplitAttributes calculatedSplitAttributes = mPresenter.computeSplitAttributes(
+                    task.getTaskProperties(), splitPinRule,
+                    splitPinRule.getDefaultSplitAttributes(),
+                    getActivitiesMinDimensionsPair(primaryContainer.getTopNonFinishingActivity(),
+                            topContainer.getTopNonFinishingActivity()));
+            if (!SplitPresenter.shouldShowSplit(calculatedSplitAttributes)) {
+                Log.w(TAG, "No space to split, abort pinning top ActivityStack.");
+                return false;
+            }
+
             // Registers a Split
             final SplitPinContainer splitPinContainer = new SplitPinContainer(primaryContainer,
-                    topContainer, splitPinRule, splitPinRule.getDefaultSplitAttributes());
+                    topContainer, splitPinRule, calculatedSplitAttributes);
             task.addSplitContainer(splitPinContainer);
 
             // Updates the Split
@@ -263,7 +274,33 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     @Override
     public void unpinTopActivityStack(int taskId){
-        // TODO
+        synchronized (mLock) {
+            final TaskContainer task = getTaskContainer(taskId);
+            if (task == null) {
+                Log.e(TAG, "Cannot find the task to unpin, id: " + taskId);
+                return;
+            }
+
+            final SplitPinContainer splitPinContainer = task.getSplitPinContainer();
+            if (splitPinContainer == null) {
+                Log.e(TAG, "No ActivityStack is pinned.");
+                return;
+            }
+
+            // Remove the SplitPinContainer from the task.
+            final TaskFragmentContainer containerToUnpin =
+                    splitPinContainer.getSecondaryContainer();
+            task.removeSplitPinContainer();
+
+            // Resets the isolated navigation and updates the container.
+            final TransactionRecord transactionRecord = mTransactionManager.startNewTransaction();
+            final WindowContainerTransaction wct = transactionRecord.getTransaction();
+            mPresenter.setTaskFragmentIsolatedNavigation(wct,
+                    containerToUnpin.getTaskFragmentToken(), false /* isolated */);
+            updateContainer(wct, containerToUnpin);
+            transactionRecord.apply(false /* shouldApplyIndependently */);
+            updateCallbackIfNecessary();
+        }
     }
 
     @Override
