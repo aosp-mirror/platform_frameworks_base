@@ -233,12 +233,12 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
             // ERROR message
             fingerprintAuthRepository.setAuthenticationStatus(
                 ErrorFingerprintAuthenticationStatus(
-                    FingerprintManager.FINGERPRINT_ERROR_LOCKOUT,
+                    FingerprintManager.FINGERPRINT_ERROR_CANCELED,
                     "testError",
                 )
             )
             assertThat(message?.source).isEqualTo(BiometricSourceType.FINGERPRINT)
-            assertThat(message?.id).isEqualTo(FingerprintManager.FINGERPRINT_ERROR_LOCKOUT)
+            assertThat(message?.id).isEqualTo(FingerprintManager.FINGERPRINT_ERROR_CANCELED)
             assertThat(message?.message).isEqualTo("testError")
             assertThat(message?.type).isEqualTo(BiometricMessageType.ERROR)
 
@@ -260,6 +260,34 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
             assertThat(message?.id)
                 .isEqualTo(KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED)
             assertThat(message?.type).isEqualTo(BiometricMessageType.FAIL)
+        }
+
+    @Test
+    fun message_fpError_lockoutFilteredOut() =
+        testScope.runTest {
+            val message by collectLastValue(underTest.message)
+
+            givenOnOccludingApp(true)
+            givenPrimaryAuthRequired(false)
+            runCurrent()
+
+            // permanent lockout error message
+            fingerprintAuthRepository.setAuthenticationStatus(
+                ErrorFingerprintAuthenticationStatus(
+                    FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT,
+                    "testPermanentLockoutMessageFiltered",
+                )
+            )
+            assertThat(message).isNull()
+
+            // temporary lockout error message
+            fingerprintAuthRepository.setAuthenticationStatus(
+                ErrorFingerprintAuthenticationStatus(
+                    FingerprintManager.FINGERPRINT_ERROR_LOCKOUT,
+                    "testLockoutMessageFiltered",
+                )
+            )
+            assertThat(message).isNull()
         }
 
     private fun givenOnOccludingApp(isOnOccludingApp: Boolean) {

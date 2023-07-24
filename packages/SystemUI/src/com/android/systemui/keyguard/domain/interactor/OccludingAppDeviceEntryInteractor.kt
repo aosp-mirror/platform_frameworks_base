@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.content.Context
 import android.content.Intent
-import android.hardware.fingerprint.FingerprintManager
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -35,6 +34,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -74,15 +74,13 @@ constructor(
     private val fingerprintLockoutEvents: Flow<Unit> =
         fingerprintAuthRepository.authenticationStatus
             .ifKeyguardOccludedByApp()
-            .filter {
-                it is ErrorFingerprintAuthenticationStatus &&
-                    (it.msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT ||
-                        it.msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT)
-            }
+            .filter { it is ErrorFingerprintAuthenticationStatus && it.isLockoutMessage() }
             .map {} // maps FingerprintAuthenticationStatus => Unit
     val message: Flow<BiometricMessage?> =
         merge(
-                biometricMessageInteractor.fingerprintErrorMessage,
+                biometricMessageInteractor.fingerprintErrorMessage.filterNot {
+                    it.isFingerprintLockoutMessage()
+                },
                 biometricMessageInteractor.fingerprintFailMessage,
                 biometricMessageInteractor.fingerprintHelpMessage,
             )
