@@ -15,11 +15,13 @@
  */
 package com.android.systemui.accessibility.fontscaling
 
+import android.content.res.Configuration
 import android.os.Handler
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.SeekBar
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -61,6 +63,7 @@ class FontScalingDialogTest : SysuiTestCase() {
     private lateinit var secureSettings: SecureSettings
     private lateinit var systemClock: FakeSystemClock
     private lateinit var backgroundDelayableExecutor: FakeExecutor
+    private lateinit var testableLooper: TestableLooper
     private val fontSizeValueArray: Array<String> =
         mContext
             .getResources()
@@ -73,7 +76,8 @@ class FontScalingDialogTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        val mainHandler = Handler(TestableLooper.get(this).getLooper())
+        testableLooper = TestableLooper.get(this)
+        val mainHandler = Handler(testableLooper.looper)
         systemSettings = FakeSettings()
         // Guarantee that the systemSettings always starts with the default font scale.
         systemSettings.putFloatForUser(Settings.System.FONT_SCALE, 1.0f, userTracker.userId)
@@ -285,5 +289,27 @@ class FontScalingDialogTest : SysuiTestCase() {
 
         verify(fontScalingDialog).createTextPreview(/* index= */ 0)
         fontScalingDialog.dismiss()
+    }
+
+    @Test
+    fun changeFontSize_buttonIsDisabledBeforeFontSizeChangeFinishes() {
+        fontScalingDialog.show()
+
+        val iconEndFrame: ViewGroup = fontScalingDialog.findViewById(R.id.icon_end_frame)!!
+        val doneButton: Button = fontScalingDialog.findViewById(com.android.internal.R.id.button1)!!
+
+        iconEndFrame.performClick()
+        backgroundDelayableExecutor.runAllReady()
+        backgroundDelayableExecutor.advanceClockToNext()
+        backgroundDelayableExecutor.runAllReady()
+
+        // Verify that the button is disabled before receiving onConfigurationChanged
+        assertThat(doneButton.isEnabled).isFalse()
+
+        val config = Configuration()
+        config.fontScale = 1.15f
+        fontScalingDialog.onConfigurationChanged(config)
+        testableLooper.processAllMessages()
+        assertThat(doneButton.isEnabled).isTrue()
     }
 }
