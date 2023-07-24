@@ -3170,10 +3170,43 @@
     <!--- Content of toast triggered when the notes app entry point is triggered without setting a default notes app. [CHAR LIMIT=NONE] -->
     <string name="set_default_notes_app_toast_content">Set default notes app in Settings</string>
 
-    <!--
-    Label for a button that, when clicked, sends the user to the app store to install an app.
-
-    [CHAR LIMIT=64].
-    -->
+    <!-- Label for a button that, when clicked, sends the user to the app store to install an app. [CHAR LIMIT=64]. -->
     <string name="install_app">Install app</string>
+
+    <!-- Title of the privacy dialog, shown for active / recent app usage of some phone sensors [CHAR LIMIT=30] -->
+    <string name="privacy_dialog_title">Microphone &amp; Camera</string>
+    <!-- Subtitle of the privacy dialog, shown for active / recent app usage of some phone sensors [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_summary">Recent app use</string>
+    <!-- Label of the secondary button of the privacy dialog, used to check recent app usage of phone sensors [CHAR LIMIT=30] -->
+    <string name="privacy_dialog_more_button">See recent access</string>
+    <!-- Label of the primary button to dismiss the privacy dialog [CHAR LIMIT=20] -->
+    <string name="privacy_dialog_done_button">Done</string>
+    <!-- Description for expanding a collapsible widget in the privacy dialog [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_expand_action">Expand and show options</string>
+    <!-- Description for collapsing a collapsible widget in the privacy dialog [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_collapse_action">Collapse</string>
+    <!-- Label of a button of the privacy dialog to close an app actively using a phone sensor [CHAR LIMIT=50] -->
+    <string name="privacy_dialog_close_app_button">Close this app</string>
+    <!-- Message shown in the privacy dialog when an app actively using a phone sensor is closed [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_close_app_message"><xliff:g id="app_name" example="Gmail">%1$s</xliff:g> closed</string>
+    <!-- Label of a button of the privacy dialog to learn more of a service actively or recently using a phone sensor [CHAR LIMIT=50] -->
+    <string name="privacy_dialog_manage_service">Manage service</string>
+    <!-- Label of a button of the privacy dialog to manage permissions of an app actively or recently using a phone sensor [CHAR LIMIT=50] -->
+    <string name="privacy_dialog_manage_permissions">Manage access</string>
+    <!-- Label for active usage of a phone sensor by phone call in the privacy dialog [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_active_call_usage">In use by phone call</string>
+    <!-- Label for recent usage of a phone sensor by phone call in the privacy dialog [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_recent_call_usage">Recently used in phone call</string>
+    <!-- Label for active app usage of a phone sensor in the privacy dialog [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_active_app_usage">In use by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
+    <!-- Label for recent app usage of a phone sensor in the privacy dialog [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_recent_app_usage">Recently used by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
+    <!-- Label for active app usage of a phone sensor with sub-attribution or proxy label in the privacy dialog [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_active_app_usage_1">In use by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g>)</string>
+    <!-- Label for recent app usage of a phone sensor with sub-attribution or proxy label in the privacy dialog [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_recent_app_usage_1">Recently used by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g>)</string>
+    <!-- Label for active app usage of a phone sensor with sub-attribution and proxy label in the privacy dialog [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_active_app_usage_2">In use by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g> \u2022 <xliff:g id="proxy_label" example="Speech services">%3$s</xliff:g>)</string>
+    <!-- Label for recent app usage of a phone sensor with sub-attribution and proxy label in the privacy dialog [CHAR LIMIT=NONE] -->
+    <string name="privacy_dialog_recent_app_usage_2">Recently used by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g> \u2022 <xliff:g id="proxy_label" example="Speech services">%3$s</xliff:g>)</string>
 </resources>

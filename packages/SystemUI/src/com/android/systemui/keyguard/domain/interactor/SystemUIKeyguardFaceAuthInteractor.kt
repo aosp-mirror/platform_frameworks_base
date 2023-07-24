@@ -30,6 +30,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
+import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -67,6 +68,7 @@ constructor(
     private val featureFlags: FeatureFlags,
     private val faceAuthenticationLogger: FaceAuthenticationLogger,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
 ) : CoreStartable, KeyguardFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
@@ -115,6 +117,15 @@ constructor(
                     FaceAuthUiEvent.FACE_AUTH_UPDATED_KEYGUARD_VISIBILITY_CHANGED,
                     fallbackToDetect = true
                 )
+            }
+            .launchIn(applicationScope)
+
+        deviceEntryFingerprintAuthRepository.isLockedOut
+            .onEach {
+                if (it) {
+                    faceAuthenticationLogger.faceLockedOut("Fingerprint locked out")
+                    repository.lockoutFaceAuth()
+                }
             }
             .launchIn(applicationScope)
     }

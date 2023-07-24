@@ -405,6 +405,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     UriGrantsManagerInternal mUgmInternal;
     @Mock
     AppOpsManager mAppOpsManager;
+    private AppOpsManager.OnOpChangedListener mOnPermissionChangeListener;
     @Mock
     private TestableNotificationManagerService.NotificationAssistantAccessGrantedCallback
             mNotificationAssistantAccessGrantedCallback;
@@ -604,6 +605,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         TestableResources tr = mContext.getOrCreateTestableResources();
         tr.addOverride(com.android.internal.R.string.config_defaultSearchSelectorPackageName,
                 SEARCH_SELECTOR_PKG);
+
+        doAnswer(invocation -> {
+            mOnPermissionChangeListener = invocation.getArgument(2);
+            return null;
+        }).when(mAppOpsManager).startWatchingMode(eq(AppOpsManager.OP_POST_NOTIFICATION), any(),
+                any());
+        when(mUmInternal.isUserInitialized(anyInt())).thenReturn(true);
 
         mWorkerHandler = spy(mService.new WorkerHandler(mTestableLooper.getLooper()));
         mService.init(mWorkerHandler, mRankingHandler, mPackageManager, mPackageManagerClient,
@@ -3221,6 +3229,108 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void onOpChanged_permissionRevoked_cancelsAllNotificationsFromPackage()
+            throws RemoteException {
+        // Have preexisting posted notifications from revoked package and other packages.
+        mService.addNotification(new NotificationRecord(mContext,
+                generateSbn("revoked", 1001, 1, 0), mTestNotificationChannel));
+        mService.addNotification(new NotificationRecord(mContext,
+                generateSbn("other", 1002, 2, 0), mTestNotificationChannel));
+        // Have preexisting enqueued notifications from revoked package and other packages.
+        mService.addEnqueuedNotification(new NotificationRecord(mContext,
+                generateSbn("revoked", 1001, 3, 0), mTestNotificationChannel));
+        mService.addEnqueuedNotification(new NotificationRecord(mContext,
+                generateSbn("other", 1002, 4, 0), mTestNotificationChannel));
+        assertThat(mService.mNotificationList).hasSize(2);
+        assertThat(mService.mEnqueuedNotifications).hasSize(2);
+
+        when(mPackageManagerInternal.getPackageUid("revoked", 0, 0)).thenReturn(1001);
+        when(mPermissionHelper.hasPermission(eq(1001))).thenReturn(false);
+
+        mOnPermissionChangeListener.onOpChanged(
+                AppOpsManager.OPSTR_POST_NOTIFICATION, "revoked", 0);
+        waitForIdle();
+
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getSbn().getPackageName()).isEqualTo("other");
+        assertThat(mService.mEnqueuedNotifications).hasSize(1);
+        assertThat(mService.mEnqueuedNotifications.get(0).getSbn().getPackageName()).isEqualTo(
+                "other");
+    }
+
+    @Test
+    public void onOpChanged_permissionStillGranted_notificationsAreNotAffected()
+            throws RemoteException {
+        // NOTE: This combination (receiving the onOpChanged broadcast for a package, the permission
+        // being now granted, AND having previously posted notifications from said package) should
+        // never happen (if we trust the broadcasts are correct). So this test is for a what-if
+        // scenario, to verify we still handle it reasonably.
+
+        // Have preexisting posted notifications from specific package and other packages.
+        mService.addNotification(new NotificationRecord(mContext,
+                generateSbn("granted", 1001, 1, 0), mTestNotificationChannel));
+        mService.addNotification(new NotificationRecord(mContext,
+                generateSbn("other", 1002, 2, 0), mTestNotificationChannel));
+        // Have preexisting enqueued notifications from specific package and other packages.
+        mService.addEnqueuedNotification(new NotificationRecord(mContext,
+                generateSbn("granted", 1001, 3, 0), mTestNotificationChannel));
+        mService.addEnqueuedNotification(new NotificationRecord(mContext,
+                generateSbn("other", 1002, 4, 0), mTestNotificationChannel));
+        assertThat(mService.mNotificationList).hasSize(2);
+        assertThat(mService.mEnqueuedNotifications).hasSize(2);
+
+        when(mPackageManagerInternal.getPackageUid("granted", 0, 0)).thenReturn(1001);
+        when(mPermissionHelper.hasPermission(eq(1001))).thenReturn(true);
+
+        mOnPermissionChangeListener.onOpChanged(
+                AppOpsManager.OPSTR_POST_NOTIFICATION, "granted", 0);
+        waitForIdle();
+
+        assertThat(mService.mNotificationList).hasSize(2);
+        assertThat(mService.mEnqueuedNotifications).hasSize(2);
+    }
+
+    @Test
+    public void onOpChanged_notInitializedUser_ignored() throws RemoteException {
+        when(mUmInternal.isUserInitialized(eq(0))).thenReturn(false);
+
+        mOnPermissionChangeListener.onOpChanged(
+                AppOpsManager.OPSTR_POST_NOTIFICATION, "package", 0);
+        waitForIdle();
+
+        // We early-exited and didn't even query PM for package details.
+        verify(mPackageManagerInternal, never()).getPackageUid(any(), anyLong(), anyInt());
+    }
+
+    @Test
+    public void setNotificationsEnabledForPackage_disabling_clearsNotifications() throws Exception {
+        mService.addNotification(new NotificationRecord(mContext,
+                generateSbn("package", 1001, 1, 0), mTestNotificationChannel));
+        assertThat(mService.mNotificationList).hasSize(1);
+        when(mPackageManagerInternal.getPackageUid("package", 0, 0)).thenReturn(1001);
+        when(mPermissionHelper.hasRequestedPermission(any(), eq("package"), anyInt())).thenReturn(
+                true);
+
+        // Start with granted permission and simulate effect of revoking it.
+        when(mPermissionHelper.hasPermission(1001)).thenReturn(true);
+        doAnswer(invocation -> {
+            when(mPermissionHelper.hasPermission(1001)).thenReturn(false);
+            mOnPermissionChangeListener.onOpChanged(
+                    AppOpsManager.OPSTR_POST_NOTIFICATION, "package", 0);
+            return null;
+        }).when(mPermissionHelper).setNotificationPermission("package", 0, false, true);
+
+        mBinderService.setNotificationsEnabledForPackage("package", 1001, false);
+        waitForIdle();
+
+        assertThat(mService.mNotificationList).hasSize(0);
+
+        mTestableLooper.moveTimeForward(500);
+        waitForIdle();
+        verify(mContext).sendBroadcastAsUser(any(), eq(UserHandle.of(0)), eq(null));
+    }
+
+    @Test
     public void testUpdateAppNotifyCreatorBlock() throws Exception {
         when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
 
@@ -4240,6 +4350,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testSetNASMigrationDoneAndResetDefault_enableNAS() throws Exception {
         int userId = 10;
+        setNASMigrationDone(false, userId);
         when(mUm.getProfileIds(userId, false)).thenReturn(new int[]{userId});
 
         mBinderService.setNASMigrationDoneAndResetDefault(userId, true);
@@ -4251,6 +4362,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testSetNASMigrationDoneAndResetDefault_disableNAS() throws Exception {
         int userId = 10;
+        setNASMigrationDone(false, userId);
         when(mUm.getProfileIds(userId, false)).thenReturn(new int[]{userId});
 
         mBinderService.setNASMigrationDoneAndResetDefault(userId, false);
@@ -4263,6 +4375,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testSetNASMigrationDoneAndResetDefault_multiProfile() throws Exception {
         int userId1 = 11;
         int userId2 = 12; //work profile
+        setNASMigrationDone(false, userId1);
+        setNASMigrationDone(false, userId2);
         setUsers(new int[]{userId1, userId2});
         when(mUm.isManagedProfile(userId2)).thenReturn(true);
         when(mUm.getProfileIds(userId1, false)).thenReturn(new int[]{userId1, userId2});
@@ -4276,6 +4390,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testSetNASMigrationDoneAndResetDefault_multiUser() throws Exception {
         int userId1 = 11;
         int userId2 = 12;
+        setNASMigrationDone(false, userId1);
+        setNASMigrationDone(false, userId2);
         setUsers(new int[]{userId1, userId2});
         when(mUm.getProfileIds(userId1, false)).thenReturn(new int[]{userId1});
         when(mUm.getProfileIds(userId2, false)).thenReturn(new int[]{userId2});

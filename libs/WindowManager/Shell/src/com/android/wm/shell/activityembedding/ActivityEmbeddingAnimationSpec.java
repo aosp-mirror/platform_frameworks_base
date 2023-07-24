@@ -26,7 +26,6 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.ClipRectAnimation;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
@@ -189,14 +188,6 @@ class ActivityEmbeddingAnimationSpec {
                 startBounds.top - endBounds.top, 0);
         endTranslate.setDuration(CHANGE_ANIMATION_DURATION);
         endSet.addAnimation(endTranslate);
-        // The end leash is resizing, we should update the window crop based on the clip rect.
-        final Rect startClip = new Rect(startBounds);
-        final Rect endClip = new Rect(endBounds);
-        startClip.offsetTo(0, 0);
-        endClip.offsetTo(0, 0);
-        final Animation clipAnim = new ClipRectAnimation(startClip, endClip);
-        clipAnim.setDuration(CHANGE_ANIMATION_DURATION);
-        endSet.addAnimation(clipAnim);
         endSet.initialize(startBounds.width(), startBounds.height(), parentBounds.width(),
                 parentBounds.height());
         endSet.scaleCurrentDuration(mTransitionAnimationScaleSetting);

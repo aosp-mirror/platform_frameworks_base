@@ -109,7 +109,7 @@ object Flags {
         sysPropBooleanFlag(
             128,
             "persist.sysui.notification.builder_extras_override",
-            default = false
+            default = true
         )
 
     // 200 - keyguard/lockscreen
@@ -215,6 +215,12 @@ object Flags {
     @JvmField
     val LOCK_SCREEN_LONG_PRESS_DIRECT_TO_WPP =
         unreleasedFlag(232, "lock_screen_long_press_directly_opens_wallpaper_picker")
+
+    /** Whether page transition animations in the wallpaper picker are enabled */
+    // TODO(b/291710220): Tracking bug.
+    @JvmField
+    val WALLPAPER_PICKER_PAGE_TRANSITIONS =
+        unreleasedFlag(291710220, "wallpaper_picker_page_transitions")
 
     /** Whether to run the new udfps keyguard refactor code. */
     // TODO(b/279440316): Tracking bug.
@@ -698,7 +704,7 @@ object Flags {
     // TODO(b/283740863): Tracking Bug
     @JvmField
     val ENABLE_NEW_PRIVACY_DIALOG =
-        unreleasedFlag(283740863, "enable_new_privacy_dialog", teamfood = false)
+        unreleasedFlag(283740863, "enable_new_privacy_dialog", teamfood = true)
 
     // TODO(b/289573946): Tracking Bug
     @JvmField val PRECOMPUTED_TEXT = unreleasedFlag(289573946, "precomputed_text")

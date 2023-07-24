@@ -32,7 +32,9 @@ import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.TrafficStateCallback
 import android.net.wifi.WifiManager.UNKNOWN_SSID
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlots
@@ -57,6 +59,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
@@ -65,6 +68,8 @@ import org.mockito.MockitoAnnotations
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 class WifiRepositoryImplTest : SysuiTestCase() {
 
     private lateinit var underTest: WifiRepositoryImpl

@@ -250,6 +250,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // Updates the Split
             final TransactionRecord transactionRecord = mTransactionManager.startNewTransaction();
             final WindowContainerTransaction wct = transactionRecord.getTransaction();
+
+            mPresenter.setTaskFragmentIsolatedNavigation(wct,
+                    splitPinContainer.getSecondaryContainer().getTaskFragmentToken(),
+                    true /* isolatedNav */);
             mPresenter.updateSplitContainer(splitPinContainer, wct);
             transactionRecord.apply(false /* shouldApplyIndependently */);
             updateCallbackIfNecessary();
