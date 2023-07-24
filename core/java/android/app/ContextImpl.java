@@ -27,7 +27,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UiContext;
-import android.app.servertransaction.WindowTokenClientController;
 import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
@@ -97,6 +96,7 @@ import android.view.DisplayAdjustments;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.window.WindowContext;
 import android.window.WindowTokenClient;
+import android.window.WindowTokenClientController;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;

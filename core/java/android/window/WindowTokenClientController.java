@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app.servertransaction;
+package android.window;
 
 import static android.view.WindowManager.LayoutParams.WindowType;
 import static android.view.WindowManagerGlobal.getWindowManagerService;
@@ -23,6 +23,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
+import android.app.servertransaction.WindowContextConfigurationChangeItem;
+import android.app.servertransaction.WindowContextWindowRemovalItem;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -31,8 +33,6 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.IWindowManager;
-import android.window.WindowContext;
-import android.window.WindowTokenClient;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;

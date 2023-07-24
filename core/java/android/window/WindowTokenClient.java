@@ -25,7 +25,6 @@ import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.app.IWindowToken;
 import android.app.ResourcesManager;
-import android.app.servertransaction.WindowTokenClientController;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
