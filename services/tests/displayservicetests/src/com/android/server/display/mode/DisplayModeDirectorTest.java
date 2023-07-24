@@ -88,7 +88,6 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
-import com.android.server.LocalServices;
 import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.TestUtils;
 import com.android.server.display.mode.DisplayModeDirector.BrightnessObserver;
@@ -149,15 +148,9 @@ public class DisplayModeDirectorTest {
         mContext = spy(new ContextWrapper(ApplicationProvider.getApplicationContext()));
         final MockContentResolver resolver = mSettingsProviderRule.mockContentResolver(mContext);
         when(mContext.getContentResolver()).thenReturn(resolver);
-        mInjector = spy(new FakesInjector());
+        mInjector = spy(new FakesInjector(mDisplayManagerInternalMock, mStatusBarMock,
+                mSensorManagerInternalMock));
         mHandler = new Handler(Looper.getMainLooper());
-
-        LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
-        LocalServices.addService(StatusBarManagerInternal.class, mStatusBarMock);
-        LocalServices.removeServiceForTest(SensorManagerInternal.class);
-        LocalServices.addService(SensorManagerInternal.class, mSensorManagerInternalMock);
-        LocalServices.removeServiceForTest(DisplayManagerInternal.class);
-        LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
     }
 
     private DisplayModeDirector createDirectorFromRefreshRateArray(
@@ -2831,16 +2824,28 @@ public class DisplayModeDirectorTest {
         private final DisplayInfo mDisplayInfo;
         private final Display mDisplay;
         private boolean mDisplayInfoValid = true;
-        private ContentObserver mBrightnessObserver;
+        private final DisplayManagerInternal mDisplayManagerInternal;
+        private final StatusBarManagerInternal mStatusBarManagerInternal;
+        private final SensorManagerInternal mSensorManagerInternal;
+
         private ContentObserver mPeakRefreshRateObserver;
 
         FakesInjector() {
+            this(null, null, null);
+        }
+
+        FakesInjector(DisplayManagerInternal displayManagerInternal,
+                StatusBarManagerInternal statusBarManagerInternal,
+                SensorManagerInternal sensorManagerInternal) {
             mDeviceConfig = new FakeDeviceConfig();
             mDisplayInfo = new DisplayInfo();
             mDisplayInfo.defaultModeId = MODE_ID;
             mDisplayInfo.supportedModes = new Display.Mode[] {new Display.Mode(MODE_ID,
                     800, 600, /* refreshRate= */ 60)};
             mDisplay = createDisplay(DISPLAY_ID);
+            mDisplayManagerInternal = displayManagerInternal;
+            mStatusBarManagerInternal = statusBarManagerInternal;
+            mSensorManagerInternal = sensorManagerInternal;
         }
 
         @NonNull
@@ -2894,6 +2899,21 @@ public class DisplayModeDirectorTest {
         @Override
         public boolean supportsFrameRateOverride() {
             return true;
+        }
+
+        @Override
+        public DisplayManagerInternal getDisplayManagerInternal() {
+            return mDisplayManagerInternal;
+        }
+
+        @Override
+        public StatusBarManagerInternal getStatusBarManagerInternal() {
+            return mStatusBarManagerInternal;
+        }
+
+        @Override
+        public SensorManagerInternal getSensorManagerInternal() {
+            return mSensorManagerInternal;
         }
 
         protected Display createDisplay(int id) {
