@@ -33,6 +33,7 @@ import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -72,6 +73,9 @@ public class DreamControllerTest {
     @Mock
     private IDreamService mIDreamService;
 
+    @Mock
+    private Resources mResources;
+
     @Captor
     private ArgumentCaptor<ServiceConnection> mServiceConnectionACaptor;
     @Captor
@@ -105,6 +109,7 @@ public class DreamControllerTest {
                 .thenReturn(powerManager);
         when(mContext.getSystemServiceName(PowerManager.class))
                 .thenReturn(Context.POWER_SERVICE);
+        when(mContext.getResources()).thenReturn(mResources);
 
         mToken = new Binder();
         mDreamName = ComponentName.unflattenFromString("dream");
