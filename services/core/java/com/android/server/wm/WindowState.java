@@ -85,7 +85,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
@@ -954,17 +953,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mInputWindowHandle.trustedOverlay =
                 (mAttrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0
                 && mOwnerCanAddInternalSystemWindow;
-        mInputWindowHandle.trustedOverlay |=
-                mAttrs.type == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY
-                || mAttrs.type == TYPE_INPUT_METHOD || mAttrs.type == TYPE_INPUT_METHOD_DIALOG
-                || mAttrs.type == TYPE_MAGNIFICATION_OVERLAY || mAttrs.type == TYPE_STATUS_BAR
-                || mAttrs.type == TYPE_NOTIFICATION_SHADE
-                || mAttrs.type == TYPE_NAVIGATION_BAR
-                || mAttrs.type == TYPE_NAVIGATION_BAR_PANEL
-                || mAttrs.type == TYPE_SECURE_SYSTEM_OVERLAY
-                || mAttrs.type == TYPE_DOCK_DIVIDER
-                || mAttrs.type == TYPE_ACCESSIBILITY_OVERLAY
-                || mAttrs.type == TYPE_INPUT_CONSUMER;
+        mInputWindowHandle.trustedOverlay |= InputMonitor.isTrustedOverlay(mAttrs.type);
 
         // Make sure we initial all fields before adding to parentWindow, to prevent exception
         // during onDisplayChanged.
