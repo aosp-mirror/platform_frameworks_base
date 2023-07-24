@@ -653,4 +653,23 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertEquals(mDisplayContent.getImeContainer().getParent().getSurfaceControl(),
                 mDisplayContent.computeImeParent());
     }
+
+    @Test
+    public void testIsolatedNavigation() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tf0 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
+                .createActivityCount(1)
+                .setOrganizer(mOrganizer)
+                .setFragmentToken(new Binder())
+                .build();
+
+        // Cannot be isolated if not embedded.
+        task.setIsolatedNav(true);
+        assertFalse(task.isIsolatedNav());
+
+        // Ensure the TaskFragment is isolated once set.
+        tf0.setIsolatedNav(true);
+        assertTrue(tf0.isIsolatedNav());
+    }
 }
