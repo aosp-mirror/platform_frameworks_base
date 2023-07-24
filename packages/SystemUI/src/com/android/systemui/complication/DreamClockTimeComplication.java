@@ -16,12 +16,13 @@
 
 package com.android.systemui.complication;
 
-import static com.android.systemui.complication.dagger.DreamClockTimeComplicationModule.DREAM_CLOCK_TIME_COMPLICATION_VIEW;
+import static com.android.systemui.complication.dagger.DreamClockTimeComplicationComponent.DreamClockTimeComplicationModule.DREAM_CLOCK_TIME_COMPLICATION_VIEW;
 import static com.android.systemui.complication.dagger.RegisteredComplicationsModule.DREAM_CLOCK_TIME_COMPLICATION_LAYOUT_PARAMS;
 
 import android.view.View;
 
 import com.android.systemui.CoreStartable;
+import com.android.systemui.complication.dagger.DreamClockTimeComplicationComponent;
 import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.shared.condition.Monitor;
@@ -29,21 +30,20 @@ import com.android.systemui.util.condition.ConditionalCoreStartable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 
 /**
  * Clock Time Complication that produce Clock Time view holder.
  */
 public class DreamClockTimeComplication implements Complication {
-    private final Provider<DreamClockTimeViewHolder> mDreamClockTimeViewHolderProvider;
+    private final DreamClockTimeComplicationComponent.Factory mComponentFactory;
 
     /**
      * Default constructor for {@link DreamClockTimeComplication}.
      */
     @Inject
     public DreamClockTimeComplication(
-            Provider<DreamClockTimeViewHolder> dreamClockTimeViewHolderProvider) {
-        mDreamClockTimeViewHolderProvider = dreamClockTimeViewHolderProvider;
+            DreamClockTimeComplicationComponent.Factory componentFactory) {
+        mComponentFactory = componentFactory;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class DreamClockTimeComplication implements Complication {
      */
     @Override
     public ViewHolder createView(ComplicationViewModel model) {
-        return mDreamClockTimeViewHolderProvider.get();
+        return mComponentFactory.create().getViewHolder();
     }
 
     /**
