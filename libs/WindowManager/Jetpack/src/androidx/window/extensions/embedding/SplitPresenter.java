@@ -17,7 +17,6 @@
 package androidx.window.extensions.embedding;
 
 import static android.content.pm.PackageManager.MATCH_ALL;
-import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -40,7 +39,6 @@ import android.view.WindowInsets;
 import android.view.WindowMetrics;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
-import android.window.TaskFragmentOperation;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.IntDef;
@@ -427,10 +425,8 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final SplitPinContainer pinnedContainer =
                 container.getTaskContainer().getSplitPinContainer();
         if (pinnedContainer != null) {
-            final TaskFragmentOperation operation = new TaskFragmentOperation.Builder(
-                    OP_TYPE_REORDER_TO_FRONT).build();
-            wct.addTaskFragmentOperation(
-                    pinnedContainer.getSecondaryContainer().getTaskFragmentToken(), operation);
+            reorderTaskFragmentToFront(wct,
+                    pinnedContainer.getSecondaryContainer().getTaskFragmentToken());
         }
     }
 
