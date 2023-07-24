@@ -16,7 +16,9 @@
 
 package com.android.systemui.scene.ui.viewmodel
 
+import android.view.MotionEvent
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.RemoteUserInput
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +28,9 @@ class SceneContainerViewModel(
     private val interactor: SceneInteractor,
     val containerName: String,
 ) {
+    /** A flow of motion events originating from outside of the scene framework. */
+    val remoteUserInput: StateFlow<RemoteUserInput?> = interactor.remoteUserInput
+
     /**
      * Keys of all scenes in the container.
      *
@@ -48,5 +53,10 @@ class SceneContainerViewModel(
     /** Notifies of the progress of a scene transition. */
     fun setSceneTransitionProgress(progress: Float) {
         interactor.setSceneTransitionProgress(containerName, progress)
+    }
+
+    /** Handles a [MotionEvent] representing remote user input. */
+    fun onRemoteUserInput(event: MotionEvent) {
+        interactor.onRemoteUserInput(RemoteUserInput.translateMotionEvent(event))
     }
 }
