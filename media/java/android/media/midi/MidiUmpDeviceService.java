@@ -130,7 +130,7 @@ public abstract class MidiUmpDeviceService extends Service {
 
     /**
      * Returns the {@link MidiDeviceInfo} instance for this service
-     * @return the MidiDeviceInfo of the virtual MIDI device
+     * @return the MidiDeviceInfo of the virtual MIDI device if it was successfully created
      */
     public final @Nullable MidiDeviceInfo getDeviceInfo() {
         return mDeviceInfo;
@@ -140,7 +140,7 @@ public abstract class MidiUmpDeviceService extends Service {
      * Called to notify when the {@link MidiDeviceStatus} has changed
      * @param status the current status of the MIDI device
      */
-    public void onDeviceStatusChanged(@Nullable MidiDeviceStatus status) {
+    public void onDeviceStatusChanged(@NonNull MidiDeviceStatus status) {
     }
 
     /**
