@@ -187,6 +187,9 @@ object CustomizationProviderContract {
         /** Flag denoting transit clock are enabled in wallpaper picker. */
         const val FLAG_NAME_TRANSIT_CLOCK = "lockscreen_custom_transit_clock"
 
+        /** Flag denoting transit clock are enabled in wallpaper picker. */
+        const val FLAG_NAME_PAGE_TRANSITIONS = "wallpaper_picker_page_transitions"
+
         object Columns {
             /** String. Unique ID for the flag. */
             const val NAME = "name"
