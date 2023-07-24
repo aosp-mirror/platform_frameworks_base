@@ -877,12 +877,13 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     }
 
     public IRecognitionStatusCallback createSoundTriggerCallbackLocked(
-            IHotwordRecognitionStatusCallback callback) {
+            Context context, IHotwordRecognitionStatusCallback callback,
+            Identity voiceInteractorIdentity) {
         if (DEBUG) {
             Slog.d(TAG, "createSoundTriggerCallbackLocked");
         }
-        return new HotwordDetectionConnection.SoundTriggerCallback(callback,
-                mHotwordDetectionConnection, mInfo.getServiceInfo().applicationInfo.uid);
+        return new HotwordDetectionConnection.SoundTriggerCallback(context, callback,
+                mHotwordDetectionConnection, voiceInteractorIdentity);
     }
 
     private static ServiceInfo getServiceInfoLocked(@NonNull ComponentName componentName,
