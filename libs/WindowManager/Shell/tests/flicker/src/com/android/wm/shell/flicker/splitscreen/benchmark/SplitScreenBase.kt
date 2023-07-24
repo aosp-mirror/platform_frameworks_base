@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.splitscreen
+package com.android.wm.shell.flicker.splitscreen.benchmark
 
 import android.content.Context
 import android.tools.device.flicker.legacy.FlickerBuilder
