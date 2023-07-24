@@ -936,6 +936,12 @@ public final class Call {
             return mState;
         }
 
+        /**
+         * @return the Telecom identifier associated with this {@link Call} . This is not a stable
+         * identifier and is not guaranteed to be unique across device reboots.
+         */
+        public @NonNull String getId() { return mTelecomCallId; }
+
         /** {@hide} */
         @TestApi
         public String getTelecomCallId() {

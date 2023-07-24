@@ -56,7 +56,6 @@ public final class StreamingCall implements Parcelable {
 
     /**
      * The ID associated with this call.  This is the same value as {@link CallControl#getCallId()}.
-     * @hide
      */
     public static final String EXTRA_CALL_ID = "android.telecom.extra.CALL_ID";
 
