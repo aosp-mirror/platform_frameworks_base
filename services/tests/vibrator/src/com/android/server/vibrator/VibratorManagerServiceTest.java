@@ -509,7 +509,7 @@ public class VibratorManagerServiceTest {
         verify(listeners[0]).onVibrating(eq(true));
         verify(listeners[1]).onVibrating(eq(true));
         verify(listeners[2], never()).onVibrating(eq(true));
-        cancelVibrate(service);
+        cancelVibrate(service); // Clean up long-ish effect.
     }
 
     @Test
@@ -1333,6 +1333,8 @@ public class VibratorManagerServiceTest {
         // Alarm vibration will be scaled with SCALE_NONE.
         assertEquals(1f,
                 ((PrimitiveSegment) fakeVibrator.getAllEffectSegments().get(2)).getScale(), 1e-5);
+
+        cancelVibrate(service); // Clean up long-ish effect.
     }
 
     @Test
@@ -1368,7 +1370,7 @@ public class VibratorManagerServiceTest {
 
         // Vibration is not stopped nearly after updating service.
         assertFalse(waitUntil(s -> !s.isVibrating(1), service, 50));
-        cancelVibrate(service);
+        cancelVibrate(service); // Clean up long effect.
     }
 
     @Test
