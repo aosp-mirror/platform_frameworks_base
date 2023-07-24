@@ -722,10 +722,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return bounds.width() > bounds.height();
     }
 
-    public boolean isDensityChanged(int densityDpi) {
-        return mDensity != densityDpi;
-    }
-
     /**
      * Return if this layout is landscape.
      */
