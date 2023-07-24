@@ -71,7 +71,7 @@ open class OpenAppFromLockscreenViaIntentTest(flicker: LegacyFlickerTest) :
      * Checks that the [ComponentNameMatcher.NAV_BAR] layer starts invisible, becomes visible during
      * unlocking animation and remains visible at the end
      */
-    @Presubmit
+    @FlakyTest(bugId = 288341660)
     @Test
     fun navBarLayerVisibilityChanges() {
         Assume.assumeFalse(flicker.scenario.isTablet)
