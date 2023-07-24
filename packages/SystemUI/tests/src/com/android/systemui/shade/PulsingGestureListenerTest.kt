@@ -29,6 +29,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
@@ -73,6 +74,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
     @Mock
     private lateinit var userTracker: UserTracker
     @Mock
+    private lateinit var dozeInteractor: DozeInteractor
+    @Mock
     private lateinit var screenOffAnimationController: ScreenOffAnimationController
 
     private lateinit var powerRepository: FakePowerRepository
@@ -98,6 +101,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
                 ambientDisplayConfiguration,
                 statusBarStateController,
                 shadeLogger,
+                dozeInteractor,
                 userTracker,
                 tunerService,
                 dumpManager
