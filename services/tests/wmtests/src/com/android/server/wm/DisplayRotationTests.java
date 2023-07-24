@@ -1148,6 +1148,15 @@ public class DisplayRotationTests {
                 + " fixed to user rotation.", mTarget.isFixedToUserRotation());
     }
 
+    @Test
+    public void testIsFixedToUserRotation_displayContentOrientationFixed() throws Exception {
+        mBuilder.build();
+        when(mMockDisplayContent.isDisplayOrientationFixed()).thenReturn(true);
+
+        assertFalse("Display rotation should respect app requested orientation if"
+                + " the display has fixed orientation.", mTarget.isFixedToUserRotation());
+    }
+
     private void moveTimeForward(long timeMillis) {
         sCurrentUptimeMillis += timeMillis;
         sClock.fastForward(timeMillis);
