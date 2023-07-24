@@ -36,6 +36,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityThread;
+import android.app.IApplicationThread;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -91,10 +92,12 @@ public class InputMethodDialogWindowContextTest extends WindowTestsBase {
         spyOn(mIWindowManager);
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
+            IApplicationThread appThread = (IApplicationThread) args[0];
             IBinder clientToken = (IBinder) args[1];
             int displayId = (int) args[3];
             DisplayContent dc = mWm.mRoot.getDisplayContent(displayId);
-            mWm.mWindowContextListenerController.registerWindowContainerListener(clientToken,
+            final WindowProcessController wpc = mAtm.getProcessController(appThread);
+            mWm.mWindowContextListenerController.registerWindowContainerListener(wpc, clientToken,
                     dc.getImeContainer(), 1000 /* ownerUid */, TYPE_INPUT_METHOD_DIALOG,
                     null /* options */);
             return dc.getImeContainer().getConfiguration();

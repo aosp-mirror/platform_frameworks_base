@@ -69,22 +69,24 @@ class WindowContextListenerController {
     final ArrayMap<IBinder, WindowContextListenerImpl> mListeners = new ArrayMap<>();
 
     /**
-     * @see #registerWindowContainerListener(IBinder, WindowContainer, int, int, Bundle, boolean)
+     * @see #registerWindowContainerListener(WindowProcessController, IBinder, WindowContainer, int,
+     * int, Bundle, boolean)
      */
-    void registerWindowContainerListener(@NonNull IBinder clientToken,
-            @NonNull WindowContainer<?> container, int ownerUid, @WindowType int type,
-            @Nullable Bundle options) {
-        registerWindowContainerListener(clientToken, container, ownerUid, type, options,
+    void registerWindowContainerListener(@NonNull WindowProcessController wpc,
+            @NonNull IBinder clientToken, @NonNull WindowContainer<?> container, int ownerUid,
+            @WindowType int type, @Nullable Bundle options) {
+        registerWindowContainerListener(wpc, clientToken, container, ownerUid, type, options,
                 true /* shouDispatchConfigWhenRegistering */);
     }
 
     /**
      * Registers the listener to a {@code container} which is associated with
-     * a {@code clientToken}, which is a {@link android.window.WindowContext} representation. If the
+     * a {@code clientToken}, which is a {@link WindowContext} representation. If the
      * listener associated with {@code clientToken} hasn't been initialized yet, create one
      * {@link WindowContextListenerImpl}. Otherwise, the listener associated with
      * {@code clientToken} switches to listen to the {@code container}.
      *
+     * @param wpc the process that we should send the window configuration change to
      * @param clientToken the token to associate with the listener
      * @param container the {@link WindowContainer} which the listener is going to listen to.
      * @param ownerUid the caller UID
@@ -94,17 +96,30 @@ class WindowContextListenerController {
      *                {@code container}'s config will dispatch to the client side when
      *                registering the {@link WindowContextListenerImpl}
      */
-    void registerWindowContainerListener(@NonNull IBinder clientToken,
-            @NonNull WindowContainer<?> container, int ownerUid, @WindowType int type,
-            @Nullable Bundle options, boolean shouDispatchConfigWhenRegistering) {
+    void registerWindowContainerListener(@NonNull WindowProcessController wpc,
+            @NonNull IBinder clientToken, @NonNull WindowContainer<?> container, int ownerUid,
+            @WindowType int type, @Nullable Bundle options,
+            boolean shouDispatchConfigWhenRegistering) {
         WindowContextListenerImpl listener = mListeners.get(clientToken);
         if (listener == null) {
-            listener = new WindowContextListenerImpl(clientToken, container, ownerUid, type,
+            listener = new WindowContextListenerImpl(wpc, clientToken, container, ownerUid, type,
                     options);
             listener.register(shouDispatchConfigWhenRegistering);
         } else {
-            listener.updateContainer(container);
+            updateContainerForWindowContextListener(clientToken, container);
         }
+    }
+
+    /**
+     * Updates the {@link WindowContainer} that an existing {@link WindowContext} is listening to.
+     */
+    void updateContainerForWindowContextListener(@NonNull IBinder clientToken,
+            @NonNull WindowContainer<?> container) {
+        final WindowContextListenerImpl listener = mListeners.get(clientToken);
+        if (listener == null) {
+            throw new IllegalArgumentException("Can't find listener for " + clientToken);
+        }
+        listener.updateContainer(container);
     }
 
     void unregisterWindowContainerListener(IBinder clientToken) {
@@ -189,9 +204,13 @@ class WindowContextListenerController {
 
     @VisibleForTesting
     class WindowContextListenerImpl implements WindowContainerListener {
-        @NonNull private final IWindowToken mClientToken;
+        @NonNull
+        private final WindowProcessController mWpc;
+        @NonNull
+        private final IWindowToken mClientToken;
         private final int mOwnerUid;
-        @NonNull private WindowContainer<?> mContainer;
+        @NonNull
+        private WindowContainer<?> mContainer;
         /**
          * The options from {@link Context#createWindowContext(int, Bundle)}.
          * <p>It can be used for choosing the {@link DisplayArea} where the window context
@@ -207,8 +226,10 @@ class WindowContextListenerController {
 
         private boolean mHasPendingConfiguration;
 
-        private WindowContextListenerImpl(IBinder clientToken, WindowContainer<?> container,
+        private WindowContextListenerImpl(@NonNull WindowProcessController wpc,
+                @NonNull IBinder clientToken, @NonNull WindowContainer<?> container,
                 int ownerUid, @WindowType int type, @Nullable Bundle options) {
+            mWpc = Objects.requireNonNull(wpc);
             mClientToken = IWindowToken.Stub.asInterface(clientToken);
             mContainer = Objects.requireNonNull(container);
             mOwnerUid = ownerUid;
@@ -308,6 +329,7 @@ class WindowContextListenerController {
             mLastReportedDisplay = displayId;
 
             try {
+                // TODO(b/290876897): migrate to dispatch through wpc
                 mClientToken.onConfigurationChanged(config, displayId);
             } catch (RemoteException e) {
                 ProtoLog.w(WM_ERROR, "Could not report config changes to the window token client.");
@@ -337,6 +359,7 @@ class WindowContextListenerController {
             }
             mDeathRecipient.unlinkToDeath();
             try {
+                // TODO(b/290876897): migrate to dispatch through wpc
                 mClientToken.onWindowTokenRemoved();
             } catch (RemoteException e) {
                 ProtoLog.w(WM_ERROR, "Could not report token removal to the window token client.");

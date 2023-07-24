@@ -43,6 +43,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import android.app.ActivityManagerInternal;
+import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.app.usage.UsageStatsManagerInternal;
@@ -321,6 +322,10 @@ public class SystemServicesTestRule implements TestRule {
                 mock(ActivityManagerService.class, withSettings().stubOnly());
         mAtmService = new TestActivityTaskManagerService(mContext, amService);
         LocalServices.addService(ActivityTaskManagerInternal.class, mAtmService.getAtmInternal());
+        // Create a fake WindowProcessController for the system process.
+        final WindowProcessController wpc =
+                addProcess("android", "system", 1485 /* pid */, 1000 /* uid */);
+        wpc.setThread(ActivityThread.currentActivityThread().getApplicationThread());
     }
 
     private void setUpWindowManagerService() {
