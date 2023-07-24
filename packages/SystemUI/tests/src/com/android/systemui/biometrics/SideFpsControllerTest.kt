@@ -840,6 +840,27 @@ class SideFpsControllerTest : SysuiTestCase() {
 
             assertThat((lpFlags and PRIVATE_FLAG_TRUSTED_OVERLAY) != 0).isTrue()
         }
+
+    @Test
+    fun primaryBouncerRequestAnimatesAlphaIn() = testWithDisplay {
+        sideFpsController.show(SideFpsUiRequestSource.PRIMARY_BOUNCER, REASON_AUTH_KEYGUARD)
+        executor.runAllReady()
+        verify(sideFpsView).animate()
+    }
+
+    @Test
+    fun alternateBouncerRequestsDoesNotAnimateAlphaIn() = testWithDisplay {
+        sideFpsController.show(SideFpsUiRequestSource.ALTERNATE_BOUNCER, REASON_AUTH_KEYGUARD)
+        executor.runAllReady()
+        verify(sideFpsView, never()).animate()
+    }
+
+    @Test
+    fun autoShowRequestsDoesNotAnimateAlphaIn() = testWithDisplay {
+        sideFpsController.show(SideFpsUiRequestSource.AUTO_SHOW, REASON_AUTH_KEYGUARD)
+        executor.runAllReady()
+        verify(sideFpsView, never()).animate()
+    }
 }
 
 private fun insetsForSmallNavbar() = insetsWithBottom(60)
