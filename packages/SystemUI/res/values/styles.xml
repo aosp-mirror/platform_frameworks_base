@@ -1439,4 +1439,22 @@
         <item name="android:windowEnterAnimation">@anim/long_press_lock_screen_popup_enter</item>
         <item name="android:windowExitAnimation">@anim/long_press_lock_screen_popup_exit</item>
     </style>
+
+    <style name="TextAppearance.PrivacyDialog.Item.Title"
+           parent="@android:style/TextAppearance.DeviceDefault.Medium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+    </style>
+
+    <style name="TextAppearance.PrivacyDialog.Item.Summary"
+           parent="@android:style/TextAppearance.DeviceDefault.Small">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
+    </style>
+
+    <style name="Theme.PrivacyDialog" parent="@style/Theme.SystemUI.Dialog">
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainer</item>
+    </style>
 </resources>
