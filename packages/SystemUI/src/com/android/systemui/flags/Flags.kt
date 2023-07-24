@@ -636,7 +636,13 @@ object Flags {
     val CLIPBOARD_SHARED_TRANSITIONS =
             unreleasedFlag("clipboard_shared_transitions", teamfood = true)
 
+    /**
+     * Whether the scene container (Flexiglass) is enabled. Note that [SCENE_CONTAINER] should be
+     * checked and toggled together with [SCENE_CONTAINER_ENABLED] so that ProGuard can remove
+     * unused code from our APK at compile time.
+     */
     // TODO(b/283300105): Tracking Bug
+    @JvmField val SCENE_CONTAINER_ENABLED = false
     @JvmField val SCENE_CONTAINER = unreleasedFlag("scene_container")
 
     // 1900
