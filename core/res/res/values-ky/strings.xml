@@ -2166,7 +2166,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Иштетүү"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Жумуш колдонмолору жок"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Жеке колдонмолор жок"</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"Жумуш үчүн <xliff:g id="APP">%s</xliff:g> колдонмосун ачасызбы?"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"<xliff:g id="APP">%s</xliff:g> жумуш колдонмосун ачасызбы?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Жеке <xliff:g id="APP">%s</xliff:g> колдонмосунда ачасызбы?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Жумуш <xliff:g id="APP">%s</xliff:g> колдонмосунда ачасызбы?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"Жумуш колдонмосунан чаласызбы?"</string>
