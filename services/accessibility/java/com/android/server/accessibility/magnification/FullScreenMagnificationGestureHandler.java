@@ -204,7 +204,9 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         mViewportDraggingState = new ViewportDraggingState();
         mPanningScalingState = new PanningScalingState(context);
         mSinglePanningState = new SinglePanningState(context);
-        setSinglePanningEnabled(false);
+        setSinglePanningEnabled(
+                context.getResources()
+                        .getBoolean(R.bool.config_enable_a11y_magnification_single_panning));
 
         if (mDetectShortcutTrigger) {
             mScreenStateReceiver = new ScreenStateReceiver(context, this);
