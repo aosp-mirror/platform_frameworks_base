@@ -220,6 +220,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -312,6 +313,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private CentralSurfacesCommandQueueCallbacks mCommandQueueCallbacks;
     private float mTransitionToFullShadeProgress = 0f;
     private final NotificationListContainer mNotifListContainer;
+    private final NotificationExpansionRepository mNotificationExpansionRepository;
     private boolean mIsShortcutListSearchEnabled;
 
     private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
@@ -725,6 +727,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             NotificationShelfController notificationShelfController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             NotificationPresenter notificationPresenter,
+            NotificationExpansionRepository notificationExpansionRepository,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
@@ -832,6 +835,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStackScroller = mStackScrollerController.getView();
         mNotifListContainer = mStackScrollerController.getNotificationListContainer();
         mPresenter = notificationPresenter;
+        mNotificationExpansionRepository = notificationExpansionRepository;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;
@@ -1546,7 +1550,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mActivityLaunchAnimator.setCallback(mActivityLaunchAnimatorCallback);
         mActivityLaunchAnimator.addListener(mActivityLaunchAnimatorListener);
         mNotificationAnimationProvider = new NotificationLaunchAnimatorControllerProvider(
-                getNotificationShadeWindowViewController(),
+                mNotificationExpansionRepository,
                 mNotifListContainer,
                 mHeadsUpManager,
                 mJankMonitor);

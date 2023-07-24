@@ -72,7 +72,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.data.repository.FakePowerRepository;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationClickNotifier;
@@ -85,6 +84,7 @@ import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorCon
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
@@ -220,8 +220,8 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         HeadsUpManagerPhone headsUpManager = mock(HeadsUpManagerPhone.class);
         NotificationLaunchAnimatorControllerProvider notificationAnimationProvider =
                 new NotificationLaunchAnimatorControllerProvider(
-                        mock(NotificationShadeWindowViewController.class), mock(
-                        NotificationListContainer.class),
+                        new NotificationExpansionRepository(),
+                        mock(NotificationListContainer.class),
                         headsUpManager,
                         mJankMonitor);
         mNotificationActivityStarter =
