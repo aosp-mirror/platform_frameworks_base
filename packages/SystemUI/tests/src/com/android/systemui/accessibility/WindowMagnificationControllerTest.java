@@ -66,6 +66,7 @@ import android.graphics.RegionIterator;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
@@ -221,6 +222,14 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         mInstrumentation.runOnMainSync(
                 () -> mWindowMagnificationController.deleteWindowMagnification());
         mValueAnimator.cancel();
+    }
+
+    @Test
+    public void initWindowMagnificationController_checkAllowDiagonalScrollingWithSecureSettings() {
+        verify(mSecureSettings).getIntForUser(
+                eq(Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING),
+                /* def */ eq(1), /* userHandle= */ anyInt());
+        assertTrue(mWindowMagnificationController.isDiagonalScrollingEnabled());
     }
 
     @Test

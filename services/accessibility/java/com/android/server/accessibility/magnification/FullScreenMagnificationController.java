@@ -142,6 +142,8 @@ public class FullScreenMagnificationController implements
         private int mIdOfLastServiceToMagnify = INVALID_SERVICE_ID;
         private boolean mMagnificationActivated = false;
 
+        private boolean mZoomedOutFromService = false;
+
         @GuardedBy("mLock") @Nullable private MagnificationThumbnail mMagnificationThumbnail;
 
         DisplayMagnification(int displayId) {
@@ -545,6 +547,24 @@ public class FullScreenMagnificationController implements
             return changed;
         }
 
+        /**
+         * Directly Zooms out the scale to 1f with animating the transition. This method is
+         * triggered only by service automatically, such as when user context changed.
+         */
+        void zoomOutFromService() {
+            setScaleAndCenter(1.0f, Float.NaN, Float.NaN,
+                    transformToStubCallback(true),
+                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+            mZoomedOutFromService = true;
+        }
+
+        /**
+         * Whether the zooming out is triggered by {@link #zoomOutFromService}.
+         */
+        boolean isZoomedOutFromService() {
+            return mZoomedOutFromService;
+        }
+
         @GuardedBy("mLock")
         boolean reset(boolean animate) {
             return reset(transformToStubCallback(animate));
@@ -619,6 +639,8 @@ public class FullScreenMagnificationController implements
                             mIdOfLastServiceToMagnify);
                 });
             }
+            // the zoom scale would be changed so we reset the flag
+            mZoomedOutFromService = false;
             return changed;
         }
 
@@ -944,9 +966,7 @@ public class FullScreenMagnificationController implements
             }
 
             if (isAlwaysOnMagnificationEnabled()) {
-                setScaleAndCenter(displayId, 1.0f, Float.NaN, Float.NaN,
-                        true,
-                        AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+                zoomOutFromService(displayId);
             } else {
                 reset(displayId, true);
             }
@@ -1425,6 +1445,37 @@ public class FullScreenMagnificationController implements
         return MathUtils.constrain(mScaleProvider.getScale(displayId),
                 MagnificationConstants.PERSISTED_SCALE_MIN_VALUE,
                 MagnificationScaleProvider.MAX_SCALE);
+    }
+
+    /**
+     * Directly Zooms out the scale to 1f with animating the transition. This method is
+     * triggered only by service automatically, such as when user context changed.
+     *
+     * @param displayId The logical display id.
+     */
+    private void zoomOutFromService(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null || !display.isActivated()) {
+                return;
+            }
+            display.zoomOutFromService();
+        }
+    }
+
+    /**
+     * Whether the magnification is zoomed out by {@link #zoomOutFromService(int)}.
+     *
+     * @param displayId The logical display id.
+     */
+    public boolean isZoomedOutFromService(int displayId) {
+        synchronized (mLock) {
+            final DisplayMagnification display = mDisplays.get(displayId);
+            if (display == null || !display.isActivated()) {
+                return false;
+            }
+            return display.isZoomedOutFromService();
+        }
     }
 
     /**

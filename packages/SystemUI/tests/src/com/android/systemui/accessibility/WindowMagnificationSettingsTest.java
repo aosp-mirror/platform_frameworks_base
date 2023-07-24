@@ -26,10 +26,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -109,6 +111,11 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
         mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
 
+        when(mSecureSettings.getIntForUser(anyString(), anyInt(), anyInt())).then(
+                returnsSecondArg());
+        when(mSecureSettings.getFloatForUser(anyString(), anyFloat(), anyInt())).then(
+                returnsSecondArg());
+
         mWindowMagnificationSettings = new WindowMagnificationSettings(mContext,
                 mWindowMagnificationSettingsCallback, mSfVsyncFrameProvider,
                 mSecureSettings);
@@ -125,6 +132,14 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
     public void tearDown() {
         mMotionEventHelper.recycleEvents();
         mWindowMagnificationSettings.hideSettingPanel();
+    }
+
+    @Test
+    public void initSettingPanel_checkAllowDiagonalScrollingWithSecureSettings() {
+        verify(mSecureSettings).getIntForUser(
+                eq(Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING),
+                /* def */ eq(1), /* userHandle= */ anyInt());
+        assertThat(mWindowMagnificationSettings.isDiagonalScrollingEnabled()).isTrue();
     }
 
     @Test
@@ -273,7 +288,12 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         // Perform click
         diagonalScrollingSwitch.performClick();
 
-        verify(mWindowMagnificationSettingsCallback).onSetDiagonalScrolling(!currentCheckedState);
+        final boolean isAllowed = !currentCheckedState;
+        verify(mSecureSettings).putIntForUser(
+                eq(Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING),
+                /* value= */ eq(isAllowed ? 1 : 0),
+                /* userHandle= */ anyInt());
+        verify(mWindowMagnificationSettingsCallback).onSetDiagonalScrolling(isAllowed);
     }
 
     @Test
