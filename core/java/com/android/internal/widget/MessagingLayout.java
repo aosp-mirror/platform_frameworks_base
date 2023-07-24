@@ -156,7 +156,11 @@ public class MessagingLayout extends FrameLayout
         mConversationTitle = conversationTitle;
     }
 
-    @RemotableViewMethod
+    /**
+     * Set Messaging data
+     * @param extras Bundle contains messaging data
+     */
+    @RemotableViewMethod(asyncImpl = "setDataAsync")
     public void setData(Bundle extras) {
         Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
         List<Notification.MessagingStyle.Message> newMessages
@@ -171,6 +175,18 @@ public class MessagingLayout extends FrameLayout
         boolean showSpinner =
                 extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
         bind(newMessages, newHistoricMessages, showSpinner);
+    }
+
+    /**
+     * RemotableViewMethod's asyncImpl of {@link #setData(Bundle)}.
+     * This should be called on a background thread, and returns a Runnable which is then must be
+     * called on the main thread to complete the operation and set text.
+     * @param extras Bundle contains messaging data
+     * @hide
+     */
+    @NonNull
+    public Runnable setDataAsync(Bundle extras) {
+        return () -> setData(extras);
     }
 
     @Override
