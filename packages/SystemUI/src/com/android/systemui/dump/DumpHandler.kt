@@ -382,13 +382,6 @@ constructor(
         const val DUMPSYS_DUMPABLE_DIVIDER =
             "----------------------------------------------------------------------------"
 
-        /**
-         * Important: do not change this divider without updating any bug report processing tools
-         * (e.g. ABT), since this divider is used to determine boundaries for bug report views
-         */
-        const val DUMPSYS_BUFFER_DIVIDER =
-            "============================================================================"
-
         private fun findBestTargetMatch(c: Collection<DumpsysEntry>, target: String) =
             c.asSequence().filter { it.name.endsWith(target) }.minByOrNull { it.name.length }
 
@@ -409,14 +402,14 @@ constructor(
                 is DumpableEntry,
                 is TableLogBufferEntry -> {
                     println()
-                    println(entry.name)
+                    println("${entry.name}:")
                     println(DUMPSYS_DUMPABLE_DIVIDER)
                 }
                 is LogBufferEntry -> {
                     println()
                     println()
                     println("BUFFER ${entry.name}:")
-                    println(DUMPSYS_BUFFER_DIVIDER)
+                    println(DUMPSYS_DUMPABLE_DIVIDER)
                 }
             }
 
