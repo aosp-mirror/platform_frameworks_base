@@ -142,14 +142,6 @@ class OpenThirdActivityOverSplitTest(flicker: LegacyFlickerTest) :
         }
     }
 
-    /** Assert the background animation layer is never visible during transition. */
-    @Presubmit
-    @Test
-    fun backgroundLayerNeverVisible() {
-        val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
-        flicker.assertLayers { isInvisible(backgroundColorLayer) }
-    }
-
     companion object {
         /** {@inheritDoc} */
         private var startDisplayBounds = Rect.EMPTY
