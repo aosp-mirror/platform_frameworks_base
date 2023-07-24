@@ -119,7 +119,7 @@ public class DisplayBrightnessStrategySelector {
         if (!mOldBrightnessStrategyName.equals(displayBrightnessStrategy.getName())) {
             Slog.i(TAG,
                     "Changing the DisplayBrightnessStrategy from " + mOldBrightnessStrategyName
-                            + " to" + displayBrightnessStrategy.getName() + " for display "
+                            + " to " + displayBrightnessStrategy.getName() + " for display "
                             + mDisplayId);
             mOldBrightnessStrategyName = displayBrightnessStrategy.getName();
         }
