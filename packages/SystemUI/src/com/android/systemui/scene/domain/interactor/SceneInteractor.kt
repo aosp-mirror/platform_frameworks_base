@@ -18,11 +18,14 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.data.repository.SceneContainerRepository
+import com.android.systemui.scene.shared.model.RemoteUserInput
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.SceneTransitionModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Generic business logic and app state accessors for the scene framework.
@@ -91,5 +94,15 @@ constructor(
      */
     fun sceneTransitions(containerName: String): StateFlow<SceneTransitionModel?> {
         return repository.sceneTransitions(containerName)
+    }
+
+    private val _remoteUserInput: MutableStateFlow<RemoteUserInput?> = MutableStateFlow(null)
+
+    /** A flow of motion events originating from outside of the scene framework. */
+    val remoteUserInput: StateFlow<RemoteUserInput?> = _remoteUserInput.asStateFlow()
+
+    /** Handles a remote user input. */
+    fun onRemoteUserInput(input: RemoteUserInput) {
+        _remoteUserInput.value = input
     }
 }

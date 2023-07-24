@@ -92,6 +92,14 @@ private fun Scene(
     onSceneChanged: (SceneModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val destinationScenes: Map<UserAction, SceneModel> by
+        scene.destinationScenes(containerName).collectAsState()
+    val swipeLeftDestinationScene = destinationScenes[UserAction.Swipe(Direction.LEFT)]
+    val swipeUpDestinationScene = destinationScenes[UserAction.Swipe(Direction.UP)]
+    val swipeRightDestinationScene = destinationScenes[UserAction.Swipe(Direction.RIGHT)]
+    val swipeDownDestinationScene = destinationScenes[UserAction.Swipe(Direction.DOWN)]
+    val backDestinationScene = destinationScenes[UserAction.Back]
+
     // TODO(b/280880714): replace with the real UI and make sure to call onTransitionProgress.
     Box(modifier) {
         Column(
@@ -102,14 +110,6 @@ private fun Scene(
                 containerName = containerName,
                 modifier = Modifier,
             )
-
-            val destinationScenes: Map<UserAction, SceneModel> by
-                scene.destinationScenes(containerName).collectAsState()
-            val swipeLeftDestinationScene = destinationScenes[UserAction.Swipe(Direction.LEFT)]
-            val swipeUpDestinationScene = destinationScenes[UserAction.Swipe(Direction.UP)]
-            val swipeRightDestinationScene = destinationScenes[UserAction.Swipe(Direction.RIGHT)]
-            val swipeDownDestinationScene = destinationScenes[UserAction.Swipe(Direction.DOWN)]
-            val backDestinationScene = destinationScenes[UserAction.Back]
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
