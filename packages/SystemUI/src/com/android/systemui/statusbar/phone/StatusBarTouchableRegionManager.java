@@ -34,15 +34,21 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.ScreenDecorations;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.model.SceneContainerNames;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Manages what parts of the status bar are touchable. Clients are primarily UI that display in the
@@ -78,6 +84,9 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             ConfigurationController configurationController,
             HeadsUpManagerPhone headsUpManager,
             ShadeExpansionStateManager shadeExpansionStateManager,
+            Provider<SceneInteractor> sceneInteractor,
+            Provider<JavaAdapter> javaAdapter,
+            FeatureFlags featureFlags,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController
     ) {
         mContext = context;
@@ -114,6 +123,12 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
         shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
+
+        if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+            javaAdapter.get().alwaysCollectFlow(
+                    sceneInteractor.get().isVisible(SceneContainerNames.SYSTEM_UI_DEFAULT),
+                    this::onShadeExpansionFullyChanged);
+        }
 
         mOnComputeInternalInsetsListener = this::onComputeInternalInsets;
     }
