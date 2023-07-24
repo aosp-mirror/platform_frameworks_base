@@ -67,7 +67,10 @@ open class OpenAppFromNotificationWarmTest(flicker: LegacyFlickerTest) :
                 wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
                 testApp.postNotification(wmHelper)
                 device.pressHome()
-                wmHelper.StateSyncBuilder().withHomeActivityVisible().waitForAndVerify()
+                wmHelper.StateSyncBuilder()
+                    .withHomeActivityVisible()
+                    .withWindowSurfaceDisappeared(ComponentNameMatcher.NOTIFICATION_SHADE)
+                    .waitForAndVerify()
             }
 
             transitions {
