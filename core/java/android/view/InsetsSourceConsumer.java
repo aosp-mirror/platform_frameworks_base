@@ -149,9 +149,12 @@ public class InsetsSourceConsumer {
             // Check if we need to restore server visibility.
             final InsetsSource localSource = mState.peekSource(mId);
             final InsetsSource serverSource = mController.getLastDispatchedState().peekSource(mId);
-            if (localSource != null && serverSource != null
-                    && localSource.isVisible() != serverSource.isVisible()) {
-                localSource.setVisible(serverSource.isVisible());
+            final boolean localVisible = localSource != null && localSource.isVisible();
+            final boolean serverVisible = serverSource != null && serverSource.isVisible();
+            if (localSource != null) {
+                localSource.setVisible(serverVisible);
+            }
+            if (localVisible != serverVisible) {
                 mController.notifyVisibilityChanged();
             }
         } else {
