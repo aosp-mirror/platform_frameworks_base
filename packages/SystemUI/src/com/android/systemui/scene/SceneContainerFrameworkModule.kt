@@ -16,7 +16,6 @@
 
 package com.android.systemui.scene
 
-import com.android.systemui.scene.domain.startable.SceneContainerStartableModule
 import com.android.systemui.scene.shared.model.SceneContainerConfigModule
 import com.android.systemui.scene.ui.composable.SceneModule
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModelModule
@@ -26,7 +25,6 @@ import dagger.Module
     includes =
         [
             SceneContainerConfigModule::class,
-            SceneContainerStartableModule::class,
             SceneContainerViewModelModule::class,
             SceneModule::class,
         ],
