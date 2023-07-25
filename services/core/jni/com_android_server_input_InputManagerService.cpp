@@ -108,6 +108,7 @@ static struct {
     jmethodID notifySensorEvent;
     jmethodID notifySensorAccuracy;
     jmethodID notifyStylusGestureStarted;
+    jmethodID isInputMethodConnectionActive;
     jmethodID notifyVibratorState;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
@@ -321,6 +322,7 @@ public:
 
     TouchAffineTransformation getTouchAffineTransformation(JNIEnv* env, jfloatArray matrixArr);
     void notifyStylusGestureStarted(int32_t deviceId, nsecs_t eventTime) override;
+    bool isInputMethodConnectionActive() override;
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -1305,6 +1307,14 @@ void NativeInputManager::notifyStylusGestureStarted(int32_t deviceId, nsecs_t ev
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyStylusGestureStarted, deviceId,
                         eventTime);
     checkAndClearExceptionFromCallback(env, "notifyStylusGestureStarted");
+}
+
+bool NativeInputManager::isInputMethodConnectionActive() {
+    JNIEnv* env = jniEnv();
+    const jboolean result =
+            env->CallBooleanMethod(mServiceObj, gServiceClassInfo.isInputMethodConnectionActive);
+    checkAndClearExceptionFromCallback(env, "isInputMethodConnectionActive");
+    return result;
 }
 
 bool NativeInputManager::filterInputEvent(const InputEvent& inputEvent, uint32_t policyFlags) {
@@ -2748,6 +2758,9 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyStylusGestureStarted, clazz, "notifyStylusGestureStarted",
                   "(IJ)V");
+
+    GET_METHOD_ID(gServiceClassInfo.isInputMethodConnectionActive, clazz,
+                  "isInputMethodConnectionActive", "()Z");
 
     GET_METHOD_ID(gServiceClassInfo.notifyVibratorState, clazz, "notifyVibratorState", "(IZ)V");
 
