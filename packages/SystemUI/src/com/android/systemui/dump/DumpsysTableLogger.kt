@@ -93,24 +93,24 @@ class DumpsysTableLogger(
     }
 
     private fun printSectionStart(pw: PrintWriter) {
-        pw.println(HEADER_PREFIX + sectionName)
-        pw.println("version $VERSION")
+        pw.append(HEADER_PREFIX).println(sectionName)
+        pw.append("version ").println(VERSION)
     }
 
     private fun printSectionEnd(pw: PrintWriter) {
-        pw.println(FOOTER_PREFIX + sectionName)
+        pw.append(FOOTER_PREFIX).println(sectionName)
     }
 
     private fun printSchema(pw: PrintWriter) {
-        pw.println(columns.joinToString(separator = SEPARATOR))
+        columns.joinTo(pw, separator = SEPARATOR).println()
     }
 
     private fun printData(pw: PrintWriter) {
         val count = columns.size
-        rows
-            .filter { it.size == count }
-            .forEach { dataLine ->
-                pw.println(dataLine.joinToString(separator = SEPARATOR))
+        rows.forEach { dataLine ->
+            if (dataLine.size == count) {
+                dataLine.joinTo(pw, separator = SEPARATOR).println()
+            }
         }
     }
 }
