@@ -37,10 +37,13 @@ import java.util.Arrays;
  */
 public class FontScaleConverter {
 
+    /** @hide */
     @VisibleForTesting
-    final float[] mFromSpValues;
+    public final float[] mFromSpValues;
+
+    /** @hide */
     @VisibleForTesting
-    final float[] mToDpValues;
+    public final float[] mToDpValues;
 
     /**
      * Creates a lookup table for the given conversions.

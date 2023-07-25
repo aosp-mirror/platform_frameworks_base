@@ -61,19 +61,6 @@ class FontScaleConverterFactoryTest {
         assertThat(table.convertSpToDp(100F)).isWithin(CONVERSION_TOLERANCE).of(300f)
     }
 
-    @SmallTest
-    fun missingLookupTable110_returnsInterpolated() {
-        val table = FontScaleConverterFactory.forScale(1.1F)!!
-
-        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(1.1f)
-        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(8f * 1.1f)
-        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(11f)
-        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(5f * 1.1f)
-        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
-        assertThat(table.convertSpToDp(50F)).isLessThan(50f * 1.1f)
-        assertThat(table.convertSpToDp(100F)).isLessThan(100f * 1.1f)
-    }
-
     @Test
     fun missingLookupTable199_returnsInterpolated() {
         val table = FontScaleConverterFactory.forScale(1.9999F)!!
@@ -97,18 +84,22 @@ class FontScaleConverterFactoryTest {
     }
 
     @SmallTest
+    @Test
     fun missingLookupTableNegativeReturnsNull() {
         assertThat(FontScaleConverterFactory.forScale(-1F)).isNull()
     }
 
     @SmallTest
+    @Test
     fun unnecessaryFontScalesReturnsNull() {
         assertThat(FontScaleConverterFactory.forScale(0F)).isNull()
         assertThat(FontScaleConverterFactory.forScale(1F)).isNull()
+        assertThat(FontScaleConverterFactory.forScale(1.1F)).isNull()
         assertThat(FontScaleConverterFactory.forScale(0.85F)).isNull()
     }
 
     @SmallTest
+    @Test
     fun tablesMatchAndAreMonotonicallyIncreasing() {
         FontScaleConverterFactory.LOOKUP_TABLES.forEach { _, lookupTable ->
             assertThat(lookupTable.mToDpValues).hasLength(lookupTable.mFromSpValues.size)
@@ -123,6 +114,7 @@ class FontScaleConverterFactoryTest {
     }
 
     @SmallTest
+    @Test
     fun testIsNonLinearFontScalingActive() {
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(1f)).isFalse()
         assertThat(FontScaleConverterFactory.isNonLinearFontScalingActive(0f)).isFalse()

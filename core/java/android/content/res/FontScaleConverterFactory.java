@@ -31,8 +31,9 @@ import com.android.internal.annotations.VisibleForTesting;
 public class FontScaleConverterFactory {
     private static final float SCALE_KEY_MULTIPLIER = 100f;
 
+    /** @hide */
     @VisibleForTesting
-    static final SparseArray<FontScaleConverter> LOOKUP_TABLES = new SparseArray<>();
+    public static final SparseArray<FontScaleConverter> LOOKUP_TABLES = new SparseArray<>();
 
     private static float sMinScaleBeforeCurvesApplied = 1.05f;
 
