@@ -47,6 +47,7 @@ constructor(
     override fun start() {
         listenForAodToLockscreenOrOccluded()
         listenForAodToGone()
+        listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
     private fun listenForAodToLockscreenOrOccluded() {

@@ -50,6 +50,7 @@ constructor(
         listenForAlternateBouncerToGone()
         listenForAlternateBouncerToLockscreenAodOrDozing()
         listenForAlternateBouncerToPrimaryBouncer()
+        listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
     private fun listenForAlternateBouncerToLockscreenAodOrDozing() {

@@ -63,12 +63,12 @@ constructor(
         listenForLockscreenToGone()
         listenForLockscreenToGoneDragging()
         listenForLockscreenToOccluded()
-        listenForLockscreenToCamera()
         listenForLockscreenToAodOrDozing()
         listenForLockscreenToPrimaryBouncer()
         listenForLockscreenToDreaming()
         listenForLockscreenToPrimaryBouncerDragging()
         listenForLockscreenToAlternateBouncer()
+        listenForLockscreenTransitionToCamera()
     }
 
     /**
@@ -127,6 +127,10 @@ constructor(
                 emit(null)
             }
             .distinctUntilChanged()
+
+    private fun listenForLockscreenTransitionToCamera() {
+        listenForTransitionToCamera(scope, keyguardInteractor)
+    }
 
     private fun listenForLockscreenToDreaming() {
         val invalidFromStates = setOf(KeyguardState.AOD, KeyguardState.DOZING)
@@ -311,7 +315,7 @@ constructor(
             keyguardInteractor.isKeyguardOccluded
                 .sample(
                     combine(
-                        transitionInteractor.finishedKeyguardState,
+                        transitionInteractor.startedKeyguardState,
                         keyguardInteractor.isDreaming,
                         ::Pair
                     ),
@@ -319,27 +323,6 @@ constructor(
                 )
                 .collect { (isOccluded, keyguardState, isDreaming) ->
                     if (isOccluded && !isDreaming && keyguardState == KeyguardState.LOCKSCREEN) {
-                        startTransitionTo(KeyguardState.OCCLUDED)
-                    }
-                }
-        }
-    }
-
-    /** This signal may come in before the occlusion signal, and can provide a custom transition */
-    private fun listenForLockscreenToCamera() {
-        scope.launch {
-            keyguardInteractor.onCameraLaunchDetected
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { (_, lastStartedStep) ->
-                    // DREAMING/AOD/OFF may trigger on the first power button push, so include this
-                    // state in order to cancel and correct the transition
-                    if (
-                        lastStartedStep.to == KeyguardState.LOCKSCREEN ||
-                            lastStartedStep.to == KeyguardState.DREAMING ||
-                            lastStartedStep.to == KeyguardState.DOZING ||
-                            lastStartedStep.to == KeyguardState.AOD ||
-                            lastStartedStep.to == KeyguardState.OFF
-                    ) {
                         startTransitionTo(KeyguardState.OCCLUDED)
                     }
                 }

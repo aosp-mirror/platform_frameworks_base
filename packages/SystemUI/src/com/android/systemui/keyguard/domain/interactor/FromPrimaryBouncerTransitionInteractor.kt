@@ -61,6 +61,7 @@ constructor(
         listenForPrimaryBouncerToAodOrDozing()
         listenForPrimaryBouncerToLockscreenOrOccluded()
         listenForPrimaryBouncerToDreamingLockscreenHosted()
+        listenForTransitionToCamera(scope, keyguardInteractor)
     }
 
     val surfaceBehindVisibility: Flow<Boolean?> =
