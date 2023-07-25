@@ -498,6 +498,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun handleRequest_fullscreenTask_desktopStashed_returnWCTWithAllAppsBroughtToFront() {
         assumeTrue(ENABLE_SHELL_TRANSITIONS)
+        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
 
         val stashedFreeformTask = setUpFreeformTask(DEFAULT_DISPLAY)
         markTaskHidden(stashedFreeformTask)
@@ -569,6 +570,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun handleRequest_freeformTask_desktopStashed_returnWCTWithAllAppsBroughtToFront() {
         assumeTrue(ENABLE_SHELL_TRANSITIONS)
+        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
 
         val stashedFreeformTask = setUpFreeformTask(DEFAULT_DISPLAY)
         markTaskHidden(stashedFreeformTask)
@@ -626,6 +628,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     fun stashDesktopApps_stateUpdates() {
+        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
+
         controller.stashDesktopApps(DEFAULT_DISPLAY)
 
         assertThat(desktopModeTaskRepository.isStashed(DEFAULT_DISPLAY)).isTrue()
@@ -634,6 +638,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     fun hideStashedDesktopApps_stateUpdates() {
+        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
+
         desktopModeTaskRepository.setStashed(DEFAULT_DISPLAY, true)
         desktopModeTaskRepository.setStashed(SECOND_DISPLAY, true)
         controller.hideStashedDesktopApps(DEFAULT_DISPLAY)

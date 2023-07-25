@@ -150,20 +150,24 @@ class DesktopTasksController(
      * back to front during the launch.
      */
     fun stashDesktopApps(displayId: Int) {
-        KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: stashDesktopApps")
-        desktopModeTaskRepository.setStashed(displayId, true)
+        if (DesktopModeStatus.isStashingEnabled()) {
+            KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: stashDesktopApps")
+            desktopModeTaskRepository.setStashed(displayId, true)
+        }
     }
 
     /**
      * Clear the stashed state for the given display
      */
     fun hideStashedDesktopApps(displayId: Int) {
-        KtProtoLog.v(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: hideStashedApps displayId=%d",
-                displayId
-        )
-        desktopModeTaskRepository.setStashed(displayId, false)
+        if (DesktopModeStatus.isStashingEnabled()) {
+            KtProtoLog.v(
+                    WM_SHELL_DESKTOP_MODE,
+                    "DesktopTasksController: hideStashedApps displayId=%d",
+                    displayId
+            )
+            desktopModeTaskRepository.setStashed(displayId, false)
+        }
     }
 
     /** Get number of tasks that are marked as visible */
