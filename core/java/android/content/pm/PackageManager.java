@@ -3448,6 +3448,14 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device is capable of communicating with
+     * other devices via Thread network.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_THREADNETWORK = "android.hardware.threadnetwork";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device is capable of communicating with
      * other devices via ultra wideband.
      */
     @SdkConstant(SdkConstantType.FEATURE)
