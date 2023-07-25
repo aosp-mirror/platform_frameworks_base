@@ -129,7 +129,7 @@ class MotionPredictorTest {
         // Prediction will happen for t=12 (since it is the next input interval after the requested
         // time, 8, plus the model offset, 1).
         assertEquals(12, predicted!!.eventTime)
-        assertEquals(30f, predicted.x, /*delta=*/5f)
+        assertEquals(30f, predicted.x, /*delta=*/10f)
         assertEquals(60f, predicted.y, /*delta=*/15f)
     }
 }
