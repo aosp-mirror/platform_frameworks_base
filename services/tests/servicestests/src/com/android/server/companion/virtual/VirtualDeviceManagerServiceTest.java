@@ -16,7 +16,6 @@
 
 package com.android.server.companion.virtual;
 
-import static android.companion.virtual.VirtualDeviceManager.ASSOCIATION_ID_INVALID;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
@@ -1714,19 +1713,16 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
-    public void getAssociationIdForDevice_invalidDeviceId_returnsInvalidAssociationId() {
-        assertThat(mLocalService.getAssociationIdForDevice(DEVICE_ID_INVALID))
-                .isEqualTo(ASSOCIATION_ID_INVALID);
-        assertThat(mLocalService.getAssociationIdForDevice(DEVICE_ID_DEFAULT))
-                .isEqualTo(ASSOCIATION_ID_INVALID);
-        assertThat(mLocalService.getAssociationIdForDevice(VIRTUAL_DEVICE_ID_2))
-                .isEqualTo(ASSOCIATION_ID_INVALID);
+    public void getPersistentIdForDevice_invalidDeviceId_returnsNull() {
+        assertThat(mLocalService.getPersistentIdForDevice(DEVICE_ID_INVALID)).isNull();
+        assertThat(mLocalService.getPersistentIdForDevice(DEVICE_ID_DEFAULT)).isNull();
+        assertThat(mLocalService.getPersistentIdForDevice(VIRTUAL_DEVICE_ID_2)).isNull();
     }
 
     @Test
-    public void getAssociationIdForDevice_returnsCorrectAssociationId() {
-        assertThat(mLocalService.getAssociationIdForDevice(VIRTUAL_DEVICE_ID_1))
-                .isEqualTo(mAssociationInfo.getId());
+    public void getPersistentIdForDevice_returnsCorrectId() {
+        assertThat(mLocalService.getPersistentIdForDevice(VIRTUAL_DEVICE_ID_1))
+                .isEqualTo(mDeviceImpl.getPersistentDeviceId());
     }
 
     private VirtualDeviceImpl createVirtualDevice(int virtualDeviceId, int ownerUid) {
@@ -1740,12 +1736,13 @@ public class VirtualDeviceManagerServiceTest {
             VirtualDeviceParams params) {
         VirtualDeviceImpl virtualDeviceImpl = new VirtualDeviceImpl(mContext,
                 mAssociationInfo, mVdms, new Binder(), ownerUid, virtualDeviceId,
-                mInputController, mCameraAccessController
-                /* onDeviceCloseListener= */ /*deviceId -> mVdms.removeVirtualDevice(deviceId)*/,
+                mInputController, mCameraAccessController,
                 mPendingTrampolineCallback, mActivityListener, mSoundEffectListener,
                 mRunningAppsChangedCallback, params, new DisplayManagerGlobal(mIDisplayManager));
         mVdms.addVirtualDevice(virtualDeviceImpl);
         assertThat(virtualDeviceImpl.getAssociationId()).isEqualTo(mAssociationInfo.getId());
+        assertThat(virtualDeviceImpl.getPersistentDeviceId())
+                .isEqualTo("companion:" + mAssociationInfo.getId());
         return virtualDeviceImpl;
     }
 

@@ -19,6 +19,7 @@ package com.android.server.companion.virtual;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.os.LocaleList;
 import android.util.ArraySet;
@@ -158,12 +159,12 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract @NonNull ArraySet<Integer> getDisplayIdsForDevice(int deviceId);
 
     /**
-     * Gets the CDM association ID for the VirtualDevice with the given device ID.
+     * Gets the persistent ID for the VirtualDevice with the given device ID.
      *
      * @param deviceId which device we're asking about
-     * @return the CDM association ID for this device, or
-     *   {@link android.companion.virtual.VirtualDeviceManager#ASSOCIATION_ID_INVALID} if no such
-     *   association exists.
+     * @return the persistent ID for this device, or {@code null} if no such ID exists.
+     *
+     * @see VirtualDevice#getPersistentDeviceId()
      */
-    public abstract int getAssociationIdForDevice(int deviceId);
+    public abstract @Nullable String getPersistentIdForDevice(int deviceId);
 }
