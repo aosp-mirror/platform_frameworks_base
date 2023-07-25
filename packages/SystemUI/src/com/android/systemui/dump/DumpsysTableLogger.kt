@@ -16,6 +16,7 @@
 
 package com.android.systemui.dump
 
+import android.os.Trace
 import java.io.PrintWriter
 
 /**
@@ -83,10 +84,12 @@ class DumpsysTableLogger(
 ) {
 
     fun printTableData(pw: PrintWriter) {
+        Trace.beginSection("DumpsysTableLogger#printTableData")
         printSectionStart(pw)
         printSchema(pw)
         printData(pw)
         printSectionEnd(pw)
+        Trace.endSection()
     }
 
     private fun printSectionStart(pw: PrintWriter) {
