@@ -1244,6 +1244,27 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testFinishRotationControllerWithFixedRotation() {
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(app);
+        registerTestTransitionPlayer();
+        mDisplayContent.setLastHasContent();
+        mDisplayContent.requestChangeTransitionIfNeeded(1 /* changes */, null /* displayChange */);
+        assertNotNull(mDisplayContent.getAsyncRotationController());
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(null);
+        assertNull("Clear rotation controller if rotation is not changed",
+                mDisplayContent.getAsyncRotationController());
+
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(app);
+        assertNotNull(mDisplayContent.getAsyncRotationController());
+        mDisplayContent.getDisplayRotation().setRotation(
+                mDisplayContent.getWindowConfiguration().getRotation() + 1);
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(null);
+        assertNotNull("Keep rotation controller if rotation will be changed",
+                mDisplayContent.getAsyncRotationController());
+    }
+
+    @Test
     public void testDeferRotationForTransientLaunch() {
         final TestTransitionPlayer player = registerTestTransitionPlayer();
         assumeFalse(mDisplayContent.mTransitionController.useShellTransitionsRotation());
