@@ -1002,7 +1002,13 @@ public class KeyguardIndicationController {
                 return; // udfps affordance is highlighted, no need to show action to unlock
             } else if (mKeyguardUpdateMonitor.isFaceEnrolled()
                     && !mKeyguardUpdateMonitor.getIsFaceAuthenticated()) {
-                String message = mContext.getString(R.string.keyguard_retry);
+                String message;
+                if (mAccessibilityManager.isEnabled()
+                        || mAccessibilityManager.isTouchExplorationEnabled()) {
+                    message = mContext.getString(R.string.accesssibility_keyguard_retry);
+                } else {
+                    message = mContext.getString(R.string.keyguard_retry);
+                }
                 mStatusBarKeyguardViewManager.setKeyguardMessage(message, mInitialTextColorState);
             }
         } else {
