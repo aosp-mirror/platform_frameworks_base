@@ -60,6 +60,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.FaceAuthAccessibilityDelegate;
 import com.android.systemui.biometrics.SideFpsController;
 import com.android.systemui.biometrics.SideFpsUiRequestSource;
 import com.android.systemui.classifier.FalsingA11yDelegate;
@@ -158,6 +159,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     private ViewMediatorCallback mViewMediatorCallback;
     @Mock
     private AudioManager mAudioManager;
+    @Mock
+    private FaceAuthAccessibilityDelegate mFaceAuthAccessibilityDelegate;
 
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallback;
@@ -216,7 +219,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 mUserSwitcherController, mFeatureFlags, mGlobalSettings,
                 mSessionTracker, Optional.of(mSideFpsController), mFalsingA11yDelegate,
                 mTelephonyManager, mViewMediatorCallback, mAudioManager,
-                mock(KeyguardFaceAuthInteractor.class));
+                mock(KeyguardFaceAuthInteractor.class),
+                mFaceAuthAccessibilityDelegate);
     }
 
     @Test
@@ -683,6 +687,11 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         verify(mView).setAlpha(1f);
         verify(mView).setTranslationY(0f);
+    }
+
+    @Test
+    public void setAccessibilityDelegate() {
+        verify(mView).setAccessibilityDelegate(eq(mFaceAuthAccessibilityDelegate));
     }
 
     private KeyguardSecurityContainer.SwipeListener getRegisteredSwipeListener() {

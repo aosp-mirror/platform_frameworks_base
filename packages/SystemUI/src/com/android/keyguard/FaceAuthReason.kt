@@ -20,6 +20,7 @@ import android.annotation.StringDef
 import android.os.PowerManager
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
+import com.android.keyguard.FaceAuthApiRequestReason.Companion.ACCESSIBILITY_ACTION
 import com.android.keyguard.FaceAuthApiRequestReason.Companion.NOTIFICATION_PANEL_CLICKED
 import com.android.keyguard.FaceAuthApiRequestReason.Companion.PICK_UP_GESTURE_TRIGGERED
 import com.android.keyguard.FaceAuthApiRequestReason.Companion.QS_EXPANDED
@@ -71,6 +72,7 @@ import com.android.keyguard.InternalFaceAuthReasons.USER_SWITCHING
     NOTIFICATION_PANEL_CLICKED,
     QS_EXPANDED,
     PICK_UP_GESTURE_TRIGGERED,
+    ACCESSIBILITY_ACTION,
 )
 annotation class FaceAuthApiRequestReason {
     companion object {
@@ -80,6 +82,7 @@ annotation class FaceAuthApiRequestReason {
         const val QS_EXPANDED = "Face auth due to QS expansion."
         const val PICK_UP_GESTURE_TRIGGERED =
             "Face auth due to pickup gesture triggered when the device is awake and not from AOD."
+        const val ACCESSIBILITY_ACTION = "Face auth due to an accessibility action."
     }
 }
 
@@ -217,7 +220,8 @@ constructor(private val id: Int, val reason: String, var extraInfo: Int = 0) :
     @UiEvent(doc = STRONG_AUTH_ALLOWED_CHANGED)
     FACE_AUTH_UPDATED_STRONG_AUTH_CHANGED(1255, STRONG_AUTH_ALLOWED_CHANGED),
     @UiEvent(doc = NON_STRONG_BIOMETRIC_ALLOWED_CHANGED)
-    FACE_AUTH_NON_STRONG_BIOMETRIC_ALLOWED_CHANGED(1256, NON_STRONG_BIOMETRIC_ALLOWED_CHANGED);
+    FACE_AUTH_NON_STRONG_BIOMETRIC_ALLOWED_CHANGED(1256, NON_STRONG_BIOMETRIC_ALLOWED_CHANGED),
+    @UiEvent(doc = ACCESSIBILITY_ACTION) FACE_AUTH_ACCESSIBILITY_ACTION(1454, ACCESSIBILITY_ACTION);
 
     override fun getId(): Int = this.id
 
@@ -233,6 +237,8 @@ private val apiRequestReasonToUiEvent =
             FaceAuthUiEvent.FACE_AUTH_TRIGGERED_NOTIFICATION_PANEL_CLICKED,
         QS_EXPANDED to FaceAuthUiEvent.FACE_AUTH_TRIGGERED_QS_EXPANDED,
         PICK_UP_GESTURE_TRIGGERED to FaceAuthUiEvent.FACE_AUTH_TRIGGERED_PICK_UP_GESTURE_TRIGGERED,
+        PICK_UP_GESTURE_TRIGGERED to FaceAuthUiEvent.FACE_AUTH_TRIGGERED_PICK_UP_GESTURE_TRIGGERED,
+        ACCESSIBILITY_ACTION to FaceAuthUiEvent.FACE_AUTH_ACCESSIBILITY_ACTION,
     )
 
 /** Converts the [reason] to the corresponding [FaceAuthUiEvent]. */
