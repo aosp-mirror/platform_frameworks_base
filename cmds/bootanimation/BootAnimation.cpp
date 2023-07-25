@@ -81,18 +81,18 @@ static constexpr const char* PRODUCT_USERSPACE_REBOOT_ANIMATION_FILE = "/product
 static constexpr const char* OEM_USERSPACE_REBOOT_ANIMATION_FILE = "/oem/media/userspace-reboot.zip";
 static constexpr const char* SYSTEM_USERSPACE_REBOOT_ANIMATION_FILE = "/system/media/userspace-reboot.zip";
 
-static const char BOOTANIM_DATA_DIR_PATH[] = "/data/bootanim";
+static const char BOOTANIM_DATA_DIR_PATH[] = "/data/misc/bootanim";
 static const char BOOTANIM_TIME_DIR_NAME[] = "time";
-static const char BOOTANIM_TIME_DIR_PATH[] = "/data/bootanim/time";
+static const char BOOTANIM_TIME_DIR_PATH[] = "/data/misc/bootanim/time";
 static const char CLOCK_FONT_ASSET[] = "images/clock_font.png";
 static const char CLOCK_FONT_ZIP_NAME[] = "clock_font.png";
 static const char PROGRESS_FONT_ASSET[] = "images/progress_font.png";
 static const char PROGRESS_FONT_ZIP_NAME[] = "progress_font.png";
 static const char LAST_TIME_CHANGED_FILE_NAME[] = "last_time_change";
-static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/bootanim/time/last_time_change";
+static const char LAST_TIME_CHANGED_FILE_PATH[] = "/data/misc/bootanim/time/last_time_change";
 static const char ACCURATE_TIME_FLAG_FILE_NAME[] = "time_is_accurate";
-static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/bootanim/time/time_is_accurate";
-static const char TIME_FORMAT_12_HOUR_FLAG_FILE_PATH[] = "/data/bootanim/time/time_format_12_hour";
+static const char ACCURATE_TIME_FLAG_FILE_PATH[] = "/data/misc/bootanim/time/time_is_accurate";
+static const char TIME_FORMAT_12_HOUR_FLAG_FILE_PATH[] = "/data/misc/bootanim/time/time_format_12_hour";
 // Java timestamp format. Don't show the clock if the date is before 2000-01-01 00:00:00.
 static const long long ACCURATE_TIME_EPOCH = 946684800000;
 static constexpr char FONT_BEGIN_CHAR = ' ';
