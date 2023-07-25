@@ -36,7 +36,7 @@ abstract class ActivityEmbeddingTestBase(flicker: LegacyFlickerTest) : BaseTest(
     /** Asserts the background animation layer is never visible during bounds change transition. */
     @Presubmit
     @Test
-    fun backgroundLayerNeverVisible() {
+    open fun backgroundLayerNeverVisible() {
         val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
         flicker.assertLayers {
             isInvisible(backgroundColorLayer)
