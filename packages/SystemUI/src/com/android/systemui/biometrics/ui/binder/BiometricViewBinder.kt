@@ -305,6 +305,10 @@ object BiometricViewBinder {
                         .collect { onClick ->
                             iconViewOverlay.setOnClickListener(onClick)
                             iconView.setOnClickListener(onClick)
+                            if (onClick == null) {
+                                iconViewOverlay.isClickable = false
+                                iconView.isClickable = false
+                            }
                         }
                 }
 
