@@ -22,9 +22,7 @@ import android.platform.test.rule.PressHomeRule
 import android.platform.test.rule.UnlockScreenRule
 import android.tools.common.NavBar
 import android.tools.common.Rotation
-import android.tools.device.apphelpers.MessagingAppHelper
 import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
-import android.tools.device.flicker.rules.LaunchAppRule
 import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.rules.RuleChain
@@ -36,9 +34,6 @@ object Utils {
         return RuleChain.outerRule(UnlockScreenRule())
             .around(
                 NavigationModeRule(navigationMode.value, /* changeNavigationModeAfterTest */ false)
-            )
-            .around(
-                LaunchAppRule(MessagingAppHelper(instrumentation), clearCacheAfterParsing = false)
             )
             .around(RemoveAllTasksButHomeRule())
             .around(
