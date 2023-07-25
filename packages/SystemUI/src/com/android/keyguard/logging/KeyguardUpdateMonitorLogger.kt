@@ -602,10 +602,10 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
 
     fun allowFingerprintOnCurrentOccludingActivityChanged(allow: Boolean) {
         logBuffer.log(
-                TAG,
-                VERBOSE,
-                { bool1 = allow },
-                { "allowFingerprintOnCurrentOccludingActivityChanged: $bool1" }
+            TAG,
+            VERBOSE,
+            { bool1 = allow },
+            { "allowFingerprintOnCurrentOccludingActivityChanged: $bool1" }
         )
     }
 
@@ -725,6 +725,30 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
             DEBUG,
             { str1 = "$biometricSourceType" },
             { "notifying about enrollments changed: $str1" }
+        )
+    }
+
+    fun logUserSwitching(userId: Int, context: String) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = userId
+                str1 = context
+            },
+            { "userCurrentlySwitching: $str1, userId: $int1" }
+        )
+    }
+
+    fun logUserSwitchComplete(userId: Int, context: String) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = userId
+                str1 = context
+            },
+            { "userSwitchComplete: $str1, userId: $int1" }
         )
     }
 }
