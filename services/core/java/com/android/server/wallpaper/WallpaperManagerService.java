@@ -2940,6 +2940,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         checkPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT);
         final long ident = Binder.clearCallingIdentity();
         try {
+            List<WallpaperData> pendingColorExtraction = new ArrayList<>();
             synchronized (mLock) {
                 WallpaperData wallpaper = mWallpaperMap.get(mCurrentUserId);
                 WallpaperData lockWallpaper = mLockWallpaperMap.get(mCurrentUserId);
@@ -2975,7 +2976,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             // Need to extract colors again to re-calculate dark hints after
                             // applying dimming.
                             wp.mIsColorExtractedFromDim = true;
-                            notifyWallpaperColorsChanged(wp, wp.mWhich);
+                            pendingColorExtraction.add(wp);
                             changed = true;
                         }
                     }
@@ -3006,6 +3007,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         saveSettingsLocked(wallpaper.userId);
                     }
                 }
+            }
+            for (WallpaperData wp: pendingColorExtraction) {
+                notifyWallpaperColorsChanged(wp, wp.mWhich);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
