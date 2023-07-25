@@ -53,7 +53,6 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySavingStats;
-import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
@@ -78,7 +77,6 @@ public class NotifierTest {
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfigurationMock;
     @Mock private SystemPropertiesWrapper mSystemPropertiesMock;
     @Mock private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
-    @Mock private BatteryStatsImpl mBatteryStats;
     @Mock private Vibrator mVibrator;
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
 
