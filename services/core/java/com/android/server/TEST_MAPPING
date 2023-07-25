@@ -14,10 +14,10 @@
             "file_patterns": ["NotificationManagerService\\.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceTestCases",
+            "name": "CtsWindowManagerDeviceWindow",
             "options": [
                 {
-                    "include-filter": "android.server.wm.ToastWindowTest"
+                    "include-filter": "android.server.wm.window.ToastWindowTest"
                 }
             ],
             "file_patterns": ["NotificationManagerService\\.java"]
