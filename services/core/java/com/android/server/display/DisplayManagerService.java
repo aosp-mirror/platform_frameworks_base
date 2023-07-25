@@ -3151,11 +3151,6 @@ public final class DisplayManagerService extends SystemService {
         // with the corresponding displaydevice.
         HighBrightnessModeMetadata hbmMetadata =
                 mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(display);
-        if (hbmMetadata == null) {
-            Slog.wtf(TAG, "High Brightness Mode Metadata is null in DisplayManagerService for "
-                    + "display: " + display.getDisplayIdLocked());
-            return null;
-        }
         if (mConfigParameterProvider.isNewPowerControllerFeatureEnabled()) {
             displayPowerController = new DisplayPowerController2(
                     mContext, /* injector= */ null, mDisplayPowerCallbacks, mPowerHandler,

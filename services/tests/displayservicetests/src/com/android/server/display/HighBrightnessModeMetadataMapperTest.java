@@ -17,35 +17,69 @@
 package com.android.server.display;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class HighBrightnessModeMetadataMapperTest {
+
+    @Mock
+    private LogicalDisplay mDisplayMock;
+
+    @Mock
+    private DisplayDevice mDeviceMock;
+
+    @Mock
+    private DisplayDeviceConfig mDdcMock;
+
+    @Mock
+    private DisplayDeviceConfig.HighBrightnessModeData mHbmDataMock;
 
     private HighBrightnessModeMetadataMapper mHighBrightnessModeMetadataMapper;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        when(mDisplayMock.getPrimaryDisplayDeviceLocked()).thenReturn(mDeviceMock);
+        when(mDeviceMock.getDisplayDeviceConfig()).thenReturn(mDdcMock);
+        when(mDdcMock.getHighBrightnessModeData()).thenReturn(mHbmDataMock);
         mHighBrightnessModeMetadataMapper = new HighBrightnessModeMetadataMapper();
     }
 
     @Test
-    public void testGetHighBrightnessModeMetadata() {
-        // Display device is null
-        final LogicalDisplay display = mock(LogicalDisplay.class);
-        when(display.getPrimaryDisplayDeviceLocked()).thenReturn(null);
-        assertNull(mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(display));
+    public void testGetHighBrightnessModeMetadata_NoDisplayDevice() {
+        when(mDisplayMock.getPrimaryDisplayDeviceLocked()).thenReturn(null);
+        assertNull(mHighBrightnessModeMetadataMapper
+                .getHighBrightnessModeMetadataLocked(mDisplayMock));
+    }
 
-        // No HBM metadata stored for this display yet
-        final DisplayDevice device = mock(DisplayDevice.class);
-        when(display.getPrimaryDisplayDeviceLocked()).thenReturn(device);
+    @Test
+    public void testGetHighBrightnessModeMetadata_NoHBMData() {
+        when(mDdcMock.getHighBrightnessModeData()).thenReturn(null);
+        assertNull(mHighBrightnessModeMetadataMapper
+                .getHighBrightnessModeMetadataLocked(mDisplayMock));
+    }
+
+    @Test
+    public void testGetHighBrightnessModeMetadata_NewDisplay() {
         HighBrightnessModeMetadata hbmMetadata =
-                mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(display);
+                mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(mDisplayMock);
+        assertNotNull(hbmMetadata);
+        assertTrue(hbmMetadata.getHbmEventQueue().isEmpty());
+        assertTrue(hbmMetadata.getRunningStartTimeMillis() < 0);
+    }
+
+    @Test
+    public void testGetHighBrightnessModeMetadata_Modify() {
+        HighBrightnessModeMetadata hbmMetadata =
+                mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(mDisplayMock);
+        assertNotNull(hbmMetadata);
         assertTrue(hbmMetadata.getHbmEventQueue().isEmpty());
         assertTrue(hbmMetadata.getRunningStartTimeMillis() < 0);
 
@@ -55,8 +89,10 @@ public class HighBrightnessModeMetadataMapperTest {
         long setTime = 300;
         hbmMetadata.addHbmEvent(new HbmEvent(startTimeMillis, endTimeMillis));
         hbmMetadata.setRunningStartTimeMillis(setTime);
+
         hbmMetadata =
-                mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(display);
+                mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(mDisplayMock);
+
         assertEquals(1, hbmMetadata.getHbmEventQueue().size());
         assertEquals(startTimeMillis,
                 hbmMetadata.getHbmEventQueue().getFirst().getStartTimeMillis());

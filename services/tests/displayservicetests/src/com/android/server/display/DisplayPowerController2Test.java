@@ -50,6 +50,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.testing.TestableContext;
@@ -144,11 +145,12 @@ public final class DisplayPowerController2Test {
         mTestLooper = new TestLooper(mClock::now);
         mHandler = new Handler(mTestLooper.getLooper());
 
-        // Put the system into manual brightness by default, just to minimize unexpected events and
-        // have a consistent starting state
+        // Set some settings to minimize unexpected events and have a consistent starting state
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+        Settings.System.putFloatForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0, UserHandle.USER_CURRENT);
 
         addLocalServiceMock(WindowManagerPolicy.class, mWindowManagerPolicyMock);
         addLocalServiceMock(ColorDisplayService.ColorDisplayServiceInternal.class,
