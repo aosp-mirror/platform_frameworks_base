@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app.servertransaction;
+package android.window;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -36,7 +36,6 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
-import android.window.WindowTokenClient;
 
 import androidx.test.filters.SmallTest;
 

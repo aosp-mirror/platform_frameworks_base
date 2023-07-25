@@ -49,7 +49,6 @@ import android.app.servertransaction.ConfigurationChangeItem;
 import android.app.servertransaction.NewIntentItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
-import android.app.servertransaction.WindowTokenClientController;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.CompatibilityInfo;
@@ -65,6 +64,7 @@ import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.View;
+import android.window.WindowTokenClientController;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;

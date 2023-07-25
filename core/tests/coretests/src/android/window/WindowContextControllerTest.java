@@ -30,7 +30,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import android.app.servertransaction.WindowTokenClientController;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 
