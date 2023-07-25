@@ -687,14 +687,12 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         @Override
-        public int getAssociationIdForDevice(int deviceId) {
+        public @Nullable String getPersistentIdForDevice(int deviceId) {
             VirtualDeviceImpl virtualDevice;
             synchronized (mVirtualDeviceManagerLock) {
                 virtualDevice = mVirtualDevices.get(deviceId);
             }
-            return virtualDevice == null
-                    ? VirtualDeviceManager.ASSOCIATION_ID_INVALID
-                    : virtualDevice.getAssociationId();
+            return virtualDevice == null ? null : virtualDevice.getPersistentDeviceId();
         }
 
         @Override
