@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include "android-base/parseint.h"
 #include "android-base/stringprintf.h"
 #include "android-base/strings.h"
 #include "androidfw/BigBuffer.h"
@@ -229,14 +230,29 @@ std::string GetToolFingerprint() {
   static const char* const sMinorVersion = "19";
 
   // The build id of aapt2 binary.
-  static std::string sBuildId = android::build::GetBuildNumber();
+  static const std::string sBuildId = [] {
+    std::string buildNumber = android::build::GetBuildNumber();
 
-  if (android::base::StartsWith(sBuildId, "eng.")) {
-    time_t now = time(0);
-    tm* ltm = localtime(&now);
+    if (android::base::StartsWith(buildNumber, "eng.")) {
+      // android::build::GetBuildNumber() returns something like "eng.user.20230725.214219" where
+      // the latter two parts are "yyyyMMdd.HHmmss" at build time. Use "yyyyMM" in the fingerprint.
+      std::vector<std::string> parts = util::Split(buildNumber, '.');
+      int buildYear;
+      int buildMonth;
+      if (parts.size() < 3 || parts[2].length() < 6 ||
+          !android::base::ParseInt(parts[2].substr(0, 4), &buildYear) ||
+          !android::base::ParseInt(parts[2].substr(4, 2), &buildMonth)) {
+        // Fallback to localtime() if GetBuildNumber() returns an unexpected output.
+        time_t now = time(0);
+        tm* ltm = localtime(&now);
+        buildYear = 1900 + ltm->tm_year;
+        buildMonth = 1 + ltm->tm_mon;
+      }
 
-    sBuildId = android::base::StringPrintf("eng.%d%d", 1900 + ltm->tm_year, 1 + ltm->tm_mon);
-  }
+      buildNumber = android::base::StringPrintf("eng.%04d%02d", buildYear, buildMonth);
+    }
+    return buildNumber;
+  }();
 
   return android::base::StringPrintf("%s.%s-%s", sMajorVersion, sMinorVersion, sBuildId.c_str());
 }
