@@ -73,7 +73,7 @@ open class AutoEnterPipOnGoToHomeTest(flicker: LegacyFlickerTest) :
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 293133362)
     @Test
     override fun pipLayerReduces() {
         flicker.assertLayers {
