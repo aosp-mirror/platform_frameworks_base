@@ -1372,6 +1372,50 @@ public final class CompanionDeviceManager {
         }
     }
 
+    /**
+     * Sets the {@link AssociationInfo#getTag() tag} for this association.
+     *
+     * <p>The length of the tag must be at most 20 characters.
+     *
+     * <p>This allows to store useful information about the associated devices.
+     *
+     * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the Association
+     *                          of the companion device recorded by CompanionDeviceManager
+     * @param tag the tag of this association
+     */
+    @UserHandleAware
+    public void setAssociationTag(int associationId, @NonNull String tag) {
+        Objects.requireNonNull(tag, "tag cannot be null");
+
+        if (tag.length() > 20) {
+            throw new IllegalArgumentException("Length of the tag must be at most 20 characters");
+        }
+
+        try {
+            mService.setAssociationTag(associationId, tag);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears the {@link AssociationInfo#getTag() tag} for this association.
+     *
+     * <p>The tag will be set to null for this association when calling this API.
+     *
+     * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the Association
+     *                          of the companion device recorded by CompanionDeviceManager
+     * @see CompanionDeviceManager#setAssociationTag(int, String)
+     */
+    @UserHandleAware
+    public void clearAssociationTag(int associationId) {
+        try {
+            mService.clearAssociationTag(associationId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private boolean checkFeaturePresent() {
         boolean featurePresent = mService != null;
         if (!featurePresent && DEBUG) {

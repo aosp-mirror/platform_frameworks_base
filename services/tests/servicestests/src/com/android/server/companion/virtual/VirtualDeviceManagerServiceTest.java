@@ -363,7 +363,8 @@ public class VirtualDeviceManagerServiceTest {
                 new CameraAccessController(mContext, mLocalService, mCameraAccessBlockedCallback);
 
         mAssociationInfo = new AssociationInfo(/* associationId= */ 1, 0, null,
-                MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false, 0, 0, -1);
+                null, MacAddress.BROADCAST_ADDRESS, "", null, null, true, false, false,
+                0, 0, -1);
 
         mVdms = new VirtualDeviceManagerService(mContext);
         mLocalService = mVdms.getLocalServiceInstance();

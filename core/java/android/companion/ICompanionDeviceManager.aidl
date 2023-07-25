@@ -115,4 +115,8 @@ interface ICompanionDeviceManager {
 
     @EnforcePermission("MANAGE_COMPANION_DEVICES")
     void enableSecureTransport(boolean enabled);
+
+    void setAssociationTag(int associationId, String tag);
+
+    void clearAssociationTag(int associationId);
 }
