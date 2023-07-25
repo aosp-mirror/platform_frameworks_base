@@ -118,6 +118,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         whenever(context.getString(eq(R.string.note_task_shortcut_long_label), any()))
             .thenReturn(NOTE_TASK_LONG_LABEL)
         whenever(context.packageManager).thenReturn(packageManager)
+        whenever(context.createContextAsUser(any(), any())).thenReturn(context)
         whenever(packageManager.getApplicationInfo(any(), any<Int>())).thenReturn(mock())
         whenever(packageManager.getApplicationLabel(any())).thenReturn(NOTE_TASK_LONG_LABEL)
         whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(NOTE_TASK_INFO)
@@ -353,7 +354,13 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     @Test
     fun showNoteTask_defaultUserSet_shouldStartActivityWithExpectedUserAndLogUiEvent() {
-        whenever(secureSettings.getInt(eq(Settings.Secure.DEFAULT_NOTE_TASK_PROFILE), any()))
+        whenever(
+                secureSettings.getIntForUser(
+                    /* name= */ eq(Settings.Secure.DEFAULT_NOTE_TASK_PROFILE),
+                    /* def= */ any(),
+                    /* userHandle= */ any()
+                )
+            )
             .thenReturn(10)
         val user10 = UserHandle.of(/* userId= */ 10)
 
@@ -615,13 +622,21 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun showNoteTask_copeDevices_tailButtonEntryPoint_shouldStartBubbleInWorkProfile() {
+    fun showNoteTask_copeDevices_tailButtonEntryPoint_shouldStartBubbleInTheUserSelectedUser() {
+        whenever(
+                secureSettings.getIntForUser(
+                    /* name= */ eq(Settings.Secure.DEFAULT_NOTE_TASK_PROFILE),
+                    /* def= */ any(),
+                    /* userHandle= */ any()
+                )
+            )
+            .thenReturn(mainUserInfo.id)
         whenever(devicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile).thenReturn(true)
         userTracker.set(mainAndWorkProfileUsers, mainAndWorkProfileUsers.indexOf(mainUserInfo))
 
         createNoteTaskController().showNoteTask(entryPoint = TAIL_BUTTON)
 
-        verifyNoteTaskOpenInBubbleInUser(workUserInfo.userHandle)
+        verifyNoteTaskOpenInBubbleInUser(mainUserInfo.userHandle)
     }
 
     @Test
@@ -813,13 +828,39 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun getUserForHandlingNotesTaking_cope_tailButton_shouldReturnWorkProfileUser() {
+    fun getUserForHandlingNotesTaking_cope_userSelectedWorkProfile_tailButton_shouldReturnWorkProfileUser() { // ktlint-disable max-line-length
+        whenever(
+                secureSettings.getIntForUser(
+                    /* name= */ eq(Settings.Secure.DEFAULT_NOTE_TASK_PROFILE),
+                    /* def= */ any(),
+                    /* userHandle= */ any()
+                )
+            )
+            .thenReturn(workUserInfo.id)
         whenever(devicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile).thenReturn(true)
         userTracker.set(mainAndWorkProfileUsers, mainAndWorkProfileUsers.indexOf(mainUserInfo))
 
         val user = createNoteTaskController().getUserForHandlingNotesTaking(TAIL_BUTTON)
 
         assertThat(user).isEqualTo(UserHandle.of(workUserInfo.id))
+    }
+
+    @Test
+    fun getUserForHandlingNotesTaking_cope_userSelectedMainProfile_tailButton_shouldReturnMainProfileUser() { // ktlint-disable max-line-length
+        whenever(
+                secureSettings.getIntForUser(
+                    /* name= */ eq(Settings.Secure.DEFAULT_NOTE_TASK_PROFILE),
+                    /* def= */ any(),
+                    /* userHandle= */ any()
+                )
+            )
+            .thenReturn(mainUserInfo.id)
+        whenever(devicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile).thenReturn(true)
+        userTracker.set(mainAndWorkProfileUsers, mainAndWorkProfileUsers.indexOf(mainUserInfo))
+
+        val user = createNoteTaskController().getUserForHandlingNotesTaking(TAIL_BUTTON)
+
+        assertThat(user).isEqualTo(UserHandle.of(mainUserInfo.id))
     }
 
     @Test

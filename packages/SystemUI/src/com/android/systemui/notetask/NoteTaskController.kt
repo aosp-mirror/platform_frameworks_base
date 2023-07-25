@@ -41,6 +41,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.log.DebugLogger.debugLog
+import com.android.systemui.notetask.NoteTaskEntryPoint.QUICK_AFFORDANCE
+import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
@@ -121,23 +123,26 @@ constructor(
 
     /**
      * Returns the [UserHandle] of an android user that should handle the notes taking [entryPoint].
-     *
-     * On company owned personally enabled (COPE) devices, if the given [entryPoint] is in the
-     * [FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES] list, the default notes app in the work
-     * profile user will always be launched.
-     *
-     * On non managed devices or devices with other management modes, the current [UserHandle] is
-     * returned.
+     * 1. tail button entry point: In COPE or work profile devices, the user can select whether the
+     *    work or main profile notes app should be launched in the Settings app. In non-management
+     *    or device owner devices, the user can only select main profile notes app.
+     * 2. lock screen quick affordance: since there is no user setting, the main profile notes app
+     *    is used as default for work profile devices while the work profile notes app is used for
+     *    COPE devices.
+     * 3. Other entry point: the current user from [UserTracker.userHandle].
      */
     fun getUserForHandlingNotesTaking(entryPoint: NoteTaskEntryPoint): UserHandle =
-        if (
-            entryPoint in FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES &&
-                devicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile
-        ) {
-            userTracker.userProfiles.firstOrNull { userManager.isManagedProfile(it.id) }?.userHandle
-                ?: userTracker.userHandle
-        } else {
-            secureSettings.preferredUser
+        when {
+            entryPoint == TAIL_BUTTON -> secureSettings.preferredUser
+            devicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile &&
+                entryPoint == QUICK_AFFORDANCE -> {
+                userTracker.userProfiles
+                    .firstOrNull { userManager.isManagedProfile(it.id) }
+                    ?.userHandle
+                    ?: userTracker.userHandle
+            }
+            // On work profile devices, SysUI always run in the main user.
+            else -> userTracker.userHandle
         }
 
     /**
@@ -267,15 +272,7 @@ constructor(
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED
             }
 
-        // If the required user matches the tracking user, the injected context is already a context
-        // of the required user. Avoid calling #createContextAsUser because creating a context for
-        // a user takes time.
-        val userContext =
-            if (user == userTracker.userHandle) {
-                context
-            } else {
-                context.createContextAsUser(user, /* flags= */ 0)
-            }
+        val userContext = context.createContextAsUser(user, /* flags= */ 0)
 
         userContext.packageManager.setComponentEnabledSetting(
             componentName,
@@ -283,7 +280,7 @@ constructor(
             PackageManager.DONT_KILL_APP,
         )
 
-        debugLog { "setNoteTaskShortcutEnabled - completed: $isEnabled" }
+        debugLog { "setNoteTaskShortcutEnabled for user $user- completed: $enabledState" }
     }
 
     /**
@@ -359,10 +356,12 @@ constructor(
 
     private val SecureSettings.preferredUser: UserHandle
         get() {
+            val trackingUserId = userTracker.userHandle.identifier
             val userId =
-                secureSettings.getInt(
-                    Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
-                    userTracker.userHandle.identifier,
+                secureSettings.getIntForUser(
+                    /* name= */ Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
+                    /* def= */ trackingUserId,
+                    /* userHandle= */ trackingUserId,
                 )
             return UserHandle.of(userId)
         }
@@ -381,16 +380,6 @@ constructor(
          * @see com.android.launcher3.icons.IconCache.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE
          */
         const val EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE = "extra_shortcut_badge_override_package"
-
-        /**
-         * A list of entry points which should be redirected to the work profile default notes app
-         * on company owned personally enabled (COPE) devices.
-         *
-         * Entry points in this list don't let users / admin to select the work or personal default
-         * notes app to be launched.
-         */
-        val FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES =
-            listOf(NoteTaskEntryPoint.TAIL_BUTTON, NoteTaskEntryPoint.QUICK_AFFORDANCE)
     }
 }
 
