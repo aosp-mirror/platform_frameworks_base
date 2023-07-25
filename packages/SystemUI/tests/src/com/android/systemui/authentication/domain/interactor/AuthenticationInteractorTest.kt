@@ -89,6 +89,22 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setLockscreenEnabled(false)
 
             val isUnlocked by collectLastValue(underTest.isUnlocked)
+            // Toggle isUnlocked, twice.
+            //
+            // This is done because the underTest.isUnlocked flow doesn't receive values from
+            // just changing the state above; the actual isUnlocked state needs to change to
+            // cause the logic under test to "pick up" the current state again.
+            //
+            // It is done twice to make sure that we don't actually change the isUnlocked
+            // state from what it originally was.
+            utils.authenticationRepository.setUnlocked(
+                !utils.authenticationRepository.isUnlocked.value
+            )
+            runCurrent()
+            utils.authenticationRepository.setUnlocked(
+                !utils.authenticationRepository.isUnlocked.value
+            )
+            runCurrent()
             assertThat(isUnlocked).isTrue()
         }
 
