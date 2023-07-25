@@ -1013,6 +1013,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                     runSetBooleanFlag(pw, mLetterboxConfiguration
                             ::setUserAppAspectRatioSettingsOverrideEnabled);
                     break;
+                case "--isUserAppAspectRatioFullscreenEnabled":
+                    runSetBooleanFlag(pw, mLetterboxConfiguration
+                            ::setUserAppAspectRatioFullscreenOverrideEnabled);
+                    break;
                 case "--isCameraCompatRefreshEnabled":
                     runSetBooleanFlag(pw, mLetterboxConfiguration::setCameraCompatRefreshEnabled);
                     break;
@@ -1092,6 +1096,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                         break;
                     case "isUserAppAspectRatioSettingsEnabled":
                         mLetterboxConfiguration.resetUserAppAspectRatioSettingsEnabled();
+                        break;
+                    case "isUserAppAspectRatioFullscreenEnabled":
+                        mLetterboxConfiguration.resetUserAppAspectRatioFullscreenEnabled();
                         break;
                     case "isCameraCompatRefreshEnabled":
                         mLetterboxConfiguration.resetCameraCompatRefreshEnabled();
@@ -1204,6 +1211,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
             mLetterboxConfiguration.resetTranslucentLetterboxingEnabled();
             mLetterboxConfiguration.resetUserAppAspectRatioSettingsEnabled();
+            mLetterboxConfiguration.resetUserAppAspectRatioFullscreenEnabled();
             mLetterboxConfiguration.resetCameraCompatRefreshEnabled();
             mLetterboxConfiguration.resetCameraCompatRefreshCycleThroughStopEnabled();
         }
@@ -1272,6 +1280,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mLetterboxConfiguration.isTranslucentLetterboxingEnabled());
             pw.println("Is the user aspect ratio settings enabled: "
                     + mLetterboxConfiguration.isUserAppAspectRatioSettingsEnabled());
+            pw.println("Is the fullscreen option in user aspect ratio settings enabled: "
+                    + mLetterboxConfiguration.isUserAppAspectRatioFullscreenEnabled());
         }
         return 0;
     }
@@ -1471,6 +1481,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        Whether letterboxing for translucent activities is enabled.");
         pw.println("      --isUserAppAspectRatioSettingsEnabled [true|1|false|0]");
         pw.println("        Whether user aspect ratio settings are enabled.");
+        pw.println("      --isUserAppAspectRatioFullscreenEnabled [true|1|false|0]");
+        pw.println("        Whether user aspect ratio fullscreen option is enabled.");
         pw.println("      --isCameraCompatRefreshEnabled [true|1|false|0]");
         pw.println("        Whether camera compatibility refresh is enabled.");
         pw.println("      --isCameraCompatRefreshCycleThroughStopEnabled [true|1|false|0]");

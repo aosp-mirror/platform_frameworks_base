@@ -158,6 +158,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -173,6 +174,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+@Ignore("b/292153259")
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)

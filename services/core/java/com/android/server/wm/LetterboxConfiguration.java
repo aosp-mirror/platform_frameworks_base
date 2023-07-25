@@ -85,6 +85,11 @@ final class LetterboxConfiguration {
     // TODO(b/288142656): Enable user aspect ratio settings by default.
     private static final boolean DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_SETTINGS = false;
 
+    // Whether per-app fullscreen user aspect ratio override option is enabled
+    private static final String KEY_ENABLE_USER_ASPECT_RATIO_FULLSCREEN =
+            "enable_app_compat_user_aspect_ratio_fullscreen";
+    private static final boolean DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_FULLSCREEN = true;
+
     // Whether the letterbox wallpaper style is enabled by default
     private static final String KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER =
             "enable_letterbox_background_wallpaper";
@@ -266,6 +271,9 @@ final class LetterboxConfiguration {
     // Allows to enable user aspect ratio settings ignoring flags.
     private boolean mUserAppAspectRatioSettingsOverrideEnabled;
 
+    // Allows to enable fullscreen option in user aspect ratio settings ignoring flags.
+    private boolean mUserAppAspectRatioFullscreenOverrideEnabled;
+
     // The override for letterbox background type in case it's different from
     // LETTERBOX_BACKGROUND_OVERRIDE_UNSET
     @LetterboxBackgroundType
@@ -379,6 +387,10 @@ final class LetterboxConfiguration {
                                 R.bool.config_appCompatUserAppAspectRatioSettingsIsEnabled))
                 .addDeviceConfigEntry(KEY_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER,
                         DEFAULT_VALUE_ENABLE_LETTERBOX_BACKGROUND_WALLPAPER, /* enabled */ true)
+                .addDeviceConfigEntry(KEY_ENABLE_USER_ASPECT_RATIO_FULLSCREEN,
+                        DEFAULT_VALUE_ENABLE_USER_ASPECT_RATIO_FULLSCREEN,
+                        mContext.getResources().getBoolean(
+                                R.bool.config_appCompatUserAppAspectRatioFullscreenIsEnabled))
                 .build();
     }
 
@@ -1274,5 +1286,22 @@ final class LetterboxConfiguration {
      */
     void resetUserAppAspectRatioSettingsEnabled() {
         setUserAppAspectRatioSettingsOverrideEnabled(false);
+    }
+
+    /**
+     * Whether fullscreen option in per-app user aspect ratio settings is enabled
+     */
+    boolean isUserAppAspectRatioFullscreenEnabled() {
+        return isUserAppAspectRatioSettingsEnabled()
+                && (mUserAppAspectRatioFullscreenOverrideEnabled
+                    || mDeviceConfig.getFlagValue(KEY_ENABLE_USER_ASPECT_RATIO_FULLSCREEN));
+    }
+
+    void setUserAppAspectRatioFullscreenOverrideEnabled(boolean enabled) {
+        mUserAppAspectRatioFullscreenOverrideEnabled = enabled;
+    }
+
+    void resetUserAppAspectRatioFullscreenEnabled() {
+        setUserAppAspectRatioFullscreenOverrideEnabled(false);
     }
 }
