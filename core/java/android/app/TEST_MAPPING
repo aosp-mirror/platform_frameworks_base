@@ -59,10 +59,10 @@
             "file_patterns": ["INotificationManager\\.aidl"]
         },
         {
-            "name": "CtsWindowManagerDeviceTestCases",
+            "name": "CtsWindowManagerDeviceWindow",
             "options": [
                 {
-                    "include-filter": "android.server.wm.ToastWindowTest"
+                    "include-filter": "android.server.wm.window.ToastWindowTest"
                 }
             ],
             "file_patterns": ["INotificationManager\\.aidl"]
@@ -244,8 +244,143 @@
                 "(/|^)DeviceFeature[^/]*", "(/|^)Hdmi[^/]*"
             ]
         },
+{
+            "name": "CtsWindowManagerDeviceActivity",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
         {
-            "name": "CtsWindowManagerTestCases",
+            "name": "CtsWindowManagerDeviceAm",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "CtsWindowManagerDeviceBackNavigation",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "CtsWindowManagerDeviceDisplay",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "CtsWindowManagerDeviceKeyguard",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "CtsWindowManagerDeviceInsets",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "CtsWindowManagerDeviceTaskFragment",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "CtsWindowManagerDeviceScvh",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "CtsWindowManagerDeviceWindow",
+            "options": [
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                },
+                {
+                    "include-filter": "android.content.wm.cts"
+                }
+            ],
+            "file_patterns": ["(/|^)ContextImpl.java"]
+        },
+        {
+            "name": "CtsWindowManagerDeviceOther",
             "options": [
                 {
                     "exclude-annotation": "androidx.test.filters.FlakyTest"
