@@ -86,7 +86,10 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -127,6 +130,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Service that manages requests and callbacks for launchers that support
@@ -215,7 +221,8 @@ public class LauncherAppsService extends SystemService {
 
         final LauncherAppsServiceInternal mInternal;
 
-        private RemoteCallbackList<IDumpCallback> mDumpCallbacks = new RemoteCallbackList<>();
+        @NonNull
+        private final RemoteCallbackList<IDumpCallback> mDumpCallbacks = new RemoteCallbackList<>();
 
         public LauncherAppsImpl(Context context) {
             mContext = context;
@@ -1462,46 +1469,124 @@ public class LauncherAppsService extends SystemService {
                     getActivityOptionsForLauncher(opts), user.getIdentifier());
         }
 
+        @Override
+        public void onShellCommand(FileDescriptor in, @NonNull FileDescriptor out,
+                @NonNull FileDescriptor err, @Nullable String[] args, ShellCallback cb,
+                @Nullable ResultReceiver receiver) {
+            final int callingUid = injectBinderCallingUid();
+            if (!(callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID)) {
+                throw new SecurityException("Caller must be shell");
+            }
+
+            final long token = injectClearCallingIdentity();
+            try {
+                int status = (new LauncherAppsShellCommand())
+                        .exec(this, in, out, err, args, cb, receiver);
+                if (receiver != null) {
+                    receiver.send(status, null);
+                }
+            } finally {
+                injectRestoreCallingIdentity(token);
+            }
+        }
+
+        /** Handles Shell commands for LauncherAppsService */
+        private class LauncherAppsShellCommand extends ShellCommand {
+            @Override
+            public int onCommand(@Nullable String cmd) {
+                if ("dump-view-hierarchies".equals(cmd)) {
+                    dumpViewCaptureDataToShell();
+                    return 0;
+                } else {
+                    return handleDefaultCommands(cmd);
+                }
+            }
+
+            private void dumpViewCaptureDataToShell() {
+                try (ZipOutputStream zipOs = new ZipOutputStream(getRawOutputStream())) {
+                    forEachViewCaptureWindow((fileName, is) -> {
+                        try {
+                            zipOs.putNextEntry(new ZipEntry("FS" + fileName));
+                            is.transferTo(zipOs);
+                            zipOs.closeEntry();
+                        } catch (IOException e) {
+                            getErrPrintWriter().write("Failed to output " + fileName
+                                    + " data to shell: " + e.getMessage());
+                        }
+                    });
+                } catch (IOException e) {
+                    getErrPrintWriter().write("Failed to create or close zip output stream: "
+                            + e.getMessage());
+                }
+            }
+
+            @Override
+            public void onHelp() {
+                final PrintWriter pw = getOutPrintWriter();
+                pw.println("Usage: cmd launcherapps COMMAND [options ...]");
+                pw.println();
+                pw.println("cmd launcherapps dump-view-hierarchies");
+                pw.println("    Output captured view hierarchies. Files will be generated in ");
+                pw.println("    `"  + WM_TRACE_DIR + "`. After pulling the data to your device,");
+                pw.println("     you can upload / visualize it at `go/winscope`.");
+                pw.println();
+            }
+        }
 
         /**
          * Using a pipe, outputs view capture data to the wmtrace dir
          */
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
+                @Nullable String[] args) {
             super.dump(fd, pw, args);
 
             // Before the wmtrace directory is picked up by dumpstate service, some processes need
             // to write their data to that location. They can do that via these dumpCallbacks.
-            int i = mDumpCallbacks.beginBroadcast();
-            while (i > 0) {
-                i--;
-                dumpDataToWmTrace((String) mDumpCallbacks.getBroadcastCookie(i) + "_" + i,
-                        mDumpCallbacks.getBroadcastItem(i));
+            forEachViewCaptureWindow(this::dumpViewCaptureDataToWmTrace);
+        }
+
+        private void dumpViewCaptureDataToWmTrace(@NonNull String fileName,
+                @NonNull InputStream is) {
+            Path outPath = Paths.get(fileName);
+            try {
+                Files.copy(is, outPath, StandardCopyOption.REPLACE_EXISTING);
+                Files.setPosixFilePermissions(outPath, WM_TRACE_FILE_PERMISSIONS);
+            } catch (IOException e) {
+                Log.d(TAG, "failed to write data to " + fileName + " in wmtrace dir", e);
+            }
+        }
+
+        /**
+         * IDumpCallback.onDump alerts the in-process ViewCapture instance to start sending data
+         * to LauncherAppsService via the pipe's input provided. This data (as well as an output
+         * file name) is provided to the consumer via an InputStream to output where it wants (for
+         * example, the winscope trace directory or the shell's stdout).
+         */
+        private void forEachViewCaptureWindow(
+                @NonNull BiConsumer<String, InputStream> outputtingConsumer) {
+            for (int i = mDumpCallbacks.beginBroadcast() - 1; i >= 0; i--) {
+                String packageName = (String) mDumpCallbacks.getBroadcastCookie(i);
+                String fileName = WM_TRACE_DIR + packageName + "_" + i + VC_FILE_SUFFIX;
+
+                try {
+                    // Order is important here. OnDump needs to be called before the BiConsumer
+                    // accepts & starts blocking on reading the input stream.
+                    ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
+                    mDumpCallbacks.getBroadcastItem(i).onDump(pipe[1]);
+
+                    InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pipe[0]);
+                    outputtingConsumer.accept(fileName, is);
+                    is.close();
+                } catch (Exception e) {
+                    Log.d(TAG, "failed to pipe view capture data", e);
+                }
             }
             mDumpCallbacks.finishBroadcast();
         }
 
-        private void dumpDataToWmTrace(String name, IDumpCallback cb) {
-            ParcelFileDescriptor[] pipe;
-            try {
-                pipe = ParcelFileDescriptor.createPipe();
-                cb.onDump(pipe[1]);
-            } catch (IOException | RemoteException e) {
-                Log.d(TAG, "failed to pipe view capture data", e);
-                return;
-            }
-
-            Path path = Paths.get(WM_TRACE_DIR + Paths.get(name + VC_FILE_SUFFIX).getFileName());
-            try (InputStream is = new ParcelFileDescriptor.AutoCloseInputStream(pipe[0])) {
-                Files.copy(is, path, StandardCopyOption.REPLACE_EXISTING);
-                Files.setPosixFilePermissions(path, WM_TRACE_FILE_PERMISSIONS);
-            } catch (IOException e) {
-                Log.d(TAG, "failed to write data to file in wmtrace dir", e);
-            }
-        }
-
         @RequiresPermission(READ_FRAME_BUFFER)
         @Override
-        public void registerDumpCallback(IDumpCallback cb) {
+        public void registerDumpCallback(@NonNull IDumpCallback cb) {
             int status = checkCallingOrSelfPermissionForPreflight(mContext, READ_FRAME_BUFFER);
             if (PERMISSION_GRANTED == status) {
                 String name = mContext.getPackageManager().getNameForUid(Binder.getCallingUid());
@@ -1513,7 +1598,7 @@ public class LauncherAppsService extends SystemService {
 
         @RequiresPermission(READ_FRAME_BUFFER)
         @Override
-        public void unRegisterDumpCallback(IDumpCallback cb) {
+        public void unRegisterDumpCallback(@NonNull IDumpCallback cb) {
             int status = checkCallingOrSelfPermissionForPreflight(mContext, READ_FRAME_BUFFER);
             if (PERMISSION_GRANTED == status) {
                 mDumpCallbacks.unregister(cb);
