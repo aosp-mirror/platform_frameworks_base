@@ -17,7 +17,7 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval" >
 
-    <solid android:color="@android:color/white" />
+    <solid android:color="?android:attr/colorBackground" />
 
     <size
         android:height="56dp"
