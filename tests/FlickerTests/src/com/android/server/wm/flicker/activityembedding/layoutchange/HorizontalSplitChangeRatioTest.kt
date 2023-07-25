@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.activityembedding
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.Rect
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -64,6 +65,13 @@ class HorizontalSplitChangeRatioTest(flicker: LegacyFlickerTest) :
             testApp.exit(wmHelper)
         }
     }
+
+    @FlakyTest(bugId = 293075402)
+    override fun backgroundLayerNeverVisible() = super.backgroundLayerNeverVisible()
+
+    @FlakyTest(bugId = 293075402)
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
     /** Assert the Main activity window is always visible. */
     @Presubmit
