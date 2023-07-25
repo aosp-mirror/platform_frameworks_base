@@ -27,6 +27,7 @@ import static android.app.StatusBarManager.NavBarMode;
 import static android.app.StatusBarManager.SessionFlags;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.ViewRootImpl.CLIENT_TRANSIENT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
 
 import android.Manifest;
@@ -636,6 +637,31 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 } catch (RemoteException ex) {}
             }
             return false;
+        }
+
+        @Override
+        public void confirmImmersivePrompt() {
+            if (mBar == null) {
+                return;
+            }
+            try {
+                mBar.confirmImmersivePrompt();
+            } catch (RemoteException ex) {
+            }
+        }
+
+        @Override
+        public void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode) {
+            if (mBar == null) {
+                return;
+            }
+            if (!CLIENT_TRANSIENT) {
+                // Only call from here when the client transient is not enabled.
+                try {
+                    mBar.immersiveModeChanged(rootDisplayAreaId, isImmersiveMode);
+                } catch (RemoteException ex) {
+                }
+            }
         }
 
         // TODO(b/118592525): support it per display if necessary.
