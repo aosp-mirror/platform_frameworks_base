@@ -1386,6 +1386,10 @@ public class AudioService extends IAudioService.Stub
                 new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED);
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
+        if (mDisplayManager == null) {
+            intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+            intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        }
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_USER_BACKGROUND);
         intentFilter.addAction(Intent.ACTION_USER_FOREGROUND);
@@ -1416,7 +1420,9 @@ public class AudioService extends IAudioService.Stub
             subscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionChangedListener);
         }
 
-        mDisplayManager.registerDisplayListener(mDisplayListener, mAudioHandler);
+        if (mDisplayManager != null) {
+            mDisplayManager.registerDisplayListener(mDisplayListener, mAudioHandler);
+        }
     }
 
     public void systemReady() {
@@ -9587,6 +9593,17 @@ public class AudioService extends IAudioService.Stub
             } else if (action.equals(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED)
                     || action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 mDeviceBroker.receiveBtEvent(intent);
+            } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                if (mMonitorRotation) {
+                    RotationHelper.enable();
+                }
+                AudioSystem.setParameters("screen_state=on");
+            } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                if (mMonitorRotation) {
+                    //reduce wakeups (save current) by only listening when display is on
+                    RotationHelper.disable();
+                }
+                AudioSystem.setParameters("screen_state=off");
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 sendMsg(mAudioHandler,
                         MSG_CONFIGURATION_CHANGED,
