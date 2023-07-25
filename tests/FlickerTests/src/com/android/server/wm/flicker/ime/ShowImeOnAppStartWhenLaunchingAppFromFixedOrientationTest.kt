@@ -73,7 +73,7 @@ class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: LegacyF
 
     @Presubmit @Test fun imeLayerBecomesVisible() = flicker.imeLayerBecomesVisible()
 
-    @FlakyTest(bugId = 293096776)
+    @Presubmit
     @Test
     fun snapshotStartingWindowLayerCoversExactlyOnApp() {
         flicker.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp)
