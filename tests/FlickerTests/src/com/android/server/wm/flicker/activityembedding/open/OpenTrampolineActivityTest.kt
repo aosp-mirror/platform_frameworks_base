@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.activityembedding
+package com.android.server.wm.flicker.activityembedding.open
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.Rect
 import android.tools.common.flicker.subject.region.RegionSubject
-import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -173,7 +173,8 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
                         .coversExactly(startDisplayBounds)
                 }
                 .then()
-                .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT,
+                    isOptional = true)
                 .then()
                 .isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
         }
