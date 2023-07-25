@@ -171,12 +171,15 @@ constructor(
         wmHelper
             .StateSyncBuilder()
             .withActivityState(ALWAYS_EXPAND_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-            .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_PAUSED)
+            .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_PAUSED,
+                PlatformConsts.STATE_STOPPED)
             .waitForAndVerify()
     }
 
     private fun launchSecondaryActivityFromButton(
-            wmHelper: WindowManagerStateHelper, buttonName: String) {
+        wmHelper: WindowManagerStateHelper,
+        buttonName: String
+    ) {
         val launchButton =
                 uiDevice.wait(Until.findObject(By.res(getPackage(), buttonName)), FIND_TIMEOUT)
         require(launchButton != null) {
