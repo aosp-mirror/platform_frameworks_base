@@ -381,24 +381,15 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             final Rect taskBounds = taskConfig.windowConfiguration.getBounds();
             final WindowManager windowManager = Objects.requireNonNull(
                     context.getSystemService(WindowManager.class));
-            final Rect currentBounds = windowManager.getCurrentWindowMetrics().getBounds();
             final Rect maxBounds = windowManager.getMaximumWindowMetrics().getBounds();
             boolean isTaskExpanded = maxBounds.equals(taskBounds);
-            boolean isActivityExpanded = maxBounds.equals(currentBounds);
             /*
              * We need to proxy being in full screen because when a user enters PiP and exits PiP
              * the task windowingMode will report multi-window/pinned until the transition is
              * finished in WM Shell.
              * maxBounds == taskWindowBounds is a proxy check to verify the window is full screen
-             * For tasks that are letterboxed, we use currentBounds == maxBounds to filter these
-             * out.
              */
-            // TODO(b/262900133) remove currentBounds check when letterboxed apps report bounds.
-            // currently we don't want to report to letterboxed apps since they do not update the
-            // window bounds when the Activity is moved.  An inaccurate fold will be reported so
-            // we skip.
-            return isTaskExpanded && (isActivityExpanded
-                    || mTaskFragmentOrganizer.isActivityEmbedded(activityToken));
+            return isTaskExpanded;
         } else {
             // TODO(b/242674941): use task windowing mode for window context that associates with
             //  activity.

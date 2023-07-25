@@ -36,6 +36,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
+import static android.window.ConfigurationHelper.shouldUpdateWindowMetricsBounds;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
@@ -5987,6 +5988,11 @@ public final class ActivityThread extends ClientTransactionHandler
     public static boolean shouldReportChange(@Nullable Configuration currentConfig,
             @NonNull Configuration newConfig, @Nullable SizeConfigurationBuckets sizeBuckets,
             int handledConfigChanges) {
+        // Always report changes in window configuration bounds
+        if (shouldUpdateWindowMetricsBounds(currentConfig, newConfig)) {
+            return true;
+        }
+
         final int publicDiff = currentConfig.diffPublicOnly(newConfig);
         // Don't report the change if there's no public diff between current and new config.
         if (publicDiff == 0) {
