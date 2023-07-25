@@ -38,6 +38,14 @@
         android:text="Launch Secondary Activity in RTL" />
 
     <Button
+        android:id="@+id/launch_secondary_activity_horizontally_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:onClick="launchSecondaryActivity"
+        android:tag="BOTTOM_TO_TOP"
+        android:text="Launch Secondary Activity Horizontally" />
+
+    <Button
         android:id="@+id/launch_placeholder_split_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"

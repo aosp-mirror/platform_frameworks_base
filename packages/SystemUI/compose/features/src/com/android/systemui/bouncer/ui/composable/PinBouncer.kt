@@ -14,63 +14,40 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalAnimationApi::class, ExperimentalAnimationGraphicsApi::class)
-
 package com.android.systemui.bouncer.ui.composable
 
 import android.view.HapticFeedbackConstants
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.Transition
-import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
-import androidx.compose.animation.graphics.res.animatedVectorResource
-import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
-import androidx.compose.animation.graphics.vector.AnimatedImageVector
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Easings
@@ -78,7 +55,6 @@ import com.android.compose.grid.VerticalGrid
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.R
 import com.android.systemui.bouncer.ui.viewmodel.ActionButtonAppearance
-import com.android.systemui.bouncer.ui.viewmodel.EnteredKey
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -105,147 +81,6 @@ internal fun PinBouncer(
         PinInputDisplay(viewModel)
         Spacer(Modifier.height(100.dp))
         PinPad(viewModel)
-    }
-}
-
-@Composable
-private fun PinInputDisplay(viewModel: PinBouncerViewModel) {
-    val currentPinEntries: List<EnteredKey> by viewModel.pinEntries.collectAsState()
-
-    // visiblePinEntries keeps pins removed from currentPinEntries in the composition until their
-    // disappear-animation completed. The list is sorted by the natural ordering of EnteredKey,
-    // which is guaranteed to produce the original edit order, since the model only modifies entries
-    // at the end.
-    val visiblePinEntries = remember { SnapshotStateList<EnteredKey>() }
-    currentPinEntries.forEach {
-        val index = visiblePinEntries.binarySearch(it)
-        if (index < 0) {
-            val insertionPoint = -(index + 1)
-            visiblePinEntries.add(insertionPoint, it)
-        }
-    }
-
-    Row(
-        modifier =
-            Modifier.heightIn(min = entryShapeSize)
-                // Pins overflowing horizontally should still be shown as scrolling.
-                .wrapContentSize(unbounded = true),
-    ) {
-        visiblePinEntries.forEachIndexed { index, entry ->
-            key(entry) {
-                val visibility = remember {
-                    MutableTransitionState<EntryVisibility>(EntryVisibility.Hidden)
-                }
-                visibility.targetState =
-                    when {
-                        currentPinEntries.isEmpty() && visiblePinEntries.size > 1 ->
-                            EntryVisibility.BulkHidden(index, visiblePinEntries.size)
-                        currentPinEntries.contains(entry) -> EntryVisibility.Shown
-                        else -> EntryVisibility.Hidden
-                    }
-
-                val shape = viewModel.pinShapes.getShape(entry.sequenceNumber)
-                PinInputEntry(shape, updateTransition(visibility, label = "Pin Entry $entry"))
-
-                LaunchedEffect(entry) {
-                    // Remove entry from visiblePinEntries once the hide transition completed.
-                    snapshotFlow {
-                            visibility.currentState == visibility.targetState &&
-                                visibility.targetState != EntryVisibility.Shown
-                        }
-                        .collect { isRemoved ->
-                            if (isRemoved) {
-                                visiblePinEntries.remove(entry)
-                            }
-                        }
-                }
-            }
-        }
-    }
-}
-
-private sealed class EntryVisibility {
-    object Shown : EntryVisibility()
-
-    object Hidden : EntryVisibility()
-
-    /**
-     * Same as [Hidden], but applies when multiple entries are hidden simultaneously, without
-     * collapsing during the hide.
-     */
-    data class BulkHidden(val staggerIndex: Int, val totalEntryCount: Int) : EntryVisibility()
-}
-
-@Composable
-private fun PinInputEntry(shapeResourceId: Int, transition: Transition<EntryVisibility>) {
-    // spec: http://shortn/_DEhE3Xl2bi
-    val dismissStaggerDelayMs = 33
-    val dismissDurationMs = 450
-    val expansionDurationMs = 250
-    val shapeCollapseDurationMs = 200
-
-    val animatedEntryWidth by
-        transition.animateDp(
-            transitionSpec = {
-                when (val target = targetState) {
-                    is EntryVisibility.BulkHidden ->
-                        // only collapse horizontal space once all entries are removed
-                        snap(dismissDurationMs + dismissStaggerDelayMs * target.totalEntryCount)
-                    else -> tween(expansionDurationMs, easing = Easings.Standard)
-                }
-            },
-            label = "entry space"
-        ) { state ->
-            if (state == EntryVisibility.Shown) entryShapeSize else 0.dp
-        }
-
-    val animatedShapeSize by
-        transition.animateDp(
-            transitionSpec = {
-                when {
-                    EntryVisibility.Hidden isTransitioningTo EntryVisibility.Shown -> {
-                        // The AVD contains the entry transition.
-                        snap()
-                    }
-                    targetState is EntryVisibility.BulkHidden -> {
-                        val target = targetState as EntryVisibility.BulkHidden
-                        tween(
-                            dismissDurationMs,
-                            delayMillis = target.staggerIndex * dismissStaggerDelayMs,
-                            easing = Easings.Legacy,
-                        )
-                    }
-                    else -> tween(shapeCollapseDurationMs, easing = Easings.StandardDecelerate)
-                }
-            },
-            label = "shape size"
-        ) { state ->
-            if (state == EntryVisibility.Shown) entryShapeSize else 0.dp
-        }
-
-    val dotColor = MaterialTheme.colorScheme.onSurfaceVariant
-    Layout(
-        content = {
-            val image = AnimatedImageVector.animatedVectorResource(shapeResourceId)
-            var atEnd by remember { mutableStateOf(false) }
-            Image(
-                painter = rememberAnimatedVectorPainter(image, atEnd),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                colorFilter = ColorFilter.tint(dotColor),
-            )
-            LaunchedEffect(Unit) { atEnd = true }
-        }
-    ) { measurables, _ ->
-        val shapeSizePx = animatedShapeSize.roundToPx()
-        val placeable = measurables.single().measure(Constraints.fixed(shapeSizePx, shapeSizePx))
-
-        layout(animatedEntryWidth.roundToPx(), entryShapeSize.roundToPx()) {
-            placeable.place(
-                ((animatedEntryWidth - animatedShapeSize) / 2f).roundToPx(),
-                ((entryShapeSize - animatedShapeSize) / 2f).roundToPx()
-            )
-        }
     }
 }
 
@@ -510,8 +345,6 @@ private suspend fun showFailureAnimation(
         }
     }
 }
-
-private val entryShapeSize = 30.dp
 
 private val pinButtonSize = 84.dp
 private val pinButtonErrorShrinkFactor = 67.dp / pinButtonSize

@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.events
 
 import android.content.Context
 import android.graphics.Rect
+import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.util.Pair
 import android.view.Gravity
 import android.view.View
@@ -37,11 +39,14 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RunWith(AndroidTestingRunner::class)
+@TestableLooper.RunWithLooper
 class SystemEventChipAnimationControllerTest : SysuiTestCase() {
     private lateinit var controller: SystemEventChipAnimationController
 
@@ -159,7 +164,7 @@ class SystemEventChipAnimationControllerTest : SysuiTestCase() {
         assertThat(chipRect).isEqualTo(Rect(890, 25, 990, 75))
     }
 
-    class TestView(context: Context) : View(context), BackgroundAnimatableView {
+    private class TestView(context: Context) : View(context), BackgroundAnimatableView {
         override val view: View
             get() = this
 

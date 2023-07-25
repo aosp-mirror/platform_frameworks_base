@@ -1097,6 +1097,9 @@
 
     <dimen name="ongoing_appops_dialog_side_padding">16dp</dimen>
 
+    <dimen name="privacy_dialog_background_radius_large">12dp</dimen>
+    <dimen name="privacy_dialog_background_radius_small">4dp</dimen>
+
     <!-- Size of media cards in the QSPanel carousel -->
     <dimen name="qs_media_padding">16dp</dimen>
     <dimen name="qs_media_album_radius">14dp</dimen>
@@ -1346,6 +1349,8 @@
     <dimen name="media_output_dialog_default_margin_end">16dp</dimen>
     <dimen name="media_output_dialog_selectable_margin_end">80dp</dimen>
     <dimen name="media_output_dialog_list_padding_top">8dp</dimen>
+    <dimen name="media_output_dialog_icon_left_radius">28dp</dimen>
+    <dimen name="media_output_dialog_icon_right_radius">0dp</dimen>
 
     <!-- Distance that the full shade transition takes in order to complete by tapping on a button
          like "expand". -->

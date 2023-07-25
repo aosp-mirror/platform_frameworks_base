@@ -29,6 +29,7 @@ import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle
@@ -49,11 +50,11 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.wm.shell.sysui.ShellInterface
 import com.google.common.util.concurrent.MoreExecutors
-import dagger.Lazy
 import java.util.Optional
 import java.util.concurrent.Executor
 import org.junit.After
@@ -82,6 +83,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     private val displayTracker = FakeDisplayTracker(mContext)
     private val fakeSystemClock = FakeSystemClock()
     private val sysUiState = SysUiState(displayTracker)
+    private val featureFlags = FakeFeatureFlags()
     private val screenLifecycle = ScreenLifecycle(dumpManager)
     private val wakefulnessLifecycle =
         WakefulnessLifecycle(mContext, null, fakeSystemClock, dumpManager)
@@ -132,12 +134,13 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 executor,
                 commandQueue,
                 shellInterface,
-                Lazy { navBarController },
-                Lazy { Optional.of(centralSurfaces) },
-                Lazy { shadeViewController },
+                { navBarController },
+                { Optional.of(centralSurfaces) },
+                { shadeViewController },
                 navModeController,
                 statusBarWinController,
                 sysUiState,
+                mock(),
                 userTracker,
                 screenLifecycle,
                 wakefulnessLifecycle,
@@ -145,6 +148,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 displayTracker,
                 sysuiUnlockAnimationController,
                 assistUtils,
+                featureFlags,
                 dumpManager,
                 unfoldTransitionProgressForwarder
             )
