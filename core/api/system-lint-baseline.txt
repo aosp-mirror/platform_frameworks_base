@@ -15,6 +15,12 @@ KotlinKeyword: android.app.Notification#when:
     Avoid field names that are Kotlin hard keywords ("when"); see https://android.github.io/kotlin-guides/interop.html#no-hard-keywords
 
 
+ListenerLast: android.telephony.satellite.SatelliteManager#stopSatelliteTransmissionUpdates(android.telephony.satellite.SatelliteTransmissionUpdateCallback, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>) parameter #1:
+    Listeners should always be at end of argument list (method `stopSatelliteTransmissionUpdates`)
+ListenerLast: android.telephony.satellite.SatelliteManager#stopSatelliteTransmissionUpdates(android.telephony.satellite.SatelliteTransmissionUpdateCallback, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>) parameter #2:
+    Listeners should always be at end of argument list (method `stopSatelliteTransmissionUpdates`)
+
+
 MissingGetterMatchingBuilder: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallViaAudioProcessing(boolean):
     android.telecom.CallScreeningService.CallResponse does not declare a `shouldScreenCallViaAudioProcessing()` method matching method android.telecom.CallScreeningService.CallResponse.Builder.setShouldScreenCallViaAudioProcessing(boolean)
 MissingGetterMatchingBuilder: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
@@ -211,6 +217,8 @@ SamShouldBeLast: android.security.KeyChain#choosePrivateKeyAlias(android.app.Act
     SAM-compatible parameters (such as parameter 2, "response", in android.security.KeyChain.choosePrivateKeyAlias) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.security.KeyChain#choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, String[], java.security.Principal[], android.net.Uri, String):
     SAM-compatible parameters (such as parameter 2, "response", in android.security.KeyChain.choosePrivateKeyAlias) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.telephony.satellite.SatelliteManager#startSatelliteTransmissionUpdates(java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>, android.telephony.satellite.SatelliteTransmissionUpdateCallback):
+    SAM-compatible parameters (such as parameter 2, "resultListener", in android.telephony.satellite.SatelliteManager.startSatelliteTransmissionUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.View#postDelayed(Runnable, long):
     SAM-compatible parameters (such as parameter 1, "action", in android.view.View.postDelayed) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.View#postOnAnimationDelayed(Runnable, long):

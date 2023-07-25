@@ -16,11 +16,14 @@
 
 package android.telephony.satellite;
 
+import android.annotation.SystemApi;
+
 /**
  * A callback class for monitoring satellite modem state change events.
  *
  * @hide
  */
+@SystemApi
 public interface SatelliteStateCallback {
     /**
      * Called when satellite modem state changes.

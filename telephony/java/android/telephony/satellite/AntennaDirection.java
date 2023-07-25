@@ -17,7 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,6 +37,7 @@ import java.util.Objects;
  * positive X and pointing away from back of the phone for negative X.
  * @hide
  */
+@SystemApi
 public final class AntennaDirection implements Parcelable {
     /** Antenna x axis direction. */
     private float mX;
@@ -50,7 +51,6 @@ public final class AntennaDirection implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
     public AntennaDirection(float x, float y, float z) {
         mX = x;
         mY = y;

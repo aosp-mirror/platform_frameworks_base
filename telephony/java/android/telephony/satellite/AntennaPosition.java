@@ -17,7 +17,7 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
-import android.compat.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,6 +28,7 @@ import java.util.Objects;
  * direction to be used with satellite communication and suggested device hold positions.
  * @hide
  */
+@SystemApi
 public final class AntennaPosition implements Parcelable {
     /** Antenna direction used for satellite communication. */
     @NonNull AntennaDirection mAntennaDirection;
@@ -38,7 +39,6 @@ public final class AntennaPosition implements Parcelable {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
     public AntennaPosition(@NonNull AntennaDirection antennaDirection, int suggestedHoldPosition) {
         mAntennaDirection = antennaDirection;
         mSuggestedHoldPosition = suggestedHoldPosition;
