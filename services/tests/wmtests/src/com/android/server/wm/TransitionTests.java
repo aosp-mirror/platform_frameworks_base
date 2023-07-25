@@ -1384,7 +1384,8 @@ public class TransitionTests extends WindowTestsBase {
                 .mTaskSnapshotController;
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
-        final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
+        final Transition openTransition = createTestTransition(TRANSIT_OPEN, controller);
+        controller.moveToCollecting(openTransition);
 
         // Start out with task2 visible and set up a transition that closes task2 and opens task1
         final Task task1 = createTask(mDisplayContent);
@@ -1416,7 +1417,8 @@ public class TransitionTests extends WindowTestsBase {
         controller.finishTransition(openTransition);
 
         // We are now going to simulate closing task1 to return back to (open) task2.
-        final Transition closeTransition = controller.createTransition(TRANSIT_CLOSE);
+        final Transition closeTransition = createTestTransition(TRANSIT_CLOSE, controller);
+        controller.moveToCollecting(closeTransition);
 
         closeTransition.collectExistenceChange(task2);
         closeTransition.collectExistenceChange(activity2);
