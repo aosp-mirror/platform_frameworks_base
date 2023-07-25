@@ -678,8 +678,11 @@ class AppIdPermissionPolicy : SchemePolicy() {
             newState.userStates.forEachIndexed { _, userId, userState ->
                 userState.appIdPermissionFlags[appId]?.forEachReversedIndexed {
                     _, permissionName, oldFlags ->
+                    // Do not revoke the permission during an upgrade if it's POLICY_FIXED or
+                    // SYSTEM_FIXED. Otherwise the user cannot grant back the permission.
                     if (permissionName in STORAGE_AND_MEDIA_PERMISSIONS &&
-                        oldFlags.hasBits(PermissionFlags.RUNTIME_GRANTED)) {
+                        oldFlags.hasBits(PermissionFlags.RUNTIME_GRANTED) &&
+                        !oldFlags.hasAnyBit(SYSTEM_OR_POLICY_FIXED_MASK)) {
                         Slog.v(
                             LOG_TAG, "Revoking storage permission: $permissionName for appId: " +
                                 " $appId and user: $userId"
