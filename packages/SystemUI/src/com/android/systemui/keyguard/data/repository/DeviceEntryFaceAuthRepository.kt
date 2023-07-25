@@ -26,6 +26,8 @@ import com.android.internal.logging.UiEventLogger
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.Dumpable
 import com.android.systemui.R
+import com.android.systemui.biometrics.data.repository.FacePropertyRepository
+import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -58,6 +60,7 @@ import java.util.stream.Collectors
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -68,6 +71,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -120,6 +124,7 @@ interface DeviceEntryFaceAuthRepository {
     fun cancel()
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class DeviceEntryFaceAuthRepositoryImpl
 @Inject
@@ -143,7 +148,8 @@ constructor(
     @FaceDetectTableLog private val faceDetectLog: TableLogBuffer,
     @FaceAuthTableLog private val faceAuthLog: TableLogBuffer,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    private val featureFlags: FeatureFlags,
+    featureFlags: FeatureFlags,
+    facePropertyRepository: FacePropertyRepository,
     dumpManager: DumpManager,
 ) : DeviceEntryFaceAuthRepository, Dumpable {
     private var authCancellationSignal: CancellationSignal? = null
@@ -162,6 +168,13 @@ constructor(
     private val _detectionStatus = MutableStateFlow<FaceDetectionStatus?>(null)
     override val detectionStatus: Flow<FaceDetectionStatus>
         get() = _detectionStatus.filterNotNull()
+
+    private val isFaceBiometricsAllowed: Flow<Boolean> =
+        facePropertyRepository.sensorInfo.flatMapLatest {
+            if (it?.strength == SensorStrength.STRONG)
+                biometricSettingsRepository.isStrongBiometricAllowed
+            else biometricSettingsRepository.isNonStrongBiometricAllowed
+        }
 
     private val _isLockedOut = MutableStateFlow(false)
     override val isLockedOut: StateFlow<Boolean> = _isLockedOut
@@ -274,10 +287,8 @@ constructor(
                 canFaceAuthOrDetectRun(faceDetectLog),
                 logAndObserve(isBypassEnabled, "isBypassEnabled", faceDetectLog),
                 logAndObserve(
-                    biometricSettingsRepository.isNonStrongBiometricAllowed
-                        .isFalse()
-                        .or(trustRepository.isCurrentUserTrusted),
-                    "nonStrongBiometricIsNotAllowedOrCurrentUserIsTrusted",
+                    isFaceBiometricsAllowed.isFalse().or(trustRepository.isCurrentUserTrusted),
+                    "biometricIsNotAllowedOrCurrentUserIsTrusted",
                     faceDetectLog
                 ),
                 // We don't want to run face detect if fingerprint can be used to unlock the device
@@ -369,20 +380,11 @@ constructor(
                 canFaceAuthOrDetectRun(faceAuthLog),
                 logAndObserve(isLockedOut.isFalse(), "isNotInLockOutState", faceAuthLog),
                 logAndObserve(
-                    deviceEntryFingerprintAuthRepository.isLockedOut.isFalse(),
-                    "fpIsNotLockedOut",
-                    faceAuthLog
-                ),
-                logAndObserve(
                     trustRepository.isCurrentUserTrusted.isFalse(),
                     "currentUserIsNotTrusted",
                     faceAuthLog
                 ),
-                logAndObserve(
-                    biometricSettingsRepository.isNonStrongBiometricAllowed,
-                    "nonStrongBiometricIsAllowed",
-                    faceAuthLog
-                ),
+                logAndObserve(isFaceBiometricsAllowed, "isFaceBiometricsAllowed", faceAuthLog),
                 logAndObserve(isAuthenticated.isFalse(), "faceNotAuthenticated", faceAuthLog),
             )
             .reduce(::and)
