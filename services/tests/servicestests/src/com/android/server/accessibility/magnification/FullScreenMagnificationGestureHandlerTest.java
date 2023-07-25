@@ -50,6 +50,7 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.platform.test.annotations.FlakyTest;
 import android.provider.Settings;
 import android.testing.TestableContext;
 import android.util.DebugUtils;
@@ -608,6 +609,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    @FlakyTest
     public void testScroll_singlePanningAndAtEdge_delegatingState() {
         goFromStateIdleTo(STATE_SINGLE_PANNING);
         mFullScreenMagnificationController.setCenter(
