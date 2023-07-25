@@ -1935,7 +1935,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         } else if (mFixedRotationLaunchingApp != null && r == null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
             // Keep async rotation controller if the next transition of display is requested.
-            if (!mTransitionController.isCollecting(this)) {
+            if (!mTransitionController.hasCollectingRotationChange(this, getRotation())) {
                 finishAsyncRotationIfPossible();
             }
         }
