@@ -99,10 +99,10 @@ class FontScaleConverterFactoryTest {
     fun missingLookupTable_cachesInterpolated() {
         val table = FontScaleConverterFactory.forScale(1.6F)!!
 
-        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((1.6F * 100).toInt())).isTrue()
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((1.6F * 100).toInt())).isTrue()
         // Double check known existing values
-        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((1.5F * 100).toInt())).isTrue()
-        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((1.7F * 100).toInt())).isFalse()
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((1.5F * 100).toInt())).isTrue()
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((1.7F * 100).toInt())).isFalse()
     }
 
     @Test
@@ -110,10 +110,10 @@ class FontScaleConverterFactoryTest {
     fun missingLookupTablePastEnd_cachesLinear() {
         val table = FontScaleConverterFactory.forScale(3F)!!
 
-        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((3F * 100).toInt())).isTrue()
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((3F * 100).toInt())).isTrue()
         // Double check known existing values
-        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((1.5F * 100).toInt())).isTrue()
-        assertThat(FontScaleConverterFactory.LOOKUP_TABLES.contains((1.7F * 100).toInt())).isFalse()
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((1.5F * 100).toInt())).isTrue()
+        assertThat(FontScaleConverterFactory.sLookupTables.contains((1.7F * 100).toInt())).isFalse()
     }
 
     @SmallTest
@@ -134,7 +134,7 @@ class FontScaleConverterFactoryTest {
     @SmallTest
     @Test
     fun tablesMatchAndAreMonotonicallyIncreasing() {
-        FontScaleConverterFactory.LOOKUP_TABLES.forEach { _, lookupTable ->
+        FontScaleConverterFactory.sLookupTables.forEach { _, lookupTable ->
             if (lookupTable !is FontScaleConverterImpl) {
                 throw IllegalStateException("Didn't return a FontScaleConverterImpl")
             }
