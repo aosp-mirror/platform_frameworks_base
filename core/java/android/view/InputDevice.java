@@ -958,6 +958,7 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     @Nullable
+    @TestApi
     public String getKeyboardLanguageTag() {
         return mKeyboardLanguageTag;
     }
@@ -968,6 +969,7 @@ public final class InputDevice implements Parcelable {
      * @hide
      */
     @Nullable
+    @TestApi
     public String getKeyboardLayoutType() {
         return mKeyboardLayoutType;
     }
