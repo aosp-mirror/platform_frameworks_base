@@ -85,6 +85,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.MergedConfiguration;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -102,6 +103,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
+import android.window.ClientWindowFrames;
 import android.window.ITransitionPlayer;
 import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
@@ -622,6 +624,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         for (WindowState win : windows) {
             win.mWinAnimator.mDrawState = HAS_DRAWN;
         }
+    }
+
+    static void makeLastConfigReportedToClient(WindowState w, boolean visible) {
+        w.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
+                new MergedConfiguration(), true /* useLatestConfig */, visible);
     }
 
     /**
