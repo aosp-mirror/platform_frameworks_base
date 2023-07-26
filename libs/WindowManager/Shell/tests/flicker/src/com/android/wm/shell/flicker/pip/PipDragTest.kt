@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -62,7 +62,7 @@ class PipDragTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
         }
     }
 
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipLayerMovesAwayFromEdge() {
         flicker.assertLayers {
