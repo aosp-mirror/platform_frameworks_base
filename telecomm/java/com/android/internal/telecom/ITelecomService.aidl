@@ -358,6 +358,8 @@ interface ITelecomService {
 
     int cleanupOrphanPhoneAccounts();
 
+    boolean isNonUiInCallServiceBound(in String packageName);
+
     void resetCarMode();
 
     void setTestDefaultCallRedirectionApp(String packageName);

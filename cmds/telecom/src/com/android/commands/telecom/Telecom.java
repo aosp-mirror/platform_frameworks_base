@@ -76,6 +76,8 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_CLEANUP_ORPHAN_PHONE_ACCOUNTS =
             "cleanup-orphan-phone-accounts";
     private static final String COMMAND_RESET_CAR_MODE = "reset-car-mode";
+    private static final String COMMAND_IS_NON_IN_CALL_SERVICE_BOUND =
+            "is-non-ui-in-call-service-bound";
 
     /**
      * Change the system dialer package name if a package name was specified,
@@ -169,6 +171,8 @@ public final class Telecom extends BaseCommand {
                         + " over Telephony.\n"
                 + "telecom log-mark <MESSAGE>: emits a message into the telecom logs.  Useful for "
                         + "testers to indicate where in the logs various test steps take place.\n"
+                + "telecom is-non-ui-in-call-service-bound <PACKAGE>: queries a particular "
+                + "non-ui-InCallService in InCallController to determine if it is bound \n"
         );
     }
 
@@ -269,6 +273,9 @@ public final class Telecom extends BaseCommand {
                 break;
             case COMMAND_GET_MAX_PHONES:
                 runGetMaxPhones();
+                break;
+            case COMMAND_IS_NON_IN_CALL_SERVICE_BOUND:
+                runIsNonUiInCallServiceBound();
                 break;
             case COMMAND_SET_TEST_EMERGENCY_PHONE_ACCOUNT_PACKAGE_FILTER:
                 runSetEmergencyPhoneAccountPackageFilter();
@@ -425,6 +432,18 @@ public final class Telecom extends BaseCommand {
         int numSims = Integer.parseInt(nextArgRequired());
         System.out.println("Setting sim count to " + numSims + ". Device may reboot");
         mTelephonyManager.switchMultiSimConfig(numSims);
+    }
+
+    /**
+     * prints out whether a particular non-ui InCallServices is bound in a call
+     */
+    public void runIsNonUiInCallServiceBound() throws RemoteException {
+        if (TextUtils.isEmpty(mArgs.peekNextArg())) {
+            System.out.println("No Argument passed. Please pass a <PACKAGE_NAME> to lookup.");
+        } else {
+            System.out.println(
+                    String.valueOf(mTelecomService.isNonUiInCallServiceBound(nextArg())));
+        }
     }
 
     /**
