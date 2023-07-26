@@ -229,8 +229,8 @@ public class BinaryTransparencyService extends SystemService {
 
                 // Only digest and split name are different between splits.
                 Digest digest = measureApk(split.getPath());
-                appInfo.digest = digest.value;
-                appInfo.digestAlgorithm = digest.algorithm;
+                appInfo.digest = digest.value();
+                appInfo.digestAlgorithm = digest.algorithm();
 
                 results.add(appInfo);
             }
@@ -391,8 +391,8 @@ public class BinaryTransparencyService extends SystemService {
                 var apexInfo = new IBinaryTransparencyService.ApexInfo();
                 apexInfo.packageName = packageState.getPackageName();
                 apexInfo.longVersion = packageState.getVersionCode();
-                apexInfo.digest = apexChecksum.value;
-                apexInfo.digestAlgorithm = apexChecksum.algorithm;
+                apexInfo.digest = apexChecksum.value();
+                apexInfo.digestAlgorithm = apexChecksum.algorithm();
                 apexInfo.signerDigests =
                         computePackageSignerSha256Digests(packageState.getSigningInfo());
 
@@ -1693,13 +1693,5 @@ public class BinaryTransparencyService extends SystemService {
         return slice.getList();
     }
 
-    private static class Digest {
-        public int algorithm;
-        public byte[] value;
-
-        Digest(int algorithm, byte[] value) {
-            this.algorithm = algorithm;
-            this.value = value;
-        }
-    }
+    private record Digest(int algorithm, byte[] value) {}
 }
