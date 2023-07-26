@@ -73,6 +73,12 @@ public class WindowTokenClientController {
         }
     }
 
+    /** Creates a new instance for test only. */
+    @VisibleForTesting
+    public static WindowTokenClientController createInstanceForTesting() {
+        return new WindowTokenClientController();
+    }
+
     private WindowTokenClientController() {}
 
     /**
