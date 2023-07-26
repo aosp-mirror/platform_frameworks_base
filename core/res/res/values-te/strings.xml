@@ -2166,7 +2166,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"అన్‌పాజ్ చేయండి"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"వర్క్ యాప్‌లు లేవు"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"వ్యక్తిగత యాప్‌లు లేవు"</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"వర్క్ <xliff:g id="APP">%s</xliff:g> యాప్‌ను తెరవాలా?"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"<xliff:g id="APP">%s</xliff:g> వర్క్ యాప్‌ను తెరవాలా?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"వ్యక్తిగత <xliff:g id="APP">%s</xliff:g> యాప్‌లో తెరవాలా?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"వర్క్ <xliff:g id="APP">%s</xliff:g> యాప్‌లో తెరవాలా?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"వర్క్ యాప్ నుండి కాల్ చేయాలా?"</string>
