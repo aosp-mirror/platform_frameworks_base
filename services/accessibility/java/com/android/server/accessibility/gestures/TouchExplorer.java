@@ -1341,6 +1341,8 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 Slog.e(LOG_TAG, "Unable to find a valid pointer for touch exploration.");
                 return;
             }
+            // Send hover exit if we haven't closed a previous touch exploration event stream.
+            sendHoverExitAndTouchExplorationGestureEndIfNeeded(pointerId);
             final int pointerIdBits = (1 << pointerId);
             final int policyFlags = mState.getLastReceivedPolicyFlags();
             mSendHoverEnterAndMoveDelayed.setPointerIdBits(pointerIdBits);
