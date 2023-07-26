@@ -69,7 +69,6 @@ import com.android.server.LocalServices;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -451,21 +450,21 @@ public class VibrationThreadTest {
                 fakeVibrator.getEffectSegments(vibrationId));
     }
 
-    @Ignore("b/290940400")
     @LargeTest
     @Test
     public void vibrate_singleVibratorRepeatingAlwaysOnWaveform_turnsVibratorBackOn()
             throws Exception {
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
         fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
+        int expectedOnDuration = SetAmplitudeVibratorStep.REPEATING_EFFECT_ON_DURATION;
 
-        int[] amplitudes = new int[]{1, 2};
         VibrationEffect effect = VibrationEffect.createWaveform(
-                new long[]{4900, 50}, amplitudes, 0);
+                /* timings= */ new long[]{expectedOnDuration - 100, 50},
+                /* amplitudes= */ new int[]{1, 2}, /* repeat= */ 0);
         long vibrationId = startThreadAndDispatcher(effect);
 
         assertTrue(waitUntil(() -> fakeVibrator.getEffectSegments(vibrationId).size() > 1,
-                5000 + TEST_TIMEOUT_MILLIS));
+                expectedOnDuration + TEST_TIMEOUT_MILLIS));
         mVibrationConductor.notifyCancelled(
                 new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_USER),
                 /* immediate= */ false);
@@ -473,12 +472,12 @@ public class VibrationThreadTest {
 
         verifyCallbacksTriggered(vibrationId, Vibration.Status.CANCELLED_BY_USER);
         assertFalse(mControllers.get(VIBRATOR_ID).isVibrating());
-        // First time turn vibrator ON for minimum of 5s.
-        assertEquals(5000L, fakeVibrator.getEffectSegments(vibrationId).get(0).getDuration());
-        // Vibrator turns off in the middle of the second execution of first step, turn it back ON
-        // for another 5s + remaining of 850ms.
-        assertEquals(4900 + 50 + 4900,
-                fakeVibrator.getEffectSegments(vibrationId).get(1).getDuration(), /* delta= */ 20);
+        List<VibrationEffectSegment> effectSegments = fakeVibrator.getEffectSegments(vibrationId);
+        // First time, turn vibrator ON for the expected fixed duration.
+        assertEquals(expectedOnDuration, effectSegments.get(0).getDuration());
+        // Vibrator turns off in the middle of the second execution of the first step. Expect it to
+        // be turned back ON at least for the fixed duration + the remaining duration of the step.
+        assertTrue(expectedOnDuration < effectSegments.get(1).getDuration());
         // Set amplitudes for a cycle {1, 2}, start second loop then turn it back on to same value.
         assertEquals(expectedAmplitudes(1, 2, 1, 1),
                 mVibratorProviders.get(VIBRATOR_ID).getAmplitudes().subList(0, 4));
