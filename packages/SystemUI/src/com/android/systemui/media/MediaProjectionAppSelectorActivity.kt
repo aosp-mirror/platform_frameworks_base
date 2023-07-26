@@ -85,7 +85,7 @@ class MediaProjectionAppSelectorActivity(
 
     public override fun onCreate(bundle: Bundle?) {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-        component = componentFactory.create(activity = this, view = this, resultHandler = this)
+        component = componentFactory.create(view = this, resultHandler = this)
         component.lifecycleObservers.forEach { lifecycle.addObserver(it) }
 
         // Create a separate configuration controller for this activity as the configuration
