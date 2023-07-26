@@ -927,8 +927,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
 
         if (virtualDisplayWrapper == null) {
-            throw new IllegalStateException(
-                    "Virtual device doesn't have a virtual display with ID " + displayId);
+            Slog.w(TAG, "Virtual device " + mDeviceId + " doesn't have a virtual display with ID "
+                    + displayId);
+            return;
         }
 
         final long ident = Binder.clearCallingIdentity();
