@@ -1518,10 +1518,15 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      *                      list.
      */
     public void switchMemberDeviceContent(CachedBluetoothDevice newMainDevice) {
-        // Backup from main device
+        // Remove the sub device from mMemberDevices first to prevent hash mismatch problem due
+        // to mDevice switch
+        removeMemberDevice(newMainDevice);
+
+        // Backup from current main device
         final BluetoothDevice tmpDevice = mDevice;
         final short tmpRssi = mRssi;
         final boolean tmpJustDiscovered = mJustDiscovered;
+
         // Set main device from sub device
         release();
         mDevice = newMainDevice.mDevice;
@@ -1535,6 +1540,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         newMainDevice.mRssi = tmpRssi;
         newMainDevice.mJustDiscovered = tmpJustDiscovered;
         newMainDevice.fillData();
+
+        // Add the sub device back into mMemberDevices with correct hash
+        addMemberDevice(newMainDevice);
     }
 
     /**
