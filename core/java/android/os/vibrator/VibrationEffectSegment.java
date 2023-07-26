@@ -123,6 +123,13 @@ public abstract class VibrationEffectSegment implements Parcelable {
     public abstract <T extends VibrationEffectSegment> T applyEffectStrength(int effectStrength);
 
     /**
+     * Returns a compact version of the {@link #toString()} result for debugging purposes.
+     *
+     * @hide
+     */
+    public abstract String toDebugString();
+
+    /**
      * Checks the given frequency argument is valid to represent a vibration effect frequency in
      * hertz, i.e. a finite non-negative value.
      *

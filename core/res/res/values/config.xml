@@ -3936,8 +3936,14 @@
     <!-- Flag indicating device support for EAP SIM, AKA, AKA' -->
     <bool name="config_eap_sim_based_auth_supported">true</bool>
 
+    <!-- How long history of recent vibrations should be kept for the dumpsys. -->
+    <integer name="config_recentVibrationsDumpSizeLimit">20</integer>
+
     <!-- How long history of previous vibrations should be kept for the dumpsys. -->
-    <integer name="config_previousVibrationsDumpLimit">50</integer>
+    <integer name="config_previousVibrationsDumpSizeLimit">50</integer>
+
+    <!-- How close vibration request should be when they're aggregated for dumpsys, in ms. -->
+    <integer name="config_previousVibrationsDumpAggregationTimeMillisLimit">1000</integer>
 
     <!-- The default vibration strength, must be between 1 and 255 inclusive. -->
     <integer name="config_defaultVibrationAmplitude">255</integer>

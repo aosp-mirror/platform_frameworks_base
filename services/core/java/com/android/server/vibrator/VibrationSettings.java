@@ -54,6 +54,7 @@ import android.os.Vibrator;
 import android.os.Vibrator.VibrationIntensity;
 import android.os.vibrator.VibrationConfig;
 import android.provider.Settings;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -65,6 +66,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -601,8 +603,32 @@ final class VibrationSettings {
         }
     }
 
+    /** Write current settings into given {@link PrintWriter}. */
+    void dump(IndentingPrintWriter pw) {
+        pw.println("VibrationSettings:");
+        pw.increaseIndent();
+        pw.println("vibrateOn = " + mVibrateOn);
+        pw.println("vibrateInputDevices = " + mVibrateInputDevices);
+        pw.println("batterySaverMode = " + mBatterySaverMode);
+        pw.println("VibrationIntensities:");
+
+        pw.increaseIndent();
+        for (int i = 0; i < mCurrentVibrationIntensities.size(); i++) {
+            int usage = mCurrentVibrationIntensities.keyAt(i);
+            int intensity = mCurrentVibrationIntensities.valueAt(i);
+            pw.println(VibrationAttributes.usageToString(usage) + " = "
+                    + intensityToString(intensity)
+                    + ", default: " + intensityToString(getDefaultIntensity(usage)));
+        }
+        pw.decreaseIndent();
+
+        mVibrationConfig.dumpWithoutDefaultSettings(pw);
+        pw.println("processStateCache = " + mUidObserver.mProcStatesCache);
+        pw.decreaseIndent();
+    }
+
     /** Write current settings into given {@link ProtoOutputStream}. */
-    public void dumpProto(ProtoOutputStream proto) {
+    void dump(ProtoOutputStream proto) {
         synchronized (mLock) {
             proto.write(VibratorManagerServiceDumpProto.VIBRATE_ON, mVibrateOn);
             proto.write(VibratorManagerServiceDumpProto.LOW_POWER_MODE, mBatterySaverMode);

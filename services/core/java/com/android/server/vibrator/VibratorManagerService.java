@@ -56,6 +56,7 @@ import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.os.vibrator.persistence.VibrationXmlParser;
 import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
@@ -80,6 +81,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -204,9 +206,15 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mNativeWrapper = injector.getNativeWrapper();
         mNativeWrapper.init(listener);
 
-        int dumpLimit = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_previousVibrationsDumpLimit);
-        mVibratorManagerRecords = new VibratorManagerRecords(dumpLimit);
+        int recentDumpSizeLimit = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_recentVibrationsDumpSizeLimit);
+        int dumpSizeLimit = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_previousVibrationsDumpSizeLimit);
+        int dumpAggregationTimeLimit = mContext.getResources().getInteger(
+                com.android.internal.R.integer
+                        .config_previousVibrationsDumpAggregationTimeMillisLimit);
+        mVibratorManagerRecords = new VibratorManagerRecords(
+                recentDumpSizeLimit, dumpSizeLimit, dumpAggregationTimeLimit);
 
         mBatteryStatsService = injector.getBatteryStatsService();
         mFrameworkStatsLogger = injector.getFrameworkStatsLogger(mHandler);
@@ -544,49 +552,74 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
     }
 
-    private void dumpText(PrintWriter pw) {
+    private void dumpText(PrintWriter w) {
         if (DEBUG) {
             Slog.d(TAG, "Dumping vibrator manager service to text...");
         }
+        IndentingPrintWriter pw = new IndentingPrintWriter(w, /* singleIndent= */ "  ");
         synchronized (mLock) {
             pw.println("Vibrator Manager Service:");
-            pw.println("  mVibrationSettings:");
-            pw.println("    " + mVibrationSettings);
+            pw.increaseIndent();
+
+            mVibrationSettings.dump(pw);
             pw.println();
-            pw.println("  mVibratorControllers:");
+
+            pw.println("VibratorControllers:");
+            pw.increaseIndent();
             for (int i = 0; i < mVibrators.size(); i++) {
-                pw.println("    " + mVibrators.valueAt(i));
+                mVibrators.valueAt(i).dump(pw);
             }
+            pw.decreaseIndent();
             pw.println();
-            pw.println("  mCurrentVibration:");
-            pw.println("    " + (mCurrentVibration == null
-                    ? null : mCurrentVibration.getVibration().getDebugInfo()));
+
+            pw.println("CurrentVibration:");
+            pw.increaseIndent();
+            if (mCurrentVibration != null) {
+                mCurrentVibration.getVibration().getDebugInfo().dump(pw);
+            } else {
+                pw.println("null");
+            }
+            pw.decreaseIndent();
             pw.println();
-            pw.println("  mNextVibration:");
-            pw.println("    " + (mNextVibration == null
-                    ? null : mNextVibration.getVibration().getDebugInfo()));
+
+            pw.println("NextVibration:");
+            pw.increaseIndent();
+            if (mNextVibration != null) {
+                mNextVibration.getVibration().getDebugInfo().dump(pw);
+            } else {
+                pw.println("null");
+            }
+            pw.decreaseIndent();
             pw.println();
-            pw.println("  mCurrentExternalVibration:");
-            pw.println("    " + (mCurrentExternalVibration == null
-                    ? null : mCurrentExternalVibration.getDebugInfo()));
-            pw.println();
+
+            pw.println("CurrentExternalVibration:");
+            pw.increaseIndent();
+            if (mCurrentExternalVibration != null) {
+                mCurrentExternalVibration.getDebugInfo().dump(pw);
+            } else {
+                pw.println("null");
+            }
+            pw.decreaseIndent();
         }
-        mVibratorManagerRecords.dumpText(pw);
+
+        pw.println();
+        pw.println();
+        mVibratorManagerRecords.dump(pw);
     }
 
-    synchronized void dumpProto(FileDescriptor fd) {
+    private void dumpProto(FileDescriptor fd) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
         if (DEBUG) {
             Slog.d(TAG, "Dumping vibrator manager service to proto...");
         }
         synchronized (mLock) {
-            mVibrationSettings.dumpProto(proto);
+            mVibrationSettings.dump(proto);
             if (mCurrentVibration != null) {
-                mCurrentVibration.getVibration().getDebugInfo().dumpProto(proto,
+                mCurrentVibration.getVibration().getDebugInfo().dump(proto,
                         VibratorManagerServiceDumpProto.CURRENT_VIBRATION);
             }
             if (mCurrentExternalVibration != null) {
-                mCurrentExternalVibration.getDebugInfo().dumpProto(proto,
+                mCurrentExternalVibration.getDebugInfo().dump(proto,
                         VibratorManagerServiceDumpProto.CURRENT_EXTERNAL_VIBRATION);
             }
 
@@ -601,7 +634,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             proto.write(VibratorManagerServiceDumpProto.VIBRATOR_UNDER_EXTERNAL_CONTROL,
                     isUnderExternalControl);
         }
-        mVibratorManagerRecords.dumpProto(proto);
+        mVibratorManagerRecords.dump(proto);
         proto.flush();
     }
 
@@ -1581,64 +1614,105 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     /** Keep records of vibrations played and provide debug information for this service. */
     private static final class VibratorManagerRecords {
-        private final SparseArray<LinkedList<Vibration.DebugInfo>> mPreviousVibrations =
-                new SparseArray<>();
-        private final LinkedList<Vibration.DebugInfo> mPreviousExternalVibrations =
-                new LinkedList<>();
-        private final int mPreviousVibrationsLimit;
+        private final VibrationRecords mAggregatedVibrationHistory;
+        private final VibrationRecords mRecentVibrations;
 
-        VibratorManagerRecords(int limit) {
-            mPreviousVibrationsLimit = limit;
+        VibratorManagerRecords(int recentVibrationSizeLimit, int aggregationSizeLimit,
+                int aggregationTimeLimit) {
+            mAggregatedVibrationHistory =
+                    new VibrationRecords(aggregationSizeLimit, aggregationTimeLimit);
+            mRecentVibrations = new VibrationRecords(
+                    recentVibrationSizeLimit, /* aggregationTimeLimit= */ 0);
         }
 
         synchronized void record(HalVibration vib) {
-            int usage = vib.callerInfo.attrs.getUsage();
-            if (!mPreviousVibrations.contains(usage)) {
-                mPreviousVibrations.put(usage, new LinkedList<>());
-            }
-            record(mPreviousVibrations.get(usage), vib.getDebugInfo());
+            record(vib.getDebugInfo());
         }
 
         synchronized void record(ExternalVibrationHolder vib) {
-            record(mPreviousExternalVibrations, vib.getDebugInfo());
+            record(vib.getDebugInfo());
         }
 
-        synchronized void record(LinkedList<Vibration.DebugInfo> records,
-                Vibration.DebugInfo info) {
-            if (records.size() > mPreviousVibrationsLimit) {
-                records.removeFirst();
+        private synchronized void record(Vibration.DebugInfo info) {
+            AggregatedVibrationRecord removedRecord = mRecentVibrations.record(info);
+            if (removedRecord != null) {
+                mAggregatedVibrationHistory.record(removedRecord.mLatestVibration);
             }
-            records.addLast(info);
         }
 
-        synchronized void dumpText(PrintWriter pw) {
-            for (int i = 0; i < mPreviousVibrations.size(); i++) {
-                pw.println();
-                pw.print("  Previous vibrations for usage ");
-                pw.print(VibrationAttributes.usageToString(mPreviousVibrations.keyAt(i)));
-                pw.println(":");
-                for (Vibration.DebugInfo info : mPreviousVibrations.valueAt(i)) {
-                    pw.println("    " + info);
+        synchronized void dump(IndentingPrintWriter pw) {
+            pw.println("Recent vibrations:");
+            pw.increaseIndent();
+            mRecentVibrations.dump(pw);
+            pw.decreaseIndent();
+            pw.println();
+            pw.println();
+
+            pw.println("Aggregated vibration history:");
+            pw.increaseIndent();
+            mAggregatedVibrationHistory.dump(pw);
+            pw.decreaseIndent();
+        }
+
+        synchronized void dump(ProtoOutputStream proto) {
+            mRecentVibrations.dump(proto);
+        }
+    }
+
+    /** Keep records of vibrations played and provide debug information for this service. */
+    private static final class VibrationRecords {
+        private final SparseArray<LinkedList<AggregatedVibrationRecord>> mVibrations =
+                new SparseArray<>();
+        private final int mSizeLimit;
+        private final int mAggregationTimeLimit;
+
+        VibrationRecords(int sizeLimit, int aggregationTimeLimit) {
+            mSizeLimit = sizeLimit;
+            mAggregationTimeLimit = aggregationTimeLimit;
+        }
+
+        synchronized AggregatedVibrationRecord record(Vibration.DebugInfo info) {
+            int usage = info.mCallerInfo.attrs.getUsage();
+            if (!mVibrations.contains(usage)) {
+                mVibrations.put(usage, new LinkedList<>());
+            }
+            LinkedList<AggregatedVibrationRecord> records = mVibrations.get(usage);
+            if (mAggregationTimeLimit > 0 && !records.isEmpty()) {
+                AggregatedVibrationRecord lastRecord = records.getLast();
+                if (lastRecord.mayAggregate(info, mAggregationTimeLimit)) {
+                    lastRecord.record(info);
+                    return null;
                 }
             }
+            AggregatedVibrationRecord removedRecord = null;
+            if (records.size() > mSizeLimit) {
+                removedRecord = records.removeFirst();
+            }
+            records.addLast(new AggregatedVibrationRecord(info));
+            return removedRecord;
+        }
 
-            pw.println();
-            pw.println("  Previous external vibrations:");
-            for (Vibration.DebugInfo info : mPreviousExternalVibrations) {
-                pw.println("    " + info);
+        synchronized void dump(IndentingPrintWriter pw) {
+            for (int i = 0; i < mVibrations.size(); i++) {
+                pw.println(VibrationAttributes.usageToString(mVibrations.keyAt(i)) + ":");
+                pw.increaseIndent();
+                for (AggregatedVibrationRecord info : mVibrations.valueAt(i)) {
+                    info.dump(pw);
+                }
+                pw.decreaseIndent();
+                pw.println();
             }
         }
 
-        synchronized void dumpProto(ProtoOutputStream proto) {
-            for (int i = 0; i < mPreviousVibrations.size(); i++) {
+        synchronized void dump(ProtoOutputStream proto) {
+            for (int i = 0; i < mVibrations.size(); i++) {
                 long fieldId;
-                switch (mPreviousVibrations.keyAt(i)) {
+                switch (mVibrations.keyAt(i)) {
                     case VibrationAttributes.USAGE_RINGTONE:
                         fieldId = VibratorManagerServiceDumpProto.PREVIOUS_RING_VIBRATIONS;
                         break;
                     case VibrationAttributes.USAGE_NOTIFICATION:
-                        fieldId = VibratorManagerServiceDumpProto
-                                .PREVIOUS_NOTIFICATION_VIBRATIONS;
+                        fieldId = VibratorManagerServiceDumpProto.PREVIOUS_NOTIFICATION_VIBRATIONS;
                         break;
                     case VibrationAttributes.USAGE_ALARM:
                         fieldId = VibratorManagerServiceDumpProto.PREVIOUS_ALARM_VIBRATIONS;
@@ -1646,15 +1720,67 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     default:
                         fieldId = VibratorManagerServiceDumpProto.PREVIOUS_VIBRATIONS;
                 }
-                for (Vibration.DebugInfo info : mPreviousVibrations.valueAt(i)) {
-                    info.dumpProto(proto, fieldId);
+                for (AggregatedVibrationRecord info : mVibrations.valueAt(i)) {
+                    if (info.mLatestVibration.mPlayedEffect == null) {
+                        // External vibrations are reported separately in the dump proto
+                        info.dump(proto,
+                                VibratorManagerServiceDumpProto.PREVIOUS_EXTERNAL_VIBRATIONS);
+                    } else {
+                        info.dump(proto, fieldId);
+                    }
                 }
             }
+        }
 
-            for (Vibration.DebugInfo info : mPreviousExternalVibrations) {
-                info.dumpProto(proto,
-                        VibratorManagerServiceDumpProto.PREVIOUS_EXTERNAL_VIBRATIONS);
+        synchronized void dumpOnSingleField(ProtoOutputStream proto, long fieldId) {
+            for (int i = 0; i < mVibrations.size(); i++) {
+                for (AggregatedVibrationRecord info : mVibrations.valueAt(i)) {
+                    info.dump(proto, fieldId);
+                }
             }
+        }
+    }
+
+    /**
+     * Record that keeps the last {@link Vibration.DebugInfo} played, aggregating close vibrations
+     * from the same uid that have the same {@link VibrationAttributes} and {@link VibrationEffect}.
+     */
+    private static final class AggregatedVibrationRecord {
+        private final Vibration.DebugInfo mFirstVibration;
+        private Vibration.DebugInfo mLatestVibration;
+        private int mVibrationCount;
+
+        AggregatedVibrationRecord(Vibration.DebugInfo info) {
+            mLatestVibration = mFirstVibration = info;
+            mVibrationCount = 1;
+        }
+
+        synchronized boolean mayAggregate(Vibration.DebugInfo info, long timeLimit) {
+            return Objects.equals(mLatestVibration.mCallerInfo.uid, info.mCallerInfo.uid)
+                    && Objects.equals(mLatestVibration.mCallerInfo.attrs, info.mCallerInfo.attrs)
+                    && Objects.equals(mLatestVibration.mPlayedEffect, info.mPlayedEffect)
+                    && Math.abs(mLatestVibration.mCreateTime - info.mCreateTime) < timeLimit;
+        }
+
+        synchronized void record(Vibration.DebugInfo vib) {
+            mLatestVibration = vib;
+            mVibrationCount++;
+        }
+
+        synchronized void dump(IndentingPrintWriter pw) {
+            mFirstVibration.dumpCompact(pw);
+            if (mVibrationCount == 1) {
+                return;
+            }
+            if (mVibrationCount > 2) {
+                pw.println(
+                        "-> Skipping " + (mVibrationCount - 2) + " aggregated vibrations, latest:");
+            }
+            mLatestVibration.dumpCompact(pw);
+        }
+
+        synchronized void dump(ProtoOutputStream proto, long fieldId) {
+            mLatestVibration.dump(proto, fieldId);
         }
     }
 
@@ -1676,7 +1802,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     /**
      * Ends the external vibration, and clears related service state.
      *
-     * @param vibrationEndInfo the status and related info to end the associated Vibration with
+     * @param vibrationEndInfo        the status and related info to end the associated Vibration
      * @param continueExternalControl indicates whether external control will continue. If not, the
      *                                HAL will have external control turned off.
      */

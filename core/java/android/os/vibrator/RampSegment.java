@@ -185,6 +185,17 @@ public final class RampSegment extends VibrationEffectSegment {
                 + "}";
     }
 
+    /** @hide */
+    @Override
+    public String toDebugString() {
+        return String.format("Ramp=%dms(amplitude=%.2f%s to %.2f%s)",
+                mDuration,
+                mStartAmplitude,
+                Float.compare(mStartFrequencyHz, 0) == 0 ? "" : " @ " + mStartFrequencyHz + "Hz",
+                mEndAmplitude,
+                Float.compare(mEndFrequencyHz, 0) == 0 ? "" : " @ " + mEndFrequencyHz + "Hz");
+    }
+
     @Override
     public int describeContents() {
         return 0;

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.vibrator.Braking;
 import android.hardware.vibrator.IVibrator;
+import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
 import android.util.Range;
 import android.util.SparseBooleanArray;
@@ -207,6 +208,25 @@ public class VibratorInfo implements Parcelable {
                 + '}';
     }
 
+    /** @hide */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("VibratorInfo:");
+        pw.increaseIndent();
+        pw.println("id = " + mId);
+        pw.println("capabilities = " + Arrays.toString(getCapabilitiesNames()));
+        pw.println("capabilitiesFlags = " + Long.toBinaryString(mCapabilities));
+        pw.println("supportedEffects = " + Arrays.toString(getSupportedEffectsNames()));
+        pw.println("supportedPrimitives = " + Arrays.toString(getSupportedPrimitivesNames()));
+        pw.println("supportedBraking = " + Arrays.toString(getSupportedBrakingNames()));
+        pw.println("primitiveDelayMax = " + mPrimitiveDelayMax);
+        pw.println("compositionSizeMax = " + mCompositionSizeMax);
+        pw.println("pwlePrimitiveDurationMax = " + mPwlePrimitiveDurationMax);
+        pw.println("pwleSizeMax = " + mPwleSizeMax);
+        pw.println("q-factor = " + mQFactor);
+        pw.println("frequencyProfile = " + mFrequencyProfile);
+        pw.decreaseIndent();
+    }
+
     /** Return the id of this vibrator. */
     public int getId() {
         return mId;
@@ -370,7 +390,7 @@ public class VibratorInfo implements Parcelable {
      * Gets the resonant frequency of the vibrator.
      *
      * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown or
-     *         this vibrator is a composite of multiple physical devices.
+     * this vibrator is a composite of multiple physical devices.
      */
     public float getResonantFrequencyHz() {
         return mFrequencyProfile.mResonantFrequencyHz;
@@ -380,7 +400,7 @@ public class VibratorInfo implements Parcelable {
      * Gets the <a href="https://en.wikipedia.org/wiki/Q_factor">Q factor</a> of the vibrator.
      *
      * @return the Q factor of the vibrator, or {@link Float#NaN NaN} if it's unknown or
-     *         this vibrator is a composite of multiple physical devices.
+     * this vibrator is a composite of multiple physical devices.
      */
     public float getQFactor() {
         return mQFactor;
