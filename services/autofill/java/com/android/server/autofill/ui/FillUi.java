@@ -91,6 +91,7 @@ final class FillUi {
         void requestShowFillUi(int width, int height,
                 IAutofillWindowPresenter windowPresenter);
         void requestHideFillUi();
+        void requestHideFillUiWhenDestroyed();
         void startIntentSender(IntentSender intentSender);
         void dispatchUnhandledKey(KeyEvent keyEvent);
         void cancelSession();
@@ -482,7 +483,7 @@ final class FillUi {
         }
         mCallback.onDestroy();
         if (notifyClient) {
-            mCallback.requestHideFillUi();
+            mCallback.requestHideFillUiWhenDestroyed();
         }
         mDestroyed = true;
     }

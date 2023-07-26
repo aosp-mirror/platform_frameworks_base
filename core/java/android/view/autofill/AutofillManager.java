@@ -4305,6 +4305,14 @@ public final class AutofillManager {
         }
 
         @Override
+        public void requestHideFillUiWhenDestroyed(int sessionId, AutofillId id) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.requestHideFillUi(id, true));
+            }
+        }
+
+        @Override
         public void notifyNoFillUi(int sessionId, AutofillId id, int sessionFinishedState) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
