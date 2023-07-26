@@ -244,7 +244,7 @@
                 "(/|^)DeviceFeature[^/]*", "(/|^)Hdmi[^/]*"
             ]
         },
-{
+        {
             "name": "CtsWindowManagerDeviceActivity",
             "options": [
                 {
