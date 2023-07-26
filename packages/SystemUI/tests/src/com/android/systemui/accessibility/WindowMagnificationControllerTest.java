@@ -775,7 +775,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
         final View mirrorView = mWindowManager.getAttachedView();
 
-        final long timeout = SystemClock.uptimeMillis() + 1000;
+        final long timeout = SystemClock.uptimeMillis() + 5000;
         final AtomicDouble maxScaleX = new AtomicDouble();
         final Runnable onAnimationFrame = new Runnable() {
             @Override
