@@ -199,4 +199,8 @@
     <bool name="allow_clear_initial_attach_data_profile">false</bool>
     <java-symbol type="bool" name="allow_clear_initial_attach_data_profile" />
 
+    <!-- Boolean indicating whether TelephonyAnalytics module is active or not. -->
+    <bool name="telephony_analytics_switch">true</bool>
+    <java-symbol type="bool" name="telephony_analytics_switch" />
+
 </resources>
