@@ -931,11 +931,11 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntryInternal(
     .entry = *entry,
     .config = *best_config,
     .type_flags = type_flags,
+    .dynamic_ref_table = package_group.dynamic_ref_table.get(),
     .package_name = &best_package->GetPackageName(),
     .type_string_ref = StringPoolRef(best_package->GetTypeStringPool(), best_type->id - 1),
     .entry_string_ref = StringPoolRef(best_package->GetKeyStringPool(),
                                       (*best_entry_verified)->key()),
-    .dynamic_ref_table = package_group.dynamic_ref_table.get(),
   };
 }
 
