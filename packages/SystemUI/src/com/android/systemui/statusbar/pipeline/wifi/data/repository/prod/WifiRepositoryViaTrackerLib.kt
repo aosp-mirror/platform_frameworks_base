@@ -44,7 +44,6 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
@@ -208,10 +207,14 @@ constructor(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    // TODO(b/292534484): Re-use WifiRepositoryImpl code to implement wifi activity since
-    // WifiTrackerLib doesn't expose activity details.
     override val wifiActivity: StateFlow<DataActivityModel> =
-        MutableStateFlow(DataActivityModel(false, false))
+        WifiRepositoryHelper.createActivityFlow(
+            wifiManager,
+            mainExecutor,
+            scope,
+            wifiTrackerLibTableLogBuffer,
+            this::logActivity,
+        )
 
     private fun logOnWifiEntriesChanged(connectedEntry: WifiEntry?) {
         inputLogger.log(
@@ -229,6 +232,10 @@ constructor(
             { int1 = state ?: -1 },
             { "onWifiStateChanged. State=${if (int1 == -1) null else int1}" },
         )
+    }
+
+    private fun logActivity(activity: String) {
+        inputLogger.log(TAG, LogLevel.DEBUG, { str1 = activity }, { "onActivityChanged: $str1" })
     }
 
     /**

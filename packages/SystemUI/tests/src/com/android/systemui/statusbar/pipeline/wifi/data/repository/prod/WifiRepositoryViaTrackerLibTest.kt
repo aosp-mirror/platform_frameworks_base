@@ -25,6 +25,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.WIFI_NETWORK_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -45,6 +46,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.verify
 
 /**
  * Note: Most of these tests are duplicates of [WifiRepositoryImplTest] tests.
@@ -643,9 +645,64 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
             assertThat(underTest.isWifiConnectedWithValidSsid()).isFalse()
         }
 
+    @Test
+    fun wifiActivity_callbackGivesNone_activityFlowHasNone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiActivity)
+
+            getTrafficStateCallback()
+                .onStateChanged(WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE)
+
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
+        }
+
+    @Test
+    fun wifiActivity_callbackGivesIn_activityFlowHasIn() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiActivity)
+
+            getTrafficStateCallback()
+                .onStateChanged(WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN)
+
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = true, hasActivityOut = false))
+        }
+
+    @Test
+    fun wifiActivity_callbackGivesOut_activityFlowHasOut() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiActivity)
+
+            getTrafficStateCallback()
+                .onStateChanged(WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT)
+
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = false, hasActivityOut = true))
+        }
+
+    @Test
+    fun wifiActivity_callbackGivesInout_activityFlowHasInAndOut() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.wifiActivity)
+
+            getTrafficStateCallback()
+                .onStateChanged(WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT)
+
+            assertThat(latest)
+                .isEqualTo(DataActivityModel(hasActivityIn = true, hasActivityOut = true))
+        }
+
     private fun getCallback(): WifiPickerTracker.WifiPickerTrackerCallback {
         testScope.runCurrent()
         return callbackCaptor.value
+    }
+
+    private fun getTrafficStateCallback(): WifiManager.TrafficStateCallback {
+        testScope.runCurrent()
+        val callbackCaptor = argumentCaptor<WifiManager.TrafficStateCallback>()
+        verify(wifiManager).registerTrafficStateCallback(any(), callbackCaptor.capture())
+        return callbackCaptor.value!!
     }
 
     private fun createRepo(): WifiRepositoryViaTrackerLib {

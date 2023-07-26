@@ -28,7 +28,6 @@ import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
-import android.net.wifi.WifiManager.TrafficStateCallback
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -40,7 +39,6 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
-import com.android.systemui.statusbar.pipeline.shared.data.model.toWifiDataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.getMainOrUnderlyingWifiInfo
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
@@ -218,29 +216,15 @@ constructor(
             )
 
     override val wifiActivity: StateFlow<DataActivityModel> =
-        conflatedCallbackFlow {
-                val callback = TrafficStateCallback { state ->
-                    logger.logActivity(prettyPrintActivity(state))
-                    trySend(state.toWifiDataActivityModel())
-                }
-                wifiManager.registerTrafficStateCallback(mainExecutor, callback)
-                awaitClose { wifiManager.unregisterTrafficStateCallback(callback) }
-            }
-            .logDiffsForTable(
-                wifiTableLogBuffer,
-                columnPrefix = ACTIVITY_PREFIX,
-                initialValue = ACTIVITY_DEFAULT,
-            )
-            .stateIn(
-                scope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = ACTIVITY_DEFAULT,
-            )
+        WifiRepositoryHelper.createActivityFlow(
+            wifiManager,
+            mainExecutor,
+            scope,
+            wifiTableLogBuffer,
+            logger::logActivity,
+        )
 
     companion object {
-        private const val ACTIVITY_PREFIX = "wifiActivity"
-
-        val ACTIVITY_DEFAULT = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
         // Start out with no known wifi network.
         // Note: [WifiStatusTracker] (the old implementation of connectivity logic) does do an
         // initial fetch to get a starting wifi network. But, it uses a deprecated API
@@ -281,16 +265,6 @@ constructor(
                     wifiInfo.isOsuAp,
                     wifiInfo.passpointProviderFriendlyName
                 )
-            }
-        }
-
-        private fun prettyPrintActivity(activity: Int): String {
-            return when (activity) {
-                TrafficStateCallback.DATA_ACTIVITY_NONE -> "NONE"
-                TrafficStateCallback.DATA_ACTIVITY_IN -> "IN"
-                TrafficStateCallback.DATA_ACTIVITY_OUT -> "OUT"
-                TrafficStateCallback.DATA_ACTIVITY_INOUT -> "INOUT"
-                else -> "INVALID"
             }
         }
 
