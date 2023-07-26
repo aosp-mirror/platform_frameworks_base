@@ -34,7 +34,6 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Build.VERSION_CODES.N;
-import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.util.RotationUtils.deltaRotation;
@@ -5425,7 +5424,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final WindowProcessController wpc = mAtmService.getProcessController(
                     getDisplayUiContext().getIApplicationThread());
             mWmService.mWindowContextListenerController.registerWindowContainerListener(
-                    wpc, getDisplayUiContext().getWindowContextToken(), this, SYSTEM_UID,
+                    wpc, getDisplayUiContext().getWindowContextToken(), this,
                     INVALID_WINDOW_TYPE, null /* options */);
         }
     }
