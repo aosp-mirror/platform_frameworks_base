@@ -461,8 +461,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor
     ) {
-
-
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
@@ -493,7 +491,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mDisplayInsetsController = displayInsetsController;
         mTabletopModeController = tabletopModeController;
 
-        shellInit.addInitCallback(this::onInit, this);
+        if (!PipUtils.isPip2ExperimentEnabled()) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
     }
 
     private void onInit() {
@@ -1257,6 +1257,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             mMainExecutor.execute(() -> {
                 PipController.this.showPictureInPictureMenu();
             });
+        }
+
+        @Override
+        public PipTransitionController getPipTransitionController() {
+            return mPipTransitionController;
         }
     }
 

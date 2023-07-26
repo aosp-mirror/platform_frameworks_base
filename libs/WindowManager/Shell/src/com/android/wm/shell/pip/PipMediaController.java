@@ -150,13 +150,15 @@ public class PipMediaController {
         mContext = context;
         mMainHandler = mainHandler;
         mHandlerExecutor = new HandlerExecutor(mMainHandler);
-        IntentFilter mediaControlFilter = new IntentFilter();
-        mediaControlFilter.addAction(ACTION_PLAY);
-        mediaControlFilter.addAction(ACTION_PAUSE);
-        mediaControlFilter.addAction(ACTION_NEXT);
-        mediaControlFilter.addAction(ACTION_PREV);
-        mContext.registerReceiverForAllUsers(mMediaActionReceiver, mediaControlFilter,
-                SYSTEMUI_PERMISSION, mainHandler, Context.RECEIVER_EXPORTED);
+        if (!PipUtils.isPip2ExperimentEnabled()) {
+            IntentFilter mediaControlFilter = new IntentFilter();
+            mediaControlFilter.addAction(ACTION_PLAY);
+            mediaControlFilter.addAction(ACTION_PAUSE);
+            mediaControlFilter.addAction(ACTION_NEXT);
+            mediaControlFilter.addAction(ACTION_PREV);
+            mContext.registerReceiverForAllUsers(mMediaActionReceiver, mediaControlFilter,
+                    SYSTEMUI_PERMISSION, mainHandler, Context.RECEIVER_EXPORTED);
+        }
 
         // Creates the standard media buttons that we may show.
         mPauseAction = getDefaultRemoteAction(R.string.pip_pause,

@@ -49,7 +49,6 @@ import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
-import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -147,7 +146,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
 
     public DefaultMixedHandler(@NonNull ShellInit shellInit, @NonNull Transitions player,
             Optional<SplitScreenController> splitScreenControllerOptional,
-            Optional<PipTouchHandler> pipTouchHandlerOptional,
+            @Nullable PipTransitionController pipTransitionController,
             Optional<RecentsTransitionHandler> recentsHandlerOptional,
             KeyguardTransitionHandler keyguardHandler,
             Optional<DesktopModeController> desktopModeControllerOptional,
@@ -155,11 +154,12 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             Optional<UnfoldTransitionHandler> unfoldHandler) {
         mPlayer = player;
         mKeyguardHandler = keyguardHandler;
-        if (Transitions.ENABLE_SHELL_TRANSITIONS && pipTouchHandlerOptional.isPresent()
+        if (Transitions.ENABLE_SHELL_TRANSITIONS
+                && pipTransitionController != null
                 && splitScreenControllerOptional.isPresent()) {
             // Add after dependencies because it is higher priority
             shellInit.addInitCallback(() -> {
-                mPipHandler = pipTouchHandlerOptional.get().getTransitionHandler();
+                mPipHandler = pipTransitionController;
                 mSplitHandler = splitScreenControllerOptional.get().getTransitionHandler();
                 mPlayer.addHandler(this);
                 if (mSplitHandler != null) {
