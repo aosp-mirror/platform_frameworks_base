@@ -16,7 +16,9 @@
 
 package com.android.server.display.utils;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
 import android.os.PowerManager;
@@ -25,6 +27,7 @@ import android.util.Pair;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.annotations.Keep;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.DisplayDeviceConfig;
 
 import org.junit.Test;
@@ -157,5 +160,30 @@ public class DeviceConfigParsingUtilsTest {
                 () -> DeviceConfigParsingUtils.parseBrightness("1.65"));
 
         assertEquals("Brightness value out of bounds: 1.65", result.getMessage());
+    }
+
+    @Test
+    public void testDisplayBrightnessThresholdsIntToFloat_Null() {
+        assertNull(DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat(null));
+    }
+
+    @Test
+    public void testDisplayBrightnessThresholdsIntToFloat() {
+        assertArrayEquals(new float[]{ BrightnessSynchronizer.brightnessIntToFloat(155), -1,
+                        BrightnessSynchronizer.brightnessIntToFloat(170) },
+                DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat(
+                        new int[]{ 155, -1, 170 }), FLOAT_TOLERANCE);
+    }
+
+    @Test
+    public void testAmbientBrightnessThresholdsIntToFloat_Null() {
+        assertNull(DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat(null));
+    }
+
+    @Test
+    public void testAmbientBrightnessThresholdsIntToFloat() {
+        assertArrayEquals(new float[]{ 1700, 20000, -1 },
+                DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat(
+                        new int[]{ 1700, 20000, -1 }), FLOAT_TOLERANCE);
     }
 }

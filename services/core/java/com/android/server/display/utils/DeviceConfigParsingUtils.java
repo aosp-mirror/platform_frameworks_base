@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.PowerManager;
 import android.util.Slog;
 
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.DisplayDeviceConfig;
 
 import java.util.ArrayList;
@@ -148,5 +149,44 @@ public class DeviceConfigParsingUtils {
             throw new IllegalArgumentException("Brightness value out of bounds: " + stringVal);
         }
         return value;
+    }
+
+    /**
+     * Convert display brightness thresholds to a float array.
+     * @param thresholdsInt The int array of the thresholds in the range [0, 255]
+     * @return The float array of the thresholds
+     */
+    public static float[] displayBrightnessThresholdsIntToFloat(int[] thresholdsInt) {
+        if (thresholdsInt == null) {
+            return null;
+        }
+
+        float[] thresholds = new float[thresholdsInt.length];
+        for (int i = 0; i < thresholds.length; i++) {
+            if (thresholdsInt[i] < 0) {
+                // A negative value means that there's no threshold
+                thresholds[i] = thresholdsInt[i];
+            } else {
+                thresholds[i] = BrightnessSynchronizer.brightnessIntToFloat(thresholdsInt[i]);
+            }
+        }
+        return thresholds;
+    }
+
+    /**
+     * Convert ambient brightness thresholds to a float array.
+     * @param thresholdsInt The int array of the thresholds
+     * @return The float array of the thresholds
+     */
+    public static float[] ambientBrightnessThresholdsIntToFloat(int[] thresholdsInt) {
+        if (thresholdsInt == null) {
+            return null;
+        }
+
+        float[] thresholds = new float[thresholdsInt.length];
+        for (int i = 0; i < thresholds.length; i++) {
+            thresholds[i] = thresholdsInt[i];
+        }
+        return thresholds;
     }
 }

@@ -16,6 +16,9 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.utils.DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat;
+import static com.android.server.display.utils.DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -475,7 +478,7 @@ public class DisplayDeviceConfig {
     private static final int DEFAULT_REFRESH_RATE_IN_HBM = 0;
     private static final int DEFAULT_LOW_REFRESH_RATE = 60;
     private static final int DEFAULT_HIGH_REFRESH_RATE = 0;
-    private static final int[] DEFAULT_BRIGHTNESS_THRESHOLDS = new int[]{};
+    private static final float[] DEFAULT_BRIGHTNESS_THRESHOLDS = new float[]{};
 
     private static final float[] DEFAULT_AMBIENT_THRESHOLD_LEVELS = new float[]{0f};
     private static final float[] DEFAULT_AMBIENT_BRIGHTENING_THRESHOLDS = new float[]{100f};
@@ -691,9 +694,14 @@ public class DisplayDeviceConfig {
      * prevent flicker, we only support higher refresh rates if the display brightness is above a
      * threshold. For example, no higher refresh rate if display brightness <= disp0 && ambient
      * brightness <= amb0 || display brightness <= disp1 && ambient brightness <= amb1
+     *
+     * Brightness thresholds are paired with lux thresholds - they both have to be met.
+     *
+     * A negative brightness or lux value means that only one threshold should be used - e.g. if
+     * the brightness value is negative, only the lux threshold is applied.
      */
-    private int[] mLowDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
-    private int[] mLowAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+    private float[] mLowDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+    private float[] mLowAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
 
     /**
      * The display uses different gamma curves for different refresh rates. It's hard for panel
@@ -705,9 +713,14 @@ public class DisplayDeviceConfig {
      * have lower display brightness requirements for the flickering is visible. For example, fixed
      * refresh rate if display brightness >= disp0 && ambient brightness >= amb0 || display
      * brightness >= disp1 && ambient brightness >= amb1
+     *
+     * Brightness thresholds are paired with lux thresholds - they both have to be met.
+     *
+     * A negative brightness or lux value means that only one threshold should be used - e.g. if
+     * the brightness value is negative, only the lux threshold is applied.
      */
-    private int[] mHighDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
-    private int[] mHighAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+    private float[] mHighDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
+    private float[] mHighAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
 
     private final HashMap<String, ThermalBrightnessThrottlingData>
             mThermalBrightnessThrottlingDataMapByThrottlingId = new HashMap<>();
@@ -1493,36 +1506,44 @@ public class DisplayDeviceConfig {
     /**
      * @return An array of lower display brightness thresholds. This, in combination with lower
      * ambient brightness thresholds help define buckets in which the refresh rate switching is not
-     * allowed
+     * allowed.
+     *
+     * A negative threshold value means that only the lux threshold is applied.
      */
-    public int[] getLowDisplayBrightnessThresholds() {
+    public float[] getLowDisplayBrightnessThresholds() {
         return mLowDisplayBrightnessThresholds;
     }
 
     /**
      * @return An array of lower ambient brightness thresholds. This, in combination with lower
      * display brightness thresholds help define buckets in which the refresh rate switching is not
-     * allowed
+     * allowed.
+     *
+     * A negative threshold value means that only the display brightness threshold is applied.
      */
-    public int[] getLowAmbientBrightnessThresholds() {
+    public float[] getLowAmbientBrightnessThresholds() {
         return mLowAmbientBrightnessThresholds;
     }
 
     /**
      * @return An array of high display brightness thresholds. This, in combination with high
      * ambient brightness thresholds help define buckets in which the refresh rate switching is not
-     * allowed
+     * allowed.
+     *
+     * A negative threshold value means that only the lux threshold is applied.
      */
-    public int[] getHighDisplayBrightnessThresholds() {
+    public float[] getHighDisplayBrightnessThresholds() {
         return mHighDisplayBrightnessThresholds;
     }
 
     /**
      * @return An array of high ambient brightness thresholds. This, in combination with high
      * display brightness thresholds help define buckets in which the refresh rate switching is not
-     * allowed
+     * allowed.
+     *
+     * A negative threshold value means that only the display brightness threshold is applied.
      */
-    public int[] getHighAmbientBrightnessThresholds() {
+    public float[] getHighAmbientBrightnessThresholds() {
         return mHighAmbientBrightnessThresholds;
     }
 
@@ -2144,34 +2165,46 @@ public class DisplayDeviceConfig {
      */
     private void loadLowerBrightnessThresholds(BlockingZoneConfig lowerBlockingZoneConfig) {
         if (lowerBlockingZoneConfig == null) {
-            mLowDisplayBrightnessThresholds = mContext.getResources().getIntArray(
+            int[] lowDisplayBrightnessThresholdsInt = mContext.getResources().getIntArray(
                 R.array.config_brightnessThresholdsOfPeakRefreshRate);
-            mLowAmbientBrightnessThresholds = mContext.getResources().getIntArray(
+            int[] lowAmbientBrightnessThresholdsInt = mContext.getResources().getIntArray(
                 R.array.config_ambientThresholdsOfPeakRefreshRate);
-            if (mLowDisplayBrightnessThresholds == null || mLowAmbientBrightnessThresholds == null
-                    || mLowDisplayBrightnessThresholds.length
-                    != mLowAmbientBrightnessThresholds.length) {
+            if (lowDisplayBrightnessThresholdsInt == null
+                    || lowAmbientBrightnessThresholdsInt == null
+                    || lowDisplayBrightnessThresholdsInt.length
+                    != lowAmbientBrightnessThresholdsInt.length) {
                 throw new RuntimeException("display low brightness threshold array and ambient "
                     + "brightness threshold array have different length: "
-                    + "mLowDisplayBrightnessThresholds="
-                    + Arrays.toString(mLowDisplayBrightnessThresholds)
-                    + ", mLowAmbientBrightnessThresholds="
-                    + Arrays.toString(mLowAmbientBrightnessThresholds));
+                    + "lowDisplayBrightnessThresholdsInt="
+                    + Arrays.toString(lowDisplayBrightnessThresholdsInt)
+                    + ", lowAmbientBrightnessThresholdsInt="
+                    + Arrays.toString(lowAmbientBrightnessThresholdsInt));
             }
+
+            mLowDisplayBrightnessThresholds =
+                    displayBrightnessThresholdsIntToFloat(lowDisplayBrightnessThresholdsInt);
+            mLowAmbientBrightnessThresholds =
+                    ambientBrightnessThresholdsIntToFloat(lowAmbientBrightnessThresholdsInt);
         } else {
             List<DisplayBrightnessPoint> lowerThresholdDisplayBrightnessPoints =
                     lowerBlockingZoneConfig.getBlockingZoneThreshold().getDisplayBrightnessPoint();
             int size = lowerThresholdDisplayBrightnessPoints.size();
-            mLowDisplayBrightnessThresholds = new int[size];
-            mLowAmbientBrightnessThresholds = new int[size];
+            mLowDisplayBrightnessThresholds = new float[size];
+            mLowAmbientBrightnessThresholds = new float[size];
             for (int i = 0; i < size; i++) {
-                // We are explicitly casting this value to an integer to be able to reuse the
-                // existing DisplayBrightnessPoint type. It is fine to do this because the round off
-                // will have the negligible and unnoticeable impact on the loaded thresholds.
-                mLowDisplayBrightnessThresholds[i] = (int) lowerThresholdDisplayBrightnessPoints
-                    .get(i).getNits().floatValue();
+                float thresholdNits = lowerThresholdDisplayBrightnessPoints
+                        .get(i).getNits().floatValue();
+                if (thresholdNits < 0) {
+                    // A negative value means that there's no threshold
+                    mLowDisplayBrightnessThresholds[i] = thresholdNits;
+                } else {
+                    float thresholdBacklight = mNitsToBacklightSpline.interpolate(thresholdNits);
+                    mLowDisplayBrightnessThresholds[i] =
+                            mBacklightToBrightnessSpline.interpolate(thresholdBacklight);
+                }
+
                 mLowAmbientBrightnessThresholds[i] = lowerThresholdDisplayBrightnessPoints
-                    .get(i).getLux().intValue();
+                    .get(i).getLux().floatValue();
             }
         }
     }
@@ -2183,34 +2216,46 @@ public class DisplayDeviceConfig {
      */
     private void loadHigherBrightnessThresholds(BlockingZoneConfig blockingZoneConfig) {
         if (blockingZoneConfig == null) {
-            mHighDisplayBrightnessThresholds = mContext.getResources().getIntArray(
+            int[] highDisplayBrightnessThresholdsInt = mContext.getResources().getIntArray(
                 R.array.config_highDisplayBrightnessThresholdsOfFixedRefreshRate);
-            mHighAmbientBrightnessThresholds = mContext.getResources().getIntArray(
+            int[] highAmbientBrightnessThresholdsInt = mContext.getResources().getIntArray(
                 R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate);
-            if (mHighAmbientBrightnessThresholds == null || mHighDisplayBrightnessThresholds == null
-                    || mHighAmbientBrightnessThresholds.length
-                    != mHighDisplayBrightnessThresholds.length) {
+            if (highDisplayBrightnessThresholdsInt == null
+                    || highAmbientBrightnessThresholdsInt == null
+                    || highDisplayBrightnessThresholdsInt.length
+                    != highAmbientBrightnessThresholdsInt.length) {
                 throw new RuntimeException("display high brightness threshold array and ambient "
                     + "brightness threshold array have different length: "
-                    + "mHighDisplayBrightnessThresholds="
-                    + Arrays.toString(mHighDisplayBrightnessThresholds)
-                    + ", mHighAmbientBrightnessThresholds="
-                    + Arrays.toString(mHighAmbientBrightnessThresholds));
+                    + "highDisplayBrightnessThresholdsInt="
+                    + Arrays.toString(highDisplayBrightnessThresholdsInt)
+                    + ", highAmbientBrightnessThresholdsInt="
+                    + Arrays.toString(highAmbientBrightnessThresholdsInt));
             }
+
+            mHighDisplayBrightnessThresholds =
+                    displayBrightnessThresholdsIntToFloat(highDisplayBrightnessThresholdsInt);
+            mHighAmbientBrightnessThresholds =
+                    ambientBrightnessThresholdsIntToFloat(highAmbientBrightnessThresholdsInt);
         } else {
             List<DisplayBrightnessPoint> higherThresholdDisplayBrightnessPoints =
                     blockingZoneConfig.getBlockingZoneThreshold().getDisplayBrightnessPoint();
             int size = higherThresholdDisplayBrightnessPoints.size();
-            mHighDisplayBrightnessThresholds = new int[size];
-            mHighAmbientBrightnessThresholds = new int[size];
+            mHighDisplayBrightnessThresholds = new float[size];
+            mHighAmbientBrightnessThresholds = new float[size];
             for (int i = 0; i < size; i++) {
-                // We are explicitly casting this value to an integer to be able to reuse the
-                // existing DisplayBrightnessPoint type. It is fine to do this because the round off
-                // will have the negligible and unnoticeable impact on the loaded thresholds.
-                mHighDisplayBrightnessThresholds[i] = (int) higherThresholdDisplayBrightnessPoints
-                    .get(i).getNits().floatValue();
+                float thresholdNits = higherThresholdDisplayBrightnessPoints
+                        .get(i).getNits().floatValue();
+                if (thresholdNits < 0) {
+                    // A negative value means that there's no threshold
+                    mHighDisplayBrightnessThresholds[i] = thresholdNits;
+                } else {
+                    float thresholdBacklight = mNitsToBacklightSpline.interpolate(thresholdNits);
+                    mHighDisplayBrightnessThresholds[i] =
+                            mBacklightToBrightnessSpline.interpolate(thresholdBacklight);
+                }
+
                 mHighAmbientBrightnessThresholds[i] = higherThresholdDisplayBrightnessPoints
-                    .get(i).getLux().intValue();
+                    .get(i).getLux().floatValue();
             }
         }
     }

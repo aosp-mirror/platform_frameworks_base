@@ -23,6 +23,8 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
 import android.util.Slog;
 
+import com.android.server.display.utils.DeviceConfigParsingUtils;
+
 import java.util.concurrent.Executor;
 
 /**
@@ -102,32 +104,64 @@ public class DeviceConfigParameterProvider {
                 DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE, -1);
     }
 
-    /** Return null if no such property or wrong format (not comma separated integers). */
+    /**
+     * Get the high ambient brightness thresholds for the configured refresh rate zone. The values
+     * are paired with brightness thresholds.
+     *
+     * A negative value means that only the display brightness threshold should be used.
+     *
+     * Return null if no such property or wrong format (not comma separated integers).
+     */
     @Nullable
-    public int[] getHighAmbientBrightnessThresholds() {
-        return getIntArrayProperty(DisplayManager.DeviceConfig
-                .KEY_FIXED_REFRESH_RATE_HIGH_AMBIENT_BRIGHTNESS_THRESHOLDS);
+    public float[] getHighAmbientBrightnessThresholds() {
+        return DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat(
+                getIntArrayProperty(DisplayManager.DeviceConfig
+                        .KEY_FIXED_REFRESH_RATE_HIGH_AMBIENT_BRIGHTNESS_THRESHOLDS));
     }
 
-    /** Return null if no such property or wrong format (not comma separated integers). */
+    /**
+     * Get the high display brightness thresholds for the configured refresh rate zone. The values
+     * are paired with lux thresholds.
+     *
+     * A negative value means that only the ambient threshold should be used.
+     *
+     * Return null if no such property or wrong format (not comma separated integers).
+     */
     @Nullable
-    public int[] getHighDisplayBrightnessThresholds() {
-        return getIntArrayProperty(DisplayManager.DeviceConfig
-                .KEY_FIXED_REFRESH_RATE_HIGH_DISPLAY_BRIGHTNESS_THRESHOLDS);
+    public float[] getHighDisplayBrightnessThresholds() {
+        return DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat(
+                getIntArrayProperty(DisplayManager.DeviceConfig
+                        .KEY_FIXED_REFRESH_RATE_HIGH_DISPLAY_BRIGHTNESS_THRESHOLDS));
     }
 
-    /** Return null if no such property or wrong format (not comma separated integers). */
+    /**
+     * Get the low display brightness thresholds for the configured refresh rate zone. The values
+     * are paired with lux thresholds.
+     *
+     * A negative value means that only the ambient threshold should be used.
+     *
+     * Return null if no such property or wrong format (not comma separated integers).
+     */
     @Nullable
-    public int[] getLowDisplayBrightnessThresholds() {
-        return getIntArrayProperty(DisplayManager.DeviceConfig
-                .KEY_FIXED_REFRESH_RATE_LOW_DISPLAY_BRIGHTNESS_THRESHOLDS);
+    public float[] getLowDisplayBrightnessThresholds() {
+        return DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat(
+                getIntArrayProperty(DisplayManager.DeviceConfig
+                        .KEY_FIXED_REFRESH_RATE_LOW_DISPLAY_BRIGHTNESS_THRESHOLDS));
     }
 
-    /** Return null if no such property or wrong format (not comma separated integers). */
+    /**
+     * Get the low ambient brightness thresholds for the configured refresh rate zone. The values
+     * are paired with brightness thresholds.
+     *
+     * A negative value means that only the display brightness threshold should be used.
+     *
+     * Return null if no such property or wrong format (not comma separated integers).
+     */
     @Nullable
-    public int[] getLowAmbientBrightnessThresholds() {
-        return getIntArrayProperty(DisplayManager.DeviceConfig
-                .KEY_FIXED_REFRESH_RATE_LOW_AMBIENT_BRIGHTNESS_THRESHOLDS);
+    public float[] getLowAmbientBrightnessThresholds() {
+        return DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat(
+                getIntArrayProperty(DisplayManager.DeviceConfig
+                        .KEY_FIXED_REFRESH_RATE_LOW_AMBIENT_BRIGHTNESS_THRESHOLDS));
     }
 
     /** add property change listener to DeviceConfig */

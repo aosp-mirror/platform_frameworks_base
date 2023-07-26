@@ -18,7 +18,7 @@ package com.android.server.display.mode;
 
 import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
 import static android.hardware.display.DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE;
-import static android.os.PowerManager.BRIGHTNESS_INVALID;
+import static android.os.PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
 import android.annotation.IntegerRes;
 import android.annotation.NonNull;
@@ -42,6 +42,7 @@ import android.os.IThermalEventListener;
 import android.os.IThermalService;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -72,6 +73,7 @@ import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.display.utils.AmbientFilter;
 import com.android.server.display.utils.AmbientFilterFactory;
+import com.android.server.display.utils.DeviceConfigParsingUtils;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.sensors.SensorManagerInternal.ProximityActiveListener;
@@ -86,6 +88,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.function.IntSupplier;
 
 /**
@@ -895,7 +898,7 @@ public class DisplayModeDirector {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_LOW_BRIGHTNESS_THRESHOLDS_CHANGED: {
-                    Pair<int[], int[]> thresholds = (Pair<int[], int[]>) msg.obj;
+                    Pair<float[], float[]> thresholds = (Pair<float[], float[]>) msg.obj;
                     mBrightnessObserver.onDeviceConfigLowBrightnessThresholdsChanged(
                             thresholds.first, thresholds.second);
                     break;
@@ -909,7 +912,7 @@ public class DisplayModeDirector {
                 }
 
                 case MSG_HIGH_BRIGHTNESS_THRESHOLDS_CHANGED: {
-                    Pair<int[], int[]> thresholds = (Pair<int[], int[]>) msg.obj;
+                    Pair<float[], float[]> thresholds = (Pair<float[], float[]>) msg.obj;
 
                     mBrightnessObserver.onDeviceConfigHighBrightnessThresholdsChanged(
                             thresholds.first, thresholds.second);
@@ -1487,10 +1490,32 @@ public class DisplayModeDirector {
     @VisibleForTesting
     public class BrightnessObserver implements DisplayManager.DisplayListener {
         private static final int LIGHT_SENSOR_RATE_MS = 250;
-        private int[] mLowDisplayBrightnessThresholds;
-        private int[] mLowAmbientBrightnessThresholds;
-        private int[] mHighDisplayBrightnessThresholds;
-        private int[] mHighAmbientBrightnessThresholds;
+
+        /**
+         * Brightness thresholds for the low zone. Paired with lux thresholds.
+         *
+         * A negative value means that only the lux threshold should be applied.
+         */
+        private float[] mLowDisplayBrightnessThresholds;
+        /**
+         * Lux thresholds for the low zone. Paired with brightness thresholds.
+         *
+         * A negative value means that only the display brightness threshold should be applied.
+         */
+        private float[] mLowAmbientBrightnessThresholds;
+
+        /**
+         * Brightness thresholds for the high zone. Paired with lux thresholds.
+         *
+         * A negative value means that only the lux threshold should be applied.
+         */
+        private float[] mHighDisplayBrightnessThresholds;
+        /**
+         * Lux thresholds for the high zone. Paired with brightness thresholds.
+         *
+         * A negative value means that only the display brightness threshold should be applied.
+         */
+        private float[] mHighAmbientBrightnessThresholds;
         // valid threshold if any item from the array >= 0
         private boolean mShouldObserveDisplayLowChange;
         private boolean mShouldObserveAmbientLowChange;
@@ -1508,7 +1533,8 @@ public class DisplayModeDirector {
         // Take it as low brightness before valid sensor data comes
         private float mAmbientLux = -1.0f;
         private AmbientFilter mAmbientFilter;
-        private int mBrightness = -1;
+
+        private float mBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
         private final Context mContext;
         private final Injector mInjector;
@@ -1546,22 +1572,22 @@ public class DisplayModeDirector {
         }
 
         @VisibleForTesting
-        int[] getLowDisplayBrightnessThreshold() {
+        float[] getLowDisplayBrightnessThresholds() {
             return mLowDisplayBrightnessThresholds;
         }
 
         @VisibleForTesting
-        int[] getLowAmbientBrightnessThreshold() {
+        float[] getLowAmbientBrightnessThresholds() {
             return mLowAmbientBrightnessThresholds;
         }
 
         @VisibleForTesting
-        int[] getHighDisplayBrightnessThreshold() {
+        float[] getHighDisplayBrightnessThresholds() {
             return mHighDisplayBrightnessThresholds;
         }
 
         @VisibleForTesting
-        int[] getHighAmbientBrightnessThreshold() {
+        float[] getHighAmbientBrightnessThresholds() {
             return mHighAmbientBrightnessThresholds;
         }
 
@@ -1589,12 +1615,14 @@ public class DisplayModeDirector {
                     () -> mConfigParameterProvider.getLowDisplayBrightnessThresholds(),
                     () -> displayDeviceConfig.getLowDisplayBrightnessThresholds(),
                     R.array.config_brightnessThresholdsOfPeakRefreshRate,
-                    displayDeviceConfig, attemptReadFromFeatureParams);
+                    displayDeviceConfig, attemptReadFromFeatureParams,
+                    DeviceConfigParsingUtils::displayBrightnessThresholdsIntToFloat);
             mLowAmbientBrightnessThresholds = loadBrightnessThresholds(
                     () -> mConfigParameterProvider.getLowAmbientBrightnessThresholds(),
                     () -> displayDeviceConfig.getLowAmbientBrightnessThresholds(),
                     R.array.config_ambientThresholdsOfPeakRefreshRate,
-                    displayDeviceConfig, attemptReadFromFeatureParams);
+                    displayDeviceConfig, attemptReadFromFeatureParams,
+                    DeviceConfigParsingUtils::ambientBrightnessThresholdsIntToFloat);
             if (mLowDisplayBrightnessThresholds.length != mLowAmbientBrightnessThresholds.length) {
                 throw new RuntimeException("display low brightness threshold array and ambient "
                         + "brightness threshold array have different length: "
@@ -1649,12 +1677,14 @@ public class DisplayModeDirector {
                     () -> mConfigParameterProvider.getHighDisplayBrightnessThresholds(),
                     () -> displayDeviceConfig.getHighDisplayBrightnessThresholds(),
                     R.array.config_highDisplayBrightnessThresholdsOfFixedRefreshRate,
-                    displayDeviceConfig, attemptReadFromFeatureParams);
+                    displayDeviceConfig, attemptReadFromFeatureParams,
+                    DeviceConfigParsingUtils::displayBrightnessThresholdsIntToFloat);
             mHighAmbientBrightnessThresholds = loadBrightnessThresholds(
                     () -> mConfigParameterProvider.getHighAmbientBrightnessThresholds(),
                     () -> displayDeviceConfig.getHighAmbientBrightnessThresholds(),
                     R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate,
-                    displayDeviceConfig, attemptReadFromFeatureParams);
+                    displayDeviceConfig, attemptReadFromFeatureParams,
+                    DeviceConfigParsingUtils::ambientBrightnessThresholdsIntToFloat);
             if (mHighDisplayBrightnessThresholds.length
                     != mHighAmbientBrightnessThresholds.length) {
                 throw new RuntimeException("display high brightness threshold array and ambient "
@@ -1666,27 +1696,27 @@ public class DisplayModeDirector {
             }
         }
 
-        private int[] loadBrightnessThresholds(
-                Callable<int[]> loadFromDeviceConfigDisplaySettingsCallable,
-                Callable<int[]> loadFromDisplayDeviceConfigCallable,
+        private float[] loadBrightnessThresholds(
+                Callable<float[]> loadFromDeviceConfigDisplaySettingsCallable,
+                Callable<float[]> loadFromDisplayDeviceConfigCallable,
                 int brightnessThresholdOfFixedRefreshRateKey,
-                DisplayDeviceConfig displayDeviceConfig, boolean attemptReadFromFeatureParams) {
-            int[] brightnessThresholds = null;
+                DisplayDeviceConfig displayDeviceConfig, boolean attemptReadFromFeatureParams,
+                Function<int[], float[]> conversion) {
+            float[] brightnessThresholds = null;
 
             if (attemptReadFromFeatureParams) {
                 try {
-                    brightnessThresholds =
-                        loadFromDeviceConfigDisplaySettingsCallable.call();
+                    brightnessThresholds = loadFromDeviceConfigDisplaySettingsCallable.call();
                 } catch (Exception exception) {
                     // Do nothing
                 }
             }
             if (brightnessThresholds == null) {
                 try {
-                    brightnessThresholds =
-                            (displayDeviceConfig == null) ? mContext.getResources().getIntArray(
-                                    brightnessThresholdOfFixedRefreshRateKey)
-                                    : loadFromDisplayDeviceConfigCallable.call();
+                    brightnessThresholds = displayDeviceConfig == null ? conversion.apply(
+                            mContext.getResources().getIntArray(
+                                    brightnessThresholdOfFixedRefreshRateKey)) :
+                            loadFromDisplayDeviceConfigCallable.call();
                 } catch (Exception e) {
                     Slog.e(TAG, "Unexpectedly failed to load display brightness threshold");
                     e.printStackTrace();
@@ -1695,32 +1725,15 @@ public class DisplayModeDirector {
             return brightnessThresholds;
         }
 
-        /**
-         * @return the display brightness thresholds for the low brightness zones
-         */
-        @VisibleForTesting
-        int[] getLowDisplayBrightnessThresholds() {
-            return mLowDisplayBrightnessThresholds;
-        }
-
-        /**
-         * @return the ambient brightness thresholds for the low brightness zones
-         */
-        @VisibleForTesting
-        int[] getLowAmbientBrightnessThresholds() {
-            return mLowAmbientBrightnessThresholds;
-        }
-
         private void observe(SensorManager sensorManager) {
             mSensorManager = sensorManager;
             mBrightness = getBrightness(Display.DEFAULT_DISPLAY);
 
             // DeviceConfig is accessible after system ready.
-            int[] lowDisplayBrightnessThresholds =
+            float[] lowDisplayBrightnessThresholds =
                     mConfigParameterProvider.getLowDisplayBrightnessThresholds();
-            int[] lowAmbientBrightnessThresholds =
+            float[] lowAmbientBrightnessThresholds =
                     mConfigParameterProvider.getLowAmbientBrightnessThresholds();
-
             if (lowDisplayBrightnessThresholds != null && lowAmbientBrightnessThresholds != null
                     && lowDisplayBrightnessThresholds.length
                     == lowAmbientBrightnessThresholds.length) {
@@ -1728,11 +1741,10 @@ public class DisplayModeDirector {
                 mLowAmbientBrightnessThresholds = lowAmbientBrightnessThresholds;
             }
 
-            int[] highDisplayBrightnessThresholds =
+            float[] highDisplayBrightnessThresholds =
                     mConfigParameterProvider.getHighDisplayBrightnessThresholds();
-            int[] highAmbientBrightnessThresholds =
+            float[] highAmbientBrightnessThresholds =
                     mConfigParameterProvider.getHighAmbientBrightnessThresholds();
-
             if (highDisplayBrightnessThresholds != null && highAmbientBrightnessThresholds != null
                     && highDisplayBrightnessThresholds.length
                     == highAmbientBrightnessThresholds.length) {
@@ -1787,8 +1799,8 @@ public class DisplayModeDirector {
             }
         }
 
-        private void onDeviceConfigLowBrightnessThresholdsChanged(int[] displayThresholds,
-                int[] ambientThresholds) {
+        private void onDeviceConfigLowBrightnessThresholdsChanged(float[] displayThresholds,
+                float[] ambientThresholds) {
             if (displayThresholds != null && ambientThresholds != null
                     && displayThresholds.length == ambientThresholds.length) {
                 mLowDisplayBrightnessThresholds = displayThresholds;
@@ -1802,12 +1814,14 @@ public class DisplayModeDirector {
                         () -> mConfigParameterProvider.getLowDisplayBrightnessThresholds(),
                         () -> displayDeviceConfig.getLowDisplayBrightnessThresholds(),
                         R.array.config_brightnessThresholdsOfPeakRefreshRate,
-                        displayDeviceConfig, /* attemptReadFromFeatureParams= */ false);
+                        displayDeviceConfig, /* attemptReadFromFeatureParams= */ false,
+                        DeviceConfigParsingUtils::displayBrightnessThresholdsIntToFloat);
                 mLowAmbientBrightnessThresholds = loadBrightnessThresholds(
                         () -> mConfigParameterProvider.getLowAmbientBrightnessThresholds(),
                         () -> displayDeviceConfig.getLowAmbientBrightnessThresholds(),
                         R.array.config_ambientThresholdsOfPeakRefreshRate,
-                        displayDeviceConfig, /* attemptReadFromFeatureParams= */ false);
+                        displayDeviceConfig, /* attemptReadFromFeatureParams= */ false,
+                        DeviceConfigParsingUtils::ambientBrightnessThresholdsIntToFloat);
             }
             restartObserver();
         }
@@ -1831,8 +1845,8 @@ public class DisplayModeDirector {
             }
         }
 
-        private void onDeviceConfigHighBrightnessThresholdsChanged(int[] displayThresholds,
-                int[] ambientThresholds) {
+        private void onDeviceConfigHighBrightnessThresholdsChanged(float[] displayThresholds,
+                float[] ambientThresholds) {
             if (displayThresholds != null && ambientThresholds != null
                     && displayThresholds.length == ambientThresholds.length) {
                 mHighDisplayBrightnessThresholds = displayThresholds;
@@ -1846,12 +1860,14 @@ public class DisplayModeDirector {
                         () -> mConfigParameterProvider.getLowDisplayBrightnessThresholds(),
                         () -> displayDeviceConfig.getHighDisplayBrightnessThresholds(),
                         R.array.config_highDisplayBrightnessThresholdsOfFixedRefreshRate,
-                        displayDeviceConfig, /* attemptReadFromFeatureParams= */ false);
+                        displayDeviceConfig, /* attemptReadFromFeatureParams= */ false,
+                        DeviceConfigParsingUtils::displayBrightnessThresholdsIntToFloat);
                 mHighAmbientBrightnessThresholds = loadBrightnessThresholds(
                         () -> mConfigParameterProvider.getHighAmbientBrightnessThresholds(),
                         () -> displayDeviceConfig.getHighAmbientBrightnessThresholds(),
                         R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate,
-                        displayDeviceConfig, /* attemptReadFromFeatureParams= */ false);
+                        displayDeviceConfig, /* attemptReadFromFeatureParams= */ false,
+                        DeviceConfigParsingUtils::ambientBrightnessThresholdsIntToFloat);
             }
             restartObserver();
         }
@@ -1886,11 +1902,11 @@ public class DisplayModeDirector {
             pw.println("    mShouldObserveAmbientLowChange: " + mShouldObserveAmbientLowChange);
             pw.println("    mRefreshRateInLowZone: " + mRefreshRateInLowZone);
 
-            for (int d : mLowDisplayBrightnessThresholds) {
+            for (float d : mLowDisplayBrightnessThresholds) {
                 pw.println("    mDisplayLowBrightnessThreshold: " + d);
             }
 
-            for (int d : mLowAmbientBrightnessThresholds) {
+            for (float d : mLowAmbientBrightnessThresholds) {
                 pw.println("    mAmbientLowBrightnessThreshold: " + d);
             }
 
@@ -1898,11 +1914,11 @@ public class DisplayModeDirector {
             pw.println("    mShouldObserveAmbientHighChange: " + mShouldObserveAmbientHighChange);
             pw.println("    mRefreshRateInHighZone: " + mRefreshRateInHighZone);
 
-            for (int d : mHighDisplayBrightnessThresholds) {
+            for (float d : mHighDisplayBrightnessThresholds) {
                 pw.println("    mDisplayHighBrightnessThresholds: " + d);
             }
 
-            for (int d : mHighAmbientBrightnessThresholds) {
+            for (float d : mHighAmbientBrightnessThresholds) {
                 pw.println("    mAmbientHighBrightnessThresholds: " + d);
             }
 
@@ -1931,9 +1947,9 @@ public class DisplayModeDirector {
 
                 // We don't support multiple display blocking zones yet, so only handle
                 // brightness changes for the default display for now.
-                int brightness = getBrightness(displayId);
+                float brightness = getBrightness(displayId);
                 synchronized (mLock) {
-                    if (brightness != mBrightness) {
+                    if (!BrightnessSynchronizer.floatEquals(brightness, mBrightness)) {
                         mBrightness = brightness;
                         onBrightnessChangedLocked();
                     }
@@ -2012,8 +2028,8 @@ public class DisplayModeDirector {
          * Checks to see if at least one value is positive, in which case it is necessary to listen
          * to value changes.
          */
-        private boolean hasValidThreshold(int[] a) {
-            for (int d: a) {
+        private boolean hasValidThreshold(float[] a) {
+            for (float d: a) {
                 if (d >= 0) {
                     return true;
                 }
@@ -2022,10 +2038,18 @@ public class DisplayModeDirector {
             return false;
         }
 
-        private boolean isInsideLowZone(int brightness, float lux) {
+        /**
+         * Check if we're in the low zone where higher refresh rates aren't allowed to prevent
+         * flickering.
+         * @param brightness The brightness value or a negative value meaning that only the lux
+         *                   threshold should be applied
+         * @param lux The lux value. If negative, only the brightness threshold is applied
+         * @return True if we're in the low zone
+         */
+        private boolean isInsideLowZone(float brightness, float lux) {
             for (int i = 0; i < mLowDisplayBrightnessThresholds.length; i++) {
-                int disp = mLowDisplayBrightnessThresholds[i];
-                int ambi = mLowAmbientBrightnessThresholds[i];
+                float disp = mLowDisplayBrightnessThresholds[i];
+                float ambi = mLowAmbientBrightnessThresholds[i];
 
                 if (disp >= 0 && ambi >= 0) {
                     if (brightness <= disp && lux <= ambi) {
@@ -2045,10 +2069,18 @@ public class DisplayModeDirector {
             return false;
         }
 
-        private boolean isInsideHighZone(int brightness, float lux) {
+        /**
+         * Check if we're in the high zone where higher refresh rates aren't allowed to prevent
+         * flickering.
+         * @param brightness The brightness value or a negative value meaning that only the lux
+         *                   threshold should be applied
+         * @param lux The lux value. If negative, only the brightness threshold is applied
+         * @return True if we're in the high zone
+         */
+        private boolean isInsideHighZone(float brightness, float lux) {
             for (int i = 0; i < mHighDisplayBrightnessThresholds.length; i++) {
-                int disp = mHighDisplayBrightnessThresholds[i];
-                int ambi = mHighAmbientBrightnessThresholds[i];
+                float disp = mHighDisplayBrightnessThresholds[i];
+                float ambi = mHighAmbientBrightnessThresholds[i];
 
                 if (disp >= 0 && ambi >= 0) {
                     if (brightness >= disp && lux >= ambi) {
@@ -2075,7 +2107,7 @@ public class DisplayModeDirector {
             Vote refreshRateVote = null;
             Vote refreshRateSwitchingVote = null;
 
-            if (mBrightness < 0) {
+            if (Float.isNaN(mBrightness)) {
                 // Either the setting isn't available or we shouldn't be observing yet anyways.
                 // Either way, just bail out since there's nothing we can do here.
                 return;
@@ -2191,13 +2223,18 @@ public class DisplayModeDirector {
             return mDefaultDisplayState == Display.STATE_ON;
         }
 
-        private int getBrightness(int displayId) {
+        /**
+         * Get the brightness value for a display
+         * @param displayId The ID of the display
+         * @return The brightness value
+         */
+        private float getBrightness(int displayId) {
             final BrightnessInfo info = mInjector.getBrightnessInfo(displayId);
             if (info != null) {
-                return BrightnessSynchronizer.brightnessFloatToInt(info.adjustedBrightness);
+                return info.adjustedBrightness;
             }
 
-            return BRIGHTNESS_INVALID;
+            return BRIGHTNESS_INVALID_FLOAT;
         }
 
         private final class LightSensorEventListener implements SensorEventListener {
@@ -2285,7 +2322,7 @@ public class DisplayModeDirector {
                 }
             }
 
-            private boolean isDifferentZone(float lux1, float lux2, int[] luxThresholds) {
+            private boolean isDifferentZone(float lux1, float lux2, float[] luxThresholds) {
                 for (final float boundary : luxThresholds) {
                     // Test each boundary. See if the current value and the new value are at
                     // different sides.
@@ -2719,9 +2756,9 @@ public class DisplayModeDirector {
             mHandler.obtainMessage(MSG_DEFAULT_PEAK_REFRESH_RATE_CHANGED,
                     defaultPeakRefreshRate == -1 ? null : defaultPeakRefreshRate).sendToTarget();
 
-            int[] lowDisplayBrightnessThresholds =
+            float[] lowDisplayBrightnessThresholds =
                     mConfigParameterProvider.getLowDisplayBrightnessThresholds();
-            int[] lowAmbientBrightnessThresholds =
+            float[] lowAmbientBrightnessThresholds =
                     mConfigParameterProvider.getLowAmbientBrightnessThresholds();
             final int refreshRateInLowZone = mConfigParameterProvider.getRefreshRateInLowZone();
 
@@ -2732,9 +2769,9 @@ public class DisplayModeDirector {
             mHandler.obtainMessage(MSG_REFRESH_RATE_IN_LOW_ZONE_CHANGED, refreshRateInLowZone,
                     0).sendToTarget();
 
-            int[] highDisplayBrightnessThresholds =
+            float[] highDisplayBrightnessThresholds =
                     mConfigParameterProvider.getHighDisplayBrightnessThresholds();
-            int[] highAmbientBrightnessThresholds =
+            float[] highAmbientBrightnessThresholds =
                     mConfigParameterProvider.getHighAmbientBrightnessThresholds();
             final int refreshRateInHighZone = mConfigParameterProvider.getRefreshRateInHighZone();
 
