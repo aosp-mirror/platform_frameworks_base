@@ -890,10 +890,12 @@ public class DisplayModeDirectorTest {
         config.setLowAmbientBrightnessThresholds(initialAmbientThresholds);
         director.start(sensorManager);
 
+        float[] expectedDisplayThresholds = { BrightnessSynchronizer.brightnessIntToFloat(10) };
+        float[] expectedAmbientThresholds = { 20 };
         assertThat(director.getBrightnessObserver().getLowDisplayBrightnessThresholds())
-                .isEqualTo(initialDisplayThresholds);
+                .isEqualTo(expectedDisplayThresholds);
         assertThat(director.getBrightnessObserver().getLowAmbientBrightnessThresholds())
-                .isEqualTo(initialAmbientThresholds);
+                .isEqualTo(expectedAmbientThresholds);
 
         final int[] updatedDisplayThresholds = { 9, 14 };
         final int[] updatedAmbientThresholds = { -1, 19 };
@@ -901,10 +903,14 @@ public class DisplayModeDirectorTest {
         config.setLowAmbientBrightnessThresholds(updatedAmbientThresholds);
         // Need to wait for the property change to propagate to the main thread.
         waitForIdleSync();
+
+        expectedDisplayThresholds = new float[]{ BrightnessSynchronizer.brightnessIntToFloat(9),
+                BrightnessSynchronizer.brightnessIntToFloat(14) };
+        expectedAmbientThresholds = new float[]{ -1, 19 };
         assertThat(director.getBrightnessObserver().getLowDisplayBrightnessThresholds())
-                .isEqualTo(updatedDisplayThresholds);
+                .isEqualTo(expectedDisplayThresholds);
         assertThat(director.getBrightnessObserver().getLowAmbientBrightnessThresholds())
-                .isEqualTo(updatedAmbientThresholds);
+                .isEqualTo(expectedAmbientThresholds);
     }
 
     @Test
@@ -2363,14 +2369,14 @@ public class DisplayModeDirectorTest {
         assertEquals(director.getBrightnessObserver().getRefreshRateInLowZone(), 85);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmHdr(), 95);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmSunlight(), 100);
-        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
-                new int[]{250});
-        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
-                new int[]{7000});
-        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThreshold(),
-                new int[]{5});
-        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
-                new int[]{10});
+        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThresholds(),
+                new float[]{ BrightnessSynchronizer.brightnessIntToFloat(250) }, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThresholds(),
+                new float[]{7000}, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThresholds(),
+                new float[]{ BrightnessSynchronizer.brightnessIntToFloat(5) }, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThresholds(),
+                new float[]{10}, /* delta= */ 0);
 
 
         // Notify that the default display is updated, such that DisplayDeviceConfig has new values
@@ -2379,10 +2385,14 @@ public class DisplayModeDirectorTest {
         when(displayDeviceConfig.getDefaultHighBlockingZoneRefreshRate()).thenReturn(55);
         when(displayDeviceConfig.getDefaultRefreshRate()).thenReturn(60);
         when(displayDeviceConfig.getDefaultPeakRefreshRate()).thenReturn(65);
-        when(displayDeviceConfig.getLowDisplayBrightnessThresholds()).thenReturn(new int[]{25});
-        when(displayDeviceConfig.getLowAmbientBrightnessThresholds()).thenReturn(new int[]{30});
-        when(displayDeviceConfig.getHighDisplayBrightnessThresholds()).thenReturn(new int[]{210});
-        when(displayDeviceConfig.getHighAmbientBrightnessThresholds()).thenReturn(new int[]{2100});
+        when(displayDeviceConfig.getLowDisplayBrightnessThresholds())
+                .thenReturn(new float[]{0.025f});
+        when(displayDeviceConfig.getLowAmbientBrightnessThresholds())
+                .thenReturn(new float[]{30});
+        when(displayDeviceConfig.getHighDisplayBrightnessThresholds())
+                .thenReturn(new float[]{0.21f});
+        when(displayDeviceConfig.getHighAmbientBrightnessThresholds())
+                .thenReturn(new float[]{2100});
         when(displayDeviceConfig.getDefaultRefreshRateInHbmHdr()).thenReturn(65);
         when(displayDeviceConfig.getDefaultRefreshRateInHbmSunlight()).thenReturn(75);
         director.defaultDisplayDeviceUpdated(displayDeviceConfig);
@@ -2393,14 +2403,14 @@ public class DisplayModeDirectorTest {
                 0.0);
         assertEquals(director.getBrightnessObserver().getRefreshRateInHighZone(), 55);
         assertEquals(director.getBrightnessObserver().getRefreshRateInLowZone(), 50);
-        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
-                new int[]{210});
-        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
-                new int[]{2100});
-        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThreshold(),
-                new int[]{25});
-        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
-                new int[]{30});
+        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThresholds(),
+                new float[]{0.21f}, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThresholds(),
+                new float[]{2100}, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThresholds(),
+                new float[]{0.025f}, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThresholds(),
+                new float[]{30}, /* delta= */ 0);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmHdr(), 65);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmSunlight(), 75);
 
@@ -2424,14 +2434,14 @@ public class DisplayModeDirectorTest {
                 0.0);
         assertEquals(director.getBrightnessObserver().getRefreshRateInHighZone(), 65);
         assertEquals(director.getBrightnessObserver().getRefreshRateInLowZone(), 70);
-        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
-                new int[]{255});
-        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
-                new int[]{8000});
-        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThreshold(),
-                new int[]{10});
-        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
-                new int[]{20});
+        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThresholds(),
+                new float[]{ BrightnessSynchronizer.brightnessIntToFloat(255) }, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThresholds(),
+                new float[]{8000}, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThresholds(),
+                new float[]{ BrightnessSynchronizer.brightnessIntToFloat(10) }, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThresholds(),
+                new float[]{20}, /* delta= */ 0);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmHdr(), 70);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmSunlight(), 80);
 
@@ -2453,14 +2463,14 @@ public class DisplayModeDirectorTest {
                 0.0);
         assertEquals(director.getBrightnessObserver().getRefreshRateInHighZone(), 55);
         assertEquals(director.getBrightnessObserver().getRefreshRateInLowZone(), 50);
-        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
-                new int[]{210});
-        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
-                new int[]{2100});
-        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThreshold(),
-                new int[]{25});
-        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
-                new int[]{30});
+        assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThresholds(),
+                new float[]{0.21f}, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThresholds(),
+                new float[]{2100}, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getLowDisplayBrightnessThresholds(),
+                new float[]{0.025f}, /* delta= */ 0);
+        assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThresholds(),
+                new float[]{30}, /* delta= */ 0);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmHdr(), 65);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmSunlight(), 75);
     }
@@ -2496,10 +2506,10 @@ public class DisplayModeDirectorTest {
         DisplayDeviceConfig ddcMock = mock(DisplayDeviceConfig.class);
         when(ddcMock.getDefaultLowBlockingZoneRefreshRate()).thenReturn(50);
         when(ddcMock.getDefaultHighBlockingZoneRefreshRate()).thenReturn(55);
-        when(ddcMock.getLowDisplayBrightnessThresholds()).thenReturn(new int[]{25});
-        when(ddcMock.getLowAmbientBrightnessThresholds()).thenReturn(new int[]{30});
-        when(ddcMock.getHighDisplayBrightnessThresholds()).thenReturn(new int[]{210});
-        when(ddcMock.getHighAmbientBrightnessThresholds()).thenReturn(new int[]{2100});
+        when(ddcMock.getLowDisplayBrightnessThresholds()).thenReturn(new float[]{0.025f});
+        when(ddcMock.getLowAmbientBrightnessThresholds()).thenReturn(new float[]{30});
+        when(ddcMock.getHighDisplayBrightnessThresholds()).thenReturn(new float[]{0.21f});
+        when(ddcMock.getHighAmbientBrightnessThresholds()).thenReturn(new float[]{2100});
 
         Resources resMock = mock(Resources.class);
         when(resMock.getInteger(
