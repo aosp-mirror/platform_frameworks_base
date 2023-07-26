@@ -212,6 +212,7 @@ public class CreateUserDialogControllerTest {
         next.performClick();
         verify(successCallback, times(1))
                 .onSuccess(expectedNewName, null, true);
+        verifyNoInteractions(cancelCallback);
     }
 
     @Test
@@ -233,6 +234,7 @@ public class CreateUserDialogControllerTest {
         next.performClick();
         verify(successCallback, times(1))
                 .onSuccess(expectedNewName, null, false);
+        verifyNoInteractions(cancelCallback);
     }
 
     private class TestCreateUserDialogController extends CreateUserDialogController {
