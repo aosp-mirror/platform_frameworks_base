@@ -23,6 +23,8 @@ import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.NoSuchElementException;
+
 /**
  * An ExternalVibration represents an on-going vibration being controlled by something other than
  * the core vibrator service.
@@ -149,7 +151,7 @@ public class ExternalVibration implements Parcelable {
         try {
             mToken.linkToDeath(recipient, 0);
         } catch (RemoteException e) {
-            return;
+            Slog.wtf(TAG, "Failed to link to token death: " + this, e);
         }
     }
 
@@ -157,7 +159,11 @@ public class ExternalVibration implements Parcelable {
      * Unlinks a recipient to death against this external vibration token
      */
     public void unlinkToDeath(IBinder.DeathRecipient recipient) {
-        mToken.unlinkToDeath(recipient, 0);
+        try {
+            mToken.unlinkToDeath(recipient, 0);
+        } catch (NoSuchElementException e) {
+            Slog.wtf(TAG, "Failed to unlink to token death", e);
+        }
     }
 
     @Override
@@ -184,12 +190,12 @@ public class ExternalVibration implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mUid);
         out.writeString(mPkg);
-        writeAudioAttributes(mAttrs, out, flags);
+        writeAudioAttributes(mAttrs, out);
         out.writeStrongBinder(mController.asBinder());
         out.writeStrongBinder(mToken);
     }
 
-    private static void writeAudioAttributes(AudioAttributes attrs, Parcel out, int flags) {
+    private static void writeAudioAttributes(AudioAttributes attrs, Parcel out) {
         out.writeInt(attrs.getUsage());
         out.writeInt(attrs.getContentType());
         out.writeInt(attrs.getCapturePreset());

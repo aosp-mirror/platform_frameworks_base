@@ -16,34 +16,37 @@
 
 package android.os;
 
-import static junit.framework.Assert.assertEquals;
-
-import static org.mockito.Mockito.mock;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.media.AudioAttributes;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.runners.JUnit4;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(JUnit4.class)
 public class ExternalVibrationTest {
-    @Ignore("b/291713224")
+
     @Test
     public void testSerialization() {
-        AudioAttributes audio = new AudioAttributes.Builder().build();
-        IExternalVibrationController controller = mock(IExternalVibrationController.class);
         ExternalVibration original = new ExternalVibration(
-                123, // uid
+                /* uid= */ 123,
                 "pkg",
-                audio,
-                controller);
+                new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .setFlags(AudioAttributes.FLAG_BYPASS_MUTE)
+                        .build(),
+                IExternalVibrationController.Stub.asInterface(new Binder()));
         Parcel p = Parcel.obtain();
         original.writeToParcel(p, 0);
         p.setDataPosition(0);
         ExternalVibration restored = ExternalVibration.CREATOR.createFromParcel(p);
-        assertEquals(original, restored);
+        assertThat(restored).isEqualTo(original);
+        // ExternalVibration.equals relies on the binder token only, check other attributes as well
+        assertThat(restored.getUid()).isEqualTo(original.getUid());
+        assertThat(restored.getPackage()).isEqualTo(original.getPackage());
+        assertThat(restored.getAudioAttributes()).isEqualTo(original.getAudioAttributes());
+        assertThat(restored.getToken()).isEqualTo(original.getToken());
     }
 }
-
