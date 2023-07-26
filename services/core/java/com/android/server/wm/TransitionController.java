@@ -578,6 +578,17 @@ class TransitionController {
     }
 
     /**
+     * Returns {@code true} if the window container is in the collecting transition, and its
+     * collected rotation is different from the target rotation.
+     */
+    boolean hasCollectingRotationChange(@NonNull WindowContainer<?> wc, int targetRotation) {
+        final Transition transition = mCollectingTransition;
+        if (transition == null || !transition.mParticipants.contains(wc)) return false;
+        final Transition.ChangeInfo changeInfo = transition.mChanges.get(wc);
+        return changeInfo != null && changeInfo.mRotation != targetRotation;
+    }
+
+    /**
      * @see #requestTransitionIfNeeded(int, int, WindowContainer, WindowContainer, RemoteTransition)
      */
     @Nullable

@@ -517,6 +517,21 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
+    public void testConfirmImmersivePrompt() {
+        mCommandQueue.confirmImmersivePrompt();
+        waitForIdleSync();
+        verify(mCallbacks).confirmImmersivePrompt();
+    }
+
+    @Test
+    public void testImmersiveModeChanged() {
+        final int displayAreaId = 10;
+        mCommandQueue.immersiveModeChanged(displayAreaId, true);
+        waitForIdleSync();
+        verify(mCallbacks).immersiveModeChanged(displayAreaId, true);
+    }
+
+    @Test
     public void testShowRearDisplayDialog() {
         final int currentBaseState = 1;
         mCommandQueue.showRearDisplayDialog(currentBaseState);

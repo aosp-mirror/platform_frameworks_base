@@ -112,6 +112,12 @@ object Flags {
             default = true
         )
 
+    /** Only notify group expansion listeners when a change happens. */
+    // TODO(b/292213543): Tracking Bug
+    @JvmField
+    val NOTIFICATION_GROUP_EXPANSION_CHANGE =
+            unreleasedFlag(292213543, "notification_group_expansion_change", teamfood = false)
+
     // 200 - keyguard/lockscreen
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =

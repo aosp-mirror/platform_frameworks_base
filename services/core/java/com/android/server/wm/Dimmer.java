@@ -215,8 +215,7 @@ class Dimmer {
         return mDimState;
     }
 
-    private void dim(SurfaceControl.Transaction t, WindowContainer container, int relativeLayer,
-            float alpha, int blurRadius) {
+    private void dim(WindowContainer container, int relativeLayer, float alpha, int blurRadius) {
         final DimState d = getDimState(container);
 
         if (d == null) {
@@ -226,6 +225,7 @@ class Dimmer {
         // The dim method is called from WindowState.prepareSurfaces(), which is always called
         // in the correct Z from lowest Z to highest. This ensures that the dim layer is always
         // relative to the highest Z layer with a dim.
+        SurfaceControl.Transaction t = mHost.getPendingTransaction();
         t.setRelativeLayer(d.mDimLayer, container.getSurfaceControl(), relativeLayer);
         t.setAlpha(d.mDimLayer, alpha);
         t.setBackgroundBlurRadius(d.mDimLayer, blurRadius);
@@ -238,26 +238,23 @@ class Dimmer {
      * for each call to {@link WindowContainer#prepareSurfaces} the Dim state will be reset
      * and the child should call dimAbove again to request the Dim to continue.
      *
-     * @param t         A transaction in which to apply the Dim.
      * @param container The container which to dim above. Should be a child of our host.
      * @param alpha     The alpha at which to Dim.
      */
-    void dimAbove(SurfaceControl.Transaction t, WindowContainer container, float alpha) {
-        dim(t, container, 1, alpha, 0);
+    void dimAbove(WindowContainer container, float alpha) {
+        dim(container, 1, alpha, 0);
     }
 
     /**
      * Like {@link #dimAbove} but places the dim below the given container.
      *
-     * @param t          A transaction in which to apply the Dim.
      * @param container  The container which to dim below. Should be a child of our host.
      * @param alpha      The alpha at which to Dim.
      * @param blurRadius The amount of blur added to the Dim.
      */
 
-    void dimBelow(SurfaceControl.Transaction t, WindowContainer container, float alpha,
-                  int blurRadius) {
-        dim(t, container, -1, alpha, blurRadius);
+    void dimBelow(WindowContainer container, float alpha, int blurRadius) {
+        dim(container, -1, alpha, blurRadius);
     }
 
     /**
