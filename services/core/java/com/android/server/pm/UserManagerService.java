@@ -2650,15 +2650,15 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setDefaultGuestRestrictions(Bundle restrictions) {
         checkManageUsersPermission("setDefaultGuestRestrictions");
+        final List<UserInfo> guests = getGuestUsers();
+        synchronized (mRestrictionsLock) {
+            for (int i = 0; i < guests.size(); i++) {
+                updateUserRestrictionsInternalLR(restrictions, guests.get(i).id);
+            }
+        }
         synchronized (mGuestRestrictions) {
             mGuestRestrictions.clear();
             mGuestRestrictions.putAll(restrictions);
-            final List<UserInfo> guests = getGuestUsers();
-            for (int i = 0; i < guests.size(); i++) {
-                synchronized (mRestrictionsLock) {
-                    updateUserRestrictionsInternalLR(mGuestRestrictions, guests.get(i).id);
-                }
-            }
         }
         synchronized (mPackagesLock) {
             writeUserListLP();
