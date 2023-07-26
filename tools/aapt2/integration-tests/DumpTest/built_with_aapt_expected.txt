@@ -1,5 +1,5 @@
 package: name='com.aapt.app' versionCode='222' versionName='222' platformBuildVersionName='12' platformBuildVersionCode='32' compileSdkVersion='32' compileSdkVersionCodename='12'
-sdkVersion:'22'
+minSdkVersion:'22'
 targetSdkVersion:'32'
 application: label='App' icon=''
 feature-group: label=''

@@ -837,9 +837,9 @@ class UsesSdkBadging : public ManifestExtractor::Element {
 
   void Print(text::Printer* printer) override {
     if (min_sdk) {
-      printer->Print(StringPrintf("sdkVersion:'%d'\n", *min_sdk));
+      printer->Print(StringPrintf("minSdkVersion:'%d'\n", *min_sdk));
     } else if (min_sdk_name) {
-      printer->Print(StringPrintf("sdkVersion:'%s'\n", min_sdk_name->data()));
+      printer->Print(StringPrintf("minSdkVersion:'%s'\n", min_sdk_name->data()));
     }
     if (max_sdk) {
       printer->Print(StringPrintf("maxSdkVersion:'%d'\n", *max_sdk));

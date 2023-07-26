@@ -1,5 +1,5 @@
 package: name='com.test.e17wmultiapknexus' versionCode='107' versionName='14' platformBuildVersionName='2.3.3' platformBuildVersionCode='10'
-sdkVersion:'1'
+minSdkVersion:'1'
 application-label:'w45wmultiapknexus_10'
 application-icon-120:'res/drawable-ldpi-v4/icon.png'
 application-icon-160:'res/drawable-mdpi-v4/icon.png'

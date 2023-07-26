@@ -1,5 +1,5 @@
 package: name='com.example.bundletool.minimal' versionCode='1' versionName='1.0' platformBuildVersionName='12' platformBuildVersionCode='31' compileSdkVersion='31' compileSdkVersionCodename='12'
-sdkVersion:'21'
+minSdkVersion:'21'
 targetSdkVersion:'31'
 uses-configuration: reqTouchScreen='3' reqKeyboardType='2' reqHardKeyboard='-1' reqNavigation='3' reqFiveWayNav='-1'
 supports-gl-texture:'GL_OES_compressed_paletted_texture'
