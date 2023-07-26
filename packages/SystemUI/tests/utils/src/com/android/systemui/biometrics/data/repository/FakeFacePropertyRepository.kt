@@ -12,24 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.biometrics.shared.model
+package com.android.systemui.biometrics.data.repository
 
-import android.hardware.biometrics.SensorProperties
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
-/** Sensor security strength. Represents [SensorProperties.Strength]. */
-enum class SensorStrength {
-    CONVENIENCE,
-    WEAK,
-    STRONG,
-}
+class FakeFacePropertyRepository : FacePropertyRepository {
+    private val faceSensorInfo = MutableStateFlow<FaceSensorInfo?>(null)
+    override val sensorInfo: Flow<FaceSensorInfo?>
+        get() = faceSensorInfo
 
-/** Convert [this] to corresponding [SensorStrength] */
-fun Int.toSensorStrength(): SensorStrength =
-    when (this) {
-        0 -> SensorStrength.CONVENIENCE
-        1 -> SensorStrength.WEAK
-        2 -> SensorStrength.STRONG
-        else -> throw IllegalArgumentException("Invalid SensorStrength value: $this")
+    fun setSensorInfo(value: FaceSensorInfo?) {
+        faceSensorInfo.value = value
     }
+}
