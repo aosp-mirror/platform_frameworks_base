@@ -61,6 +61,19 @@ class FakeDeviceEntryFaceAuthRepository : DeviceEntryFaceAuthRepository {
         _wasDisabled = true
     }
 
+    private val faceAuthPaused = MutableStateFlow(false)
+    override fun pauseFaceAuth() {
+        faceAuthPaused.value = true
+    }
+
+    override fun resumeFaceAuth() {
+        faceAuthPaused.value = false
+    }
+
+    fun isFaceAuthPaused(): Boolean {
+        return faceAuthPaused.value
+    }
+
     override suspend fun authenticate(uiEvent: FaceAuthUiEvent, fallbackToDetection: Boolean) {
         _runningAuthRequest.value = uiEvent to fallbackToDetection
         _isAuthRunning.value = true
