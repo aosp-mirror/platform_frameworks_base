@@ -18,7 +18,11 @@ package com.android.server.wm.utils;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import android.app.KeyguardManager;
 import android.app.UiAutomation;
+import android.view.KeyEvent;
+
+import androidx.test.uiautomator.UiDevice;
 
 /** Provides common utility functions. */
 public class CommonUtils {
@@ -33,5 +37,17 @@ public class CommonUtils {
         } finally {
             getUiAutomation().dropShellPermissionIdentity();
         }
+    }
+
+    /** Dismisses the Keyguard if it is locked. */
+    public static void dismissKeyguard() {
+        final KeyguardManager keyguardManager = getInstrumentation().getContext().getSystemService(
+                KeyguardManager.class);
+        if (keyguardManager == null || !keyguardManager.isKeyguardLocked()) {
+            return;
+        }
+        final UiDevice device = UiDevice.getInstance(getInstrumentation());
+        device.pressKeyCode(KeyEvent.KEYCODE_WAKEUP);
+        device.pressKeyCode(KeyEvent.KEYCODE_MENU);
     }
 }

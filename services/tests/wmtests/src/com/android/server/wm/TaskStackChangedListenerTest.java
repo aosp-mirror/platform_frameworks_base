@@ -54,7 +54,10 @@ import android.widget.LinearLayout;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.server.wm.utils.CommonUtils;
+
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -76,6 +79,11 @@ public class TaskStackChangedListenerTest {
 
     private static final int WAIT_TIMEOUT_MS = 5000;
     private static final Object sLock = new Object();
+
+    @Before
+    public void setUp() {
+        CommonUtils.dismissKeyguard();
+    }
 
     @After
     public void tearDown() throws Exception {
