@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.shared.model
+package com.android.systemui.controls.ui
 
-import android.hardware.biometrics.SensorProperties
+import android.content.ContentProvider
+import android.graphics.drawable.Icon
 
-/** Sensor security strength. Represents [SensorProperties.Strength]. */
-enum class SensorStrength {
-    CONVENIENCE,
-    WEAK,
-    STRONG,
+class CanUseIconPredicate(private val currentUserId: Int) : (Icon) -> Boolean {
+
+    override fun invoke(icon: Icon): Boolean =
+        if (icon.type == Icon.TYPE_URI || icon.type == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+            ContentProvider.getUserIdFromUri(icon.uri, currentUserId) == currentUserId
+        } else {
+            true
+        }
 }
-
-/** Convert [this] to corresponding [SensorStrength] */
-fun Int.toSensorStrength(): SensorStrength =
-    when (this) {
-        0 -> SensorStrength.CONVENIENCE
-        1 -> SensorStrength.WEAK
-        2 -> SensorStrength.STRONG
-        else -> throw IllegalArgumentException("Invalid SensorStrength value: $this")
-    }

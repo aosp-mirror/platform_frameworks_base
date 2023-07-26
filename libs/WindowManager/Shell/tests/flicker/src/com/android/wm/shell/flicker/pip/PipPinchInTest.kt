@@ -16,8 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -35,14 +34,13 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 270677470)
 class PipPinchInTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = {
         transitions { pipApp.pinchInPipWindow(wmHelper, 0.4f, 30) }
     }
 
     /** Checks that the visible region area of [pipApp] always decreases during the animation. */
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipLayerAreaDecreases() {
         flicker.assertLayers {

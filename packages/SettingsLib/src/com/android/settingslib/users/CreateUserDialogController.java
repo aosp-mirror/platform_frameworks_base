@@ -80,6 +80,8 @@ public class CreateUserDialogController {
     private Bitmap mSavedPhoto;
     private String mSavedName;
     private Drawable mSavedDrawable;
+    private String mUserName;
+    private Drawable mNewUserIcon;
     private Boolean mIsAdmin;
     private Dialog mUserCreationDialog;
     private View mGrantAdminView;
@@ -89,6 +91,7 @@ public class CreateUserDialogController {
     private ActivityStarter mActivityStarter;
     private boolean mWaitingForActivityResult;
     private NewUserData mSuccessCallback;
+    private Runnable mCancelCallback;
 
     private final String mFileAuthority;
 
@@ -113,6 +116,7 @@ public class CreateUserDialogController {
         mEditUserInfoView = null;
         mUserNameView = null;
         mSuccessCallback = null;
+        mCancelCallback = null;
         mCurrentState = INITIAL_DIALOG;
     }
 
@@ -184,14 +188,12 @@ public class CreateUserDialogController {
         mActivity = activity;
         mCustomDialogHelper = new CustomDialogHelper(activity);
         mSuccessCallback = successCallback;
+        mCancelCallback = cancelCallback;
         mActivityStarter = activityStarter;
         addCustomViews(isMultipleAdminEnabled);
         mUserCreationDialog = mCustomDialogHelper.getDialog();
         updateLayout();
-        mUserCreationDialog.setOnDismissListener(view -> {
-            cancelCallback.run();
-            clear();
-        });
+        mUserCreationDialog.setOnDismissListener(view -> finish());
         mCustomDialogHelper.setMessagePadding(MESSAGE_PADDING);
         mUserCreationDialog.setCanceledOnTouchOutside(true);
         return mUserCreationDialog;
@@ -269,20 +271,14 @@ public class CreateUserDialogController {
                 mGrantAdminView.setVisibility(View.GONE);
                 break;
             case CREATE_USER_AND_CLOSE:
-                Drawable newUserIcon = mEditUserPhotoController != null
+                mNewUserIcon = mEditUserPhotoController != null
                         ? mEditUserPhotoController.getNewUserPhotoDrawable()
                         : null;
 
                 String newName = mUserNameView.getText().toString().trim();
                 String defaultName = mActivity.getString(R.string.user_new_user_name);
-                String userName = !newName.isEmpty() ? newName : defaultName;
-
-                if (mSuccessCallback != null) {
-                    mSuccessCallback.onSuccess(userName, newUserIcon,
-                            Boolean.TRUE.equals(mIsAdmin));
-                }
+                mUserName = !newName.isEmpty() ? newName : defaultName;
                 mCustomDialogHelper.getDialog().dismiss();
-                clear();
                 break;
             case EXIT_DIALOG:
                 mCustomDialogHelper.getDialog().dismiss();
@@ -383,5 +379,21 @@ public class CreateUserDialogController {
 
     public boolean isActive() {
         return mCustomDialogHelper != null && mCustomDialogHelper.getDialog() != null;
+    }
+
+    /**
+     * Runs callback and clears saved values after dialog is dismissed.
+     */
+    public void finish() {
+        if (mCurrentState == CREATE_USER_AND_CLOSE) {
+            if (mSuccessCallback != null) {
+                mSuccessCallback.onSuccess(mUserName, mNewUserIcon, Boolean.TRUE.equals(mIsAdmin));
+            }
+        } else {
+            if (mCancelCallback != null) {
+                mCancelCallback.run();
+            }
+        }
+        clear();
     }
 }
