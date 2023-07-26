@@ -2404,6 +2404,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mLoggedInlineDatasetShown = true;
             }
             mService.logDatasetShown(this.id, mClientState, uiType);
+            Slog.d(TAG, "onShown(): " + uiType);
         }
     }
 
