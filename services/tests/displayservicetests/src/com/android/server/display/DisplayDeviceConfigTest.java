@@ -22,8 +22,10 @@ import static com.android.server.display.utils.DeviceConfigParsingUtils.displayB
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Temperature;
 import android.util.SparseArray;
 import android.util.Spline;
@@ -74,8 +77,7 @@ public final class DisplayDeviceConfigTest {
     private static final int[] HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{-1, 30000};
     private static final float[] NITS = {2, 500, 800};
     private static final float[] BRIGHTNESS = {0, 0.62f, 1};
-    private static final Spline NITS_TO_BRIGHTNESS_SPLINE =
-            Spline.createSpline(NITS, BRIGHTNESS);
+    private static final Spline NITS_TO_BRIGHTNESS_SPLINE = Spline.createSpline(NITS, BRIGHTNESS);
 
     private DisplayDeviceConfig mDisplayDeviceConfig;
     private static final float ZERO_DELTA = 0.0f;
@@ -178,40 +180,174 @@ public final class DisplayDeviceConfigTest {
         assertEquals(82, mDisplayDeviceConfig.getDefaultRefreshRateInHbmHdr());
         assertEquals(83, mDisplayDeviceConfig.getDefaultRefreshRateInHbmSunlight());
 
-        assertEquals("sensor_12345",
-                mDisplayDeviceConfig.getScreenOffBrightnessSensor().type);
-        assertEquals("Sensor 12345",
-                mDisplayDeviceConfig.getScreenOffBrightnessSensor().name);
+        assertNotNull(mDisplayDeviceConfig.getHostUsiVersion());
+        assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMajorVersion(), 2);
+        assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMinorVersion(), 0);
+    }
 
-        assertArrayEquals(new int[]{-1, 10, 20, 30, 40},
-                mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux());
+    @Test
+    public void testConfigValuesFromConfigResource() {
+        setupDisplayDeviceConfigFromConfigResourceFile();
+        verifyConfigValuesFromConfigResource();
+    }
+
+    @Test
+    public void testThermalRefreshRateThrottlingFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        SparseArray<SurfaceControl.RefreshRateRange> defaultMap =
+                mDisplayDeviceConfig.getThermalRefreshRateThrottlingData(null);
+        assertNotNull(defaultMap);
+        assertEquals(2, defaultMap.size());
+        assertEquals(30, defaultMap.get(Temperature.THROTTLING_CRITICAL).min, SMALL_DELTA);
+        assertEquals(60, defaultMap.get(Temperature.THROTTLING_CRITICAL).max, SMALL_DELTA);
+        assertEquals(0, defaultMap.get(Temperature.THROTTLING_SHUTDOWN).min, SMALL_DELTA);
+        assertEquals(30, defaultMap.get(Temperature.THROTTLING_SHUTDOWN).max, SMALL_DELTA);
+
+        SparseArray<SurfaceControl.RefreshRateRange> testMap =
+                mDisplayDeviceConfig.getThermalRefreshRateThrottlingData("test");
+        assertNotNull(testMap);
+        assertEquals(1, testMap.size());
+        assertEquals(60, testMap.get(Temperature.THROTTLING_EMERGENCY).min, SMALL_DELTA);
+        assertEquals(90, testMap.get(Temperature.THROTTLING_EMERGENCY).max, SMALL_DELTA);
+    }
+
+    @Test
+    public void testValidLuxThrottling() throws Exception {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        Map<DisplayDeviceConfig.BrightnessLimitMapType, Map<Float, Float>> luxThrottlingData =
+                mDisplayDeviceConfig.getLuxThrottlingData();
+        assertEquals(2, luxThrottlingData.size());
+
+        Map<Float, Float> adaptiveOnBrightnessPoints = luxThrottlingData.get(
+                DisplayDeviceConfig.BrightnessLimitMapType.ADAPTIVE);
+        assertEquals(2, adaptiveOnBrightnessPoints.size());
+        assertEquals(0.3f, adaptiveOnBrightnessPoints.get(1000f), SMALL_DELTA);
+        assertEquals(0.5f, adaptiveOnBrightnessPoints.get(5000f), SMALL_DELTA);
+
+        Map<Float, Float> adaptiveOffBrightnessPoints = luxThrottlingData.get(
+                DisplayDeviceConfig.BrightnessLimitMapType.DEFAULT);
+        assertEquals(2, adaptiveOffBrightnessPoints.size());
+        assertEquals(0.35f, adaptiveOffBrightnessPoints.get(1500f), SMALL_DELTA);
+        assertEquals(0.55f, adaptiveOffBrightnessPoints.get(5500f), SMALL_DELTA);
+    }
+
+    @Test
+    public void testInvalidLuxThrottling() throws Exception {
+        setupDisplayDeviceConfigFromDisplayConfigFile(
+                getContent(getInvalidLuxThrottling(), getValidProxSensor()));
+
+        Map<DisplayDeviceConfig.BrightnessLimitMapType, Map<Float, Float>> luxThrottlingData =
+                mDisplayDeviceConfig.getLuxThrottlingData();
+        assertEquals(1, luxThrottlingData.size());
+
+        Map<Float, Float> adaptiveOnBrightnessPoints = luxThrottlingData.get(
+                DisplayDeviceConfig.BrightnessLimitMapType.ADAPTIVE);
+        assertEquals(1, adaptiveOnBrightnessPoints.size());
+        assertEquals(0.3f, adaptiveOnBrightnessPoints.get(1000f), SMALL_DELTA);
+    }
+
+    @Test
+    public void testFallbackToConfigResource() throws IOException {
+        setupDisplayDeviceConfigFromConfigResourceFile();
+
+        // Empty display config file
+        setupDisplayDeviceConfigFromDisplayConfigFile(
+                "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<displayConfiguration />\n");
+
+        // We should fall back to the config resource
+        verifyConfigValuesFromConfigResource();
+    }
+
+    @Test
+    public void testDensityMappingFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertEquals(120, mDisplayDeviceConfig.getDensityMapping()
+                .getDensityForResolution(720, 480));
+        assertEquals(213, mDisplayDeviceConfig.getDensityMapping()
+                .getDensityForResolution(1280, 720));
+        assertEquals(320, mDisplayDeviceConfig.getDensityMapping()
+                .getDensityForResolution(1920, 1080));
+        assertEquals(640, mDisplayDeviceConfig.getDensityMapping()
+                .getDensityForResolution(3840, 2160));
+    }
+
+    @Test
+    public void testHighBrightnessModeDataFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        DisplayDeviceConfig.HighBrightnessModeData hbmData =
+                mDisplayDeviceConfig.getHighBrightnessModeData();
+        assertNotNull(hbmData);
+        assertEquals(BRIGHTNESS[1], hbmData.transitionPoint, ZERO_DELTA);
+        assertEquals(10000, hbmData.minimumLux, ZERO_DELTA);
+        assertEquals(1800 * 1000, hbmData.timeWindowMillis);
+        assertEquals(300 * 1000, hbmData.timeMaxMillis);
+        assertEquals(60 * 1000, hbmData.timeMinMillis);
+        assertFalse(hbmData.allowInLowPowerMode);
+        assertEquals(0.6f, hbmData.minimumHdrPercentOfScreen, ZERO_DELTA);
+
+        List<DisplayManagerInternal.RefreshRateLimitation> refreshRateLimitations =
+                mDisplayDeviceConfig.getRefreshRateLimitations();
+        assertEquals(1, refreshRateLimitations.size());
+        assertEquals(DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE,
+                refreshRateLimitations.get(0).type);
+        assertEquals(120, refreshRateLimitations.get(0).range.min, ZERO_DELTA);
+        assertEquals(120, refreshRateLimitations.get(0).range.max, ZERO_DELTA);
+
+        // Max desired Hdr/SDR ratio upper-bounds the HDR brightness.
+        assertTrue(mDisplayDeviceConfig.hasSdrToHdrRatioSpline());
+        assertEquals(NITS_TO_BRIGHTNESS_SPLINE.interpolate(500 * 1.6f),
+                mDisplayDeviceConfig.getHdrBrightnessFromSdr(
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(500), Float.POSITIVE_INFINITY),
+                ZERO_DELTA);
+        assertEquals(NITS_TO_BRIGHTNESS_SPLINE.interpolate(500),
+                mDisplayDeviceConfig.getHdrBrightnessFromSdr(
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(500), 1.0f),
+                ZERO_DELTA);
+        assertEquals(NITS_TO_BRIGHTNESS_SPLINE.interpolate(500 * 1.25f),
+                mDisplayDeviceConfig.getHdrBrightnessFromSdr(
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(500), 1.25f),
+                SMALL_DELTA);
+        assertEquals(NITS_TO_BRIGHTNESS_SPLINE.interpolate(2 * 4),
+                mDisplayDeviceConfig.getHdrBrightnessFromSdr(
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(2), Float.POSITIVE_INFINITY),
+                SMALL_DELTA);
+    }
+
+    @Test
+    public void testThermalBrightnessThrottlingDataFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
 
         List<DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel>
                 defaultThrottlingLevels = new ArrayList<>();
         defaultThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.light), 0.4f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.light), 0.4f
+                ));
         defaultThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.moderate), 0.3f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.moderate), 0.3f
+                ));
         defaultThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.severe), 0.2f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.severe), 0.2f
+                ));
         defaultThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.critical), 0.1f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.critical), 0.1f
+                ));
         defaultThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.emergency), 0.05f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.emergency), 0.05f
+                ));
         defaultThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.shutdown), 0.025f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.shutdown), 0.025f
+                ));
 
         DisplayDeviceConfig.ThermalBrightnessThrottlingData defaultThrottlingData =
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData(defaultThrottlingLevels);
@@ -220,28 +356,28 @@ public final class DisplayDeviceConfigTest {
                 concurrentThrottlingLevels = new ArrayList<>();
         concurrentThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.light), 0.2f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.light), 0.2f
+                ));
         concurrentThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.moderate), 0.15f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.moderate), 0.15f
+                ));
         concurrentThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.severe), 0.1f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.severe), 0.1f
+                ));
         concurrentThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.critical), 0.05f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.critical), 0.05f
+                ));
         concurrentThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.emergency), 0.025f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.emergency), 0.025f
+                ));
         concurrentThrottlingLevels.add(
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData.ThrottlingLevel(
-                DisplayDeviceConfig.convertThermalStatus(ThermalStatus.shutdown), 0.0125f
-        ));
+                        DisplayDeviceConfig.convertThermalStatus(ThermalStatus.shutdown), 0.0125f
+                ));
         DisplayDeviceConfig.ThermalBrightnessThrottlingData concurrentThrottlingData =
                 new DisplayDeviceConfig.ThermalBrightnessThrottlingData(concurrentThrottlingLevels);
 
@@ -252,29 +388,87 @@ public final class DisplayDeviceConfigTest {
 
         assertEquals(throttlingDataMap,
                 mDisplayDeviceConfig.getThermalBrightnessThrottlingDataMapByThrottlingId());
-
-        assertNotNull(mDisplayDeviceConfig.getHostUsiVersion());
-        assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMajorVersion(), 2);
-        assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMinorVersion(), 0);
-
-        // Max desired Hdr/SDR ratio upper-bounds the HDR brightness.
-        assertEquals(1.0f,
-                mDisplayDeviceConfig.getHdrBrightnessFromSdr(0.62f, Float.POSITIVE_INFINITY),
-                ZERO_DELTA);
-        assertEquals(0.62f,
-                mDisplayDeviceConfig.getHdrBrightnessFromSdr(0.62f, 1.0f),
-                ZERO_DELTA);
-        assertEquals(0.77787f,
-                mDisplayDeviceConfig.getHdrBrightnessFromSdr(0.62f, 1.25f),
-                SMALL_DELTA);
-
-        // Todo: Add asserts for DensityMapping,
-        // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
 
     @Test
-    public void testConfigValuesFromConfigResource() {
+    public void testAmbientLightSensorFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertEquals("test_light_sensor",
+                mDisplayDeviceConfig.getAmbientLightSensor().type);
+        assertEquals("Test Ambient Light Sensor",
+                mDisplayDeviceConfig.getAmbientLightSensor().name);
+        assertEquals(60, mDisplayDeviceConfig.getAmbientLightSensor().minRefreshRate, ZERO_DELTA);
+        assertEquals(120, mDisplayDeviceConfig.getAmbientLightSensor().maxRefreshRate, ZERO_DELTA);
+    }
+
+    @Test
+    public void testScreenOffBrightnessSensorFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertEquals("test_binned_brightness_sensor",
+                mDisplayDeviceConfig.getScreenOffBrightnessSensor().type);
+        assertEquals("Test Binned Brightness Sensor",
+                mDisplayDeviceConfig.getScreenOffBrightnessSensor().name);
+
+        assertArrayEquals(new int[]{ -1, 10, 20, 30, 40 },
+                mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux());
+    }
+
+    @Test
+    public void testProximitySensorFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertEquals("test_proximity_sensor",
+                mDisplayDeviceConfig.getProximitySensor().type);
+        assertEquals("Test Proximity Sensor",
+                mDisplayDeviceConfig.getProximitySensor().name);
+    }
+
+    @Test
+    public void testProximitySensorWithEmptyValuesFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile(
+                getContent(getValidLuxThrottling(), getProxSensorWithEmptyValues()));
+        assertNull(mDisplayDeviceConfig.getProximitySensor());
+    }
+
+    @Test
+    public void testBlockingZoneThresholdsFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertArrayEquals(new float[]{ NITS_TO_BRIGHTNESS_SPLINE.interpolate(50),
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(300),
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(300), -1},
+                mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(), SMALL_DELTA);
+        assertArrayEquals(new float[]{50, 60, -1, 60},
+                mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(), ZERO_DELTA);
+        assertArrayEquals(new float[]{ NITS_TO_BRIGHTNESS_SPLINE.interpolate(80),
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(100),
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(100), -1},
+                mDisplayDeviceConfig.getHighDisplayBrightnessThresholds(), SMALL_DELTA);
+        assertArrayEquals(new float[]{70, 80, -1, 80},
+                mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(), ZERO_DELTA);
+    }
+
+    @Test
+    public void testBlockingZoneThresholdsFromConfigResource() {
         setupDisplayDeviceConfigFromConfigResourceFile();
+
+        assertArrayEquals(displayBrightnessThresholdsIntToFloat(
+                        LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE),
+                mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(), SMALL_DELTA);
+        assertArrayEquals(ambientBrightnessThresholdsIntToFloat(
+                        LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE),
+                mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(), ZERO_DELTA);
+        assertArrayEquals(displayBrightnessThresholdsIntToFloat(
+                        HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE),
+                mDisplayDeviceConfig.getHighDisplayBrightnessThresholds(), SMALL_DELTA);
+        assertArrayEquals(ambientBrightnessThresholdsIntToFloat(
+                        HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE),
+                mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(), ZERO_DELTA);
+    }
+
+    private void verifyConfigValuesFromConfigResource() {
         assertNull(mDisplayDeviceConfig.getName());
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(), new
                 float[]{2.0f, 200.0f, 600.0f}, ZERO_DELTA);
@@ -342,100 +536,8 @@ public final class DisplayDeviceConfigTest {
         assertEquals(mDisplayDeviceConfig.getDefaultRefreshRateInHbmHdr(),
                 DEFAULT_REFRESH_RATE_IN_HBM_HDR);
 
-        // Todo: Add asserts for ThermalBrightnessThrottlingData, DensityMapping,
-        // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
-    }
-
-    @Test
-    public void testThermalRefreshRateThrottlingFromDisplayConfig() throws IOException {
-        setupDisplayDeviceConfigFromDisplayConfigFile();
-
-        SparseArray<SurfaceControl.RefreshRateRange> defaultMap =
-                mDisplayDeviceConfig.getThermalRefreshRateThrottlingData(null);
-        assertNotNull(defaultMap);
-        assertEquals(2, defaultMap.size());
-        assertEquals(30, defaultMap.get(Temperature.THROTTLING_CRITICAL).min, SMALL_DELTA);
-        assertEquals(60, defaultMap.get(Temperature.THROTTLING_CRITICAL).max, SMALL_DELTA);
-        assertEquals(0, defaultMap.get(Temperature.THROTTLING_SHUTDOWN).min, SMALL_DELTA);
-        assertEquals(30, defaultMap.get(Temperature.THROTTLING_SHUTDOWN).max, SMALL_DELTA);
-
-        SparseArray<SurfaceControl.RefreshRateRange> testMap =
-                mDisplayDeviceConfig.getThermalRefreshRateThrottlingData("test");
-        assertNotNull(testMap);
-        assertEquals(1, testMap.size());
-        assertEquals(60, testMap.get(Temperature.THROTTLING_EMERGENCY).min, SMALL_DELTA);
-        assertEquals(90, testMap.get(Temperature.THROTTLING_EMERGENCY).max, SMALL_DELTA);
-    }
-
-    @Test
-    public void testValidLuxThrottling() throws Exception {
-        setupDisplayDeviceConfigFromDisplayConfigFile();
-
-        Map<DisplayDeviceConfig.BrightnessLimitMapType, Map<Float, Float>> luxThrottlingData =
-                mDisplayDeviceConfig.getLuxThrottlingData();
-        assertEquals(2, luxThrottlingData.size());
-
-        Map<Float, Float> adaptiveOnBrightnessPoints = luxThrottlingData.get(
-                DisplayDeviceConfig.BrightnessLimitMapType.ADAPTIVE);
-        assertEquals(2, adaptiveOnBrightnessPoints.size());
-        assertEquals(0.3f, adaptiveOnBrightnessPoints.get(1000f), SMALL_DELTA);
-        assertEquals(0.5f, adaptiveOnBrightnessPoints.get(5000f), SMALL_DELTA);
-
-        Map<Float, Float> adaptiveOffBrightnessPoints = luxThrottlingData.get(
-                DisplayDeviceConfig.BrightnessLimitMapType.DEFAULT);
-        assertEquals(2, adaptiveOffBrightnessPoints.size());
-        assertEquals(0.35f, adaptiveOffBrightnessPoints.get(1500f), SMALL_DELTA);
-        assertEquals(0.55f, adaptiveOffBrightnessPoints.get(5500f), SMALL_DELTA);
-    }
-
-    @Test
-    public void testInvalidLuxThrottling() throws Exception {
-        setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getInvalidLuxThrottling()));
-
-        Map<DisplayDeviceConfig.BrightnessLimitMapType, Map<Float, Float>> luxThrottlingData =
-                mDisplayDeviceConfig.getLuxThrottlingData();
-        assertEquals(1, luxThrottlingData.size());
-
-        Map<Float, Float> adaptiveOnBrightnessPoints = luxThrottlingData.get(
-                DisplayDeviceConfig.BrightnessLimitMapType.ADAPTIVE);
-        assertEquals(1, adaptiveOnBrightnessPoints.size());
-        assertEquals(0.3f, adaptiveOnBrightnessPoints.get(1000f), SMALL_DELTA);
-    }
-
-    @Test
-    public void testBlockingZoneThresholdsFromDisplayConfig() throws IOException {
-        setupDisplayDeviceConfigFromDisplayConfigFile();
-
-        assertArrayEquals(new float[]{ NITS_TO_BRIGHTNESS_SPLINE.interpolate(50),
-                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(300),
-                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(300), -1},
-                mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(), SMALL_DELTA);
-        assertArrayEquals(new float[]{50, 60, -1, 60},
-                mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(), ZERO_DELTA);
-        assertArrayEquals(new float[]{ NITS_TO_BRIGHTNESS_SPLINE.interpolate(80),
-                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(100),
-                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(100), -1},
-                mDisplayDeviceConfig.getHighDisplayBrightnessThresholds(), SMALL_DELTA);
-        assertArrayEquals(new float[]{70, 80, -1, 80},
-                mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(), ZERO_DELTA);
-    }
-
-    @Test
-    public void testBlockingZoneThresholdsFromConfigResource() {
-        setupDisplayDeviceConfigFromConfigResourceFile();
-
-        assertArrayEquals(displayBrightnessThresholdsIntToFloat(
-                LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE),
-                mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(), SMALL_DELTA);
-        assertArrayEquals(ambientBrightnessThresholdsIntToFloat(
-                LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE),
-                mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(), ZERO_DELTA);
-        assertArrayEquals(displayBrightnessThresholdsIntToFloat(
-                HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE),
-                mDisplayDeviceConfig.getHighDisplayBrightnessThresholds(), SMALL_DELTA);
-        assertArrayEquals(ambientBrightnessThresholdsIntToFloat(
-                HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE),
-                mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(), ZERO_DELTA);
+        assertEquals("test_light_sensor", mDisplayDeviceConfig.getAmbientLightSensor().type);
+        assertEquals("", mDisplayDeviceConfig.getAmbientLightSensor().name);
     }
 
     private String getValidLuxThrottling() {
@@ -541,14 +643,50 @@ public final class DisplayDeviceConfigTest {
                + "</refreshRateThrottlingMap>\n";
     }
 
-    private String getContent() {
-        return getContent(getValidLuxThrottling());
+    private String getValidProxSensor() {
+        return "<proxSensor>\n"
+                +   "<type>test_proximity_sensor</type>\n"
+                +   "<name>Test Proximity Sensor</name>\n"
+                + "</proxSensor>\n";
     }
 
-    private String getContent(String brightnessCapConfig) {
+    private String getProxSensorWithEmptyValues() {
+        return "<proxSensor>\n"
+                +   "<type></type>\n"
+                +   "<name></name>\n"
+                + "</proxSensor>\n";
+    }
+
+    private String getContent() {
+        return getContent(getValidLuxThrottling(), getValidProxSensor());
+    }
+
+    private String getContent(String brightnessCapConfig, String proxSensor) {
         return "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<displayConfiguration>\n"
-                +   "<name>Example Display</name>"
+                +   "<name>Example Display</name>\n"
+                +   "<densityMapping>\n"
+                +       "<density>\n"
+                +           "<height>480</height>\n"
+                +           "<width>720</width>\n"
+                +           "<density>120</density>\n"
+                +       "</density>\n"
+                +       "<density>\n"
+                +           "<height>720</height>\n"
+                +           "<width>1280</width>\n"
+                +           "<density>213</density>\n"
+                +       "</density>\n"
+                +       "<density>\n"
+                +           "<height>1080</height>\n"
+                +           "<width>1920</width>\n"
+                +           "<density>320</density>\n"
+                +       "</density>\n"
+                +       "<density>\n"
+                +           "<height>2160</height>\n"
+                +           "<width>3840</width>\n"
+                +           "<density>640</density>\n"
+                +       "</density>\n"
+                +   "</densityMapping>\n"
                 +   "<screenBrightnessMap>\n"
                 +       "<point>\n"
                 +           "<value>" + BRIGHTNESS[0] + "</value>\n"
@@ -578,7 +716,7 @@ public final class DisplayDeviceConfigTest {
                 +       "</displayBrightnessMapping>\n"
                 +   "</autoBrightness>\n"
                 +   "<highBrightnessMode enabled=\"true\">\n"
-                +       "<transitionPoint>0.62</transitionPoint>\n"
+                +       "<transitionPoint>" + BRIGHTNESS[1] + "</transitionPoint>\n"
                 +       "<minimumLux>10000</minimumLux>\n"
                 +       "<timing>\n"
                 +           "<!-- allow for 5 minutes out of every 30 minutes -->\n"
@@ -590,8 +728,8 @@ public final class DisplayDeviceConfigTest {
                 +           "<minimum>120</minimum>\n"
                 +           "<maximum>120</maximum>\n"
                 +       "</refreshRate>\n"
-                +       "<thermalStatusLimit>light</thermalStatusLimit>\n"
                 +       "<allowInLowPowerMode>false</allowInLowPowerMode>\n"
+                +       "<minimumHdrPercentOfScreen>0.6</minimumHdrPercentOfScreen>\n"
                 +       "<sdrHdrRatioMap>\n"
                 +            "<point>\n"
                 +                "<sdrNits>2.000</sdrNits>\n"
@@ -604,10 +742,19 @@ public final class DisplayDeviceConfigTest {
                 +       "</sdrHdrRatioMap>\n"
                 +   "</highBrightnessMode>\n"
                 + brightnessCapConfig
+                +   "<lightSensor>\n"
+                +       "<type>test_light_sensor</type>\n"
+                +       "<name>Test Ambient Light Sensor</name>\n"
+                +       "<refreshRate>\n"
+                +           "<minimum>60</minimum>\n"
+                +           "<maximum>120</maximum>\n"
+                +       "</refreshRate>\n"
+                +   "</lightSensor>\n"
                 +   "<screenOffBrightnessSensor>\n"
-                +       "<type>sensor_12345</type>\n"
-                +       "<name>Sensor 12345</name>\n"
+                +       "<type>test_binned_brightness_sensor</type>\n"
+                +       "<name>Test Binned Brightness Sensor</name>\n"
                 +   "</screenOffBrightnessSensor>\n"
+                + proxSensor
                 +   "<ambientBrightnessChangeThresholds>\n"
                 +       "<brighteningThresholds>\n"
                 +           "<minimum>10</minimum>\n"
@@ -946,9 +1093,9 @@ public final class DisplayDeviceConfigTest {
         when(mResources.getInteger(R.integer.config_defaultRefreshRate))
                 .thenReturn(DEFAULT_REFRESH_RATE);
         when(mResources.getInteger(R.integer.config_fixedRefreshRateInHighZone))
-            .thenReturn(DEFAULT_HIGH_BLOCKING_ZONE_REFRESH_RATE);
+                .thenReturn(DEFAULT_HIGH_BLOCKING_ZONE_REFRESH_RATE);
         when(mResources.getInteger(R.integer.config_defaultRefreshRateInZone))
-            .thenReturn(DEFAULT_LOW_BLOCKING_ZONE_REFRESH_RATE);
+                .thenReturn(DEFAULT_LOW_BLOCKING_ZONE_REFRESH_RATE);
         when(mResources.getIntArray(R.array.config_brightnessThresholdsOfPeakRefreshRate))
                 .thenReturn(LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
         when(mResources.getIntArray(R.array.config_ambientThresholdsOfPeakRefreshRate))
@@ -960,11 +1107,14 @@ public final class DisplayDeviceConfigTest {
                 R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate))
                 .thenReturn(HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
         when(mResources.getInteger(
-            R.integer.config_defaultRefreshRateInHbmHdr))
-            .thenReturn(DEFAULT_REFRESH_RATE_IN_HBM_HDR);
+                R.integer.config_defaultRefreshRateInHbmHdr))
+                .thenReturn(DEFAULT_REFRESH_RATE_IN_HBM_HDR);
         when(mResources.getInteger(
-            R.integer.config_defaultRefreshRateInHbmSunlight))
-            .thenReturn(DEFAULT_REFRESH_RATE_IN_HBM_SUNLIGHT);
+                R.integer.config_defaultRefreshRateInHbmSunlight))
+                .thenReturn(DEFAULT_REFRESH_RATE_IN_HBM_SUNLIGHT);
+
+        when(mResources.getString(com.android.internal.R.string.config_displayLightSensorType))
+                .thenReturn("test_light_sensor");
 
         mDisplayDeviceConfig = DisplayDeviceConfig.create(mContext, true);
     }

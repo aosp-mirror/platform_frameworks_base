@@ -222,8 +222,14 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *          <minimum>120</minimum>
  *          <maximum>120</maximum>
  *        </refreshRate>
- *        <thermalStatusLimit>light</thermalStatusLimit>
  *        <allowInLowPowerMode>false</allowInLowPowerMode>
+ *        <minimumHdrPercentOfScreen>0.6</minimumHdrPercentOfScreen>
+ *        <sdrHdrRatioMap>
+ *          <point>
+ *            <sdrNits>2.000</sdrNits>
+ *            <hdrRatio>4.000</hdrRatio>
+ *          </point>
+ *        </sdrHdrRatioMap>
  *      </highBrightnessMode>
  *
  *      <luxThrottling>
@@ -276,6 +282,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      <lightSensor>
  *        <type>android.sensor.light</type>
  *        <name>1234 Ambient Light Sensor</name>
+ *        <refreshRate>
+ *          <minimum>60</minimum>
+ *          <maximum>120</maximum>
+ *        </refreshRate>
  *      </lightSensor>
  *      <screenOffBrightnessSensor>
  *        <type>com.google.sensor.binned_brightness</type>
