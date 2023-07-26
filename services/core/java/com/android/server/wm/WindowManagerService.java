@@ -9591,14 +9591,18 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Requires ACCESS_SURFACE_FLINGER permission");
         }
 
-        DisplayContent dc;
-        synchronized (mGlobalLock) {
-            dc = mRoot.getDisplayContentOrCreate(displayId);
-            if (dc == null) {
-                return false;
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                DisplayContent dc = mRoot.getDisplayContentOrCreate(displayId);
+                if (dc == null) {
+                    return false;
+                }
+                dc.replaceContent(sc);
+                return true;
             }
-            dc.replaceContent(sc);
-            return true;
+        } finally {
+            Binder.restoreCallingIdentity(origId);
         }
     }
 }
