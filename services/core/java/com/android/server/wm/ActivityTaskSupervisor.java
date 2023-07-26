@@ -621,6 +621,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         mFinishingActivities.remove(r);
 
         stopWaitingForActivityVisible(r);
+
+        final Task task = r.getTask();
+        if (task != null && task.mKillProcessesOnDestroyed && task.getTopMostActivity() == r) {
+            // The activity is destroyed or its process is died, so cancel the pending kill.
+            task.mKillProcessesOnDestroyed = false;
+            removeTimeoutOfKillProcessesOnDestroyed(task);
+        }
     }
 
     /** There is no valid launch time, just stop waiting. */
@@ -1901,9 +1908,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         killTaskProcessesIfPossible(task);
     }
 
+    private void removeTimeoutOfKillProcessesOnDestroyed(Task task) {
+        mHandler.removeMessages(KILL_TASK_PROCESSES_TIMEOUT_MSG, task);
+    }
+
     void killTaskProcessesOnDestroyedIfNeeded(Task task) {
         if (task == null || !task.mKillProcessesOnDestroyed) return;
-        mHandler.removeMessages(KILL_TASK_PROCESSES_TIMEOUT_MSG, task);
+        removeTimeoutOfKillProcessesOnDestroyed(task);
         killTaskProcessesIfPossible(task);
     }
 
@@ -2776,7 +2787,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 } break;
                 case KILL_TASK_PROCESSES_TIMEOUT_MSG: {
                     final Task task = (Task) msg.obj;
-                    if (task.mKillProcessesOnDestroyed) {
+                    if (task.mKillProcessesOnDestroyed && task.hasActivity()) {
                         Slog.i(TAG, "Destroy timeout of remove-task, attempt to kill " + task);
                         killTaskProcessesIfPossible(task);
                     }

@@ -1038,6 +1038,13 @@ public class RecentTasksTest extends WindowTestsBase {
         top.setState(ActivityRecord.State.DESTROYING, "test");
         top.destroyed("test");
         assertFalse(task.mKillProcessesOnDestroyed);
+
+        // If the process is died, the state should be cleared.
+        final Task lastTask = tasks.get(0);
+        lastTask.addChild(top);
+        lastTask.mKillProcessesOnDestroyed = true;
+        top.handleAppDied();
+        assertFalse(lastTask.mKillProcessesOnDestroyed);
     }
 
     @Test
