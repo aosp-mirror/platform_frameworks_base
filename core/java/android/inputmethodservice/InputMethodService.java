@@ -807,9 +807,11 @@ public class InputMethodService extends AbstractInputMethodService {
             onUnbindInput();
             mInputBinding = null;
             mInputConnection = null;
-            // free-up cached InkWindow surface on detaching from current client.
+
             if (mInkWindow != null) {
-                removeHandwritingInkWindow();
+                finishStylusHandwriting();
+                // free-up InkWindow surface after timeout.
+                scheduleStylusWindowIdleTimeout();
             }
         }
 
@@ -1020,6 +1022,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 mOnPreparedStylusHwCalled = true;
             }
             if (onStartStylusHandwriting()) {
+                cancelStylusWindowIdleTimeout();
                 mPrivOps.onStylusHandwritingReady(requestId, Process.myPid());
             } else {
                 Log.i(TAG, "IME is not ready. Can't start Stylus Handwriting");
@@ -1109,7 +1112,7 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @Override
         public void removeStylusHandwritingWindow() {
-            InputMethodService.this.removeStylusHandwritingWindow();
+            InputMethodService.this.finishAndRemoveStylusHandwritingWindow();
         }
 
         /**
@@ -2667,21 +2670,15 @@ public class InputMethodService extends AbstractInputMethodService {
      * Typically, this is called when {@link InkWindow} should no longer be holding a surface in
      * memory.
      */
-    private void removeStylusHandwritingWindow() {
+    private void finishAndRemoveStylusHandwritingWindow() {
+        cancelStylusWindowIdleTimeout();
+        mOnPreparedStylusHwCalled = false;
+        mStylusWindowIdleTimeoutRunnable = null;
         if (mInkWindow != null) {
             if (mHandwritingRequestId.isPresent()) {
                 // if handwriting session is still ongoing. This shouldn't happen.
                 finishStylusHandwriting();
             }
-            removeHandwritingInkWindow();
-        }
-    }
-
-    private void removeHandwritingInkWindow() {
-        cancelStylusWindowIdleTimeout();
-        mOnPreparedStylusHwCalled = false;
-        mStylusWindowIdleTimeoutRunnable = null;
-        if (mInkWindow != null) {
             mInkWindow.hide(true /* remove */);
             mInkWindow.destroy();
             mInkWindow = null;
@@ -2707,7 +2704,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private Runnable getStylusWindowIdleTimeoutRunnable() {
         if (mStylusWindowIdleTimeoutRunnable == null) {
             mStylusWindowIdleTimeoutRunnable = () -> {
-                removeHandwritingInkWindow();
+                finishAndRemoveStylusHandwritingWindow();
                 mStylusWindowIdleTimeoutRunnable = null;
             };
         }
