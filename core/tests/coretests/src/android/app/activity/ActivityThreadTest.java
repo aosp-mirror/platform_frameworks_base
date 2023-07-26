@@ -106,6 +106,7 @@ public class ActivityThreadTest {
                     false /* launchActivity */);
 
     private WindowTokenClientController mOriginalWindowTokenClientController;
+    private Configuration mOriginalAppConfig;
 
     private ArrayList<VirtualDisplay> mCreatedVirtualDisplays;
 
@@ -114,6 +115,8 @@ public class ActivityThreadTest {
         // Keep track of the original controller, so that it can be used to restore in tearDown()
         // when there is override in some test cases.
         mOriginalWindowTokenClientController = WindowTokenClientController.getInstance();
+        mOriginalAppConfig = new Configuration(ActivityThread.currentActivityThread()
+                .getConfiguration());
     }
 
     @After
@@ -123,6 +126,8 @@ public class ActivityThreadTest {
             mCreatedVirtualDisplays = null;
         }
         WindowTokenClientController.overrideForTesting(mOriginalWindowTokenClientController);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                () -> restoreConfig(ActivityThread.currentActivityThread(), mOriginalAppConfig));
     }
 
     @Test
@@ -564,16 +569,10 @@ public class ActivityThreadTest {
             activityThread.updatePendingConfiguration(newAppConfig);
             activityThread.handleConfigurationChanged(newAppConfig, DEVICE_ID_INVALID);
 
-            try {
-                assertEquals("Virtual display orientation must not change when process"
-                                + " configuration orientation changes.",
-                        originalVirtualDisplayOrientation,
-                        virtualDisplayContext.getResources().getConfiguration().orientation);
-            } finally {
-                // Make sure to reset the process config to prevent side effects to other
-                // tests.
-                restoreConfig(activityThread, originalAppConfig);
-            }
+            assertEquals("Virtual display orientation must not change when process"
+                            + " configuration orientation changes.",
+                    originalVirtualDisplayOrientation,
+                    virtualDisplayContext.getResources().getConfiguration().orientation);
         });
     }
 
