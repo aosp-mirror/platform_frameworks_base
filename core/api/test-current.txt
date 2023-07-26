@@ -3526,6 +3526,7 @@ package android.view {
   public final class InputDevice implements android.os.Parcelable {
     method @RequiresPermission("android.permission.DISABLE_INPUT_DEVICE") public void disable();
     method @RequiresPermission("android.permission.DISABLE_INPUT_DEVICE") public void enable();
+    method public int getAssociatedDisplayId();
     method @NonNull public android.hardware.input.InputDeviceIdentifier getIdentifier();
     method @Nullable public String getKeyboardLanguageTag();
     method @Nullable public String getKeyboardLayoutType();
