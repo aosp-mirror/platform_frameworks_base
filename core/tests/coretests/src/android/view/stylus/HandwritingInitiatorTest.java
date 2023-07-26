@@ -75,7 +75,7 @@ public class HandwritingInitiatorTest {
     private static final int HW_BOUNDS_OFFSETS_TOP_PX = 20;
     private static final int HW_BOUNDS_OFFSETS_RIGHT_PX = 30;
     private static final int HW_BOUNDS_OFFSETS_BOTTOM_PX = 40;
-    private int mHandwritingSlop = 4;
+    private int mHandwritingSlop = 2;
 
     private static final Rect sHwArea1;
     private static final Rect sHwArea2;
