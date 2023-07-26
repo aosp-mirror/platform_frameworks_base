@@ -33,8 +33,9 @@ abstract class SplitScreenBase(flicker: LegacyFlickerTest) : BaseBenchmarkTest(f
             tapl.setEnableRotation(true)
             setRotation(flicker.scenario.startRotation)
             tapl.setExpectedRotation(flicker.scenario.startRotation.value)
-            if (tapl.workspace.switchToOverview().hasTasks()) {
-                tapl.workspace.switchToOverview().dismissAllTasks()
+            val overview = tapl.workspace.switchToOverview()
+            if (overview.hasTasks()) {
+                overview.dismissAllTasks()
             }
         }
     }
