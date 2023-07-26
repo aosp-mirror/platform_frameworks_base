@@ -366,7 +366,7 @@ public class ShutdownCheckPointsTest {
     }
 
     /** Fake system dependencies for testing. */
-    private final class TestInjector implements ShutdownCheckPoints.Injector {
+    private static final class TestInjector implements ShutdownCheckPoints.Injector {
         private long mNow;
         private int mCheckPointsLimit;
         private int mDumpFilesLimit;

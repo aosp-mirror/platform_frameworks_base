@@ -424,7 +424,7 @@ public class WakeLockLogTest {
         return sw.toString();
     }
 
-    public class TestInjector extends WakeLockLog.Injector {
+    public static class TestInjector extends WakeLockLog.Injector {
         private final int mTagDatabaseSize;
         private final int mLogSize;
 
