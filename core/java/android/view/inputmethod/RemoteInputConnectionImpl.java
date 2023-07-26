@@ -1107,8 +1107,7 @@ final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
             return false;
         }
         if (mParentInputMethodManager.mRequestCursorUpdateDisplayIdCheck.get()
-                && mParentInputMethodManager.getDisplayId() != imeDisplayId
-                && !mParentInputMethodManager.hasVirtualDisplayToScreenMatrix()) {
+                && mParentInputMethodManager.getDisplayId() != imeDisplayId) {
             // requestCursorUpdates() is not currently supported across displays.
             return false;
         }

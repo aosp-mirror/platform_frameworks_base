@@ -81,8 +81,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.Matrix;
-import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
 import android.media.AudioManagerInternal;
@@ -118,7 +116,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.DisplayInfo;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -288,7 +285,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final InputManagerInternal mInputManagerInternal;
     final ImePlatformCompatUtils mImePlatformCompatUtils;
     final InputMethodDeviceConfigs mInputMethodDeviceConfigs;
-    private final DisplayManagerInternal mDisplayManagerInternal;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
             new ArrayMap<>();
     private final UserManagerInternal mUserManagerInternal;
@@ -458,35 +454,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     final ArrayMap<IBinder, ClientState> mClients = new ArrayMap<>();
 
-    private static final class VirtualDisplayInfo {
-        /**
-         * {@link ClientState} where {@link android.hardware.display.VirtualDisplay} is running.
-         */
-        private final ClientState mParentClient;
-        /**
-         * {@link Matrix} to convert screen coordinates in the embedded virtual display to
-         * screen coordinates where {@link #mParentClient} exists.
-         */
-        private final Matrix mMatrix;
-
-        VirtualDisplayInfo(ClientState parentClient, Matrix matrix) {
-            mParentClient = parentClient;
-            mMatrix = matrix;
-        }
-    }
-
-    /**
-     * A mapping table from virtual display IDs created for
-     * {@link android.hardware.display.VirtualDisplay} to its parent IME client where the embedded
-     * virtual display is running.
-     *
-     * <p>Note: this can be used only for virtual display IDs created by
-     * {@link android.hardware.display.VirtualDisplay}.</p>
-     */
-    @GuardedBy("ImfLock.class")
-    private final SparseArray<VirtualDisplayInfo> mVirtualDisplayIdToParentMap =
-            new SparseArray<>();
-
     /**
      * Set once the system is ready to run third party code.
      */
@@ -603,16 +570,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @Nullable
     EditorInfo mCurEditorInfo;
-
-    /**
-     * A special {@link Matrix} to convert virtual screen coordinates to the IME target display
-     * coordinates.
-     *
-     * <p>Used only while the IME client is running in a virtual display. {@code null}
-     * otherwise.</p>
-     */
-    @Nullable
-    private Matrix mCurVirtualDisplayToScreenMatrix = null;
 
     /**
      * Id obtained with {@link InputMethodInfo#getId()} for the input method that we are currently
@@ -1728,7 +1685,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mImePlatformCompatUtils = new ImePlatformCompatUtils();
         mInputMethodDeviceConfigs = new InputMethodDeviceConfigs();
-        mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
@@ -2309,14 +2265,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 clearClientSessionLocked(cs);
                 clearClientSessionForAccessibilityLocked(cs);
 
-                final int numItems = mVirtualDisplayIdToParentMap.size();
-                for (int i = numItems - 1; i >= 0; --i) {
-                    final VirtualDisplayInfo info = mVirtualDisplayIdToParentMap.valueAt(i);
-                    if (info.mParentClient == cs) {
-                        mVirtualDisplayIdToParentMap.removeAt(i);
-                    }
-                }
-
                 if (mCurClient == cs) {
                     hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */, 0 /* flags */,
                             null /* resultReceiver */, SoftInputShowHideReason.HIDE_REMOVE_CLIENT);
@@ -2332,7 +2280,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     mBoundToAccessibility = false;
                     mCurClient = null;
-                    mCurVirtualDisplayToScreenMatrix = null;
                 }
                 if (mCurFocusedWindowClient == cs) {
                     mCurFocusedWindowClient = null;
@@ -2366,10 +2313,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mCurClient.mSessionRequested = false;
             mCurClient.mSessionRequestedForAccessibility = false;
             mCurClient = null;
-            mCurVirtualDisplayToScreenMatrix = null;
             ImeTracker.forLogging().onFailed(mCurStatsToken, ImeTracker.PHASE_SERVER_WAIT_IME);
             mCurStatsToken = null;
             InputMethodManager.invalidateLocalStylusHandwritingAvailabilityCaches();
+
             mMenuController.hideInputMethodMenuLocked();
         }
     }
@@ -2484,33 +2431,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
                 session.mSession, accessibilityInputMethodSessions,
                 (session.mChannel != null ? session.mChannel.dup() : null),
-                curId, getSequenceNumberLocked(), mCurVirtualDisplayToScreenMatrix,
-                suppressesSpellChecker);
-    }
-
-    @GuardedBy("ImfLock.class")
-    @Nullable
-    private Matrix getVirtualDisplayToScreenMatrixLocked(int clientDisplayId, int imeDisplayId) {
-        if (clientDisplayId == imeDisplayId) {
-            return null;
-        }
-        int displayId = clientDisplayId;
-        Matrix matrix = null;
-        while (true) {
-            final VirtualDisplayInfo info = mVirtualDisplayIdToParentMap.get(displayId);
-            if (info == null) {
-                return null;
-            }
-            if (matrix == null) {
-                matrix = new Matrix(info.mMatrix);
-            } else {
-                matrix.postConcat(info.mMatrix);
-            }
-            if (info.mParentClient.mSelfReportedDisplayId == imeDisplayId) {
-                return matrix;
-            }
-            displayId = info.mParentClient.mSelfReportedDisplayId;
-        }
+                curId, getSequenceNumberLocked(), suppressesSpellChecker);
     }
 
     @GuardedBy("ImfLock.class")
@@ -2574,7 +2495,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // party code.
             return new InputBindResult(
                     InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
-                    null, null, null, selectedMethodId, getSequenceNumberLocked(), null, false);
+                    null, null, null, selectedMethodId, getSequenceNumberLocked(), false);
         }
 
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mPackageManagerInternal, cs.mUid,
@@ -2611,9 +2532,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mCurInputConnection = inputConnection;
         mCurRemoteAccessibilityInputConnection = remoteAccessibilityInputConnection;
         mCurImeDispatcher = imeDispatcher;
-        mCurVirtualDisplayToScreenMatrix =
-                getVirtualDisplayToScreenMatrixLocked(cs.mSelfReportedDisplayId,
-                        mDisplayIdToShowIme);
         // Override the locale hints if the app is running on a virtual device.
         if (mVdmInternal == null) {
             mVdmInternal = LocalServices.getService(VirtualDeviceManagerInternal.class);
@@ -2729,7 +2647,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 requestClientSessionForAccessibilityLocked(cs);
                 return new InputBindResult(
                         InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
-                        null, null, null, getCurIdLocked(), getSequenceNumberLocked(), null, false);
+                        null, null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
             } else {
                 long bindingDuration = SystemClock.uptimeMillis() - getLastBindTimeLocked();
                 if (bindingDuration < TIME_TO_RECONNECT) {
@@ -2742,8 +2660,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     // to see if we can get back in touch with the service.
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                            null, null, null, getCurIdLocked(), getSequenceNumberLocked(), null,
-                            false);
+                            null, null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
                             getSelectedMethodIdLocked(), bindingDuration, 0);
@@ -3898,7 +3815,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
-                    null, null, null, null, -1, null, false);
+                    null, null, null, null, -1, false);
         }
 
         mCurFocusedWindow = windowToken;
@@ -4354,95 +4271,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         super.removeImeSurface_enforcePermission();
 
         mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE).sendToTarget();
-    }
-
-    @Override
-    public void reportVirtualDisplayGeometryAsync(IInputMethodClient parentClient,
-            int childDisplayId, float[] matrixValues) {
-        final IInputMethodClientInvoker parentClientInvoker =
-                IInputMethodClientInvoker.create(parentClient, mHandler);
-        try {
-            final DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(childDisplayId);
-            if (displayInfo == null) {
-                throw new IllegalArgumentException(
-                        "Cannot find display for non-existent displayId: " + childDisplayId);
-            }
-            final int callingUid = Binder.getCallingUid();
-            if (callingUid != displayInfo.ownerUid) {
-                throw new SecurityException("The caller doesn't own the display.");
-            }
-
-            synchronized (ImfLock.class) {
-                final ClientState cs = mClients.get(parentClientInvoker.asBinder());
-                if (cs == null) {
-                    return;
-                }
-
-                // null matrixValues means that the entry needs to be removed.
-                if (matrixValues == null) {
-                    final VirtualDisplayInfo info =
-                            mVirtualDisplayIdToParentMap.get(childDisplayId);
-                    if (info == null) {
-                        return;
-                    }
-                    if (info.mParentClient != cs) {
-                        throw new SecurityException("Only the owner client can clear"
-                                + " VirtualDisplayGeometry for display #" + childDisplayId);
-                    }
-                    mVirtualDisplayIdToParentMap.remove(childDisplayId);
-                    return;
-                }
-
-                VirtualDisplayInfo info = mVirtualDisplayIdToParentMap.get(childDisplayId);
-                if (info != null && info.mParentClient != cs) {
-                    throw new InvalidParameterException("Display #" + childDisplayId
-                            + " is already registered by " + info.mParentClient);
-                }
-                if (info == null) {
-                    if (!mWindowManagerInternal.isUidAllowedOnDisplay(childDisplayId, cs.mUid)) {
-                        throw new SecurityException(cs + " cannot access to display #"
-                                + childDisplayId);
-                    }
-                    info = new VirtualDisplayInfo(cs, new Matrix());
-                    mVirtualDisplayIdToParentMap.put(childDisplayId, info);
-                }
-                info.mMatrix.setValues(matrixValues);
-
-                if (mCurClient == null || mCurClient.mCurSession == null) {
-                    return;
-                }
-
-                Matrix matrix = null;
-                int displayId = mCurClient.mSelfReportedDisplayId;
-                boolean needToNotify = false;
-                while (true) {
-                    needToNotify |= (displayId == childDisplayId);
-                    final VirtualDisplayInfo next = mVirtualDisplayIdToParentMap.get(displayId);
-                    if (next == null) {
-                        break;
-                    }
-                    if (matrix == null) {
-                        matrix = new Matrix(next.mMatrix);
-                    } else {
-                        matrix.postConcat(next.mMatrix);
-                    }
-                    if (next.mParentClient.mSelfReportedDisplayId == mCurTokenDisplayId) {
-                        if (needToNotify) {
-                            final float[] values = new float[9];
-                            matrix.getValues(values);
-                            mCurClient.mClient.updateVirtualDisplayToScreenMatrix(
-                                    getSequenceNumberLocked(), values);
-                        }
-                        break;
-                    }
-                    displayId = info.mParentClient.mSelfReportedDisplayId;
-                }
-            }
-        } catch (Throwable t) {
-            if (parentClientInvoker != null) {
-                parentClientInvoker.throwExceptionFromSystem(t.toString());
-            }
-        }
     }
 
     @Override
@@ -5857,7 +5685,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     final InputBindResult res = new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION,
                             imeSession, accessibilityInputMethodSessions, null, getCurIdLocked(),
-                            getSequenceNumberLocked(), mCurVirtualDisplayToScreenMatrix, false);
+                            getSequenceNumberLocked(), false);
                     mCurClient.mClient.onBindAccessibilityService(res, accessibilityConnectionId);
                 }
             }

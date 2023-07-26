@@ -36,7 +36,6 @@ import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
-import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
@@ -95,14 +94,12 @@ public class InputMethodManagerServiceTestBase {
                     null,
                     "0",
                     0,
-                    null,
                     false);
 
     @Mock protected WindowManagerInternal mMockWindowManagerInternal;
     @Mock protected ActivityManagerInternal mMockActivityManagerInternal;
     @Mock protected PackageManagerInternal mMockPackageManagerInternal;
     @Mock protected InputManagerInternal mMockInputManagerInternal;
-    @Mock protected DisplayManagerInternal mMockDisplayManagerInternal;
     @Mock protected UserManagerInternal mMockUserManagerInternal;
     @Mock protected InputMethodBindingController mMockInputMethodBindingController;
     @Mock protected IInputMethodClient mMockInputMethodClient;
@@ -165,8 +162,6 @@ public class InputMethodManagerServiceTestBase {
                 .when(() -> LocalServices.getService(PackageManagerInternal.class));
         doReturn(mMockInputManagerInternal)
                 .when(() -> LocalServices.getService(InputManagerInternal.class));
-        doReturn(mMockDisplayManagerInternal)
-                .when(() -> LocalServices.getService(DisplayManagerInternal.class));
         doReturn(mMockUserManagerInternal)
                 .when(() -> LocalServices.getService(UserManagerInternal.class));
         doReturn(mMockImeTargetVisibilityPolicy)

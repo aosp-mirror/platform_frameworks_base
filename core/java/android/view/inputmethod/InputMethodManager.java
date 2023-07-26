@@ -60,7 +60,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
@@ -572,18 +571,6 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     private CursorAnchorInfo mCursorAnchorInfo = null;
 
-    /**
-     * A special {@link Matrix} that can be provided by the system when this instance is running
-     * inside a virtual display.
-     *
-     * <p>If this is non-{@code null}, {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}
-     * should be adjusted with this {@link Matrix}.</p>
-     *
-     * <p>{@code null} when not used.</p>
-     */
-    @GuardedBy("mH")
-    private Matrix mVirtualDisplayToScreenMatrix = null;
-
     // -----------------------------------------------------------
 
     /**
@@ -670,7 +657,6 @@ public final class InputMethodManager {
     private static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
     private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
     private static final int MSG_SET_INTERACTIVE = 13;
-    private static final int MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX = 30;
     private static final int MSG_ON_SHOW_REQUESTED = 31;
 
     /**
@@ -1037,7 +1023,6 @@ public final class InputMethodManager {
                         mCurMethod = res.method; // for @UnsupportedAppUsage
                         mCurBindState = new BindState(res);
                         mCurId = res.id; // for @UnsupportedAppUsage
-                        mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
                     }
                     startInputInner(StartInputReason.BOUND_TO_IMMS, null, 0, 0, 0);
                     return;
@@ -1245,43 +1230,6 @@ public final class InputMethodManager {
                     }
                     return;
                 }
-                case MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX: {
-                    final float[] matrixValues = (float[]) msg.obj;
-                    final int bindSequence = msg.arg1;
-                    synchronized (mH) {
-                        if (getBindSequenceLocked() != bindSequence) {
-                            return;
-                        }
-                        if (matrixValues == null || mVirtualDisplayToScreenMatrix == null) {
-                            // Either InputBoundResult#mVirtualDisplayToScreenMatrixValues is null
-                            // OR this app is unbound from the parent VirtualDisplay. In this case,
-                            // calling updateCursorAnchorInfo() isn't safe. Only clear the matrix.
-                            mVirtualDisplayToScreenMatrix = null;
-                            return;
-                        }
-
-                        final float[] currentValues = new float[9];
-                        mVirtualDisplayToScreenMatrix.getValues(currentValues);
-                        if (Arrays.equals(currentValues, matrixValues)) {
-                            return;
-                        }
-                        mVirtualDisplayToScreenMatrix.setValues(matrixValues);
-
-                        if (mCursorAnchorInfo == null || !isImeSessionAvailableLocked()
-                                || mServedInputConnection == null) {
-                            return;
-                        }
-                        if (!mServedInputConnection.isCursorAnchorInfoMonitoring()) {
-                            return;
-                        }
-                        // Since the host VirtualDisplay is moved, we need to issue
-                        // IMS#updateCursorAnchorInfo() again.
-                        mCurBindState.mImeSession.updateCursorAnchorInfo(
-                                CursorAnchorInfo.createForAdditionalParentMatrix(
-                                        mCursorAnchorInfo, mVirtualDisplayToScreenMatrix));
-                    }
-                    return;
-                }
                 case MSG_ON_SHOW_REQUESTED: {
                     synchronized (mH) {
                         if (mImeInsetsConsumer != null) {
@@ -1357,12 +1305,6 @@ public final class InputMethodManager {
         public void reportFullscreenMode(boolean fullscreen) {
             mH.obtainMessage(MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, 0)
                     .sendToTarget();
-        }
-
-        @Override
-        public void updateVirtualDisplayToScreenMatrix(int bindSequence, float[] matrixValues) {
-            mH.obtainMessage(MSG_UPDATE_VIRTUAL_DISPLAY_TO_SCREEN_MATRIX, bindSequence, 0,
-                    matrixValues).sendToTarget();
         }
 
         @Override
@@ -1958,7 +1900,6 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     @GuardedBy("mH")
     void finishInputLocked() {
-        mVirtualDisplayToScreenMatrix = null;
         View clearedView = null;
         mNextServedView = null;
         if (mServedView != null) {
@@ -2839,7 +2780,6 @@ public final class InputMethodManager {
                         + InputMethodDebug.startInputFlagsToString(startInputFlags));
                 return false;
             }
-            mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
             if (res.id != null) {
                 updateInputChannelLocked(res.channel);
                 mCurMethod = res.method; // for @UnsupportedAppUsage
@@ -3400,13 +3340,7 @@ public final class InputMethodManager {
                 return;
             }
             if (DEBUG) Log.v(TAG, "updateCursorAnchorInfo: " + cursorAnchorInfo);
-            if (mVirtualDisplayToScreenMatrix != null) {
-                mCurBindState.mImeSession.updateCursorAnchorInfo(
-                        CursorAnchorInfo.createForAdditionalParentMatrix(
-                                cursorAnchorInfo, mVirtualDisplayToScreenMatrix));
-            } else {
-                mCurBindState.mImeSession.updateCursorAnchorInfo(cursorAnchorInfo);
-            }
+            mCurBindState.mImeSession.updateCursorAnchorInfo(cursorAnchorInfo);
             mCursorAnchorInfo = cursorAnchorInfo;
         }
     }
@@ -4017,40 +3951,6 @@ public final class InputMethodManager {
      */
     public void setRequestCursorUpdateDisplayIdCheck(boolean enabled) {
         mRequestCursorUpdateDisplayIdCheck.set(enabled);
-    }
-
-    /**
-     * An internal API for {@link android.hardware.display.VirtualDisplay} to report where its
-     * embedded virtual display is placed.
-     *
-     * @param childDisplayId Display ID of the embedded virtual display.
-     * @param matrix         {@link Matrix} to convert virtual display screen coordinates to
-     *                       the host screen coordinates. {@code null} to clear the relationship.
-     * @hide
-     */
-    public void reportVirtualDisplayGeometry(int childDisplayId, @Nullable Matrix matrix) {
-        final float[] matrixValues;
-        if (matrix == null) {
-            matrixValues = null;
-        } else {
-            matrixValues = new float[9];
-            matrix.getValues(matrixValues);
-        }
-        IInputMethodManagerGlobalInvoker.reportVirtualDisplayGeometryAsync(mClient, childDisplayId,
-                matrixValues);
-    }
-
-    /**
-     * An internal API that returns if the current display has a transformation matrix to apply.
-     *
-     * @return {@code true} if {@link Matrix} to convert virtual display screen coordinates to
-     * the host screen coordinates is set.
-     * @hide
-     */
-    public boolean hasVirtualDisplayToScreenMatrix() {
-        synchronized (mH) {
-            return mVirtualDisplayToScreenMatrix != null;
-        }
     }
 
     /**

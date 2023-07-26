@@ -249,26 +249,6 @@ final class IInputMethodClientInvoker {
     }
 
     @AnyThread
-    void updateVirtualDisplayToScreenMatrix(int bindSequence, float[] matrixValues) {
-        if (mIsProxy) {
-            updateVirtualDisplayToScreenMatrixInternal(bindSequence, matrixValues);
-        } else {
-            mHandler.post(() ->
-                    updateVirtualDisplayToScreenMatrixInternal(bindSequence, matrixValues));
-        }
-    }
-
-    @AnyThread
-    private void updateVirtualDisplayToScreenMatrixInternal(int bindSequence,
-            float[] matrixValues) {
-        try {
-            mTarget.updateVirtualDisplayToScreenMatrix(bindSequence, matrixValues);
-        } catch (RemoteException e) {
-            logRemoteException(e);
-        }
-    }
-
-    @AnyThread
     void setImeTraceEnabled(boolean enabled) {
         if (mIsProxy) {
             setImeTraceEnabledInternal(enabled);

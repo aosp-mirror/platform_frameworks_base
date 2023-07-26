@@ -453,20 +453,6 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
-    static void reportVirtualDisplayGeometryAsync(@NonNull IInputMethodClient client,
-            int childDisplayId, @Nullable float[] matrixValues) {
-        final IInputMethodManager service = getService();
-        if (service == null) {
-            return;
-        }
-        try {
-            service.reportVirtualDisplayGeometryAsync(client, childDisplayId, matrixValues);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    @AnyThread
     static void reportPerceptibleAsync(@NonNull IBinder windowToken, boolean perceptible) {
         final IInputMethodManager service = getService();
         if (service == null) {
