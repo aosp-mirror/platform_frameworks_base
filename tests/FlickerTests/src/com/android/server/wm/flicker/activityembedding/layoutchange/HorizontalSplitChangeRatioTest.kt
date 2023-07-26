@@ -67,9 +67,11 @@ class HorizontalSplitChangeRatioTest(flicker: LegacyFlickerTest) :
     }
 
     @FlakyTest(bugId = 293075402)
+    @Test
     override fun backgroundLayerNeverVisible() = super.backgroundLayerNeverVisible()
 
     @FlakyTest(bugId = 293075402)
+    @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
