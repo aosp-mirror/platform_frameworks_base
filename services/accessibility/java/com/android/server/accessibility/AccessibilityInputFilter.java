@@ -40,6 +40,7 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
 import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
+import com.android.server.accessibility.magnification.FullScreenMagnificationVibrationHelper;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationPromptController;
@@ -654,11 +655,14 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         } else {
             final Context uiContext = displayContext.createWindowContext(
                     TYPE_MAGNIFICATION_OVERLAY, null /* options */);
+            FullScreenMagnificationVibrationHelper fullScreenMagnificationVibrationHelper =
+                    new FullScreenMagnificationVibrationHelper(uiContext);
             magnificationGestureHandler = new FullScreenMagnificationGestureHandler(uiContext,
                     mAms.getMagnificationController().getFullScreenMagnificationController(),
                     mAms.getTraceManager(),
                     mAms.getMagnificationController(), detectControlGestures, triggerable,
-                    new WindowMagnificationPromptController(displayContext, mUserId), displayId);
+                    new WindowMagnificationPromptController(displayContext, mUserId), displayId,
+                    fullScreenMagnificationVibrationHelper);
         }
         return magnificationGestureHandler;
     }

@@ -36,6 +36,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -165,6 +166,8 @@ public class FullScreenMagnificationGestureHandlerTest {
     WindowMagnificationPromptController mWindowMagnificationPromptController;
     @Mock
     AccessibilityTraceManager mMockTraceManager;
+    @Mock
+    FullScreenMagnificationVibrationHelper mMockFullScreenMagnificationVibrationHelper;
 
     @Rule
     public final TestableContext mContext = new TestableContext(getInstrumentation().getContext());
@@ -247,7 +250,8 @@ public class FullScreenMagnificationGestureHandlerTest {
         FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
                 mContext, mFullScreenMagnificationController, mMockTraceManager, mMockCallback,
                 detectTripleTap, detectShortcutTrigger,
-                mWindowMagnificationPromptController, DISPLAY_0);
+                mWindowMagnificationPromptController, DISPLAY_0,
+                mMockFullScreenMagnificationVibrationHelper);
         h.setSinglePanningEnabled(true);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
@@ -631,6 +635,52 @@ public class FullScreenMagnificationGestureHandlerTest {
 
         assertTrue(mMgh.mCurrentState == mMgh.mDelegatingState);
         assertTrue(isZoomed());
+    }
+
+    @Test
+    public void testScroll_singleHorizontalPanningAndAtEdge_vibrate() {
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0,
+                INITIAL_MAGNIFICATION_BOUNDS.left,
+                INITIAL_MAGNIFICATION_BOUNDS.top / 2,
+                false,
+                1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF endCoords = new PointF(initCoords.x, initCoords.y);
+        endCoords.offset(swipeMinDistance, 0);
+        allowEventDelegation();
+
+        swipeAndHold(initCoords, endCoords);
+
+        verify(mMockFullScreenMagnificationVibrationHelper).vibrateIfSettingEnabled();
+    }
+
+    @Test
+    public void testScroll_singleVerticalPanningAndAtEdge_doNotVibrate() {
+        goFromStateIdleTo(STATE_SINGLE_PANNING);
+        mFullScreenMagnificationController.setCenter(
+                DISPLAY_0,
+                INITIAL_MAGNIFICATION_BOUNDS.left,
+                INITIAL_MAGNIFICATION_BOUNDS.top,
+                false,
+                1);
+        final float swipeMinDistance = ViewConfiguration.get(mContext).getScaledTouchSlop() + 1;
+        PointF initCoords =
+                new PointF(
+                        mFullScreenMagnificationController.getCenterX(DISPLAY_0),
+                        mFullScreenMagnificationController.getCenterY(DISPLAY_0));
+        PointF endCoords = new PointF(initCoords.x, initCoords.y);
+        endCoords.offset(0, swipeMinDistance);
+        allowEventDelegation();
+
+        swipeAndHold(initCoords, endCoords);
+
+        verify(mMockFullScreenMagnificationVibrationHelper, never()).vibrateIfSettingEnabled();
     }
 
     @Test
