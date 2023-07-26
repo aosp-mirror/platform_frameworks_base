@@ -2148,6 +2148,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 if (!isStorageOrMedia) {
                     continue;
                 }
+                boolean isSystemOrPolicyFixed = (getPermissionFlags(newPackage.getPackageName(),
+                        permInfo.name, userId) & (FLAG_PERMISSION_SYSTEM_FIXED
+                        | FLAG_PERMISSION_POLICY_FIXED)) != 0;
+                if (isSystemOrPolicyFixed) {
+                    continue;
+                }
 
                 EventLog.writeEvent(0x534e4554, "171430330", newPackage.getUid(),
                         "Revoking permission " + permInfo.name + " from package "
