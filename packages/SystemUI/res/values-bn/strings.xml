@@ -398,7 +398,7 @@
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"সব নীরব বিজ্ঞপ্তি মুছুন"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'বিরক্ত করবে না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"এখন শুরু করুন"</string>
-    <string name="empty_shade_text" msgid="8935967157319717412">"কোনো বিজ্ঞপ্তি নেই"</string>
+    <string name="empty_shade_text" msgid="8935967157319717412">"কোনও বিজ্ঞপ্তি নেই"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"নতুন কোনও বিজ্ঞপ্তি নেই"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"পুরনো বিজ্ঞপ্তি দেখতে আনলক করুন"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"আপনার অভিভাবক এই ডিভাইস ম্যানেজ করেন"</string>
@@ -861,7 +861,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g>-এর <xliff:g id="SONG_NAME">%1$s</xliff:g> গানটি <xliff:g id="APP_LABEL">%3$s</xliff:g> অ্যাপে চালান"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> গানটি <xliff:g id="APP_LABEL">%2$s</xliff:g> অ্যাপে চালান"</string>
     <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"আপনার জন্য"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> চলছে"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> এখন চালু রয়েছে"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"আগের অবস্থায় ফিরুন"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>-এ চালাতে আরও কাছে আনুন"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"এখানে চালানোর জন্য আপনার ডিভাইস <xliff:g id="DEVICENAME">%1$s</xliff:g>-এর কাছে নিয়ে যান"</string>
