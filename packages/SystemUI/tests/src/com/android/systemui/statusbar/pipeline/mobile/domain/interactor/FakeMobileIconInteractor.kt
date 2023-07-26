@@ -77,6 +77,8 @@ class FakeMobileIconInteractor(
 
     override val isForceHidden = MutableStateFlow(false)
 
+    override val isAllowedDuringAirplaneMode = MutableStateFlow(false)
+
     fun setIsEmergencyOnly(emergency: Boolean) {
         _isEmergencyOnly.value = emergency
     }

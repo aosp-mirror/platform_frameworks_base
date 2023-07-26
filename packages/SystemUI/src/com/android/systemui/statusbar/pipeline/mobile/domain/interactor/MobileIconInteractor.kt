@@ -111,6 +111,9 @@ interface MobileIconInteractor {
     /** See [MobileIconsInteractor.isForceHidden]. */
     val isForceHidden: Flow<Boolean>
 
+    /** See [MobileConnectionRepository.isAllowedDuringAirplaneMode]. */
+    val isAllowedDuringAirplaneMode: StateFlow<Boolean>
+
     /** True when in carrier network change mode */
     val carrierNetworkChangeActive: StateFlow<Boolean>
 }
@@ -267,4 +270,6 @@ class MobileIconInteractorImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isInService = connectionRepository.isInService
+
+    override val isAllowedDuringAirplaneMode = connectionRepository.isAllowedDuringAirplaneMode
 }
