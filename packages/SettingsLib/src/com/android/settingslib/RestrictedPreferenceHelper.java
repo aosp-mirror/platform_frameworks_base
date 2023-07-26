@@ -17,7 +17,6 @@
 package com.android.settingslib;
 
 import static android.app.admin.DevicePolicyResources.Strings.Settings.CONTROLLED_BY_ADMIN_SUMMARY;
-
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.app.admin.DevicePolicyManager;
@@ -32,6 +31,7 @@ import android.util.TypedValue;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
@@ -48,7 +48,8 @@ public class RestrictedPreferenceHelper {
     int uid;
 
     private boolean mDisabledByAdmin;
-    private EnforcedAdmin mEnforcedAdmin;
+    @VisibleForTesting
+    EnforcedAdmin mEnforcedAdmin;
     private String mAttrUserRestriction = null;
     private boolean mDisabledSummary = false;
 
@@ -193,8 +194,14 @@ public class RestrictedPreferenceHelper {
      * @return true if the disabled state was changed.
      */
     public boolean setDisabledByAdmin(EnforcedAdmin admin) {
-        final boolean disabled = (admin != null ? true : false);
-        mEnforcedAdmin = admin;
+        boolean disabled = false;
+        mEnforcedAdmin = null;
+        if (admin != null) {
+            disabled = true;
+            // Copy the received instance to prevent pass be reference being overwritten.
+            mEnforcedAdmin = new EnforcedAdmin(admin);
+        }
+
         boolean changed = false;
         if (mDisabledByAdmin != disabled) {
             mDisabledByAdmin = disabled;

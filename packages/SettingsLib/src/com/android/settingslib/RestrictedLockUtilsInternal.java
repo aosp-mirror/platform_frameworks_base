@@ -125,7 +125,8 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
             return null;
         }
 
-        final EnforcedAdmin admin = getProfileOrDeviceOwner(context, enforcingUser.getUserHandle());
+        final EnforcedAdmin admin =
+                getProfileOrDeviceOwner(context, userRestriction, enforcingUser.getUserHandle());
         if (admin != null) {
             return admin;
         }
