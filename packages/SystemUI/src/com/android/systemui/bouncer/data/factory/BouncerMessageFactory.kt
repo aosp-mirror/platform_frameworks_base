@@ -131,7 +131,9 @@ constructor(
             PROMPT_REASON_AFTER_LOCKOUT -> biometricLockout(securityMode)
             PROMPT_REASON_PREPARE_FOR_UPDATE -> authRequiredForUnattendedUpdate(securityMode)
             PROMPT_REASON_FINGERPRINT_LOCKED_OUT -> fingerprintUnlockUnavailable(securityMode)
-            PROMPT_REASON_FACE_LOCKED_OUT -> faceUnlockUnavailable(securityMode)
+            PROMPT_REASON_FACE_LOCKED_OUT ->
+                if (fpAllowedInBouncer) faceLockedOutButFingerprintAvailable(securityMode)
+                else faceLockedOut(securityMode)
             PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT ->
                 if (fpAllowedInBouncer) incorrectSecurityInputWithFingerprint(securityMode)
                 else incorrectSecurityInput(securityMode)
@@ -311,11 +313,20 @@ private fun nonStrongAuthTimeoutWithFingerprintAllowed(securityMode: SecurityMod
     }
 }
 
-private fun faceUnlockUnavailable(securityMode: SecurityMode): Pair<Int, Int> {
+private fun faceLockedOut(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
         SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_face_locked_out)
         SecurityMode.Password -> Pair(keyguard_enter_password, kg_face_locked_out)
         SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_face_locked_out)
+        else -> Pair(0, 0)
+    }
+}
+
+private fun faceLockedOutButFingerprintAvailable(securityMode: SecurityMode): Pair<Int, Int> {
+    return when (securityMode) {
+        SecurityMode.Pattern -> Pair(kg_unlock_with_pattern_or_fp, kg_face_locked_out)
+        SecurityMode.Password -> Pair(kg_unlock_with_password_or_fp, kg_face_locked_out)
+        SecurityMode.PIN -> Pair(kg_unlock_with_pin_or_fp, kg_face_locked_out)
         else -> Pair(0, 0)
     }
 }
