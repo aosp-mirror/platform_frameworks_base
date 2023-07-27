@@ -185,9 +185,12 @@ constructor(
                 networkId = NETWORK_ID,
                 isValidated = this.hasInternetAccess(),
                 level = this.level,
-                ssid = this.ssid,
-                // TODO(b/292534484): Fetch the real values from [WifiEntry] (#getTitle might be
-                // appropriate).
+                ssid = this.title,
+                // With WifiTrackerLib, [WifiEntry.title] will appropriately fetch the  SSID for
+                // typical wifi networks *and* passpoint/OSU APs. So, the AP-specific values can
+                // always be false/null in this repository.
+                // TODO(b/292534484): Remove these fields from the wifi network model once this
+                //  repository is fully enabled.
                 isPasspointAccessPoint = false,
                 isOnlineSignUpForPasspointAccessPoint = false,
                 passpointProviderFriendlyName = null,
