@@ -1319,6 +1319,7 @@ public final class InputDevice implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public int getAssociatedDisplayId() {
         return mAssociatedDisplayId;
     }
