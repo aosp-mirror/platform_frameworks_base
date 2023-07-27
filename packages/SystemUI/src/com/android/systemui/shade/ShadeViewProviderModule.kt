@@ -42,6 +42,7 @@ import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.NotificationShelfController
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent
@@ -78,6 +79,7 @@ abstract class ShadeViewProviderModule {
             containerConfigProvider: Provider<SceneContainerConfig>,
             @Named(SceneContainerNames.SYSTEM_UI_DEFAULT)
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
+            layoutInsetController: NotificationInsetsController,
         ): WindowRootView {
             return if (
                 featureFlags.isEnabled(Flags.SCENE_CONTAINER) && ComposeFacade.isComposeAvailable()
@@ -88,6 +90,7 @@ abstract class ShadeViewProviderModule {
                     viewModel = viewModelProvider.get(),
                     containerConfig = containerConfigProvider.get(),
                     scenes = scenesProvider.get(),
+                    layoutInsetController = layoutInsetController,
                 )
                 sceneWindowRootView
             } else {

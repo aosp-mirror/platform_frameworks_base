@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconList;
+import com.android.systemui.statusbar.phone.StatusBarNotificationPresenterModule;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
@@ -96,7 +97,7 @@ import java.util.concurrent.Executor;
  * their own version of CentralSurfaces can include just dependencies, without injecting
  * CentralSurfaces itself.
  */
-@Module
+@Module(includes = {StatusBarNotificationPresenterModule.class})
 public interface CentralSurfacesDependenciesModule {
     /** */
     @SysUISingleton

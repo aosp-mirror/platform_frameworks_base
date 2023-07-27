@@ -352,6 +352,13 @@ public final class WMShell implements
     }
 
     @Override
+    public boolean isDumpCritical() {
+        // Dump can't be critical because the shell has to dump on the main thread for
+        // synchronization reasons, which isn't reliably fast.
+        return false;
+    }
+
+    @Override
     public void dump(PrintWriter pw, String[] args) {
         // Handle commands if provided
         if (mShell.handleCommand(args, pw)) {

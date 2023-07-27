@@ -377,6 +377,8 @@ internal constructor(
     }
 }
 
+@Deprecated("Please use com.google.ux.material.libmonet.dynamiccolor.MaterialDynamicColors " +
+        "instead")
 class ColorScheme(
     @ColorInt val seed: Int,
     val darkTheme: Boolean,

@@ -28,4 +28,10 @@ abstract class LockscreenLayoutModule {
     abstract fun bindDefaultLayout(
         defaultLockscreenLayout: DefaultLockscreenLayout
     ): LockscreenLayout
+
+    @Binds
+    @IntoSet
+    abstract fun bindShortcutsBesideUdfpsLockscreenLayout(
+        shortcutsBesideUdfpsLockscreenLayout: ShortcutsBesideUdfpsLockscreenLayout
+    ): LockscreenLayout
 }

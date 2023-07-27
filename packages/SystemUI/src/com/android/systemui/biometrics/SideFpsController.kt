@@ -50,7 +50,9 @@ import androidx.annotation.RawRes
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieProperty
 import com.airbnb.lottie.model.KeyPath
+import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
+import com.android.keyguard.KeyguardPINView
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
@@ -112,7 +114,7 @@ constructor(
     private val isReverseDefaultRotation =
         context.resources.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
 
-    private var overlayHideAnimator: ViewPropertyAnimator? = null
+    private var overlayShowAnimator: ViewPropertyAnimator? = null
 
     private var overlayView: View? = null
         set(value) {
@@ -122,13 +124,23 @@ constructor(
                 windowManager.removeView(oldView)
                 orientationListener.disable()
             }
-            overlayHideAnimator?.cancel()
-            overlayHideAnimator = null
+            overlayShowAnimator?.cancel()
+            overlayShowAnimator = null
 
             field = value
             field?.let { newView ->
+                if (requests.contains(SideFpsUiRequestSource.PRIMARY_BOUNCER)) {
+                    newView.alpha = 0f
+                    overlayShowAnimator =
+                        newView
+                            .animate()
+                            .alpha(1f)
+                            .setDuration(KeyguardPINView.ANIMATION_DURATION)
+                            .setInterpolator(Interpolators.ALPHA_IN)
+                }
                 windowManager.addView(newView, overlayViewParams)
                 orientationListener.enable()
+                overlayShowAnimator?.start()
             }
         }
     @VisibleForTesting var overlayOffsets: SensorLocationInternal = SensorLocationInternal.DEFAULT

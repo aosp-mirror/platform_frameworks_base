@@ -24,8 +24,10 @@ class SceneWindowRootView(
         viewModel: SceneContainerViewModel,
         containerConfig: SceneContainerConfig,
         scenes: Set<Scene>,
+        layoutInsetController: LayoutInsetsController,
     ) {
         this.viewModel = viewModel
+        setLayoutInsetsController(layoutInsetController)
         SceneWindowRootViewBinder.bind(
             view = this@SceneWindowRootView,
             viewModel = viewModel,

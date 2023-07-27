@@ -215,8 +215,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
     public void onNotificationClicked(NotificationEntry entry, ExpandableNotificationRow row) {
         mLogger.logStartingActivityFromClick(entry);
 
-        if (mRemoteInputManager.isRemoteInputActive(entry)
-                && !TextUtils.isEmpty(row.getActiveRemoteInputText())) {
+        if (mRemoteInputManager.isRemoteInputActive(entry)) {
             // We have an active remote input typed and the user clicked on the notification.
             // this was probably unintentional, so we're closing the edit text instead.
             mRemoteInputManager.closeRemoteInputs();

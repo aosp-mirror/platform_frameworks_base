@@ -150,6 +150,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಯಲು ಅನ್‌ಲಾಕ್ ಐಕಾನ್ ಅನ್ನು ಒತ್ತಿ."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ಪಿನ್ ಬಳಸಿ"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ಪ್ಯಾಟರ್ನ್ ಬಳಸಿ"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ"</string>
@@ -362,6 +364,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ಮುಖದ ಮೂಲಕ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ಮುಖ ಗುರುತಿಸಲಾಗಿದೆ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ಬಳಸಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ಈ ಸಾಧನವು ನಿಮ್ಮ ಸಂಸ್ಥೆಗೆ ಸೇರಿದೆ"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ಈ ಸಾಧನವು <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ಗೆ ಸೇರಿದೆ"</string>
@@ -415,14 +419,10 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"ನೀವು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುತ್ತಿರುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಕಾಣಿಸುವ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ Android ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"ನೀವು ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತಿರುವಾಗ, ರೆಕಾರ್ಡಿಂಗ್ ಮಾಡುತ್ತಿರುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟ್ ಮಾಡುತ್ತಿರುವಾಗ, ಆ ಆ್ಯಪ್‌ನಲ್ಲಿ ತೋರಿಸುವ ಅಥವಾ ಪ್ಲೇ ಮಾಡುವ ಯಾವುದೇ ವಿಷಯಕ್ಕೆ Android ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ. ಆದ್ದರಿಂದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ವಿವರಗಳು, ಸಂದೇಶಗಳು, ಫೋಟೋಗಳು ಹಾಗೂ ಆಡಿಯೊ ಮತ್ತು ವೀಡಿಯೊದಂತಹ ವಿಷಯಗಳ ಕುರಿತು ಜಾಗರೂಕರಾಗಿರಿ."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ಪ್ರಾರಂಭಿಸಿ"</string>
-    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
-    <skip />
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"ನೀವು ಆ್ಯಪ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದಾಗ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗುತ್ತದೆ"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"ಬದಲಿಗೆ ಈ ಆ್ಯಪ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"ಮರಳಿ ಬದಲಿಸಿ"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"ಆ್ಯಪ್ ಸ್ವಿಚ್"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"ನಿಮ್ಮ IT ನಿರ್ವಾಹಕರು ನಿರ್ಬಂಧಿಸಿದ್ದಾರೆ"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ಸಾಧನ ನೀತಿಯಿಂದ ಸ್ಕ್ರೀನ್ ಕ್ಯಾಪ್ಚರಿಂಗ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸಿ"</string>
@@ -940,6 +940,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"ಮತ್ತೊಂದು ಪಿನ್ ಅನ್ನು ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> ಸಾಧನಕ್ಕಾಗಿ ಬದಲಾವಣೆಯನ್ನು ದೃಢೀಕರಿಸಿ"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ಇನ್ನಷ್ಟು ನೋಡಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="retry_face" msgid="416380073082560186">"ಮುಖದ ದೃಢೀಕರಣವನ್ನು ಮರುಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ಶಿಫಾರಸುಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ಮಾಧ್ಯಮ"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಈ ಮಾಧ್ಯಮ ಕಂಟ್ರೋಲ್‌ಗಳನ್ನು ಮರೆಮಾಡಬೇಕೆ?"</string>
@@ -1166,4 +1167,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant ನಿಮ್ಮ ಮಾತನ್ನು ಆಲಿಸುತ್ತಿದೆ"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಡೀಫಾಲ್ಟ್ ಟಿಪ್ಪಣಿಗಳ ಆ್ಯಪ್ ಅನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="install_app" msgid="5066668100199613936">"ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"ಮೈಕ್ರೊಫೋನ್ ಮತ್ತು ಕ್ಯಾಮರಾ"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್ ಬಳಕೆ"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"ಇತ್ತೀಚಿನ ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ನೋಡಿ"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"ಮುಗಿದಿದೆ"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"ಆಯ್ಕೆಗಳನ್ನು ವಿಸ್ತೃತಗೊಳಿಸಿ ಮತ್ತು ತೋರಿಸಿ"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"ಕುಗ್ಗಿಸಿ"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಮುಚ್ಚಿ"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಮುಚ್ಚಲಾಗಿದೆ"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"ಸೇವೆಯನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"ಆ್ಯಕ್ಸೆಸ್ ಅನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"ಫೋನ್ ಕರೆ ಮೂಲಕ ಬಳಕೆಯಲ್ಲಿದೆ"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"ಫೋನ್ ಕರೆಯಲ್ಲಿ ಇತ್ತೀಚಿಗೆ ಬಳಸಲಾಗಿದೆ"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನಿಂದ ಬಳಕೆಯಲ್ಲಿದೆ"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನಿಂದ ಬಳಕೆಯಲ್ಲಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನಿಂದ ಬಳಕೆಯಲ್ಲಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>
