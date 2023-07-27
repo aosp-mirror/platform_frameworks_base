@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2020 The Android Open Source Project
+     Copyright (C) 2023 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
      limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/controls_list"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:divider="@drawable/controls_list_divider"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:showDividers="middle" />

@@ -1238,6 +1238,7 @@
     <dimen name="controls_header_app_icon_size">24dp</dimen>
     <dimen name="controls_top_margin">48dp</dimen>
     <dimen name="controls_content_margin_horizontal">0dp</dimen>
+    <dimen name="controls_content_padding">16dp</dimen>
     <dimen name="control_header_text_size">24sp</dimen>
     <dimen name="control_item_text_size">14sp</dimen>
     <dimen name="control_menu_item_text_size">16sp</dimen>
@@ -1256,6 +1257,8 @@
     <dimen name="control_chevron_icon_size">20dp</dimen>
     <dimen name="control_spacing">8dp</dimen>
     <dimen name="control_list_divider">1dp</dimen>
+    <dimen name="control_list_vertical_spacing">8dp</dimen>
+    <dimen name="control_list_horizontal_spacing">12dp</dimen>
     <dimen name="control_corner_radius">14dp</dimen>
     <dimen name="control_height">104dp</dimen>
     <dimen name="control_padding">12dp</dimen>
