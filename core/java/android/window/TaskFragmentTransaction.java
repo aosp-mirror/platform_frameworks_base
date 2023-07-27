@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.SurfaceControl;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -192,6 +193,9 @@ public final class TaskFragmentTransaction implements Parcelable {
         @Nullable
         private TaskFragmentParentInfo mTaskFragmentParentInfo;
 
+        @Nullable
+        private SurfaceControl mSurfaceControl;
+
         public Change(@ChangeType int type) {
             mType = type;
         }
@@ -206,6 +210,7 @@ public final class TaskFragmentTransaction implements Parcelable {
             mActivityIntent = in.readTypedObject(Intent.CREATOR);
             mActivityToken = in.readStrongBinder();
             mTaskFragmentParentInfo = in.readTypedObject(TaskFragmentParentInfo.CREATOR);
+            mSurfaceControl = in.readTypedObject(SurfaceControl.CREATOR);
         }
 
         @Override
@@ -219,6 +224,7 @@ public final class TaskFragmentTransaction implements Parcelable {
             dest.writeTypedObject(mActivityIntent, flags);
             dest.writeStrongBinder(mActivityToken);
             dest.writeTypedObject(mTaskFragmentParentInfo, flags);
+            dest.writeTypedObject(mSurfaceControl, flags);
         }
 
         /** The change is related to the TaskFragment created with this unique token. */
@@ -306,6 +312,13 @@ public final class TaskFragmentTransaction implements Parcelable {
             return this;
         }
 
+        /** @hide */
+        @NonNull
+        public Change setTaskFragmentSurfaceControl(@Nullable SurfaceControl sc) {
+            mSurfaceControl = sc;
+            return this;
+        }
+
         @ChangeType
         public int getType() {
             return mType;
@@ -357,6 +370,21 @@ public final class TaskFragmentTransaction implements Parcelable {
         @Nullable
         public TaskFragmentParentInfo getTaskFragmentParentInfo() {
             return mTaskFragmentParentInfo;
+        }
+
+        /**
+         * Gets the {@link SurfaceControl} of the TaskFragment. This field is {@code null} for
+         * a regular {@link TaskFragmentOrganizer} and is only available for a system
+         * {@link TaskFragmentOrganizer} in the
+         * {@link TaskFragmentTransaction#TYPE_TASK_FRAGMENT_APPEARED} event. See
+         * {@link ITaskFragmentOrganizerController#registerOrganizer(ITaskFragmentOrganizer,
+         * boolean)}
+         *
+         * @hide
+         */
+        @Nullable
+        public SurfaceControl getTaskFragmentSurfaceControl() {
+            return mSurfaceControl;
         }
 
         @Override
