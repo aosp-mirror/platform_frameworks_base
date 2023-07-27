@@ -283,7 +283,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see StreamConfigurationMap#getInputFormats
      * @see StreamConfigurationMap#getInputSizes
      * @see StreamConfigurationMap#getValidOutputFormatsForInput
-     * @see StreamConfigurationMap#getOutputSizes
+     * @see StreamConfigurationMap#getOutputSizes(int)
+     * @see StreamConfigurationMap#getOutputSizes(Class)
      * @see android.media.ImageWriter
      * @see android.media.ImageReader
      * @deprecated Please use {@link
