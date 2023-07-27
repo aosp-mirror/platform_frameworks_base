@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.domain.interactor
 import android.content.res.Resources
 import android.hardware.biometrics.BiometricSourceType
 import android.hardware.biometrics.BiometricSourceType.FINGERPRINT
+import android.hardware.fingerprint.FingerprintManager
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
@@ -129,7 +130,14 @@ data class BiometricMessage(
     val type: BiometricMessageType,
     val id: Int,
     val message: String?,
-)
+) {
+    fun isFingerprintLockoutMessage(): Boolean {
+        return source == FINGERPRINT &&
+            type == BiometricMessageType.ERROR &&
+            (id == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT ||
+                id == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT)
+    }
+}
 
 enum class BiometricMessageType {
     HELP,
