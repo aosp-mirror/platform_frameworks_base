@@ -137,7 +137,7 @@
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"မျက်နှာ စကင်ဖတ်နေသည်"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"ပို့ရန်"</string>
     <string name="cancel" msgid="1089011503403416730">"မလုပ်တော့"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"အတည်ပြုပါ"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"အတည်ပြုရန်"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"ထပ်စမ်းကြည့်ရန်"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်ရန် တို့ပါ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"ထပ်စမ်းကြည့်ပါ"</string>
@@ -150,6 +150,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"မျက်နှာ မှတ်မိသည်။ ရှေ့ဆက်ရန် နှိပ်ပါ။"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"မျက်နှာ မှတ်မိသည်။ ရှေ့ဆက်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ။"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"အထောက်အထားစိစစ်ပြီးပြီ"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ပင်နံပါတ်သုံးရန်"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ပုံစံကို သုံးရန်"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"စကားဝှက် သုံးရန်"</string>
@@ -362,6 +364,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"မျက်နှာဖြင့် ဖွင့်လိုက်သည်"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"မျက်နှာ မှတ်မိသည်"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ထပ်စမ်းကြည့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ကို အသုံးပြုရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ဤစက်ကို သင့်အဖွဲ့အစည်းက ပိုင်ဆိုင်သည်"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ဤစက်ကို <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> က ပိုင်ဆိုင်သည်"</string>
@@ -415,14 +419,10 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"မျှဝေ၊ ရုပ်သံဖမ်း (သို့) ကာစ်လုပ်သည့်အခါ Android သည် သင့်ဖန်သားပြင်တွင် မြင်နိုင်သည့် (သို့) သင့်စက်တွင် ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့ အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"အက်ပ်တစ်ခုဖြင့် မျှဝေ၊ ရုပ်သံဖမ်း (သို့) ကာစ်လုပ်သည့်အခါ Android သည် ယင်းအက်ပ်တွင် ပြထားသည့် (သို့) ဖွင့်ထားသည့် အရာအားလုံးကို တွေ့နိုင်သည်။ ထို့ကြောင့် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ မက်ဆေ့ဂျ်၊ ဓာတ်ပုံ၊ အသံနှင့် ဗီဒီယိုကဲ့သို့အရာများကို ဂရုစိုက်ပါ။"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"စတင်ရန်"</string>
-    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
-    <skip />
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"အက်ပ်ပြောင်းချိန်တွင် မျှဝေခြင်းကို ခဏရပ်သည်"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"၎င်းအစား ဤအက်ပ်ကို မျှဝေရန်"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"ပြန်ပြောင်းရန်"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"အက်ပ်ပြောင်းစနစ်"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"သင်၏ IT စီမံခန့်ခွဲသူက ပိတ်ထားသည်"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ကိရိယာ မူဝါဒက ဖန်သားပြင်ပုံဖမ်းခြင်းကို ပိတ်ထားသည်"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"အားလုံးရှင်းရန်"</string>
@@ -940,6 +940,8 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"နောက်ပင်နံပါတ်တစ်ခု စမ်းကြည့်ရန်"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> အတွက် အပြောင်းအလဲကို အတည်ပြုပါ"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ပိုကြည့်ရန် ပွတ်ဆွဲပါ"</string>
+    <!-- no translation found for retry_face (416380073082560186) -->
+    <skip />
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"အကြံပြုချက်များ ဖွင့်နေသည်"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"မီဒီယာ"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> အတွက် ဤမီဒီယာထိန်းချုပ်မှု ဖျောက်ထားမလား။"</string>
@@ -949,7 +951,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"ဆက်တင်များ"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> ၏ <xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%3$s</xliff:g> တွင် ဖွင့်ထားသည်"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g> အနက် <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> ပွင့်နေပါသည်"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> လုပ်ဆောင်နေသည်"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"ဖွင့်ရန်"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"ခဏရပ်ရန်"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"ယခင် တစ်ပုဒ်"</string>
@@ -1166,4 +1168,40 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant နားထောင်နေသည်"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ဆက်တင်များတွင် မူရင်းမှတ်စုများအက်ပ် သတ်မှတ်ပါ"</string>
     <string name="install_app" msgid="5066668100199613936">"အက်ပ် ထည့်သွင်းရန်"</string>
+    <!-- no translation found for privacy_dialog_title (7839968133469098311) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_summary (2458769652125995409) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_more_button (7610604080293562345) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_done_button (4504330708531434263) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_expand_action (9129262348628331377) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_collapse_action (277419962019466347) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_close_app_button (8006250171305878606) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_close_app_message (1316408652526310985) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_manage_service (8320590856621823604) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_manage_permissions (2543451567190470413) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_call_usage (7858746847946397562) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_call_usage (1214810644978167344) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_app_usage (631997836335929880) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_app_usage (4883417856848222450) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_app_usage_1 (9047570143069220911) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_app_usage_1 (2551340497722370109) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_app_usage_2 (2770926061339921767) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_app_usage_2 (2874689735085367167) -->
+    <skip />
 </resources>
