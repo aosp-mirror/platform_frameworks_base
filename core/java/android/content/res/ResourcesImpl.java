@@ -54,6 +54,7 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.view.DisplayAdjustments;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.GrowingArrayUtils;
 
 import libcore.util.NativeAllocationRegistry;
@@ -160,6 +161,23 @@ public class ResourcesImpl {
         sPreloadedDrawables = new LongSparseArray[2];
         sPreloadedDrawables[0] = new LongSparseArray<>();
         sPreloadedDrawables[1] = new LongSparseArray<>();
+    }
+
+    /**
+     * Clear the cache when the framework resources packages is changed.
+     *
+     * It's only used in the test initial function instead of regular app behaviors. It doesn't
+     * guarantee the thread-safety so mark this with @VisibleForTesting.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    static void resetDrawableStateCache() {
+        synchronized (sSync) {
+            sPreloadedDrawables[0].clear();
+            sPreloadedDrawables[1].clear();
+            sPreloadedColorDrawables.clear();
+            sPreloadedComplexColors.clear();
+            sPreloaded = false;
+        }
     }
 
     /**
