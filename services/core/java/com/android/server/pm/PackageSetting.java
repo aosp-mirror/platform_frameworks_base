@@ -1118,6 +1118,9 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     private static void writeArchiveState(ProtoOutputStream proto, ArchiveState archiveState) {
+        if (archiveState == null) {
+            return;
+        }
         long archiveStateToken = proto.start(PackageProto.UserInfoProto.ARCHIVE_STATE);
         for (ArchiveState.ArchiveActivityInfo activityInfo : archiveState.getActivityInfos()) {
             long activityInfoToken = proto.start(
