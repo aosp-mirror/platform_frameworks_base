@@ -2170,7 +2170,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"إلغاء الإيقاف المؤقت"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ما مِن تطبيقات عمل."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ما مِن تطبيقات شخصية."</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"هل تريد فتح تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في الملف الشخصي للعمل؟"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"هل تريد فتح تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في ملفك الشخصي للعمل؟"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"هل تريد فتح المحتوى في تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في الملف الشخصي؟"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"هل تريد فتح المحتوى في تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في الملف الشخصي للعمل؟"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"هل تريد الاتصال من تطبيق العمل؟"</string>
