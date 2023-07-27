@@ -18,6 +18,9 @@ package com.android.server.permission.access.immutable
 
 import android.util.ArrayMap
 
+/**
+ * Immutable map with index-based access.
+ */
 sealed class IndexedMap<K, V>(
     internal val map: ArrayMap<K, V>
 ) : Immutable<MutableIndexedMap<K, V>> {
@@ -42,6 +45,9 @@ sealed class IndexedMap<K, V>(
     override fun toString(): String = map.toString()
 }
 
+/**
+ * Mutable map with index-based access.
+ */
 class MutableIndexedMap<K, V>(
     map: ArrayMap<K, V> = ArrayMap()
 ) : IndexedMap<K, V>(map) {

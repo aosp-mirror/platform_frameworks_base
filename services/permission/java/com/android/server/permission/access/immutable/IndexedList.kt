@@ -16,6 +16,9 @@
 
 package com.android.server.permission.access.immutable
 
+/**
+ * Immutable list with index-based access.
+ */
 sealed class IndexedList<T>(
     internal val list: ArrayList<T>
 ) : Immutable<MutableIndexedList<T>> {
@@ -34,6 +37,9 @@ sealed class IndexedList<T>(
     override fun toString(): String = list.toString()
 }
 
+/**
+ * Mutable list with index-based access.
+ */
 class MutableIndexedList<T>(
     list: ArrayList<T> = ArrayList()
 ) : IndexedList<T>(list) {
