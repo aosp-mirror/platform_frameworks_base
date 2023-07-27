@@ -15,23 +15,17 @@
  *
  */
 
-package com.android.systemui.keyguard.ui.view.layout
+package com.android.systemui.keyguard.shared.model
 
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
-
-@Module
-abstract class LockscreenLayoutModule {
-    @Binds
-    @IntoSet
-    abstract fun bindDefaultLayout(
-        defaultLockscreenLayout: DefaultLockscreenLayout
-    ): LockscreenLayout
-
-    @Binds
-    @IntoSet
-    abstract fun bindShortcutsBesideUdfpsLockscreenLayout(
-        shortcutsBesideUdfpsLockscreenLayout: ShortcutsBesideUdfpsLockscreenLayout
-    ): LockscreenLayout
-}
+/**
+ * Provides a stateful representation of the visibility of the KeyguardRootView
+ *
+ * @param statusBarState State of the status bar represented by [StatusBarState]
+ * @param goingToFullShade Whether status bar is going to full shade
+ * @param occlusionTransitionRunning Whether the occlusion transition is running in this instant
+ */
+data class KeyguardRootViewVisibilityState(
+    val statusBarState: Int,
+    val goingToFullShade: Boolean,
+    val occlusionTransitionRunning: Boolean,
+)

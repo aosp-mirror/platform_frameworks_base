@@ -101,10 +101,9 @@ constructor(
             quickAffordanceAlwaysVisible(position),
             keyguardInteractor.isDozing,
             keyguardInteractor.isKeyguardShowing,
-            keyguardInteractor.isQuickSettingsVisible,
             biometricSettingsRepository.isCurrentUserInLockdown,
-        ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible, isUserInLockdown ->
-            if (!isDozing && isKeyguardShowing && !isQuickSettingsVisible && !isUserInLockdown) {
+        ) { affordance, isDozing, isKeyguardShowing, isUserInLockdown ->
+            if (!isDozing && isKeyguardShowing && !isUserInLockdown) {
                 affordance
             } else {
                 KeyguardQuickAffordanceModel.Hidden

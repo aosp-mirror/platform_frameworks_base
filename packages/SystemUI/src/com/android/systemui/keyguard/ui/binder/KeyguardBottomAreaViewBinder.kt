@@ -63,6 +63,7 @@ import kotlinx.coroutines.launch
  * view-model to be reused for multiple view/view-binder bindings.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
+@Deprecated("Deprecated as part of b/278057014")
 object KeyguardBottomAreaViewBinder {
 
     private const val EXIT_DOZE_BUTTON_REVEAL_ANIMATION_DURATION_MS = 250L
@@ -75,6 +76,8 @@ object KeyguardBottomAreaViewBinder {
      * Users of the [KeyguardBottomAreaViewBinder] class should use this to control the binder after
      * it is bound.
      */
+    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
+    @Deprecated("Deprecated as part of b/278057014")
     interface Binding {
         /**
          * Returns a collection of [ViewPropertyAnimator] instances that can be used to animate the
@@ -96,6 +99,7 @@ object KeyguardBottomAreaViewBinder {
     }
 
     /** Binds the view to the view-model, continuing to update the former based on the latter. */
+    @Deprecated("Deprecated as part of b/278057014")
     @SuppressLint("ClickableViewAccessibility")
     @JvmStatic
     fun bind(
@@ -132,6 +136,8 @@ object KeyguardBottomAreaViewBinder {
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         viewModel.startButton.collect { buttonModel ->
                             updateButton(
@@ -144,6 +150,7 @@ object KeyguardBottomAreaViewBinder {
                         }
                     }
 
+                    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         viewModel.endButton.collect { buttonModel ->
                             updateButton(
@@ -180,6 +187,7 @@ object KeyguardBottomAreaViewBinder {
                         }
                     }
 
+                    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         updateButtonAlpha(
                             view = startButton,
@@ -188,6 +196,7 @@ object KeyguardBottomAreaViewBinder {
                         )
                     }
 
+                    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         updateButtonAlpha(
                             view = endButton,
@@ -213,6 +222,7 @@ object KeyguardBottomAreaViewBinder {
                             }
                     }
 
+                    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
                     launch {
                         configurationBasedDimensions.collect { dimensions ->
                             startButton.updateLayoutParams<ViewGroup.LayoutParams> {
@@ -287,6 +297,8 @@ object KeyguardBottomAreaViewBinder {
         }
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
+    // If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     @SuppressLint("ClickableViewAccessibility")
     private fun updateButton(
         view: ImageView,
@@ -394,6 +406,8 @@ object KeyguardBottomAreaViewBinder {
         view.isSelected = viewModel.isSelected
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
+    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private suspend fun updateButtonAlpha(
         view: View,
         viewModel: Flow<KeyguardQuickAffordanceViewModel>,
@@ -405,6 +419,7 @@ object KeyguardBottomAreaViewBinder {
             .collect { view.alpha = it }
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
     private fun View.animateVisibility(visible: Boolean) {
         animate()
             .withStartAction {
@@ -422,6 +437,8 @@ object KeyguardBottomAreaViewBinder {
             .start()
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
+    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private class OnLongClickListener(
         private val falsingManager: FalsingManager?,
         private val viewModel: KeyguardQuickAffordanceViewModel,
@@ -455,9 +472,10 @@ object KeyguardBottomAreaViewBinder {
         }
 
         override fun onLongClickUseDefaultHapticFeedback(view: View?) = false
-
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
+    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private class OnClickListener(
         private val viewModel: KeyguardQuickAffordanceViewModel,
         private val falsingManager: FalsingManager,
@@ -479,6 +497,7 @@ object KeyguardBottomAreaViewBinder {
         }
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
     private fun loadFromResources(view: View): ConfigurationBasedDimensions {
         return ConfigurationBasedDimensions(
             defaultBurnInPreventionYOffsetPx =
@@ -491,6 +510,7 @@ object KeyguardBottomAreaViewBinder {
         )
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
     /** Opens the wallpaper picker screen after the device is unlocked by the user. */
     private fun navigateToLockScreenSettings(
         activityStarter: ActivityStarter,
@@ -510,6 +530,8 @@ object KeyguardBottomAreaViewBinder {
         )
     }
 
+    @Deprecated("Deprecated as part of b/278057014")
+    //If updated, be sure to update [KeyguardQuickAffordanceViewBinder.kt]
     private data class ConfigurationBasedDimensions(
         val defaultBurnInPreventionYOffsetPx: Int,
         val buttonSizePx: Size,
