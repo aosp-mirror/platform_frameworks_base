@@ -1872,6 +1872,8 @@ struct FabricatedOverlayEntryParameters {
   DataValue data_value;
   std::string data_string_value;
   std::optional<android::base::borrowed_fd> data_binary_value;
+  off64_t binary_data_offset;
+  size_t binary_data_size;
   std::string configuration;
 };
 
