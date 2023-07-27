@@ -150,6 +150,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Tvár bola rozpoznaná. Pokračujte stlačením."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Tvár bola rozpoznaná. Pokračujte stlačením ikony odomknutia"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Overené"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Použiť PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Použiť vzor"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Použiť heslo"</string>
@@ -362,6 +364,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Odomknuté tvárou"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Tvár bola rozpoznaná"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Potiahnutím nahor to skúste znova"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ak chcete použiť NFC, odomknite"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zariadenie patrí vašej organizácii"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Toto zariadení patrí organizácii <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -415,14 +419,10 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Počas zdieľania, nahrávania alebo prenosu bude mať Android prístup k všetkému, čo sa zobrazuje na obrazovke alebo prehráva v zariadení. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Počas zdieľania, nahrávania alebo prenosu v aplikácii bude mať Android prístup k všetkému zobrazovanému alebo prehrávaného obsahu v danej aplikácii. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Začať"</string>
-    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
-    <skip />
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"Zdieľanie sa pozastaví, keď prepnete aplikácie"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"Zdieľať radšej túto aplikáciu"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"Prepnúť späť"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"Prepnutie aplikácie"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokované vaším správcom IT"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Snímanie obrazovky je zakázané pravidlami pre zariadenie"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Vymazať všetko"</string>
@@ -940,6 +940,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Skúste iný PIN"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Potvrdenie zmeny zariadenia <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Potiahnutím zobrazíte ďalšie položky"</string>
+    <string name="retry_face" msgid="416380073082560186">"Znova skúsiť overenie tvárou"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Načítavajú sa odporúčania"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Médiá"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Chcete tento ovládač médií pre <xliff:g id="APP_NAME">%1$s</xliff:g> skryť?"</string>
@@ -1166,4 +1167,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Pozornosť Asistenta je zapnutá"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Nastavte predvolenú aplikáciu na poznámky v Nastaveniach"</string>
     <string name="install_app" msgid="5066668100199613936">"Inštalovať aplikáciu"</string>
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"Mikrofón a kamera"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"Nedávne využitie aplikácie"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Zobraziť nedávny prístup"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Hotovo"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Rozbaliť a zobraziť možnosti"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Zbaliť"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"Zavrieť túto aplikáciu"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> je zatvorená"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"Spravovať službu"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"Spravovať prístup"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"Využíva telefonický hovor"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"Nedávno využil telefonický hovor"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"Využíva <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"Nedávno využila aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"Využíva <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Nedávno využila aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Využíva <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Nedávno využila aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>

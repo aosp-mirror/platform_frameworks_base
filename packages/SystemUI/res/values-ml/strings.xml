@@ -150,6 +150,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"മുഖം തിരിച്ചറിഞ്ഞു. തുടരാൻ അമർത്തുക."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"മുഖം തിരിച്ചറിഞ്ഞു. തുടരാൻ അൺലോക്ക് ഐക്കൺ അമർത്തുക."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"പരിശോധിച്ചുറപ്പിച്ചു"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"പിൻ ഉപയോഗിക്കുക"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"പാറ്റേൺ ഉപയോഗിക്കുക"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"പാസ്‌വേഡ് ഉപയോഗിക്കുക"</string>
@@ -362,6 +364,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"മുഖം ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്‌തു"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"മുഖം തിരിച്ചറിഞ്ഞു"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"വീണ്ടും ശ്രമിക്കാൻ മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ഉപയോഗിക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ഈ ഉപകരണം നിങ്ങളുടെ സ്ഥാപനത്തിന്റേതാണ്"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ഈ ഉപകരണം <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> എന്ന സ്ഥാപനത്തിന്റേതാണ്"</string>
@@ -415,14 +419,10 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"പങ്കിടുമ്പോൾ, റെക്കോർഡ് ചെയ്യുമ്പോൾ അല്ലെങ്കിൽ കാസ്റ്റ് ചെയ്യുമ്പോൾ, Android-ന് നിങ്ങളുടെ സ്ക്രീനിൽ ദൃശ്യമാകുന്നതോ ഉപകരണത്തിൽ പ്ലേ ചെയ്യുന്നതോ ആയ ഏത് കാര്യത്തിലേക്കും ആക്സസ് ഉണ്ട്. അതിനാൽ പാസ്‍വേഡുകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, ഓഡിയോ, വീഡിയോ എന്നിവ പോലുള്ള കാര്യങ്ങൾ നൽകുമ്പോൾ സൂക്ഷിക്കുക."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"ഒരു ആപ്പ് പങ്കിടുമ്പോൾ, റെക്കോർഡ് ചെയ്യുമ്പോൾ അല്ലെങ്കിൽ കാസ്റ്റ് ചെയ്യുമ്പോൾ, Android-ന് ആ ആപ്പിൽ കാണിക്കുന്ന അല്ലെങ്കിൽ പ്ലേ ചെയ്യുന്ന എല്ലാത്തിലേക്കും ആക്സസ് ഉണ്ട്. അതിനാൽ പാസ്‍വേഡുകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, ഓഡിയോ, വീഡിയോ എന്നിവ പോലുള്ള കാര്യങ്ങൾ നൽകുമ്പോൾ സൂക്ഷിക്കുക."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ആരംഭിക്കുക"</string>
-    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
-    <skip />
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"നിങ്ങൾ ആപ്പുകൾ മാറുമ്പോൾ പങ്കിടൽ താൽക്കാലികമായി നിർത്തും"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"പകരം ഈ ആപ്പ് പങ്കിടുക"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"മടങ്ങുക"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"ആപ്പ് മാറുക"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"നിങ്ങളുടെ ഐടി അഡ്‌മിൻ ബ്ലോക്ക് ചെയ്‌തു"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ഉപകരണ നയം, സ്ക്രീൻ ക്യാപ്‌ചർ ചെയ്യൽ പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"എല്ലാം മായ്‌ക്കുക"</string>
@@ -940,6 +940,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"മറ്റൊരു പിൻ പരീക്ഷിക്കുക"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> എന്നതിനുള്ള മാറ്റം സ്ഥിരീകരിക്കുക"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"കൂടുതൽ കാണാൻ സ്വൈപ്പ് ചെയ്യുക"</string>
+    <string name="retry_face" msgid="416380073082560186">"മുഖം പരിശോധിച്ചുറപ്പിക്കാൻ വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"നിർദ്ദേശങ്ങൾ ലോഡ് ചെയ്യുന്നു"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"മീഡിയ"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> ആപ്പിനുള്ള ഈ മീഡിയാ കൺട്രോൾ മറയ്ക്കണോ?"</string>
@@ -1166,4 +1167,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant സജീവമാണ്"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ക്രമീകരണത്തിൽ കുറിപ്പുകൾക്കുള്ള ഡിഫോൾട്ട് ആപ്പ് സജ്ജീകരിക്കുക"</string>
     <string name="install_app" msgid="5066668100199613936">"ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യൂ"</string>
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"മൈക്രോഫോണും ക്യാമറയും"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"അടുത്തിടെയുള്ള ആപ്പ് ഉപയോഗം"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"അടുത്തിടെയുള്ള ആക്‌സസ് കാണുക"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"പൂർത്തിയായി"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"വികസിപ്പിച്ച് ഓപ്ഷനുകൾ കാണിക്കുക"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"ചുരുക്കുക"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"ഈ ആപ്പ് അടയ്ക്കുക"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"<xliff:g id="APP_NAME">%1$s</xliff:g> അടച്ചു"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"സേവനം മാനേജ് ചെയ്യുക"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"ആക്‌സസ് മാനേജ് ചെയ്യുക"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"ഫോൺ കോളിൽ ഉപയോഗിക്കുന്നു"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"ഫോൺ കോളിൽ അടുത്തിടെ ഉപയോഗിച്ചു"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"<xliff:g id="APP_NAME">%1$s</xliff:g> ഉപയോഗിക്കുന്നു"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"<xliff:g id="APP_NAME">%1$s</xliff:g> അടുത്തിടെ ഉപയോഗിച്ചു"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) ഉപയോഗിക്കുന്നു"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) അടുത്തിടെ ഉപയോഗിച്ചു"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ഉപയോഗിക്കുന്നു"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) അടുത്തിടെ ഉപയോഗിച്ചു"</string>
 </resources>

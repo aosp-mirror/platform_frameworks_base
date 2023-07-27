@@ -150,6 +150,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດເພື່ອສືບຕໍ່."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດໄອຄອນປົດລັອກເພື່ອສືບຕໍ່."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ຮັບຮອງຄວາມຖືກຕ້ອງແລ້ວ"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ໃຊ້ PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ໃຊ້ຮູບແບບ"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"ໃຊ້ລະຫັດຜ່ານ"</string>
@@ -362,6 +364,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ປົດລັອກດ້ວຍໃບໜ້າແລ້ວ"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ຈຳແນກໜ້າໄດ້ແລ້ວ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ປັດຂຶ້ນເພື່ອລອງໃໝ່"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ປົດລັອກເພື່ອໃຊ້ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ອຸປະກອນນີ້ເປັນຂອງອົງການທ່ານ"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ອຸ​ປະ​ກອນ​ນີ້​ເປັນ​ຂອງ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -415,14 +419,10 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານແອັບ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ແອັບດັ່ງກ່າວ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ເລີ່ມ"</string>
-    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
-    <skip />
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"ການແບ່ງປັນຈະຢຸດຊົ່ວຄາວເມື່ອທ່ານປ່ຽນແອັບ"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"ແບ່ງປັນແອັບນີ້ແທນ"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"ປ່ຽນກັບຄືນ"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"ປ່ຽນແອັບ"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"ຖືກບລັອກໄວ້ໂດຍຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານ"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ການຖ່າຍຮູບໜ້າຈໍຖືກປິດການນຳໃຊ້ໄວ້ໂດຍນະໂຍບາຍອຸປະກອນ"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ລຶບລ້າງທັງໝົດ"</string>
@@ -940,6 +940,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"ລອງໃຊ້ PIN ອື່ນ"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"ຢືນຢັນການປ່ຽນແປງສຳລັບ <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ປັດເພື່ອເບິ່ງເພີ່ມເຕີມ"</string>
+    <string name="retry_face" msgid="416380073082560186">"ລອງການພິສູດຢືນຢັນດ້ວຍໃບໜ້າຄືນໃໝ່"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ກຳລັງໂຫຼດຄຳແນະນຳ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"ມີເດຍ"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"ເຊື່ອງຕົວຄວບຄຸມມີເດຍນີ້ສຳລັບ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
@@ -1166,4 +1167,22 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"ການເອີ້ນໃຊ້ຜູ້ຊ່ວຍເປີດຢູ່"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ຕັ້ງຄ່າແອັບຈົດບັນທຶກເລີ່ມຕົ້ນໃນການຕັ້ງຄ່າ"</string>
     <string name="install_app" msgid="5066668100199613936">"ຕິດຕັ້ງແອັບ"</string>
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"ໄມໂຄຣໂຟນ ແລະ ກ້ອງຖ່າຍຮູບ"</string>
+    <string name="privacy_dialog_summary" msgid="2458769652125995409">"ການໃຊ້ແອັບຫຼ້າສຸດ"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"ເບິ່ງສິດເຂົ້າເຖິງຫຼ້າສຸດ"</string>
+    <string name="privacy_dialog_done_button" msgid="4504330708531434263">"ແລ້ວໆ"</string>
+    <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"ຂະຫຍາຍ ແລະ ສະແດງຕົວເລືອກ"</string>
+    <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"ຫຍໍ້ລົງ"</string>
+    <string name="privacy_dialog_close_app_button" msgid="8006250171305878606">"ປິດແອັບນີ້"</string>
+    <string name="privacy_dialog_close_app_message" msgid="1316408652526310985">"ປິດ <xliff:g id="APP_NAME">%1$s</xliff:g> ແລ້ວ"</string>
+    <string name="privacy_dialog_manage_service" msgid="8320590856621823604">"ຈັດການບໍລິການ"</string>
+    <string name="privacy_dialog_manage_permissions" msgid="2543451567190470413">"ຈັດການສິດເຂົ້າເຖິງ"</string>
+    <string name="privacy_dialog_active_call_usage" msgid="7858746847946397562">"ໃຊ້ຢູ່ໂດຍການໂທ"</string>
+    <string name="privacy_dialog_recent_call_usage" msgid="1214810644978167344">"ໃຊ້ຫຼ້າສຸດໃນການໂທ"</string>
+    <string name="privacy_dialog_active_app_usage" msgid="631997836335929880">"ໃຊ້ຢູ່ໂດຍ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_recent_app_usage" msgid="4883417856848222450">"ໃຊ້ຫຼ້າສຸດໂດຍ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="privacy_dialog_active_app_usage_1" msgid="9047570143069220911">"ໃຊ້ຢູ່ໂດຍ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"ໃຊ້ຫຼ້າສຸດໂດຍ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
+    <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"ໃຊ້ຢູ່ໂດຍ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ໃຊ້ຫຼ້າສຸດໂດຍ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
 </resources>
