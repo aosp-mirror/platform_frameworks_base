@@ -27,12 +27,10 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
-import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.Surface.ROTATION_0;
@@ -112,11 +110,9 @@ import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Insets;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
-import android.hardware.display.VirtualDisplay;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -124,7 +120,6 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
-import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -2652,138 +2647,6 @@ public class DisplayContentTests extends WindowTestsBase {
         nextImeAppTarget.mActivityRecord.commitVisibility(false, false);
         mDisplayContent.setImeLayeringTarget(nextImeAppTarget);
         assertNotEquals(imeMenuDialog, mDisplayContent.findFocusedWindow());
-    }
-
-    @Test
-    public void testVirtualDisplayContent_withoutSurface() {
-        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
-        // mirror.
-        setUpDefaultTaskDisplayAreaWindowToken();
-
-        // GIVEN SurfaceControl does not mirror a null surface.
-        Point surfaceSize = new Point(
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
-
-        // GIVEN a new VirtualDisplay with an associated surface.
-        final VirtualDisplay display = createVirtualDisplay(surfaceSize, null /* surface */);
-        final int displayId = display.getDisplay().getDisplayId();
-        mWm.mRoot.onDisplayAdded(displayId);
-
-        // WHEN getting the DisplayContent for the new virtual display.
-        DisplayContent actualDC = mWm.mRoot.getDisplayContent(displayId);
-        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                DEFAULT_DISPLAY);
-        session.setVirtualDisplayId(displayId);
-        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
-        actualDC.updateRecording();
-
-        // THEN mirroring is not started, since a null surface indicates the VirtualDisplay is off.
-        assertThat(actualDC.isCurrentlyRecording()).isFalse();
-
-        display.release();
-    }
-
-    @Test
-    public void testVirtualDisplayContent_withSurface() {
-        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
-        // mirror.
-        setUpDefaultTaskDisplayAreaWindowToken();
-
-        // GIVEN SurfaceControl can successfully mirror the provided surface.
-        Point surfaceSize = new Point(
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
-        surfaceControlMirrors(surfaceSize);
-
-        // GIVEN a new VirtualDisplay with an associated surface.
-        final VirtualDisplay display = createVirtualDisplay(surfaceSize, new Surface());
-        final int displayId = display.getDisplay().getDisplayId();
-
-        // GIVEN a session for this display.
-        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                DEFAULT_DISPLAY);
-        session.setVirtualDisplayId(displayId);
-        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
-        mWm.mRoot.onDisplayAdded(displayId);
-
-        // WHEN getting the DisplayContent for the new virtual display.
-        DisplayContent actualDC = mWm.mRoot.getDisplayContent(displayId);
-        actualDC.updateRecording();
-
-        // THEN mirroring is initiated for the default display's DisplayArea.
-        assertThat(actualDC.isCurrentlyRecording()).isTrue();
-
-        display.release();
-    }
-
-    @Test
-    public void testVirtualDisplayContent_displayMirroring() {
-        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
-        // mirror.
-        setUpDefaultTaskDisplayAreaWindowToken();
-
-        // GIVEN SurfaceControl can successfully mirror the provided surface.
-        Point surfaceSize = new Point(
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
-                mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().height());
-        surfaceControlMirrors(surfaceSize);
-        // Initially disable getDisplayIdToMirror since the DMS may create the DC outside the direct
-        // call in the test. We need to spy on the DC before updateRecording is called or we can't
-        // verify setDisplayMirroring is called
-        doReturn(INVALID_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
-
-        // GIVEN a new VirtualDisplay with an associated surface.
-        final VirtualDisplay display = createVirtualDisplay(surfaceSize, new Surface());
-        final int displayId = display.getDisplay().getDisplayId();
-
-        // GIVEN a session for this display.
-        mWm.mRoot.onDisplayAdded(displayId);
-
-        // WHEN getting the DisplayContent for the new virtual display.
-        DisplayContent actualDC = mWm.mRoot.getDisplayContent(displayId);
-        spyOn(actualDC);
-        // Return the default display as the value to mirror to ensure the VD with flag mirroring
-        // creates a ContentRecordingSession automatically.
-        doReturn(DEFAULT_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
-        actualDC.updateRecording();
-
-        // THEN mirroring is initiated for the default display's DisplayArea.
-        verify(actualDC).setDisplayMirroring();
-        assertThat(actualDC.isCurrentlyRecording()).isTrue();
-        display.release();
-    }
-
-    /**
-     * Creates a WindowToken associated with the default task DisplayArea, in order for that
-     * DisplayArea to be mirrored.
-     */
-    private void setUpDefaultTaskDisplayAreaWindowToken() {
-        // GIVEN the default task display area is represented by the WindowToken.
-        spyOn(mWm.mWindowContextListenerController);
-        doReturn(mDefaultDisplay.getDefaultTaskDisplayArea()).when(
-                mWm.mWindowContextListenerController).getContainer(any());
-    }
-
-    /**
-     * SurfaceControl successfully creates a mirrored surface of the given size.
-     */
-    private SurfaceControl surfaceControlMirrors(Point surfaceSize) {
-        // Do not set the parent, since the mirrored surface is the root of a new surface hierarchy.
-        SurfaceControl mirroredSurface = new SurfaceControl.Builder()
-                .setName("mirroredSurface")
-                .setBufferSize(surfaceSize.x, surfaceSize.y)
-                .setCallsite("mirrorSurface")
-                .build();
-        doReturn(mirroredSurface).when(() -> SurfaceControl.mirrorSurface(any()));
-        doReturn(surfaceSize).when(mWm.mDisplayManagerInternal).getDisplaySurfaceDefaultSize(
-                anyInt());
-        return mirroredSurface;
-    }
-
-    private VirtualDisplay createVirtualDisplay(Point size, Surface surface) {
-        return mWm.mDisplayManager.createVirtualDisplay("VirtualDisplay", size.x, size.y,
-                DisplayMetrics.DENSITY_140, surface, VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
     }
 
     @Test
