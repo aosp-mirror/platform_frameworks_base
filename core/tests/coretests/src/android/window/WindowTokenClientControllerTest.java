@@ -76,7 +76,7 @@ public class WindowTokenClientControllerTest {
         mOriginalWindowManagerService = WindowManagerGlobal.getWindowManagerService();
         WindowManagerGlobal.overrideWindowManagerServiceForTesting(mWindowManagerService);
         doReturn(mClientToken).when(mWindowTokenClient).asBinder();
-        mController = spy(WindowTokenClientController.getInstance());
+        mController = spy(WindowTokenClientController.createInstanceForTesting());
     }
 
     @After
