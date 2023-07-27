@@ -105,5 +105,6 @@ public class GlobalSettings {
         Settings.Global.HDR_FORCE_CONVERSION_TYPE,
         Settings.Global.Wearable.RTL_SWIPE_TO_DISMISS_ENABLED_DEV,
         Settings.Global.Wearable.REDUCE_MOTION,
+        Settings.Global.Wearable.WEAR_LAUNCHER_UI_MODE,
     };
 }

@@ -19147,6 +19147,12 @@ public final class Settings {
              * @hide
              */
             public static final String WEAR_MEDIA_SESSIONS_PACKAGE = "wear_media_sessions_package";
+
+            /*
+             * Controls the launcher ui mode on wearable devices.
+             * @hide
+             */
+            public static final String WEAR_LAUNCHER_UI_MODE = "wear_launcher_ui_mode";
         }
     }
 
