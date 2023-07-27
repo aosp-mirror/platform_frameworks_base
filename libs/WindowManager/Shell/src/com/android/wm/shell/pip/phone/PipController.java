@@ -352,6 +352,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                             mMainExecutor.executeDelayed(
                                     mMovePipInResponseToKeepClearAreasChangeCallback,
                                     PIP_KEEP_CLEAR_AREAS_DELAY);
+
+                            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                                    "onKeepClearAreasChanged: restricted=%s, unrestricted=%s",
+                                    restricted, unrestricted);
                         }
                     }
                 }
@@ -950,6 +954,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     private void setLauncherKeepClearAreaHeight(boolean visible, int height) {
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "setLauncherKeepClearAreaHeight: visible=%b, height=%d", visible, height);
         if (visible) {
             Rect rect = new Rect(
                     0, mPipBoundsState.getDisplayBounds().bottom - height,
@@ -1007,9 +1013,10 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             int launcherRotation, Rect hotseatKeepClearArea) {
 
         if (mEnablePipKeepClearAlgorithm) {
-            // pre-emptively add the keep clear area for Hotseat, so that it is taken into account
+            // preemptively add the keep clear area for Hotseat, so that it is taken into account
             // when calculating the entry destination bounds of PiP window
-            mPipBoundsState.getRestrictedKeepClearAreas().add(hotseatKeepClearArea);
+            mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG,
+                    hotseatKeepClearArea);
         } else {
             int shelfHeight = hotseatKeepClearArea.height();
             setShelfHeightLocked(shelfHeight > 0 /* visible */, shelfHeight);
