@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.shared.model
 
+import android.hardware.fingerprint.FingerprintManager
 import android.os.SystemClock.elapsedRealtime
 
 /**
@@ -49,4 +50,9 @@ data class ErrorFingerprintAuthenticationStatus(
     val msg: String? = null,
     // present to break equality check if the same error occurs repeatedly.
     val createdAt: Long = elapsedRealtime(),
-) : FingerprintAuthenticationStatus()
+) : FingerprintAuthenticationStatus() {
+    fun isLockoutMessage(): Boolean {
+        return msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT ||
+            msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT
+    }
+}
