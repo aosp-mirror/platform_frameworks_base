@@ -38,6 +38,8 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
     private val expansionListeners = CopyOnWriteArrayList<ShadeExpansionListener>()
     private val fullExpansionListeners = CopyOnWriteArrayList<ShadeFullExpansionListener>()
     private val qsExpansionListeners = CopyOnWriteArrayList<ShadeQsExpansionListener>()
+    private val qsExpansionFractionListeners =
+        CopyOnWriteArrayList<ShadeQsExpansionFractionListener>()
     private val stateListeners = CopyOnWriteArrayList<ShadeStateListener>()
     private val shadeStateEventsListeners = CopyOnWriteArrayList<ShadeStateEventsListener>()
 
@@ -45,6 +47,7 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
     @FloatRange(from = 0.0, to = 1.0) private var fraction: Float = 0f
     private var expanded: Boolean = false
     private var qsExpanded: Boolean = false
+    private var qsExpansionFraction = 0f
     private var tracking: Boolean = false
     private var dragDownPxAmount: Float = 0f
 
@@ -80,6 +83,15 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
 
     fun removeQsExpansionListener(listener: ShadeQsExpansionListener) {
         qsExpansionListeners.remove(listener)
+    }
+
+    fun addQsExpansionFractionListener(listener: ShadeQsExpansionFractionListener) {
+        qsExpansionFractionListeners.add(listener)
+        listener.onQsExpansionFractionChanged(qsExpansionFraction)
+    }
+
+    fun removeQsExpansionFractionListener(listener: ShadeQsExpansionFractionListener) {
+        qsExpansionFractionListeners.remove(listener)
     }
 
     /** Adds a listener that will be notified when the panel state has changed. */
@@ -173,6 +185,15 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
 
         debugLog("qsExpanded=$qsExpanded")
         qsExpansionListeners.forEach { it.onQsExpansionChanged(qsExpanded) }
+    }
+
+    fun onQsExpansionFractionChanged(qsExpansionFraction: Float) {
+        this.qsExpansionFraction = qsExpansionFraction
+
+        debugLog("qsExpansionFraction=$qsExpansionFraction")
+        qsExpansionFractionListeners.forEach {
+            it.onQsExpansionFractionChanged(qsExpansionFraction)
+        }
     }
 
     fun onShadeExpansionFullyChanged(isExpanded: Boolean) {
