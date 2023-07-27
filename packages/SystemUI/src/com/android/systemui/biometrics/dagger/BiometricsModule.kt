@@ -17,6 +17,8 @@
 package com.android.systemui.biometrics.dagger
 
 import com.android.settingslib.udfps.UdfpsUtils
+import com.android.systemui.biometrics.data.repository.FacePropertyRepository
+import com.android.systemui.biometrics.data.repository.FacePropertyRepositoryImpl
 import com.android.systemui.biometrics.data.repository.FaceSettingsRepository
 import com.android.systemui.biometrics.data.repository.FaceSettingsRepositoryImpl
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
@@ -50,6 +52,10 @@ interface BiometricsModule {
     @Binds
     @SysUISingleton
     fun faceSettings(impl: FaceSettingsRepositoryImpl): FaceSettingsRepository
+
+    @Binds
+    @SysUISingleton
+    fun faceSensors(impl: FacePropertyRepositoryImpl): FacePropertyRepository
 
     @Binds
     @SysUISingleton

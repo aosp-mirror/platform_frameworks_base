@@ -17,7 +17,7 @@
 package com.android.wm.shell.flicker.pip
 
 import android.graphics.Rect
-import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
@@ -80,7 +80,7 @@ class PipDragThenSnapTest(flicker: LegacyFlickerTest) : PipTransition(flicker) {
     /**
      * Checks that the visible region area of [pipApp] moves to closest edge during the animation.
      */
-    @Postsubmit
+    @Presubmit
     @Test
     fun pipLayerMovesToClosestEdge() {
         flicker.assertLayers {

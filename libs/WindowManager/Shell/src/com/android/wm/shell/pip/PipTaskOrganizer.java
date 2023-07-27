@@ -364,13 +364,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mMainExecutor = mainExecutor;
 
         // TODO: Can be removed once wm components are created on the shell-main thread
-        mMainExecutor.execute(() -> {
-            mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_PIP);
-        });
-        mTaskOrganizer.addFocusListener(this);
-        mPipTransitionController.setPipOrganizer(this);
-        displayController.addDisplayWindowListener(this);
-        pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
+        if (!PipUtils.isPip2ExperimentEnabled()) {
+            mMainExecutor.execute(() -> {
+                mTaskOrganizer.addListenerForType(this, TASK_LISTENER_TYPE_PIP);
+            });
+            mTaskOrganizer.addFocusListener(this);
+            mPipTransitionController.setPipOrganizer(this);
+            displayController.addDisplayWindowListener(this);
+            pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
+        }
     }
 
     public PipTransitionController getTransitionController() {

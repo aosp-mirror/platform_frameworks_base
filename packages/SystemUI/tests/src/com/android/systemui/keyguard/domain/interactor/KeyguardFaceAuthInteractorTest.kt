@@ -342,12 +342,13 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun faceUnlockIsDisabledWhenFpIsLockedOut() = testScope.runTest {
-        underTest.start()
+    fun faceUnlockIsDisabledWhenFpIsLockedOut() =
+        testScope.runTest {
+            underTest.start()
 
-        fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
-        runCurrent()
+            fakeDeviceEntryFingerprintAuthRepository.setLockedOut(true)
+            runCurrent()
 
-        assertThat(faceAuthRepository.wasDisabled).isTrue()
-    }
+            assertThat(faceAuthRepository.wasDisabled).isTrue()
+        }
 }

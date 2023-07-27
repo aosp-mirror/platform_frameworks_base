@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.shared.model
+package com.android.wm.shell.dagger.pip;
 
-import android.hardware.biometrics.SensorProperties
+import android.annotation.Nullable;
 
-/** Sensor security strength. Represents [SensorProperties.Strength]. */
-enum class SensorStrength {
-    CONVENIENCE,
-    WEAK,
-    STRONG,
-}
+import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.pip2.PipTransition;
 
-/** Convert [this] to corresponding [SensorStrength] */
-fun Int.toSensorStrength(): SensorStrength =
-    when (this) {
-        0 -> SensorStrength.CONVENIENCE
-        1 -> SensorStrength.WEAK
-        2 -> SensorStrength.STRONG
-        else -> throw IllegalArgumentException("Invalid SensorStrength value: $this")
+import dagger.Module;
+import dagger.Provides;
+
+/**
+ * Provides dependencies from {@link com.android.wm.shell.pip2}, this implementation is meant to be
+ * the successor of its sibling {@link Pip1SharedModule}.
+ */
+@Module
+public abstract class Pip2Module {
+    @WMSingleton
+    @Provides
+    @Nullable
+    static PipTransition providePipTransition() {
+        return null;
     }
+}

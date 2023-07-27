@@ -142,8 +142,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipAnimationController = pipAnimationController;
         mTransitions = transitions;
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            shellInit.addInitCallback(this::onInit, this);
+        if (!PipUtils.isPip2ExperimentEnabled()) {
+            if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+                shellInit.addInitCallback(this::onInit, this);
+            }
         }
     }
 

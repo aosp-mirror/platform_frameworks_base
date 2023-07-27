@@ -36,6 +36,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
@@ -776,6 +777,34 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         assertEquals(mController.overrideOrientationIfNeeded(
                 /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    @Test
+    public void testOverrideOrientationIfNeeded_userFullscreenOverride_returnsUser() {
+        spyOn(mController);
+        doReturn(true).when(mController).shouldApplyUserFullscreenOverride();
+
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_UNSPECIFIED), SCREEN_ORIENTATION_USER);
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT, OVERRIDE_ANY_ORIENTATION})
+    public void testOverrideOrientationIfNeeded_userFullScreenOverrideOverSystem_returnsUser() {
+        spyOn(mController);
+        doReturn(true).when(mController).shouldApplyUserFullscreenOverride();
+
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_USER);
+    }
+
+    @Test
+    public void testOverrideOrientationIfNeeded_userFullScreenOverrideDisabled_returnsUnchanged() {
+        spyOn(mController);
+        doReturn(false).when(mController).shouldApplyUserFullscreenOverride();
+
+        assertEquals(mController.overrideOrientationIfNeeded(
+                /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_PORTRAIT);
     }
 
     // shouldUseDisplayLandscapeNaturalOrientation

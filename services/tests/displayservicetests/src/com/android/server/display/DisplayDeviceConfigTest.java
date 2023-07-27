@@ -17,6 +17,9 @@
 package com.android.server.display;
 
 
+import static com.android.server.display.utils.DeviceConfigParsingUtils.ambientBrightnessThresholdsIntToFloat;
+import static com.android.server.display.utils.DeviceConfigParsingUtils.displayBrightnessThresholdsIntToFloat;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -31,6 +34,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Temperature;
 import android.util.SparseArray;
+import android.util.Spline;
 import android.view.SurfaceControl;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -63,10 +67,15 @@ public final class DisplayDeviceConfigTest {
     private static final int DEFAULT_LOW_BLOCKING_ZONE_REFRESH_RATE = 95;
     private static final int DEFAULT_REFRESH_RATE_IN_HBM_HDR = 90;
     private static final int DEFAULT_REFRESH_RATE_IN_HBM_SUNLIGHT = 100;
-    private static final int[] LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{10, 30};
-    private static final int[] LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{1, 21};
-    private static final int[] HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{160};
-    private static final int[] HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{30000};
+    private static final int[] LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE =
+            new int[]{10, 30, -1};
+    private static final int[] LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{-1, 1, 21};
+    private static final int[] HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{160, -1};
+    private static final int[] HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{-1, 30000};
+    private static final float[] NITS = {2, 500, 800};
+    private static final float[] BRIGHTNESS = {0, 0.62f, 1};
+    private static final Spline NITS_TO_BRIGHTNESS_SPLINE =
+            Spline.createSpline(NITS, BRIGHTNESS);
 
     private DisplayDeviceConfig mDisplayDeviceConfig;
     private static final float ZERO_DELTA = 0.0f;
@@ -98,12 +107,9 @@ public final class DisplayDeviceConfigTest {
         assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowIncrease(), 0.04f, ZERO_DELTA);
         assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowDecrease(), 0.03f, ZERO_DELTA);
         assertEquals(mDisplayDeviceConfig.getBrightnessDefault(), 0.5f, ZERO_DELTA);
-        assertArrayEquals(mDisplayDeviceConfig.getBrightness(), new float[]{0.0f, 0.62f, 1.0f},
-                ZERO_DELTA);
-        assertArrayEquals(mDisplayDeviceConfig.getNits(), new float[]{2.0f, 500.0f, 800.0f},
-                ZERO_DELTA);
-        assertArrayEquals(mDisplayDeviceConfig.getBacklight(), new float[]{0.0f, 0.62f, 1.0f},
-                ZERO_DELTA);
+        assertArrayEquals(mDisplayDeviceConfig.getBrightness(), BRIGHTNESS, ZERO_DELTA);
+        assertArrayEquals(mDisplayDeviceConfig.getNits(), NITS, ZERO_DELTA);
+        assertArrayEquals(mDisplayDeviceConfig.getBacklight(), BRIGHTNESS, ZERO_DELTA);
         assertEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLightDebounce(), 2000);
         assertEquals(mDisplayDeviceConfig.getAutoBrightnessDarkeningLightDebounce(), 1000);
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(), new
@@ -171,14 +177,6 @@ public final class DisplayDeviceConfigTest {
         assertEquals(90, mDisplayDeviceConfig.getRefreshRange("test2").max, SMALL_DELTA);
         assertEquals(82, mDisplayDeviceConfig.getDefaultRefreshRateInHbmHdr());
         assertEquals(83, mDisplayDeviceConfig.getDefaultRefreshRateInHbmSunlight());
-        assertArrayEquals(new int[]{45, 55},
-                mDisplayDeviceConfig.getLowDisplayBrightnessThresholds());
-        assertArrayEquals(new int[]{50, 60},
-                mDisplayDeviceConfig.getLowAmbientBrightnessThresholds());
-        assertArrayEquals(new int[]{65, 75},
-                mDisplayDeviceConfig.getHighDisplayBrightnessThresholds());
-        assertArrayEquals(new int[]{70, 80},
-                mDisplayDeviceConfig.getHighAmbientBrightnessThresholds());
 
         assertEquals("sensor_12345",
                 mDisplayDeviceConfig.getScreenOffBrightnessSensor().type);
@@ -343,14 +341,6 @@ public final class DisplayDeviceConfigTest {
                 DEFAULT_REFRESH_RATE_IN_HBM_SUNLIGHT);
         assertEquals(mDisplayDeviceConfig.getDefaultRefreshRateInHbmHdr(),
                 DEFAULT_REFRESH_RATE_IN_HBM_HDR);
-        assertArrayEquals(mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(),
-                LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
-        assertArrayEquals(mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(),
-                LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
-        assertArrayEquals(mDisplayDeviceConfig.getHighDisplayBrightnessThresholds(),
-                HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
-        assertArrayEquals(mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(),
-                HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
 
         // Todo: Add asserts for ThermalBrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
@@ -410,6 +400,42 @@ public final class DisplayDeviceConfigTest {
                 DisplayDeviceConfig.BrightnessLimitMapType.ADAPTIVE);
         assertEquals(1, adaptiveOnBrightnessPoints.size());
         assertEquals(0.3f, adaptiveOnBrightnessPoints.get(1000f), SMALL_DELTA);
+    }
+
+    @Test
+    public void testBlockingZoneThresholdsFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        assertArrayEquals(new float[]{ NITS_TO_BRIGHTNESS_SPLINE.interpolate(50),
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(300),
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(300), -1},
+                mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(), SMALL_DELTA);
+        assertArrayEquals(new float[]{50, 60, -1, 60},
+                mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(), ZERO_DELTA);
+        assertArrayEquals(new float[]{ NITS_TO_BRIGHTNESS_SPLINE.interpolate(80),
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(100),
+                        NITS_TO_BRIGHTNESS_SPLINE.interpolate(100), -1},
+                mDisplayDeviceConfig.getHighDisplayBrightnessThresholds(), SMALL_DELTA);
+        assertArrayEquals(new float[]{70, 80, -1, 80},
+                mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(), ZERO_DELTA);
+    }
+
+    @Test
+    public void testBlockingZoneThresholdsFromConfigResource() {
+        setupDisplayDeviceConfigFromConfigResourceFile();
+
+        assertArrayEquals(displayBrightnessThresholdsIntToFloat(
+                LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE),
+                mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(), SMALL_DELTA);
+        assertArrayEquals(ambientBrightnessThresholdsIntToFloat(
+                LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE),
+                mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(), ZERO_DELTA);
+        assertArrayEquals(displayBrightnessThresholdsIntToFloat(
+                HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE),
+                mDisplayDeviceConfig.getHighDisplayBrightnessThresholds(), SMALL_DELTA);
+        assertArrayEquals(ambientBrightnessThresholdsIntToFloat(
+                HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE),
+                mDisplayDeviceConfig.getHighAmbientBrightnessThresholds(), ZERO_DELTA);
     }
 
     private String getValidLuxThrottling() {
@@ -525,16 +551,16 @@ public final class DisplayDeviceConfigTest {
                 +   "<name>Example Display</name>"
                 +   "<screenBrightnessMap>\n"
                 +       "<point>\n"
-                +           "<value>0.0</value>\n"
-                +           "<nits>2.0</nits>\n"
+                +           "<value>" + BRIGHTNESS[0] + "</value>\n"
+                +           "<nits>" + NITS[0] + "</nits>\n"
                 +       "</point>\n"
                 +       "<point>\n"
-                +           "<value>0.62</value>\n"
-                +           "<nits>500.0</nits>\n"
+                +           "<value>" + BRIGHTNESS[1] + "</value>\n"
+                +           "<nits>" + NITS[1] + "</nits>\n"
                 +       "</point>\n"
                 +       "<point>\n"
-                +           "<value>1.0</value>\n"
-                +           "<nits>800.0</nits>\n"
+                +           "<value>" + BRIGHTNESS[2] + "</value>\n"
+                +           "<nits>" + NITS[2] + "</nits>\n"
                 +       "</point>\n"
                 +   "</screenBrightnessMap>\n"
                 +   "<autoBrightness>\n"
@@ -799,13 +825,19 @@ public final class DisplayDeviceConfigTest {
                 +           "<blockingZoneThreshold>\n"
                 +               "<displayBrightnessPoint>\n"
                 +                   "<lux>50</lux>\n"
-                // This number will be rounded to integer when read by the system
-                +                   "<nits>45.3</nits>\n"
+                +                   "<nits>50</nits>\n"
                 +               "</displayBrightnessPoint>\n"
                 +               "<displayBrightnessPoint>\n"
                 +                   "<lux>60</lux>\n"
-                // This number will be rounded to integer when read by the system
-                +                   "<nits>55.2</nits>\n"
+                +                   "<nits>300</nits>\n"
+                +               "</displayBrightnessPoint>\n"
+                +               "<displayBrightnessPoint>\n"
+                +                   "<lux>-1</lux>\n"
+                +                   "<nits>300</nits>\n"
+                +               "</displayBrightnessPoint>\n"
+                +               "<displayBrightnessPoint>\n"
+                +                   "<lux>60</lux>\n"
+                +                   "<nits>-1</nits>\n"
                 +               "</displayBrightnessPoint>\n"
                 +           "</blockingZoneThreshold>\n"
                 +       "</lowerBlockingZoneConfigs>\n"
@@ -814,13 +846,19 @@ public final class DisplayDeviceConfigTest {
                 +           "<blockingZoneThreshold>\n"
                 +               "<displayBrightnessPoint>\n"
                 +                   "<lux>70</lux>\n"
-                // This number will be rounded to integer when read by the system
-                +                   "<nits>65.6</nits>\n"
+                +                   "<nits>80</nits>\n"
                 +               "</displayBrightnessPoint>\n"
                 +               "<displayBrightnessPoint>\n"
                 +                   "<lux>80</lux>\n"
-                // This number will be rounded to integer when read by the system
-                +                   "<nits>75</nits>\n"
+                +                   "<nits>100</nits>\n"
+                +               "</displayBrightnessPoint>\n"
+                +               "<displayBrightnessPoint>\n"
+                +                   "<lux>-1</lux>\n"
+                +                   "<nits>100</nits>\n"
+                +               "</displayBrightnessPoint>\n"
+                +               "<displayBrightnessPoint>\n"
+                +                   "<lux>80</lux>\n"
+                +                   "<nits>-1</nits>\n"
                 +               "</displayBrightnessPoint>\n"
                 +           "</blockingZoneThreshold>\n"
                 +       "</higherBlockingZoneConfigs>\n"

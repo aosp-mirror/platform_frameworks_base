@@ -2401,6 +2401,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
+    @Override
+    public void requestHideFillUiWhenDestroyed(AutofillId id) {
+        synchronized (mLock) {
+            // NOTE: We allow this call in a destroyed state as the UI is
+            // asked to go away after we get destroyed, so let it do that.
+            try {
+                mClient.requestHideFillUiWhenDestroyed(this.id, id);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error requesting to hide fill UI", e);
+            }
+
+            mInlineSessionController.hideInlineSuggestionsUiLocked(id);
+        }
+    }
+
     // AutoFillUiCallback
     @Override
     public void cancelSession() {

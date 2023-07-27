@@ -57,6 +57,7 @@ import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUiEventLogger;
+import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
 
@@ -228,7 +229,9 @@ public class PipTouchHandler {
         // TODO(b/181599115): This should really be initializes as part of the pip controller, but
         // until all PIP implementations derive from the controller, just initialize the touch handler
         // if it is needed
-        shellInit.addInitCallback(this::onInit, this);
+        if (!PipUtils.isPip2ExperimentEnabled()) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
     }
 
     /**

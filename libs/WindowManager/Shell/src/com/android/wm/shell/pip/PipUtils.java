@@ -27,6 +27,7 @@ import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -45,6 +46,9 @@ public class PipUtils {
 
     // Minimum difference between two floats (e.g. aspect ratios) to consider them not equal.
     private static final double EPSILON = 1e-7;
+
+    private static final String ENABLE_PIP2_IMPLEMENTATION =
+            "persist.wm.debug.enable_pip2_implementation";
 
     /**
      * @return the ComponentName and user id of the top non-SystemUI activity in the pinned stack.
@@ -133,5 +137,9 @@ public class PipUtils {
             Log.e(TAG, "Failed to get task snapshot, taskId=" + taskId, e);
             return null;
         }
+    }
+
+    public static boolean isPip2ExperimentEnabled() {
+        return SystemProperties.getBoolean(ENABLE_PIP2_IMPLEMENTATION, false);
     }
 }
