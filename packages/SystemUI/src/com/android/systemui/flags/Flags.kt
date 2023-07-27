@@ -382,6 +382,9 @@ object Flags {
     // 804 - monochromatic themes
     @JvmField val MONOCHROMATIC_THEME = releasedFlag(804, "monochromatic")
 
+    // TODO(b/293380347): Tracking Bug
+    @JvmField val COLOR_FIDELITY = unreleasedFlag(805, "color_fidelity")
+
     // 900 - media
     // TODO(b/254512697): Tracking Bug
     val MEDIA_TAP_TO_TRANSFER = releasedFlag(900, "media_tap_to_transfer")
