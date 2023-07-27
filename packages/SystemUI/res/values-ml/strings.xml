@@ -147,6 +147,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"മുഖം തിരിച്ചറിഞ്ഞു. തുടരാൻ അമർത്തുക."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"മുഖം തിരിച്ചറിഞ്ഞു. തുടരാൻ അൺലോക്ക് ഐക്കൺ അമർത്തുക."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"പരിശോധിച്ചുറപ്പിച്ചു"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"പിൻ ഉപയോഗിക്കുക"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"പാറ്റേൺ ഉപയോഗിക്കുക"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"പാസ്‌വേഡ് ഉപയോഗിക്കുക"</string>
@@ -359,6 +361,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"മുഖം ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്‌തു"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"മുഖം തിരിച്ചറിഞ്ഞു"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"വീണ്ടും ശ്രമിക്കാൻ മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ഉപയോഗിക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ഈ ഉപകരണം നിങ്ങളുടെ സ്ഥാപനത്തിന്റേതാണ്"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ഈ ഉപകരണം <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> എന്ന സ്ഥാപനത്തിന്റേതാണ്"</string>
@@ -928,6 +932,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"മറ്റൊരു പിൻ പരീക്ഷിക്കുക"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> എന്നതിനുള്ള മാറ്റം സ്ഥിരീകരിക്കുക"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"കൂടുതൽ കാണാൻ സ്വൈപ്പ് ചെയ്യുക"</string>
+    <string name="retry_face" msgid="416380073082560186">"മുഖം പരിശോധിച്ചുറപ്പിക്കാൻ വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"നിർദ്ദേശങ്ങൾ ലോഡ് ചെയ്യുന്നു"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"മീഡിയ"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> ആപ്പിനുള്ള ഈ മീഡിയാ കൺട്രോൾ മറയ്ക്കണോ?"</string>

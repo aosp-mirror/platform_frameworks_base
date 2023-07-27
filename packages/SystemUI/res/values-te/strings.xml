@@ -147,6 +147,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ముఖం గుర్తించబడింది. కొనసాగించడానికి నొక్కండి."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ముఖం గుర్తించబడింది. కొనసాగడానికి అన్‌లాక్ చిహ్నం నొక్కండి."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ప్రామాణీకరించబడింది"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించండి"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ఆకృతిని ఉపయోగించండి"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"పాస్‌వర్డ్‌ను ఉపయోగించండి"</string>
@@ -359,6 +361,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ముఖం గుర్తించబడింది"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"మళ్ళీ ప్రయత్నించడానికి పైకి స్వైప్ చేయండి"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCని ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>కు చెందినది"</string>
@@ -928,6 +932,8 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"మరొక పిన్‌ని ప్రయత్నించండి"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g>కి సంబంధించి మార్పును నిర్ధారించండి"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"మరిన్నింటిని చూడటం కోసం స్వైప్ చేయండి"</string>
+    <!-- no translation found for retry_face (416380073082560186) -->
+    <skip />
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"సిఫార్సులు లోడ్ అవుతున్నాయి"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"మీడియా"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం ఈ మీడియా కంట్రోల్‌ను దాచి ఉంచాలా?"</string>

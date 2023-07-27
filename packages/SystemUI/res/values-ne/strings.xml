@@ -147,6 +147,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"अनुहार पहिचान गरियो। जारी राख्न थिच्नुहोस्।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"अनुहार पहिचान गरियो। जारी राख्न अनलक आइकनमा थिच्नुहोस्।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"प्रमाणीकरण गरियो"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN प्रयोग गर्नुहोस्"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ढाँचा प्रयोग गर्नुहोस्"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"पासवर्ड प्रयोग गर्नुहोस्"</string>
@@ -359,6 +361,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"अनुहार प्रयोग गरी अनलक गरियो"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"अनुहार पहिचान गरियो"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"फेरि प्रयास गर्न माथितिर स्वाइप गर्नुहोस्"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC प्रयोग गर्न स्क्रिन अनलक गर्नुहोस्"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"यो डिभाइस तपाईंको सङ्गठनको स्वामित्वमा छ"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"यो डिभाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> को स्वामित्वमा छ"</string>
@@ -928,6 +932,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"अर्को PIN प्रयोग गरी हेर्नु…"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> का हकमा गरिएको परिवर्तन पुष्टि गर्नुहोस्"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"थप हेर्न स्वाइप गर्नुहोस्"</string>
+    <string name="retry_face" msgid="416380073082560186">"फेरि अनुहारमार्फत प्रमाणीकरण गरी हेर्नुहोस्"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सिफारिसहरू लोड गर्दै"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मिडिया"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> का हकमा यो मिडिया कन्ट्रोल लुकाउने हो?"</string>

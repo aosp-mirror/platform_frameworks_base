@@ -147,6 +147,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Царайг таньсан. Үргэлжлүүлэхийн тулд дарна уу."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Царайг таньсан. Үргэлжлүүлэх бол түгжээг тайлах дүрсийг дар."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Баталгаажуулагдсан"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ПИН ашиглах"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Хээ ашиглах"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Нууц үг ашиглах"</string>
@@ -359,6 +361,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Царайгаар түгжээг тайлсан"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Царайг таньсан"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Дахин оролдохын тулд дээш шударна уу"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC-г ашиглахын тулд түгжээг тайлна уу"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Энэ төхөөрөмж танай байгууллагад харьяалагддаг"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Энэ төхөөрөмж <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>-д харьяалагддаг"</string>
@@ -928,6 +932,8 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Өөр ПИН ашиглах"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g>-н өөрчлөлтийг баталгаажуулна уу"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Илүү ихийг харахын тулд шударна уу"</string>
+    <!-- no translation found for retry_face (416380073082560186) -->
+    <skip />
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Зөвлөмжүүдийг ачаалж байна"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медиа"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Энэ медиа хяналтыг <xliff:g id="APP_NAME">%1$s</xliff:g>-д нуух уу?"</string>
