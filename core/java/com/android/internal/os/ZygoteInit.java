@@ -26,7 +26,6 @@ import android.app.ApplicationLoaders;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.SharedLibraryInfo;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Environment;
 import android.os.IInstalld;
@@ -102,20 +101,9 @@ public class ZygoteInit {
     private static final String SOCKET_NAME_ARG = "--socket-name=";
 
     /**
-     * Used to pre-load resources.
-     */
-    @UnsupportedAppUsage
-    private static Resources mResources;
-
-    /**
      * The path of a file that contains classes to preload.
      */
     private static final String PRELOADED_CLASSES = "/system/etc/preloaded-classes";
-
-    /**
-     * Controls whether we should preload resources during zygote init.
-     */
-    private static final boolean PRELOAD_RESOURCES = true;
 
     private static final int UNPRIVILEGED_UID = 9999;
     private static final int UNPRIVILEGED_GID = 9999;
@@ -143,7 +131,7 @@ public class ZygoteInit {
         cacheNonBootClasspathClassLoaders();
         bootTimingsTraceLog.traceEnd(); // CacheNonBootClasspathClassLoaders
         bootTimingsTraceLog.traceBegin("PreloadResources");
-        preloadResources();
+        Resources.preloadResources();
         bootTimingsTraceLog.traceEnd(); // PreloadResources
         Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadAppProcessHALs");
         nativePreloadAppProcessHALs();
@@ -411,87 +399,6 @@ public class ZygoteInit {
                     hidlManager,
                     androidTestBase,
                 });
-    }
-
-    /**
-     * Load in commonly used resources, so they can be shared across processes.
-     *
-     * These tend to be a few Kbytes, but are frequently in the 20-40K range, and occasionally even
-     * larger.
-     */
-    private static void preloadResources() {
-        try {
-            mResources = Resources.getSystem();
-            mResources.startPreloading();
-            if (PRELOAD_RESOURCES) {
-                Log.i(TAG, "Preloading resources...");
-
-                long startTime = SystemClock.uptimeMillis();
-                TypedArray ar = mResources.obtainTypedArray(
-                        com.android.internal.R.array.preloaded_drawables);
-                int N = preloadDrawables(ar);
-                ar.recycle();
-                Log.i(TAG, "...preloaded " + N + " resources in "
-                        + (SystemClock.uptimeMillis() - startTime) + "ms.");
-
-                startTime = SystemClock.uptimeMillis();
-                ar = mResources.obtainTypedArray(
-                        com.android.internal.R.array.preloaded_color_state_lists);
-                N = preloadColorStateLists(ar);
-                ar.recycle();
-                Log.i(TAG, "...preloaded " + N + " resources in "
-                        + (SystemClock.uptimeMillis() - startTime) + "ms.");
-
-                if (mResources.getBoolean(
-                        com.android.internal.R.bool.config_freeformWindowManagement)) {
-                    startTime = SystemClock.uptimeMillis();
-                    ar = mResources.obtainTypedArray(
-                            com.android.internal.R.array.preloaded_freeform_multi_window_drawables);
-                    N = preloadDrawables(ar);
-                    ar.recycle();
-                    Log.i(TAG, "...preloaded " + N + " resource in "
-                            + (SystemClock.uptimeMillis() - startTime) + "ms.");
-                }
-            }
-            mResources.finishPreloading();
-        } catch (RuntimeException e) {
-            Log.w(TAG, "Failure preloading resources", e);
-        }
-    }
-
-    private static int preloadColorStateLists(TypedArray ar) {
-        int N = ar.length();
-        for (int i = 0; i < N; i++) {
-            int id = ar.getResourceId(i, 0);
-
-            if (id != 0) {
-                if (mResources.getColorStateList(id, null) == null) {
-                    throw new IllegalArgumentException(
-                            "Unable to find preloaded color resource #0x"
-                                    + Integer.toHexString(id)
-                                    + " (" + ar.getString(i) + ")");
-                }
-            }
-        }
-        return N;
-    }
-
-
-    private static int preloadDrawables(TypedArray ar) {
-        int N = ar.length();
-        for (int i = 0; i < N; i++) {
-            int id = ar.getResourceId(i, 0);
-
-            if (id != 0) {
-                if (mResources.getDrawable(id, null) == null) {
-                    throw new IllegalArgumentException(
-                            "Unable to find preloaded drawable resource #0x"
-                                    + Integer.toHexString(id)
-                                    + " (" + ar.getString(i) + ")");
-                }
-            }
-        }
-        return N;
     }
 
     /**
