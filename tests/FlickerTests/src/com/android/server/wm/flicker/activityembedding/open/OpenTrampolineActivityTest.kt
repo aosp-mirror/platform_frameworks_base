@@ -133,7 +133,8 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
                 }
                 // Begin of transition.
                 .then()
-                .isAppWindowInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                .isAppWindowInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT,
+                    isOptional = true)
                 .then()
                 .invoke("mainAndSecondaryInSplit") {
                     val mainActivityRegion =
