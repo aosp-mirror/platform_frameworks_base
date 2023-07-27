@@ -42,18 +42,21 @@ import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
 import java.util.concurrent.atomic.AtomicInteger
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 /** The Dialog that contains a seekbar for changing the font size. */
-class FontScalingDialog(
-    context: Context,
+class FontScalingDialogDelegate @Inject constructor(
+    private val context: Context,
+    private val systemUIDialogFactory: SystemUIDialog.Factory,
+    private val layoutInflater: LayoutInflater,
     private val systemSettings: SystemSettings,
     private val secureSettings: SecureSettings,
     private val systemClock: SystemClock,
     private val userTracker: UserTracker,
     @Main mainHandler: Handler,
-    @Background private val backgroundDelayableExecutor: DelayableExecutor
-) : SystemUIDialog(context) {
+    @Background private val backgroundDelayableExecutor: DelayableExecutor,
+) : SystemUIDialog.Delegate {
     private val MIN_UPDATE_INTERVAL_MS: Long = 800
     private val CHANGE_BY_SEEKBAR_DELAY_MS: Long = 100
     private val CHANGE_BY_BUTTON_DELAY_MS: Long = 300
@@ -75,19 +78,22 @@ class FontScalingDialog(
             }
         }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        setTitle(R.string.font_scaling_dialog_title)
-        setView(LayoutInflater.from(context).inflate(R.layout.font_scaling_dialog, null))
-        setPositiveButton(
-            R.string.quick_settings_done,
-            /* onClick = */ null,
-            /* dismissOnClick = */ true
-        )
-        super.onCreate(savedInstanceState)
+    override fun createDialog(): SystemUIDialog = systemUIDialogFactory.create(this)
 
-        title = requireViewById(com.android.internal.R.id.alertTitle)
-        doneButton = requireViewById(com.android.internal.R.id.button1)
-        seekBarWithIconButtonsView = requireViewById(R.id.font_scaling_slider)
+    override fun beforeCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+        dialog.setTitle(R.string.font_scaling_dialog_title)
+        dialog.setView(layoutInflater.inflate(R.layout.font_scaling_dialog, null))
+        dialog.setPositiveButton(
+                R.string.quick_settings_done,
+                /* onClick = */ null,
+                /* dismissOnClick = */ true
+        )
+    }
+
+    override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+        title = dialog.requireViewById(com.android.internal.R.id.alertTitle)
+        doneButton = dialog.requireViewById(com.android.internal.R.id.button1)
+        seekBarWithIconButtonsView = dialog.requireViewById(R.id.font_scaling_slider)
 
         val labelArray = arrayOfNulls<String>(strEntryValues.size)
         for (i in strEntryValues.indices) {
@@ -135,7 +141,7 @@ class FontScalingDialog(
                 }
             }
         )
-        doneButton.setOnClickListener { dismiss() }
+        doneButton.setOnClickListener { dialog.dismiss() }
         systemSettings.registerContentObserver(Settings.System.FONT_SCALE, fontSizeObserver)
     }
 
@@ -156,7 +162,7 @@ class FontScalingDialog(
             backgroundDelayableExecutor.executeDelayed({ updateFontScale() }, delayMs)
     }
 
-    override fun stop() {
+    override fun onStop(dialog: SystemUIDialog) {
         cancelUpdateFontScaleRunnable?.run()
         cancelUpdateFontScaleRunnable = null
         systemSettings.unregisterContentObserver(fontSizeObserver)
@@ -189,9 +195,7 @@ class FontScalingDialog(
         return strEntryValues.size - 1
     }
 
-    override fun onConfigurationChanged(configuration: Configuration) {
-        super.onConfigurationChanged(configuration)
-
+    override fun onConfigurationChanged(dialog: SystemUIDialog, configuration: Configuration) {
         val configDiff = configuration.diff(this.configuration)
         this.configuration.setTo(configuration)
 
