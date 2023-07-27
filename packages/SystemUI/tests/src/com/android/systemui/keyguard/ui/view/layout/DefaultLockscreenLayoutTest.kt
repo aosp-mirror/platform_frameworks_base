@@ -29,7 +29,7 @@ import com.android.systemui.biometrics.AuthController
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
-import com.android.systemui.monet.utils.ArgbSubject.assertThat
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
