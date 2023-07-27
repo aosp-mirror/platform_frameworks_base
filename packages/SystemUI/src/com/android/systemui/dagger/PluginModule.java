@@ -28,6 +28,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.phone.ActivityStarterImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
+import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 import dagger.Binds;
@@ -48,6 +49,10 @@ public abstract class PluginModule {
     /** */
     @Binds
     abstract DarkIconDispatcher provideDarkIconDispatcher(DarkIconDispatcherImpl controllerImpl);
+
+    @Binds
+    abstract SysuiDarkIconDispatcher provideSysuiDarkIconDispatcher(
+            DarkIconDispatcherImpl controllerImpl);
 
     /** */
     @Binds
