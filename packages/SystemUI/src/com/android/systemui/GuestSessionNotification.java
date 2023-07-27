@@ -64,12 +64,15 @@ public final class GuestSessionNotification {
         }
         String contentText;
         if (userInfo.isEphemeral()) {
-            contentText = mContext.getString(R.string.guest_notification_ephemeral);
+            contentText = mContext.getString(
+                    com.android.settingslib.R.string.guest_notification_ephemeral);
         } else if (isGuestFirstLogin) {
-            contentText = mContext.getString(R.string.guest_notification_non_ephemeral);
+            contentText = mContext.getString(
+                    com.android.settingslib.R.string.guest_notification_non_ephemeral);
         } else {
             contentText = mContext.getString(
-                            R.string.guest_notification_non_ephemeral_non_first_login);
+                    com.android.settingslib.R.string
+                        .guest_notification_non_ephemeral_non_first_login);
         }
 
         final Intent guestExitIntent = new Intent(
@@ -89,7 +92,7 @@ public final class GuestSessionNotification {
 
         Notification.Builder builder = new Notification.Builder(mContext,
                                                                 NotificationChannels.ALERTS)
-                .setSmallIcon(R.drawable.ic_account_circle)
+                .setSmallIcon(com.android.settingslib.R.drawable.ic_account_circle)
                 .setContentTitle(mContext.getString(R.string.guest_notification_session_active))
                 .setContentText(contentText)
                 .setPriority(Notification.PRIORITY_DEFAULT)

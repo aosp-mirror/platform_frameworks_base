@@ -227,8 +227,9 @@ constructor(
 
         val startPadding: Int =
             with(context.resources) {
-                getDimensionPixelSize(R.dimen.clock_padding_start) +
-                    getDimensionPixelSize(R.dimen.below_clock_padding_start)
+                getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.clock_padding_start
+                ) + getDimensionPixelSize(R.dimen.below_clock_padding_start)
             }
 
         val endPadding: Int =
@@ -375,15 +376,21 @@ constructor(
         val layoutParams =
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
-                resources.getDimensionPixelSize(R.dimen.small_clock_height)
+                resources.getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.small_clock_height
+                )
             )
         layoutParams.topMargin =
             KeyguardPreviewSmartspaceViewModel.getStatusBarHeight(resources) +
-                resources.getDimensionPixelSize(R.dimen.small_clock_padding_top)
+                resources.getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.small_clock_padding_top
+                )
         hostView.layoutParams = layoutParams
 
         hostView.setPaddingRelative(
-            resources.getDimensionPixelSize(R.dimen.clock_padding_start),
+            resources.getDimensionPixelSize(
+                com.android.systemui.customization.R.dimen.clock_padding_start
+            ),
             0,
             0,
             0
