@@ -150,6 +150,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ముఖం గుర్తించబడింది. కొనసాగించడానికి నొక్కండి."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ముఖం గుర్తించబడింది. కొనసాగడానికి అన్‌లాక్ చిహ్నం నొక్కండి."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"ప్రామాణీకరించబడింది"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"పిన్‌ను ఉపయోగించండి"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ఆకృతిని ఉపయోగించండి"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"పాస్‌వర్డ్‌ను ఉపయోగించండి"</string>
@@ -362,6 +364,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ముఖం గుర్తించబడింది"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"మళ్ళీ ప్రయత్నించడానికి పైకి స్వైప్ చేయండి"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCని ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>కు చెందినది"</string>
@@ -415,14 +419,10 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"మీరు షేర్ చేస్తున్నప్పుడు, రికార్డ్ చేస్తున్నప్పుడు, లేదా ప్రసారం చేస్తున్నప్పుడు, మీ స్క్రీన్‌పై కనిపించే దేనికైనా లేదా మీ పరికరంలో ప్లే అయిన దేనికైనా Androidకు యాక్సెస్ ఉంటుంది. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, ఇంకా వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"మీరు ఏదైనా యాప్‌ను షేర్ చేస్తున్నప్పుడు, రికార్డ్ చేస్తున్నప్పుడు, లేదా ప్రసారం చేస్తున్నప్పుడు, ఆ యాప్‌లో చూపబడిన దేనికైనా లేదా ప్లే అయిన దేనికైనా Androidకు యాక్సెస్ ఉంటుంది. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, ఇంకా వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ప్రారంభించండి"</string>
-    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
-    <skip />
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"మీరు యాప్‌లను మార్చినప్పుడు షేరింగ్ పాజ్ చేయబడుతుంది"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"బదులుగా ఈ యాప్‌ను షేర్ చేయండి"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"మునుపటి దానికి స్విచ్ అవ్వండి"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"యాప్ స్విచ్"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"మీ IT అడ్మిన్ ద్వారా బ్లాక్ చేయబడింది"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"పరికర పాలసీ ద్వారా స్క్రీన్ క్యాప్చర్ చేయడం డిజేబుల్ చేయబడింది"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"అన్నీ క్లియర్ చేయండి"</string>
@@ -940,6 +940,8 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"మరొక పిన్‌ని ప్రయత్నించండి"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g>కి సంబంధించి మార్పును నిర్ధారించండి"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"మరిన్నింటిని చూడటం కోసం స్వైప్ చేయండి"</string>
+    <!-- no translation found for retry_face (416380073082560186) -->
+    <skip />
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"సిఫార్సులు లోడ్ అవుతున్నాయి"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"మీడియా"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> కోసం ఈ మీడియా కంట్రోల్‌ను దాచి ఉంచాలా?"</string>
@@ -1166,4 +1168,40 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant అటెన్షన్ ఆన్‌లో ఉంది"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"సెట్టింగ్‌లలో ఆటోమేటిక్‌గా ఉండేలా ఒక నోట్స్ యాప్‌ను సెట్ చేసుకోండి"</string>
     <string name="install_app" msgid="5066668100199613936">"యాప్‌ను ఇన్‌స్టాల్ చేయండి"</string>
+    <!-- no translation found for privacy_dialog_title (7839968133469098311) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_summary (2458769652125995409) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_more_button (7610604080293562345) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_done_button (4504330708531434263) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_expand_action (9129262348628331377) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_collapse_action (277419962019466347) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_close_app_button (8006250171305878606) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_close_app_message (1316408652526310985) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_manage_service (8320590856621823604) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_manage_permissions (2543451567190470413) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_call_usage (7858746847946397562) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_call_usage (1214810644978167344) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_app_usage (631997836335929880) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_app_usage (4883417856848222450) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_app_usage_1 (9047570143069220911) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_app_usage_1 (2551340497722370109) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_app_usage_2 (2770926061339921767) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_app_usage_2 (2874689735085367167) -->
+    <skip />
 </resources>
