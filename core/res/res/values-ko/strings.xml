@@ -616,6 +616,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"생체 인식 또는 화면 잠금을 사용"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"본인 확인"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"생체 인식을 사용하여 계속하세요"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"계속하려면 지문을 인증하세요"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"계속하려면 얼굴로 인증하세요"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"계속하려면 생체 인식이나 화면 잠금을 사용하세요"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"생체 인식 하드웨어를 사용할 수 없음"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"인증이 취소되었습니다."</string>
