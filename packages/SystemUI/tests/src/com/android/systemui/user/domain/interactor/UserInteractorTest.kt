@@ -692,6 +692,7 @@ class UserInteractorTest : SysuiTestCase() {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
+            runCurrent()
             val refreshUsersCallCount = userRepository.refreshUsersCallCount
 
             fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
@@ -712,6 +713,7 @@ class UserInteractorTest : SysuiTestCase() {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
+            runCurrent()
             val refreshUsersCallCount = userRepository.refreshUsersCallCount
 
             fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
