@@ -81,7 +81,6 @@ import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.model.SceneContainerNames;
 import com.android.systemui.scene.shared.model.SceneKey;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -476,7 +475,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
             // When the scene framework transitions from bouncer to gone, we dismiss the keyguard.
             mSceneTransitionCollectionJob = mJavaAdapter.get().alwaysCollectFlow(
-                mSceneInteractor.get().sceneTransitions(SceneContainerNames.SYSTEM_UI_DEFAULT),
+                mSceneInteractor.get().getTransitions(),
                 sceneTransitionModel -> {
                     if (sceneTransitionModel != null
                             && sceneTransitionModel.getFrom() == SceneKey.Bouncer.INSTANCE

@@ -41,7 +41,7 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
     @Test
     fun allSceneKeys() {
         val underTest = utils.fakeSceneContainerRepository()
-        assertThat(underTest.allSceneKeys(SceneTestUtils.CONTAINER_1))
+        assertThat(underTest.allSceneKeys())
             .isEqualTo(
                 listOf(
                     SceneKey.QuickSettings,
@@ -53,115 +53,58 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
             )
     }
 
-    @Test(expected = IllegalStateException::class)
-    fun allSceneKeys_noSuchContainer_throws() {
-        val underTest = utils.fakeSceneContainerRepository()
-        underTest.allSceneKeys("nonExistingContainer")
-    }
-
     @Test
     fun currentScene() = runTest {
         val underTest = utils.fakeSceneContainerRepository()
-        val currentScene by collectLastValue(underTest.currentScene(SceneTestUtils.CONTAINER_1))
+        val currentScene by collectLastValue(underTest.currentScene)
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
-        underTest.setCurrentScene(SceneTestUtils.CONTAINER_1, SceneModel(SceneKey.Shade))
+        underTest.setCurrentScene(SceneModel(SceneKey.Shade))
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun currentScene_noSuchContainer_throws() {
-        val underTest = utils.fakeSceneContainerRepository()
-        underTest.currentScene("nonExistingContainer")
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun setCurrentScene_noSuchContainer_throws() {
-        val underTest = utils.fakeSceneContainerRepository()
-        underTest.setCurrentScene("nonExistingContainer", SceneModel(SceneKey.Shade))
     }
 
     @Test(expected = IllegalStateException::class)
     fun setCurrentScene_noSuchSceneInContainer_throws() {
         val underTest =
             utils.fakeSceneContainerRepository(
-                setOf(
-                    utils.fakeSceneContainerConfig(SceneTestUtils.CONTAINER_1),
-                    utils.fakeSceneContainerConfig(
-                        SceneTestUtils.CONTAINER_2,
-                        listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
-                    ),
-                )
+                utils.fakeSceneContainerConfig(listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)),
             )
-        underTest.setCurrentScene(SceneTestUtils.CONTAINER_2, SceneModel(SceneKey.Shade))
+        underTest.setCurrentScene(SceneModel(SceneKey.Shade))
     }
 
     @Test
     fun isVisible() = runTest {
         val underTest = utils.fakeSceneContainerRepository()
-        val isVisible by collectLastValue(underTest.isVisible(SceneTestUtils.CONTAINER_1))
+        val isVisible by collectLastValue(underTest.isVisible)
         assertThat(isVisible).isTrue()
 
-        underTest.setVisible(SceneTestUtils.CONTAINER_1, false)
+        underTest.setVisible(false)
         assertThat(isVisible).isFalse()
 
-        underTest.setVisible(SceneTestUtils.CONTAINER_1, true)
+        underTest.setVisible(true)
         assertThat(isVisible).isTrue()
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun isVisible_noSuchContainer_throws() {
-        val underTest = utils.fakeSceneContainerRepository()
-        underTest.isVisible("nonExistingContainer")
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun setVisible_noSuchContainer_throws() {
-        val underTest = utils.fakeSceneContainerRepository()
-        underTest.setVisible("nonExistingContainer", false)
     }
 
     @Test
-    fun sceneTransitionProgress() = runTest {
+    fun transitionProgress() = runTest {
         val underTest = utils.fakeSceneContainerRepository()
-        val sceneTransitionProgress by
-            collectLastValue(underTest.sceneTransitionProgress(SceneTestUtils.CONTAINER_1))
+        val sceneTransitionProgress by collectLastValue(underTest.transitionProgress)
         assertThat(sceneTransitionProgress).isEqualTo(1f)
 
-        underTest.setSceneTransitionProgress(SceneTestUtils.CONTAINER_1, 0.1f)
+        underTest.setSceneTransitionProgress(0.1f)
         assertThat(sceneTransitionProgress).isEqualTo(0.1f)
 
-        underTest.setSceneTransitionProgress(SceneTestUtils.CONTAINER_1, 0.9f)
+        underTest.setSceneTransitionProgress(0.9f)
         assertThat(sceneTransitionProgress).isEqualTo(0.9f)
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun sceneTransitionProgress_noSuchContainer_throws() {
-        val underTest = utils.fakeSceneContainerRepository()
-        underTest.sceneTransitionProgress("nonExistingContainer")
     }
 
     @Test
     fun setSceneTransition() = runTest {
-        val underTest =
-            utils.fakeSceneContainerRepository(
-                setOf(
-                    utils.fakeSceneContainerConfig(SceneTestUtils.CONTAINER_1),
-                    utils.fakeSceneContainerConfig(
-                        SceneTestUtils.CONTAINER_2,
-                        listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
-                    ),
-                )
-            )
-        val sceneTransition by
-            collectLastValue(underTest.sceneTransitions(SceneTestUtils.CONTAINER_2))
+        val underTest = utils.fakeSceneContainerRepository()
+        val sceneTransition by collectLastValue(underTest.transitions)
         assertThat(sceneTransition).isNull()
 
-        underTest.setSceneTransition(
-            SceneTestUtils.CONTAINER_2,
-            SceneKey.Lockscreen,
-            SceneKey.QuickSettings
-        )
+        underTest.setSceneTransition(SceneKey.Lockscreen, SceneKey.QuickSettings)
         assertThat(sceneTransition)
             .isEqualTo(
                 SceneTransitionModel(from = SceneKey.Lockscreen, to = SceneKey.QuickSettings)
@@ -169,46 +112,20 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
     }
 
     @Test(expected = IllegalStateException::class)
-    fun setSceneTransition_noSuchContainer_throws() {
-        val underTest = utils.fakeSceneContainerRepository()
-        underTest.setSceneTransition("nonExistingContainer", SceneKey.Lockscreen, SceneKey.Shade)
-    }
-
-    @Test(expected = IllegalStateException::class)
     fun setSceneTransition_noFromSceneInContainer_throws() {
         val underTest =
             utils.fakeSceneContainerRepository(
-                setOf(
-                    utils.fakeSceneContainerConfig(SceneTestUtils.CONTAINER_1),
-                    utils.fakeSceneContainerConfig(
-                        SceneTestUtils.CONTAINER_2,
-                        listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
-                    ),
-                )
+                utils.fakeSceneContainerConfig(listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)),
             )
-        underTest.setSceneTransition(
-            SceneTestUtils.CONTAINER_2,
-            SceneKey.Shade,
-            SceneKey.Lockscreen
-        )
+        underTest.setSceneTransition(SceneKey.Shade, SceneKey.Lockscreen)
     }
 
     @Test(expected = IllegalStateException::class)
     fun setSceneTransition_noToSceneInContainer_throws() {
         val underTest =
             utils.fakeSceneContainerRepository(
-                setOf(
-                    utils.fakeSceneContainerConfig(SceneTestUtils.CONTAINER_1),
-                    utils.fakeSceneContainerConfig(
-                        SceneTestUtils.CONTAINER_2,
-                        listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)
-                    ),
-                )
+                utils.fakeSceneContainerConfig(listOf(SceneKey.QuickSettings, SceneKey.Lockscreen)),
             )
-        underTest.setSceneTransition(
-            SceneTestUtils.CONTAINER_2,
-            SceneKey.Shade,
-            SceneKey.Lockscreen
-        )
+        underTest.setSceneTransition(SceneKey.Shade, SceneKey.Lockscreen)
     }
 }

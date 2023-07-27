@@ -22,9 +22,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.SceneTestUtils.Companion.CONTAINER_1
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
@@ -51,20 +49,15 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     private val underTest =
         LockscreenSceneViewModel(
             applicationScope = testScope.backgroundScope,
-            interactorFactory =
-                object : LockscreenSceneInteractor.Factory {
-                    override fun create(containerName: String): LockscreenSceneInteractor {
-                        return utils.lockScreenSceneInteractor(
+            interactor =
+                utils.lockScreenSceneInteractor(
+                    authenticationInteractor = authenticationInteractor,
+                    bouncerInteractor =
+                        utils.bouncerInteractor(
                             authenticationInteractor = authenticationInteractor,
-                            bouncerInteractor =
-                                utils.bouncerInteractor(
-                                    authenticationInteractor = authenticationInteractor,
-                                    sceneInteractor = sceneInteractor,
-                                ),
-                        )
-                    }
-                },
-            containerName = CONTAINER_1
+                            sceneInteractor = sceneInteractor,
+                        ),
+                ),
         )
 
     @Test
@@ -116,7 +109,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onLockButtonClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(false)
             runCurrent()
@@ -129,7 +122,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(true)
             runCurrent()
@@ -142,7 +135,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(false)
             runCurrent()
@@ -155,7 +148,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onLockButtonClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_1))
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(true)
             runCurrent()

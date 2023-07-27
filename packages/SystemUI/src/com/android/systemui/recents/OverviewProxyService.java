@@ -97,7 +97,6 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.model.SceneContainerNames;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeViewController;
@@ -221,8 +220,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             // If scene framework is enabled, set the scene container window to
                             // visible and let the touch "slip" into that window.
                             if (mFeatureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
-                                mSceneInteractor.get().setVisible(
-                                        SceneContainerNames.SYSTEM_UI_DEFAULT, true);
+                                mSceneInteractor.get().setVisible(true);
                             } else {
                                 centralSurfaces.onInputFocusTransfer(
                                         mInputFocusTransferStarted, false /* cancel */,

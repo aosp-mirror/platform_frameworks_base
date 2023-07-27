@@ -30,7 +30,6 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.RemoteUserInput
-import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shade.ShadeViewController
@@ -183,7 +182,7 @@ class PhoneStatusBarViewController private constructor(
                 sceneInteractor.get()
                     .onRemoteUserInput(RemoteUserInput.translateMotionEvent(event))
                 // TODO(b/291965119): remove once view is expanded to cover the status bar
-                sceneInteractor.get().setVisible(SceneContainerNames.SYSTEM_UI_DEFAULT, true)
+                sceneInteractor.get().setVisible(true)
                 return false
             }
 
