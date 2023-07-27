@@ -63,8 +63,8 @@ constructor(
         return true
     }
 
-    fun layoutViews() {
-        layout?.layoutViews(keyguardRootView)
+    fun layoutViews(rootView: KeyguardRootView = keyguardRootView) {
+        layout?.layoutViews(rootView)
     }
 
     companion object {
@@ -85,7 +85,13 @@ interface LockscreenLayout {
             .applyTo(rootView)
         layoutIndicationArea(rootView)
         layoutLockIcon(rootView)
+        layoutShortcuts(rootView)
+        layoutAmbientIndicationArea(rootView)
+        layoutSettingsPopupMenu(rootView)
     }
     fun layoutIndicationArea(rootView: KeyguardRootView)
     fun layoutLockIcon(rootView: KeyguardRootView)
+    fun layoutShortcuts(rootView: KeyguardRootView)
+    fun layoutAmbientIndicationArea(rootView: KeyguardRootView)
+    fun layoutSettingsPopupMenu(rootView: KeyguardRootView)
 }

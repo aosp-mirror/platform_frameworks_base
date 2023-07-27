@@ -22,6 +22,7 @@ import android.graphics.Point
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.common.shared.model.Position
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
@@ -32,14 +33,17 @@ import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -63,6 +67,18 @@ constructor(
     bouncerRepository: KeyguardBouncerRepository,
     configurationRepository: ConfigurationRepository,
 ) {
+
+    data class PreviewMode(
+        val isInPreviewMode: Boolean = false,
+        val shouldHighlightSelectedAffordance: Boolean = false,
+    )
+
+    /**
+     * Whether this view-model instance is powering the preview experience that renders exclusively
+     * in the wallpaper picker application. This should _always_ be `false` for the real lock screen
+     * experience.
+     */
+    val previewMode = MutableStateFlow(PreviewMode())
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
      * all.
@@ -142,8 +158,6 @@ constructor(
     val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
-    /** Whether or not quick settings or quick quick settings are showing. */
-    val isQuickSettingsVisible: Flow<Boolean> = repository.isQuickSettingsVisible
     /**
      * Observable for [BiometricUnlockModel] when biometrics like face or any fingerprint (rear,
      * side, under display) is used to unlock the device.
@@ -182,6 +196,18 @@ constructor(
     /** Notifies when a new configuration is set */
     val configurationChange: Flow<Unit> = configurationRepository.onAnyConfigurationChange
 
+    /** Represents the current state of the KeyguardRootView visibility */
+    val keyguardRootViewVisibilityState: Flow<KeyguardRootViewVisibilityState> =
+        repository.keyguardRootViewVisibility
+
+    /** The position of the keyguard clock. */
+    val clockPosition: Flow<Position> = repository.clockPosition
+
+    val keyguardAlpha: Flow<Float> = repository.keyguardAlpha
+
+    /** Whether to animate the next doze mode transition. */
+    val animateDozingTransitions: Flow<Boolean> = repository.animateBottomAreaDozingTransitions
+
     fun dozeTransitionTo(vararg states: DozeStateModel): Flow<DozeTransitionModel> {
         return dozeTransitionModel.filter { states.contains(it.to) }
     }
@@ -209,6 +235,22 @@ constructor(
     /** Sets whether quick settings or quick-quick settings is visible. */
     fun setQuickSettingsVisible(isVisible: Boolean) {
         repository.setQuickSettingsVisible(isVisible)
+    }
+
+    fun setKeyguardRootVisibility(statusBarState: Int, goingToFullShade: Boolean, isOcclusionTransitionRunning: Boolean) {
+        repository.setKeyguardVisibility(statusBarState, goingToFullShade, isOcclusionTransitionRunning)
+    }
+
+    fun setClockPosition(x: Int, y: Int) {
+        repository.setClockPosition(x, y)
+    }
+
+    fun setAlpha(alpha: Float) {
+        repository.setKeyguardAlpha(alpha)
+    }
+
+    fun setAnimateDozingTransitions(animate: Boolean) {
+        repository.setAnimateDozingTransitions(animate)
     }
 
     companion object {

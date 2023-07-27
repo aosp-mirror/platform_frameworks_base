@@ -97,6 +97,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteracto
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.ui.view.KeyguardRootView;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
@@ -314,6 +315,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private ShadeInteractor mShadeInteractor;
     @Mock private JavaAdapter mJavaAdapter;
     @Mock private CastController mCastController;
+    @Mock private KeyguardRootView mKeyguardRootView;
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
@@ -618,7 +620,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardInteractor,
                 mActivityStarter,
                 mKeyguardViewConfigurator,
-                mKeyguardFaceAuthInteractor);
+                mKeyguardFaceAuthInteractor,
+                mKeyguardRootView);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 null,

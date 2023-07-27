@@ -17,6 +17,8 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import javax.inject.Inject
@@ -33,6 +35,8 @@ constructor(
     bottomAreaInteractor: KeyguardBottomAreaInteractor,
     keyguardBottomAreaViewModel: KeyguardBottomAreaViewModel,
     private val burnInHelperWrapper: BurnInHelperWrapper,
+    private val shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
+    private val featureFlags: FeatureFlags,
 ) {
 
     /** Notifies when a new configuration is set */
@@ -43,15 +47,28 @@ constructor(
 
     /** An observable for whether the indication area should be padded. */
     val isIndicationAreaPadded: Flow<Boolean> =
-        combine(keyguardBottomAreaViewModel.startButton, keyguardBottomAreaViewModel.endButton) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            combine(shortcutsCombinedViewModel.startButton, shortcutsCombinedViewModel.endButton) {
                 startButtonModel,
                 endButtonModel ->
                 startButtonModel.isVisible || endButtonModel.isVisible
             }
-            .distinctUntilChanged()
+                .distinctUntilChanged()
+        } else {
+            combine(keyguardBottomAreaViewModel.startButton, keyguardBottomAreaViewModel.endButton) {
+                startButtonModel,
+                endButtonModel ->
+                startButtonModel.isVisible || endButtonModel.isVisible
+            }
+                .distinctUntilChanged()
+        }
     /** An observable for the x-offset by which the indication area should be translated. */
     val indicationAreaTranslationX: Flow<Float> =
-        bottomAreaInteractor.clockPosition.map { it.x.toFloat() }.distinctUntilChanged()
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            keyguardInteractor.clockPosition.map { it.x.toFloat() }.distinctUntilChanged()
+        } else {
+            bottomAreaInteractor.clockPosition.map { it.x.toFloat() }.distinctUntilChanged()
+        }
 
     /** Returns an observable for the y-offset by which the indication area should be translated. */
     fun indicationAreaTranslationY(defaultBurnInOffset: Int): Flow<Float> {

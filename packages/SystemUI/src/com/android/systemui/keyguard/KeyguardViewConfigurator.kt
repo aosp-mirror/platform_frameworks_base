@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard
 
+import android.content.res.Configuration
 import android.view.View
 import android.view.ViewGroup
 import com.android.systemui.CoreStartable
@@ -24,18 +25,29 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.ui.binder.KeyguardAmbientIndicationAreaViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
+import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
+import com.android.systemui.keyguard.ui.binder.KeyguardSettingsViewBinder
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardAmbientIndicationViewModel
 import com.android.systemui.keyguard.ui.view.layout.KeyguardLayoutManager
 import com.android.systemui.keyguard.ui.view.layout.KeyguardLayoutManagerCommandListener
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
@@ -49,26 +61,44 @@ class KeyguardViewConfigurator
 constructor(
     private val keyguardRootView: KeyguardRootView,
     private val sharedNotificationContainer: SharedNotificationContainer,
+    private val keyguardRootViewModel: KeyguardRootViewModel,
     private val keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel,
     private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
+    private val keyguardAmbientIndicationViewModel: KeyguardAmbientIndicationViewModel,
     private val notificationShadeWindowView: NotificationShadeWindowView,
     private val featureFlags: FeatureFlags,
     private val indicationController: KeyguardIndicationController,
     private val keyguardLayoutManager: KeyguardLayoutManager,
     private val keyguardLayoutManagerCommandListener: KeyguardLayoutManagerCommandListener,
+    private val keyguardQuickAffordancesCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
+    private val falsingManager: FalsingManager,
+    private val vibratorHelper: VibratorHelper,
+    private val keyguardStateController: KeyguardStateController,
+    private val keyguardSettingsMenuViewModel: KeyguardSettingsMenuViewModel,
+    private val activityStarter: ActivityStarter,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
 ) : CoreStartable {
 
+    private var rootViewHandle: DisposableHandle? = null
     private var indicationAreaHandle: DisposableHandle? = null
+    private var leftShortcutHandle: KeyguardQuickAffordanceViewBinder.Binding? = null
+    private var rightShortcutHandle: KeyguardQuickAffordanceViewBinder.Binding? = null
+    private var ambientIndicationAreaHandle: KeyguardAmbientIndicationAreaViewBinder.Binding? = null
+    private var settingsPopupMenuHandle: DisposableHandle? = null
 
     override fun start() {
         bindKeyguardRootView()
         val notificationPanel =
             notificationShadeWindowView.requireViewById(R.id.notification_panel) as ViewGroup
-        bindIndicationArea(notificationPanel)
+        unbindKeyguardBottomArea(notificationPanel)
+        bindIndicationArea()
         bindLockIconView(notificationPanel)
         setupNotificationStackScrollLayout(notificationPanel)
+        bindLeftShortcut()
+        bindRightShortcut()
+        bindAmbientIndicationArea()
+        bindSettingsPopupMenu()
 
         keyguardLayoutManager.layoutViews()
         keyguardLayoutManagerCommandListener.start()
@@ -90,16 +120,21 @@ constructor(
         }
     }
 
-    fun bindIndicationArea(legacyParent: ViewGroup) {
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        leftShortcutHandle?.onConfigurationChanged()
+        rightShortcutHandle?.onConfigurationChanged()
+        ambientIndicationAreaHandle?.onConfigurationChanged()
+
+        keyguardLayoutManager.layoutViews()
+    }
+
+    fun bindIndicationArea() {
         indicationAreaHandle?.dispose()
 
         // At startup, 2 views with the ID `R.id.keyguard_indication_area` will be available.
         // Disable one of them
-        if (featureFlags.isEnabled(Flags.MIGRATE_INDICATION_AREA)) {
-            legacyParent.findViewById<View>(R.id.keyguard_indication_area)?.let {
-                legacyParent.removeView(it)
-            }
-        } else {
+        if (!featureFlags.isEnabled(Flags.MIGRATE_INDICATION_AREA)) {
             keyguardRootView.findViewById<View?>(R.id.keyguard_indication_area)?.let {
                 keyguardRootView.removeView(it)
             }
@@ -109,8 +144,22 @@ constructor(
             KeyguardIndicationAreaBinder.bind(
                 notificationShadeWindowView,
                 keyguardIndicationAreaViewModel,
-                indicationController
+                keyguardRootViewModel,
+                indicationController,
+                featureFlags,
             )
+    }
+
+    private fun bindKeyguardRootView() {
+        rootViewHandle?.dispose()
+        rootViewHandle = KeyguardRootViewBinder.bind(
+            keyguardRootView,
+            keyguardRootViewModel,
+            featureFlags,
+            occludingAppDeviceEntryMessageViewModel,
+            chipbarCoordinator,
+            keyguardStateController,
+        )
     }
 
     private fun bindLockIconView(legacyParent: ViewGroup) {
@@ -125,12 +174,84 @@ constructor(
         }
     }
 
-    private fun bindKeyguardRootView() {
-        KeyguardRootViewBinder.bind(
-            keyguardRootView,
-            featureFlags,
-            occludingAppDeviceEntryMessageViewModel,
-            chipbarCoordinator,
-        )
+    private fun bindAmbientIndicationArea() {
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            ambientIndicationAreaHandle?.destroy()
+            ambientIndicationAreaHandle =
+                KeyguardAmbientIndicationAreaViewBinder.bind(
+                    notificationShadeWindowView,
+                    keyguardAmbientIndicationViewModel,
+                    keyguardRootViewModel,
+                )
+        } else {
+            keyguardRootView.findViewById<View?>(R.id.ambient_indication_container)?.let {
+                keyguardRootView.removeView(it)
+            }
+        }
+    }
+
+    private fun bindSettingsPopupMenu() {
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            settingsPopupMenuHandle?.dispose()
+            settingsPopupMenuHandle =
+                KeyguardSettingsViewBinder.bind(
+                    keyguardRootView,
+                    keyguardSettingsMenuViewModel,
+                    vibratorHelper,
+                    activityStarter,
+                )
+        } else {
+            keyguardRootView.findViewById<View?>(R.id.keyguard_settings_button)?.let {
+                keyguardRootView.removeView(it)
+            }
+        }
+    }
+
+    private fun unbindKeyguardBottomArea(legacyParent: ViewGroup) {
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            legacyParent.requireViewById<View>(R.id.keyguard_bottom_area).let {
+                legacyParent.removeView(it)
+            }
+        }
+    }
+
+    private fun bindLeftShortcut() {
+        leftShortcutHandle?.destroy()
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            leftShortcutHandle =
+                KeyguardQuickAffordanceViewBinder.bind(
+                    keyguardRootView.requireViewById(R.id.start_button),
+                    keyguardQuickAffordancesCombinedViewModel.startButton,
+                    keyguardRootViewModel.alpha,
+                    falsingManager,
+                    vibratorHelper,
+                ) {
+                    indicationController.showTransientIndication(it)
+                }
+        } else {
+            keyguardRootView.findViewById<View?>(R.id.start_button)?.let {
+                keyguardRootView.removeView(it)
+            }
+        }
+    }
+
+    private fun bindRightShortcut() {
+        rightShortcutHandle?.destroy()
+        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            rightShortcutHandle =
+                KeyguardQuickAffordanceViewBinder.bind(
+                    keyguardRootView.requireViewById(R.id.end_button),
+                    keyguardQuickAffordancesCombinedViewModel.endButton,
+                    keyguardRootViewModel.alpha,
+                    falsingManager,
+                    vibratorHelper,
+                ) {
+                    indicationController.showTransientIndication(it)
+                }
+        } else {
+            keyguardRootView.findViewById<View?>(R.id.end_button)?.let {
+                keyguardRootView.removeView(it)
+            }
+        }
     }
 }

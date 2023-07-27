@@ -20,8 +20,13 @@ package com.android.systemui.keyguard.ui.view
 import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.ImageView
+import androidx.core.content.res.ResourcesCompat
 import com.android.keyguard.LockIconView
 import com.android.systemui.R
+import com.android.systemui.animation.view.LaunchableImageView
 
 /** Provides a container for all keyguard ui content. */
 class KeyguardRootView(
@@ -36,6 +41,10 @@ class KeyguardRootView(
     init {
         addIndicationTextArea()
         addLockIconView()
+        addAmbientIndicationArea()
+        addLeftShortcut()
+        addRightShortcut()
+        addSettingsPopupMenu()
     }
 
     private fun addIndicationTextArea() {
@@ -45,6 +54,67 @@ class KeyguardRootView(
 
     private fun addLockIconView() {
         val view = LockIconView(context, attrs).apply { id = R.id.lock_icon_view }
+        addView(view)
+    }
+
+    private fun addAmbientIndicationArea() {
+        LayoutInflater.from(context).inflate(R.layout.ambient_indication, this)
+    }
+
+    private fun addLeftShortcut() {
+        val view = LaunchableImageView(context, attrs)
+            .apply {
+                id = R.id.start_button
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                background =
+                    ResourcesCompat.getDrawable(
+                        context.resources,
+                        R.drawable.keyguard_bottom_affordance_bg,
+                        context.theme
+                    )
+                foreground =
+                    ResourcesCompat.getDrawable(
+                        context.resources,
+                        R.drawable.keyguard_bottom_affordance_selected_border,
+                        context.theme
+                    )
+                visibility = View.INVISIBLE
+            }
+        addView(view)
+    }
+
+    private fun addRightShortcut() {
+        val view = LaunchableImageView(context, attrs)
+            .apply {
+                id = R.id.end_button
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                background =
+                    ResourcesCompat.getDrawable(
+                        context.resources,
+                        R.drawable.keyguard_bottom_affordance_bg,
+                        context.theme
+                    )
+                foreground =
+                    ResourcesCompat.getDrawable(
+                        context.resources,
+                        R.drawable.keyguard_bottom_affordance_selected_border,
+                        context.theme
+                    )
+                visibility = View.INVISIBLE
+            }
+        addView(view)
+    }
+
+    private fun addSettingsPopupMenu() {
+        val view = LayoutInflater.from(context).inflate(
+            R.layout.keyguard_settings_popup_menu,
+            this,
+            false
+        )
+        .apply {
+            id = R.id.keyguard_settings_button
+            visibility = GONE
+        }
         addView(view)
     }
 }
