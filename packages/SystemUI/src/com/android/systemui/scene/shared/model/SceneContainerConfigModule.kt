@@ -16,44 +16,27 @@
 
 package com.android.systemui.scene.shared.model
 
-import com.android.systemui.dagger.SysUISingleton
 import dagger.Module
 import dagger.Provides
-import javax.inject.Named
 
 @Module
 object SceneContainerConfigModule {
 
     @Provides
-    fun containerConfigs(): Map<String, SceneContainerConfig> {
-        return mapOf(
-            SceneContainerNames.SYSTEM_UI_DEFAULT to
-                SceneContainerConfig(
-                    name = SceneContainerNames.SYSTEM_UI_DEFAULT,
-                    // Note that this list is in z-order. The first one is the bottom-most and the
-                    // last
-                    // one is top-most.
-                    sceneKeys =
-                        listOf(
-                            SceneKey.Gone,
-                            SceneKey.Lockscreen,
-                            SceneKey.Bouncer,
-                            SceneKey.Shade,
-                            SceneKey.QuickSettings,
-                        ),
-                    initialSceneKey = SceneKey.Lockscreen,
+    fun containerConfig(): SceneContainerConfig {
+        return SceneContainerConfig(
+            // Note that this list is in z-order. The first one is the bottom-most and the
+            // last
+            // one is top-most.
+            sceneKeys =
+                listOf(
+                    SceneKey.Gone,
+                    SceneKey.Lockscreen,
+                    SceneKey.Bouncer,
+                    SceneKey.Shade,
+                    SceneKey.QuickSettings,
                 ),
+            initialSceneKey = SceneKey.Lockscreen,
         )
-    }
-
-    @Provides
-    @SysUISingleton
-    @Named(SceneContainerNames.SYSTEM_UI_DEFAULT)
-    fun provideDefaultSceneContainerConfig(
-        configs: Map<String, SceneContainerConfig>,
-    ): SceneContainerConfig {
-        return checkNotNull(configs[SceneContainerNames.SYSTEM_UI_DEFAULT]) {
-            "No SceneContainerConfig named \"${SceneContainerNames.SYSTEM_UI_DEFAULT}\"."
-        }
     }
 }

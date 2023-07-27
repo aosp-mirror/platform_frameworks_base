@@ -28,7 +28,6 @@ import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.model.SysUiState
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.util.mockito.mock
@@ -47,7 +46,7 @@ import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(JUnit4::class)
-class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
+class SceneContainerStartableTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
@@ -66,7 +65,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     private val sysUiState: SysUiState = mock()
 
     private val underTest =
-        SystemUiDefaultSceneContainerStartable(
+        SceneContainerStartable(
             applicationScope = testScope.backgroundScope,
             sceneInteractor = sceneInteractor,
             authenticationInteractor = authenticationInteractor,
@@ -84,14 +83,8 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun hydrateVisibility_featureEnabled() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
-            val isVisible by
-                collectLastValue(sceneInteractor.isVisible(SceneContainerNames.SYSTEM_UI_DEFAULT))
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val isVisible by collectLastValue(sceneInteractor.isVisible)
             prepareState(
                 isFeatureEnabled = true,
                 isDeviceUnlocked = true,
@@ -104,24 +97,15 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
 
             assertThat(isVisible).isFalse()
 
-            sceneInteractor.setCurrentScene(
-                SceneContainerNames.SYSTEM_UI_DEFAULT,
-                SceneModel(SceneKey.Shade)
-            )
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Shade))
             assertThat(isVisible).isTrue()
         }
 
     @Test
     fun hydrateVisibility_featureDisabled() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
-            val isVisible by
-                collectLastValue(sceneInteractor.isVisible(SceneContainerNames.SYSTEM_UI_DEFAULT))
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
+            val isVisible by collectLastValue(sceneInteractor.isVisible)
             prepareState(
                 isFeatureEnabled = false,
                 isDeviceUnlocked = true,
@@ -133,28 +117,17 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
             underTest.start()
             assertThat(isVisible).isTrue()
 
-            sceneInteractor.setCurrentScene(
-                SceneContainerNames.SYSTEM_UI_DEFAULT,
-                SceneModel(SceneKey.Gone)
-            )
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone))
             assertThat(isVisible).isTrue()
 
-            sceneInteractor.setCurrentScene(
-                SceneContainerNames.SYSTEM_UI_DEFAULT,
-                SceneModel(SceneKey.Shade)
-            )
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Shade))
             assertThat(isVisible).isTrue()
         }
 
     @Test
     fun switchToLockscreenWhenDeviceLocks_featureEnabled() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isDeviceUnlocked = true,
@@ -171,12 +144,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchToLockscreenWhenDeviceLocks_featureDisabled() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = false,
                 isDeviceUnlocked = false,
@@ -193,12 +161,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromBouncerToGoneWhenDeviceUnlocked_featureEnabled() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isDeviceUnlocked = false,
@@ -215,12 +178,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromBouncerToGoneWhenDeviceUnlocked_featureDisabled() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = false,
                 isDeviceUnlocked = false,
@@ -237,12 +195,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromLockscreenToGoneWhenDeviceUnlocksWithBypassOn_featureOn_bypassOn() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isBypassEnabled = true,
@@ -259,12 +212,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromLockscreenToGoneWhenDeviceUnlocksWithBypassOn_featureOn_bypassOff() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isBypassEnabled = false,
@@ -281,12 +229,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchFromLockscreenToGoneWhenDeviceUnlocksWithBypassOn_featureOff_bypassOn() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = false,
                 isBypassEnabled = true,
@@ -303,12 +246,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchToGoneWhenDeviceSleepsUnlocked_featureEnabled() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isDeviceUnlocked = true,
@@ -325,12 +263,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchToGoneWhenDeviceSleepsUnlocked_featureDisabled() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = false,
                 isDeviceUnlocked = true,
@@ -347,12 +280,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchToLockscreenWhenDeviceSleepsLocked_featureEnabled() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = true,
                 isDeviceUnlocked = false,
@@ -369,12 +297,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
     @Test
     fun switchToLockscreenWhenDeviceSleepsLocked_featureDisabled() =
         testScope.runTest {
-            val currentSceneKey by
-                collectLastValue(
-                    sceneInteractor.currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT).map {
-                        it.key
-                    }
-                )
+            val currentSceneKey by collectLastValue(sceneInteractor.currentScene.map { it.key })
             prepareState(
                 isFeatureEnabled = false,
                 isDeviceUnlocked = false,
@@ -403,10 +326,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
                     SceneKey.QuickSettings,
                 )
                 .forEachIndexed { index, sceneKey ->
-                    sceneInteractor.setCurrentScene(
-                        SceneContainerNames.SYSTEM_UI_DEFAULT,
-                        SceneModel(sceneKey),
-                    )
+                    sceneInteractor.setCurrentScene(SceneModel(sceneKey))
                     runCurrent()
 
                     verify(sysUiState, times(index + 1)).commitUpdate(Display.DEFAULT_DISPLAY)
@@ -422,9 +342,7 @@ class SystemUiDefaultSceneContainerStartableTest : SysuiTestCase() {
         featureFlags.set(Flags.SCENE_CONTAINER, isFeatureEnabled)
         authenticationRepository.setUnlocked(isDeviceUnlocked)
         keyguardRepository.setBypassEnabled(isBypassEnabled)
-        initialSceneKey?.let {
-            sceneInteractor.setCurrentScene(SceneContainerNames.SYSTEM_UI_DEFAULT, SceneModel(it))
-        }
+        initialSceneKey?.let { sceneInteractor.setCurrentScene(SceneModel(it)) }
     }
 
     companion object {

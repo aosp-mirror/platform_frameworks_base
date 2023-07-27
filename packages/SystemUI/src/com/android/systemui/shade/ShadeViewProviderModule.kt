@@ -36,7 +36,6 @@ import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
-import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.scene.ui.view.SceneWindowRootView
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
@@ -72,11 +71,8 @@ abstract class ShadeViewProviderModule {
         fun providesWindowRootView(
             layoutInflater: LayoutInflater,
             featureFlags: FeatureFlags,
-            @Named(SceneContainerNames.SYSTEM_UI_DEFAULT)
             viewModelProvider: Provider<SceneContainerViewModel>,
-            @Named(SceneContainerNames.SYSTEM_UI_DEFAULT)
             containerConfigProvider: Provider<SceneContainerConfig>,
-            @Named(SceneContainerNames.SYSTEM_UI_DEFAULT)
             scenesProvider: Provider<Set<@JvmSuppressWildcards Scene>>,
         ): WindowRootView {
             return if (

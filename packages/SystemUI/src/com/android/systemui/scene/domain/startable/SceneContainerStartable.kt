@@ -28,7 +28,6 @@ import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING
@@ -44,12 +43,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
- * Hooks up business logic that manipulates the state of the [SceneInteractor] for the default
- * system UI scene container (the one named [SceneContainerNames.SYSTEM_UI_DEFAULT]) based on state
- * from other systems.
+ * Hooks up business logic that manipulates the state of the [SceneInteractor] for the system UI
+ * scene container based on state from other systems.
  */
 @SysUISingleton
-class SystemUiDefaultSceneContainerStartable
+class SceneContainerStartable
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
@@ -72,13 +70,10 @@ constructor(
     /** Updates the visibility of the scene container based on the current scene. */
     private fun hydrateVisibility() {
         applicationScope.launch {
-            sceneInteractor
-                .currentScene(CONTAINER_NAME)
+            sceneInteractor.currentScene
                 .map { it.key }
                 .distinctUntilChanged()
-                .collect { sceneKey ->
-                    sceneInteractor.setVisible(CONTAINER_NAME, sceneKey != SceneKey.Gone)
-                }
+                .collect { sceneKey -> sceneInteractor.setVisible(sceneKey != SceneKey.Gone) }
         }
     }
 
@@ -87,7 +82,7 @@ constructor(
         applicationScope.launch {
             authenticationInteractor.isUnlocked
                 .map { isUnlocked ->
-                    val currentSceneKey = sceneInteractor.currentScene(CONTAINER_NAME).value.key
+                    val currentSceneKey = sceneInteractor.currentScene.value.key
                     val isBypassEnabled = authenticationInteractor.isBypassEnabled()
                     when {
                         isUnlocked ->
@@ -135,8 +130,7 @@ constructor(
     /** Keeps [SysUiState] up-to-date */
     private fun hydrateSystemUiState() {
         applicationScope.launch {
-            sceneInteractor
-                .currentScene(SceneContainerNames.SYSTEM_UI_DEFAULT)
+            sceneInteractor.currentScene
                 .map { it.key }
                 .distinctUntilChanged()
                 .collect { sceneKey ->
@@ -155,12 +149,7 @@ constructor(
 
     private fun switchToScene(targetSceneKey: SceneKey) {
         sceneInteractor.setCurrentScene(
-            containerName = CONTAINER_NAME,
             scene = SceneModel(targetSceneKey),
         )
-    }
-
-    companion object {
-        private const val CONTAINER_NAME = SceneContainerNames.SYSTEM_UI_DEFAULT
     }
 }

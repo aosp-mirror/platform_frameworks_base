@@ -27,6 +27,6 @@ interface SceneContainerStartableModule {
 
     @Binds
     @IntoMap
-    @ClassKey(SystemUiDefaultSceneContainerStartable::class)
-    fun bind(impl: SystemUiDefaultSceneContainerStartable): CoreStartable
+    @ClassKey(SceneContainerStartable::class)
+    fun bind(impl: SceneContainerStartable): CoreStartable
 }

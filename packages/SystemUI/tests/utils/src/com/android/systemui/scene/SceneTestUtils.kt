@@ -41,7 +41,6 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.RemoteUserInput
 import com.android.systemui.scene.shared.model.RemoteUserInputAction
 import com.android.systemui.scene.shared.model.SceneContainerConfig
-import com.android.systemui.scene.shared.model.SceneContainerNames
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.repository.UserRepository
@@ -96,13 +95,9 @@ class SceneTestUtils(
     private val context = test.context
 
     fun fakeSceneContainerRepository(
-        containerConfigurations: Set<SceneContainerConfig> =
-            setOf(
-                fakeSceneContainerConfig(CONTAINER_1),
-                fakeSceneContainerConfig(CONTAINER_2),
-            )
+        containerConfig: SceneContainerConfig = fakeSceneContainerConfig(),
     ): SceneContainerRepository {
-        return SceneContainerRepository(containerConfigurations.associateBy { it.name })
+        return SceneContainerRepository(containerConfig)
     }
 
     fun fakeSceneKeys(): List<SceneKey> {
@@ -116,11 +111,9 @@ class SceneTestUtils(
     }
 
     fun fakeSceneContainerConfig(
-        name: String,
         sceneKeys: List<SceneKey> = fakeSceneKeys(),
     ): SceneContainerConfig {
         return SceneContainerConfig(
-            name = name,
             sceneKeys = sceneKeys,
             initialSceneKey = SceneKey.Lockscreen,
         )
@@ -174,7 +167,6 @@ class SceneTestUtils(
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
             featureFlags = featureFlags,
-            containerName = CONTAINER_1,
         )
     }
 
@@ -184,14 +176,8 @@ class SceneTestUtils(
         return BouncerViewModel(
             applicationContext = context,
             applicationScope = applicationScope(),
-            interactorFactory =
-                object : BouncerInteractor.Factory {
-                    override fun create(containerName: String): BouncerInteractor {
-                        return bouncerInteractor
-                    }
-                },
+            interactor = bouncerInteractor,
             featureFlags = featureFlags,
-            containerName = CONTAINER_1,
         )
     }
 
@@ -202,13 +188,7 @@ class SceneTestUtils(
         return LockscreenSceneInteractor(
             applicationScope = applicationScope(),
             authenticationInteractor = authenticationInteractor,
-            bouncerInteractorFactory =
-                object : BouncerInteractor.Factory {
-                    override fun create(containerName: String): BouncerInteractor {
-                        return bouncerInteractor
-                    }
-                },
-            containerName = CONTAINER_1,
+            bouncerInteractor = bouncerInteractor,
         )
     }
 
@@ -217,9 +197,6 @@ class SceneTestUtils(
     }
 
     companion object {
-        const val CONTAINER_1 = SceneContainerNames.SYSTEM_UI_DEFAULT
-        const val CONTAINER_2 = "container2"
-
         val REMOTE_INPUT_DOWN_GESTURE =
             listOf(
                 RemoteUserInput(10f, 10f, RemoteUserInputAction.DOWN),

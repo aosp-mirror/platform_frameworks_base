@@ -29,26 +29,20 @@ import kotlinx.coroutines.flow.asStateFlow
 class SceneContainerRepository
 @Inject
 constructor(
-    private val containerConfigByName: Map<String, SceneContainerConfig>,
+    private val config: SceneContainerConfig,
 ) {
 
-    private val containerVisibilityByName: Map<String, MutableStateFlow<Boolean>> =
-        containerConfigByName
-            .map { (containerName, _) -> containerName to MutableStateFlow(true) }
-            .toMap()
-    private val currentSceneByContainerName: Map<String, MutableStateFlow<SceneModel>> =
-        containerConfigByName
-            .map { (containerName, config) ->
-                containerName to MutableStateFlow(SceneModel(config.initialSceneKey))
-            }
-            .toMap()
-    private val sceneTransitionProgressByContainerName: Map<String, MutableStateFlow<Float>> =
-        containerConfigByName
-            .map { (containerName, _) -> containerName to MutableStateFlow(1f) }
-            .toMap()
-    private val sceneTransitionByContainerName:
-        Map<String, MutableStateFlow<SceneTransitionModel?>> =
-        containerConfigByName.keys.associateWith { MutableStateFlow(null) }
+    private val _isVisible = MutableStateFlow(true)
+    val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
+
+    private val _currentScene = MutableStateFlow(SceneModel(config.initialSceneKey))
+    val currentScene: StateFlow<SceneModel> = _currentScene.asStateFlow()
+
+    private val _transitionProgress = MutableStateFlow(1f)
+    val transitionProgress: StateFlow<Float> = _transitionProgress.asStateFlow()
+
+    private val _transitions = MutableStateFlow<SceneTransitionModel?>(null)
+    val transitions: StateFlow<SceneTransitionModel?> = _transitions.asStateFlow()
 
     /**
      * Returns the keys to all scenes in the container with the given name.
@@ -56,100 +50,50 @@ constructor(
      * The scenes will be sorted in z-order such that the last one is the one that should be
      * rendered on top of all previous ones.
      */
-    fun allSceneKeys(containerName: String): List<SceneKey> {
-        return containerConfigByName[containerName]?.sceneKeys
-            ?: error(noSuchContainerErrorMessage(containerName))
+    fun allSceneKeys(): List<SceneKey> {
+        return config.sceneKeys
     }
 
     /** Sets the current scene in the container with the given name. */
-    fun setCurrentScene(containerName: String, scene: SceneModel) {
-        check(allSceneKeys(containerName).contains(scene.key)) {
+    fun setCurrentScene(scene: SceneModel) {
+        check(allSceneKeys().contains(scene.key)) {
             """
-                Cannot set current scene key to "${scene.key}". The container "$containerName" does
-                not contain a scene with that key.
+                Cannot set current scene key to "${scene.key}". The configuration does not contain a
+                scene with that key.
             """
                 .trimIndent()
         }
 
-        currentSceneByContainerName.setValue(containerName, scene)
+        _currentScene.value = scene
     }
 
     /** Sets the scene transition in the container with the given name. */
-    fun setSceneTransition(containerName: String, from: SceneKey, to: SceneKey) {
-        check(allSceneKeys(containerName).contains(from)) {
+    fun setSceneTransition(from: SceneKey, to: SceneKey) {
+        check(allSceneKeys().contains(from)) {
             """
-                Cannot set current scene key to "$from". The container "$containerName" does
-                not contain a scene with that key.
-            """
-                .trimIndent()
-        }
-        check(allSceneKeys(containerName).contains(to)) {
-            """
-                Cannot set current scene key to "$to". The container "$containerName" does
-                not contain a scene with that key.
+                Cannot set current scene key to "$from". The configuration does not contain a scene
+                with that key.
             """
                 .trimIndent()
         }
+        check(allSceneKeys().contains(to)) {
+            """
+                Cannot set current scene key to "$to". The configuration does not contain a scene
+                with that key.
+            """
+                .trimIndent()
+        }
 
-        sceneTransitionByContainerName.setValue(
-            containerName,
-            SceneTransitionModel(from = from, to = to)
-        )
-    }
-
-    /** The current scene in the container with the given name. */
-    fun currentScene(containerName: String): StateFlow<SceneModel> {
-        return currentSceneByContainerName.mutableOrError(containerName).asStateFlow()
-    }
-
-    /**
-     * Scene transitions as pairs of keys. A new value is emitted exactly once, each time a scene
-     * transition occurs. The flow begins with a `null` value at first, because the initial scene is
-     * not something that we transition to from another scene.
-     */
-    fun sceneTransitions(containerName: String): StateFlow<SceneTransitionModel?> {
-        return sceneTransitionByContainerName.mutableOrError(containerName).asStateFlow()
+        _transitions.value = SceneTransitionModel(from = from, to = to)
     }
 
     /** Sets whether the container with the given name is visible. */
-    fun setVisible(containerName: String, isVisible: Boolean) {
-        containerVisibilityByName.setValue(containerName, isVisible)
-    }
-
-    /** Whether the container with the given name should be visible. */
-    fun isVisible(containerName: String): StateFlow<Boolean> {
-        return containerVisibilityByName.mutableOrError(containerName).asStateFlow()
+    fun setVisible(isVisible: Boolean) {
+        _isVisible.value = isVisible
     }
 
     /** Sets scene transition progress to the current scene in the container with the given name. */
-    fun setSceneTransitionProgress(containerName: String, progress: Float) {
-        sceneTransitionProgressByContainerName.setValue(containerName, progress)
-    }
-
-    /** Progress of the transition into the current scene in the container with the given name. */
-    fun sceneTransitionProgress(containerName: String): StateFlow<Float> {
-        return sceneTransitionProgressByContainerName.mutableOrError(containerName).asStateFlow()
-    }
-
-    private fun <T> Map<String, MutableStateFlow<T>>.mutableOrError(
-        containerName: String,
-    ): MutableStateFlow<T> {
-        return this[containerName] ?: error(noSuchContainerErrorMessage(containerName))
-    }
-
-    private fun <T> Map<String, MutableStateFlow<T>>.setValue(
-        containerName: String,
-        value: T,
-    ) {
-        val mutable = mutableOrError(containerName)
-        mutable.value = value
-    }
-
-    private fun noSuchContainerErrorMessage(containerName: String): String {
-        return """
-            No container named "$containerName". Existing containers:
-            ${containerConfigByName.values.joinToString(", ") { it.name }}
-        """
-            .trimIndent()
+    fun setSceneTransitionProgress(progress: Float) {
+        _transitionProgress.value = progress
     }
 }

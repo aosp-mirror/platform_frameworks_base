@@ -20,7 +20,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -48,20 +47,15 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val underTest =
         ShadeSceneViewModel(
             applicationScope = testScope.backgroundScope,
-            lockscreenSceneInteractorFactory =
-                object : LockscreenSceneInteractor.Factory {
-                    override fun create(containerName: String): LockscreenSceneInteractor {
-                        return utils.lockScreenSceneInteractor(
+            lockscreenSceneInteractor =
+                utils.lockScreenSceneInteractor(
+                    authenticationInteractor = authenticationInteractor,
+                    bouncerInteractor =
+                        utils.bouncerInteractor(
                             authenticationInteractor = authenticationInteractor,
-                            bouncerInteractor =
-                                utils.bouncerInteractor(
-                                    authenticationInteractor = authenticationInteractor,
-                                    sceneInteractor = sceneInteractor,
-                                ),
-                        )
-                    }
-                },
-            containerName = SceneTestUtils.CONTAINER_1
+                            sceneInteractor = sceneInteractor,
+                        ),
+                ),
         )
 
     @Test
@@ -87,8 +81,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceUnlocked_switchesToGone() =
         testScope.runTest {
-            val currentScene by
-                collectLastValue(sceneInteractor.currentScene(SceneTestUtils.CONTAINER_1))
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(true)
             runCurrent()
@@ -101,8 +94,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     @Test
     fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
         testScope.runTest {
-            val currentScene by
-                collectLastValue(sceneInteractor.currentScene(SceneTestUtils.CONTAINER_1))
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             utils.authenticationRepository.setUnlocked(false)
             runCurrent()
