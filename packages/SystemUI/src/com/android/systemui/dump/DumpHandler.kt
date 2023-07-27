@@ -16,12 +16,10 @@
 
 package com.android.systemui.dump
 
-import android.content.Context
+import android.icu.text.SimpleDateFormat
 import android.os.SystemClock
 import android.os.Trace
-import com.android.systemui.CoreStartable
 import com.android.systemui.ProtoDumpable
-import com.android.systemui.R
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_CRITICAL
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_NORMAL
 import com.android.systemui.dump.DumpsysEntry.DumpableEntry
@@ -35,8 +33,9 @@ import java.io.BufferedOutputStream
 import java.io.FileDescriptor
 import java.io.FileOutputStream
 import java.io.PrintWriter
+import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Provider
+import kotlin.system.measureTimeMillis
 
 /**
  * Oversees SystemUI's output during bug reports (and dumpsys in general)
@@ -77,6 +76,7 @@ import javax.inject.Provider
  * $ <invocation> dumpables
  * $ <invocation> buffers
  * $ <invocation> tables
+ * $ <invocation> all
  *
  * # Finally, the following will simulate what we dump during the CRITICAL and NORMAL sections of a
  * # bug report:
@@ -91,10 +91,9 @@ import javax.inject.Provider
 class DumpHandler
 @Inject
 constructor(
-    private val context: Context,
     private val dumpManager: DumpManager,
     private val logBufferEulogizer: LogBufferEulogizer,
-    private val startables: MutableMap<Class<*>, Provider<CoreStartable>>,
+    private val config: SystemUIConfigDumpable,
 ) {
     /** Dump the diagnostics! Behavior can be controlled via [args]. */
     fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
@@ -109,6 +108,8 @@ constructor(
                 return
             }
 
+        pw.print("Dump starting: ")
+        pw.println(DATE_FORMAT.format(System.currentTimeMillis()))
         when {
             parsedArgs.dumpPriority == PRIORITY_ARG_CRITICAL -> dumpCritical(pw, parsedArgs)
             parsedArgs.dumpPriority == PRIORITY_ARG_NORMAL && !parsedArgs.proto -> {
@@ -129,6 +130,11 @@ constructor(
             "dumpables" -> dumpDumpables(pw, args)
             "buffers" -> dumpBuffers(pw, args)
             "tables" -> dumpTables(pw, args)
+            "all" -> {
+                dumpDumpables(pw, args)
+                dumpBuffers(pw, args)
+                dumpTables(pw, args)
+            }
             "config" -> dumpConfig(pw)
             "help" -> dumpHelp(pw)
             else -> {
@@ -148,7 +154,6 @@ constructor(
                 dumpDumpable(target, pw, args.rawArgs)
             }
         }
-        dumpConfig(pw)
     }
 
     private fun dumpNormal(pw: PrintWriter, args: ParsedArgs) {
@@ -251,53 +256,8 @@ constructor(
             .sortedBy { it.name }
             .minByOrNull { it.name.length }
 
-    private fun dumpDumpable(entry: DumpableEntry, pw: PrintWriter, args: Array<String>) {
-        pw.preamble(entry)
-        entry.dumpable.dump(pw, args)
-    }
-
-    private fun dumpBuffer(entry: LogBufferEntry, pw: PrintWriter, tailLength: Int) {
-        pw.preamble(entry)
-        entry.buffer.dump(pw, tailLength)
-    }
-
-    private fun dumpTableBuffer(buffer: TableLogBufferEntry, pw: PrintWriter, args: Array<String>) {
-        pw.preamble(buffer)
-        buffer.table.dump(pw, args)
-    }
-
     private fun dumpConfig(pw: PrintWriter) {
-        pw.println("SystemUiServiceComponents configuration:")
-        pw.print("vendor component: ")
-        pw.println(context.resources.getString(R.string.config_systemUIVendorServiceComponent))
-        val services: MutableList<String> =
-            startables.keys.map({ cls: Class<*> -> cls.simpleName }).toMutableList()
-
-        services.add(context.resources.getString(R.string.config_systemUIVendorServiceComponent))
-        dumpServiceList(pw, "global", services.toTypedArray())
-        dumpServiceList(pw, "per-user", R.array.config_systemUIServiceComponentsPerUser)
-    }
-
-    private fun dumpServiceList(pw: PrintWriter, type: String, resId: Int) {
-        val services: Array<String> = context.resources.getStringArray(resId)
-        dumpServiceList(pw, type, services)
-    }
-
-    private fun dumpServiceList(pw: PrintWriter, type: String, services: Array<String>?) {
-        pw.print(type)
-        pw.print(": ")
-        if (services == null) {
-            pw.println("N/A")
-            return
-        }
-        pw.print(services.size)
-        pw.println(" services")
-        for (i in services.indices) {
-            pw.print("  ")
-            pw.print(i)
-            pw.print(": ")
-            pw.println(services[i])
-        }
+        config.dump(pw, arrayOf())
     }
 
     private fun dumpHelp(pw: PrintWriter) {
@@ -426,13 +386,6 @@ constructor(
         const val DUMPSYS_DUMPABLE_DIVIDER =
             "----------------------------------------------------------------------------"
 
-        /**
-         * Important: do not change this divider without updating any bug report processing tools
-         * (e.g. ABT), since this divider is used to determine boundaries for bug report views
-         */
-        const val DUMPSYS_BUFFER_DIVIDER =
-            "============================================================================"
-
         private fun findBestTargetMatch(c: Collection<DumpsysEntry>, target: String) =
             c.asSequence().filter { it.name.endsWith(target) }.minByOrNull { it.name.length }
 
@@ -453,42 +406,71 @@ constructor(
                 is DumpableEntry,
                 is TableLogBufferEntry -> {
                     println()
-                    println(entry.name)
+                    println("${entry.name}:")
                     println(DUMPSYS_DUMPABLE_DIVIDER)
                 }
                 is LogBufferEntry -> {
                     println()
                     println()
                     println("BUFFER ${entry.name}:")
-                    println(DUMPSYS_BUFFER_DIVIDER)
+                    println(DUMPSYS_DUMPABLE_DIVIDER)
                 }
             }
 
-        /**
-         * Zero-arg utility to write a [DumpableEntry] to the given [PrintWriter] in a
-         * dumpsys-appropriate format.
-         */
-        private fun dumpDumpable(entry: DumpableEntry, pw: PrintWriter) {
-            pw.preamble(entry)
-            entry.dumpable.dump(pw, arrayOf())
+        private fun PrintWriter.footer(entry: DumpsysEntry, dumpTimeMillis: Long) {
+            if (entry !is DumpableEntry) return
+            println()
+            print(entry.priority)
+            print(" dump took ")
+            print(dumpTimeMillis)
+            print("ms -- ")
+            print(entry.name)
+            if (entry.priority == DumpPriority.CRITICAL && dumpTimeMillis > 25) {
+                print(" -- warning: individual dump time exceeds 5% of total CRITICAL dump time!")
+            }
+            println()
+        }
+
+        private inline fun PrintWriter.wrapSection(entry: DumpsysEntry, block: () -> Unit) {
+            preamble(entry)
+            val dumpTime = measureTimeMillis(block)
+            footer(entry, dumpTime)
         }
 
         /**
-         * Zero-arg utility to write a [LogBufferEntry] to the given [PrintWriter] in a
+         * Utility to write a [DumpableEntry] to the given [PrintWriter] in a
          * dumpsys-appropriate format.
          */
-        private fun dumpBuffer(entry: LogBufferEntry, pw: PrintWriter) {
-            pw.preamble(entry)
-            entry.buffer.dump(pw, 0)
+        private fun dumpDumpable(
+                entry: DumpableEntry,
+                pw: PrintWriter,
+                args: Array<String> = arrayOf(),
+        ) = pw.wrapSection(entry) {
+            entry.dumpable.dump(pw, args)
         }
 
         /**
-         * Zero-arg utility to write a [TableLogBufferEntry] to the given [PrintWriter] in a
+         * Utility to write a [LogBufferEntry] to the given [PrintWriter] in a
          * dumpsys-appropriate format.
          */
-        private fun dumpTableBuffer(entry: TableLogBufferEntry, pw: PrintWriter) {
-            pw.preamble(entry)
-            entry.table.dump(pw, arrayOf())
+        private fun dumpBuffer(
+                entry: LogBufferEntry,
+                pw: PrintWriter,
+                tailLength: Int = 0,
+        ) = pw.wrapSection(entry) {
+            entry.buffer.dump(pw, tailLength)
+        }
+
+        /**
+         * Utility to write a [TableLogBufferEntry] to the given [PrintWriter] in a
+         * dumpsys-appropriate format.
+         */
+        private fun dumpTableBuffer(
+                entry: TableLogBufferEntry,
+                pw: PrintWriter,
+                args: Array<String> = arrayOf(),
+        ) = pw.wrapSection(entry) {
+            entry.table.dump(pw, args)
         }
 
         /**
@@ -510,6 +492,7 @@ constructor(
     }
 }
 
+private val DATE_FORMAT = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
 private val PRIORITY_OPTIONS = arrayOf(PRIORITY_ARG_CRITICAL, PRIORITY_ARG_NORMAL)
 
 private val COMMANDS =
