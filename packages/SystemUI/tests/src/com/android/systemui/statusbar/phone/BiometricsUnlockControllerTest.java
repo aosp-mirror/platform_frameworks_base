@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.flags.Flags.FP_LISTEN_OCCLUDING_APPS;
 import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 
@@ -125,12 +126,15 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private ViewRootImpl mViewRootImpl;
     private final FakeSystemClock mSystemClock = new FakeSystemClock();
+    private FakeFeatureFlags mFeatureFlags;
     private BiometricUnlockController mBiometricUnlockController;
-    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mFeatureFlags = new FakeFeatureFlags();
+        mFeatureFlags.set(FP_LISTEN_OCCLUDING_APPS, false);
+        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         TestableResources res = getContext().getOrCreateTestableResources();
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
@@ -156,7 +160,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController.addListener(mBiometricUnlockEventsListener);
         when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(mStrongAuthTracker);
         when(mStatusBarKeyguardViewManager.getViewRootImpl()).thenReturn(mViewRootImpl);
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
     }
 
     @Test
@@ -428,7 +431,25 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
 
     @Test
     public void onFPFailureNoHaptics_notInteractive_showLockScreen() {
-        // GIVEN no vibrator and device is dreaming
+        mFeatureFlags.set(FP_LISTEN_OCCLUDING_APPS, true);
+
+        // GIVEN no vibrator and device is not interactive
+        when(mVibratorHelper.hasVibrator()).thenReturn(false);
+        when(mUpdateMonitor.isDeviceInteractive()).thenReturn(false);
+        when(mUpdateMonitor.isDreaming()).thenReturn(false);
+
+        // WHEN FP fails
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+
+        // THEN wakeup the device
+        verify(mPowerManager).wakeUp(anyLong(), anyInt(), anyString());
+    }
+
+    @Test
+    public void onFPFailureNoHaptics_notInteractive_showLockScreen_doNotListenOccludingApps() {
+        mFeatureFlags.set(FP_LISTEN_OCCLUDING_APPS, false);
+
+        // GIVEN no vibrator and device is not interactive
         when(mVibratorHelper.hasVibrator()).thenReturn(false);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(false);
         when(mUpdateMonitor.isDreaming()).thenReturn(false);
@@ -442,6 +463,24 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
 
     @Test
     public void onFPFailureNoHaptics_dreaming_showLockScreen() {
+        mFeatureFlags.set(FP_LISTEN_OCCLUDING_APPS, true);
+
+        // GIVEN no vibrator and device is dreaming
+        when(mVibratorHelper.hasVibrator()).thenReturn(false);
+        when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
+        when(mUpdateMonitor.isDreaming()).thenReturn(true);
+
+        // WHEN FP fails
+        mBiometricUnlockController.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
+
+        // THEN never wakeup the device
+        verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+    }
+
+    @Test
+    public void onFPFailureNoHaptics_dreaming_showLockScreen_doNotListeOccludingApps() {
+        mFeatureFlags.set(FP_LISTEN_OCCLUDING_APPS, false);
+
         // GIVEN no vibrator and device is dreaming
         when(mVibratorHelper.hasVibrator()).thenReturn(false);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
