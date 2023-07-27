@@ -617,6 +617,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Koristi biometriju ili zaključavanje ekrana"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Potvrdite identitet"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Koristite biometriju da nastavite"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"Potvrdite identitet otiskom prsta da nastavite"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"Potvrdite identitet licem da nastavite"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Koristite biometriju ili zaključavanje ekrana da nastavite"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrijski hardver nije dostupan"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentifikacija je otkazana"</string>
@@ -2165,7 +2167,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Ponovo pokreni"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nema poslovnih aplikacija"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nema ličnih aplikacija"</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"Otvoriti poslovnu aplikaciju <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Otvoriti aplikaciju <xliff:g id="APP">%s</xliff:g> za posao?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Otvoriti u ličnoj aplikaciji <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"Otvoriti u poslovnoj aplikaciji <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"Pozvati iz poslovne aplikacije?"</string>

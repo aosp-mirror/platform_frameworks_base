@@ -616,6 +616,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"ໃຊ້ລະບົບຊີວະມິຕິ ຫຼື ການລັອກໜ້າຈໍ"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"ຢັ້ງຢືນວ່າແມ່ນທ່ານ"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"ໃຊ້ລະບົບຊີວະມິຕິຂອງທ່ານເພື່ອດຳເນີນການຕໍ່"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"ໃຊ້ລາຍນິ້ວມືຂອງທ່ານເພື່ອສືບຕໍ່"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"ໃຊ້ໃບໜ້າຂອງທ່ານເພື່ອສືບຕໍ່"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"ໃຊ້ລະບົບຊີວະມິຕິ ຫຼື ການລັອກໜ້າຈໍຂອງທ່ານເພື່ອດຳເນີນການຕໍ່"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ຮາດແວຊີວະມິຕິບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"ຍົກເລີກການຮັບຮອງຄວາມຖືກຕ້ອງແລ້ວ"</string>

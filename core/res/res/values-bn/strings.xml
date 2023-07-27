@@ -616,6 +616,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"বায়োমেট্রিক্স অথবা স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"আপনার পরিচয় যাচাই করুন"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"চালিয়ে যেতে আপনার বায়োমেট্রিক্স ব্যবহার করুন"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"চালিয়ে যেতে ফিঙ্গারপ্রিন্ট ব্যবহার করুন"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"চালিয়ে যেতে আপনার ফেস ব্যবহার করুন"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"চালিয়ে যেতে আপনার বায়োমেট্রিক্স বা স্ক্রিন লক ব্যবহার করুন"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"বায়োমেট্রিক হার্ডওয়্যার পাওয়া যাবে না"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"যাচাইকরণ বাতিল হয়েছে"</string>
