@@ -55,6 +55,7 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.settings.FakeGlobalSettings;
@@ -77,7 +78,6 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public static final String FORMATTED_45M = "0h 45m";
     public static final String FORMATTED_HOUR = "1h 0m";
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
-    private final GlobalSettings mGlobalSettings = new FakeGlobalSettings();
     private PowerNotificationWarnings mPowerNotificationWarnings;
 
     @Mock
@@ -90,6 +90,10 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private View mView;
+    @Mock
+    private SystemUIDialog.Factory mSystemUIDialogFactory;
+    @Mock
+    private SystemUIDialog mSystemUIDialog;
 
     private BroadcastReceiver mReceiver;
 
@@ -113,9 +117,16 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));
-        mPowerNotificationWarnings = new PowerNotificationWarnings(wrapper, starter,
-                broadcastSender, () -> mBatteryController, mDialogLaunchAnimator, mUiEventLogger,
-                mGlobalSettings, mUserTracker);
+        when(mSystemUIDialogFactory.create()).thenReturn(mSystemUIDialog);
+        mPowerNotificationWarnings = new PowerNotificationWarnings(
+                wrapper,
+                starter,
+                broadcastSender,
+                () -> mBatteryController,
+                mDialogLaunchAnimator,
+                mUiEventLogger,
+                mUserTracker,
+                mSystemUIDialogFactory);
         BatteryStateSnapshot snapshot = new BatteryStateSnapshot(100, false, false, 1,
                 BatteryManager.BATTERY_HEALTH_GOOD, 5, 15);
         mPowerNotificationWarnings.updateSnapshot(snapshot);
@@ -251,7 +262,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
 
         verify(mDialogLaunchAnimator, never()).showFromView(any(), any());
 
-        assertThat(mPowerNotificationWarnings.getSaverConfirmationDialog().isShowing()).isTrue();
+        verify(mPowerNotificationWarnings.getSaverConfirmationDialog()).show();
         mPowerNotificationWarnings.getSaverConfirmationDialog().dismiss();
     }
 
@@ -266,7 +277,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
 
         verify(mDialogLaunchAnimator, never()).showFromView(any(), any());
 
-        assertThat(mPowerNotificationWarnings.getSaverConfirmationDialog().isShowing()).isTrue();
+        verify(mPowerNotificationWarnings.getSaverConfirmationDialog()).show();
         mPowerNotificationWarnings.getSaverConfirmationDialog().dismiss();
     }
 }

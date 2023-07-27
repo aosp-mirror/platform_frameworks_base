@@ -36,6 +36,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,6 +56,8 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 class UserSwitchDialogControllerTest : SysuiTestCase() {
 
+    @Mock
+    private lateinit var dialogFactory: SystemUIDialog.Factory
     @Mock
     private lateinit var dialog: SystemUIDialog
     @Mock
@@ -80,7 +83,8 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(dialog.context).thenReturn(mContext)
+        whenever(dialog.context).thenReturn(mContext)
+        whenever(dialogFactory.create()).thenReturn(dialog)
 
         controller = UserSwitchDialogController(
             { userDetailViewAdapter },
@@ -88,7 +92,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
             falsingManager,
             dialogLaunchAnimator,
             uiEventLogger,
-            { dialog }
+            dialogFactory
         )
     }
 

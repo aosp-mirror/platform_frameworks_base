@@ -51,6 +51,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSystemUIDialogController
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -97,9 +98,10 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Mock lateinit var authorizedPanelsRepository: AuthorizedPanelsRepository
     @Mock lateinit var featureFlags: FeatureFlags
     @Mock lateinit var packageManager: PackageManager
+    @Mock lateinit var systemUIDialogFactory: SystemUIDialog.Factory
 
     private val preferredPanelRepository = FakeSelectedComponentRepository()
-    private val fakeDialogController = FakeSystemUIDialogController()
+    private lateinit var fakeDialogController: FakeSystemUIDialogController
     private val uiExecutor = FakeExecutor(FakeSystemClock())
     private val bgExecutor = FakeExecutor(FakeSystemClock())
 
@@ -114,6 +116,9 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
+        fakeDialogController = FakeSystemUIDialogController(mContext)
+        whenever(systemUIDialogFactory.create(any(Context::class.java)))
+            .thenReturn(fakeDialogController.dialog)
         controlsSettingsRepository = FakeControlsSettingsRepository()
 
         // This way, it won't be cloned every time `LayoutInflater.fromContext` is called, but we
@@ -146,10 +151,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                 authorizedPanelsRepository,
                 preferredPanelRepository,
                 featureFlags,
-                ControlsDialogsFactory {
-                    isRemoveAppDialogCreated = true
-                    fakeDialogController.dialog
-                },
+                ControlsDialogsFactory(systemUIDialogFactory),
                 dumpManager,
             )
         `when`(userTracker.userId).thenReturn(0)
