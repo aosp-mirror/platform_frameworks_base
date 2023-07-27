@@ -281,7 +281,7 @@
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"ውሂብ ቆጣቢ በርቷል"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# መሣሪያ}one{# መሣሪያዎች}other{# መሣሪያዎች}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"የባትሪ ብርሃን"</string>
-    <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"ካሜራ ስራ ላይ ነው"</string>
+    <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"ካሜራ ሥራ ላይ ነው"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"የውሂብ አጠቃቀም"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"ቀሪ ውሂብ"</string>
@@ -825,9 +825,9 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"መተግበሪያዎች የእርስዎን <xliff:g id="TYPES_LIST">%s</xliff:g> እየተጠቀሙ ነው።"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"፣ "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" እና "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"በ<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ስራ ላይ እየዋለ ነው"</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"በቅርብ ጊዜ በ<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ስራ ላይ ውሏል"</string>
-    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(ስራ)"</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"በ<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ሥራ ላይ እየዋለ ነው"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"በቅርብ ጊዜ በ<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> ሥራ ላይ ውሏል"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(ሥራ)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"የስልክ ጥሪ"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(በ<xliff:g id="APPLICATION_NAME_S_">%s</xliff:g> በኩል)"</string>
     <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
@@ -981,7 +981,7 @@
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ለኦዲዮ ውጽዓት ተገኚ የሆኑ መሣሪያዎች"</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"የድምጽ መጠን"</string>
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
-    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ድምጽ ማውጫዎች እና ማሳያዎች"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ድምፅ ማውጫዎች እና ማሳያዎች"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"የተጠቆሙ መሣሪያዎች"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"ሚዲያን ወደ ሌላ መሣሪያ ለማንቀሳቀስ የተጋራውን ክፍለ ጊዜዎን ያቁሙ"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"አቁም"</string>
