@@ -147,6 +147,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Դեմքը ճանաչվեց։ Սեղմեք շարունակելու համար։"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Դեմքը ճանաչվեց։ Սեղմեք ապակողպման պատկերակը։"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Նույնականացված է"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Օգտագործել PIN կոդ"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Օգտագործել նախշ"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Օգտագործել գաղտնաբառ"</string>
@@ -359,6 +361,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Ապակողպվեց դեմքով"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Դեմքը ճանաչվեց"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Սահեցրեք վերև՝ նորից փորձելու համար"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ապակողպեք՝ NFC-ն օգտագործելու համար"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Այս սարքը պատկանում է ձեր ընկերությանը"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Այս սարքը պատկանում է «<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>» կազմակերպությանը"</string>
@@ -928,6 +932,8 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Փորձեք մեկ այլ PIN կոդ"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Հաստատեք փոփոխությունը <xliff:g id="DEVICE">%s</xliff:g> սարքի համար"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Սահեցրեք մատը՝ ավելին իմանալու համար"</string>
+    <!-- no translation found for retry_face (416380073082560186) -->
+    <skip />
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Բեռնման խորհուրդներ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Մեդիա"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Թաքցնե՞լ <xliff:g id="APP_NAME">%1$s</xliff:g>-ի մեդիա աշխատաշրջանի կառավարման տարրը։"</string>

@@ -147,6 +147,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"顔を認識しました。押して続行してください。"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"顔を認識しました。ロック解除アイコンを押して続行します。"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"認証済み"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN を使用"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"パターンを使用"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"パスワードを使用"</string>
@@ -359,6 +361,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"顔でロック解除しました"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"顔を認識しました"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"上にスワイプしてもう一度お試しください"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC を使用するには、ロックを解除してください"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"これは組織が所有するデバイスです"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"これは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> が所有するデバイスです"</string>
@@ -928,6 +932,8 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"別の PIN をお試しください"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g>の変更を確認する"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"スワイプすると他の構造が表示されます"</string>
+    <!-- no translation found for retry_face (416380073082560186) -->
+    <skip />
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"候補を読み込んでいます"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"メディア"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> のこのコントロールを非表示にしますか？"</string>
@@ -937,7 +943,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g>（アーティスト名: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>）が <xliff:g id="APP_LABEL">%3$s</xliff:g> で再生中"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="ELAPSED_TIME">%1$s</xliff:g>/<xliff:g id="TOTAL_TIME">%2$s</xliff:g>"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> を実行しています"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> を実行中"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"再生"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"一時停止"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"前のトラック"</string>
