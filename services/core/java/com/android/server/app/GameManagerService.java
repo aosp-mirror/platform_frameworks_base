@@ -346,6 +346,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
                         if (mHandler.hasMessages(CANCEL_GAME_LOADING_MODE)) {
                             mHandler.removeMessages(CANCEL_GAME_LOADING_MODE);
                         }
+                        Slog.v(TAG, String.format(
+                                "Game loading power mode %s (game state change isLoading=%b)",
+                                        isLoading ? "ON" : "OFF", isLoading));
                         mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, isLoading);
                         if (isLoading) {
                             int loadingBoostDuration = getLoadingBoostDuration(packageName, userId);
@@ -369,6 +372,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     break;
                 }
                 case CANCEL_GAME_LOADING_MODE: {
+                    Slog.v(TAG, "Game loading power mode OFF (loading boost ended)");
                     mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, false);
                     break;
                 }
@@ -1279,6 +1283,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 // instruction.
                 mHandler.removeMessages(CANCEL_GAME_LOADING_MODE);
             } else {
+                Slog.v(TAG, "Game loading power mode ON (loading boost on game start)");
                 mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, true);
             }
 
@@ -1555,6 +1560,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 }
             }
         }, new IntentFilter(Intent.ACTION_SHUTDOWN));
+        Slog.v(TAG, "Game loading power mode OFF (game manager service start/restart)");
+        mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, false);
+        Slog.v(TAG, "Game power mode OFF (game manager service start/restart)");
+        mPowerManagerInternal.setPowerMode(Mode.GAME, false);
     }
 
     private void sendUserMessage(int userId, int what, String eventForLog, int delayMillis) {

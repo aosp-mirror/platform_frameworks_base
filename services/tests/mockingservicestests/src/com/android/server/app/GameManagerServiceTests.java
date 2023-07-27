@@ -2157,6 +2157,14 @@ public class GameManagerServiceTests {
     }
 
     @Test
+    public void testResetGamePowerMode() {
+        GameManagerService gameManagerService = createServiceAndStartUser(USER_ID_1);
+        gameManagerService.onBootCompleted();
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, false);
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME, false);
+    }
+
+    @Test
     public void testNotifyGraphicsEnvironmentSetup() {
         String configString = "mode=2,loadingBoost=2000";
         when(DeviceConfig.getProperty(anyString(), anyString()))
