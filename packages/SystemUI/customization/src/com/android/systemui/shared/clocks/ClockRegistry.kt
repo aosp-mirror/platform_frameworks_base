@@ -60,7 +60,7 @@ private val KNOWN_PLUGINS =
         "com.android.systemui.falcon.nine" to listOf(ClockMetadata("DIGITAL_CLOCK_WEATHER")),
     )
 
-private fun <TKey, TVal> ConcurrentHashMap<TKey, TVal>.concurrentGetOrPut(
+private fun <TKey : Any, TVal : Any> ConcurrentHashMap<TKey, TVal>.concurrentGetOrPut(
     key: TKey,
     value: TVal,
     onNew: () -> Unit
