@@ -32,6 +32,11 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
+import kotlinx.coroutines.flow.FlowKt;
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
+
 /**
  */
 @SysUISingleton
@@ -46,6 +51,9 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
     private float mDarkIntensity;
     private int mDarkModeIconColorSingleTone;
     private int mLightModeIconColorSingleTone;
+
+    private final MutableStateFlow<DarkChange> mDarkChangeFlow = StateFlowKt.MutableStateFlow(
+            DarkChange.EMPTY);
 
     /**
      */
@@ -64,6 +72,11 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
 
     public LightBarTransitionsController getTransitionsController() {
         return mTransitionsController;
+    }
+
+    @Override
+    public StateFlow<DarkChange> darkChangeFlow() {
+        return FlowKt.asStateFlow(mDarkChangeFlow);
     }
 
     public void addDarkReceiver(DarkReceiver receiver) {
@@ -122,6 +135,7 @@ public class DarkIconDispatcherImpl implements SysuiDarkIconDispatcher,
     }
 
     private void applyIconTint() {
+        mDarkChangeFlow.setValue(new DarkChange(mTintAreas, mDarkIntensity, mIconTint));
         for (int i = 0; i < mReceivers.size(); i++) {
             mReceivers.valueAt(i).onDarkChanged(mTintAreas, mDarkIntensity, mIconTint);
         }
