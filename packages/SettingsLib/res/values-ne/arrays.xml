@@ -282,4 +282,10 @@
     <item msgid="8828567335701536560">"अडियो स्रोत"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
   </string-array>
+  <string-array name="grammatical_gender_values">
+    <item msgid="4976102487934077239">"०"</item>
+    <item msgid="2646486108212979598">"१"</item>
+    <item msgid="3753634915787796632">"२"</item>
+    <item msgid="4779928470672877922">"३"</item>
+  </string-array>
 </resources>
