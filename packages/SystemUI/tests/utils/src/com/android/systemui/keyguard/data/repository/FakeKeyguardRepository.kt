@@ -22,6 +22,7 @@ import com.android.systemui.common.shared.model.Position
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
 import com.android.systemui.keyguard.shared.model.ScreenModel
 import com.android.systemui.keyguard.shared.model.ScreenState
 import com.android.systemui.keyguard.shared.model.StatusBarState
@@ -115,6 +116,20 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _isQuickSettingsVisible = MutableStateFlow(false)
     override val isQuickSettingsVisible: Flow<Boolean> = _isQuickSettingsVisible.asStateFlow()
 
+    private val _keyguardAlpha = MutableStateFlow(1f)
+    override val keyguardAlpha: StateFlow<Float> = _keyguardAlpha
+
+    private val _keyguardRootViewVisibility =
+        MutableStateFlow(
+            KeyguardRootViewVisibilityState(
+                0,
+                goingToFullShade = false,
+                occlusionTransitionRunning = false
+            )
+        )
+    override val keyguardRootViewVisibility: Flow<KeyguardRootViewVisibilityState> =
+        _keyguardRootViewVisibility.asStateFlow()
+
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
     }
@@ -132,6 +147,8 @@ class FakeKeyguardRepository : KeyguardRepository {
         _animateBottomAreaDozingTransitions.tryEmit(animate)
     }
 
+
+    @Deprecated("Deprecated as part of b/278057014")
     override fun setBottomAreaAlpha(alpha: Float) {
         _bottomAreaAlpha.value = alpha
     }
@@ -222,5 +239,19 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     override fun isUdfpsSupported(): Boolean {
         return _isUdfpsSupported.value
+    }
+
+    override fun setKeyguardAlpha(alpha: Float) {
+        _keyguardAlpha.value = alpha
+    }
+
+    override fun setKeyguardVisibility(
+        statusBarState: Int,
+        goingToFullShade: Boolean,
+        occlusionTransitionRunning: Boolean
+    ) {
+        _keyguardRootViewVisibility.value = KeyguardRootViewVisibilityState(
+            statusBarState, goingToFullShade, occlusionTransitionRunning
+        )
     }
 }

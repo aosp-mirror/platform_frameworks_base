@@ -22,9 +22,9 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.ViewGroup.MarginLayoutParams
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -56,7 +56,7 @@ import javax.inject.Inject
  * This will be the most common use case for phones in portrait mode.
  */
 @SysUISingleton
-class DefaultLockscreenLayout
+class ShortcutsBesideUdfpsLockscreenLayout
 @Inject
 constructor(
     private val authController: AuthController,
@@ -64,7 +64,7 @@ constructor(
     private val windowManager: WindowManager,
     private val context: Context,
 ) : LockscreenLayout {
-    override val id: String = DEFAULT
+    override val id: String = SHORTCUTS_BESIDE_UDFPS
 
     override fun layoutIndicationArea(rootView: KeyguardRootView) {
         val indicationArea = rootView.findViewById<View>(R.id.keyguard_indication_area) ?: return
@@ -149,6 +149,8 @@ constructor(
     override fun layoutShortcuts(rootView: KeyguardRootView) {
         val leftShortcut = rootView.findViewById<View>(R.id.start_button) ?: return
         val rightShortcut = rootView.findViewById<View>(R.id.end_button) ?: return
+        val lockIconView = rootView.findViewById<View>(R.id.lock_icon_view) ?: return
+        val udfpsSupported = keyguardUpdateMonitor.isUdfpsSupported
         val width =
             context.resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width)
         val height =
@@ -160,32 +162,50 @@ constructor(
         val padding =
             context.resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_padding)
 
-        leftShortcut.apply {
-            updateLayoutParams<MarginLayoutParams> {
-                marginStart = horizontalOffsetMargin
-                bottomMargin = verticalOffsetMargin
+        if (!udfpsSupported) {
+            leftShortcut.apply {
+                updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    marginStart = horizontalOffsetMargin
+                    bottomMargin = verticalOffsetMargin
+                }
+                setPadding(padding)
             }
-            setPadding(padding)
-        }
 
-        rightShortcut.apply {
-            updateLayoutParams<MarginLayoutParams> {
-                marginEnd = horizontalOffsetMargin
-                bottomMargin = verticalOffsetMargin
+            rightShortcut.apply {
+                updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    marginEnd = horizontalOffsetMargin
+                    bottomMargin = verticalOffsetMargin
+                }
+                setPadding(padding)
             }
-            setPadding(padding)
         }
 
         rootView.getConstraintSet().apply {
-            constrainWidth(leftShortcut.id, width)
-            constrainHeight(leftShortcut.id, height)
-            connect(leftShortcut.id, LEFT, PARENT_ID, LEFT)
-            connect(leftShortcut.id, BOTTOM, PARENT_ID, BOTTOM)
+            if (udfpsSupported) {
+                constrainWidth(leftShortcut.id, width)
+                constrainHeight(leftShortcut.id, height)
+                connect(leftShortcut.id, LEFT, PARENT_ID, LEFT)
+                connect(leftShortcut.id, RIGHT, lockIconView.id, LEFT)
+                connect(leftShortcut.id, TOP, lockIconView.id, TOP)
+                connect(leftShortcut.id, BOTTOM, lockIconView.id, BOTTOM)
 
-            constrainWidth(rightShortcut.id, width)
-            constrainHeight(rightShortcut.id, height)
-            connect(rightShortcut.id, RIGHT, PARENT_ID, RIGHT)
-            connect(rightShortcut.id, BOTTOM, PARENT_ID, BOTTOM)
+                constrainWidth(rightShortcut.id, width)
+                constrainHeight(rightShortcut.id, height)
+                connect(rightShortcut.id, RIGHT, PARENT_ID, RIGHT)
+                connect(rightShortcut.id, LEFT, lockIconView.id, RIGHT)
+                connect(rightShortcut.id, TOP, lockIconView.id, TOP)
+                connect(rightShortcut.id, BOTTOM, lockIconView.id, BOTTOM)
+            } else {
+                constrainWidth(leftShortcut.id, width)
+                constrainHeight(leftShortcut.id, height)
+                connect(leftShortcut.id, LEFT, PARENT_ID, LEFT)
+                connect(leftShortcut.id, BOTTOM, PARENT_ID, BOTTOM)
+
+                constrainWidth(rightShortcut.id, width)
+                constrainHeight(rightShortcut.id, height)
+                connect(rightShortcut.id, RIGHT, PARENT_ID, RIGHT)
+                connect(rightShortcut.id, BOTTOM, PARENT_ID, BOTTOM)
+            }
             applyTo(rootView)
         }
     }
@@ -213,7 +233,6 @@ constructor(
                 connect(ambientIndicationContainer.id, LEFT, PARENT_ID, LEFT)
                 connect(ambientIndicationContainer.id, RIGHT, PARENT_ID, RIGHT)
             }
-
             applyTo(rootView)
         }
     }
@@ -246,7 +265,7 @@ constructor(
             width = WRAP_CONTENT
         }
 
-        popupMenu.updateLayoutParams<MarginLayoutParams> {
+        popupMenu.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin =
                 context.resources.getDimensionPixelSize(R.dimen.keyguard_affordance_vertical_offset)
             marginStart = horizontalOffsetMargin
@@ -281,6 +300,6 @@ constructor(
         }
 
     companion object {
-        const val DEFAULT = "default"
+        const val SHORTCUTS_BESIDE_UDFPS = "shortcutsBesideUdfps"
     }
 }

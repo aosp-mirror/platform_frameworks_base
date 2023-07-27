@@ -17,20 +17,26 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.DrawableRes
+import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.animation.Interpolators
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
@@ -40,31 +46,74 @@ object KeyguardRootViewBinder {
     @JvmStatic
     fun bind(
         view: ViewGroup,
+        viewModel: KeyguardRootViewModel,
         featureFlags: FeatureFlags,
         occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
         chipbarCoordinator: ChipbarCoordinator,
-    ) {
-        if (featureFlags.isEnabled(Flags.FP_LISTEN_OCCLUDING_APPS)) {
+        keyguardStateController: KeyguardStateController,
+    ): DisposableHandle {
+        val disposableHandle =
             view.repeatWhenAttached {
-                repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    launch {
-                        occludingAppDeviceEntryMessageViewModel.message.collect { biometricMessage
-                            ->
-                            if (biometricMessage?.message != null) {
-                                chipbarCoordinator.displayView(
-                                    createChipbarInfo(
-                                        biometricMessage.message,
-                                        R.drawable.ic_lock,
+                if (featureFlags.isEnabled(Flags.FP_LISTEN_OCCLUDING_APPS)) {
+                    repeatOnLifecycle(Lifecycle.State.CREATED) {
+                        launch {
+                            occludingAppDeviceEntryMessageViewModel.message.collect {
+                                biometricMessage ->
+                                if (biometricMessage?.message != null) {
+                                    chipbarCoordinator.displayView(
+                                        createChipbarInfo(
+                                            biometricMessage.message,
+                                            R.drawable.ic_lock,
+                                        )
                                     )
-                                )
-                            } else {
-                                chipbarCoordinator.removeView(ID, "occludingAppMsgNull")
+                                } else {
+                                    chipbarCoordinator.removeView(ID, "occludingAppMsgNull")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+                    repeatOnLifecycle(Lifecycle.State.STARTED) {
+                        launch {
+                            viewModel.keyguardRootViewVisibilityState.collect { visibilityState ->
+                                view.animate().cancel()
+                                val goingToFullShade = visibilityState.goingToFullShade
+                                val statusBarState = visibilityState.statusBarState
+                                val isOcclusionTransitionRunning =
+                                    visibilityState.occlusionTransitionRunning
+                                if (goingToFullShade) {
+                                    view.animate().alpha(0f).setStartDelay(
+                                        keyguardStateController.keyguardFadingAwayDelay
+                                    ).setDuration(
+                                        keyguardStateController.shortenedFadingAwayDuration
+                                    ).setInterpolator(
+                                        Interpolators.ALPHA_OUT
+                                    ).withEndAction { view.visibility = View.GONE }.start()
+                                } else if (
+                                    statusBarState == StatusBarState.KEYGUARD ||
+                                    statusBarState == StatusBarState.SHADE_LOCKED
+                                ) {
+                                    view.visibility = View.VISIBLE
+                                    if (!isOcclusionTransitionRunning) {
+                                        view.alpha = 1f
+                                    }
+                                } else {
+                                    view.visibility = View.GONE
+                                }
+                            }
+                        }
+
+                        launch {
+                            viewModel.alpha.collect { alpha ->
+                                view.alpha = alpha
                             }
                         }
                     }
                 }
             }
-        }
+        return disposableHandle
     }
 
     /**
@@ -73,10 +122,10 @@ object KeyguardRootViewBinder {
     private fun createChipbarInfo(message: String, @DrawableRes icon: Int): ChipbarInfo {
         return ChipbarInfo(
             startIcon =
-                TintedIcon(
-                    Icon.Resource(icon, null),
-                    ChipbarInfo.DEFAULT_ICON_TINT,
-                ),
+            TintedIcon(
+                Icon.Resource(icon, null),
+                ChipbarInfo.DEFAULT_ICON_TINT,
+            ),
             text = Text.Loaded(message),
             endItem = null,
             vibrationEffect = null,

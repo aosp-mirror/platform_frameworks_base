@@ -823,6 +823,12 @@
     <dimen name="keyguard_affordance_fixed_radius">24dp</dimen>
     <dimen name="keyguard_affordance_fixed_padding">12dp</dimen>
 
+    <!--  The width/height/padding of the keyguard settings popup menu  -->
+    <dimen name="keyguard_settings_popup_menu_icon_height">24dp</dimen>
+    <dimen name="keyguard_settings_popup_menu_icon_width">24dp</dimen>
+    <dimen name="keyguard_settings_popup_menu_icon_end_margin">8dp</dimen>
+    <dimen name="keyguard_settings_popup_menu_padding">12dp</dimen>
+
     <!-- Amount the button should shake when it's not long-pressed for long enough. -->
     <dimen name="keyguard_affordance_shake_amplitude">8dp</dimen>
 
