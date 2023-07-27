@@ -137,7 +137,7 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         mInfoMediaManager =
-                new ManagerInfoMediaManager(
+                InfoMediaManager.createInstance(
                         context, packageName, notification, mLocalBluetoothManager);
     }
 

@@ -76,7 +76,6 @@ import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastMetadata;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
-import com.android.settingslib.media.ManagerInfoMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
@@ -194,7 +193,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mKeyGuardManager = keyGuardManager;
         mFeatureFlags = featureFlags;
         mUserTracker = userTracker;
-        InfoMediaManager imm = new ManagerInfoMediaManager(mContext, packageName, null, lbm);
+        InfoMediaManager imm = InfoMediaManager.createInstance(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mDialogLaunchAnimator = dialogLaunchAnimator;
