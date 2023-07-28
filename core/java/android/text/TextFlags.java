@@ -44,6 +44,6 @@ public final class TextFlags {
     /**
      * Default value for the flag {@link #ENABLE_NEW_CONTEXT_MENU}.
      */
-    public static final boolean ENABLE_NEW_CONTEXT_MENU_DEFAULT = false;
+    public static final boolean ENABLE_NEW_CONTEXT_MENU_DEFAULT = true;
 
 }
