@@ -1247,7 +1247,7 @@
     <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Želite li nastaviti s postavljanjem?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pritisnuli ste tipku za uključivanje/isključivanje, čime se obično isključuje zaslon.\n\nPokušajte lagano dodirnuti dok postavljate svoj otisak prsta."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Isključi zaslon"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Nastavi postavljanje"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Nastavi s postavljanjem"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Nastaviti s potvrđivanjem otiska prsta?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pritisnuli ste tipku za uključivanje/isključivanje, čime se obično isključuje zaslon.\n\nPokušajte lagano dodirnuti da biste potvrdili svoj otisak prsta."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Isključi zaslon"</string>

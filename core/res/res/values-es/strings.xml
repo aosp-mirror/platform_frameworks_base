@@ -1247,7 +1247,7 @@
     <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"¿Quieres seguir con la configuración?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Has pulsado el botón de encendido, lo que suele apagar la pantalla.\n\nPrueba a apoyar el dedo ligeramente para verificar tu huella digital."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Apagar pantalla"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Seguir configurando"</string>
+    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Continuar configuración"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"¿Seguir verificando tu huella digital?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Has pulsado el botón de encendido, lo que suele apagar la pantalla.\n\nPrueba a apoyar el dedo ligeramente para verificar tu huella digital."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Apagar pantalla"</string>
