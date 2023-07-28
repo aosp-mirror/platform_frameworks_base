@@ -74,14 +74,19 @@ interface ICompanionDeviceManager {
     @EnforcePermission("MANAGE_COMPANION_DEVICES")
     void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
+    @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void addOnTransportsChangedListener(IOnTransportsChangedListener listener);
 
+    @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void removeOnTransportsChangedListener(IOnTransportsChangedListener listener);
 
+    @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void sendMessage(int messageType, in byte[] data, in int[] associationIds);
 
+    @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void addOnMessageReceivedListener(int messageType, IOnMessageReceivedListener listener);
 
+    @EnforcePermission("USE_COMPANION_TRANSPORTS")
     void removeOnMessageReceivedListener(int messageType, IOnMessageReceivedListener listener);
 
     void notifyDeviceAppeared(int associationId);

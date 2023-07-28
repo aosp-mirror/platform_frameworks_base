@@ -21,6 +21,7 @@ import static android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES;
 import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE;
+import static android.Manifest.permission.USE_COMPANION_TRANSPORTS;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
@@ -640,29 +641,44 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        @EnforcePermission(USE_COMPANION_TRANSPORTS)
         public void addOnTransportsChangedListener(IOnTransportsChangedListener listener) {
+            addOnTransportsChangedListener_enforcePermission();
+
             mTransportManager.addListener(listener);
         }
 
         @Override
+        @EnforcePermission(USE_COMPANION_TRANSPORTS)
         public void removeOnTransportsChangedListener(IOnTransportsChangedListener listener) {
+            removeOnTransportsChangedListener_enforcePermission();
+
             mTransportManager.removeListener(listener);
         }
 
         @Override
+        @EnforcePermission(USE_COMPANION_TRANSPORTS)
         public void sendMessage(int messageType, byte[] data, int[] associationIds) {
+            sendMessage_enforcePermission();
+
             mTransportManager.sendMessage(messageType, data, associationIds);
         }
 
         @Override
+        @EnforcePermission(USE_COMPANION_TRANSPORTS)
         public void addOnMessageReceivedListener(int messageType,
                 IOnMessageReceivedListener listener) {
+            addOnMessageReceivedListener_enforcePermission();
+
             mTransportManager.addListener(messageType, listener);
         }
 
         @Override
+        @EnforcePermission(USE_COMPANION_TRANSPORTS)
         public void removeOnMessageReceivedListener(int messageType,
                 IOnMessageReceivedListener listener) {
+            removeOnMessageReceivedListener_enforcePermission();
+
             mTransportManager.removeListener(messageType, listener);
         }
 
