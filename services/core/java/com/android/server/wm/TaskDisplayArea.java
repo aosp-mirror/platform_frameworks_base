@@ -1851,9 +1851,17 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                                         0 /* launchFlags */);
                 task.reparent(launchRoot == null ? toDisplayArea : launchRoot, POSITION_TOP);
 
-                // Set the windowing mode to undefined by default to let the root task inherited the
-                // windowing mode.
-                task.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+                // If the task is going to be reparented to the non-fullscreen root TDA and the task
+                // is set to FULLSCREEN explicitly, we keep the windowing mode as is. Otherwise, the
+                // task will inherit the display windowing mode unexpectedly.
+                final boolean keepWindowingMode = launchRoot == null
+                        && task.getRequestedOverrideWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                        && toDisplayArea.getWindowingMode() != WINDOWING_MODE_FULLSCREEN;
+                if (!keepWindowingMode) {
+                    // Set the windowing mode to undefined to let the root task inherited the
+                    // windowing mode.
+                    task.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+                }
                 lastReparentedRootTask = task;
             }
             // Root task may be removed from this display. Ensure each root task will be processed
