@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
@@ -63,10 +63,12 @@ class MovePipDownOnShelfHeightChange(flicker: LegacyFlickerTest) :
     }
 
     /** Checks that the visible region of [pipApp] window always moves down during the animation. */
-    @FlakyTest(bugId = 292813143) @Test fun pipWindowMovesDown() = pipWindowMoves(Direction.DOWN)
+    @Presubmit
+    @Test
+    fun pipWindowMovesDown() = pipWindowMoves(Direction.DOWN)
 
     /** Checks that the visible region of [pipApp] layer always moves down during the animation. */
-    @FlakyTest(bugId = 292813143)
+    @Presubmit
     @Test
     fun pipLayerMovesDown() = pipLayerMoves(Direction.DOWN)
 }
