@@ -86,6 +86,7 @@ public class WindowContextController {
      * @param token The token used to attach to a window manager node. It is usually from
      *              {@link Context#getWindowContextToken()}.
      */
+    @VisibleForTesting
     public WindowContextController(@NonNull WindowTokenClient token) {
         mToken = token;
     }
@@ -104,7 +105,7 @@ public class WindowContextController {
             throw new IllegalStateException("A Window Context can be only attached to "
                     + "a DisplayArea once.");
         }
-        mAttachedToDisplayArea = WindowTokenClientController.getInstance().attachToDisplayArea(
+        mAttachedToDisplayArea = getWindowTokenClientController().attachToDisplayArea(
                 mToken, type, displayId, options)
                 ? AttachStatus.STATUS_ATTACHED : AttachStatus.STATUS_FAILED;
         if (mAttachedToDisplayArea == AttachStatus.STATUS_FAILED) {
@@ -141,17 +142,24 @@ public class WindowContextController {
             throw new IllegalStateException("The Window Context should have been attached"
                     + " to a DisplayArea. AttachToDisplayArea:" + mAttachedToDisplayArea);
         }
-        WindowTokenClientController.getInstance().attachToWindowToken(mToken, windowToken);
+        getWindowTokenClientController().attachToWindowToken(mToken, windowToken);
     }
 
     /** Detaches the window context from the node it's currently associated with. */
     public void detachIfNeeded() {
         if (mAttachedToDisplayArea == AttachStatus.STATUS_ATTACHED) {
-            WindowTokenClientController.getInstance().detachIfNeeded(mToken);
+            getWindowTokenClientController().detachIfNeeded(mToken);
             mAttachedToDisplayArea = AttachStatus.STATUS_DETACHED;
             if (DEBUG_ATTACH) {
                 Log.d(TAG, "Detach Window Context.");
             }
         }
+    }
+
+    /** Gets the {@link WindowTokenClientController}. */
+    @VisibleForTesting
+    @NonNull
+    public WindowTokenClientController getWindowTokenClientController() {
+        return WindowTokenClientController.getInstance();
     }
 }

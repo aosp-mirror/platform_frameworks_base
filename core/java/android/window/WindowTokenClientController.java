@@ -17,7 +17,6 @@
 package android.window;
 
 import static android.view.WindowManager.LayoutParams.WindowType;
-import static android.view.WindowManagerGlobal.getWindowManagerService;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,6 +32,7 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,6 +56,7 @@ public class WindowTokenClientController {
     private final ArrayMap<IBinder, WindowTokenClient> mWindowTokenClientMap = new ArrayMap<>();
 
     /** Gets the singleton controller. */
+    @NonNull
     public static WindowTokenClientController getInstance() {
         synchronized (WindowTokenClientController.class) {
             if (sController == null) {
@@ -75,6 +76,7 @@ public class WindowTokenClientController {
 
     /** Creates a new instance for test only. */
     @VisibleForTesting
+    @NonNull
     public static WindowTokenClientController createInstanceForTesting() {
         return new WindowTokenClientController();
     }
@@ -202,5 +204,12 @@ public class WindowTokenClientController {
             Log.w(TAG, "Can't find attached WindowTokenClient for " + clientToken);
         }
         return windowTokenClient;
+    }
+
+    /** Gets the {@link IWindowManager}. */
+    @VisibleForTesting
+    @Nullable
+    public IWindowManager getWindowManagerService() {
+        return WindowManagerGlobal.getWindowManagerService();
     }
 }
