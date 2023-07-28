@@ -7,7 +7,9 @@
           "include-filter": "android.util.apk.SourceStampVerifierTest"
         }
       ]
-    },
+    }
+  ],
+  "presubmit-large": [
     {
       "name": "CtsPackageManagerTestCases",
       "options": [

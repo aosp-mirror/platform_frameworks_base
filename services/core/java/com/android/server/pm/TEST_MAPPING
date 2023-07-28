@@ -102,7 +102,9 @@
           "include-filter": "android.appsecurity.cts.EphemeralTest#testGetSearchableInfo"
         }
       ]
-    },
+    }
+  ],
+  "presubmit-large":[
     {
       "name": "CtsPackageManagerTestCases",
       "options": [
