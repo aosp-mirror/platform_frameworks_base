@@ -239,7 +239,7 @@ object Flags {
 
     /** Whether to delay showing bouncer UI when face auth or active unlock are enrolled. */
     // TODO(b/279794160): Tracking bug.
-    @JvmField val DELAY_BOUNCER = unreleasedFlag(235, "delay_bouncer", teamfood = true)
+    @JvmField val DELAY_BOUNCER = releasedFlag(235, "delay_bouncer")
 
     /** Keyguard Migration */
 
