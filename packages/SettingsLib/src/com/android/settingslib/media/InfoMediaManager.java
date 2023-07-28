@@ -62,6 +62,7 @@ import androidx.annotation.RequiresApi;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.media.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,6 +103,28 @@ public abstract class InfoMediaManager extends MediaManager {
         mBluetoothManager = localBluetoothManager;
         if (!TextUtils.isEmpty(packageName)) {
             mPackageName = packageName;
+        }
+    }
+
+    /** Creates an instance of InfoMediaManager. */
+    public static InfoMediaManager createInstance(
+            Context context,
+            String packageName,
+            Notification notification,
+            LocalBluetoothManager localBluetoothManager) {
+        if (Flags.useMediaRouter2ForInfoMediaManager()) {
+            try {
+                return new RouterInfoMediaManager(
+                        context, packageName, notification, localBluetoothManager);
+            } catch (PackageNotAvailableException ex) {
+                // TODO: b/293578081 - Propagate this exception to callers for proper handling.
+                Log.w(TAG, "Returning a no-op InfoMediaManager for package " + packageName);
+                return new NoOpInfoMediaManager(
+                        context, packageName, notification, localBluetoothManager);
+            }
+        } else {
+            return new ManagerInfoMediaManager(
+                    context, packageName, notification, localBluetoothManager);
         }
     }
 
