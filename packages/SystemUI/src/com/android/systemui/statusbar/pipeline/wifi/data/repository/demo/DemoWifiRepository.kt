@@ -97,6 +97,7 @@ constructor(
             isValidated = validated ?: true,
             level = level ?: 0,
             ssid = ssid ?: DEMO_NET_SSID,
+            hotspotDeviceType = hotspotDeviceType,
 
             // These fields below aren't supported in demo mode, since they aren't needed to satisfy
             // the interface.

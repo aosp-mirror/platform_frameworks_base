@@ -23,6 +23,8 @@ import androidx.lifecycle.LifecycleRegistry
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.table.TableLogBuffer
@@ -37,6 +39,8 @@ import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiReposito
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.WIFI_NETWORK_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.WIFI_STATE_DEFAULT
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Inactive.toHotspotDeviceType
+import com.android.wifitrackerlib.HotspotNetworkEntry
 import com.android.wifitrackerlib.MergedCarrierEntry
 import com.android.wifitrackerlib.WifiEntry
 import com.android.wifitrackerlib.WifiPickerTracker
@@ -61,6 +65,7 @@ import kotlinx.coroutines.flow.stateIn
 class WifiRepositoryViaTrackerLib
 @Inject
 constructor(
+    featureFlags: FeatureFlags,
     @Application private val scope: CoroutineScope,
     @Main private val mainExecutor: Executor,
     private val wifiPickerTrackerFactory: WifiPickerTrackerFactory,
@@ -73,6 +78,8 @@ constructor(
         LifecycleRegistry(this).also {
             mainExecutor.execute { it.currentState = Lifecycle.State.CREATED }
         }
+
+    private val isInstantTetherEnabled = featureFlags.isEnabled(Flags.INSTANT_TETHER)
 
     private var wifiPickerTracker: WifiPickerTracker? = null
 
@@ -181,11 +188,19 @@ constructor(
                 numberOfLevels = wifiManager.maxSignalLevel + 1,
             )
         } else {
+            val hotspotDeviceType =
+                if (isInstantTetherEnabled && this is HotspotNetworkEntry) {
+                    this.deviceType.toHotspotDeviceType()
+                } else {
+                    WifiNetworkModel.HotspotDeviceType.NONE
+                }
+
             WifiNetworkModel.Active(
                 networkId = NETWORK_ID,
                 isValidated = this.hasInternetAccess(),
                 level = this.level,
                 ssid = this.title,
+                hotspotDeviceType = hotspotDeviceType,
                 // With WifiTrackerLib, [WifiEntry.title] will appropriately fetch the  SSID for
                 // typical wifi networks *and* passpoint/OSU APs. So, the AP-specific values can
                 // always be false/null in this repository.
@@ -259,6 +274,7 @@ constructor(
     class Factory
     @Inject
     constructor(
+        private val featureFlags: FeatureFlags,
         @Application private val scope: CoroutineScope,
         @Main private val mainExecutor: Executor,
         private val wifiPickerTrackerFactory: WifiPickerTrackerFactory,
@@ -267,6 +283,7 @@ constructor(
     ) {
         fun create(wifiManager: WifiManager): WifiRepositoryViaTrackerLib {
             return WifiRepositoryViaTrackerLib(
+                featureFlags,
                 scope,
                 mainExecutor,
                 wifiPickerTrackerFactory,

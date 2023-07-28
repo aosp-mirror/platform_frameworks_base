@@ -261,6 +261,8 @@ constructor(
                     isValidated = networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED),
                     level = wifiManager.calculateSignalLevel(wifiInfo.rssi),
                     wifiInfo.ssid,
+                    // This repository doesn't support any hotspot information.
+                    WifiNetworkModel.HotspotDeviceType.NONE,
                     wifiInfo.isPasspointAp,
                     wifiInfo.isOsuAp,
                     wifiInfo.passpointProviderFriendlyName

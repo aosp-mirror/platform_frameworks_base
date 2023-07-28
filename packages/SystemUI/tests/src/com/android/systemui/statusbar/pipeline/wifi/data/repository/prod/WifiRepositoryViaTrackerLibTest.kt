@@ -18,10 +18,13 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.UNKNOWN_SSID
+import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
@@ -35,6 +38,8 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.wifitrackerlib.HotspotNetworkEntry
+import com.android.wifitrackerlib.HotspotNetworkEntry.DeviceType
 import com.android.wifitrackerlib.MergedCarrierEntry
 import com.android.wifitrackerlib.WifiEntry
 import com.android.wifitrackerlib.WifiPickerTracker
@@ -59,10 +64,25 @@ import org.mockito.Mockito.verify
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
 
-    private lateinit var underTest: WifiRepositoryViaTrackerLib
+    // Using lazy means that the class will only be constructed once it's fetched. Because the
+    // repository internally sets some values on construction, we need to set up some test
+    // parameters (like feature flags) *before* construction. Using lazy allows us to do that setup
+    // inside each test case without needing to manually recreate the repository.
+    private val underTest: WifiRepositoryViaTrackerLib by lazy {
+        WifiRepositoryViaTrackerLib(
+            featureFlags,
+            testScope.backgroundScope,
+            executor,
+            wifiPickerTrackerFactory,
+            wifiManager,
+            logger,
+            tableLogger,
+        )
+    }
 
     private val executor = FakeExecutor(FakeSystemClock())
     private val logger = LogBuffer("name", maxSize = 100, logcatEchoTracker = mock())
+    private val featureFlags = FakeFeatureFlags()
     private val tableLogger = mock<TableLogBuffer>()
     private val wifiManager =
         mock<WifiManager>().apply { whenever(this.maxSignalLevel).thenReturn(10) }
@@ -76,9 +96,9 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        featureFlags.set(Flags.INSTANT_TETHER, false)
         whenever(wifiPickerTrackerFactory.create(any(), capture(callbackCaptor)))
             .thenReturn(wifiPickerTracker)
-        underTest = createRepo()
     }
 
     @Test
@@ -270,6 +290,136 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
             assertThat(latestActive.isPasspointAccessPoint).isFalse()
             assertThat(latestActive.isOnlineSignUpForPasspointAccessPoint).isFalse()
             assertThat(latestActive.passpointProviderFriendlyName).isNull()
+        }
+
+    @Test
+    fun wifiNetwork_notHotspot_none() =
+        testScope.runTest {
+            featureFlags.set(Flags.INSTANT_TETHER, true)
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry =
+                mock<WifiEntry>().apply { whenever(this.isPrimaryNetwork).thenReturn(true) }
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat((latest as WifiNetworkModel.Active).hotspotDeviceType)
+                .isEqualTo(WifiNetworkModel.HotspotDeviceType.NONE)
+        }
+
+    @Test
+    fun wifiNetwork_hotspot_unknown() =
+        testScope.runTest {
+            featureFlags.set(Flags.INSTANT_TETHER, true)
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry = createHotspotWithType(NetworkProviderInfo.DEVICE_TYPE_UNKNOWN)
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat((latest as WifiNetworkModel.Active).hotspotDeviceType)
+                .isEqualTo(WifiNetworkModel.HotspotDeviceType.UNKNOWN)
+        }
+
+    @Test
+    fun wifiNetwork_hotspot_phone() =
+        testScope.runTest {
+            featureFlags.set(Flags.INSTANT_TETHER, true)
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry = createHotspotWithType(NetworkProviderInfo.DEVICE_TYPE_PHONE)
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat((latest as WifiNetworkModel.Active).hotspotDeviceType)
+                .isEqualTo(WifiNetworkModel.HotspotDeviceType.PHONE)
+        }
+
+    @Test
+    fun wifiNetwork_hotspot_tablet() =
+        testScope.runTest {
+            featureFlags.set(Flags.INSTANT_TETHER, true)
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry = createHotspotWithType(NetworkProviderInfo.DEVICE_TYPE_TABLET)
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat((latest as WifiNetworkModel.Active).hotspotDeviceType)
+                .isEqualTo(WifiNetworkModel.HotspotDeviceType.TABLET)
+        }
+
+    @Test
+    fun wifiNetwork_hotspot_laptop() =
+        testScope.runTest {
+            featureFlags.set(Flags.INSTANT_TETHER, true)
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry = createHotspotWithType(NetworkProviderInfo.DEVICE_TYPE_LAPTOP)
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat((latest as WifiNetworkModel.Active).hotspotDeviceType)
+                .isEqualTo(WifiNetworkModel.HotspotDeviceType.LAPTOP)
+        }
+
+    @Test
+    fun wifiNetwork_hotspot_watch() =
+        testScope.runTest {
+            featureFlags.set(Flags.INSTANT_TETHER, true)
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry = createHotspotWithType(NetworkProviderInfo.DEVICE_TYPE_WATCH)
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat((latest as WifiNetworkModel.Active).hotspotDeviceType)
+                .isEqualTo(WifiNetworkModel.HotspotDeviceType.WATCH)
+        }
+
+    @Test
+    fun wifiNetwork_hotspot_auto() =
+        testScope.runTest {
+            featureFlags.set(Flags.INSTANT_TETHER, true)
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry = createHotspotWithType(NetworkProviderInfo.DEVICE_TYPE_AUTO)
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat((latest as WifiNetworkModel.Active).hotspotDeviceType)
+                .isEqualTo(WifiNetworkModel.HotspotDeviceType.AUTO)
+        }
+
+    @Test
+    fun wifiNetwork_hotspot_invalid() =
+        testScope.runTest {
+            featureFlags.set(Flags.INSTANT_TETHER, true)
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry = createHotspotWithType(1234)
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            assertThat((latest as WifiNetworkModel.Active).hotspotDeviceType)
+                .isEqualTo(WifiNetworkModel.HotspotDeviceType.INVALID)
+        }
+
+    @Test
+    fun wifiNetwork_hotspot_flagOff_valueNotUsed() =
+        testScope.runTest {
+            // WHEN the flag is off
+            featureFlags.set(Flags.INSTANT_TETHER, false)
+
+            val latest by collectLastValue(underTest.wifiNetwork)
+
+            val wifiEntry = createHotspotWithType(NetworkProviderInfo.DEVICE_TYPE_WATCH)
+            whenever(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntry)
+            getCallback().onWifiEntriesChanged()
+
+            // THEN NONE is always used, even if the wifi entry does have a hotspot device type
+            assertThat((latest as WifiNetworkModel.Active).hotspotDeviceType)
+                .isEqualTo(WifiNetworkModel.HotspotDeviceType.NONE)
         }
 
     @Test
@@ -726,15 +876,11 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
         return callbackCaptor.value!!
     }
 
-    private fun createRepo(): WifiRepositoryViaTrackerLib {
-        return WifiRepositoryViaTrackerLib(
-            testScope.backgroundScope,
-            executor,
-            wifiPickerTrackerFactory,
-            wifiManager,
-            logger,
-            tableLogger,
-        )
+    private fun createHotspotWithType(@DeviceType type: Int): HotspotNetworkEntry {
+        return mock<HotspotNetworkEntry>().apply {
+            whenever(this.isPrimaryNetwork).thenReturn(true)
+            whenever(this.deviceType).thenReturn(type)
+        }
     }
 
     private companion object {
