@@ -453,6 +453,78 @@ public class ContentRecorderTests extends WindowTestsBase {
                 displayAreaBounds.width(), displayAreaBounds.height());
     }
 
+    @Test
+    public void testDisplayContentUpdatesRecording_withoutSurface() {
+        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
+        // mirror.
+        setUpDefaultTaskDisplayAreaWindowToken();
+
+        // WHEN getting the DisplayContent for the new virtual display without providing a valid
+        // size from getDisplaySurfaceDefaultSize, i.e. the case of null surface.
+        final DisplayContent virtualDisplay =
+                mRootWindowContainer.getDisplayContent(mDisplaySession.getVirtualDisplayId());
+        doReturn(null).when(mWm.mDisplayManagerInternal).getDisplaySurfaceDefaultSize(anyInt());
+        mWm.mContentRecordingController.setContentRecordingSessionLocked(mDisplaySession, mWm);
+        virtualDisplay.updateRecording();
+
+        // THEN mirroring is not started, since a null surface indicates the VirtualDisplay is off.
+        assertThat(virtualDisplay.isCurrentlyRecording()).isFalse();
+    }
+
+    @Test
+    public void testDisplayContentUpdatesRecording_withSurface() {
+        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
+        // mirror.
+        setUpDefaultTaskDisplayAreaWindowToken();
+
+        // WHEN getting the DisplayContent for the virtual display with a valid size from
+        // getDisplaySurfaceDefaultSize (done by surfaceControlMirrors in setUp).
+        final DisplayContent virtualDisplay =
+                mRootWindowContainer.getDisplayContent(mDisplaySession.getVirtualDisplayId());
+        mWm.mContentRecordingController.setContentRecordingSessionLocked(mDisplaySession, mWm);
+        virtualDisplay.updateRecording();
+
+        // THEN mirroring is initiated for the default display's DisplayArea.
+        assertThat(virtualDisplay.isCurrentlyRecording()).isTrue();
+    }
+
+    @Test
+    public void testDisplayContentUpdatesRecording_displayMirroring() {
+        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
+        // mirror.
+        setUpDefaultTaskDisplayAreaWindowToken();
+
+        // GIVEN SurfaceControl can successfully mirror the provided surface.
+        surfaceControlMirrors(sSurfaceSize);
+        // Initially disable getDisplayIdToMirror since the DMS may create the DC outside the direct
+        // call in the test. We need to spy on the DC before updateRecording is called or we can't
+        // verify setDisplayMirroring is called
+        doReturn(INVALID_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
+
+        // WHEN getting the DisplayContent for the new virtual display.
+        final DisplayContent virtualDisplay =
+                mRootWindowContainer.getDisplayContent(mDisplaySession.getVirtualDisplayId());
+        // Return the default display as the value to mirror to ensure the VD with flag mirroring
+        // creates a ContentRecordingSession automatically.
+        doReturn(DEFAULT_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
+        virtualDisplay.updateRecording();
+
+        // THEN mirroring is initiated for the default display's DisplayArea.
+        verify(virtualDisplay).setDisplayMirroring();
+        assertThat(virtualDisplay.isCurrentlyRecording()).isTrue();
+    }
+
+    /**
+     * Creates a WindowToken associated with the default task DisplayArea, in order for that
+     * DisplayArea to be mirrored.
+     */
+    private void setUpDefaultTaskDisplayAreaWindowToken() {
+        // GIVEN the default task display area is represented by the WindowToken.
+        spyOn(mWm.mWindowContextListenerController);
+        doReturn(mDefaultDisplay.getDefaultTaskDisplayArea()).when(
+                mWm.mWindowContextListenerController).getContainer(any());
+    }
+
     /**
      * Creates a {@link android.window.WindowContainerToken} associated with a task, in order for
      * that task to be recorded.
