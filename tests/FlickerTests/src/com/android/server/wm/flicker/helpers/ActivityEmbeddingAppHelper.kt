@@ -56,9 +56,7 @@ constructor(
         launchSecondaryActivityFromButton(wmHelper, "launch_secondary_activity_rtl_button")
     }
 
-    /**
-     * Clicks the button to launch the secondary activity in a horizontal split.
-     */
+    /** Clicks the button to launch the secondary activity in a horizontal split. */
     fun launchSecondaryActivityHorizontally(wmHelper: WindowManagerStateHelper) {
         launchSecondaryActivityFromButton(wmHelper, "launch_secondary_activity_horizontally_button")
     }
@@ -67,7 +65,7 @@ constructor(
     fun launchThirdActivity(wmHelper: WindowManagerStateHelper) {
         val launchButton =
             uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "launch_third_activity_button")),
+                Until.findObject(By.res(packageName, "launch_third_activity_button")),
                 FIND_TIMEOUT
             )
         require(launchButton != null) { "Can't find launch third activity button on screen." }
@@ -87,7 +85,7 @@ constructor(
     fun launchTrampolineActivity(wmHelper: WindowManagerStateHelper) {
         val launchButton =
             uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "launch_trampoline_button")),
+                Until.findObject(By.res(packageName, "launch_trampoline_button")),
                 FIND_TIMEOUT
             )
         require(launchButton != null) { "Can't find launch trampoline activity button on screen." }
@@ -105,53 +103,45 @@ constructor(
      */
     fun finishSecondaryActivity(wmHelper: WindowManagerStateHelper) {
         val finishButton =
-                uiDevice.wait(
-                        Until.findObject(By.res(getPackage(), "finish_secondary_activity_button")),
-                        FIND_TIMEOUT
-                )
+            uiDevice.wait(
+                Until.findObject(By.res(packageName, "finish_secondary_activity_button")),
+                FIND_TIMEOUT
+            )
         require(finishButton != null) { "Can't find finish secondary activity button on screen." }
         finishButton.click()
         wmHelper
-                .StateSyncBuilder()
-                .withActivityRemoved(SECONDARY_ACTIVITY_COMPONENT)
-                .waitForAndVerify()
-     }
+            .StateSyncBuilder()
+            .withActivityRemoved(SECONDARY_ACTIVITY_COMPONENT)
+            .waitForAndVerify()
+    }
 
-    /**
-     * Clicks the button to toggle the split ratio of secondary activity.
-     */
+    /** Clicks the button to toggle the split ratio of secondary activity. */
     fun changeSecondaryActivityRatio(wmHelper: WindowManagerStateHelper) {
         val launchButton =
-                uiDevice.wait(
-                        Until.findObject(
-                                By.res(getPackage(),
-                                        "toggle_split_ratio_button")),
-                        FIND_TIMEOUT
-                )
+            uiDevice.wait(
+                Until.findObject(By.res(packageName, "toggle_split_ratio_button")),
+                FIND_TIMEOUT
+            )
         require(launchButton != null) {
             "Can't find toggle ratio for secondary activity button on screen."
         }
         launchButton.click()
         wmHelper
-                .StateSyncBuilder()
-                .withAppTransitionIdle()
-                .withTransitionSnapshotGone()
-                .waitForAndVerify()
+            .StateSyncBuilder()
+            .withAppTransitionIdle()
+            .withTransitionSnapshotGone()
+            .waitForAndVerify()
     }
 
     fun secondaryActivityEnterPip(wmHelper: WindowManagerStateHelper) {
         val pipButton =
-                uiDevice.wait(
-                        Until.findObject(By.res(getPackage(), "secondary_enter_pip_button")),
-                        FIND_TIMEOUT
-                )
+            uiDevice.wait(
+                Until.findObject(By.res(packageName, "secondary_enter_pip_button")),
+                FIND_TIMEOUT
+            )
         require(pipButton != null) { "Can't find enter pip button on screen." }
         pipButton.click()
-        wmHelper
-                .StateSyncBuilder()
-                .withAppTransitionIdle()
-                .withPipShown()
-                .waitForAndVerify()
+        wmHelper.StateSyncBuilder().withAppTransitionIdle().withPipShown().waitForAndVerify()
     }
 
     /**
@@ -161,7 +151,7 @@ constructor(
     fun launchAlwaysExpandActivity(wmHelper: WindowManagerStateHelper) {
         val launchButton =
             uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "launch_always_expand_activity_button")),
+                Until.findObject(By.res(packageName, "launch_always_expand_activity_button")),
                 FIND_TIMEOUT
             )
         require(launchButton != null) {
@@ -171,8 +161,11 @@ constructor(
         wmHelper
             .StateSyncBuilder()
             .withActivityState(ALWAYS_EXPAND_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-            .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_PAUSED,
-                PlatformConsts.STATE_STOPPED)
+            .withActivityState(
+                MAIN_ACTIVITY_COMPONENT,
+                PlatformConsts.STATE_PAUSED,
+                PlatformConsts.STATE_STOPPED
+            )
             .waitForAndVerify()
     }
 
@@ -181,16 +174,16 @@ constructor(
         buttonName: String
     ) {
         val launchButton =
-                uiDevice.wait(Until.findObject(By.res(getPackage(), buttonName)), FIND_TIMEOUT)
+            uiDevice.wait(Until.findObject(By.res(packageName, buttonName)), FIND_TIMEOUT)
         require(launchButton != null) {
             "Can't find launch secondary activity button : " + buttonName + "on screen."
         }
         launchButton.click()
         wmHelper
-                .StateSyncBuilder()
-                .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-                .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
-                .waitForAndVerify()
+            .StateSyncBuilder()
+            .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+            .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+            .waitForAndVerify()
     }
 
     /**
@@ -200,7 +193,7 @@ constructor(
     fun launchPlaceholderSplit(wmHelper: WindowManagerStateHelper) {
         val launchButton =
             uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "launch_placeholder_split_button")),
+                Until.findObject(By.res(packageName, "launch_placeholder_split_button")),
                 FIND_TIMEOUT
             )
         require(launchButton != null) { "Can't find launch placeholder split button on screen." }
@@ -219,7 +212,7 @@ constructor(
     fun launchPlaceholderSplitRTL(wmHelper: WindowManagerStateHelper) {
         val launchButton =
             uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "launch_placeholder_split_rtl_button")),
+                Until.findObject(By.res(packageName, "launch_placeholder_split_rtl_button")),
                 FIND_TIMEOUT
             )
         require(launchButton != null) { "Can't find launch placeholder split button on screen." }

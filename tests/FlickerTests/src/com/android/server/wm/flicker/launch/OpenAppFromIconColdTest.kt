@@ -70,8 +70,8 @@ class OpenAppFromIconColdTest(flicker: LegacyFlickerTest) : OpenAppFromLauncherT
                 tapl
                     .goHome()
                     .switchToAllApps()
-                    .getAppIcon(testApp.launcherName)
-                    .launch(testApp.`package`)
+                    .getAppIcon(testApp.appName)
+                    .launch(testApp.packageName)
             }
             teardown { testApp.exit(wmHelper) }
         }

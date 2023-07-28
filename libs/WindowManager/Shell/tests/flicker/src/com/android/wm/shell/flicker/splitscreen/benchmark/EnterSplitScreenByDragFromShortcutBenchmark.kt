@@ -53,7 +53,7 @@ abstract class EnterSplitScreenByDragFromShortcutBenchmark(
                 .getAppIcon(secondaryApp.appName)
                 .openDeepShortcutMenu()
                 .getMenuItem("Split Screen Secondary Activity")
-                .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
+                .dragToSplitscreen(secondaryApp.packageName, primaryApp.packageName)
             SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
         }
     }

@@ -66,7 +66,8 @@ class OpenAppInSizeCompatModeTest(flicker: LegacyFlickerTest) : BaseAppCompat(fl
      */
     @Postsubmit
     @Test
-    fun letterboxAppFocusedAtEnd() = flicker.assertEventLog { focusChanges(letterboxApp.`package`) }
+    fun letterboxAppFocusedAtEnd() =
+        flicker.assertEventLog { focusChanges(letterboxApp.packageName) }
 
     @Postsubmit
     @Test

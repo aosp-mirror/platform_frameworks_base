@@ -16,9 +16,9 @@
 
 package com.android.server.wm.flicker.activityembedding
 
-import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.Before
@@ -38,8 +38,6 @@ abstract class ActivityEmbeddingTestBase(flicker: LegacyFlickerTest) : BaseTest(
     @Test
     open fun backgroundLayerNeverVisible() {
         val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")
-        flicker.assertLayers {
-            isInvisible(backgroundColorLayer)
-        }
+        flicker.assertLayers { isInvisible(backgroundColorLayer) }
     }
 }

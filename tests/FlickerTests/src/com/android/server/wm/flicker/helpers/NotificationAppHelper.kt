@@ -35,7 +35,7 @@ constructor(
 ) : StandardAppHelper(instr, launcherName, component) {
     fun postNotification(wmHelper: WindowManagerStateHelper) {
         val button =
-            uiDevice.wait(Until.findObject(By.res(getPackage(), "post_notification")), FIND_TIMEOUT)
+            uiDevice.wait(Until.findObject(By.res(packageName, "post_notification")), FIND_TIMEOUT)
 
         requireNotNull(button) {
             "Post notification button not found, this usually happens when the device " +

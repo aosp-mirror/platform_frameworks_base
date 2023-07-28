@@ -117,7 +117,7 @@ abstract class EnterPipTransition(flicker: LegacyFlickerTest) : PipTransition(fl
     @Presubmit
     @Test
     open fun focusChanges() {
-        flicker.assertEventLog { this.focusChanges(pipApp.`package`, "NexusLauncherActivity") }
+        flicker.assertEventLog { this.focusChanges(pipApp.packageName, "NexusLauncherActivity") }
     }
 
     companion object {

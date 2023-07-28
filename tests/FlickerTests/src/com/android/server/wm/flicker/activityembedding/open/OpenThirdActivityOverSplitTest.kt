@@ -18,7 +18,6 @@ package com.android.server.wm.flicker.activityembedding.open
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.datatypes.Rect
-import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest

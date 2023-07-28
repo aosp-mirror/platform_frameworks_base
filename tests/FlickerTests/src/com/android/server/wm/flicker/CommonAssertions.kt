@@ -170,9 +170,7 @@ fun LegacyFlickerTest.statusBarLayerIsVisibleAtStartAndEnd() {
  * the SF trace
  */
 fun LegacyFlickerTest.navBarLayerPositionAtStart() {
-    assertLayersStart {
-        assertNavBarPosition(this, scenario.isGesturalNavigation)
-    }
+    assertLayersStart { assertNavBarPosition(this, scenario.isGesturalNavigation) }
 }
 
 /**
@@ -180,9 +178,7 @@ fun LegacyFlickerTest.navBarLayerPositionAtStart() {
  * the SF trace
  */
 fun LegacyFlickerTest.navBarLayerPositionAtEnd() {
-    assertLayersEnd {
-        assertNavBarPosition(this, scenario.isGesturalNavigation)
-    }
+    assertLayersEnd { assertNavBarPosition(this, scenario.isGesturalNavigation) }
 }
 
 private fun assertNavBarPosition(sfState: LayerTraceEntrySubject, isGesturalNavigation: Boolean) {
@@ -195,19 +191,23 @@ private fun assertNavBarPosition(sfState: LayerTraceEntrySubject, isGesturalNavi
 
     when (navBarPosition) {
         Position.TOP ->
-            navBarRegion.hasSameTopPosition(displayArea)
+            navBarRegion
+                .hasSameTopPosition(displayArea)
                 .hasSameLeftPosition(displayArea)
                 .hasSameRightPosition(displayArea)
         Position.BOTTOM ->
-            navBarRegion.hasSameBottomPosition(displayArea)
+            navBarRegion
+                .hasSameBottomPosition(displayArea)
                 .hasSameLeftPosition(displayArea)
                 .hasSameRightPosition(displayArea)
         Position.LEFT ->
-            navBarRegion.hasSameLeftPosition(displayArea)
+            navBarRegion
+                .hasSameLeftPosition(displayArea)
                 .hasSameTopPosition(displayArea)
                 .hasSameBottomPosition(displayArea)
         Position.RIGHT ->
-            navBarRegion.hasSameRightPosition(displayArea)
+            navBarRegion
+                .hasSameRightPosition(displayArea)
                 .hasSameTopPosition(displayArea)
                 .hasSameBottomPosition(displayArea)
         else -> error("Unknown position $navBarPosition")

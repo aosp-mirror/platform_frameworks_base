@@ -35,92 +35,84 @@ import org.junit.runners.Parameterized
 /**
  * Test launching a secondary Activity into Picture-In-Picture mode.
  *
- * Setup: Start from a split A|B.
- * Transition: B enters PIP, observe the window shrink to the bottom right corner on screen.
+ * Setup: Start from a split A|B. Transition: B enters PIP, observe the window shrink to the bottom
+ * right corner on screen.
  *
  * To run this test: `atest FlickerTests:SecondaryActivityEnterPipTest`
- *
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class SecondaryActivityEnterPipTest (flicker: LegacyFlickerTest) :
-        ActivityEmbeddingTestBase(flicker) {
+class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
+    ActivityEmbeddingTestBase(flicker) {
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
             tapl.setExpectedRotationCheckEnabled(false)
             testApp.launchViaIntent(wmHelper)
             testApp.launchSecondaryActivity(wmHelper)
             startDisplayBounds =
-                    wmHelper.currentState.layerState.physicalDisplayBounds
-                            ?: error("Can't get display bounds")
+                wmHelper.currentState.layerState.physicalDisplayBounds
+                    ?: error("Can't get display bounds")
         }
-        transitions {
-            testApp.secondaryActivityEnterPip(wmHelper)
-        }
+        transitions { testApp.secondaryActivityEnterPip(wmHelper) }
         teardown {
             tapl.goHome()
             testApp.exit(wmHelper)
         }
     }
 
-    /**
-     * Main and secondary activity start from a split each taking half of the screen.
-     */
+    /** Main and secondary activity start from a split each taking half of the screen. */
     @Presubmit
     @Test
     fun layersStartFromEqualSplit() {
         flicker.assertLayersStart {
-            val leftLayerRegion =
-                    visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+            val leftLayerRegion = visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
             val rightLayerRegion =
-                    visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+                visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
             // Compare dimensions of two splits, given we're using default split attributes,
             // both activities take up the same visible size on the display.
             check { "height" }
-                    .that(leftLayerRegion.region.height).isEqual(rightLayerRegion.region.height)
+                .that(leftLayerRegion.region.height)
+                .isEqual(rightLayerRegion.region.height)
             check { "width" }
-                    .that(leftLayerRegion.region.width).isEqual(rightLayerRegion.region.width)
+                .that(leftLayerRegion.region.width)
+                .isEqual(rightLayerRegion.region.width)
             leftLayerRegion.notOverlaps(rightLayerRegion.region)
             leftLayerRegion.plus(rightLayerRegion.region).coversExactly(startDisplayBounds)
         }
         flicker.assertLayersEnd {
             visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-                    .coversExactly(startDisplayBounds)
+                .coversExactly(startDisplayBounds)
         }
     }
 
-    /**
-     * Main Activity is visible throughout the transition and becomes fullscreen.
-     */
+    /** Main Activity is visible throughout the transition and becomes fullscreen. */
     @Presubmit
     @Test
     fun mainActivityWindowBecomesFullScreen() {
         flicker.assertWm { isAppWindowVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT) }
         flicker.assertWmEnd {
             visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-                    .coversExactly(startDisplayBounds)
+                .coversExactly(startDisplayBounds)
         }
     }
 
-    /**
-     * Main Activity is visible throughout the transition and becomes fullscreen.
-     */
+    /** Main Activity is visible throughout the transition and becomes fullscreen. */
     @Presubmit
     @Test
     fun mainActivityLayerBecomesFullScreen() {
         flicker.assertLayers {
             isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-                    .then()
-                    .isVisible(TRANSITION_SNAPSHOT)
-                    .isInvisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-                    .then()
-                    .isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                .then()
+                .isVisible(TRANSITION_SNAPSHOT)
+                .isInvisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                .then()
+                .isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
         }
         flicker.assertLayersEnd {
             visibleRegion(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
-                    .coversExactly(startDisplayBounds)
+                .coversExactly(startDisplayBounds)
         }
     }
 
@@ -136,18 +128,15 @@ class SecondaryActivityEnterPipTest (flicker: LegacyFlickerTest) :
         }
         flicker.assertWmEnd {
             val pipWindowRegion =
-                    visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-            check{"height"}
-                    .that(pipWindowRegion.region.height)
-                    .isLower(startDisplayBounds.height / 2)
-            check{"width"}
-                    .that(pipWindowRegion.region.width).isLower(startDisplayBounds.width)
+                visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+            check { "height" }
+                .that(pipWindowRegion.region.height)
+                .isLower(startDisplayBounds.height / 2)
+            check { "width" }.that(pipWindowRegion.region.width).isLower(startDisplayBounds.width)
         }
     }
 
-    /**
-     * During the transition Secondary Activity shrinks to the bottom right corner.
-     */
+    /** During the transition Secondary Activity shrinks to the bottom right corner. */
     @Presubmit
     @Test
     fun secondaryLayerShrinks() {
@@ -162,13 +151,9 @@ class SecondaryActivityEnterPipTest (flicker: LegacyFlickerTest) :
             }
         }
         flicker.assertLayersEnd {
-            val pipRegion = visibleRegion(
-                    ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
-            check { "height" }
-                    .that(pipRegion.region.height)
-                    .isLower(startDisplayBounds.height / 2)
-            check { "width" }
-                    .that(pipRegion.region.width).isLower(startDisplayBounds.width)
+            val pipRegion = visibleRegion(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
+            check { "height" }.that(pipRegion.region.height).isLower(startDisplayBounds.height / 2)
+            check { "width" }.that(pipRegion.region.width).isLower(startDisplayBounds.width)
         }
     }
 

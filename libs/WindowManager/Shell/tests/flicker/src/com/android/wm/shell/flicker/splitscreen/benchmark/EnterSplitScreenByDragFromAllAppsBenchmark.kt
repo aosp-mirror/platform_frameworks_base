@@ -47,7 +47,7 @@ abstract class EnterSplitScreenByDragFromAllAppsBenchmark(override val flicker: 
                 tapl.launchedAppState.taskbar
                     .openAllApps()
                     .getAppIcon(secondaryApp.appName)
-                    .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
+                    .dragToSplitscreen(secondaryApp.packageName, primaryApp.packageName)
                 SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
             }
         }

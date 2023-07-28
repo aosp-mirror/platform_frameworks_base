@@ -36,7 +36,7 @@ constructor(
 ) : StandardAppHelper(instr, launcherName, component) {
     fun openNewTask(device: UiDevice, wmHelper: WindowManagerStateHelper) {
         val button =
-            device.wait(Until.findObject(By.res(getPackage(), "launch_new_task")), FIND_TIMEOUT)
+            device.wait(Until.findObject(By.res(packageName, "launch_new_task")), FIND_TIMEOUT)
 
         requireNotNull(button) {
             "Button not found, this usually happens when the device " +

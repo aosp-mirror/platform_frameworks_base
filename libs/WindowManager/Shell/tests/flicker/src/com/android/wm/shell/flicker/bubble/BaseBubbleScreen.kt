@@ -47,7 +47,7 @@ abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) 
 
     private val uid =
         context.packageManager
-            .getApplicationInfo(testApp.`package`, PackageManager.ApplicationInfoFlags.of(0))
+            .getApplicationInfo(testApp.packageName, PackageManager.ApplicationInfoFlags.of(0))
             .uid
 
     @JvmOverloads
@@ -57,7 +57,7 @@ abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) 
         return {
             setup {
                 notifyManager.setBubblesAllowed(
-                    testApp.`package`,
+                    testApp.packageName,
                     uid,
                     NotificationManager.BUBBLE_PREFERENCE_ALL
                 )
@@ -68,7 +68,7 @@ abstract class BaseBubbleScreen(flicker: LegacyFlickerTest) : BaseTest(flicker) 
 
             teardown {
                 notifyManager.setBubblesAllowed(
-                    testApp.`package`,
+                    testApp.packageName,
                     uid,
                     NotificationManager.BUBBLE_PREFERENCE_NONE
                 )

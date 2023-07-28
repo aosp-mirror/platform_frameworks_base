@@ -26,7 +26,7 @@ import com.android.server.wm.flicker.helpers.PipAppHelper
 
 /** Helper class for PIP app on AndroidTV */
 open class PipAppHelperTv(instrumentation: Instrumentation) : PipAppHelper(instrumentation) {
-    private val appSelector = By.pkg(`package`).depth(0)
+    private val appSelector = By.pkg(packageName).depth(0)
 
     val ui: UiObject2?
         get() = uiDevice.findObject(appSelector)
@@ -46,7 +46,7 @@ open class PipAppHelperTv(instrumentation: Instrumentation) : PipAppHelper(instr
     }
 
     override fun clickObject(resId: String) {
-        val selector = By.res(`package`, resId)
+        val selector = By.res(packageName, resId)
         focusOnObject(selector) || error("Could not focus on `$resId` object")
         uiDevice.pressDPadCenter()
     }
@@ -68,7 +68,7 @@ open class PipAppHelperTv(instrumentation: Instrumentation) : PipAppHelper(instr
     }
 
     fun waitUntilClosed(): Boolean {
-        val appSelector = By.pkg(`package`).depth(0)
+        val appSelector = By.pkg(packageName).depth(0)
         return uiDevice.wait(Until.gone(appSelector), APP_CLOSE_WAIT_TIME_MS)
     }
 
