@@ -51,14 +51,18 @@ filegroup {
 }
 
 filegroup {
-    name: "WMShellFlickerTestsSplitScreenEnter-src",
+    name: "WMShellFlickerTestsSplitScreenGroup1-src",
     srcs: [
-        "src/com/android/wm/shell/flicker/splitscreen/Enter*.kt",
+        "src/com/android/wm/shell/flicker/splitscreen/A*.kt",
+        "src/com/android/wm/shell/flicker/splitscreen/B*.kt",
+        "src/com/android/wm/shell/flicker/splitscreen/C*.kt",
+        "src/com/android/wm/shell/flicker/splitscreen/D*.kt",
+        "src/com/android/wm/shell/flicker/splitscreen/E*.kt",
     ],
 }
 
 filegroup {
-    name: "WMShellFlickerTestsSplitScreenOther-src",
+    name: "WMShellFlickerTestsSplitScreenGroup2-src",
     srcs: [
         "src/com/android/wm/shell/flicker/splitscreen/*.kt",
     ],
@@ -135,8 +139,8 @@ android_test {
     exclude_srcs: [
         ":WMShellFlickerTestsBubbles-src",
         ":WMShellFlickerTestsPip-src",
-        ":WMShellFlickerTestsSplitScreenEnter-src",
-        ":WMShellFlickerTestsSplitScreenOther-src",
+        ":WMShellFlickerTestsSplitScreenGroup1-src",
+        ":WMShellFlickerTestsSplitScreenGroup2-src",
         ":WMShellFlickerTestsSplitScreenBase-src",
         ":WMShellFlickerServiceTests-src",
     ],
@@ -167,7 +171,7 @@ android_test {
 }
 
 android_test {
-    name: "WMShellFlickerTestsSplitScreenEnter",
+    name: "WMShellFlickerTestsSplitScreenGroup1",
     defaults: ["WMShellFlickerTestsDefault"],
     additional_manifests: ["manifests/AndroidManifestSplitScreen.xml"],
     package_name: "com.android.wm.shell.flicker.splitscreen",
@@ -175,12 +179,12 @@ android_test {
     srcs: [
         ":WMShellFlickerTestsBase-src",
         ":WMShellFlickerTestsSplitScreenBase-src",
-        ":WMShellFlickerTestsSplitScreenEnter-src",
+        ":WMShellFlickerTestsSplitScreenGroup1-src",
     ],
 }
 
 android_test {
-    name: "WMShellFlickerTestsSplitScreenOther",
+    name: "WMShellFlickerTestsSplitScreenGroup2",
     defaults: ["WMShellFlickerTestsDefault"],
     additional_manifests: ["manifests/AndroidManifestSplitScreen.xml"],
     package_name: "com.android.wm.shell.flicker.splitscreen",
@@ -188,10 +192,10 @@ android_test {
     srcs: [
         ":WMShellFlickerTestsBase-src",
         ":WMShellFlickerTestsSplitScreenBase-src",
-        ":WMShellFlickerTestsSplitScreenOther-src",
+        ":WMShellFlickerTestsSplitScreenGroup2-src",
     ],
     exclude_srcs: [
-        ":WMShellFlickerTestsSplitScreenEnter-src",
+        ":WMShellFlickerTestsSplitScreenGroup1-src",
     ],
 }
 
