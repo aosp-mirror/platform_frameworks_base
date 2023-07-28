@@ -16,9 +16,13 @@
 
 package com.android.wm.shell.flicker.splitscreen
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
+import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.common.traces.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
@@ -55,6 +59,21 @@ class UnlockKeyguardToSplitScreen(override val flicker: LegacyFlickerTest) :
             defaultTeardown(this)
             thisTransition(this)
         }
+
+    @Test
+    @FlakyTest(bugId = 293578017)
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    // TODO(b/293578017) remove once that bug is resolve
+    @Test
+    @Presubmit
+    fun visibleLayersShownMoreThanOneConsecutiveEntry_withoutWallpaper() =
+        flicker.assertLayers { this.visibleLayersShownMoreThanOneConsecutiveEntry(
+            LayersTraceSubject.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS + listOf(
+                WALLPAPER_BBQ_WRAPPER
+            )
+        ) }
 
     @Test
     fun splitScreenDividerIsVisibleAtEnd() {
