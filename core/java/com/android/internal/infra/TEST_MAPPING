@@ -1,14 +1,22 @@
 {
   "presubmit": [
     {
-      "name": "CtsRoleTestCases"
+      "name": "CtsRoleTestCases",
+      "options": [
+          {
+              "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+          }
+      ]
     },
     {
       "name": "CtsPermissionTestCases",
       "options": [
-        {
-          "include-filter": "android.permission.cts.PermissionControllerTest"
-        }
+          {
+            "include-filter": "android.permission.cts.PermissionControllerTest"
+          },
+          {
+            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+          }
       ]
     },
     {
