@@ -53,9 +53,14 @@ final class DeviceAdapter implements CombinedVibration.VibratorAdapter {
         mSegmentAdapters = Arrays.asList(
                 // TODO(b/167947076): add filter that removes unsupported primitives
                 // TODO(b/167947076): add filter that replaces unsupported prebaked with fallback
+                // Convert segments based on device capabilities
                 new RampToStepAdapter(settings.getRampStepDuration()),
                 new StepToRampAdapter(),
+                // Add extra ramp down segments as needed
                 new RampDownAdapter(settings.getRampDownDuration(), settings.getRampStepDuration()),
+                // Split segments based on their duration and device supported limits
+                new SplitSegmentsAdapter(),
+                // Clip amplitudes and frequencies of final segments based on device bandwidth curve
                 new ClippingAmplitudeAndFrequencyAdapter()
         );
         mAvailableVibrators = vibrators;

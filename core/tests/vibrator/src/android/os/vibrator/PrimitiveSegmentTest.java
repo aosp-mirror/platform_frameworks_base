@@ -46,7 +46,6 @@ public class PrimitiveSegmentTest {
                 VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 10);
 
         assertEquals(-1, primitive.getDuration());
-        assertTrue(primitive.hasNonZeroAmplitude());
         assertEquals(VibrationEffect.Composition.PRIMITIVE_CLICK, primitive.getPrimitiveId());
         assertEquals(10, primitive.getDelay());
         assertEquals(1f, primitive.getScale(), TOLERANCE);

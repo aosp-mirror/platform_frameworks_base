@@ -88,13 +88,6 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
     }
 
     /** @hide */
-    @Override
-    public boolean hasNonZeroAmplitude() {
-        // Every primitive plays a vibration with a non-zero amplitude, even at scale == 0.
-        return true;
-    }
-
-    /** @hide */
     @NonNull
     @Override
     public PrimitiveSegment resolve(int defaultAmplitude) {

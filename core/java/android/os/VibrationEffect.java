@@ -232,11 +232,11 @@ public abstract class VibrationEffect implements Parcelable {
      * Computes a legacy vibration pattern (i.e. a pattern with duration values for "off/on"
      * vibration components) that is equivalent to this VibrationEffect.
      *
-     * <p>All non-repeating effects created with {@link #createWaveform(int[], int)} are convertible
-     * into an equivalent vibration pattern with this method. It is not guaranteed that an effect
-     * created with other means becomes converted into an equivalent legacy vibration pattern, even
-     * if it has an equivalent vibration pattern. If this method is unable to create an equivalent
-     * vibration pattern for such effects, it will return {@code null}.
+     * <p>All non-repeating effects created with {@link #createWaveform(long[], int)} are
+     * convertible into an equivalent vibration pattern with this method. It is not guaranteed that
+     * an effect created with other means becomes converted into an equivalent legacy vibration
+     * pattern, even if it has an equivalent vibration pattern. If this method is unable to create
+     * an equivalent vibration pattern for such effects, it will return {@code null}.
      *
      * <p>Note that a valid equivalent long[] pattern cannot be created for an effect that has any
      * form of repeating behavior, regardless of how the effect was created. For repeating effects,
@@ -245,7 +245,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @return a long array representing a vibration pattern equivalent to the VibrationEffect, if
      *               the method successfully derived a vibration pattern equivalent to the effect
      *               (this will always be the case if the effect was created via
-     *               {@link #createWaveform(int[], int)} and is non-repeating). Otherwise, returns
+     *               {@link #createWaveform(long[], int)} and is non-repeating). Otherwise, returns
      *               {@code null}.
      * @hide
      */
@@ -953,7 +953,7 @@ public abstract class VibrationEffect implements Parcelable {
         /**
          * Casts a provided {@link VibrationEffectSegment} to a {@link StepSegment} and returns it,
          * only if it can possibly be a segment for an effect created via
-         * {@link #createWaveform(int[], int)}. Otherwise, returns {@code null}.
+         * {@link #createWaveform(long[], int)}. Otherwise, returns {@code null}.
          */
         @Nullable
         private static StepSegment castToValidStepSegmentForOffOnTimingsOrNull(

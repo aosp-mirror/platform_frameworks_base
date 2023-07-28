@@ -54,7 +54,6 @@ public class RampSegmentTest {
                 /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 200, /* duration= */ 100);
 
         assertEquals(100L, ramp.getDuration());
-        assertTrue(ramp.hasNonZeroAmplitude());
         assertEquals(1f, ramp.getStartAmplitude());
         assertEquals(0f, ramp.getEndAmplitude());
         assertEquals(100f, ramp.getStartFrequencyHz());
@@ -93,13 +92,6 @@ public class RampSegmentTest {
                 () -> new RampSegment(/* startAmplitude= */ Float.NaN, 0, 0, 0, 0).validate());
         assertThrows(IllegalArgumentException.class,
                 () -> new RampSegment(0, 0, /* startFrequencyHz= */ Float.NaN, 0, 0).validate());
-    }
-
-    @Test
-    public void testHasNonZeroAmplitude() {
-        assertTrue(new RampSegment(0, 1, 0, 0, 0).hasNonZeroAmplitude());
-        assertTrue(new RampSegment(0.01f, 0, 0, 0, 0).hasNonZeroAmplitude());
-        assertFalse(new RampSegment(0, 0, 0, 0, 0).hasNonZeroAmplitude());
     }
 
     @Test

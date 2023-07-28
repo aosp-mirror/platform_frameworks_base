@@ -45,7 +45,6 @@ public class PrebakedSegmentTest {
                 VibrationEffect.EFFECT_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
 
         assertEquals(-1, prebaked.getDuration());
-        assertTrue(prebaked.hasNonZeroAmplitude());
         assertEquals(VibrationEffect.EFFECT_CLICK, prebaked.getEffectId());
         assertEquals(VibrationEffect.EFFECT_STRENGTH_MEDIUM, prebaked.getEffectStrength());
         assertTrue(prebaked.shouldFallback());

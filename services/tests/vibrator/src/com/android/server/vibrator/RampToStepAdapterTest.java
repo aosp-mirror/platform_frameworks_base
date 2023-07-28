@@ -66,6 +66,9 @@ public class RampToStepAdapterTest {
         assertEquals(-1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, -1));
         assertEquals(1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 1));
 
+        assertEquals(-1, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, -1));
+        assertEquals(1, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, 1));
+
         assertEquals(originalSegments, segments);
     }
 

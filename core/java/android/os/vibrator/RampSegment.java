@@ -125,12 +125,6 @@ public final class RampSegment extends VibrationEffectSegment {
 
     /** @hide */
     @Override
-    public boolean hasNonZeroAmplitude() {
-        return mStartAmplitude > 0 || mEndAmplitude > 0;
-    }
-
-    /** @hide */
-    @Override
     public void validate() {
         VibrationEffectSegment.checkFrequencyArgument(mStartFrequencyHz, "startFrequencyHz");
         VibrationEffectSegment.checkFrequencyArgument(mEndFrequencyHz, "endFrequencyHz");
