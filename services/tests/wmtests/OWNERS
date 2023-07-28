@@ -3,3 +3,5 @@ include /services/core/java/com/android/server/wm/OWNERS
 
 # Voice Interaction
 per-file *Assist* = file:/core/java/android/service/voice/OWNERS
+
+natanieljr@google.com
