@@ -139,11 +139,20 @@ public class PerformanceHintManagerTest {
     }
 
     @Test
-    public void testSetThreadsWithIllegalArgument() {
+    public void testSetThreads_emptyTids() {
         Session session = createSession();
         assumeNotNull(session);
         assertThrows(IllegalArgumentException.class, () -> {
-            session.setThreads(new int[] { });
+            session.setThreads(new int[]{});
+        });
+    }
+
+    @Test
+    public void testSetThreads_invalidTids() {
+        Session session = createSession();
+        assumeNotNull(session);
+        assertThrows(SecurityException.class, () -> {
+            session.setThreads(new int[]{-1});
         });
     }
 }

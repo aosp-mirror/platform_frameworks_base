@@ -41,7 +41,7 @@ typedef void (*APH_updateTargetWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_reportActualWorkDuration)(APerformanceHintSession*, int64_t);
 typedef void (*APH_closeSession)(APerformanceHintSession* session);
 typedef void (*APH_sendHint)(APerformanceHintSession*, int32_t);
-typedef void (*APH_setThreads)(APerformanceHintSession*, const pid_t*, size_t);
+typedef int (*APH_setThreads)(APerformanceHintSession*, const pid_t*, size_t);
 typedef void (*APH_getThreadIds)(APerformanceHintSession*, int32_t* const, size_t* const);
 
 bool gAPerformanceHintBindingInitialized = false;
@@ -112,6 +112,20 @@ void ensureAPerformanceHintBindingInitialized() {
 
 } // namespace
 
+static void throwExceptionForErrno(JNIEnv* env, int err, const std::string& msg) {
+    switch (err) {
+        case EINVAL:
+            jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", msg.c_str());
+            break;
+        case EPERM:
+            jniThrowExceptionFmt(env, "java/lang/SecurityException", msg.c_str());
+            break;
+        default:
+            jniThrowException(env, "java/lang/RuntimeException", msg.c_str());
+            break;
+    }
+}
+
 static jlong nativeAcquireManager(JNIEnv* env, jclass clazz) {
     ensureAPerformanceHintBindingInitialized();
     return reinterpret_cast<jlong>(gAPH_getManagerFn());
@@ -174,8 +188,11 @@ static void nativeSetThreads(JNIEnv* env, jclass clazz, jlong nativeSessionPtr, 
     for (size_t i = 0; i < tidsArray.size(); ++i) {
         tidsVector.push_back(static_cast<int32_t>(tidsArray[i]));
     }
-    gAPH_setThreadsFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr),
-                      tidsVector.data(), tidsVector.size());
+    int err = gAPH_setThreadsFn(reinterpret_cast<APerformanceHintSession*>(nativeSessionPtr),
+                                tidsVector.data(), tidsVector.size());
+    if (err != 0) {
+        throwExceptionForErrno(env, err, "Failed to set threads for hint session");
+    }
 }
 
 // This call should only be used for validation in tests only. This call will initiate two IPC
