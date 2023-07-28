@@ -138,6 +138,11 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
 
     @Test
     public void asynchronouslyInflateView_setNeedsInput() {
+        when(mKeyguardSecurityViewControllerFactory.create(
+               any(), any(SecurityMode.class),
+                any(KeyguardSecurityCallback.class)))
+                .thenReturn(mKeyguardInputViewController);
+
         ArgumentCaptor<AsyncLayoutInflater.OnInflateFinishedListener> argumentCaptor =
                 ArgumentCaptor.forClass(AsyncLayoutInflater.OnInflateFinishedListener.class);
         mKeyguardSecurityViewFlipperController.asynchronouslyInflateView(SecurityMode.PIN,
