@@ -26,8 +26,10 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
-import com.android.systemui.monet.utils.ArgbSubject.assertThat
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,8 +44,9 @@ class DefaultLockscreenLayoutTest : SysuiTestCase() {
     private lateinit var defaultLockscreenLayout: DefaultLockscreenLayout
     private lateinit var rootView: KeyguardRootView
     @Mock private lateinit var authController: AuthController
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var windowManager: WindowManager
+
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     @Before
     fun setup() {

@@ -17,7 +17,9 @@
 package com.android.systemui.statusbar.pipeline.wifi.domain.interactor
 
 import android.net.wifi.WifiManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
@@ -25,24 +27,30 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnec
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @SmallTest
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 class WifiInteractorImplTest : SysuiTestCase() {
 
     private lateinit var underTest: WifiInteractor
 
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
+
+    private val testScope = TestScope()
 
     @Before
     fun setUp() {
@@ -53,11 +61,12 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun ssid_unavailableNetwork_outputsNull() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             wifiRepository.setWifiNetwork(WifiNetworkModel.Unavailable)
 
             var latest: String? = "default"
             val job = underTest.ssid.onEach { latest = it }.launchIn(this)
+            runCurrent()
 
             assertThat(latest).isNull()
 
@@ -66,11 +75,12 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun ssid_inactiveNetwork_outputsNull() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive)
 
             var latest: String? = "default"
             val job = underTest.ssid.onEach { latest = it }.launchIn(this)
+            runCurrent()
 
             assertThat(latest).isNull()
 
@@ -79,13 +89,14 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun ssid_carrierMergedNetwork_outputsNull() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(networkId = 1, subscriptionId = 2, level = 1)
             )
 
             var latest: String? = "default"
             val job = underTest.ssid.onEach { latest = it }.launchIn(this)
+            runCurrent()
 
             assertThat(latest).isNull()
 
@@ -94,7 +105,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun ssid_isPasspointAccessPoint_outputsPasspointName() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.Active(
                     networkId = 1,
@@ -106,6 +117,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
             var latest: String? = null
             val job = underTest.ssid.onEach { latest = it }.launchIn(this)
+            runCurrent()
 
             assertThat(latest).isEqualTo("friendly")
 
@@ -114,7 +126,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun ssid_isOnlineSignUpForPasspoint_outputsPasspointName() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.Active(
                     networkId = 1,
@@ -126,6 +138,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
             var latest: String? = null
             val job = underTest.ssid.onEach { latest = it }.launchIn(this)
+            runCurrent()
 
             assertThat(latest).isEqualTo("friendly")
 
@@ -134,7 +147,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun ssid_unknownSsid_outputsNull() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.Active(
                     networkId = 1,
@@ -145,6 +158,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
             var latest: String? = "default"
             val job = underTest.ssid.onEach { latest = it }.launchIn(this)
+            runCurrent()
 
             assertThat(latest).isNull()
 
@@ -153,7 +167,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun ssid_validSsid_outputsSsid() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.Active(
                     networkId = 1,
@@ -164,6 +178,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
             var latest: String? = null
             val job = underTest.ssid.onEach { latest = it }.launchIn(this)
+            runCurrent()
 
             assertThat(latest).isEqualTo("MyAwesomeWifiNetwork")
 
@@ -172,7 +187,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun isEnabled_matchesRepoIsEnabled() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isEnabled.onEach { latest = it }.launchIn(this)
 
@@ -193,7 +208,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun isDefault_matchesRepoIsDefault() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isDefault.onEach { latest = it }.launchIn(this)
 
@@ -214,7 +229,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun wifiNetwork_matchesRepoWifiNetwork() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val wifiNetwork =
                 WifiNetworkModel.Active(
                     networkId = 45,
@@ -227,6 +242,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
             var latest: WifiNetworkModel? = null
             val job = underTest.wifiNetwork.onEach { latest = it }.launchIn(this)
+            runCurrent()
 
             assertThat(latest).isEqualTo(wifiNetwork)
 
@@ -235,7 +251,7 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun activity_matchesRepoWifiActivity() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataActivityModel? = null
             val job = underTest.activity.onEach { latest = it }.launchIn(this)
 
@@ -259,11 +275,12 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun isForceHidden_repoHasWifiHidden_outputsTrue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.WIFI))
 
             var latest: Boolean? = null
             val job = underTest.isForceHidden.onEach { latest = it }.launchIn(this)
+            runCurrent()
 
             assertThat(latest).isTrue()
 
@@ -272,16 +289,15 @@ class WifiInteractorImplTest : SysuiTestCase() {
 
     @Test
     fun isForceHidden_repoDoesNotHaveWifiHidden_outputsFalse() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectivityRepository.setForceHiddenIcons(setOf())
 
             var latest: Boolean? = null
             val job = underTest.isForceHidden.onEach { latest = it }.launchIn(this)
+            runCurrent()
 
             assertThat(latest).isFalse()
 
             job.cancel()
         }
 }
-
-private val IMMEDIATE = Dispatchers.Main.immediate

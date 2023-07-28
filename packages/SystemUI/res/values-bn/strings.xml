@@ -150,6 +150,8 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"ফেস শনাক্ত করা হয়েছে। চালিয়ে যেতে প্রেস করুন।"</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"ফেস শনাক্ত করা হয়েছে। চালিয়ে যেতে আনলক আইকন প্রেস করুন।"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"প্রমাণীকৃত"</string>
+    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
+    <skip />
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"পিন ব্যবহার করুন"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"প্যাটার্ন ব্যবহার করুন"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"পাসওয়ার্ড ব্যবহার করুন"</string>
@@ -362,6 +364,8 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ফেস দেখিয়ে আনলক করা হয়েছে"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ফেস চিনে নেওয়া হয়েছে"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"আবার চেষ্টা করতে উপরের দিকে সোয়াইপ করুন"</string>
+    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
+    <skip />
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ব্যবহার করতে আনলক করুন"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"এই ডিভাইসটি <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>-এর"</string>
@@ -415,14 +419,10 @@
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"আপনি শেয়ার, রেকর্ড বা কাস্ট করার সময়, স্ক্রিনে দৃশ্যমান বা ডিভাইসে চালানো সব কিছুই Android অ্যাক্সেস করতে পারবে। তাই পাসওয়ার্ড, পেমেন্টের বিবরণ, মেসেজ, ফটো এবং অডিও ও ভিডিওর মতো বিষয়ে সতর্ক থাকুন।"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"আপনি কোনও অ্যাপ শেয়ার, রেকর্ড বা কাস্ট করার সময়, সেই অ্যাপে দেখা যায় বা চালানো হয় এমন সব কিছু Android অ্যাক্সেস করতে পারবে। তাই পাসওয়ার্ড, পেমেন্টের বিবরণ, মেসেজ, ফটো এবং অডিও ও ভিডিওর মতো বিষয়ে সতর্ক থাকুন।"</string>
     <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"শুরু করুন"</string>
-    <!-- no translation found for media_projection_task_switcher_text (590885489897412359) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_switch (8682258717291921123) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_action_back (5324164224147845282) -->
-    <skip />
-    <!-- no translation found for media_projection_task_switcher_notification_channel (7613206306777814253) -->
-    <skip />
+    <string name="media_projection_task_switcher_text" msgid="590885489897412359">"আপনি অ্যাপ পাল্টানোর সময় শেয়ারিং পজ করা হয়"</string>
+    <string name="media_projection_task_switcher_action_switch" msgid="8682258717291921123">"এর পরিবর্তে এই অ্যাপ শেয়ার করুন"</string>
+    <string name="media_projection_task_switcher_action_back" msgid="5324164224147845282">"আবার পাল্টান"</string>
+    <string name="media_projection_task_switcher_notification_channel" msgid="7613206306777814253">"অ্যাপ পাল্টান"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"আপনার আইটি অ্যাডমিন ব্লক করেছেন"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ডিভাইস নীতির কারণে স্ক্রিন ক্যাপচার করার প্রসেস বন্ধ করা আছে"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"সব মুছে দিন"</string>
@@ -435,7 +435,7 @@
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"সব নীরব বিজ্ঞপ্তি মুছুন"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'বিরক্ত করবে না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"এখন শুরু করুন"</string>
-    <string name="empty_shade_text" msgid="8935967157319717412">"কোনো বিজ্ঞপ্তি নেই"</string>
+    <string name="empty_shade_text" msgid="8935967157319717412">"কোনও বিজ্ঞপ্তি নেই"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"নতুন কোনও বিজ্ঞপ্তি নেই"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"পুরনো বিজ্ঞপ্তি দেখতে আনলক করুন"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"আপনার অভিভাবক এই ডিভাইস ম্যানেজ করেন"</string>
@@ -940,6 +940,8 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"আরেকটি পিন লিখে চেষ্টা করুন"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g>-এর জন্য পরিবর্তন কনফার্ম করুন"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"আরও দেখতে সোয়াইপ করুন"</string>
+    <!-- no translation found for retry_face (416380073082560186) -->
+    <skip />
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"সাজেশন লোড করা হচ্ছে"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"মিডিয়া"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর মিডিয়া কন্ট্রোল লুকিয়ে রাখতে চান?"</string>
@@ -949,7 +951,7 @@
     <string name="controls_media_settings_button" msgid="5815790345117172504">"সেটিংস"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g>-এর <xliff:g id="SONG_NAME">%1$s</xliff:g> গানটি <xliff:g id="APP_LABEL">%3$s</xliff:g> অ্যাপে চলছে"</string>
     <string name="controls_media_seekbar_description" msgid="4389621713616214611">"<xliff:g id="TOTAL_TIME">%2$s</xliff:g>টির মধ্যে <xliff:g id="ELAPSED_TIME">%1$s</xliff:g>টি"</string>
-    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> চলছে"</string>
+    <string name="controls_media_empty_title" msgid="8296102892421573325">"<xliff:g id="APP_NAME">%1$s</xliff:g> এখন চালু রয়েছে"</string>
     <string name="controls_media_button_play" msgid="2705068099607410633">"চালান"</string>
     <string name="controls_media_button_pause" msgid="8614887780950376258">"পজ করুন"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"আগের ট্র্যাক"</string>
@@ -1166,4 +1168,40 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"অ্যাসিস্ট্যান্ট আপনার কথা শোনার জন্য চালু করা আছে"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"\'সেটিংস\' থেকে ডিফল্ট নোট নেওয়ার অ্যাপ সেট করুন"</string>
     <string name="install_app" msgid="5066668100199613936">"অ্যাপ ইনস্টল করুন"</string>
+    <!-- no translation found for privacy_dialog_title (7839968133469098311) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_summary (2458769652125995409) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_more_button (7610604080293562345) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_done_button (4504330708531434263) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_expand_action (9129262348628331377) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_collapse_action (277419962019466347) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_close_app_button (8006250171305878606) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_close_app_message (1316408652526310985) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_manage_service (8320590856621823604) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_manage_permissions (2543451567190470413) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_call_usage (7858746847946397562) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_call_usage (1214810644978167344) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_app_usage (631997836335929880) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_app_usage (4883417856848222450) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_app_usage_1 (9047570143069220911) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_app_usage_1 (2551340497722370109) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_active_app_usage_2 (2770926061339921767) -->
+    <skip />
+    <!-- no translation found for privacy_dialog_recent_app_usage_2 (2874689735085367167) -->
+    <skip />
 </resources>

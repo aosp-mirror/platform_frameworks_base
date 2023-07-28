@@ -623,7 +623,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
-    protected NotificationPresenter mPresenter;
+    private final NotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     private final Optional<Bubbles> mBubblesOptional;
@@ -724,6 +724,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             Lazy<NotificationShadeWindowViewController> notificationShadeWindowViewControllerLazy,
             NotificationShelfController notificationShelfController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
+            NotificationPresenter notificationPresenter,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
@@ -830,6 +831,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mStackScrollerController = notificationStackScrollLayoutController;
         mStackScroller = mStackScrollerController.getView();
         mNotifListContainer = mStackScrollerController.getNotificationListContainer();
+        mPresenter = notificationPresenter;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;
@@ -1604,7 +1606,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mShadeController.setNotificationShadeWindowViewController(
                 getNotificationShadeWindowViewController());
         mBackActionInteractor.setup(mQsController, mShadeSurface);
-        mPresenter = mCentralSurfacesComponent.getNotificationPresenter();
         mNotificationActivityStarter = mCentralSurfacesComponent.getNotificationActivityStarter();
 
         mHeadsUpManager.addListener(mCentralSurfacesComponent.getStatusBarHeadsUpChangeListener());

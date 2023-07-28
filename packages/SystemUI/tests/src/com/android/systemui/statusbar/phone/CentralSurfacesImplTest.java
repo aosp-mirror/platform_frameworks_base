@@ -513,6 +513,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mNotificationShadeWindowViewControllerLazy,
                 mNotificationShelfController,
                 mStackScrollerController,
+                mNotificationPresenter,
                 mDozeParameters,
                 mScrimController,
                 mLockscreenWallpaperLazy,
@@ -590,7 +591,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // TODO(b/277764509): we should be able to call mCentralSurfaces.start() and have all the
         //  below values initialized automatically.
         mCentralSurfaces.mDozeScrimController = mDozeScrimController;
-        mCentralSurfaces.mPresenter = mNotificationPresenter;
         mCentralSurfaces.mKeyguardIndicationController = mKeyguardIndicationController;
         mCentralSurfaces.mBarService = mBarService;
         mCentralSurfaces.mGestureWakeLock = mPowerManager.newWakeLock(

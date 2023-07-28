@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
@@ -45,6 +46,8 @@ import org.mockito.MockitoAnnotations
 class KeyguardIndicationAreaViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var burnInHelperWrapper: BurnInHelperWrapper
+    @Mock private lateinit var shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel
+    @Mock private lateinit var featureFlags: FeatureFlags
 
     private lateinit var underTest: KeyguardIndicationAreaViewModel
     private lateinit var repository: FakeKeyguardRepository
@@ -83,6 +86,8 @@ class KeyguardIndicationAreaViewModelTest : SysuiTestCase() {
                 bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository),
                 keyguardBottomAreaViewModel = bottomAreaViewModel,
                 burnInHelperWrapper = burnInHelperWrapper,
+                shortcutsCombinedViewModel = shortcutsCombinedViewModel,
+                featureFlags = featureFlags,
             )
     }
 

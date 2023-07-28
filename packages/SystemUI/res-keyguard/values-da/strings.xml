@@ -73,9 +73,9 @@
     <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Lås op med adgangskode eller fingeraftryk"</string>
     <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Lås op med mønster eller fingeraftryk"</string>
     <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Enhed låst af arbejdspolitik af hensyn til sikkerhed"</string>
-    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Pinkode er påkrævet efter brug af ekstralås"</string>
-    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Adgangskode er påkrævet efter brug af ekstralås"</string>
-    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Mønster er påkrævet efter brug af ekstralås"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Pinkode er påkrævet efter brug af låsning"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Adgangskode er påkrævet efter brug af låsning"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Mønster er påkrævet efter brug af låsning"</string>
     <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Opdateringen installeres under inaktivitet"</string>
     <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"Mere sikkerhed er påkrævet. Pinkoden er ikke blevet brugt i et stykke tid."</string>
     <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Mere sikkerhed er påkrævet. Adgangskoden er ikke blevet brugt i et stykke tid."</string>

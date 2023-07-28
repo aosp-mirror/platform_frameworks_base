@@ -616,6 +616,8 @@
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"বায়\'মেট্ৰিক অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"এইয়া আপুনিয়েই বুলি সত্যাপন কৰক"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"অব্যাহত ৰাখিবলৈ আপোনাৰ বায়\'মেট্ৰিক ব্যৱহাৰ কৰক"</string>
+    <string name="biometric_dialog_fingerprint_subtitle" msgid="2520227942533751342">"অব্যাহত ৰাখিবলৈ আপোনাৰ ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰক"</string>
+    <string name="biometric_dialog_face_subtitle" msgid="5269284162191087084">"অব্যাহত ৰাখিবলৈ নিজৰ মুখাৱয়ব ব্যৱহাৰ কৰক"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"অব্যাহত ৰাখিবলৈ আপোনাৰ বায়’মেট্ৰিক অথবা স্ক্ৰীন লক ব্যৱহাৰ কৰক"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"বায়োমেট্ৰিক হাৰ্ডৱেৰ উপলব্ধ নহয়"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"বিশ্বাসযোগ্যতাৰ প্ৰমাণীকৰণ বাতিল কৰা হৈছে"</string>

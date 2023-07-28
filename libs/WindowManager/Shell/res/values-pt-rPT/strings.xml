@@ -24,7 +24,7 @@
     <string name="pip_menu_title" msgid="5393619322111827096">"Menu"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menu de ecrã no ecrã"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"A app <xliff:g id="NAME">%s</xliff:g> está no modo de ecrã no ecrã"</string>
-    <string name="pip_notification_message" msgid="8854051911700302620">"Se não pretende que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"Se não quer que a app <xliff:g id="NAME">%s</xliff:g> utilize esta funcionalidade, toque para abrir as definições e desative-a."</string>
     <string name="pip_play" msgid="3496151081459417097">"Reproduzir"</string>
     <string name="pip_pause" msgid="690688849510295232">"Pausar"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Mudar para o seguinte"</string>
