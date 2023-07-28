@@ -24,6 +24,8 @@ import android.content.Context;
 import android.os.DeviceIdleManager;
 import android.test.AndroidTestCase;
 
+import androidx.test.filters.FlakyTest;
+
 import com.android.server.job.MockBiasJobService.TestEnvironment;
 import com.android.server.job.MockBiasJobService.TestEnvironment.Event;
 
@@ -58,6 +60,7 @@ public class BiasSchedulingTest extends AndroidTestCase {
         super.tearDown();
     }
 
+    @FlakyTest(bugId = 293589359)
     public void testLowerBiasJobPreempted() throws Exception {
         for (int i = 0; i < JobConcurrencyManager.MAX_CONCURRENCY_LIMIT; ++i) {
             JobInfo job = new JobInfo.Builder(100 + i, sJobServiceComponent)
