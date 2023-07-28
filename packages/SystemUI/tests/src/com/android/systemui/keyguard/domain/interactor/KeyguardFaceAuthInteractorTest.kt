@@ -48,6 +48,7 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -74,6 +75,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
     private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
     private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     private lateinit var faceAuthRepository: FakeDeviceEntryFaceAuthRepository
+    private lateinit var fakeUserRepository: FakeUserRepository
     private lateinit var fakeDeviceEntryFingerprintAuthRepository:
         FakeDeviceEntryFingerprintAuthRepository
 
@@ -98,6 +100,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 .keyguardTransitionInteractor
 
         fakeDeviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
+        fakeUserRepository = FakeUserRepository()
         underTest =
             SystemUIKeyguardFaceAuthInteractor(
                 mContext,
@@ -131,7 +134,8 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 featureFlags,
                 FaceAuthenticationLogger(logcatLogBuffer("faceAuthBuffer")),
                 keyguardUpdateMonitor,
-                fakeDeviceEntryFingerprintAuthRepository
+                fakeDeviceEntryFingerprintAuthRepository,
+                fakeUserRepository,
             )
     }
 
@@ -209,6 +213,38 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 .isEqualTo(
                     Pair(FaceAuthUiEvent.FACE_AUTH_UPDATED_KEYGUARD_VISIBILITY_CHANGED, true)
                 )
+        }
+
+    @Test
+    fun faceAuthIsPausedWhenUserSwitchingIsInProgress() =
+        testScope.runTest {
+            underTest.start()
+
+            fakeUserRepository.setUserSwitching(false)
+            runCurrent()
+            fakeUserRepository.setUserSwitching(true)
+            runCurrent()
+
+            assertThat(faceAuthRepository.isFaceAuthPaused()).isTrue()
+        }
+
+    @Test
+    fun faceAuthIsUnpausedWhenUserSwitchingIsInComplete() =
+        testScope.runTest {
+            underTest.start()
+
+            // previously running
+            fakeUserRepository.setUserSwitching(true)
+            runCurrent()
+            fakeUserRepository.setUserSwitching(false)
+            runCurrent()
+
+            assertThat(faceAuthRepository.isFaceAuthPaused()).isFalse()
+
+            runCurrent()
+            assertThat(faceAuthRepository.runningAuthRequest.value!!.first)
+                .isEqualTo(FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING)
+            assertThat(faceAuthRepository.runningAuthRequest.value!!.second).isEqualTo(true)
         }
 
     @Test

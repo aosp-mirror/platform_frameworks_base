@@ -56,6 +56,9 @@ class NoopDeviceEntryFaceAuthRepository @Inject constructor() : DeviceEntryFaceA
         get() = emptyFlow()
 
     override fun lockoutFaceAuth() = Unit
+    override fun pauseFaceAuth() = Unit
+
+    override fun resumeFaceAuth() = Unit
 
     /**
      * Trigger face authentication.

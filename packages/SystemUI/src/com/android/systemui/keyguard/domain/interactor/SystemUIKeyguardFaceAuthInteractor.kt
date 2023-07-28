@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.shared.model.ErrorFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.log.FaceAuthenticationLogger
+import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -49,6 +50,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Encapsulates business logic related face authentication being triggered for device entry from
@@ -69,6 +71,7 @@ constructor(
     private val faceAuthenticationLogger: FaceAuthenticationLogger,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
+    private val userRepository: UserRepository,
 ) : CoreStartable, KeyguardFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
@@ -125,6 +128,23 @@ constructor(
                 if (it) {
                     faceAuthenticationLogger.faceLockedOut("Fingerprint locked out")
                     repository.lockoutFaceAuth()
+                }
+            }
+            .launchIn(applicationScope)
+
+        // User switching should stop face auth and then when it is complete we should trigger face
+        // auth so that the switched user can unlock the device with face auth.
+        userRepository.userSwitchingInProgress
+            .pairwise(false)
+            .onEach { (wasSwitching, isSwitching) ->
+                if (!wasSwitching && isSwitching) {
+                    repository.pauseFaceAuth()
+                } else if (wasSwitching && !isSwitching) {
+                    repository.resumeFaceAuth()
+                    runFaceAuth(
+                        FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING,
+                        fallbackToDetect = true
+                    )
                 }
             }
             .launchIn(applicationScope)
@@ -199,8 +219,10 @@ constructor(
             } else {
                 faceAuthenticationStatusOverride.value = null
                 applicationScope.launch {
-                    faceAuthenticationLogger.authRequested(uiEvent)
-                    repository.authenticate(uiEvent, fallbackToDetection = fallbackToDetect)
+                    withContext(mainDispatcher) {
+                        faceAuthenticationLogger.authRequested(uiEvent)
+                        repository.authenticate(uiEvent, fallbackToDetection = fallbackToDetect)
+                    }
                 }
             }
         } else {
