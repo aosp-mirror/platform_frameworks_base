@@ -734,4 +734,8 @@ object Flags {
     // TODO(b/290213663): Tracking Bug
     @JvmField
     val ONE_WAY_HAPTICS_API_MIGRATION = unreleasedFlag(3100, "oneway_haptics_api_migration")
+
+    /** Enable the Compose implementation of the PeopleSpaceActivity. */
+    @JvmField
+    val COMPOSE_PEOPLE_SPACE = unreleasedFlag(293570761, "compose_people_space")
 }
