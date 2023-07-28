@@ -25,6 +25,9 @@ import android.view.cts.surfacevalidator.CapturedActivity;
 
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.server.wm.utils.CommonUtils;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,6 +55,11 @@ public class SurfaceViewSyncContinuousTest {
             pressWakeupButton();
             pressUnlockButton();
         }
+    }
+
+    @After
+    public void tearDown() {
+        CommonUtils.waitUntilActivityRemoved(mCapturedActivity);
     }
 
     @Test

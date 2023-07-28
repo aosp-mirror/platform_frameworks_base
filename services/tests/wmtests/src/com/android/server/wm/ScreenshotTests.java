@@ -56,6 +56,9 @@ import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.server.wm.utils.CommonUtils;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -88,6 +91,11 @@ public class ScreenshotTests {
     public void setup() {
         mActivity = mActivityRule.getActivity();
         mInstrumentation.waitForIdleSync();
+    }
+
+    @After
+    public void tearDown() {
+        CommonUtils.waitUntilActivityRemoved(mActivity);
     }
 
     @Test
