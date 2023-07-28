@@ -16,6 +16,7 @@ android_test {
         "frameworks-base-testutils",
         "mockito-target-minus-junit4",
         "services.core",
+        "mockingservicestests-utils-mockito",
     ],
 
     platform_apis: true,

@@ -36,6 +36,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -102,6 +103,7 @@ public class DreamManagerServiceMockingTest {
     }
 
     @Test
+    @FlakyTest(bugId = 293443309)
     public void testSettingsQueryUserChange() {
         final DreamManagerService service = createService();
 
