@@ -155,6 +155,12 @@ public final class TvInputManagerService extends SystemService {
     // ID of the current user.
     @GuardedBy("mLock")
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
+    @GuardedBy("mLock")
+    // ID of the current input displayed on the screen.
+    private String mCurrentInputId = null;
+    @GuardedBy("mLock")
+    // SessionState of the currently active TIS session.
+    private SessionState mCurrentSessionState = null;
     // IDs of the running profiles. Their parent user ID should be mCurrentUserId.
     @GuardedBy("mLock")
     private final Set<Integer> mRunningProfiles = new HashSet<>();
@@ -884,6 +890,10 @@ public final class TvInputManagerService extends SystemService {
                 sessionState.session = null;
             }
         }
+        logExternalInputEvent(FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__RELEASED,
+                mCurrentInputId, sessionState);
+        mCurrentInputId = null;
+        mCurrentSessionState = null;
         removeSessionStateLocked(sessionToken, userId);
         return sessionState;
     }
@@ -1065,12 +1075,19 @@ public final class TvInputManagerService extends SystemService {
             Slog.e(TAG, "failed to set input info - unknown input id " + inputId);
             return;
         }
+        boolean currentCecTvInputInfoUpdated = isCurrentCecTvInputInfoUpdate(userState, inputInfo);
         inputState.info = inputInfo;
         inputState.uid = getInputUid(inputInfo);
         ServiceState serviceState = userState.serviceStateMap.get(inputInfo.getComponent());
         if (serviceState != null && serviceState.isHardware) {
             serviceState.hardwareInputMap.put(inputInfo.getId(), inputInfo);
             mTvInputHardwareManager.updateInputInfo(inputInfo);
+        }
+
+        if (currentCecTvInputInfoUpdated) {
+            logExternalInputEvent(
+                    FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__DEVICE_INFO_UPDATED,
+                    mCurrentInputId, mCurrentSessionState);
         }
 
         int n = userState.mCallbacks.beginBroadcast();
@@ -1082,6 +1099,29 @@ public final class TvInputManagerService extends SystemService {
             }
         }
         userState.mCallbacks.finishBroadcast();
+    }
+
+    @GuardedBy("mLock")
+    private boolean isCurrentCecTvInputInfoUpdate(UserState userState, TvInputInfo newInputInfo) {
+        if (newInputInfo == null || newInputInfo.getId() == null
+                || !newInputInfo.getId().equals(mCurrentInputId)) {
+            return false;
+        }
+        if (newInputInfo.getHdmiDeviceInfo() == null
+                || !newInputInfo.getHdmiDeviceInfo().isCecDevice()) {
+            return false;
+        }
+        TvInputState inputState = userState.inputMap.get(mCurrentInputId);
+        if (inputState == null || inputState.info == null) {
+            return false;
+        }
+        if (inputState.info.getHdmiDeviceInfo() == null
+                || !inputState.info.getHdmiDeviceInfo().isCecDevice()) {
+            return false;
+        }
+        int newVendorId = newInputInfo.getHdmiDeviceInfo().getVendorId(),
+            currentVendorId = inputState.info.getHdmiDeviceInfo().getVendorId();
+        return newVendorId != currentVendorId;
     }
 
     @GuardedBy("mLock")
@@ -1101,6 +1141,24 @@ public final class TvInputManagerService extends SystemService {
             return;
         }
         if (oldState != state) {
+            if (inputId.equals(mCurrentInputId)) {
+                logExternalInputEvent(
+                        FrameworkStatsLog
+                                .EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__CONNECTION_STATE_CHANGED,
+                        mCurrentInputId, mCurrentSessionState);
+            } else if (mCurrentInputId != null) {
+                TvInputInfo currentInputInfo = userState.inputMap.get(mCurrentInputId).info;
+                if (currentInputInfo != null && currentInputInfo.getHdmiDeviceInfo() != null
+                        && inputId.equals(currentInputInfo.getParentId())) {
+                    logExternalInputEvent(
+                            FrameworkStatsLog
+                                    .EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__CONNECTION_STATE_CHANGED,
+                            inputId, mCurrentSessionState);
+                    if (state == INPUT_STATE_CONNECTED_STANDBY) {
+                        mCurrentInputId = currentInputInfo.getParentId();
+                    }
+                }
+            }
             notifyInputStateChangedLocked(userState, inputId, state, null);
         }
     }
@@ -1764,10 +1822,18 @@ public final class TvInputManagerService extends SystemService {
                         UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                         SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
                                 userState);
+                        if (mCurrentInputId == null
+                                || !mCurrentInputId.equals(sessionState.inputId)) {
+                            mCurrentInputId = sessionState.inputId;
+                            logExternalInputEvent(
+                                    FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__TUNED,
+                                    sessionState.inputId, sessionState);
+                        }
                         if (!sessionState.isCurrent
                                 || !Objects.equals(sessionState.currentChannel, channelUri)) {
                             sessionState.isCurrent = true;
                             sessionState.currentChannel = channelUri;
+                            mCurrentSessionState = sessionState;
                             notifyCurrentChannelInfosUpdatedLocked(userState);
                         }
                         if (TvContract.isChannelUriForPassthroughInput(channelUri)) {
@@ -2990,6 +3056,30 @@ public final class TvInputManagerService extends SystemService {
                 hdmiPort);
     }
 
+    private void logExternalInputEvent(int eventType, String inputId, SessionState sessionState) {
+        UserState userState = getOrCreateUserStateLocked(sessionState.userId);
+        TvInputState tvInputState = userState.inputMap.get(inputId);
+        TvInputInfo tvInputInfo = tvInputState.info;
+        int inputState = tvInputState.state;
+        int inputType = tvInputInfo.getType();
+        // For non-CEC input, the value of vendorId is 0.
+        int vendorId = 0;
+        // For non-HDMI input, the value of hdmiPort is 0.
+        int hdmiPort = 0;
+        String tifSessionId = sessionState.sessionId;
+
+        if (tvInputInfo.getType() == TvInputInfo.TYPE_HDMI) {
+            HdmiDeviceInfo hdmiDeviceInfo = tvInputInfo.getHdmiDeviceInfo();
+            if (hdmiDeviceInfo != null) {
+                vendorId = hdmiDeviceInfo.getVendorId();
+                hdmiPort = hdmiDeviceInfo.getPortId();
+            }
+        }
+
+        FrameworkStatsLog.write(FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT, eventType, inputState,
+                inputType, vendorId, hdmiPort, tifSessionId);
+    }
+
     private static final class UserState {
         // A mapping from the TV input id to its TvInputState.
         private Map<String, TvInputState> inputMap = new HashMap<>();
@@ -3353,6 +3443,16 @@ public final class TvInputManagerService extends SystemService {
                 synchronized (mLock) {
                     mTvInputHardwareManager.addHdmiInput(id, inputInfo);
                     addHardwareInputLocked(inputInfo);
+                    // catch the use case when a CEC device is unplugged from
+                    // an HDMI port, then plugged in to the same HDMI port.
+                    if (mCurrentInputId != null && mCurrentSessionState != null
+                            && mCurrentInputId.equals(inputInfo.getParentId())
+                            && inputInfo.getId().equals(mCurrentSessionState.inputId)) {
+                        logExternalInputEvent(
+                                FrameworkStatsLog.EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__TUNED,
+                                inputInfo.getId(), mCurrentSessionState);
+                        mCurrentInputId = inputInfo.getId();
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -3455,6 +3555,8 @@ public final class TvInputManagerService extends SystemService {
                         UserState userState = getOrCreateUserStateLocked(mSessionState.userId);
                         mSessionState.isCurrent = true;
                         mSessionState.currentChannel = channelUri;
+                        mCurrentSessionState = mSessionState;
+                        mCurrentInputId = mSessionState.inputId;
                         notifyCurrentChannelInfosUpdatedLocked(userState);
                     }
                 } catch (RemoteException e) {
