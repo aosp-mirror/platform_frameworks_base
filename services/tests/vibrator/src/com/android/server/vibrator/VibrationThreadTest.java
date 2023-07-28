@@ -60,6 +60,7 @@ import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.FlakyTest;
 import android.platform.test.annotations.LargeTest;
 import android.util.SparseArray;
 
@@ -1490,6 +1491,7 @@ public class VibrationThreadTest {
         assertTrue(fakeVibrator.getAmplitudes().isEmpty());
     }
 
+    @FlakyTest
     @Test
     public void vibrate_multipleVibrations_withCancel() throws Exception {
         mVibratorProviders.get(VIBRATOR_ID).setSupportedEffects(
