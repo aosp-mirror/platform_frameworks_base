@@ -463,6 +463,31 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         }
     }
 
+    // To prevent FRP bypasses, the SECURE_FRP_MODE setting should not be reset when all other
+    // settings are reset.  But it should still be possible to explicitly set its value.
+    @Test
+    public void testSecureFrpModeSettingCannotBeReset() throws Exception {
+        final String name = Settings.Secure.SECURE_FRP_MODE;
+        final String origValue = getSetting(SETTING_TYPE_GLOBAL, name);
+        setSettingViaShell(SETTING_TYPE_GLOBAL, name, "1", false);
+        try {
+            assertEquals("1", getSetting(SETTING_TYPE_GLOBAL, name));
+            for (int type : new int[] { SETTING_TYPE_GLOBAL, SETTING_TYPE_SECURE }) {
+                resetSettingsViaShell(type, Settings.RESET_MODE_UNTRUSTED_DEFAULTS);
+                resetSettingsViaShell(type, Settings.RESET_MODE_UNTRUSTED_CHANGES);
+                resetSettingsViaShell(type, Settings.RESET_MODE_TRUSTED_DEFAULTS);
+            }
+            // The value should still be "1".  It should not have been reset to null.
+            assertEquals("1", getSetting(SETTING_TYPE_GLOBAL, name));
+            // It should still be possible to explicitly set the value to "0".
+            setSettingViaShell(SETTING_TYPE_GLOBAL, name, "0", false);
+            assertEquals("0", getSetting(SETTING_TYPE_GLOBAL, name));
+        } finally {
+            setSettingViaShell(SETTING_TYPE_GLOBAL, name, origValue, false);
+            assertEquals(origValue, getSetting(SETTING_TYPE_GLOBAL, name));
+        }
+    }
+
     private void doTestQueryStringInBracketsViaProviderApiForType(int type) {
         // Make sure we have a clean slate.
         deleteStringViaProviderApi(type, FAKE_SETTING_NAME);
