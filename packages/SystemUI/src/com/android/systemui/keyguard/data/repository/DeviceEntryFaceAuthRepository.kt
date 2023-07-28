@@ -110,6 +110,18 @@ interface DeviceEntryFaceAuthRepository {
     fun lockoutFaceAuth()
 
     /**
+     * Cancel current face authentication and prevent it from running until [resumeFaceAuth] is
+     * invoked.
+     */
+    fun pauseFaceAuth()
+
+    /**
+     * Allow face auth paused using [pauseFaceAuth] to run again. The next invocation to
+     * [authenticate] will run as long as other gating conditions don't stop it from running.
+     */
+    fun resumeFaceAuth()
+
+    /**
      * Trigger face authentication.
      *
      * [uiEvent] provided should be logged whenever face authentication runs. Invocation should be
@@ -185,6 +197,15 @@ constructor(
     private val _isAuthRunning = MutableStateFlow(false)
     override val isAuthRunning: StateFlow<Boolean>
         get() = _isAuthRunning
+
+    private val faceAuthPaused = MutableStateFlow(false)
+    override fun pauseFaceAuth() {
+        faceAuthPaused.value = true
+    }
+
+    override fun resumeFaceAuth() {
+        faceAuthPaused.value = false
+    }
 
     private val keyguardSessionId: InstanceId?
         get() = sessionTracker.getSessionId(StatusBarManager.SESSION_KEYGUARD)
@@ -329,11 +350,7 @@ constructor(
                     "isFaceAuthenticationEnabled",
                     tableLogBuffer
                 ),
-                logAndObserve(
-                    userRepository.userSwitchingInProgress.isFalse(),
-                    "userSwitchingNotInProgress",
-                    tableLogBuffer
-                ),
+                logAndObserve(faceAuthPaused.isFalse(), "faceAuthIsNotPaused", tableLogBuffer),
                 logAndObserve(
                     keyguardRepository.isKeyguardGoingAway.isFalse(),
                     "keyguardNotGoingAway",
@@ -454,7 +471,6 @@ constructor(
         }
 
     private fun handleFaceCancellationError() {
-        cancelNotReceivedHandlerJob?.cancel()
         applicationScope.launch {
             faceAuthRequestedWhileCancellation?.let {
                 faceAuthLogger.launchingQueuedFaceAuthRequest(it)
@@ -483,6 +499,7 @@ constructor(
     }
 
     private fun onFaceAuthRequestCompleted() {
+        cancelNotReceivedHandlerJob?.cancel()
         cancellationInProgress = false
         _isAuthRunning.value = false
         authCancellationSignal = null

@@ -541,10 +541,8 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun authenticateDoesNotRunIfUserIsCurrentlySwitching() =
-        testScope.runTest {
-            testGatingCheckForFaceAuth { fakeUserRepository.setUserSwitching(true) }
-        }
+    fun authenticateDoesNotRunIfFaceAuthIsCurrentlyPaused() =
+        testScope.runTest { testGatingCheckForFaceAuth { underTest.pauseFaceAuth() } }
 
     @Test
     fun authenticateDoesNotRunIfKeyguardIsNotShowing() =
@@ -840,7 +838,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
 
     @Test
     fun detectDoesNotRunWhenUserSwitchingInProgress() =
-        testScope.runTest { testGatingCheckForDetect { fakeUserRepository.setUserSwitching(true) } }
+        testScope.runTest { testGatingCheckForDetect { underTest.pauseFaceAuth() } }
 
     @Test
     fun detectDoesNotRunWhenKeyguardGoingAway() =
@@ -1130,7 +1128,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             .addLockoutResetCallback(faceLockoutResetCallback.capture())
         biometricSettingsRepository.setFaceEnrolled(true)
         biometricSettingsRepository.setIsFaceAuthEnabled(true)
-        fakeUserRepository.setUserSwitching(false)
+        underTest.resumeFaceAuth()
         trustRepository.setCurrentUserTrusted(false)
         keyguardRepository.setKeyguardGoingAway(false)
         keyguardRepository.setWakefulnessModel(
