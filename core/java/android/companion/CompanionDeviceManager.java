@@ -28,6 +28,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UserHandleAware;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -1308,12 +1309,13 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Enable or disable secure transport for testing. Defaults to enabled.
+     * Enables or disables secure transport for testing. Defaults to being enabled.
      * Should not be used outside of testing.
      *
      * @param enabled true to enable. false to disable.
      * @hide
      */
+    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void enableSecureTransport(boolean enabled) {
         try {

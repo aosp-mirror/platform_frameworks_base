@@ -837,6 +837,10 @@ package android.appwidget {
 
 package android.companion {
 
+  public final class CompanionDeviceManager {
+    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void enableSecureTransport(boolean);
+  }
+
   public abstract class CompanionDeviceService extends android.app.Service {
     method public void onBindCompanionDeviceService(@NonNull android.content.Intent);
   }

@@ -108,5 +108,6 @@ interface ICompanionDeviceManager {
 
     void disableSystemDataSync(int associationId, int flags);
 
+    @EnforcePermission("MANAGE_COMPANION_DEVICES")
     void enableSecureTransport(boolean enabled);
 }
