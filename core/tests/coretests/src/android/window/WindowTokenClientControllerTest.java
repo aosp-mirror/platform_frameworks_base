@@ -58,8 +58,6 @@ public class WindowTokenClientControllerTest {
     @Mock
     private WindowTokenClient mWindowTokenClient;
     @Mock
-    private IBinder mClientToken;
-    @Mock
     private IBinder mWindowToken;
     // Can't mock final class.
     private final Configuration mConfiguration = new Configuration();
@@ -70,7 +68,6 @@ public class WindowTokenClientControllerTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        doReturn(mClientToken).when(mWindowTokenClient).asBinder();
         mController = spy(WindowTokenClientController.createInstanceForTesting());
         doReturn(mWindowManagerService).when(mController).getWindowManagerService();
         mWindowContextInfo = new WindowContextInfo(mConfiguration, DEFAULT_DISPLAY);
@@ -205,7 +202,7 @@ public class WindowTokenClientControllerTest {
                 .attachWindowContextToWindowToken(any(), any(), any());
 
         // No invoke if not attached.
-        mController.onWindowContextInfoChanged(mClientToken, mWindowContextInfo);
+        mController.onWindowContextInfoChanged(mWindowTokenClient, mWindowContextInfo);
 
         verify(mWindowTokenClient, never()).onConfigurationChanged(any(), anyInt());
 
@@ -216,7 +213,7 @@ public class WindowTokenClientControllerTest {
 
         // Invoke onConfigurationChanged when onWindowContextInfoChanged
         mController.onWindowContextInfoChanged(
-                mClientToken, new WindowContextInfo(mConfiguration, DEFAULT_DISPLAY + 1));
+                mWindowTokenClient, new WindowContextInfo(mConfiguration, DEFAULT_DISPLAY + 1));
 
         verify(mWindowTokenClient).onConfigurationChanged(mConfiguration, DEFAULT_DISPLAY + 1);
     }
@@ -227,7 +224,7 @@ public class WindowTokenClientControllerTest {
                 .attachWindowContextToWindowToken(any(), any(), any());
 
         // No invoke if not attached.
-        mController.onWindowContextWindowRemoved(mClientToken);
+        mController.onWindowContextWindowRemoved(mWindowTokenClient);
 
         verify(mWindowTokenClient, never()).onWindowTokenRemoved();
 
@@ -237,7 +234,7 @@ public class WindowTokenClientControllerTest {
         verify(mWindowTokenClient, never()).onWindowTokenRemoved();
 
         // Invoke onWindowTokenRemoved when onWindowContextWindowRemoved
-        mController.onWindowContextWindowRemoved(mClientToken);
+        mController.onWindowContextWindowRemoved(mWindowTokenClient);
 
         verify(mWindowTokenClient).onWindowTokenRemoved();
     }
