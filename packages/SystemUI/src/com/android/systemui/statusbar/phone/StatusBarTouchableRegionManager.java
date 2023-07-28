@@ -37,7 +37,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
-import com.android.systemui.scene.shared.model.SceneContainerNames;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -126,7 +125,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
 
         if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
             javaAdapter.get().alwaysCollectFlow(
-                    sceneInteractor.get().isVisible(SceneContainerNames.SYSTEM_UI_DEFAULT),
+                    sceneInteractor.get().isVisible(),
                     this::onShadeExpansionFullyChanged);
         }
 

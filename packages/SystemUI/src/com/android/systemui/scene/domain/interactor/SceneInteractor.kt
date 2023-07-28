@@ -30,12 +30,8 @@ import kotlinx.coroutines.flow.asStateFlow
 /**
  * Generic business logic and app state accessors for the scene framework.
  *
- * Note that scene container specific business logic does not belong in this class. Instead, it
- * should be hoisted to a class that is specific to that scene container, for an example, please see
- * [SystemUiDefaultSceneContainerStartable].
- *
- * Also note that this class should not depend on state or logic of other modules or features.
- * Instead, other feature modules should depend on and call into this class when their parts of the
+ * Note that this class should not depend on state or logic of other modules or features. Instead,
+ * other feature modules should depend on and call into this class when their parts of the
  * application state change.
  */
 @SysUISingleton
@@ -51,50 +47,42 @@ constructor(
      * The scenes will be sorted in z-order such that the last one is the one that should be
      * rendered on top of all previous ones.
      */
-    fun allSceneKeys(containerName: String): List<SceneKey> {
-        return repository.allSceneKeys(containerName)
+    fun allSceneKeys(): List<SceneKey> {
+        return repository.allSceneKeys()
     }
 
     /** Sets the scene in the container with the given name. */
-    fun setCurrentScene(containerName: String, scene: SceneModel) {
-        val currentSceneKey = repository.currentScene(containerName).value.key
-        repository.setCurrentScene(containerName, scene)
-        repository.setSceneTransition(containerName, from = currentSceneKey, to = scene.key)
+    fun setCurrentScene(scene: SceneModel) {
+        val currentSceneKey = repository.currentScene.value.key
+        repository.setCurrentScene(scene)
+        repository.setSceneTransition(from = currentSceneKey, to = scene.key)
     }
 
     /** The current scene in the container with the given name. */
-    fun currentScene(containerName: String): StateFlow<SceneModel> {
-        return repository.currentScene(containerName)
-    }
+    val currentScene: StateFlow<SceneModel> = repository.currentScene
 
     /** Sets the visibility of the container with the given name. */
-    fun setVisible(containerName: String, isVisible: Boolean) {
-        return repository.setVisible(containerName, isVisible)
+    fun setVisible(isVisible: Boolean) {
+        return repository.setVisible(isVisible)
     }
 
     /** Whether the container with the given name is visible. */
-    fun isVisible(containerName: String): StateFlow<Boolean> {
-        return repository.isVisible(containerName)
-    }
+    val isVisible: StateFlow<Boolean> = repository.isVisible
 
     /** Sets scene transition progress to the current scene in the container with the given name. */
-    fun setSceneTransitionProgress(containerName: String, progress: Float) {
-        repository.setSceneTransitionProgress(containerName, progress)
+    fun setSceneTransitionProgress(progress: Float) {
+        repository.setSceneTransitionProgress(progress)
     }
 
     /** Progress of the transition into the current scene in the container with the given name. */
-    fun sceneTransitionProgress(containerName: String): StateFlow<Float> {
-        return repository.sceneTransitionProgress(containerName)
-    }
+    val transitionProgress: StateFlow<Float> = repository.transitionProgress
 
     /**
      * Scene transitions as pairs of keys. A new value is emitted exactly once, each time a scene
      * transition occurs. The flow begins with a `null` value at first, because the initial scene is
      * not something that we transition to from another scene.
      */
-    fun sceneTransitions(containerName: String): StateFlow<SceneTransitionModel?> {
-        return repository.sceneTransitions(containerName)
-    }
+    val transitions: StateFlow<SceneTransitionModel?> = repository.transitions
 
     private val _remoteUserInput: MutableStateFlow<RemoteUserInput?> = MutableStateFlow(null)
 
