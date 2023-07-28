@@ -16,12 +16,11 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,44 +28,34 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the shade scene. */
+@SysUISingleton
 class ShadeSceneViewModel
-@AssistedInject
+@Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    lockscreenSceneInteractorFactory: LockscreenSceneInteractor.Factory,
-    @Assisted private val containerName: String,
+    private val lockscreenSceneInteractor: LockscreenSceneInteractor,
 ) {
-    private val lockScreenInteractor: LockscreenSceneInteractor =
-        lockscreenSceneInteractorFactory.create(containerName)
-
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: StateFlow<SceneKey> =
-        lockScreenInteractor.isDeviceLocked
+        lockscreenSceneInteractor.isDeviceLocked
             .map { isLocked -> upDestinationSceneKey(isLocked = isLocked) }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue =
                     upDestinationSceneKey(
-                        isLocked = lockScreenInteractor.isDeviceLocked.value,
+                        isLocked = lockscreenSceneInteractor.isDeviceLocked.value,
                     ),
             )
 
     /** Notifies that some content in the shade was clicked. */
     fun onContentClicked() {
-        lockScreenInteractor.dismissLockscreen()
+        lockscreenSceneInteractor.dismissLockscreen()
     }
 
     private fun upDestinationSceneKey(
         isLocked: Boolean,
     ): SceneKey {
         return if (isLocked) SceneKey.Lockscreen else SceneKey.Gone
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            containerName: String,
-        ): ShadeSceneViewModel
     }
 }

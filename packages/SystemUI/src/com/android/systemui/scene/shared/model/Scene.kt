@@ -27,8 +27,6 @@ import kotlinx.coroutines.flow.asStateFlow
  * takes care of rendering the current scene and allowing scenes to be switched from one to another
  * based on either user action (for example, swiping down while on the lock screen scene may switch
  * to the shade scene).
- *
- * The framework also supports multiple containers, each one with its own configuration.
  */
 interface Scene {
 
@@ -59,7 +57,7 @@ interface Scene {
      * The API is designed such that it's possible to emit ever-changing values for each
      * [UserAction] to enable, disable, or change the destination scene of a given user action.
      */
-    fun destinationScenes(containerName: String): StateFlow<Map<UserAction, SceneModel>> =
+    fun destinationScenes(): StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow(emptyMap<UserAction, SceneModel>()).asStateFlow()
 }
 
