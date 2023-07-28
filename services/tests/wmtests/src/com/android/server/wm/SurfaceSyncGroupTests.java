@@ -47,6 +47,9 @@ import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.server.wm.utils.CommonUtils;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -77,6 +80,12 @@ public class SurfaceSyncGroupTests {
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mHandlerThread.start();
         mHandler = mHandlerThread.getThreadHandler();
+    }
+
+    @After
+    public void tearDown() {
+        mHandlerThread.quitSafely();
+        CommonUtils.waitUntilActivityRemoved(mActivity);
     }
 
     @Test

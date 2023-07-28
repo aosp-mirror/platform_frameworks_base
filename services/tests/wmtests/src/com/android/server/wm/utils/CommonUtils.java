@@ -18,14 +18,23 @@ package com.android.server.wm.utils;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import android.app.Activity;
 import android.app.KeyguardManager;
 import android.app.UiAutomation;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.test.uiautomator.UiDevice;
 
+import java.io.IOException;
+
 /** Provides common utility functions. */
 public class CommonUtils {
+    private static final String TAG = "CommonUtils";
+    private static final long REMOVAL_TIMEOUT_MS = 3000;
+    private static final long TIMEOUT_INTERVAL_MS = 200;
+
     public static UiAutomation getUiAutomation() {
         return getInstrumentation().getUiAutomation();
     }
@@ -49,5 +58,27 @@ public class CommonUtils {
         final UiDevice device = UiDevice.getInstance(getInstrumentation());
         device.pressKeyCode(KeyEvent.KEYCODE_WAKEUP);
         device.pressKeyCode(KeyEvent.KEYCODE_MENU);
+    }
+
+    public static void waitUntilActivityRemoved(Activity activity) {
+        if (!activity.isFinishing()) {
+            activity.finish();
+        }
+        final UiDevice uiDevice = UiDevice.getInstance(getInstrumentation());
+        final String classPattern = activity.getComponentName().flattenToShortString();
+        final long startTime = SystemClock.uptimeMillis();
+        while (SystemClock.uptimeMillis() - startTime <= REMOVAL_TIMEOUT_MS) {
+            SystemClock.sleep(TIMEOUT_INTERVAL_MS);
+            final String windowTokenDump;
+            try {
+                windowTokenDump = uiDevice.executeShellCommand("dumpsys window tokens");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            if (!windowTokenDump.contains(classPattern)) {
+                return;
+            }
+        }
+        Log.i(TAG, "Removal timeout of " + classPattern);
     }
 }

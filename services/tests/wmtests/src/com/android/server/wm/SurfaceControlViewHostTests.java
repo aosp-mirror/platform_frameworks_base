@@ -52,6 +52,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.server.wm.utils.CommonUtils;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,6 +89,7 @@ public class SurfaceControlViewHostTests {
     @After
     public void tearDown() {
         mInstrumentation.getUiAutomation().dropShellPermissionIdentity();
+        CommonUtils.waitUntilActivityRemoved(mActivity);
     }
 
     @Test

@@ -60,6 +60,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -76,6 +77,7 @@ public class TaskStackChangedListenerTest {
     private ITaskStackListener mTaskStackListener;
     private VirtualDisplay mVirtualDisplay;
     private ImageReader mImageReader;
+    private final ArrayList<Activity> mStartedActivities = new ArrayList<>();
 
     private static final int WAIT_TIMEOUT_MS = 5000;
     private static final Object sLock = new Object();
@@ -94,6 +96,19 @@ public class TaskStackChangedListenerTest {
             mVirtualDisplay.release();
             mImageReader.close();
         }
+        // Finish from bottom to top.
+        final int size = mStartedActivities.size();
+        for (int i = 0; i < size; i++) {
+            final Activity activity = mStartedActivities.get(i);
+            if (!activity.isFinishing()) {
+                activity.finish();
+            }
+        }
+        // Wait for the last launched activity to be removed.
+        if (size > 0) {
+            CommonUtils.waitUntilActivityRemoved(mStartedActivities.get(size - 1));
+        }
+        mStartedActivities.clear();
     }
 
     private VirtualDisplay createVirtualDisplay() {
@@ -381,6 +396,7 @@ public class TaskStackChangedListenerTest {
             throw new RuntimeException("Timed out waiting for Activity");
         }
         activity.waitForResumeStateChange(true);
+        mStartedActivities.add(activity);
         return activity;
     }
 

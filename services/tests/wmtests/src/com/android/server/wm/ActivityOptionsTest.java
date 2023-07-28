@@ -54,6 +54,8 @@ import android.window.TaskOrganizer;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.server.wm.utils.CommonUtils;
+
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -172,6 +174,7 @@ public class ActivityOptionsTest {
             instrumentation.removeMonitor(monitor);
             if (mainActivity != null) {
                 mainActivity.finish();
+                CommonUtils.waitUntilActivityRemoved(mainActivity);
             }
         }
     }
