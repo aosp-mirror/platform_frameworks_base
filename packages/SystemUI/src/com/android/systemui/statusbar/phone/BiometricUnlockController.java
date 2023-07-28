@@ -463,7 +463,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         };
 
         final boolean wakingFromDream = mMode == MODE_WAKE_AND_UNLOCK_FROM_DREAM
-                && !mStatusBarStateController.isDozing();
+                && mPowerManager.isInteractive();
 
         if (mMode != MODE_NONE && !wakingFromDream) {
             wakeUp.run();
@@ -501,7 +501,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     // later to awaken.
                 }
                 mNotificationShadeWindowController.setNotificationShadeFocusable(false);
-                mKeyguardViewMediator.onWakeAndUnlocking();
+                mKeyguardViewMediator.onWakeAndUnlocking(wakingFromDream);
                 Trace.endSection();
                 break;
             case MODE_ONLY_WAKE:
