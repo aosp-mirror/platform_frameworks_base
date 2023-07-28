@@ -66,6 +66,9 @@ public class Device {
     private static native void nativeInjectEvent(long ptr, int type, int code, int value);
     private static native void nativeConfigure(int handle, int code, int[] configs);
     private static native void nativeSetAbsInfo(int handle, int axisCode, Parcel axisParcel);
+    private static native int nativeGetEvdevEventTypeByLabel(String label);
+    private static native int nativeGetEvdevEventCodeByLabel(int type, String label);
+    private static native int nativeGetEvdevInputPropByLabel(String label);
 
     public Device(int id, String name, int vid, int pid, int bus,
             SparseArray<int[]> configuration, int ffEffectsMax,
@@ -233,5 +236,33 @@ public class Device {
             msg.setAsynchronous(true);
             msg.sendToTarget();
         }
+    }
+
+    static int getEvdevEventTypeByLabel(String label) {
+        final var type = nativeGetEvdevEventTypeByLabel(label);
+        if (type < 0) {
+            throw new IllegalArgumentException(
+                    "Failed to get evdev event type from label: " + label);
+        }
+        return type;
+    }
+
+    static int getEvdevEventCodeByLabel(int type, String label) {
+        final var code = nativeGetEvdevEventCodeByLabel(type, label);
+        if (code < 0) {
+            throw new IllegalArgumentException(
+                    "Failed to get evdev event code for type " + type + " from label: " + label);
+        }
+        return code;
+
+    }
+
+    static int getEvdevInputPropByLabel(String label) {
+        final var prop = nativeGetEvdevInputPropByLabel(label);
+        if (prop < 0) {
+            throw new IllegalArgumentException(
+                    "Failed to get evdev input prop from label: " + label);
+        }
+        return prop;
     }
 }

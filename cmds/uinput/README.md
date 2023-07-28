@@ -59,22 +59,25 @@ multiple devices are registered.
 and `"bluetooth"`.
 
 Device configuration is used to configure the uinput device. The `type` field provides a `UI_SET_*`
-control code, and data is a vector of control values to be sent to the uinput device, which depends
-on the control code.
+control code as an integer value or a string label (e.g. `"UI_SET_EVBIT"`), and data is a vector of
+control values to be sent to the uinput device, which depends on the control code.
 
-| Field         |     Type      | Description                |
-|:-------------:|:-------------:|:-------------------------- |
-| `type`        | integer       | `UI_SET_` control type     |
-| `data`        | integer array | control values             |
+| Field         |         Type          | Description            |
+|:-------------:|:---------------------:|:-----------------------|
+| `type`        |    integer\|string    | `UI_SET_` control type |
+| `data`        | integer\|string array | control values         |
+
+Due to the sequential nature in which this is parsed, the `type` field must be specified before
+the `data` field in this JSON Object.
 
 `ff_effects_max` must be provided if `UI_SET_FFBIT` is used in `configuration`.
 
 `abs_info` fields are provided to set the device axes information. It is an array of below objects:
 
-| Field         | Type          | Description                |
-|:-------------:|:-------------:|:-------------------------- |
-| `code`        | integer       | Axis code                  |
-| `info`        | object        | Axis information object    |
+| Field         |      Type       | Description             |
+|:-------------:|:---------------:|:------------------------|
+| `code`        | integer\|string | Axis code or label      |
+| `info`        |     object      | Axis information object |
 
 The axis information object is defined as below, with the fields having the same meaning as those
 Linux's [`struct input_absinfo`][struct input_absinfo]:
@@ -99,16 +102,17 @@ Example:
   "pid": 0x2c42,
   "bus": "usb",
   "configuration":[
-        {"type":100, "data":[1, 21]},         // UI_SET_EVBIT : EV_KEY and EV_FF
-        {"type":101, "data":[11, 2, 3, 4]},   // UI_SET_KEYBIT : KEY_0 KEY_1 KEY_2 KEY_3
-        {"type":107, "data":[80]}             // UI_SET_FFBIT : FF_RUMBLE
+        {"type":"UI_SET_EVBIT", "data":["EV_KEY", "EV_FF"]},
+        {"type":"UI_SET_KEYBIT", "data":["KEY_0", "KEY_1", "KEY_2", "KEY_3"]},
+        {"type":"UI_SET_ABSBIT", "data":["ABS_Y", "ABS_WHEEL"]},
+        {"type":"UI_SET_FFBIT", "data":["FF_RUMBLE"]}
   ],
   "ff_effects_max" : 1,
   "abs_info": [
-        {"code":1, "info": {"value":20, "minimum":-255,
+        {"code":"ABS_Y", "info": {"value":20, "minimum":-255,
                             "maximum":255, "fuzz":0, "flat":0, "resolution":1}
         },
-        {"code":8, "info": {"value":-50, "minimum":-255,
+        {"code":"ABS_WHEEL", "info": {"value":-50, "minimum":-255,
                             "maximum":255, "fuzz":0, "flat":0, "resolution":1}
         }
   ]
@@ -157,11 +161,11 @@ Example:
 
 Send an array of uinput event packets to the uinput device
 
-| Field         | Type          | Description                |
-|:-------------:|:-------------:|:-------------------------- |
-| `id`          | integer       | Device ID                  |
-| `command`     | string        | Must be set to "inject"    |
-| `events`      | integer array | events to inject           |
+| Field         |         Type          | Description                |
+|:-------------:|:---------------------:|:-------------------------- |
+| `id`          |        integer        | Device ID                  |
+| `command`     |        string         | Must be set to "inject"    |
+| `events`      | integer\|string array | events to inject           |
 
 The `events` parameter is an array of integers in sets of three: a type, an axis code, and an axis
 value, like you'd find in Linux's `struct input_event`. For example, sending presses of the 0 and 1
@@ -171,14 +175,14 @@ keys would look like this:
 {
   "id": 1,
   "command": "inject",
-  "events": [0x01, 0xb,  0x1,   // EV_KEY, KEY_0, DOWN
-             0x00, 0x00, 0x00,  // EV_SYN, SYN_REPORT, 0
-             0x01, 0x0b, 0x00,  // EV_KEY, KEY_0, UP
-             0x00, 0x00, 0x00,  // EV_SYN, SYN_REPORT, 0
-             0x01, 0x2,  0x1,   // EV_KEY, KEY_1, DOWN
-             0x00, 0x00, 0x01,  // EV_SYN, SYN_REPORT, 0
-             0x01, 0x02, 0x00,  // EV_KEY, KEY_1, UP
-             0x00, 0x00, 0x01   // EV_SYN, SYN_REPORT, 0
+  "events": ["EV_KEY", "KEY_0", 1,
+             "EV_SYN", "SYN_REPORT", 0,
+             "EV_KEY", "KEY_0", 0,
+             "EV_SYN", "SYN_REPORT", 0,
+             "EV_KEY", "KEY_1", 1,
+             "EV_SYN", "SYN_REPORT", 0,
+             "EV_KEY", "KEY_1", 0,
+             "EV_SYN", "SYN_REPORT", 0
             ]
 }
 ```

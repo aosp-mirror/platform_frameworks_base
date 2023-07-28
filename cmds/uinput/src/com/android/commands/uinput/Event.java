@@ -25,6 +25,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import src.com.android.commands.uinput.InputAbsInfo;
@@ -39,7 +42,35 @@ public class Event {
     public static final String COMMAND_REGISTER = "register";
     public static final String COMMAND_DELAY = "delay";
     public static final String COMMAND_INJECT = "inject";
-    private static final int ABS_CNT = 64;
+    private static final int EV_KEY = 0x01;
+    private static final int EV_REL = 0x02;
+    private static final int EV_ABS = 0x03;
+    private static final int EV_MSC = 0x04;
+    private static final int EV_SW = 0x05;
+    private static final int EV_LED = 0x11;
+    private static final int EV_SND = 0x12;
+    private static final int EV_FF = 0x15;
+
+    private enum UinputControlCode {
+        UI_SET_EVBIT("UI_SET_EVBIT", 100),
+        UI_SET_KEYBIT("UI_SET_KEYBIT", 101),
+        UI_SET_RELBIT("UI_SET_RELBIT", 102),
+        UI_SET_ABSBIT("UI_SET_ABSBIT", 103),
+        UI_SET_MSCBIT("UI_SET_MSCBIT", 104),
+        UI_SET_LEDBIT("UI_SET_LEDBIT", 105),
+        UI_SET_SNDBIT("UI_SET_SNDBIT", 106),
+        UI_SET_FFBIT("UI_SET_FFBIT", 107),
+        UI_SET_SWBIT("UI_SET_SWBIT", 109),
+        UI_SET_PROPBIT("UI_SET_PROPBIT", 110);
+
+        final String mName;
+        final int mValue;
+
+        UinputControlCode(String name, int value) {
+            this.mName = name;
+            this.mValue = value;
+        }
+    }
 
     // These constants come from "include/uapi/linux/input.h" in the kernel
     enum Bus {
@@ -257,8 +288,8 @@ public class Event {
                                 eb.setBus(readBus());
                                 break;
                             case "events":
-                                int[] injections = readIntList().stream()
-                                            .mapToInt(Integer::intValue).toArray();
+                                int[] injections = readInjectedEvents().stream()
+                                        .mapToInt(Integer::intValue).toArray();
                                 eb.setInjections(injections);
                                 break;
                             case "configuration":
@@ -293,12 +324,17 @@ public class Event {
             return e;
         }
 
-        private ArrayList<Integer> readIntList() throws IOException {
-            ArrayList<Integer> data = new ArrayList<Integer>();
+        private ArrayList<Integer> readInjectedEvents() throws IOException {
+            ArrayList<Integer> data = new ArrayList<>();
             try {
                 mReader.beginArray();
                 while (mReader.hasNext()) {
-                    data.add(Integer.decode(mReader.nextString()));
+                    // Read events in groups of three, because we expect an event type, event code,
+                    // and event value.
+                    final int type = readEvdevEventType();
+                    data.add(type);
+                    data.add(readEvdevEventCode(type));
+                    data.add(readInt());
                 }
                 mReader.endArray();
             } catch (IllegalStateException | NumberFormatException e) {
@@ -309,22 +345,32 @@ public class Event {
             return data;
         }
 
-        private byte[] readData() throws IOException {
-            ArrayList<Integer> data = readIntList();
-            byte[] rawData = new byte[data.size()];
-            for (int i = 0; i < data.size(); i++) {
-                int d = data.get(i);
-                if ((d & 0xFF) != d) {
-                    throw new IllegalStateException("Invalid data, all values must be byte-sized");
+        private int readValueAsInt(Function<String, Integer> stringToInt) throws IOException {
+            switch (mReader.peek()) {
+                case NUMBER: {
+                    return mReader.nextInt();
                 }
-                rawData[i] = (byte) d;
+                case STRING: {
+                    final var str = mReader.nextString();
+                    try {
+                        // Attempt to first parse the value as an int.
+                        return Integer.decode(str);
+                    } catch (NumberFormatException e) {
+                        // Then fall back to the supplied function.
+                        return stringToInt.apply(str);
+                    }
+                }
+                default: {
+                    throw new IllegalStateException(
+                            "Encountered malformed data. Expected int or string.");
+                }
             }
-            return rawData;
         }
 
         private int readInt() throws IOException {
-            String val = mReader.nextString();
-            return Integer.decode(val);
+            return readValueAsInt((str) -> {
+                throw new IllegalStateException("Encountered malformed data. Expected int.");
+            });
         }
 
         private Bus readBus() throws IOException {
@@ -338,17 +384,20 @@ public class Event {
             try {
                 mReader.beginArray();
                 while (mReader.hasNext()) {
-                    int type = 0;
+                    UinputControlCode controlCode = null;
                     IntStream data = null;
                     mReader.beginObject();
                     while (mReader.hasNext()) {
                         String name = mReader.nextName();
                         switch (name) {
                             case "type":
-                                type = readInt();
+                                controlCode = readUinputControlCode();
                                 break;
                             case "data":
-                                data = readIntList().stream().mapToInt(Integer::intValue);
+                                Objects.requireNonNull(controlCode,
+                                        "Configuration 'type' must be specified before 'data'.");
+                                data = readDataForControlCode(controlCode)
+                                        .stream().mapToInt(Integer::intValue);
                                 break;
                             default:
                                 consumeRemainingElements();
@@ -358,9 +407,9 @@ public class Event {
                         }
                     }
                     mReader.endObject();
-                    if (data != null) {
-                        final int[] existing = configuration.get(type);
-                        configuration.put(type, existing == null ? data.toArray()
+                    if (controlCode != null && data != null) {
+                        final int[] existing = configuration.get(controlCode.mValue);
+                        configuration.put(controlCode.mValue, existing == null ? data.toArray()
                                 : IntStream.concat(IntStream.of(existing), data).toArray());
                     }
                 }
@@ -371,6 +420,60 @@ public class Event {
                 throw new IllegalStateException("Encountered malformed data.", e);
             }
             return configuration;
+        }
+
+        private UinputControlCode readUinputControlCode() throws IOException {
+            var code = readValueAsInt((controlTypeStr) -> {
+                for (UinputControlCode controlCode : UinputControlCode.values()) {
+                    if (controlCode.mName.equals(controlTypeStr)) {
+                        return controlCode.mValue;
+                    }
+                }
+                return -1;
+            });
+            for (UinputControlCode controlCode : UinputControlCode.values()) {
+                if (controlCode.mValue == code) {
+                    return controlCode;
+                }
+            }
+            return null;
+        }
+
+        private List<Integer> readDataForControlCode(
+                UinputControlCode controlCode) throws IOException {
+            return switch (controlCode) {
+                case UI_SET_EVBIT -> readArrayAsInts(this::readEvdevEventType);
+                case UI_SET_KEYBIT -> readArrayAsInts(() -> readEvdevEventCode(EV_KEY));
+                case UI_SET_RELBIT -> readArrayAsInts(() -> readEvdevEventCode(EV_REL));
+                case UI_SET_ABSBIT -> readArrayAsInts(() -> readEvdevEventCode(EV_ABS));
+                case UI_SET_MSCBIT -> readArrayAsInts(() -> readEvdevEventCode(EV_MSC));
+                case UI_SET_LEDBIT -> readArrayAsInts(() -> readEvdevEventCode(EV_LED));
+                case UI_SET_SNDBIT -> readArrayAsInts(() -> readEvdevEventCode(EV_SND));
+                case UI_SET_FFBIT -> readArrayAsInts(() -> readEvdevEventCode(EV_FF));
+                case UI_SET_SWBIT -> readArrayAsInts(() -> readEvdevEventCode(EV_SW));
+                case UI_SET_PROPBIT -> readArrayAsInts(this::readEvdevInputProp);
+            };
+        }
+
+        interface IntValueReader {
+            int readNextValue() throws IOException;
+        }
+
+        private ArrayList<Integer> readArrayAsInts(
+                IntValueReader nextValueReader) throws IOException {
+            ArrayList<Integer> data = new ArrayList<>();
+            try {
+                mReader.beginArray();
+                while (mReader.hasNext()) {
+                    data.add(nextValueReader.readNextValue());
+                }
+                mReader.endArray();
+            } catch (IllegalStateException | NumberFormatException e) {
+                consumeRemainingElements();
+                mReader.endArray();
+                throw new IllegalStateException("Encountered malformed data.", e);
+            }
+            return data;
         }
 
         private InputAbsInfo readAbsInfo() throws IllegalStateException, IOException {
@@ -426,7 +529,7 @@ public class Event {
                         String name = mReader.nextName();
                         switch (name) {
                             case "code":
-                                type = readInt();
+                                type = readEvdevEventCode(EV_ABS);
                                 break;
                             case "info":
                                 absInfo = readAbsInfo();
@@ -450,6 +553,18 @@ public class Event {
                 throw new IllegalStateException("Encountered malformed data.", e);
             }
             return infoArray;
+        }
+
+        private int readEvdevEventType() throws IOException {
+            return readValueAsInt(Device::getEvdevEventTypeByLabel);
+        }
+
+        private int readEvdevEventCode(int type) throws IOException {
+            return readValueAsInt((str) -> Device.getEvdevEventCodeByLabel(type, str));
+        }
+
+        private int readEvdevInputProp() throws IOException {
+            return readValueAsInt(Device::getEvdevInputPropByLabel);
         }
 
         private void consumeRemainingElements() throws IOException {
