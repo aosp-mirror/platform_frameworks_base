@@ -426,16 +426,21 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         updateAppearAnimationAlpha();
         updateAppearRect();
         mAppearAnimator.addListener(new AnimatorListenerAdapter() {
-            private boolean mWasCancelled;
+            private boolean mRunWithoutInterruptions;
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (onFinishedRunnable != null) {
                     onFinishedRunnable.run();
                 }
-                if (!mWasCancelled) {
+                if (mRunWithoutInterruptions) {
                     enableAppearDrawing(false);
-                    onAppearAnimationFinished(isAppearing);
+                }
+
+                // We need to reset the View state, even if the animation was cancelled
+                onAppearAnimationFinished(isAppearing);
+
+                if (mRunWithoutInterruptions) {
                     InteractionJankMonitor.getInstance().end(getCujType(isAppearing));
                 } else {
                     InteractionJankMonitor.getInstance().cancel(getCujType(isAppearing));
@@ -444,7 +449,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
             @Override
             public void onAnimationStart(Animator animation) {
-                mWasCancelled = false;
+                mRunWithoutInterruptions = true;
                 Configuration.Builder builder = Configuration.Builder
                         .withView(getCujType(isAppearing), ActivatableNotificationView.this);
                 InteractionJankMonitor.getInstance().begin(builder);
@@ -452,7 +457,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                mWasCancelled = true;
+                mRunWithoutInterruptions = false;
             }
         });
 

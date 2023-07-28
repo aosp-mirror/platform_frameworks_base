@@ -789,6 +789,50 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         assertThat(row.isExpanded()).isTrue();
     }
 
+    @Test
+    public void onDisappearAnimationFinished_shouldSetFalse_headsUpAnimatingAway()
+            throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        // Initial state: suppose heads up animation in progress
+        row.setHeadsUpAnimatingAway(true);
+        assertThat(row.isHeadsUpAnimatingAway()).isTrue();
+
+        // on disappear animation ends
+        row.onAppearAnimationFinished(/* wasAppearing = */ false);
+        assertThat(row.isHeadsUpAnimatingAway()).isFalse();
+    }
+
+    @Test
+    public void onHUNAppear_cancelAppearDrawing_shouldResetAnimationState() throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        row.performAddAnimation(/* delay */ 0, /* duration */ 1000, /* isHeadsUpAppear */ true);
+
+        waitForIdleSync();
+        assertThat(row.isDrawingAppearAnimation()).isTrue();
+
+        row.cancelAppearDrawing();
+
+        waitForIdleSync();
+        assertThat(row.isDrawingAppearAnimation()).isFalse();
+    }
+
+    @Test
+    public void onHUNDisappear_cancelAppearDrawing_shouldResetAnimationState() throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        row.performAddAnimation(/* delay */ 0, /* duration */ 1000, /* isHeadsUpAppear */ false);
+
+        waitForIdleSync();
+        assertThat(row.isDrawingAppearAnimation()).isTrue();
+
+        row.cancelAppearDrawing();
+
+        waitForIdleSync();
+        assertThat(row.isDrawingAppearAnimation()).isFalse();
+    }
+
     private void setDrawableIconsInImageView(CachingIconView icon, Drawable iconDrawable,
             Drawable rightIconDrawable) {
         ImageView iconView = mock(ImageView.class);
