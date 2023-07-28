@@ -204,6 +204,8 @@ public class ScrollView extends FrameLayout {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private StrictMode.Span mFlingStrictSpan = null;
 
+    private DifferentialMotionFlingHelper mDifferentialMotionFlingHelper;
+
     /**
      * Sentinel value for no current active pointer.
      * Used by {@link #mActivePointerId}.
@@ -594,6 +596,14 @@ public class ScrollView extends FrameLayout {
         }
     }
 
+    private void initDifferentialFlingHelperIfNotExists() {
+        if (mDifferentialMotionFlingHelper == null) {
+            mDifferentialMotionFlingHelper =
+                    new DifferentialMotionFlingHelper(
+                            mContext, new DifferentialFlingTarget());
+        }
+    }
+
     private void recycleVelocityTracker() {
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();
@@ -942,17 +952,22 @@ public class ScrollView extends FrameLayout {
     public boolean onGenericMotionEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_SCROLL:
-                final float axisValue;
+                final int axis;
                 if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
-                    axisValue = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                    axis = MotionEvent.AXIS_VSCROLL;
                 } else if (event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
-                    axisValue = event.getAxisValue(MotionEvent.AXIS_SCROLL);
+                    axis = MotionEvent.AXIS_SCROLL;
                 } else {
-                    axisValue = 0;
+                    axis = -1;
                 }
 
+                final float axisValue = (axis == -1) ? 0 : event.getAxisValue(axis);
                 final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
+                    // Tracks whether or not we should attempt fling for this event.
+                    // Fling should not be attempted if the view is already at the limit of scroll,
+                    // since it conflicts with EdgeEffect.
+                    boolean shouldAttemptFling = true;
                     final int range = getScrollRange();
                     int oldScrollY = mScrollY;
                     int newScrollY = oldScrollY - delta;
@@ -971,6 +986,7 @@ public class ScrollView extends FrameLayout {
                             absorbed = true;
                         }
                         newScrollY = 0;
+                        shouldAttemptFling = false;
                     } else if (newScrollY > range) {
                         if (canOverscroll) {
                             mEdgeGlowBottom.onPullDistance(
@@ -980,9 +996,14 @@ public class ScrollView extends FrameLayout {
                             absorbed = true;
                         }
                         newScrollY = range;
+                        shouldAttemptFling = false;
                     }
                     if (newScrollY != oldScrollY) {
                         super.scrollTo(mScrollX, newScrollY);
+                        if (shouldAttemptFling) {
+                            initDifferentialFlingHelperIfNotExists();
+                            mDifferentialMotionFlingHelper.onMotionEvent(event, axis);
+                        }
                         return true;
                     }
                     if (absorbed) {
@@ -2126,4 +2147,23 @@ public class ScrollView extends FrameLayout {
         };
     }
 
+    private class DifferentialFlingTarget
+            implements DifferentialMotionFlingHelper.DifferentialMotionFlingTarget {
+        @Override
+        public boolean startDifferentialMotionFling(float velocity) {
+            stopDifferentialMotionFling();
+            fling((int) velocity);
+            return true;
+        }
+
+        @Override
+        public void stopDifferentialMotionFling() {
+            mScroller.abortAnimation();
+        }
+
+        @Override
+        public float getScaledScrollFactor() {
+            return -mVerticalScrollFactor;
+        }
+    }
 }

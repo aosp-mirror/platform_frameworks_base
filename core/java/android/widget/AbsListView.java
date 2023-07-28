@@ -916,6 +916,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    private DifferentialMotionFlingHelper mDifferentialMotionFlingHelper;
+
     public AbsListView(Context context) {
         super(context);
         setupDeviceConfigProperties();
@@ -4488,17 +4490,22 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean onGenericMotionEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_SCROLL:
-                final float axisValue;
+                final int axis;
                 if (event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
-                    axisValue = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                    axis = MotionEvent.AXIS_VSCROLL;
                 } else if (event.isFromSource(InputDevice.SOURCE_ROTARY_ENCODER)) {
-                    axisValue = event.getAxisValue(MotionEvent.AXIS_SCROLL);
+                    axis = MotionEvent.AXIS_SCROLL;
                 } else {
-                    axisValue = 0;
+                    axis = -1;
                 }
 
+                final float axisValue = (axis == -1) ? 0 : event.getAxisValue(axis);
                 final int delta = Math.round(axisValue * mVerticalScrollFactor);
                 if (delta != 0) {
+                    // Tracks whether or not we should attempt fling for this event.
+                    // Fling should not be attempted if the view is already at the limit of scroll,
+                    // since it conflicts with EdgeEffect.
+                    boolean shouldAttemptFling = true;
                     // If we're moving down, we want the top item. If we're moving up, bottom item.
                     final int motionIndex = delta > 0 ? 0 : getChildCount() - 1;
 
@@ -4511,6 +4518,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     final int overscrollMode = getOverScrollMode();
 
                     if (!trackMotionScroll(delta, delta)) {
+                        if (shouldAttemptFling) {
+                            initDifferentialFlingHelperIfNotExists();
+                            mDifferentialMotionFlingHelper.onMotionEvent(event, axis);
+                        }
                         return true;
                     } else if (!event.isFromSource(InputDevice.SOURCE_MOUSE) && motionView != null
                             && (overscrollMode == OVER_SCROLL_ALWAYS
@@ -4674,6 +4685,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private void initVelocityTrackerIfNotExists() {
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
+        }
+    }
+
+    private void initDifferentialFlingHelperIfNotExists() {
+        if (mDifferentialMotionFlingHelper == null) {
+            mDifferentialMotionFlingHelper =
+                    new DifferentialMotionFlingHelper(
+                            mContext, new DifferentialFlingTarget());
         }
     }
 
@@ -8195,6 +8214,28 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             default:
                 break;
             }
+        }
+    }
+
+    private class DifferentialFlingTarget
+            implements DifferentialMotionFlingHelper.DifferentialMotionFlingTarget {
+        @Override
+        public boolean startDifferentialMotionFling(float velocity) {
+            stopDifferentialMotionFling();
+            fling((int) velocity);
+            return true;
+        }
+
+        @Override
+        public void stopDifferentialMotionFling() {
+            if (mFlingRunnable != null) {
+                mFlingRunnable.endFling();
+            }
+        }
+
+        @Override
+        public float getScaledScrollFactor() {
+            return -mVerticalScrollFactor;
         }
     }
 }
