@@ -365,7 +365,7 @@ public class SoundTriggerService extends SystemService {
             // Validate package name
             try {
                 int uid = mPackageManager.getPackageUid(mOriginatorIdentity.packageName,
-                        PackageManager.PackageInfoFlags.of(0));
+                        PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ANY_USER));
                 if (!UserHandle.isSameApp(uid, mOriginatorIdentity.uid)) {
                     throw new SecurityException("Uid " + mOriginatorIdentity.uid +
                             " attempted to spoof package name " +
