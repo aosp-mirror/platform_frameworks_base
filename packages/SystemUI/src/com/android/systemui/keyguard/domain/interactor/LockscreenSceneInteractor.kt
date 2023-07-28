@@ -19,10 +19,9 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,17 +29,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Hosts business and application state accessing logic for the lockscreen scene. */
+@SysUISingleton
 class LockscreenSceneInteractor
-@AssistedInject
+@Inject
 constructor(
     @Application applicationScope: CoroutineScope,
     private val authenticationInteractor: AuthenticationInteractor,
-    bouncerInteractorFactory: BouncerInteractor.Factory,
-    @Assisted private val containerName: String,
+    private val bouncerInteractor: BouncerInteractor,
 ) {
-    private val bouncerInteractor: BouncerInteractor =
-        bouncerInteractorFactory.create(containerName)
-
     /** Whether the device is currently locked. */
     val isDeviceLocked: StateFlow<Boolean> =
         authenticationInteractor.isUnlocked
@@ -67,13 +63,6 @@ constructor(
 
     /** Attempts to dismiss the lockscreen. This will cause the bouncer to show, if needed. */
     fun dismissLockscreen() {
-        bouncerInteractor.showOrUnlockDevice(containerName = containerName)
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            containerName: String,
-        ): LockscreenSceneInteractor
+        bouncerInteractor.showOrUnlockDevice()
     }
 }

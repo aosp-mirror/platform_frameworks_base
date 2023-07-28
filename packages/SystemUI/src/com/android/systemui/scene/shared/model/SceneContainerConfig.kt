@@ -16,10 +16,8 @@
 
 package com.android.systemui.scene.shared.model
 
-/** Models the configuration of a single scene container. */
+/** Models the configuration of the scene container. */
 data class SceneContainerConfig(
-    /** Container name. Must be unique across all containers in System UI. */
-    val name: String,
 
     /**
      * The keys to all scenes in the container, sorted by z-order such that the last one renders on
