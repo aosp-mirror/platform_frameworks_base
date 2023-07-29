@@ -17,16 +17,20 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.RemoteUserInput
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
-/** Models UI state for a single scene container. */
-class SceneContainerViewModel(
+/** Models UI state for the scene container. */
+@SysUISingleton
+class SceneContainerViewModel
+@Inject
+constructor(
     private val interactor: SceneInteractor,
-    val containerName: String,
 ) {
     /** A flow of motion events originating from outside of the scene framework. */
     val remoteUserInput: StateFlow<RemoteUserInput?> = interactor.remoteUserInput
@@ -37,22 +41,22 @@ class SceneContainerViewModel(
      * The scenes will be sorted in z-order such that the last one is the one that should be
      * rendered on top of all previous ones.
      */
-    val allSceneKeys: List<SceneKey> = interactor.allSceneKeys(containerName)
+    val allSceneKeys: List<SceneKey> = interactor.allSceneKeys()
 
     /** The current scene. */
-    val currentScene: StateFlow<SceneModel> = interactor.currentScene(containerName)
+    val currentScene: StateFlow<SceneModel> = interactor.currentScene
 
     /** Whether the container is visible. */
-    val isVisible: StateFlow<Boolean> = interactor.isVisible(containerName)
+    val isVisible: StateFlow<Boolean> = interactor.isVisible
 
     /** Requests a transition to the scene with the given key. */
     fun setCurrentScene(scene: SceneModel) {
-        interactor.setCurrentScene(containerName, scene)
+        interactor.setCurrentScene(scene)
     }
 
     /** Notifies of the progress of a scene transition. */
     fun setSceneTransitionProgress(progress: Float) {
-        interactor.setSceneTransitionProgress(containerName, progress)
+        interactor.setSceneTransitionProgress(progress)
     }
 
     /** Handles a [MotionEvent] representing remote user input. */

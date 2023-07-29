@@ -733,29 +733,20 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // is
             // not enough to trigger a dismissal of the keyguard.
             underTest.onViewAttached()
-            sceneInteractor.setCurrentScene(
-                SceneTestUtils.CONTAINER_1,
-                SceneModel(SceneKey.Bouncer, null)
-            )
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer, null))
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
 
             // While listening, going from the bouncer scene to the gone scene, does dismiss the
             // keyguard.
-            sceneInteractor.setCurrentScene(
-                SceneTestUtils.CONTAINER_1,
-                SceneModel(SceneKey.Gone, null)
-            )
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone, null))
             runCurrent()
             verify(viewMediatorCallback).keyguardDone(anyBoolean(), anyInt())
 
             // While listening, moving back to the bouncer scene does not dismiss the keyguard
             // again.
             clearInvocations(viewMediatorCallback)
-            sceneInteractor.setCurrentScene(
-                SceneTestUtils.CONTAINER_1,
-                SceneModel(SceneKey.Bouncer, null)
-            )
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer, null))
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
 
@@ -763,18 +754,12 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // scene
             // does not dismiss the keyguard while we're not listening.
             underTest.onViewDetached()
-            sceneInteractor.setCurrentScene(
-                SceneTestUtils.CONTAINER_1,
-                SceneModel(SceneKey.Gone, null)
-            )
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone, null))
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
 
             // While not listening, moving back to the bouncer does not dismiss the keyguard.
-            sceneInteractor.setCurrentScene(
-                SceneTestUtils.CONTAINER_1,
-                SceneModel(SceneKey.Bouncer, null)
-            )
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer, null))
             runCurrent()
             verify(viewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt())
 
@@ -782,10 +767,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
             // gone
             // scene now does dismiss the keyguard again.
             underTest.onViewAttached()
-            sceneInteractor.setCurrentScene(
-                SceneTestUtils.CONTAINER_1,
-                SceneModel(SceneKey.Gone, null)
-            )
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone, null))
             runCurrent()
             verify(viewMediatorCallback).keyguardDone(anyBoolean(), anyInt())
         }

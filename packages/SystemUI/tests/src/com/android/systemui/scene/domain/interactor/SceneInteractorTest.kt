@@ -41,48 +41,46 @@ class SceneInteractorTest : SysuiTestCase() {
 
     @Test
     fun allSceneKeys() {
-        assertThat(underTest.allSceneKeys(SceneTestUtils.CONTAINER_1))
-            .isEqualTo(utils.fakeSceneKeys())
+        assertThat(underTest.allSceneKeys()).isEqualTo(utils.fakeSceneKeys())
     }
 
     @Test
     fun currentScene() = runTest {
-        val currentScene by collectLastValue(underTest.currentScene(SceneTestUtils.CONTAINER_1))
+        val currentScene by collectLastValue(underTest.currentScene)
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
-        underTest.setCurrentScene(SceneTestUtils.CONTAINER_1, SceneModel(SceneKey.Shade))
+        underTest.setCurrentScene(SceneModel(SceneKey.Shade))
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
     }
 
     @Test
     fun sceneTransitionProgress() = runTest {
-        val progress by
-            collectLastValue(underTest.sceneTransitionProgress(SceneTestUtils.CONTAINER_1))
+        val progress by collectLastValue(underTest.transitionProgress)
         assertThat(progress).isEqualTo(1f)
 
-        underTest.setSceneTransitionProgress(SceneTestUtils.CONTAINER_1, 0.55f)
+        underTest.setSceneTransitionProgress(0.55f)
         assertThat(progress).isEqualTo(0.55f)
     }
 
     @Test
     fun isVisible() = runTest {
-        val isVisible by collectLastValue(underTest.isVisible(SceneTestUtils.CONTAINER_1))
+        val isVisible by collectLastValue(underTest.isVisible)
         assertThat(isVisible).isTrue()
 
-        underTest.setVisible(SceneTestUtils.CONTAINER_1, false)
+        underTest.setVisible(false)
         assertThat(isVisible).isFalse()
 
-        underTest.setVisible(SceneTestUtils.CONTAINER_1, true)
+        underTest.setVisible(true)
         assertThat(isVisible).isTrue()
     }
 
     @Test
     fun sceneTransitions() = runTest {
-        val transitions by collectLastValue(underTest.sceneTransitions(SceneTestUtils.CONTAINER_1))
+        val transitions by collectLastValue(underTest.transitions)
         assertThat(transitions).isNull()
 
-        val initialSceneKey = underTest.currentScene(SceneTestUtils.CONTAINER_1).value.key
-        underTest.setCurrentScene(SceneTestUtils.CONTAINER_1, SceneModel(SceneKey.Shade))
+        val initialSceneKey = underTest.currentScene.value.key
+        underTest.setCurrentScene(SceneModel(SceneKey.Shade))
         assertThat(transitions)
             .isEqualTo(
                 SceneTransitionModel(
@@ -91,7 +89,7 @@ class SceneInteractorTest : SysuiTestCase() {
                 )
             )
 
-        underTest.setCurrentScene(SceneTestUtils.CONTAINER_1, SceneModel(SceneKey.QuickSettings))
+        underTest.setCurrentScene(SceneModel(SceneKey.QuickSettings))
         assertThat(transitions)
             .isEqualTo(
                 SceneTransitionModel(

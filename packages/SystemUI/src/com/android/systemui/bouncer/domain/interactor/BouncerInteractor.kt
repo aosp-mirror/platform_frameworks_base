@@ -24,6 +24,7 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -31,9 +32,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.util.kotlin.pairwise
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,8 +43,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Encapsulates business logic and application state accessing use-cases. */
+@SysUISingleton
 class BouncerInteractor
-@AssistedInject
+@Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val applicationContext: Context,
@@ -53,7 +53,6 @@ constructor(
     private val authenticationInteractor: AuthenticationInteractor,
     private val sceneInteractor: SceneInteractor,
     featureFlags: FeatureFlags,
-    @Assisted private val containerName: String,
 ) {
 
     /** The user-facing message to show in the bouncer. */
@@ -118,23 +117,19 @@ constructor(
     /**
      * Either shows the bouncer or unlocks the device, if the bouncer doesn't need to be shown.
      *
-     * @param containerName The name of the scene container to show the bouncer in.
      * @param message An optional message to show to the user in the bouncer.
      */
     fun showOrUnlockDevice(
-        containerName: String,
         message: String? = null,
     ) {
         applicationScope.launch {
             if (authenticationInteractor.isAuthenticationRequired()) {
                 repository.setMessage(message ?: promptMessage(getAuthenticationMethod()))
                 sceneInteractor.setCurrentScene(
-                    containerName = containerName,
                     scene = SceneModel(SceneKey.Bouncer),
                 )
             } else {
                 sceneInteractor.setCurrentScene(
-                    containerName = containerName,
                     scene = SceneModel(SceneKey.Gone),
                 )
             }
@@ -180,7 +175,6 @@ constructor(
 
         if (isAuthenticated) {
             sceneInteractor.setCurrentScene(
-                containerName = containerName,
                 scene = SceneModel(SceneKey.Gone),
             )
         } else {
@@ -227,12 +221,5 @@ constructor(
             message != null -> message
             else -> ""
         }
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            containerName: String,
-        ): BouncerInteractor
     }
 }

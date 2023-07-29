@@ -117,15 +117,19 @@ public class KeyguardSecurityViewFlipperController
             KeyguardSecurityCallback keyguardSecurityCallback,
             @Nullable OnViewInflatedCallback onViewInflatedListener) {
         int layoutId = getLayoutIdFor(securityMode);
-        if (layoutId != 0) {
-            if (DEBUG) Log.v(TAG, "inflating on bg thread id = " + layoutId);
+        int viewID = getKeyguardInputViewId(securityMode);
+        if (layoutId != 0 && viewID != 0) {
+            if (DEBUG) {
+                Log.v(TAG, "inflating on bg thread id = "
+                        + layoutId + " . viewID = " + viewID);
+            }
             mAsyncLayoutInflater.inflate(layoutId, mView,
                     (view, resId, parent) -> {
                         mView.addView(view);
                         KeyguardInputViewController<KeyguardInputView> childController =
                                 mKeyguardSecurityViewControllerFactory.create(
-                                        (KeyguardInputView) view, securityMode,
-                                        keyguardSecurityCallback);
+                                        (KeyguardInputView) view.findViewById(viewID),
+                                        securityMode, keyguardSecurityCallback);
                         childController.init();
                         mChildren.add(childController);
                         if (onViewInflatedListener != null) {
@@ -142,6 +146,19 @@ public class KeyguardSecurityViewFlipperController
             case Password: return R.layout.keyguard_password_view;
             case SimPin: return R.layout.keyguard_sim_pin_view;
             case SimPuk: return R.layout.keyguard_sim_puk_view;
+            default:
+                return 0;
+        }
+    }
+
+    private int getKeyguardInputViewId(SecurityMode securityMode) {
+        //Keyguard Input View is not the root view of the layout, use these IDs for lookup.
+        switch (securityMode) {
+            case Pattern: return R.id.keyguard_pattern_view;
+            case PIN: return R.id.keyguard_pin_view;
+            case Password: return R.id.keyguard_password_view;
+            case SimPin: return R.id.keyguard_sim_pin_view;
+            case SimPuk: return R.id.keyguard_sim_puk_view;
             default:
                 return 0;
         }

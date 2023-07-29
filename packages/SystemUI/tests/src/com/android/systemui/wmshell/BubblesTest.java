@@ -158,7 +158,6 @@ import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -174,7 +173,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-@Ignore("b/292153259")
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -280,8 +278,6 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private TaskStackListenerImpl mTaskStackListener;
     @Mock
-    private ShellTaskOrganizer mShellTaskOrganizer;
-    @Mock
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private ScreenOffAnimationController mScreenOffAnimationController;
@@ -298,6 +294,7 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private Icon mAppBubbleIcon;
 
+    private ShellTaskOrganizer mShellTaskOrganizer;
     private TaskViewTransitions mTaskViewTransitions;
 
     private TestableBubblePositioner mPositioner;
@@ -379,7 +376,13 @@ public class BubblesTest extends SysuiTestCase {
                         mock(UiEventLogger.class),
                         mock(UserTracker.class)
                 );
-        when(mShellTaskOrganizer.getExecutor()).thenReturn(syncExecutor);
+
+        mShellTaskOrganizer = new ShellTaskOrganizer(mock(ShellInit.class),
+                mock(ShellCommandHandler.class),
+                null,
+                Optional.empty(),
+                Optional.empty(),
+                syncExecutor);
         mBubbleProperties = new FakeBubbleProperties();
         mBubbleController = new TestableBubbleController(
                 mContext,

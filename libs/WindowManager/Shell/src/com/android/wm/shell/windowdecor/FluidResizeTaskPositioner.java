@@ -85,7 +85,7 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
     }
 
     @Override
-    public void onDragPositioningMove(float x, float y) {
+    public Rect onDragPositioningMove(float x, float y) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         PointF delta = DragPositioningCallbackUtility.calculateDelta(x, y, mRepositionStartPoint);
         if (isResizing() && DragPositioningCallbackUtility.changeBounds(mCtrlType,
@@ -106,10 +106,11 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
                     mRepositionTaskBounds, mTaskBoundsAtDragStart, mRepositionStartPoint, t, x, y);
             t.apply();
         }
+        return new Rect(mRepositionTaskBounds);
     }
 
     @Override
-    public void onDragPositioningEnd(float x, float y) {
+    public Rect onDragPositioningEnd(float x, float y) {
         // If task has been resized or task was dragged into area outside of
         // mDisallowedAreaForEndBounds, apply WCT to finish it.
         if (isResizing() && mHasDragResized) {
@@ -136,6 +137,7 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
         mRepositionStartPoint.set(0, 0);
         mCtrlType = CTRL_TYPE_UNDEFINED;
         mHasDragResized = false;
+        return new Rect(mRepositionTaskBounds);
     }
 
     private boolean isResizing() {

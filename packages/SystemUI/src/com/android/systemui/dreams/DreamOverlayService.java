@@ -17,6 +17,7 @@
 package com.android.systemui.dreams;
 
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_WINDOW_TITLE;
+import static com.android.systemui.dreams.dagger.DreamModule.DREAM_TOUCH_INSET_MANAGER;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -161,7 +162,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             UiEventLogger uiEventLogger,
-            TouchInsetManager touchInsetManager,
+            @Named(DREAM_TOUCH_INSET_MANAGER) TouchInsetManager touchInsetManager,
             @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
                     ComponentName lowLightDreamComponent,
             DreamOverlayCallbackController dreamOverlayCallbackController,

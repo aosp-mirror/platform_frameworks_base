@@ -103,7 +103,8 @@ class BubbleDataRepository(
      * Removes all entities that don't have a user in the activeUsers list, if any entities were
      * removed it persists the new list to disk.
      */
-    private fun filterForActiveUsersAndPersist(
+    @VisibleForTesting
+    fun filterForActiveUsersAndPersist(
             activeUsers: List<Int>,
             entitiesByUser: SparseArray<List<BubbleEntity>>
     ): SparseArray<List<BubbleEntity>> {
@@ -167,7 +168,8 @@ class BubbleDataRepository(
      * Job C resumes and reaches yield() and is then cancelled
      * Job D resumes and performs another blocking I/O
      */
-    private fun persistToDisk(
+    @VisibleForTesting
+    fun persistToDisk(
             entitiesByUser: SparseArray<List<BubbleEntity>> = volatileRepository.bubbles
     ) {
         val prev = job
@@ -188,7 +190,6 @@ class BubbleDataRepository(
      *           bubbles.
      */
     @SuppressLint("WrongConstant")
-    @VisibleForTesting
     fun loadBubbles(
             userId: Int,
             currentUsers: List<Int>,

@@ -13,14 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.surfaceeffects.shaders
 
-package com.android.systemui.scene.ui.composable
+import android.graphics.Color
+import android.testing.AndroidTestingRunner
+import androidx.test.filters.SmallTest
+import com.android.systemui.SysuiTestCase
+import org.junit.Test
+import org.junit.runner.RunWith
 
-import com.android.systemui.scene.shared.model.Scene
-import dagger.Module
-import dagger.multibindings.Multibinds
+@SmallTest
+@RunWith(AndroidTestingRunner::class)
+class SolidColorShaderTest : SysuiTestCase() {
 
-@Module
-interface SceneModule {
-    @Multibinds fun scenes(): Set<Scene>
+    @Test
+    fun compilesShader() {
+        SolidColorShader(Color.RED)
+    }
 }

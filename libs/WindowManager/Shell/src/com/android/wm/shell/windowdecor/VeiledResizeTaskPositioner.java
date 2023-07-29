@@ -105,7 +105,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
     }
 
     @Override
-    public void onDragPositioningMove(float x, float y) {
+    public Rect onDragPositioningMove(float x, float y) {
         PointF delta = DragPositioningCallbackUtility.calculateDelta(x, y, mRepositionStartPoint);
         if (isResizing() && DragPositioningCallbackUtility.changeBounds(mCtrlType,
                 mRepositionTaskBounds, mTaskBoundsAtDragStart, mStableBounds, delta,
@@ -117,10 +117,11 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
                     mRepositionTaskBounds, mTaskBoundsAtDragStart, mRepositionStartPoint, t, x, y);
             t.apply();
         }
+        return new Rect(mRepositionTaskBounds);
     }
 
     @Override
-    public void onDragPositioningEnd(float x, float y) {
+    public Rect onDragPositioningEnd(float x, float y) {
         PointF delta = DragPositioningCallbackUtility.calculateDelta(x, y,
                 mRepositionStartPoint);
         if (isResizing()) {
@@ -151,6 +152,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
         mCtrlType = CTRL_TYPE_UNDEFINED;
         mTaskBoundsAtDragStart.setEmpty();
         mRepositionStartPoint.set(0, 0);
+        return new Rect(mRepositionTaskBounds);
     }
 
     private boolean isResizing() {
