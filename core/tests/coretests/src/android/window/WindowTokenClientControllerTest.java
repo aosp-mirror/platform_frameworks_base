@@ -35,11 +35,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
 
 import androidx.test.filters.SmallTest;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -66,22 +64,14 @@ public class WindowTokenClientControllerTest {
     // Can't mock final class.
     private final Configuration mConfiguration = new Configuration();
 
-    private IWindowManager mOriginalWindowManagerService;
-
     private WindowTokenClientController mController;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mOriginalWindowManagerService = WindowManagerGlobal.getWindowManagerService();
-        WindowManagerGlobal.overrideWindowManagerServiceForTesting(mWindowManagerService);
         doReturn(mClientToken).when(mWindowTokenClient).asBinder();
         mController = spy(WindowTokenClientController.createInstanceForTesting());
-    }
-
-    @After
-    public void tearDown() {
-        WindowManagerGlobal.overrideWindowManagerServiceForTesting(mOriginalWindowManagerService);
+        doReturn(mWindowManagerService).when(mController).getWindowManagerService();
     }
 
     @Test
@@ -125,7 +115,7 @@ public class WindowTokenClientControllerTest {
                 DEFAULT_DISPLAY, null /* options */);
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService).detachWindowContext(any());
+        verify(mWindowManagerService).detachWindowContext(mWindowTokenClient);
     }
 
     @Test
@@ -165,7 +155,7 @@ public class WindowTokenClientControllerTest {
         mController.attachToDisplayContent(mWindowTokenClient, DEFAULT_DISPLAY);
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService).detachWindowContext(any());
+        verify(mWindowManagerService).detachWindowContext(mWindowTokenClient);
     }
 
     @Test
@@ -186,7 +176,7 @@ public class WindowTokenClientControllerTest {
         mController.attachToWindowToken(mWindowTokenClient, mWindowToken);
         mController.detachIfNeeded(mWindowTokenClient);
 
-        verify(mWindowManagerService).detachWindowContext(any());
+        verify(mWindowManagerService).detachWindowContext(mWindowTokenClient);
     }
 
     @Test

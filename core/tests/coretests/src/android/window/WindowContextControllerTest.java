@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.os.Binder;
@@ -36,7 +37,6 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,22 +62,14 @@ public class WindowContextControllerTest {
     @Mock
     private WindowTokenClient mMockToken;
 
-    private WindowTokenClientController mOriginalController;
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mController = new WindowContextController(mMockToken);
+        mController = spy(new WindowContextController(mMockToken));
+        doReturn(mWindowTokenClientController).when(mController).getWindowTokenClientController();
         doNothing().when(mMockToken).onConfigurationChanged(any(), anyInt(), anyBoolean());
-        mOriginalController = WindowTokenClientController.getInstance();
-        WindowTokenClientController.overrideForTesting(mWindowTokenClientController);
         doReturn(true).when(mWindowTokenClientController).attachToDisplayArea(
                 eq(mMockToken), anyInt(), anyInt(), any());
-    }
-
-    @After
-    public void tearDown() {
-        WindowTokenClientController.overrideForTesting(mOriginalController);
     }
 
     @Test(expected = IllegalStateException.class)
