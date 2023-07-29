@@ -134,12 +134,13 @@ final class InstallRequest {
     InstallRequest(InstallingSession params) {
         mUserId = params.getUser().getIdentifier();
         mInstallArgs = new InstallArgs(params.mOriginInfo, params.mMoveInfo, params.mObserver,
-                params.mInstallFlags, params.mInstallSource, params.mVolumeUuid,
-                params.getUser(), null /*instructionSets*/, params.mPackageAbiOverride,
-                params.mPermissionStates, params.mAllowlistedRestrictedPermissions,
-                params.mAutoRevokePermissionsMode, params.mTraceMethod, params.mTraceCookie,
-                params.mSigningDetails, params.mInstallReason, params.mInstallScenario,
-                params.mForceQueryableOverride, params.mDataLoaderType, params.mPackageSource,
+                params.mInstallFlags, params.mDevelopmentInstallFlags, params.mInstallSource,
+                params.mVolumeUuid,  params.getUser(), null /*instructionSets*/,
+                params.mPackageAbiOverride, params.mPermissionStates,
+                params.mAllowlistedRestrictedPermissions, params.mAutoRevokePermissionsMode,
+                params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
+                params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
+                params.mDataLoaderType, params.mPackageSource,
                 params.mApplicationEnabledSettingPersistent);
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
@@ -284,6 +285,10 @@ final class InstallRequest {
 
     public int getInstallFlags() {
         return mInstallArgs == null ? 0 : mInstallArgs.mInstallFlags;
+    }
+
+    public int getDevelopmentInstallFlags() {
+        return mInstallArgs == null ? 0 : mInstallArgs.mDevelopmentInstallFlags;
     }
 
     public int getInstallReason() {
