@@ -16,30 +16,19 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 
 /** Models UI state and handles user input for the quick settings scene. */
+@SysUISingleton
 class QuickSettingsSceneViewModel
-@AssistedInject
+@Inject
 constructor(
-    lockscreenSceneInteractorFactory: LockscreenSceneInteractor.Factory,
-    @Assisted containerName: String,
+    private val lockscreenSceneInteractor: LockscreenSceneInteractor,
 ) {
-    private val lockscreenSceneInteractor: LockscreenSceneInteractor =
-        lockscreenSceneInteractorFactory.create(containerName)
-
     /** Notifies that some content in quick settings was clicked. */
     fun onContentClicked() {
         lockscreenSceneInteractor.dismissLockscreen()
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            containerName: String,
-        ): QuickSettingsSceneViewModel
     }
 }

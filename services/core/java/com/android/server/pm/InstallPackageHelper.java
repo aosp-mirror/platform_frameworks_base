@@ -166,6 +166,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalManagerRegistry;
+import com.android.server.SystemConfig;
 import com.android.server.art.model.DexoptParams;
 import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
@@ -230,6 +231,7 @@ final class InstallPackageHelper {
     private final ViewCompiler mViewCompiler;
     private final SharedLibrariesImpl mSharedLibraries;
     private final PackageManagerServiceInjector mInjector;
+    private final UpdateOwnershipHelper mUpdateOwnershipHelper;
 
     // TODO(b/198166813): remove PMS dependency
     InstallPackageHelper(PackageManagerService pm, AppDataHelper appDataHelper) {
@@ -247,6 +249,7 @@ final class InstallPackageHelper {
         mPackageAbiHelper = pm.mInjector.getAbiHelper();
         mViewCompiler = pm.mInjector.getViewCompiler();
         mSharedLibraries = pm.mInjector.getSharedLibrariesImpl();
+        mUpdateOwnershipHelper = pm.mInjector.getUpdateOwnershipHelper();
     }
 
     InstallPackageHelper(PackageManagerService pm) {
@@ -332,6 +335,8 @@ final class InstallPackageHelper {
         final String updateOwnerFromSysconfig = isApex || !pkgSetting.isSystem() ? null
                 : mPm.mInjector.getSystemConfig().getSystemAppUpdateOwnerPackageName(
                         parsedPackage.getPackageName());
+        final boolean isUpdateOwnershipDenylisted =
+                mUpdateOwnershipHelper.isUpdateOwnershipDenylisted(parsedPackage.getPackageName());
         final boolean isUpdateOwnershipEnabled = oldUpdateOwner != null;
 
         // For standard install (install via session), the installSource isn't null.
@@ -367,6 +372,9 @@ final class InstallPackageHelper {
                         & PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP) != 0;
                 final boolean isSameUpdateOwner =
                         TextUtils.equals(oldUpdateOwner, installSource.mInstallerPackageName);
+                final boolean isInstallerUpdateOwnerDenylistProvider =
+                        mUpdateOwnershipHelper.isUpdateOwnershipDenyListProvider(
+                                installSource.mUpdateOwnerPackageName);
 
                 // Here we handle the update owner for the package, and the rules are:
                 // -. Only enabling update ownership enforcement on initial installation if the
@@ -374,13 +382,16 @@ final class InstallPackageHelper {
                 // -. Once the installer changes and users agree to proceed, clear the update
                 //    owner (package state in other users are taken into account as well).
                 if (!isUpdate) {
-                    if (!isRequestUpdateOwnership) {
+                    if (!isRequestUpdateOwnership
+                            || isUpdateOwnershipDenylisted
+                            || isInstallerUpdateOwnerDenylistProvider) {
                         installSource = installSource.setUpdateOwnerPackageName(null);
                     } else if ((!isUpdateOwnershipEnabled && pkgAlreadyExists)
                             || (isUpdateOwnershipEnabled && !isSameUpdateOwner)) {
                         installSource = installSource.setUpdateOwnerPackageName(null);
                     }
-                } else if (!isSameUpdateOwner || !isUpdateOwnershipEnabled) {
+                } else if (!isSameUpdateOwner
+                        || !isUpdateOwnershipEnabled) {
                     installSource = installSource.setUpdateOwnerPackageName(null);
                 }
             }
@@ -471,6 +482,19 @@ final class InstallPackageHelper {
 
         if (!IncrementalManager.isIncrementalPath(pkgSetting.getPathString())) {
             pkgSetting.setLoadingProgress(1f);
+        }
+
+        ArraySet<String> listItems = mUpdateOwnershipHelper.readUpdateOwnerDenyList(pkgSetting);
+        if (listItems != null && !listItems.isEmpty()) {
+            mUpdateOwnershipHelper.addToUpdateOwnerDenyList(pkgSetting.getPackageName(), listItems);
+            for (String unownedPackage : listItems) {
+                PackageSetting unownedSetting = mPm.mSettings.getPackageLPr(unownedPackage);
+                SystemConfig config = SystemConfig.getInstance();
+                if (unownedSetting != null
+                        && config.getSystemAppUpdateOwnerPackageName(unownedPackage) == null) {
+                    unownedSetting.setUpdateOwnerPackage(null);
+                }
+            }
         }
 
         return pkg;

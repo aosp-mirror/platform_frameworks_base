@@ -19,12 +19,11 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.shared.model.SceneKey
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,15 +31,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Models UI state and handles user input for the lockscreen scene. */
+@SysUISingleton
 class LockscreenSceneViewModel
-@AssistedInject
+@Inject
 constructor(
     @Application applicationScope: CoroutineScope,
-    interactorFactory: LockscreenSceneInteractor.Factory,
-    @Assisted containerName: String,
+    private val interactor: LockscreenSceneInteractor,
 ) {
-    private val interactor: LockscreenSceneInteractor = interactorFactory.create(containerName)
-
     /** The icon for the "lock" button on the lockscreen. */
     val lockButtonIcon: StateFlow<Icon> =
         interactor.isDeviceLocked
@@ -97,12 +94,5 @@ constructor(
                         }
                 )
         )
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            containerName: String,
-        ): LockscreenSceneViewModel
     }
 }

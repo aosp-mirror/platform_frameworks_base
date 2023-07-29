@@ -22,13 +22,12 @@ import android.content.Context
 import com.android.systemui.R
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.util.kotlin.pairwise
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlin.math.ceil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,17 +44,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input on bouncer UIs. */
+@SysUISingleton
 class BouncerViewModel
-@AssistedInject
+@Inject
 constructor(
     @Application private val applicationContext: Context,
     @Application private val applicationScope: CoroutineScope,
-    interactorFactory: BouncerInteractor.Factory,
+    private val interactor: BouncerInteractor,
     featureFlags: FeatureFlags,
-    @Assisted containerName: String,
 ) {
-    private val interactor: BouncerInteractor = interactorFactory.create(containerName)
-
     private val isInputEnabled: StateFlow<Boolean> =
         interactor.isThrottled
             .map { !it }
@@ -222,11 +219,4 @@ constructor(
          */
         val isUpdateAnimated: Boolean,
     )
-
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            containerName: String,
-        ): BouncerViewModel
-    }
 }

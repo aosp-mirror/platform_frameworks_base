@@ -239,7 +239,7 @@ object Flags {
 
     /** Whether to delay showing bouncer UI when face auth or active unlock are enrolled. */
     // TODO(b/279794160): Tracking bug.
-    @JvmField val DELAY_BOUNCER = unreleasedFlag(235, "delay_bouncer", teamfood = true)
+    @JvmField val DELAY_BOUNCER = releasedFlag(235, "delay_bouncer")
 
     /** Keyguard Migration */
 
@@ -381,6 +381,9 @@ object Flags {
 
     // 804 - monochromatic themes
     @JvmField val MONOCHROMATIC_THEME = releasedFlag(804, "monochromatic")
+
+    // TODO(b/293380347): Tracking Bug
+    @JvmField val COLOR_FIDELITY = unreleasedFlag(805, "color_fidelity")
 
     // 900 - media
     // TODO(b/254512697): Tracking Bug

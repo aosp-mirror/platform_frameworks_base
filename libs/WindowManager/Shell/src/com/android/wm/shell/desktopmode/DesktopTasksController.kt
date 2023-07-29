@@ -730,7 +730,7 @@ class DesktopTasksController(
      *
      * @param taskInfo the task being dragged.
      * @param position position of surface when drag ends.
-     * @param y the Y position of the motion event.
+     * @param y the Y position of the top edge of the task
      * @param windowDecor the window decoration for the task being dragged
      */
     fun onDragPositioningEnd(
