@@ -24,6 +24,7 @@ import android.util.Pair
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
+import androidx.core.animation.AnimatorTestRule
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
@@ -38,6 +39,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -50,6 +52,7 @@ import org.mockito.MockitoAnnotations
 class SystemEventChipAnimationControllerTest : SysuiTestCase() {
     private lateinit var controller: SystemEventChipAnimationController
 
+    @get:Rule val animatorTestRule = AnimatorTestRule()
     @Mock private lateinit var sbWindowController: StatusBarWindowController
     @Mock private lateinit var insetsProvider: StatusBarContentInsetsProvider
 
