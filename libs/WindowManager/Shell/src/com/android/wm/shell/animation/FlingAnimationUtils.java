@@ -117,6 +117,20 @@ public class FlingAnimationUtils {
      * @param endValue  the end value of the animator
      * @param velocity  the current velocity of the motion
      */
+    public void apply(androidx.core.animation.Animator animator,
+            float currValue, float endValue, float velocity) {
+        apply(animator, currValue, endValue, velocity, Math.abs(endValue - currValue));
+    }
+
+    /**
+     * Applies the interpolator and length to the animator, such that the fling animation is
+     * consistent with the finger motion.
+     *
+     * @param animator  the animator to apply
+     * @param currValue the current value
+     * @param endValue  the end value of the animator
+     * @param velocity  the current velocity of the motion
+     */
     public void apply(ViewPropertyAnimator animator, float currValue, float endValue,
             float velocity) {
         apply(animator, currValue, endValue, velocity, Math.abs(endValue - currValue));
@@ -139,6 +153,24 @@ public class FlingAnimationUtils {
                 maxDistance);
         animator.setDuration(properties.mDuration);
         animator.setInterpolator(properties.mInterpolator);
+    }
+
+    /**
+     * Applies the interpolator and length to the animator, such that the fling animation is
+     * consistent with the finger motion.
+     *
+     * @param animator    the animator to apply
+     * @param currValue   the current value
+     * @param endValue    the end value of the animator
+     * @param velocity    the current velocity of the motion
+     * @param maxDistance the maximum distance for this interaction; the maximum animation length
+     *                    gets multiplied by the ratio between the actual distance and this value
+     */
+    public void apply(androidx.core.animation.Animator animator,
+            float currValue, float endValue, float velocity, float maxDistance) {
+        AnimatorProperties properties = getProperties(currValue, endValue, velocity, maxDistance);
+        animator.setDuration(properties.mDuration);
+        animator.setInterpolator(properties.getInterpolator());
     }
 
     /**
@@ -367,6 +399,11 @@ public class FlingAnimationUtils {
     private static class AnimatorProperties {
         Interpolator mInterpolator;
         long mDuration;
+
+        /** Get an AndroidX interpolator wrapper of the current mInterpolator */
+        public androidx.core.animation.Interpolator getInterpolator() {
+            return mInterpolator::getInterpolation;
+        }
     }
 
     /** Builder for {@link #FlingAnimationUtils}. */
