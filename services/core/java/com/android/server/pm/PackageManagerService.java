@@ -1607,7 +1607,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 (i, pm) -> new SharedLibrariesImpl(pm, i),
                 (i, pm) -> new CrossProfileIntentFilterHelper(i.getSettings(),
                         i.getUserManagerService(), i.getLock(), i.getUserManagerInternal(),
-                        context));
+                        context),
+                (i, pm) -> new UpdateOwnershipHelper());
 
         if (Build.VERSION.SDK_INT <= 0) {
             Slog.w(TAG, "**** ro.build.version.sdk not set!");

@@ -33,7 +33,7 @@ import com.android.systemui.controls.ui.ControlViewHolder.Companion.MIN_LEVEL
  * Supports display of static images on the background of the tile. When marked active, the title
  * and subtitle will not be visible. To be used with {@link Thumbnailtemplate} only.
  */
-class ThumbnailBehavior : Behavior {
+class ThumbnailBehavior(currentUserId: Int) : Behavior {
     lateinit var template: ThumbnailTemplate
     lateinit var control: Control
     lateinit var cvh: ControlViewHolder
@@ -42,6 +42,7 @@ class ThumbnailBehavior : Behavior {
     private var shadowRadius: Float = 0f
     private var shadowColor: Int = 0
 
+    private val canUseIconPredicate = CanUseIconPredicate(currentUserId)
     private val enabled: Boolean
         get() = template.isActive()
 
@@ -80,11 +81,16 @@ class ThumbnailBehavior : Behavior {
             cvh.status.setShadowLayer(shadowOffsetX, shadowOffsetY, shadowRadius, shadowColor)
 
             cvh.bgExecutor.execute {
-                val drawable = template.getThumbnail().loadDrawable(cvh.context)
+                val drawable = template.thumbnail
+                        ?.takeIf(canUseIconPredicate)
+                        ?.loadDrawable(cvh.context)
                 cvh.uiExecutor.execute {
                     val radius = cvh.context.getResources()
                         .getDimensionPixelSize(R.dimen.control_corner_radius).toFloat()
-                    clipLayer.setDrawable(CornerDrawable(drawable, radius))
+                    // TODO(b/290037843): Add a placeholder
+                    drawable?.let {
+                        clipLayer.drawable = CornerDrawable(it, radius)
+                    }
                     clipLayer.setColorFilter(BlendModeColorFilter(cvh.context.resources
                         .getColor(R.color.control_thumbnail_tint), BlendMode.LUMINOSITY))
                     cvh.applyRenderInfo(enabled, colorOffset)
