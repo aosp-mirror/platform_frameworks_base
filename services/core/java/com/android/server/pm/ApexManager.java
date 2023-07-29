@@ -363,9 +363,13 @@ public abstract class ApexManager {
     /**
      * Performs a non-staged install of the given {@code apexFile}.
      *
+     * If {@code force} is {@code true}, then  update is forced even for APEXes that do not support
+     * non-staged update. This feature is only available on debuggable builds to improve development
+     * velocity of the teams that have their code packaged in an APEX.
+     *
      * @return {@code ApeInfo} about the newly installed APEX package.
      */
-    abstract ApexInfo installPackage(File apexFile) throws PackageManagerException;
+    abstract ApexInfo installPackage(File apexFile, boolean force) throws PackageManagerException;
 
     /**
      * Get a list of apex system services implemented in an apex.
@@ -910,10 +914,11 @@ public abstract class ApexManager {
         }
 
         @Override
-        ApexInfo installPackage(File apexFile)
+        ApexInfo installPackage(File apexFile, boolean force)
                 throws PackageManagerException {
             try {
-                return waitForApexService().installAndActivatePackage(apexFile.getAbsolutePath());
+                return waitForApexService().installAndActivatePackage(apexFile.getAbsolutePath(),
+                        force);
             } catch (RemoteException e) {
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                         "apexservice not available");
@@ -1170,7 +1175,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        ApexInfo installPackage(File apexFile) {
+        ApexInfo installPackage(File apexFile, boolean force) {
             throw new UnsupportedOperationException("APEX updates are not supported");
         }
 
