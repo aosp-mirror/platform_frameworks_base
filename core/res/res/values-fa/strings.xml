@@ -2163,7 +2163,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"لغو مکث"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"برنامه کاری‌ای وجود ندارد"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"برنامه شخصی‌ای وجود ندارد"</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"<xliff:g id="APP">%s</xliff:g> کاری باز شود؟"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"‫<xliff:g id="APP">%s</xliff:g> کاری باز شود؟"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"در <xliff:g id="APP">%s</xliff:g> شخصی باز شود؟"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"در <xliff:g id="APP">%s</xliff:g> کاری باز شود؟"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"تماس ازطریق برنامه کاری برقرار شود؟"</string>
