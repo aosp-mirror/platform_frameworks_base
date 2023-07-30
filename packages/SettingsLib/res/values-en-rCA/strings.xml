@@ -578,10 +578,10 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"User"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Restricted profile"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Add new user?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"You can share this device with other people by creating additional users. Each user has their own space, which they can customize with apps, wallpaper, and so on. Users can also adjust device settings like Wi‑Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"You can share this device with other people by creating additional users. Each user has their own space, which they can customize with apps, wallpaper and so on. Users can also adjust device settings like Wi‑Fi that affect everyone.\n\nWhen you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. Accessibility settings and services may not transfer to the new user."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Make this user an admin?"</string>
-    <string name="user_grant_admin_message" msgid="1673791931033486709">"Admins have special privileges that other users dont. An admin can manage all users, update or reset this device, modify settings, see all installed apps, and grant or revoke admin privileges for others."</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Admins have special privileges that other users don\'t. An admin can manage all users, update or reset this device, modify settings, see all installed apps and grant or revoke admin privileges for others."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Make admin"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Set up user now?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Make sure the person is available to take the device and set up their space"</string>
