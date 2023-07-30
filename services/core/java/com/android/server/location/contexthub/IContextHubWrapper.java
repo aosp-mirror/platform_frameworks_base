@@ -466,8 +466,9 @@ public abstract class IContextHubWrapper {
                 // TODO(271471342): Implement
             }
 
-            public byte[] getUuid() {
-                return UUID;
+            public byte[] getUuid() throws RemoteException {
+                //TODO(b/247124878): return the UUID defined in this file when the API is put in use
+                throw new RemoteException("This API is not implemented yet.");
             }
 
             @Override
