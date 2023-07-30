@@ -156,6 +156,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
     public SplitController(@NonNull WindowLayoutComponentImpl windowLayoutComponent,
             @NonNull DeviceStateManagerFoldingFeatureProducer foldingFeatureProducer) {
+        Log.i(TAG, "Initializing Activity Embedding Controller.");
         final MainThreadExecutor executor = new MainThreadExecutor();
         mHandler = executor.mHandler;
         mPresenter = new SplitPresenter(executor, windowLayoutComponent, this);
@@ -208,6 +209,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @Override
     public void setEmbeddingRules(@NonNull Set<EmbeddingRule> rules) {
         synchronized (mLock) {
+            Log.i(TAG, "Setting embedding rules. Size: " + rules.size());
             mSplitRules.clear();
             mSplitRules.addAll(rules);
         }
@@ -216,6 +218,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @Override
     public boolean pinTopActivityStack(int taskId, @NonNull SplitPinRule splitPinRule) {
         synchronized (mLock) {
+            Log.i(TAG, "Request to pin top activity stack.");
             final TaskContainer task = getTaskContainer(taskId);
             if (task == null) {
                 Log.e(TAG, "Cannot find the task for id: " + taskId);
@@ -272,6 +275,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @Override
     public void unpinTopActivityStack(int taskId){
         synchronized (mLock) {
+            Log.i(TAG, "Request to unpin top activity stack.");
             final TaskContainer task = getTaskContainer(taskId);
             if (task == null) {
                 Log.e(TAG, "Cannot find the task to unpin, id: " + taskId);
