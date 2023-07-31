@@ -25,8 +25,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
 import android.provider.Settings;
-import android.widget.TextView;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
@@ -55,6 +55,10 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
         ((TextView) findViewById(R.id.action_bar_title)).setText(
                 getResources().getString(R.string.accessibility_menu_settings_name)
         );
+        actionBar.setDisplayOptions(
+                ActionBar.DISPLAY_TITLE_MULTIPLE_LINES
+                        | ActionBar.DISPLAY_SHOW_TITLE
+                        | ActionBar.DISPLAY_HOME_AS_UP);
     }
 
     /**
