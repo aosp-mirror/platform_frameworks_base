@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -85,13 +86,14 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     private val mainDispatcher = StandardTestDispatcher()
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
+    private lateinit var systemClock: FakeSystemClock
 
     private lateinit var underTest: KeyguardRepositoryImpl
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
+        systemClock = FakeSystemClock()
         underTest =
             KeyguardRepositoryImpl(
                 statusBarStateController,
@@ -107,6 +109,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 dreamOverlayCallbackController,
                 mainDispatcher,
                 testScope.backgroundScope,
+                systemClock,
             )
     }
 
@@ -167,11 +170,15 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Test
     fun dozeTimeTick() =
         testScope.runTest {
-            var dozeTimeTickValue = collectLastValue(underTest.dozeTimeTick)
-            underTest.dozeTimeTick()
-            runCurrent()
+            val lastDozeTimeTick by collectLastValue(underTest.dozeTimeTick)
+            assertThat(lastDozeTimeTick).isEqualTo(0L)
 
-            assertThat(dozeTimeTickValue()).isNull()
+            // WHEN dozeTimeTick updated
+            systemClock.setUptimeMillis(systemClock.uptimeMillis() + 5)
+            underTest.dozeTimeTick()
+
+            // THEN listeners were updated to the latest uptime millis
+            assertThat(systemClock.uptimeMillis()).isEqualTo(lastDozeTimeTick)
         }
 
     @Test

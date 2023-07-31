@@ -30,7 +30,6 @@ import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,7 +59,7 @@ class FakeKeyguardRepository : KeyguardRepository {
     private val _isDozing = MutableStateFlow(false)
     override val isDozing: StateFlow<Boolean> = _isDozing
 
-    private val _dozeTimeTick = MutableSharedFlow<Unit>()
+    private val _dozeTimeTick = MutableStateFlow<Long>(0L)
     override val dozeTimeTick = _dozeTimeTick
 
     private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)
@@ -174,7 +173,11 @@ class FakeKeyguardRepository : KeyguardRepository {
     }
 
     override fun dozeTimeTick() {
-        _dozeTimeTick.tryEmit(Unit)
+        _dozeTimeTick.value = _dozeTimeTick.value + 1
+    }
+
+    fun dozeTimeTick(millis: Long) {
+        _dozeTimeTick.value = millis
     }
 
     override fun setLastDozeTapToWakePosition(position: Point) {
@@ -235,6 +238,10 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setBypassEnabled(isEnabled: Boolean) {
         _isBypassEnabled = isEnabled
+    }
+
+    fun setScreenModel(screenModel: ScreenModel) {
+        _screenModel.value = screenModel
     }
 
     override fun isUdfpsSupported(): Boolean {
