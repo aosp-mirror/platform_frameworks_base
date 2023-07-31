@@ -71,6 +71,7 @@ import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ScreenCapture;
+import android.window.WindowContextInfo;
 
 /**
  * System private interface to the window manager.
@@ -858,10 +859,10 @@ interface IWindowManager
      * @param displayId The display associated with the window context
      * @param options A bundle used to pass window-related options and choose the right DisplayArea
      *
-     * @return the DisplayArea's {@link android.app.res.Configuration} if the WindowContext is
-     * attached to the DisplayArea successfully. {@code null}, otherwise.
+     * @return the {@link WindowContextInfo} of the DisplayArea if the WindowContext is attached to
+     * the DisplayArea successfully. {@code null}, otherwise.
      */
-    @nullable Configuration attachWindowContextToDisplayArea(in IApplicationThread appThread,
+    @nullable WindowContextInfo attachWindowContextToDisplayArea(in IApplicationThread appThread,
             IBinder clientToken, int type, int displayId, in @nullable Bundle options);
 
     /**
@@ -879,13 +880,15 @@ interface IWindowManager
      * the WindowContext's token}
      * @param token the WindowToken to attach
      *
+     * @return the {@link WindowContextInfo} of the WindowToken if the WindowContext is attached to
+     * the WindowToken successfully. {@code null}, otherwise.
      * @throws IllegalArgumentException if the {@code clientToken} have not been attached to
      * the server or the WindowContext's type doesn't match WindowToken {@code token}'s type.
      *
      * @see #attachWindowContextToDisplayArea(IBinder, int, int, Bundle)
      */
-    void attachWindowContextToWindowToken(in IApplicationThread appThread, IBinder clientToken,
-            IBinder token);
+    @nullable WindowContextInfo  attachWindowContextToWindowToken(in IApplicationThread appThread,
+            IBinder clientToken, IBinder token);
 
     /**
      * Attaches a {@code clientToken} to associate with DisplayContent.
@@ -899,11 +902,11 @@ interface IWindowManager
      * the WindowContext's token}
      * @param displayId The display associated with the window context
      *
-     * @return the DisplayContent's {@link android.app.res.Configuration} if the Context is
-     * attached to the DisplayContent successfully. {@code null}, otherwise.
+     * @return the {@link WindowContextInfo} of the DisplayContent if the WindowContext is attached
+     * to the DisplayContent successfully. {@code null}, otherwise.
      * @throws android.view.WindowManager.InvalidDisplayException if the display ID is invalid
      */
-    @nullable Configuration attachWindowContextToDisplayContent(in IApplicationThread appThread,
+    @nullable WindowContextInfo attachWindowContextToDisplayContent(in IApplicationThread appThread,
             IBinder clientToken, int displayId);
 
     /**

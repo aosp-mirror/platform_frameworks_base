@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.util.MergedConfiguration;
 import android.view.SurfaceControl;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
+import android.window.WindowContextInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
@@ -163,9 +164,9 @@ public abstract class ClientTransactionHandler {
     public abstract void handleActivityConfigurationChanged(@NonNull ActivityClientRecord r,
             Configuration overrideConfig, int displayId);
 
-    /** Deliver {@link android.window.WindowContext} configuration change. */
-    public abstract void handleWindowContextConfigurationChanged(@NonNull IBinder clientToken,
-            @NonNull Configuration configuration, int displayId);
+    /** Deliver {@link android.window.WindowContextInfo} change. */
+    public abstract void handleWindowContextInfoChanged(@NonNull IBinder clientToken,
+            @NonNull WindowContextInfo info);
 
     /** Deliver {@link android.window.WindowContext} window removal event. */
     public abstract void handleWindowContextWindowRemoval(@NonNull IBinder clientToken);

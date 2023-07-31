@@ -64,6 +64,7 @@ public class WindowTokenClientControllerTest {
     // Can't mock final class.
     private final Configuration mConfiguration = new Configuration();
 
+    private WindowContextInfo mWindowContextInfo;
     private WindowTokenClientController mController;
 
     @Before
@@ -72,6 +73,7 @@ public class WindowTokenClientControllerTest {
         doReturn(mClientToken).when(mWindowTokenClient).asBinder();
         mController = spy(WindowTokenClientController.createInstanceForTesting());
         doReturn(mWindowManagerService).when(mController).getWindowManagerService();
+        mWindowContextInfo = new WindowContextInfo(mConfiguration, DEFAULT_DISPLAY);
     }
 
     @Test
@@ -86,7 +88,7 @@ public class WindowTokenClientControllerTest {
                 TYPE_APPLICATION_OVERLAY, DEFAULT_DISPLAY, null /* options */);
         verify(mWindowTokenClient, never()).onConfigurationChanged(any(), anyInt(), anyBoolean());
 
-        doReturn(mConfiguration).when(mWindowManagerService).attachWindowContextToDisplayArea(
+        doReturn(mWindowContextInfo).when(mWindowManagerService).attachWindowContextToDisplayArea(
                 any(), any(), anyInt(), anyInt(), any());
 
         assertTrue(mController.attachToDisplayArea(mWindowTokenClient, TYPE_APPLICATION_OVERLAY,
@@ -109,7 +111,7 @@ public class WindowTokenClientControllerTest {
 
         verify(mWindowManagerService, never()).detachWindowContext(any());
 
-        doReturn(mConfiguration).when(mWindowManagerService).attachWindowContextToDisplayArea(
+        doReturn(mWindowContextInfo).when(mWindowManagerService).attachWindowContextToDisplayArea(
                 any(), any(), anyInt(), anyInt(), any());
         mController.attachToDisplayArea(mWindowTokenClient, TYPE_APPLICATION_OVERLAY,
                 DEFAULT_DISPLAY, null /* options */);
@@ -129,8 +131,8 @@ public class WindowTokenClientControllerTest {
                 DEFAULT_DISPLAY);
         verify(mWindowTokenClient, never()).onConfigurationChanged(any(), anyInt(), anyBoolean());
 
-        doReturn(mConfiguration).when(mWindowManagerService).attachWindowContextToDisplayContent(
-                any(), any(), anyInt());
+        doReturn(mWindowContextInfo).when(mWindowManagerService)
+                .attachWindowContextToDisplayContent(any(), any(), anyInt());
 
         assertTrue(mController.attachToDisplayContent(mWindowTokenClient, DEFAULT_DISPLAY));
         verify(mWindowTokenClient).onConfigurationChanged(mConfiguration, DEFAULT_DISPLAY,
@@ -150,8 +152,8 @@ public class WindowTokenClientControllerTest {
 
         verify(mWindowManagerService, never()).detachWindowContext(any());
 
-        doReturn(mConfiguration).when(mWindowManagerService).attachWindowContextToDisplayContent(
-                any(), any(), anyInt());
+        doReturn(mWindowContextInfo).when(mWindowManagerService)
+                .attachWindowContextToDisplayContent(any(), any(), anyInt());
         mController.attachToDisplayContent(mWindowTokenClient, DEFAULT_DISPLAY);
         mController.detachIfNeeded(mWindowTokenClient);
 
@@ -160,11 +162,20 @@ public class WindowTokenClientControllerTest {
 
     @Test
     public void testAttachToWindowToken() throws RemoteException {
-        mController.attachToWindowToken(mWindowTokenClient, mWindowToken);
+        doReturn(null).when(mWindowManagerService).attachWindowContextToWindowToken(
+                any(), any(), any());
 
+        assertFalse(mController.attachToWindowToken(mWindowTokenClient, mWindowToken));
         verify(mWindowManagerService).attachWindowContextToWindowToken(
                 ActivityThread.currentActivityThread().getApplicationThread(), mWindowTokenClient,
                 mWindowToken);
+        verify(mWindowTokenClient, never()).onConfigurationChanged(any(), anyInt(), anyBoolean());
+
+        doReturn(mWindowContextInfo).when(mWindowManagerService)
+                .attachWindowContextToWindowToken(any(), any(), any());
+
+        assertTrue(mController.attachToWindowToken(mWindowTokenClient, mWindowToken));
+        verify(mWindowTokenClient).postOnConfigurationChanged(mConfiguration, DEFAULT_DISPLAY);
     }
 
     @Test
@@ -173,6 +184,15 @@ public class WindowTokenClientControllerTest {
 
         verify(mWindowManagerService, never()).detachWindowContext(any());
 
+        doReturn(null).when(mWindowManagerService).attachWindowContextToWindowToken(
+                any(), any(), any());
+        mController.attachToWindowToken(mWindowTokenClient, mWindowToken);
+        mController.detachIfNeeded(mWindowTokenClient);
+
+        verify(mWindowManagerService, never()).detachWindowContext(any());
+
+        doReturn(mWindowContextInfo).when(mWindowManagerService).attachWindowContextToWindowToken(
+                any(), any(), any());
         mController.attachToWindowToken(mWindowTokenClient, mWindowToken);
         mController.detachIfNeeded(mWindowTokenClient);
 
@@ -180,28 +200,43 @@ public class WindowTokenClientControllerTest {
     }
 
     @Test
-    public void testOnWindowContextConfigurationChanged() {
-        mController.onWindowContextConfigurationChanged(
-                mClientToken, mConfiguration, DEFAULT_DISPLAY);
+    public void testOnWindowContextInfoChanged() throws RemoteException {
+        doReturn(mWindowContextInfo).when(mWindowManagerService)
+                .attachWindowContextToWindowToken(any(), any(), any());
+
+        // No invoke if not attached.
+        mController.onWindowContextInfoChanged(mClientToken, mWindowContextInfo);
 
         verify(mWindowTokenClient, never()).onConfigurationChanged(any(), anyInt());
 
-        mController.attachToWindowToken(mWindowTokenClient, mWindowToken);
+        // Invoke postOnConfigurationChanged when attached
+        assertTrue(mController.attachToWindowToken(mWindowTokenClient, mWindowToken));
 
-        mController.onWindowContextConfigurationChanged(
-                mClientToken, mConfiguration, DEFAULT_DISPLAY);
+        verify(mWindowTokenClient).postOnConfigurationChanged(mConfiguration, DEFAULT_DISPLAY);
 
-        verify(mWindowTokenClient).onConfigurationChanged(mConfiguration, DEFAULT_DISPLAY);
+        // Invoke onConfigurationChanged when onWindowContextInfoChanged
+        mController.onWindowContextInfoChanged(
+                mClientToken, new WindowContextInfo(mConfiguration, DEFAULT_DISPLAY + 1));
+
+        verify(mWindowTokenClient).onConfigurationChanged(mConfiguration, DEFAULT_DISPLAY + 1);
     }
 
     @Test
-    public void testOnWindowContextWindowRemoved() {
+    public void testOnWindowContextWindowRemoved() throws RemoteException {
+        doReturn(mWindowContextInfo).when(mWindowManagerService)
+                .attachWindowContextToWindowToken(any(), any(), any());
+
+        // No invoke if not attached.
         mController.onWindowContextWindowRemoved(mClientToken);
 
         verify(mWindowTokenClient, never()).onWindowTokenRemoved();
 
+        // No invoke if not onWindowTokenRemoved.
         mController.attachToWindowToken(mWindowTokenClient, mWindowToken);
 
+        verify(mWindowTokenClient, never()).onWindowTokenRemoved();
+
+        // Invoke onWindowTokenRemoved when onWindowContextWindowRemoved
         mController.onWindowContextWindowRemoved(mClientToken);
 
         verify(mWindowTokenClient).onWindowTokenRemoved();

@@ -64,6 +64,7 @@ import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.View;
+import android.window.WindowContextInfo;
 import android.window.WindowTokenClientController;
 
 import androidx.test.filters.MediumTest;
@@ -753,13 +754,12 @@ public class ActivityThreadTest {
         WindowTokenClientController.overrideForTesting(windowTokenClientController);
         final IBinder clientToken = mock(IBinder.class);
         final Configuration configuration = new Configuration();
+        final WindowContextInfo info = new WindowContextInfo(configuration, DEFAULT_DISPLAY);
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> activityThread
-                .handleWindowContextConfigurationChanged(
-                        clientToken, configuration, DEFAULT_DISPLAY));
+                .handleWindowContextInfoChanged(clientToken, info));
 
-        verify(windowTokenClientController).onWindowContextConfigurationChanged(
-                clientToken, configuration, DEFAULT_DISPLAY);
+        verify(windowTokenClientController).onWindowContextInfoChanged(clientToken, info);
     }
 
     @Test

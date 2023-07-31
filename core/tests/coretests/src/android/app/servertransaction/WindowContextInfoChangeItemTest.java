@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
+import android.window.WindowContextInfo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,12 +31,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Tests for {@link WindowContextConfigurationChangeItem}.
+ * Tests for {@link WindowContextInfoChangeItem}.
  *
  * Build/Install/Run:
- *  atest FrameworksCoreTests:WindowContextConfigurationChangeItemTest
+ *  atest FrameworksCoreTests:WindowContextInfoChangeItemTest
  */
-public class WindowContextConfigurationChangeItemTest {
+public class WindowContextInfoChangeItemTest {
 
     @Mock
     private ClientTransactionHandler mHandler;
@@ -55,11 +56,11 @@ public class WindowContextConfigurationChangeItemTest {
 
     @Test
     public void testExecute() {
-        final WindowContextConfigurationChangeItem item = WindowContextConfigurationChangeItem
+        final WindowContextInfoChangeItem item = WindowContextInfoChangeItem
                 .obtain(mClientToken, mConfiguration, DEFAULT_DISPLAY);
         item.execute(mHandler, mToken, mPendingActions);
 
-        verify(mHandler).handleWindowContextConfigurationChanged(mClientToken, mConfiguration,
-                DEFAULT_DISPLAY);
+        verify(mHandler).handleWindowContextInfoChanged(mClientToken,
+                new WindowContextInfo(mConfiguration, DEFAULT_DISPLAY));
     }
 }
