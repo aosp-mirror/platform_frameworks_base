@@ -412,7 +412,11 @@ constructor(
             KeyguardPickerFlag(
                 name = Contract.FlagsTable.FLAG_NAME_PAGE_TRANSITIONS,
                 value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_PAGE_TRANSITIONS)
-            )
+            ),
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_PICKER_PREVIEW_ANIMATION,
+                value = featureFlags.isEnabled(Flags.WALLPAPER_PICKER_PREVIEW_ANIMATION)
+            ),
         )
     }
 
