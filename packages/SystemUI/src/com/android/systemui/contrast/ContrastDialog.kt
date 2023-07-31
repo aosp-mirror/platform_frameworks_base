@@ -61,7 +61,7 @@ class ContrastDialog(
             )
             dismiss()
         }
-        setPositiveButton(R.string.done) { _, _ -> dismiss() }
+        setPositiveButton(com.android.settingslib.R.string.done) { _, _ -> dismiss() }
         super.onCreate(savedInstanceState)
 
         contrastButtons =
