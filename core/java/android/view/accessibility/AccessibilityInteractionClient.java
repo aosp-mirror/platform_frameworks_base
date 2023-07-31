@@ -831,8 +831,17 @@ public final class AccessibilityInteractionClient
                     //   A11yService -> App -> SurfaceFlinger -> A11yService
                     ScreenCapture.ScreenCaptureListener listener =
                             new ScreenCapture.ScreenCaptureListener(
-                                    screenshot -> sendWindowScreenshotSuccess(screenshot,
-                                            interactionId));
+                                    (screenshot, status) -> {
+                                        if (status != 0) {
+                                            sendTakeScreenshotOfWindowError(
+                                                    AccessibilityService
+                                                            .ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR,
+                                                    interactionId);
+                                        } else {
+                                            sendWindowScreenshotSuccess(screenshot,
+                                                    interactionId);
+                                        }
+                                    });
                     connection.takeScreenshotOfWindow(accessibilityWindowId, interactionId,
                             listener, this);
                     mMainHandler.postDelayed(() -> {
