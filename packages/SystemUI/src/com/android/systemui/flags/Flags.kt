@@ -62,11 +62,12 @@ object Flags {
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply")
 
     /**
-     * This flag is server-controlled and should stay as [unreleasedFlag] since we never want to
-     * enable it on release builds.
+     * This flag controls whether we register a listener for StatsD notification memory reports.
+     * For statsd to actually call the listener however, a server-side toggle needs to be
+     * enabled as well.
      */
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
-        unreleasedFlag(119, "notification_memory_logging_enabled")
+            releasedFlag(119, "notification_memory_logging_enabled")
 
     // TODO(b/260335638): Tracking Bug
     @JvmField
