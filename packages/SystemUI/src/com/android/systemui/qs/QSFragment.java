@@ -52,6 +52,7 @@ import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
@@ -285,7 +286,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private void bindFooterActionsView(View root) {
         LinearLayout footerActionsView = root.findViewById(R.id.qs_footer_actions);
 
-        if (!ComposeFacade.INSTANCE.isComposeAvailable()) {
+        if (!mFeatureFlags.isEnabled(Flags.COMPOSE_QS_FOOTER_ACTIONS)
+                || !ComposeFacade.INSTANCE.isComposeAvailable()) {
             Log.d(TAG, "Binding the View implementation of the QS footer actions");
             mFooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
                     mListeningAndVisibilityLifecycleOwner);
