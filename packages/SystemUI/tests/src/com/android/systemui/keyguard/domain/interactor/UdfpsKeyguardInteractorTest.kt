@@ -38,7 +38,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -68,6 +67,7 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
     private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var burnInInteractor: BurnInInteractor
     private lateinit var shadeRepository: FakeShadeRepository
+    private lateinit var keyguardInteractor: KeyguardInteractor
 
     @Mock private lateinit var burnInHelper: BurnInHelperWrapper
     @Mock private lateinit var dialogManager: SystemUIDialogManager
@@ -79,35 +79,32 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testScope = TestScope()
         configRepository = FakeConfigurationRepository()
-        keyguardRepository = FakeKeyguardRepository()
-        bouncerRepository = FakeKeyguardBouncerRepository()
-        shadeRepository = FakeShadeRepository()
-        fakeCommandQueue = FakeCommandQueue()
         featureFlags =
             FakeFeatureFlags().apply {
                 set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
                 set(Flags.FACE_AUTH_REFACTOR, false)
             }
+        KeyguardInteractorFactory.create(featureFlags = featureFlags).let {
+            keyguardInteractor = it.keyguardInteractor
+            keyguardRepository = it.repository
+        }
+        bouncerRepository = FakeKeyguardBouncerRepository()
+        shadeRepository = FakeShadeRepository()
+        fakeCommandQueue = FakeCommandQueue()
         burnInInteractor =
             BurnInInteractor(
                 context,
                 burnInHelper,
                 testScope.backgroundScope,
                 configRepository,
-                FakeSystemClock(),
+                keyguardInteractor
             )
 
         underTest =
             UdfpsKeyguardInteractor(
                 configRepository,
                 burnInInteractor,
-                KeyguardInteractor(
-                    keyguardRepository,
-                    fakeCommandQueue,
-                    featureFlags,
-                    bouncerRepository,
-                    configRepository,
-                ),
+                keyguardInteractor,
                 shadeRepository,
                 dialogManager,
             )
@@ -215,7 +212,7 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
 
     private fun setAwake() {
         keyguardRepository.setDozeAmount(0f)
-        burnInInteractor.dozeTimeTick()
+        keyguardRepository.dozeTimeTick()
 
         bouncerRepository.setAlternateVisible(false)
         keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)

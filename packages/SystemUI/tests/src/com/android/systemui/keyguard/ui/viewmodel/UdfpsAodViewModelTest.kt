@@ -20,21 +20,19 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -58,9 +56,9 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
     private lateinit var configRepository: FakeConfigurationRepository
     private lateinit var bouncerRepository: KeyguardBouncerRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var fakeCommandQueue: FakeCommandQueue
     private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var shadeRepository: FakeShadeRepository
+    private lateinit var keyguardInteractor: KeyguardInteractor
 
     @Mock private lateinit var dialogManager: SystemUIDialogManager
     @Mock private lateinit var burnInHelper: BurnInHelperWrapper
@@ -70,17 +68,21 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         overrideResource(com.android.systemui.R.dimen.lock_icon_padding, defaultPadding)
         testScope = TestScope()
-        configRepository = FakeConfigurationRepository()
-        keyguardRepository = FakeKeyguardRepository()
-        bouncerRepository = FakeKeyguardBouncerRepository()
-        fakeCommandQueue = FakeCommandQueue()
         shadeRepository = FakeShadeRepository()
         featureFlags =
             FakeFeatureFlags().apply {
                 set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
                 set(Flags.FACE_AUTH_REFACTOR, false)
             }
-
+        KeyguardInteractorFactory.create(
+                featureFlags = featureFlags,
+            )
+            .also {
+                keyguardInteractor = it.keyguardInteractor
+                keyguardRepository = it.repository
+                configRepository = it.configurationRepository
+                bouncerRepository = it.bouncerRepository
+            }
         val udfpsKeyguardInteractor =
             UdfpsKeyguardInteractor(
                 configRepository,
@@ -89,15 +91,9 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
                     burnInHelper,
                     testScope.backgroundScope,
                     configRepository,
-                    FakeSystemClock(),
+                    keyguardInteractor,
                 ),
-                KeyguardInteractor(
-                    keyguardRepository,
-                    fakeCommandQueue,
-                    featureFlags,
-                    bouncerRepository,
-                    configRepository,
-                ),
+                keyguardInteractor,
                 shadeRepository,
                 dialogManager,
             )
