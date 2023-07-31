@@ -140,6 +140,13 @@ public final class PrimitiveSegment extends VibrationEffectSegment {
                 + '}';
     }
 
+    /** @hide */
+    @Override
+    public String toDebugString() {
+        return String.format("Primitive=%s(scale=%.2f, delay=%dms)",
+                VibrationEffect.Composition.primitiveToString(mPrimitiveId), mScale, mDelay);
+    }
+
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;

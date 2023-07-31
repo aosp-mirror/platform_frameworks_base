@@ -17,6 +17,7 @@
 package com.android.server.vibrator;
 
 import android.annotation.Nullable;
+import android.annotation.Nullable;
 import android.hardware.vibrator.IVibrator;
 import android.os.Binder;
 import android.os.IVibratorStateListener;
@@ -26,6 +27,7 @@ import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -349,6 +351,19 @@ final class VibratorController {
                 + ", mVibratorStateListeners count="
                 + mVibratorStateListeners.getRegisteredCallbackCount()
                 + '}';
+    }
+
+    void dump(IndentingPrintWriter pw) {
+        pw.println("VibratorController:");
+        pw.increaseIndent();
+        pw.println("isVibrating = " + mIsVibrating);
+        pw.println("isUnderExternalControl = " + mIsUnderExternalControl);
+        pw.println("currentAmplitude = " + mCurrentAmplitude);
+        pw.println("vibratorInfoLoadSuccessful = " + mVibratorInfoLoadSuccessful);
+        pw.println("vibratorStateListenerCount = "
+                + mVibratorStateListeners.getRegisteredCallbackCount());
+        mVibratorInfo.dump(pw);
+        pw.decreaseIndent();
     }
 
     @GuardedBy("mLock")

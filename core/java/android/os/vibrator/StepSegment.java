@@ -161,6 +161,13 @@ public final class StepSegment extends VibrationEffectSegment {
                 + "}";
     }
 
+    /** @hide */
+    @Override
+    public String toDebugString() {
+        return String.format("Step=%dms(amplitude=%.2f%s)", mDuration, mAmplitude,
+                Float.compare(mFrequencyHz, 0) == 0 ? "" : " @ " + mFrequencyHz + "Hz");
+    }
+
     @Override
     public int describeContents() {
         return 0;

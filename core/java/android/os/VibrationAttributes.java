@@ -336,10 +336,11 @@ public final class VibrationAttributes implements Parcelable {
 
     @Override
     public String toString() {
-        return "VibrationAttributes:"
-                + " Usage=" + usageToString()
-                + " Audio Usage= " + AudioAttributes.usageToString(mOriginalAudioUsage)
-                + " Flags=" + mFlags;
+        return "VibrationAttributes{"
+                + "mUsage=" + usageToString()
+                + ", mAudioUsage= " + AudioAttributes.usageToString(mOriginalAudioUsage)
+                + ", mFlags=" + mFlags
+                + '}';
     }
 
     /** @hide */

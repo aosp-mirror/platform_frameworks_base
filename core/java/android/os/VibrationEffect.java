@@ -44,7 +44,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * A VibrationEffect describes a haptic effect to be performed by a {@link Vibrator}.
@@ -629,6 +631,13 @@ public abstract class VibrationEffect implements Parcelable {
         return MathUtils.constrain(a * fx, 0f, 1f);
     }
 
+    /**
+     * Returns a compact version of the {@link #toString()} result for debugging purposes.
+     *
+     * @hide
+     */
+    public abstract String toDebugString();
+
     /** @hide */
     public static String effectIdToString(int effectId) {
         switch (effectId) {
@@ -923,6 +932,23 @@ public abstract class VibrationEffect implements Parcelable {
             return "Composed{segments=" + mSegments
                     + ", repeat=" + mRepeatIndex
                     + "}";
+        }
+
+        /** @hide */
+        @Override
+        public String toDebugString() {
+            if (mSegments.size() == 1 && mRepeatIndex < 0) {
+                // Simplify effect string, use the single segment to represent it.
+                return mSegments.get(0).toDebugString();
+            }
+            StringJoiner sj = new StringJoiner(",", "[", "]");
+            for (int i = 0; i < mSegments.size(); i++) {
+                sj.add(mSegments.get(i).toDebugString());
+            }
+            if (mRepeatIndex >= 0) {
+                return String.format(Locale.ROOT, "%s, repeat=%d", sj, mRepeatIndex);
+            }
+            return sj.toString();
         }
 
         @Override
@@ -1250,23 +1276,23 @@ public abstract class VibrationEffect implements Parcelable {
         public static String primitiveToString(@PrimitiveType int id) {
             switch (id) {
                 case PRIMITIVE_NOOP:
-                    return "PRIMITIVE_NOOP";
+                    return "NOOP";
                 case PRIMITIVE_CLICK:
-                    return "PRIMITIVE_CLICK";
+                    return "CLICK";
                 case PRIMITIVE_THUD:
-                    return "PRIMITIVE_THUD";
+                    return "THUD";
                 case PRIMITIVE_SPIN:
-                    return "PRIMITIVE_SPIN";
+                    return "SPIN";
                 case PRIMITIVE_QUICK_RISE:
-                    return "PRIMITIVE_QUICK_RISE";
+                    return "QUICK_RISE";
                 case PRIMITIVE_SLOW_RISE:
-                    return "PRIMITIVE_SLOW_RISE";
+                    return "SLOW_RISE";
                 case PRIMITIVE_QUICK_FALL:
-                    return "PRIMITIVE_QUICK_FALL";
+                    return "QUICK_FALL";
                 case PRIMITIVE_TICK:
-                    return "PRIMITIVE_TICK";
+                    return "TICK";
                 case PRIMITIVE_LOW_TICK:
-                    return "PRIMITIVE_LOW_TICK";
+                    return "LOW_TICK";
                 default:
                     return Integer.toString(id);
             }

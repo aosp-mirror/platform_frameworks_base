@@ -18,6 +18,7 @@ package com.android.server.vibrator;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.media.AudioAttributes;
 import android.os.CombinedVibration;
 import android.os.IBinder;
 import android.os.VibrationAttributes;
@@ -27,8 +28,10 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -39,7 +42,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * The base class for all vibrations.
  */
 abstract class Vibration {
-    private static final SimpleDateFormat DEBUG_DATE_FORMAT =
+    private static final SimpleDateFormat DEBUG_TIME_FORMAT =
+            new SimpleDateFormat("HH:mm:ss.SSS");
+    private static final SimpleDateFormat DEBUG_DATE_TIME_FORMAT =
             new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
     // Used to generate globally unique vibration ids.
     private static final AtomicInteger sNextVibrationId = new AtomicInteger(1); // 0 = no callback
@@ -146,10 +151,10 @@ abstract class Vibration {
         @Override
         public String toString() {
             return "CallerInfo{"
-                    + " attrs=" + attrs
-                    + ", uid=" + uid
-                    + ", displayId=" + displayId
+                    + " uid=" + uid
                     + ", opPkg=" + opPkg
+                    + ", displayId=" + displayId
+                    + ", attrs=" + attrs
                     + ", reason=" + reason
                     + '}';
         }
@@ -203,14 +208,17 @@ abstract class Vibration {
      * potentially expensive or resource-linked objects, such as {@link IBinder}.
      */
     static final class DebugInfo {
-        private final long mCreateTime;
+        final long mCreateTime;
+        final CallerInfo mCallerInfo;
+        @Nullable
+        final CombinedVibration mPlayedEffect;
+
         private final long mStartTime;
         private final long mEndTime;
         private final long mDurationMs;
-        @Nullable private final CombinedVibration mOriginalEffect;
-        @Nullable private final CombinedVibration mPlayedEffect;
+        @Nullable
+        private final CombinedVibration mOriginalEffect;
         private final float mScale;
-        private final CallerInfo mCallerInfo;
         private final Status mStatus;
 
         DebugInfo(Status status, VibrationStats stats, @Nullable CombinedVibration playedEffect,
@@ -230,10 +238,10 @@ abstract class Vibration {
 
         @Override
         public String toString() {
-            return "createTime: " + DEBUG_DATE_FORMAT.format(new Date(mCreateTime))
-                    + ", startTime: " + DEBUG_DATE_FORMAT.format(new Date(mStartTime))
+            return "createTime: " + DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime))
+                    + ", startTime: " + DEBUG_DATE_TIME_FORMAT.format(new Date(mStartTime))
                     + ", endTime: "
-                    + (mEndTime == 0 ? null : DEBUG_DATE_FORMAT.format(new Date(mEndTime)))
+                    + (mEndTime == 0 ? null : DEBUG_DATE_TIME_FORMAT.format(new Date(mEndTime)))
                     + ", durationMs: " + mDurationMs
                     + ", status: " + mStatus.name().toLowerCase(Locale.ROOT)
                     + ", playedEffect: " + mPlayedEffect
@@ -242,8 +250,56 @@ abstract class Vibration {
                     + ", callerInfo: " + mCallerInfo;
         }
 
+        /**
+         * Write this info in a compact way into given {@link PrintWriter}.
+         *
+         * <p>This is used by dumpsys to log multiple vibration records in single lines that are
+         * easy to skim through by the sorted created time.
+         */
+        void dumpCompact(IndentingPrintWriter pw) {
+            boolean isExternalVibration = mPlayedEffect == null;
+            String timingsStr = String.format(Locale.ROOT,
+                    "%s | %8s | %20s | duration: %5dms | start: %12s | end: %10s",
+                    DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime)),
+                    isExternalVibration ? "external" : "effect",
+                    mStatus.name().toLowerCase(Locale.ROOT),
+                    mDurationMs,
+                    mStartTime == 0 ? "" : DEBUG_TIME_FORMAT.format(new Date(mStartTime)),
+                    mEndTime == 0 ? "" : DEBUG_TIME_FORMAT.format(new Date(mEndTime)));
+            String callerInfoStr = String.format(Locale.ROOT,
+                    " | %s (uid=%d, displayId=%d) | usage: %s (audio=%s) | flags: %s | reason: %s",
+                    mCallerInfo.opPkg, mCallerInfo.uid, mCallerInfo.displayId,
+                    mCallerInfo.attrs.usageToString(),
+                    AudioAttributes.usageToString(mCallerInfo.attrs.getAudioUsage()),
+                    Long.toBinaryString(mCallerInfo.attrs.getFlags()),
+                    mCallerInfo.reason);
+            String effectStr = String.format(Locale.ROOT,
+                    " | played: %s | original: %s | scale: %.2f",
+                    mPlayedEffect == null ? null : mPlayedEffect.toDebugString(),
+                    mOriginalEffect == null ? null : mOriginalEffect.toDebugString(),
+                    mScale);
+            pw.println(timingsStr + callerInfoStr + effectStr);
+        }
+
+        /** Write this info into given {@link PrintWriter}. */
+        void dump(IndentingPrintWriter pw) {
+            pw.println("Vibration:");
+            pw.increaseIndent();
+            pw.println("status = " + mStatus.name().toLowerCase(Locale.ROOT));
+            pw.println("durationMs = " + mDurationMs);
+            pw.println("createTime = " + DEBUG_DATE_TIME_FORMAT.format(new Date(mCreateTime)));
+            pw.println("startTime = " + DEBUG_DATE_TIME_FORMAT.format(new Date(mStartTime)));
+            pw.println("endTime = "
+                    + (mEndTime == 0 ? null : DEBUG_DATE_TIME_FORMAT.format(new Date(mEndTime))));
+            pw.println("playedEffect = " + mPlayedEffect);
+            pw.println("originalEffect = " + mOriginalEffect);
+            pw.println("scale = " + String.format(Locale.ROOT, "%.2f", mScale));
+            pw.println("callerInfo = " + mCallerInfo);
+            pw.decreaseIndent();
+        }
+
         /** Write this info into given {@code fieldId} on {@link ProtoOutputStream}. */
-        public void dumpProto(ProtoOutputStream proto, long fieldId) {
+        void dump(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
             proto.write(VibrationProto.START_TIME, mStartTime);
             proto.write(VibrationProto.END_TIME, mEndTime);

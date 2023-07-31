@@ -32,6 +32,9 @@ import android.content.res.Resources;
 import android.os.VibrationAttributes;
 import android.os.Vibrator;
 import android.os.Vibrator.VibrationIntensity;
+import android.util.IndentingPrintWriter;
+
+import java.io.PrintWriter;
 
 /**
  * List of device-specific internal vibration configuration loaded from platform config.xml.
@@ -190,5 +193,19 @@ public class VibrationConfig {
                 + ", mDefaultNotificationIntensity=" + mDefaultNotificationVibrationIntensity
                 + ", mDefaultRingIntensity=" + mDefaultRingVibrationIntensity
                 + "}";
+    }
+
+    /**
+     * Write current settings into given {@link PrintWriter}, skipping the default settings.
+     *
+     * @hide
+     */
+    public void dumpWithoutDefaultSettings(IndentingPrintWriter pw) {
+        pw.println("VibrationConfig:");
+        pw.increaseIndent();
+        pw.println("hapticChannelMaxAmplitude = " + mHapticChannelMaxVibrationAmplitude);
+        pw.println("rampStepDurationMs = " + mRampStepDurationMs);
+        pw.println("rampDownDurationMs = " + mRampDownDurationMs);
+        pw.decreaseIndent();
     }
 }

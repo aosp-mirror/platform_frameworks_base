@@ -203,6 +203,15 @@ public final class PrebakedSegment extends VibrationEffectSegment {
                 + "}";
     }
 
+    /** @hide */
+    @Override
+    public String toDebugString() {
+        return String.format("Prebaked=%s(%s, %s fallback)",
+                VibrationEffect.effectIdToString(mEffectId),
+                VibrationEffect.effectStrengthToString(mEffectStrength),
+                mFallback ? "with" : "no");
+    }
+
     @Override
     public int describeContents() {
         return 0;

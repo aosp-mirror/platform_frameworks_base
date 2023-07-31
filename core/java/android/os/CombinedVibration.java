@@ -24,7 +24,9 @@ import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * A CombinedVibration describes a combination of haptic effects to be performed by one or more
@@ -149,6 +151,13 @@ public abstract class CombinedVibration implements Parcelable {
 
     /** @hide */
     public abstract boolean hasVibrator(int vibratorId);
+
+    /**
+     * Returns a compact version of the {@link #toString()} result for debugging purposes.
+     *
+     * @hide
+     */
+    public abstract String toDebugString();
 
     /**
      * Adapts a {@link VibrationEffect} to a specific device vibrator using the ID.
@@ -437,6 +446,13 @@ public abstract class CombinedVibration implements Parcelable {
             return "Mono{mEffect=" + mEffect + '}';
         }
 
+        /** @hide */
+        @Override
+        public String toDebugString() {
+            // Simplify vibration string, use the single effect to represent it.
+            return mEffect.toDebugString();
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -617,6 +633,17 @@ public abstract class CombinedVibration implements Parcelable {
         @Override
         public String toString() {
             return "Stereo{mEffects=" + mEffects + '}';
+        }
+
+        /** @hide */
+        @Override
+        public String toDebugString() {
+            StringJoiner sj = new StringJoiner(",", "Stereo{", "}");
+            for (int i = 0; i < mEffects.size(); i++) {
+                sj.add(String.format(Locale.ROOT, "vibrator(id=%d): %s",
+                        mEffects.keyAt(i), mEffects.valueAt(i).toDebugString()));
+            }
+            return sj.toString();
         }
 
         @Override
@@ -831,6 +858,17 @@ public abstract class CombinedVibration implements Parcelable {
         @Override
         public String toString() {
             return "Sequential{mEffects=" + mEffects + ", mDelays=" + mDelays + '}';
+        }
+
+        /** @hide */
+        @Override
+        public String toDebugString() {
+            StringJoiner sj = new StringJoiner(",", "Sequential{", "}");
+            for (int i = 0; i < mEffects.size(); i++) {
+                sj.add(String.format(Locale.ROOT, "delayMs=%d, effect=%s",
+                        mDelays.get(i), mEffects.get(i).toDebugString()));
+            }
+            return sj.toString();
         }
 
         @Override
