@@ -90,6 +90,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -1053,10 +1055,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardStatusBarViewController.init();
 
         mNotificationContainerParent = mView.findViewById(R.id.notification_container_parent);
-        updateViewControllers(
-                mView.findViewById(R.id.keyguard_status_view),
-                userAvatarContainer,
-                keyguardUserSwitcherView);
+        updateViewControllers(userAvatarContainer, keyguardUserSwitcherView);
 
         mNotificationStackScrollLayoutController.setOnHeightChangedListener(
                 new NsslHeightChangedListener());
@@ -1218,18 +1217,31 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mQsController.loadDimens();
     }
 
-    private void updateViewControllers(KeyguardStatusView keyguardStatusView,
+    private void updateViewControllers(
             FrameLayout userAvatarView,
             KeyguardUserSwitcherView keyguardUserSwitcherView) {
+        // Re-associate the KeyguardStatusViewController
         if (mKeyguardStatusViewController != null) {
             mKeyguardStatusViewController.onDestroy();
         }
-        // Re-associate the KeyguardStatusViewController
-        KeyguardStatusViewComponent statusViewComponent =
+
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            // Need a shared controller until mKeyguardStatusViewController can be removed from
+            // here, due to important state being set in that controller. Rebind in order to pick
+            // up config changes
+            mKeyguardViewConfigurator.bindKeyguardStatusView(mView);
+            mKeyguardStatusViewController =
+                    mKeyguardViewConfigurator.getKeyguardStatusViewController();
+        } else {
+            KeyguardStatusView keyguardStatusView = mView.getRootView().findViewById(
+                    R.id.keyguard_status_view);
+            KeyguardStatusViewComponent statusViewComponent =
                 mKeyguardStatusViewComponentFactory.build(keyguardStatusView);
-        mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
-        mKeyguardStatusViewController.init();
+            mKeyguardStatusViewController = statusViewComponent.getKeyguardStatusViewController();
+            mKeyguardStatusViewController.init();
+        }
         mKeyguardStatusViewController.setSplitShadeEnabled(mSplitShadeEnabled);
+
         updateClockAppearance();
 
         if (mKeyguardUserSwitcherController != null) {
@@ -1335,15 +1347,22 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     void reInflateViews() {
         debugLog("reInflateViews");
         // Re-inflate the status view group.
-        KeyguardStatusView keyguardStatusView =
-                mNotificationContainerParent.findViewById(R.id.keyguard_status_view);
-        int statusIndex = mNotificationContainerParent.indexOfChild(keyguardStatusView);
-        mNotificationContainerParent.removeView(keyguardStatusView);
-        keyguardStatusView = (KeyguardStatusView) mLayoutInflater.inflate(
-                R.layout.keyguard_status_view, mNotificationContainerParent, false);
-        mNotificationContainerParent.addView(keyguardStatusView, statusIndex);
-        attachSplitShadeMediaPlayerContainer(
-                keyguardStatusView.findViewById(R.id.status_view_media_container));
+        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            KeyguardStatusView keyguardStatusView =
+                    mNotificationContainerParent.findViewById(R.id.keyguard_status_view);
+            int statusIndex = mNotificationContainerParent.indexOfChild(keyguardStatusView);
+            mNotificationContainerParent.removeView(keyguardStatusView);
+            keyguardStatusView = (KeyguardStatusView) mLayoutInflater.inflate(
+                    R.layout.keyguard_status_view, mNotificationContainerParent, false);
+            mNotificationContainerParent.addView(keyguardStatusView, statusIndex);
+
+            attachSplitShadeMediaPlayerContainer(
+                    keyguardStatusView.findViewById(R.id.status_view_media_container));
+        } else {
+            attachSplitShadeMediaPlayerContainer(
+                    mKeyguardViewConfigurator.getKeyguardRootView()
+                        .findViewById(R.id.status_view_media_container));
+        }
 
         // we need to update KeyguardStatusView constraints after reinflating it
         updateResources();
@@ -1369,8 +1388,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                         R.layout.keyguard_user_switcher /* layoutId */,
                         showKeyguardUserSwitcher /* enabled */);
 
-        updateViewControllers(mView.findViewById(R.id.keyguard_status_view), userAvatarView,
-                keyguardUserSwitcherView);
+        updateViewControllers(userAvatarView, keyguardUserSwitcherView);
 
         if (!mFeatureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
             // Update keyguard bottom area
@@ -1666,8 +1684,14 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void updateKeyguardStatusViewAlignment(boolean animate) {
         boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
+        ConstraintLayout layout;
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            layout = mKeyguardViewConfigurator.getKeyguardRootView();
+        } else {
+            layout = mNotificationContainerParent;
+        }
         mKeyguardStatusViewController.updateAlignment(
-                mNotificationContainerParent, mSplitShadeEnabled, shouldBeCentered, animate);
+                layout, mSplitShadeEnabled, shouldBeCentered, animate);
         mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
     }
 
@@ -3390,7 +3414,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ipw.print("mPanelFlingOvershootAmount="); ipw.println(mPanelFlingOvershootAmount);
         ipw.print("mLastGesturedOverExpansion="); ipw.println(mLastGesturedOverExpansion);
         ipw.print("mIsSpringBackAnimation="); ipw.println(mIsSpringBackAnimation);
-        ipw.print("mSplitShadeEnabled="); ipw.println(mSplitShadeEnabled);
         ipw.print("mHintDistance="); ipw.println(mHintDistance);
         ipw.print("mInitialOffsetOnTouch="); ipw.println(mInitialOffsetOnTouch);
         ipw.print("mCollapsedAndHeadsUpOnDown="); ipw.println(mCollapsedAndHeadsUpOnDown);
@@ -3422,7 +3445,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ipw.print("mNextCollapseSpeedUpFactor="); ipw.println(mNextCollapseSpeedUpFactor);
         ipw.print("mGestureWaitForTouchSlop="); ipw.println(mGestureWaitForTouchSlop);
         ipw.print("mIgnoreXTouchSlop="); ipw.println(mIgnoreXTouchSlop);
-        ipw.print("mExpandLatencyTracking="); ipw.println(mExpandLatencyTracking);
         ipw.print("mExpandLatencyTracking="); ipw.println(mExpandLatencyTracking);
         ipw.println("gestureExclusionRect:" + calculateGestureExclusionRect());
         new DumpsysTableLogger(

@@ -17,6 +17,8 @@
 
 package com.android.systemui.keyguard.ui.view.layout.blueprints
 
+import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper.RunWithLooper
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -26,15 +28,17 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAr
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultLockIconSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
+import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@RunWith(JUnit4::class)
+@RunWith(AndroidTestingRunner::class)
+@RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     private lateinit var underTest: DefaultKeyguardBlueprint
@@ -45,6 +49,8 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock
     private lateinit var defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection
     @Mock private lateinit var defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection
+    @Mock private lateinit var defaultStatusViewSection: DefaultStatusViewSection
+    @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
 
     @Before
     fun setup() {
@@ -57,6 +63,8 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultShortcutsSection,
                 defaultAmbientIndicationAreaSection,
                 defaultSettingsPopupMenuSection,
+                defaultStatusViewSection,
+                splitShadeGuidelines,
             )
     }
 
@@ -69,5 +77,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
         verify(defaultShortcutsSection).apply(cs)
         verify(defaultAmbientIndicationAreaSection).apply(cs)
         verify(defaultSettingsPopupMenuSection).apply(cs)
+        verify(defaultStatusViewSection).apply(cs)
+        verify(splitShadeGuidelines).apply(cs)
     }
 }
