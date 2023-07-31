@@ -35,7 +35,6 @@ import androidx.annotation.NonNull;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -122,8 +121,10 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             NavigationModeController navModeController,
             DumpManager dumpManager,
             DisplayTracker displayTracker) {
-        mDarkIconColor = ctx.getColor(R.color.dark_mode_icon_color_single_tone);
-        mLightIconColor = ctx.getColor(R.color.light_mode_icon_color_single_tone);
+        mDarkIconColor = ctx.getColor(
+                com.android.settingslib.R.color.dark_mode_icon_color_single_tone);
+        mLightIconColor = ctx.getColor(
+                com.android.settingslib.R.color.light_mode_icon_color_single_tone);
         mStatusBarIconController = (SysuiDarkIconDispatcher) darkIconDispatcher;
         mBatteryController = batteryController;
         mBatteryController.addCallback(this);

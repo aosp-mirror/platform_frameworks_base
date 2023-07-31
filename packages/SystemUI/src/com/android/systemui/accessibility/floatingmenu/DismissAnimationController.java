@@ -24,7 +24,6 @@ import android.view.MotionEvent;
 import androidx.annotation.NonNull;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 
-import com.android.systemui.R;
 import com.android.wm.shell.common.bubbles.DismissView;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
@@ -157,9 +156,9 @@ class DismissAnimationController {
 
     void updateResources() {
         final float maxDismissSize = mDismissView.getResources().getDimensionPixelSize(
-                R.dimen.dismiss_circle_size);
+                com.android.wm.shell.R.dimen.dismiss_circle_size);
         mMinDismissSize = mDismissView.getResources().getDimensionPixelSize(
-                R.dimen.dismiss_circle_small);
+                com.android.wm.shell.R.dimen.dismiss_circle_small);
         mSizePercent = mMinDismissSize / maxDismissSize;
     }
 

@@ -129,17 +129,17 @@ constructor(
         if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
             keyguardRootViewModel.enablePreviewMode(
                 initiallySelectedSlotId =
-                bundle.getString(
-                    KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
-                ),
+                    bundle.getString(
+                        KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
+                    ),
                 shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
             )
         } else {
             bottomAreaViewModel.enablePreviewMode(
                 initiallySelectedSlotId =
-                bundle.getString(
-                    KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
-                ),
+                    bundle.getString(
+                        KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
+                    ),
                 shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
             )
         }
@@ -276,8 +276,9 @@ constructor(
 
         val startPadding: Int =
             with(context.resources) {
-                getDimensionPixelSize(R.dimen.clock_padding_start) +
-                    getDimensionPixelSize(R.dimen.below_clock_padding_start)
+                getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.clock_padding_start
+                ) + getDimensionPixelSize(R.dimen.below_clock_padding_start)
             }
 
         val endPadding: Int =
@@ -309,7 +310,7 @@ constructor(
                     false,
                 ) as KeyguardBottomAreaView
         bottomAreaView.init(
-                viewModel = bottomAreaViewModel,
+            viewModel = bottomAreaViewModel,
         )
         parentView.addView(
             bottomAreaView,
@@ -451,15 +452,21 @@ constructor(
         val layoutParams =
             FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
-                resources.getDimensionPixelSize(R.dimen.small_clock_height)
+                resources.getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.small_clock_height
+                )
             )
         layoutParams.topMargin =
             KeyguardPreviewSmartspaceViewModel.getStatusBarHeight(resources) +
-                resources.getDimensionPixelSize(R.dimen.small_clock_padding_top)
+                resources.getDimensionPixelSize(
+                    com.android.systemui.customization.R.dimen.small_clock_padding_top
+                )
         hostView.layoutParams = layoutParams
 
         hostView.setPaddingRelative(
-            resources.getDimensionPixelSize(R.dimen.clock_padding_start),
+            resources.getDimensionPixelSize(
+                com.android.systemui.customization.R.dimen.clock_padding_start
+            ),
             0,
             0,
             0
