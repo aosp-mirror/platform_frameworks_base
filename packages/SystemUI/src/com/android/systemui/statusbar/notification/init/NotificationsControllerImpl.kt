@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
-import com.android.systemui.statusbar.notification.logging.NotificationMemoryMonitor
 import com.android.systemui.statusbar.notification.row.NotifBindPipelineInitializer
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.wm.shell.bubbles.Bubbles
@@ -72,7 +71,6 @@ class NotificationsControllerImpl @Inject constructor(
     private val peopleSpaceWidgetManager: PeopleSpaceWidgetManager,
     private val bubblesOptional: Optional<Bubbles>,
     private val fgsNotifListener: ForegroundServiceNotificationListener,
-    private val memoryMonitor: Lazy<NotificationMemoryMonitor>,
     private val featureFlags: FeatureFlags
 ) : NotificationsController {
 
@@ -108,7 +106,6 @@ class NotificationsControllerImpl @Inject constructor(
         notificationLogger.setUpWithContainer(listContainer)
         peopleSpaceWidgetManager.attach(notificationListener)
         fgsNotifListener.init()
-        memoryMonitor.get().init()
     }
 
     // TODO: Convert all functions below this line into listeners instead of public methods
