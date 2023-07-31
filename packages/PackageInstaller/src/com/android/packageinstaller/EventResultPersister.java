@@ -16,6 +16,8 @@
 
 package com.android.packageinstaller;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
@@ -186,7 +188,9 @@ public class EventResultPersister {
         int status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, 0);
 
         if (status == PackageInstaller.STATUS_PENDING_USER_ACTION) {
-            context.startActivity(intent.getParcelableExtra(Intent.EXTRA_INTENT));
+            Intent intentToStart = intent.getParcelableExtra(Intent.EXTRA_INTENT);
+            intentToStart.addFlags(FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intentToStart);
 
             return;
         }
