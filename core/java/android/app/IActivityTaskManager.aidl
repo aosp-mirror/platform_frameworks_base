@@ -245,6 +245,7 @@ interface IActivityTaskManager {
      *              {@link android.view.WindowManagerPolicyConstants#KEYGUARD_GOING_AWAY_FLAG_TO_SHADE}
      *              etc.
      */
+     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD)")
     void keyguardGoingAway(int flags);
 
     void suppressResizeConfigChanges(boolean suppress);
