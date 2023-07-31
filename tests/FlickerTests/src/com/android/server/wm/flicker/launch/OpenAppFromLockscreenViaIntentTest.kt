@@ -93,7 +93,7 @@ open class OpenAppFromLockscreenViaIntentTest(flicker: LegacyFlickerTest) :
      * Checks that the [ComponentNameMatcher.NAV_BAR] starts the transition invisible, then becomes
      * visible during the unlocking animation and remains visible at the end of the transition
      */
-    @Presubmit
+    @FlakyTest(bugId = 293581770)
     @Test
     fun navBarWindowsVisibilityChanges() {
         Assume.assumeFalse(flicker.scenario.isTablet)
