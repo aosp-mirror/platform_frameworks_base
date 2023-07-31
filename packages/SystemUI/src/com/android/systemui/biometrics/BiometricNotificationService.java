@@ -177,6 +177,9 @@ public class BiometricNotificationService implements CoreStartable {
         if (mFaceManager != null) {
             mFaceManager.registerBiometricStateListener(mFaceStateListener);
         }
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.FACE_UNLOCK_RE_ENROLL, REENROLL_NOT_REQUIRED,
+                UserHandle.USER_CURRENT);
     }
 
     private void queueFaceReenrollNotification() {
