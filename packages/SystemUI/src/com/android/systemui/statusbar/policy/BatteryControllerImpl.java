@@ -29,6 +29,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.usb.UsbManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +43,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.PowerUtil;
@@ -97,6 +99,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private boolean mAodPowerSave;
     private boolean mWirelessCharging;
     private boolean mIsBatteryDefender = false;
+    private boolean mIsIncompatibleCharging = false;
     private boolean mTestMode = false;
     @VisibleForTesting
     boolean mHasReceivedBattery = false;
@@ -136,6 +139,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         filter.addAction(ACTION_LEVEL_TEST);
+        filter.addAction(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED);
         mBroadcastDispatcher.registerReceiver(this, filter);
     }
 
@@ -169,6 +173,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         ipw.print("mCharging="); ipw.println(mCharging);
         ipw.print("mCharged="); ipw.println(mCharged);
         ipw.print("mIsBatteryDefender="); ipw.println(mIsBatteryDefender);
+        ipw.print("mIsIncompatibleCharging="); ipw.println(mIsIncompatibleCharging);
         ipw.print("mPowerSave="); ipw.println(mPowerSave);
         ipw.print("mStateUnknown="); ipw.println(mStateUnknown);
         ipw.println("Callbacks:------------------");
@@ -214,6 +219,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         cb.onBatteryUnknownStateChanged(mStateUnknown);
         cb.onWirelessChargingChanged(mWirelessCharging);
         cb.onIsBatteryDefenderChanged(mIsBatteryDefender);
+        cb.onIsIncompatibleChargingChanged(mIsIncompatibleCharging);
     }
 
     @Override
@@ -229,7 +235,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
             if (mTestMode && !intent.getBooleanExtra("testmode", false)) return;
             mHasReceivedBattery = true;
-            mLevel = (int)(100f
+            mLevel = (int) (100f
                     * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                     / intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
             mPluggedChargingSource = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
@@ -262,6 +268,12 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             fireBatteryLevelChanged();
         } else if (action.equals(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)) {
             updatePowerSave();
+        } else if (action.equals(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED)) {
+            boolean isIncompatibleCharging = Utils.containsIncompatibleChargers(mContext, TAG);
+            if (isIncompatibleCharging != mIsIncompatibleCharging) {
+                mIsIncompatibleCharging = isIncompatibleCharging;
+                fireIsIncompatibleChargingChanged();
+            }
         } else if (action.equals(ACTION_LEVEL_TEST)) {
             mTestMode = true;
             mMainHandler.post(new Runnable() {
@@ -270,6 +282,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
                 int mSavedLevel = mLevel;
                 boolean mSavedPluggedIn = mPluggedIn;
                 Intent mTestIntent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+
                 @Override
                 public void run() {
                     if (mCurrentLevel < 0) {
@@ -331,6 +344,13 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     public boolean isBatteryDefender() {
         return mIsBatteryDefender;
+    }
+
+    /**
+     * Returns whether the charging adapter is incompatible.
+     */
+    public boolean isIncompatibleCharging() {
+        return mIsIncompatibleCharging;
     }
 
     @Override
@@ -453,6 +473,15 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
     }
 
+    private void fireIsIncompatibleChargingChanged() {
+        synchronized (mChangeCallbacks) {
+            final int n = mChangeCallbacks.size();
+            for (int i = 0; i < n; i++) {
+                mChangeCallbacks.get(i).onIsIncompatibleChargingChanged(mIsIncompatibleCharging);
+            }
+        }
+    }
+
     @Override
     public void dispatchDemoCommand(String command, Bundle args) {
         if (!mDemoModeController.isInDemoMode()) {
@@ -464,6 +493,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         String powerSave = args.getString("powersave");
         String present = args.getString("present");
         String defender = args.getString("defender");
+        String incompatible = args.getString("incompatible");
         if (level != null) {
             mLevel = Math.min(Math.max(Integer.parseInt(level), 0), 100);
         }
@@ -481,6 +511,10 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         if (defender != null) {
             mIsBatteryDefender = defender.equals("true");
             fireIsBatteryDefenderChanged();
+        }
+        if (incompatible != null) {
+            mIsIncompatibleCharging = incompatible.equals("true");
+            fireIsIncompatibleChargingChanged();
         }
         fireBatteryLevelChanged();
     }

@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -63,6 +64,7 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
     private ContentResolver mContentResolver;
     @Mock
     private BatteryController mBatteryController;
+    private FakeFeatureFlags mFakeFeatureFlags = new FakeFeatureFlags();
 
     private BatteryMeterViewController mController;
 
@@ -160,6 +162,7 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
                 mTunerService,
                 mHandler,
                 mContentResolver,
+                mFakeFeatureFlags,
                 mBatteryController
         );
     }
