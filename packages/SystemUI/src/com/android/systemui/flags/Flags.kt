@@ -774,7 +774,7 @@ object Flags {
 
     /** Enable the Compose implementation of the Quick Settings footer actions. */
     @JvmField
-    val COMPOSE_QS_FOOTER_ACTIONS = unreleasedFlag("compose_qs_footer_actions")
+    val COMPOSE_QS_FOOTER_ACTIONS = releasedFlag("compose_qs_footer_actions")
 
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField
