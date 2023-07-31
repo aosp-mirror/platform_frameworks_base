@@ -29,6 +29,7 @@ import com.android.systemui.BootCompleteCache;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.accessibility.AccessibilityModule;
 import com.android.systemui.accessibility.data.repository.AccessibilityRepositoryModule;
+import com.android.systemui.aconfig.AConfigModule;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.authentication.AuthenticationModule;
@@ -156,6 +157,7 @@ import javax.inject.Named;
 @Module(includes = {
             AccessibilityModule.class,
             AccessibilityRepositoryModule.class,
+            AConfigModule.class,
             AppOpsModule.class,
             AssistModule.class,
             AuthenticationModule.class,
