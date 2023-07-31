@@ -81,6 +81,19 @@ public class SharedConnectivityManager {
             mCallback = callback;
         }
 
+        @Override
+        public void onServiceConnected() {
+            if (mCallback != null) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mCallback.onServiceConnected());
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
         public void onHotspotNetworksUpdated(@NonNull List<HotspotNetwork> networks) {
             if (mCallback != null) {
                 final long token = Binder.clearCallingIdentity();
@@ -117,6 +130,7 @@ public class SharedConnectivityManager {
             }
         }
 
+        @Override
         public void onHotspotNetworkConnectionStatusChanged(
                 @NonNull HotspotNetworkConnectionStatus status) {
             if (mCallback != null) {
@@ -251,7 +265,6 @@ public class SharedConnectivityManager {
             synchronized (mProxyDataLock) {
                 mProxyMap.put(callback, proxy);
             }
-            callback.onServiceConnected();
         } catch (RemoteException e) {
             Log.e(TAG, "Exception in registerCallback", e);
             callback.onRegisterCallbackFailed(e);
