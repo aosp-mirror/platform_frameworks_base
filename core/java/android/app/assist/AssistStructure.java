@@ -651,6 +651,7 @@ public class AssistStructure implements Parcelable {
         // POJO used to override some autofill-related values when the node is parcelized.
         // Not written to parcel.
         AutofillOverlay mAutofillOverlay;
+        boolean mIsCredential;
 
         int mX;
         int mY;
@@ -799,6 +800,7 @@ public class AssistStructure implements Parcelable {
 
             if (autofillFlags != 0) {
                 mSanitized = in.readInt() == 1;
+                mIsCredential = in.readInt() == 1;
                 mImportantForAutofill = in.readInt();
 
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID) != 0) {
@@ -1033,6 +1035,7 @@ public class AssistStructure implements Parcelable {
 
             if (autofillFlags != 0) {
                 out.writeInt(mSanitized ? 1 : 0);
+                out.writeInt(mIsCredential ? 1 : 0);
                 out.writeInt(mImportantForAutofill);
                 writeSensitive = mSanitized || !sanitizeOnWrite;
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID) != 0) {
@@ -1243,6 +1246,19 @@ public class AssistStructure implements Parcelable {
          */
         @Nullable public CharSequence[] getAutofillOptions() {
             return mAutofillOptions;
+        }
+
+        /**
+         * @return whether the node is a credential.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         * TODO(b/303677885): add TestApi
+         *
+         * @hide
+         */
+        public boolean isCredential() {
+            return mIsCredential;
         }
 
         /**
@@ -2183,6 +2199,11 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
+        public void setIsCredential(boolean isCredential) {
+            mNode.mIsCredential = isCredential;
+        }
+
+        @Override
         public void setReceiveContentMimeTypes(@Nullable String[] mimeTypes) {
             mNode.mReceiveContentMimeTypes = mimeTypes;
         }
@@ -2498,7 +2519,9 @@ public class AssistStructure implements Parcelable {
                     + ", value=" + node.getAutofillValue()
                     + ", sanitized=" + node.isSanitized()
                     + ", important=" + node.getImportantForAutofill()
-                    + ", visibility=" + node.getVisibility());
+                    + ", visibility=" + node.getVisibility()
+                    + ", isCredential=" + node.isCredential()
+            );
         }
 
         final int NCHILDREN = node.getChildCount();

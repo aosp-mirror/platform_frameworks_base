@@ -9308,6 +9308,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 structure.setAutofillType(autofillType);
                 structure.setAutofillHints(getAutofillHints());
                 structure.setAutofillValue(getAutofillValue());
+                structure.setIsCredential(isCredential());
             }
             structure.setImportantForAutofill(getImportantForAutofill());
             structure.setReceiveContentMimeTypes(getReceiveContentMimeTypes());
