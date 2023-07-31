@@ -275,7 +275,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
 
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
-        mViewMediator.onWakeAndUnlocking();
+        mViewMediator.onWakeAndUnlocking(false);
         mViewMediator.onStartedWakingUp(OFF_BECAUSE_OF_USER, false);
         TestableLooper.get(this).processAllMessages();
 
@@ -707,14 +707,14 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     public void testWakeAndUnlocking() {
-        mViewMediator.onWakeAndUnlocking();
+        mViewMediator.onWakeAndUnlocking(false);
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
     }
 
     @Test
     public void testWakeAndUnlockingOverDream() {
         // Send signal to wake
-        mViewMediator.onWakeAndUnlocking();
+        mViewMediator.onWakeAndUnlocking(true);
 
         // Ensure not woken up yet
         verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
@@ -743,7 +743,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     @Test
     public void testWakeAndUnlockingOverDream_signalAuthenticateIfStillShowing() {
         // Send signal to wake
-        mViewMediator.onWakeAndUnlocking();
+        mViewMediator.onWakeAndUnlocking(true);
 
         // Ensure not woken up yet
         verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
@@ -770,6 +770,35 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // Verify keyguard view controller informed of authentication again
         verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
+    }
+
+    @Test
+    public void testWakeAndUnlockingOverNonInteractiveDream_noWakeByKeyguardViewMediator() {
+        // Send signal to wake
+        mViewMediator.onWakeAndUnlocking(false);
+
+        // Ensure not woken up yet
+        verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
+
+        // Verify keyguard told of authentication
+        verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
+        mViewMediator.mViewMediatorCallback.keyguardDonePending(true,
+                mUpdateMonitor.getCurrentUser());
+        mViewMediator.mViewMediatorCallback.readyForKeyguardDone();
+        final ArgumentCaptor<Runnable> animationRunnableCaptor =
+                ArgumentCaptor.forClass(Runnable.class);
+        verify(mStatusBarKeyguardViewManager).startPreHideAnimation(
+                animationRunnableCaptor.capture());
+
+        when(mStatusBarStateController.isDreaming()).thenReturn(true);
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+        animationRunnableCaptor.getValue().run();
+
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        mViewMediator.mViewMediatorCallback.keyguardGone();
+
+        // Verify not woken up.
+        verify(mPowerManager, never()).wakeUp(anyLong(), anyInt(), anyString());
     }
 
     @Test
