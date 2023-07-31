@@ -17,23 +17,28 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
-import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardSecurityModel
-import com.android.keyguard.KeyguardSecurityModel.SecurityMode.Password
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.Utils.Companion.toQuint
 import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
+import com.android.wm.shell.animation.Interpolators
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -44,6 +49,7 @@ constructor(
     override val transitionInteractor: KeyguardTransitionInteractor,
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
+    private val flags: FeatureFlags,
     private val keyguardSecurityModel: KeyguardSecurityModel,
 ) :
     TransitionInteractor(
@@ -55,6 +61,57 @@ constructor(
         listenForPrimaryBouncerToAodOrDozing()
         listenForPrimaryBouncerToLockscreenOrOccluded()
         listenForPrimaryBouncerToDreamingLockscreenHosted()
+    }
+
+    val surfaceBehindVisibility: Flow<Boolean?> =
+        combine(
+                transitionInteractor.startedKeyguardTransitionStep,
+                transitionInteractor.transitionStepsFromState(KeyguardState.PRIMARY_BOUNCER)
+            ) { startedStep, fromBouncerStep ->
+                if (startedStep.to != KeyguardState.GONE) {
+                    return@combine null
+                }
+
+                fromBouncerStep.value > 0.5f
+            }
+            .onStart {
+                // Default to null ("don't care, use a reasonable default").
+                emit(null)
+            }
+            .distinctUntilChanged()
+
+    val surfaceBehindModel: Flow<KeyguardSurfaceBehindModel?> =
+        combine(
+                transitionInteractor.startedKeyguardTransitionStep,
+                transitionInteractor.transitionStepsFromState(KeyguardState.PRIMARY_BOUNCER)
+            ) { startedStep, fromBouncerStep ->
+                if (startedStep.to != KeyguardState.GONE) {
+                    // BOUNCER to anything but GONE does not require any special surface
+                    // visibility handling.
+                    return@combine null
+                }
+
+                if (fromBouncerStep.value > 0.5f) {
+                    KeyguardSurfaceBehindModel(
+                        animateFromAlpha = 0f,
+                        alpha = 1f,
+                        animateFromTranslationY = 500f,
+                        translationY = 0f,
+                    )
+                } else {
+                    KeyguardSurfaceBehindModel(
+                        alpha = 0f,
+                    )
+                }
+            }
+            .onStart {
+                // Default to null ("don't care, use a reasonable default").
+                emit(null)
+            }
+            .distinctUntilChanged()
+
+    fun dismissPrimaryBouncer() {
+        startTransitionTo(KeyguardState.GONE)
     }
 
     private fun listenForPrimaryBouncerToLockscreenOrOccluded() {
@@ -124,28 +181,34 @@ constructor(
     private fun listenForPrimaryBouncerToDreamingLockscreenHosted() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                .sample(
-                    combine(
-                        keyguardInteractor.isActiveDreamLockscreenHosted,
-                        transitionInteractor.startedKeyguardTransitionStep,
-                        ::Pair
-                    ),
-                    ::toTriple
-                )
-                .collect {
-                    (isBouncerShowing, isActiveDreamLockscreenHosted, lastStartedTransitionStep) ->
-                    if (
-                        !isBouncerShowing &&
-                            isActiveDreamLockscreenHosted &&
-                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
-                    ) {
-                        startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+                    .sample(
+                            combine(
+                                    keyguardInteractor.isActiveDreamLockscreenHosted,
+                                    transitionInteractor.startedKeyguardTransitionStep,
+                                    ::Pair
+                            ),
+                            ::toTriple
+                    )
+                    .collect { (isBouncerShowing, isActiveDreamLockscreenHosted, lastStartedTransitionStep) ->
+                        if (
+                                !isBouncerShowing &&
+                                isActiveDreamLockscreenHosted &&
+                                lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
+                        ) {
+                            startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+                        }
                     }
-                }
         }
     }
 
     private fun listenForPrimaryBouncerToGone() {
+        if (flags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+            // This is handled in KeyguardSecurityContainerController and
+            // StatusBarKeyguardViewManager, which calls the transition interactor to kick off a
+            // transition vs. listening to legacy state flags.
+            return
+        }
+
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
                 .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
@@ -160,7 +223,7 @@ constructor(
                             )
                         // IME for password requires a slightly faster animation
                         val duration =
-                            if (securityMode == Password) {
+                            if (securityMode == KeyguardSecurityModel.SecurityMode.Password) {
                                 TO_GONE_SHORT_DURATION
                             } else {
                                 TO_GONE_DURATION
@@ -188,7 +251,7 @@ constructor(
 
     companion object {
         private val DEFAULT_DURATION = 300.milliseconds
-        val TO_GONE_DURATION = 250.milliseconds
+        val TO_GONE_DURATION = 500.milliseconds
         val TO_GONE_SHORT_DURATION = 200.milliseconds
     }
 }

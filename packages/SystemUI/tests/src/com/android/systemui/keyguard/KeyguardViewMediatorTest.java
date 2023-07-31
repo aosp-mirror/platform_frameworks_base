@@ -224,7 +224,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
                 mShadeWindowLogger);
         mFeatureFlags = new FakeFeatureFlags();
-
+        mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
 
         DejankUtils.setImmediate(true);
 
@@ -957,7 +957,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mSystemClock,
                 mDispatcher,
                 () -> mDreamingToLockscreenTransitionViewModel,
-                mSystemPropertiesHelper);
+                mSystemPropertiesHelper,
+                () -> mock(WindowManagerLockscreenVisibilityManager.class));
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);

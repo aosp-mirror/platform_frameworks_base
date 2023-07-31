@@ -47,6 +47,8 @@ import com.android.systemui.classifier.FalsingA11yDelegate
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.FalsingManager
@@ -145,6 +147,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     private lateinit var testableResources: TestableResources
     private lateinit var sceneTestUtils: SceneTestUtils
     private lateinit var sceneInteractor: SceneInteractor
+    private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     private lateinit var authenticationInteractor: AuthenticationInteractor
     private lateinit var sceneTransitionStateFlow: MutableStateFlow<ObservableTransitionState>
 
@@ -184,6 +187,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         featureFlags.set(Flags.SCENE_CONTAINER, false)
         featureFlags.set(Flags.BOUNCER_USER_SWITCHER, false)
+        featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
 
         keyguardPasswordViewController =
             KeyguardPasswordViewController(
@@ -206,6 +210,9 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
         whenever(userInteractor.getSelectedUserId()).thenReturn(TARGET_USER_ID)
         sceneTestUtils = SceneTestUtils(this)
         sceneInteractor = sceneTestUtils.sceneInteractor()
+        keyguardTransitionInteractor =
+            KeyguardTransitionInteractorFactory.create(sceneTestUtils.testScope.backgroundScope)
+                .keyguardTransitionInteractor
         sceneTransitionStateFlow =
             MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Lockscreen))
         sceneInteractor.setTransitionState(sceneTransitionStateFlow)
@@ -243,9 +250,9 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 { JavaAdapter(sceneTestUtils.testScope.backgroundScope) },
                 userInteractor,
                 faceAuthAccessibilityDelegate,
-            ) {
-                authenticationInteractor
-            }
+                keyguardTransitionInteractor,
+                { authenticationInteractor },
+            )
     }
 
     @Test

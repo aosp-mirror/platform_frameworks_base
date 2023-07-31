@@ -31,7 +31,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
@@ -83,16 +83,21 @@ class UdfpsFingerprintViewModelTest : SysuiTestCase() {
         bouncerRepository = FakeKeyguardBouncerRepository()
         transitionRepository = FakeKeyguardTransitionRepository()
         shadeRepository = FakeShadeRepository()
-        val transitionInteractor =
-            KeyguardTransitionInteractor(
-                transitionRepository,
-                testScope.backgroundScope,
-            )
         val keyguardInteractor =
             KeyguardInteractorFactory.create(
+                    repository = keyguardRepository,
                     featureFlags = featureFlags,
                 )
                 .keyguardInteractor
+
+        val transitionInteractor =
+            KeyguardTransitionInteractorFactory.create(
+                    scope = testScope.backgroundScope,
+                    repository = transitionRepository,
+                    keyguardInteractor = keyguardInteractor,
+                )
+                .keyguardTransitionInteractor
+
         underTest =
             FingerprintViewModel(
                 context,
