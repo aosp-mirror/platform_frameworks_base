@@ -104,12 +104,21 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(PIN)
 
-        featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, true) }
+        featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.FACE_AUTH_REFACTOR, true)
+                set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
+            }
 
         transitionInteractor =
             KeyguardTransitionInteractorFactory.create(
                     scope = testScope,
                     repository = transitionRepository,
+                    keyguardInteractor = createKeyguardInteractor(),
+                    fromLockscreenTransitionInteractor = { fromLockscreenTransitionInteractor },
+                    fromPrimaryBouncerTransitionInteractor = {
+                        fromPrimaryBouncerTransitionInteractor
+                    },
                 )
                 .keyguardTransitionInteractor
 
@@ -119,6 +128,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     keyguardInteractor = createKeyguardInteractor(),
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
+                    flags = featureFlags,
                     shadeRepository = shadeRepository,
                 )
                 .apply { start() }
@@ -129,6 +139,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                     keyguardInteractor = createKeyguardInteractor(),
                     transitionRepository = transitionRepository,
                     transitionInteractor = transitionInteractor,
+                    flags = featureFlags,
                     keyguardSecurityModel = keyguardSecurityModel,
                 )
                 .apply { start() }

@@ -32,6 +32,11 @@ interface KeyguardRepositoryModule {
     @Binds fun keyguardRepository(impl: KeyguardRepositoryImpl): KeyguardRepository
 
     @Binds
+    fun keyguardSurfaceBehindRepository(
+        impl: KeyguardSurfaceBehindRepositoryImpl
+    ): KeyguardSurfaceBehindRepository
+
+    @Binds
     fun keyguardTransitionRepository(
         impl: KeyguardTransitionRepositoryImpl
     ): KeyguardTransitionRepository

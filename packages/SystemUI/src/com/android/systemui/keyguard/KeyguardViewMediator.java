@@ -171,8 +171,6 @@ import com.android.systemui.util.time.SystemClock;
 import com.android.systemui.wallpapers.data.repository.WallpaperRepository;
 import com.android.wm.shell.keyguard.KeyguardTransitions;
 
-import dagger.Lazy;
-
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -182,6 +180,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
+import dagger.Lazy;
 import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
@@ -1035,12 +1034,19 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 IRemoteAnimationFinishedCallback finishedCallback) {
             Trace.beginSection("mExitAnimationRunner.onAnimationStart#startKeyguardExitAnimation");
             startKeyguardExitAnimation(transit, apps, wallpapers, nonApps, finishedCallback);
+            if (mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                mWmLockscreenVisibilityManager.get().onKeyguardGoingAwayRemoteAnimationStart(
+                        transit, apps, wallpapers, nonApps, finishedCallback);
+            }
             Trace.endSection();
         }
 
         @Override // Binder interface
         public void onAnimationCancelled() {
             cancelKeyguardExitAnimation();
+            if (mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                mWmLockscreenVisibilityManager.get().onKeyguardGoingAwayRemoteAnimationCancelled();
+            }
         }
     };
 
@@ -1106,7 +1112,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
                         mOccludeByDreamAnimator = ValueAnimator.ofFloat(0f, 1f);
                         mOccludeByDreamAnimator.setDuration(mDreamOpenAnimationDuration);
-                        mOccludeByDreamAnimator.setInterpolator(Interpolators.LINEAR);
+                        //mOccludeByDreamAnimator.setInterpolator(Interpolators.LINEAR);
                         mOccludeByDreamAnimator.addUpdateListener(
                                 animation -> {
                                     SyncRtSurfaceTransactionApplier.SurfaceParams.Builder
@@ -1336,6 +1342,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             mDreamingToLockscreenTransitionViewModel;
     private RemoteAnimationTarget mRemoteAnimationTarget;
 
+    private Lazy<WindowManagerLockscreenVisibilityManager> mWmLockscreenVisibilityManager;
+
     /**
      * Injected constructor. See {@link KeyguardModule}.
      */
@@ -1379,7 +1387,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             SystemClock systemClock,
             @Main CoroutineDispatcher mainDispatcher,
             Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
-            SystemPropertiesHelper systemPropertiesHelper) {
+            SystemPropertiesHelper systemPropertiesHelper,
+            Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager) {
         mContext = context;
         mUserTracker = userTracker;
         mFalsingCollector = falsingCollector;
@@ -1446,8 +1455,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mUiEventLogger = uiEventLogger;
         mSessionTracker = sessionTracker;
 
-        mMainDispatcher = mainDispatcher;
         mDreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel;
+        mWmLockscreenVisibilityManager = wmLockscreenVisibilityManager;
+        mMainDispatcher = mainDispatcher;
     }
 
     public void userActivity() {
@@ -2685,6 +2695,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             if (DEBUG) {
                 Log.d(TAG, "updateActivityLockScreenState(" + showing + ", " + aodShowing + ")");
             }
+
+            if (mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                // Handled in WmLockscreenVisibilityManager if flag is enabled.
+                return;
+            }
+
             try {
                 mActivityTaskManagerService.setLockScreenShown(showing, aodShowing);
             } catch (RemoteException e) {
@@ -2724,7 +2740,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             }
             mHiding = false;
 
-            mKeyguardViewControllerLazy.get().show(options);
+            if (!mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                // Handled directly in StatusBarKeyguardViewManager if enabled.
+                mKeyguardViewControllerLazy.get().show(options);
+            }
+
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
             adjustStatusBarLocked();
@@ -2795,19 +2815,22 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             mUpdateMonitor.setKeyguardGoingAway(true);
             mKeyguardViewControllerLazy.get().setKeyguardGoingAwayState(true);
 
-            // Don't actually hide the Keyguard at the moment, wait for window
-            // manager until it tells us it's safe to do so with
-            // startKeyguardExitAnimation.
-            // Posting to mUiOffloadThread to ensure that calls to ActivityTaskManager will be in
-            // order.
-            final int keyguardFlag = flags;
-            mUiBgExecutor.execute(() -> {
-                try {
-                    mActivityTaskManagerService.keyguardGoingAway(keyguardFlag);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error while calling WindowManager", e);
-                }
-            });
+            // Handled in WmLockscreenVisibilityManager if flag is enabled.
+            if (!mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                    // Don't actually hide the Keyguard at the moment, wait for window manager 
+                    // until it tells us it's safe to do so with startKeyguardExitAnimation.
+		    // Posting to mUiOffloadThread to ensure that calls to ActivityTaskManager 
+		    // will be in order.
+		    final int keyguardFlag = flags;
+		    mUiBgExecutor.execute(() -> {
+		        try {
+		            mActivityTaskManagerService.keyguardGoingAway(keyguardFlag);
+		        } catch (RemoteException e) {
+		            Log.e(TAG, "Error while calling WindowManager", e);
+		        }
+		    });
+            }
+
             Trace.endSection();
         }
     };
@@ -2919,7 +2942,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             if (!mHiding
                     && !mSurfaceBehindRemoteAnimationRequested
                     && !mKeyguardStateController.isFlingingToDismissKeyguardDuringSwipeGesture()) {
-                if (finishedCallback != null) {
+                // If the flag is enabled, remote animation state is handled in
+                // WmLockscreenVisibilityManager.
+                if (finishedCallback != null
+                        && !mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
                     // There will not execute animation, send a finish callback to ensure the remote
                     // animation won't hang there.
                     try {
@@ -2945,10 +2971,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         new IRemoteAnimationFinishedCallback() {
                             @Override
                             public void onAnimationFinished() throws RemoteException {
-                                try {
-                                    finishedCallback.onAnimationFinished();
-                                } catch (RemoteException e) {
-                                    Slog.w(TAG, "Failed to call onAnimationFinished", e);
+                                if (!mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                                    try {
+                                        finishedCallback.onAnimationFinished();
+                                    } catch (RemoteException e) {
+                                        Slog.w(TAG, "Failed to call onAnimationFinished", e);
+                                    }
                                 }
                                 onKeyguardExitFinished();
                                 mKeyguardViewControllerLazy.get().hide(0 /* startTime */,
@@ -2975,7 +3003,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             // it will dismiss the panel in that case.
             } else if (!mStatusBarStateController.leaveOpenOnKeyguardHide()
                     && apps != null && apps.length > 0) {
-                mSurfaceBehindRemoteAnimationFinishedCallback = finishedCallback;
+                if (!mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                    // Handled in WmLockscreenVisibilityManager. Other logic in this class will
+                    // short circuit when this is null.
+                    mSurfaceBehindRemoteAnimationFinishedCallback = finishedCallback;
+                }
                 mSurfaceBehindRemoteAnimationRunning = true;
 
                 mInteractionJankMonitor.begin(
@@ -2995,7 +3027,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         createInteractionJankMonitorConf(
                                 CUJ_LOCKSCREEN_UNLOCK_ANIMATION, "RemoteAnimationDisabled"));
 
-                mKeyguardViewControllerLazy.get().hide(startTime, fadeoutDuration);
+                if (!mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                    // Handled directly in StatusBarKeyguardViewManager if enabled.
+                    mKeyguardViewControllerLazy.get().hide(startTime, fadeoutDuration);
+                }
 
                 // TODO(bc-animation): When remote animation is enabled for keyguard exit animation,
                 // apps, wallpapers and finishedCallback are set to non-null. nonApps is not yet
@@ -3009,13 +3044,17 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     }
                     if (apps == null || apps.length == 0) {
                         Slog.e(TAG, "Keyguard exit without a corresponding app to show.");
+
                         try {
-                            finishedCallback.onAnimationFinished();
+                            if (!mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                                finishedCallback.onAnimationFinished();
+                            }
                         } catch (RemoteException e) {
                             Slog.e(TAG, "RemoteException");
                         } finally {
                             mInteractionJankMonitor.end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                         }
+
                         return;
                     }
 
@@ -3039,7 +3078,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             try {
-                                finishedCallback.onAnimationFinished();
+                                if (!mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                                    finishedCallback.onAnimationFinished();
+                                }
                             } catch (RemoteException e) {
                                 Slog.e(TAG, "RemoteException");
                             } finally {
@@ -3050,7 +3091,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         @Override
                         public void onAnimationCancel(Animator animation) {
                             try {
-                                finishedCallback.onAnimationFinished();
+                                if (!mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                                    finishedCallback.onAnimationFinished();
+                                }
                             } catch (RemoteException e) {
                                 Slog.e(TAG, "RemoteException");
                             } finally {
@@ -3200,7 +3243,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 flags |= KEYGUARD_GOING_AWAY_FLAG_TO_LAUNCHER_CLEAR_SNAPSHOT;
             }
 
-            mActivityTaskManagerService.keyguardGoingAway(flags);
+            if (!mFeatureFlags.isEnabled(Flags.KEYGUARD_WM_STATE_REFACTOR)) {
+                // Handled in WmLockscreenVisibilityManager.
+                mActivityTaskManagerService.keyguardGoingAway(flags);
+            }
+
             mKeyguardStateController.notifyKeyguardGoingAway(true);
         } catch (RemoteException e) {
             mSurfaceBehindRemoteAnimationRequested = false;

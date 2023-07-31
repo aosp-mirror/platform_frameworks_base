@@ -35,6 +35,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
+
 import android.service.trust.TrustAgentService;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -73,6 +75,8 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.WindowManagerLockscreenVisibilityInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter;
@@ -201,7 +205,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mBouncerView,
                         mAlternateBouncerInteractor,
                         mUdfpsOverlayInteractor,
-                        mActivityStarter) {
+                        mActivityStarter,
+                        mock(KeyguardTransitionInteractor.class),
+                        StandardTestDispatcher(null, null),
+                        () -> mock(WindowManagerLockscreenVisibilityInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;
@@ -701,7 +708,10 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mBouncerView,
                         mAlternateBouncerInteractor,
                         mUdfpsOverlayInteractor,
-                        mActivityStarter) {
+                        mActivityStarter,
+                        mock(KeyguardTransitionInteractor.class),
+                        StandardTestDispatcher(null, null),
+                        () -> mock(WindowManagerLockscreenVisibilityInteractor.class)) {
                     @Override
                     public ViewRootImpl getViewRootImpl() {
                         return mViewRootImpl;

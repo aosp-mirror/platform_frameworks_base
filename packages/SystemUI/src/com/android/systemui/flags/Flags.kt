@@ -286,6 +286,19 @@ object Flags {
                 teamfood = true
             )
 
+    /**
+     * TODO(b/278086361): Tracking bug
+     * Complete rewrite of the interactions between System UI and Window Manager involving keyguard
+     * state. When enabled, calls to ActivityTaskManagerService from System UI will exclusively
+     * occur from [WmLockscreenVisibilityManager] rather than the legacy KeyguardViewMediator.
+     *
+     * This flag is under development; some types of unlock may not animate properly if you enable
+     * it.
+     */
+    @JvmField
+    val KEYGUARD_WM_STATE_REFACTOR: UnreleasedFlag =
+            unreleasedFlag("keyguard_wm_state_refactor")
+
     /** Stop running face auth when the display state changes to OFF. */
     // TODO(b/294221702): Tracking bug.
     @JvmField val STOP_FACE_AUTH_ON_DISPLAY_OFF = resourceBooleanFlag(

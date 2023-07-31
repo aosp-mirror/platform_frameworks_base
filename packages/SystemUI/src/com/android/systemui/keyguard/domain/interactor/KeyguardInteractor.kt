@@ -34,12 +34,12 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDozeOff
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.ScreenModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.kotlin.sample
-import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
+import javax.inject.Inject
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -264,7 +265,26 @@ constructor(
         repository.setAnimateDozingTransitions(animate)
     }
 
+    fun isKeyguardDismissable(): Boolean {
+        return repository.isKeyguardUnlocked.value
+    }
+
     companion object {
         private const val TAG = "KeyguardInteractor"
+
+        fun isKeyguardVisibleInState(state: KeyguardState): Boolean {
+            return when (state) {
+                KeyguardState.OFF -> true
+                KeyguardState.DOZING -> true
+                KeyguardState.DREAMING -> true
+                KeyguardState.AOD -> true
+                KeyguardState.ALTERNATE_BOUNCER -> true
+                KeyguardState.PRIMARY_BOUNCER -> true
+                KeyguardState.LOCKSCREEN -> true
+                KeyguardState.GONE -> false
+                KeyguardState.OCCLUDED -> true
+                KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> false
+            }
+        }
     }
 }
