@@ -51,6 +51,7 @@ import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
 import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.bouncer.shared.model.Message
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
@@ -79,6 +80,7 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
 
     @Mock private lateinit var updateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var securityModel: KeyguardSecurityModel
+    @Mock private lateinit var systemPropertiesHelper: SystemPropertiesHelper
     @Captor
     private lateinit var updateMonitorCallback: ArgumentCaptor<KeyguardUpdateMonitorCallback>
 
@@ -108,7 +110,8 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
                 updateMonitor = updateMonitor,
                 bouncerMessageFactory = BouncerMessageFactory(updateMonitor, securityModel),
                 userRepository = userRepository,
-                fingerprintAuthRepository = fingerprintRepository
+                fingerprintAuthRepository = fingerprintRepository,
+                systemPropertiesHelper = systemPropertiesHelper
             )
     }
 
@@ -211,6 +214,21 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
 
             fingerprintRepository.setLockedOut(false)
             assertThat(lockedOutMessage()).isNull()
+        }
+
+    @Test
+    fun onRestartForMainlineUpdate_shouldProvideRelevantMessage() =
+        testScope.runTest {
+            whenever(systemPropertiesHelper.get("sys.boot.reason.last"))
+                .thenReturn("reboot,mainline_update")
+            userRepository.setSelectedUserInfo(PRIMARY_USER)
+            biometricSettingsRepository.setFaceEnrolled(true)
+            biometricSettingsRepository.setIsFaceAuthEnabled(true)
+
+            verifyMessagesForAuthFlag(
+                STRONG_AUTH_REQUIRED_AFTER_BOOT to
+                    Pair(keyguard_enter_pin, R.string.kg_prompt_after_update_pin),
+            )
         }
 
     @Test

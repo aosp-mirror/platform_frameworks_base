@@ -32,6 +32,7 @@ import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMET
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PRIMARY_AUTH_LOCKED_OUT
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART
+import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST
@@ -53,6 +54,9 @@ import com.android.systemui.R.string.kg_primary_auth_locked_out_password
 import com.android.systemui.R.string.kg_primary_auth_locked_out_pattern
 import com.android.systemui.R.string.kg_primary_auth_locked_out_pin
 import com.android.systemui.R.string.kg_prompt_after_dpm_lock
+import com.android.systemui.R.string.kg_prompt_after_update_password
+import com.android.systemui.R.string.kg_prompt_after_update_pattern
+import com.android.systemui.R.string.kg_prompt_after_update_pin
 import com.android.systemui.R.string.kg_prompt_after_user_lockdown_password
 import com.android.systemui.R.string.kg_prompt_after_user_lockdown_pattern
 import com.android.systemui.R.string.kg_prompt_after_user_lockdown_pin
@@ -130,6 +134,7 @@ constructor(
             PROMPT_REASON_USER_REQUEST -> authRequiredAfterUserLockdown(securityMode)
             PROMPT_REASON_AFTER_LOCKOUT -> biometricLockout(securityMode)
             PROMPT_REASON_PREPARE_FOR_UPDATE -> authRequiredForUnattendedUpdate(securityMode)
+            PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE -> authRequiredForMainlineUpdate(securityMode)
             PROMPT_REASON_FINGERPRINT_LOCKED_OUT -> fingerprintUnlockUnavailable(securityMode)
             PROMPT_REASON_FACE_LOCKED_OUT ->
                 if (fpAllowedInBouncer) faceLockedOutButFingerprintAvailable(securityMode)
@@ -174,6 +179,7 @@ constructor(
     PROMPT_REASON_NONE,
     PROMPT_REASON_RESTART,
     PROMPT_REASON_PRIMARY_AUTH_LOCKED_OUT,
+    PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE,
 )
 annotation class BouncerPromptReason
 
@@ -282,6 +288,15 @@ private fun authRequiredForUnattendedUpdate(securityMode: SecurityMode): Pair<In
         SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_unattended_update)
         SecurityMode.Password -> Pair(keyguard_enter_password, kg_prompt_unattended_update)
         SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_unattended_update)
+        else -> Pair(0, 0)
+    }
+}
+
+private fun authRequiredForMainlineUpdate(securityMode: SecurityMode): Pair<Int, Int> {
+    return when (securityMode) {
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_after_update_pattern)
+        SecurityMode.Password -> Pair(keyguard_enter_password, kg_prompt_after_update_password)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_after_update_pin)
         else -> Pair(0, 0)
     }
 }
