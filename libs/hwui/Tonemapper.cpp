@@ -20,6 +20,7 @@
 #include <log/log.h>
 // libshaders only exists on Android devices
 #ifdef __ANDROID__
+#include <renderthread/CanvasContext.h>
 #include <shaders/shaders.h>
 #endif
 
@@ -53,8 +54,17 @@ static sk_sp<SkColorFilter> createLinearEffectColorFilter(const shaders::LinearE
 
     ColorFilterRuntimeEffectBuilder effectBuilder(std::move(runtimeEffect));
 
+    auto colorTransform = android::mat4();
+    const auto* context = renderthread::CanvasContext::getActiveContext();
+    if (context) {
+        const auto ratio = context->targetSdrHdrRatio();
+        if (ratio > 1.0f) {
+            colorTransform = android::mat4::scale(vec4(ratio, ratio, ratio, 1.f));
+        }
+    }
+
     const auto uniforms =
-            shaders::buildLinearEffectUniforms(linearEffect, android::mat4(), maxDisplayLuminance,
+            shaders::buildLinearEffectUniforms(linearEffect, colorTransform, maxDisplayLuminance,
                                                currentDisplayLuminanceNits, maxLuminance);
 
     for (const auto& uniform : uniforms) {
