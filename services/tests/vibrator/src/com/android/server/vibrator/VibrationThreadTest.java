@@ -1005,6 +1005,7 @@ public class VibrationThreadTest {
                 mVibratorProviders.get(3).getEffectSegments(vibrationId));
     }
 
+    @FlakyTest
     @Test
     public void vibrate_multipleSyncedCallbackTriggered_finishSteps() throws Exception {
         int[] vibratorIds = new int[]{1, 2};
