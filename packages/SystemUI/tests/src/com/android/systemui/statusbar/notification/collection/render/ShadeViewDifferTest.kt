@@ -22,7 +22,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.dump.logcatLogBuffer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -30,6 +30,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.matches
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 
 @SmallTest
@@ -44,7 +45,7 @@ class ShadeViewDifferTest : SysuiTestCase() {
     private val controller5 = FakeController(mContext, "Controller5")
     private val controller6 = FakeController(mContext, "Controller6")
     private val controller7 = FakeController(mContext, "Controller7")
-    private val logger: ShadeViewDifferLogger = mock()
+    private val logger = spy(ShadeViewDifferLogger(logcatLogBuffer()))
 
     @Before
     fun setUp() {

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -61,7 +63,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
     private HeadsUpManagerPhone mHeadsUpManager;
 
-    @Mock private HeadsUpManagerLogger mHeadsUpManagerLogger;
+    private final HeadsUpManagerLogger mHeadsUpManagerLogger = new HeadsUpManagerLogger(
+            logcatLogBuffer());
     @Mock private GroupMembershipManager mGroupManager;
     @Mock private VisualStabilityProvider mVSProvider;
     @Mock private StatusBarStateController mStatusBarStateController;

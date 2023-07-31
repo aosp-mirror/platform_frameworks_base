@@ -20,6 +20,7 @@ import static android.service.notification.NotificationListenerService.REASON_CL
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -42,6 +43,7 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Handler;
@@ -248,7 +250,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(StatusBarRemoteInputCallback.class),
                         mActivityIntentHelper,
                         mock(MetricsLogger.class),
-                        mock(StatusBarNotificationActivityStarterLogger.class),
+                        new StatusBarNotificationActivityStarterLogger(logcatLogBuffer()),
                         mOnUserInteractionCallback,
                         mock(NotificationPresenter.class),
                         mock(ShadeViewController.class),
@@ -410,10 +412,12 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Test
     public void testOnFullScreenIntentWhenDozing_wakeUpDevice() {
         // GIVEN entry that can has a full screen intent that can show
+        PendingIntent fullScreenIntent = PendingIntent.getActivity(mContext, 1,
+                new Intent("fake_full_screen"), PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder nb = new Notification.Builder(mContext, "a")
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .setFullScreenIntent(mock(PendingIntent.class), true);
+                .setFullScreenIntent(fullScreenIntent, true);
         StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0,
                 "tag" + System.currentTimeMillis(), 0, 0,
                 nb.build(), new UserHandle(0), null, 0);
@@ -437,6 +441,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // GIVEN entry that can has a full screen intent that can show
         PendingIntent mockFullScreenIntent = mock(PendingIntent.class);
         when(mockFullScreenIntent.getCreatorUid()).thenReturn(kTestUid);
+        when(mockFullScreenIntent.getIntent()).thenReturn(new Intent("fake_full_screen"));
         ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.activityInfo = new ActivityInfo();
         resolveInfo.activityInfo.name = kTestActivityName;
