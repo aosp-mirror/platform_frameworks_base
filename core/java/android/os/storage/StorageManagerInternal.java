@@ -20,8 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.UserInfo;
+import android.os.IInstalld;
 import android.os.IVold;
+import android.os.ParcelFileDescriptor;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -185,4 +188,17 @@ public abstract class StorageManagerInternal {
     public abstract void prepareUserStorageForMove(String fromVolumeUuid, String toVolumeUuid,
             List<UserInfo> users);
 
+    /**
+     * A proxy call to the corresponding method in Installer.
+     * @see com.android.server.pm.Installer#createFsveritySetupAuthToken()
+     */
+    public abstract IInstalld.IFsveritySetupAuthToken createFsveritySetupAuthToken(
+            ParcelFileDescriptor authFd, int appUid, @UserIdInt int userId) throws IOException;
+
+    /**
+     * A proxy call to the corresponding method in Installer.
+     * @see com.android.server.pm.Installer#enableFsverity()
+     */
+    public abstract int enableFsverity(IInstalld.IFsveritySetupAuthToken authToken, String filePath,
+            String packageName) throws IOException;
 }
