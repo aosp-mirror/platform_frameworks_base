@@ -123,7 +123,7 @@ public class KeySyncTask implements Runnable {
      * @param userId The uid of the user whose profile has been unlocked.
      * @param credentialType The type of credential as defined in {@code LockPatternUtils}
      * @param credential The credential, encoded as a byte array
-     * @param credentialUpdated signals weather credentials were updated.
+     * @param credentialUpdated indicates credentials change.
      * @param platformKeyManager platform key manager
      * @param testOnlyInsecureCertificateHelper utility class used for end-to-end tests
      */
@@ -143,7 +143,7 @@ public class KeySyncTask implements Runnable {
         mRecoverableKeyStoreDb = recoverableKeyStoreDb;
         mUserId = userId;
         mCredentialType = credentialType;
-        mCredential = credential;
+        mCredential = credential != null ? Arrays.copyOf(credential, credential.length) : null;
         mCredentialUpdated = credentialUpdated;
         mPlatformKeyManager = platformKeyManager;
         mRecoverySnapshotStorage = snapshotStorage;
@@ -160,6 +160,10 @@ public class KeySyncTask implements Runnable {
             }
         } catch (Exception e) {
             Log.e(TAG, "Unexpected exception thrown during KeySyncTask", e);
+        } finally {
+            if (mCredential != null) {
+                Arrays.fill(mCredential, (byte) 0); // no longer needed.
+            }
         }
     }
 
