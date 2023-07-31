@@ -182,6 +182,21 @@ public class PipBoundsAlgorithm {
         return null;
     }
 
+    /**
+     * Returns the source hint rect if it is valid (if provided and is contained by the current
+     * task bounds and not too small).
+     */
+    public static Rect getValidSourceHintRect(PictureInPictureParams params, Rect sourceBounds,
+                @NonNull Rect destinationBounds) {
+        final Rect sourceHintRect = getValidSourceHintRect(params, sourceBounds);
+        if (sourceHintRect != null
+                && sourceHintRect.width() > destinationBounds.width()
+                && sourceHintRect.height() > destinationBounds.height()) {
+            return sourceHintRect;
+        }
+        return null;
+    }
+
     public float getDefaultAspectRatio() {
         return mDefaultAspectRatio;
     }
