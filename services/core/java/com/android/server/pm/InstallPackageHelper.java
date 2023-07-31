@@ -872,8 +872,10 @@ final class InstallPackageHelper {
                         "Expected exactly one .apex file under " + dir.getAbsolutePath()
                                 + " got: " + apexes.length);
             }
+            boolean force = (request.mArgs.mInstallFlags
+                    & PackageManager.INSTALL_FORCE_NON_STAGED_APEX_UPDATE) != 0;
             try (PackageParser2 packageParser = mPm.mInjector.getScanningPackageParser()) {
-                mApexManager.installPackage(apexes[0], packageParser);
+                mApexManager.installPackage(apexes[0], packageParser, force);
             }
         } catch (PackageManagerException e) {
             request.mInstallResult.setError("APEX installation failed", e);
