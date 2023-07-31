@@ -60,15 +60,17 @@ public class VisualQueryDetector {
     private final Executor mExecutor;
     private final IVoiceInteractionManagerService mManagerService;
     private final VisualQueryDetectorInitializationDelegate mInitializationDelegate;
+    private final String mAttributionTag;
 
     VisualQueryDetector(
             IVoiceInteractionManagerService managerService,
             @NonNull @CallbackExecutor Executor executor,
-            Callback callback) {
+            Callback callback, @Nullable String attributionTag) {
         mManagerService = managerService;
         mCallback = callback;
         mExecutor = executor;
         mInitializationDelegate = new VisualQueryDetectorInitializationDelegate();
+        mAttributionTag = attributionTag;
     }
 
     /**
@@ -246,7 +248,7 @@ public class VisualQueryDetector {
         void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
             initAndVerifyDetector(options, sharedMemory,
                     new InitializationStateListener(mExecutor, mCallback),
-                    DETECTOR_TYPE_VISUAL_QUERY_DETECTOR);
+                    DETECTOR_TYPE_VISUAL_QUERY_DETECTOR, mAttributionTag);
         }
 
         @Override
