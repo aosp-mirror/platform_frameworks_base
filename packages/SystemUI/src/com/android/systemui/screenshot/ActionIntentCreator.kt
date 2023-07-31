@@ -82,11 +82,15 @@ object ActionIntentCreator {
 
         return editIntent
             .setDataAndType(uri, "image/png")
+            .putExtra(EXTRA_EDIT_SOURCE, EDIT_SOURCE_SCREENSHOT)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
     }
+
+    private const val EXTRA_EDIT_SOURCE = "edit_source"
+    private const val EDIT_SOURCE_SCREENSHOT = "screenshot"
 }
 
 /**
