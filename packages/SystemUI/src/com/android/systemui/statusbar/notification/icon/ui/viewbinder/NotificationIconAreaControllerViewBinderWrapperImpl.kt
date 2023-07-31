@@ -50,6 +50,10 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerShelfViewModel
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel
+import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
@@ -60,6 +64,7 @@ import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
 import java.util.function.Function
 import javax.inject.Inject
+import kotlinx.coroutines.DisposableHandle
 
 /**
  * Controller class for [NotificationIconContainer]. This implementation serves as a temporary
@@ -86,6 +91,9 @@ constructor(
     featureFlags: FeatureFlags,
     private val statusBarWindowController: StatusBarWindowController,
     private val screenOffAnimationController: ScreenOffAnimationController,
+    private val shelfIconsViewModel: NotificationIconContainerShelfViewModel,
+    private val statusBarIconsViewModel: NotificationIconContainerStatusBarViewModel,
+    private val aodIconsViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
 ) :
     NotificationIconAreaController,
     DarkIconDispatcher.DarkReceiver,
@@ -106,6 +114,7 @@ constructor(
     private var notificationIcons: NotificationIconContainer? = null
     private var shelfIcons: NotificationIconContainer? = null
     private var aodIcons: NotificationIconContainer? = null
+    private var aodBindJob: DisposableHandle? = null
     private var aodIconAppearTranslation = 0
     private var animationsEnabled = false
     private var aodIconTint = 0
@@ -142,9 +151,11 @@ constructor(
         if (changed) {
             this.aodIcons!!.setAnimationsEnabled(false)
             this.aodIcons!!.removeAllViews()
+            aodBindJob?.dispose()
         }
         this.aodIcons = aodIcons
         this.aodIcons!!.setOnLockScreen(true)
+        aodBindJob = NotificationIconContainerViewBinder.bind(aodIcons, aodIconsViewModel)
         updateAodIconsVisibility(animate = false, forceUpdate = changed)
         updateAnimations()
         if (changed) {
@@ -153,13 +164,12 @@ constructor(
         updateIconLayoutParams(context)
     }
 
-    override fun setupShelf(notificationShelfController: NotificationShelfController) {
-        shelfRefactor.assertDisabled()
-        shelfIcons = notificationShelfController.shelfIcons
-    }
+    override fun setupShelf(notificationShelfController: NotificationShelfController) =
+        NotificationShelfViewBinderWrapperControllerImpl.unsupported
 
     override fun setShelfIcons(icons: NotificationIconContainer) {
         if (shelfRefactor.expectEnabled()) {
+            NotificationIconContainerViewBinder.bind(icons, shelfIconsViewModel)
             shelfIcons = icons
         }
     }
@@ -329,6 +339,7 @@ constructor(
         val layoutInflater = LayoutInflater.from(context)
         notificationIconArea = inflateIconArea(layoutInflater)
         notificationIcons = notificationIconArea?.findViewById(R.id.notificationIcons)
+        NotificationIconContainerViewBinder.bind(notificationIcons!!, statusBarIconsViewModel)
     }
 
     private fun updateIconLayoutParams(context: Context) {

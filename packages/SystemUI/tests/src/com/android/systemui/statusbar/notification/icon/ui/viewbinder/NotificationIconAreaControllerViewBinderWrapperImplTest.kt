@@ -27,6 +27,9 @@ import com.android.systemui.statusbar.NotificationListener
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerShelfViewModel
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
@@ -35,7 +38,8 @@ import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.mockito.whenever
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
-import org.junit.Assert
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,7 +49,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 class NotificationIconAreaControllerViewBinderWrapperImplTest : SysuiTestCase() {
     @Mock private lateinit var notifListener: NotificationListener
     @Mock private lateinit var statusBarStateController: StatusBarStateController
@@ -61,6 +65,10 @@ class NotificationIconAreaControllerViewBinderWrapperImplTest : SysuiTestCase() 
     @Mock private lateinit var demoModeController: DemoModeController
     @Mock private lateinit var aodIcons: NotificationIconContainer
     @Mock private lateinit var featureFlags: FeatureFlags
+
+    private val shelfViewModel = NotificationIconContainerShelfViewModel()
+    private val statusBarViewModel = NotificationIconContainerStatusBarViewModel()
+    private val aodViewModel = NotificationIconContainerAlwaysOnDisplayViewModel()
 
     private lateinit var underTest: NotificationIconAreaControllerViewBinderWrapperImpl
 
@@ -82,20 +90,23 @@ class NotificationIconAreaControllerViewBinderWrapperImplTest : SysuiTestCase() 
                 darkIconDispatcher,
                 featureFlags,
                 statusBarWindowController,
-                screenOffAnimController
+                screenOffAnimController,
+                shelfViewModel,
+                statusBarViewModel,
+                aodViewModel,
             )
     }
 
     @Test
     fun testNotificationIcons_settingHideIcons() {
         underTest.settingsListener.onStatusBarIconsBehaviorChanged(true)
-        Assert.assertFalse(underTest.shouldShowLowPriorityIcons())
+        assertFalse(underTest.shouldShowLowPriorityIcons())
     }
 
     @Test
     fun testNotificationIcons_settingShowIcons() {
         underTest.settingsListener.onStatusBarIconsBehaviorChanged(false)
-        Assert.assertTrue(underTest.shouldShowLowPriorityIcons())
+        assertTrue(underTest.shouldShowLowPriorityIcons())
     }
 
     @Test

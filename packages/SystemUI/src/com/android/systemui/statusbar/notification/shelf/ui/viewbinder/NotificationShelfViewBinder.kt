@@ -64,8 +64,10 @@ class NotificationShelfViewBinderWrapperControllerImpl @Inject constructor() :
 
     override fun setOnClickListener(listener: View.OnClickListener) = unsupported
 
-    private val unsupported: Nothing
-        get() = error("Code path not supported when NOTIFICATION_SHELF_REFACTOR is disabled")
+    companion object {
+        val unsupported: Nothing
+            get() = error("Code path not supported when NOTIFICATION_SHELF_REFACTOR is disabled")
+    }
 }
 
 /** Binds a [NotificationShelf] to its [view model][NotificationShelfViewModel]. */
