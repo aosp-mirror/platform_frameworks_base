@@ -634,7 +634,7 @@ public class TouchExplorer extends BaseEventStreamTransformation
             MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         switch (event.getActionMasked()) {
             case ACTION_DOWN:
-                // We should have already received ACTION_DOWN. Ignore.
+                handleActionDownStateTouchExploring(event, rawEvent, policyFlags);
                 break;
             case ACTION_POINTER_DOWN:
                 handleActionPointerDown(event, rawEvent, policyFlags);
@@ -838,6 +838,15 @@ public class TouchExplorer extends BaseEventStreamTransformation
         if (!mSendTouchInteractionEndDelayed.isPending()) {
             mSendTouchInteractionEndDelayed.post();
         }
+    }
+
+    private void handleActionDownStateTouchExploring(
+            MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        // This is an interrupted and continued touch exploration. Maintain the consistency of the
+        // event stream.
+        mSendTouchExplorationEndDelayed.cancel();
+        mSendTouchInteractionEndDelayed.cancel();
+        sendTouchExplorationGestureStartAndHoverEnterIfNeeded(policyFlags);
     }
 
     /**
@@ -1097,12 +1106,15 @@ public class TouchExplorer extends BaseEventStreamTransformation
     }
 
     /**
-     * Sends the enter events if needed. Such events are hover enter and touch explore
-     * gesture start.
+     * Sends the enter events if needed. Such events are hover enter and touch explore gesture
+     * start.
      *
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendTouchExplorationGestureStartAndHoverEnterIfNeeded(int policyFlags) {
+        if (!mState.isTouchExploring()) {
+            mDispatcher.sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_START);
+        }
         MotionEvent event = mState.getLastInjectedHoverEvent();
         if (event != null && event.getActionMasked() == ACTION_HOVER_EXIT) {
             final int pointerIdBits = event.getPointerIdBits();
@@ -1114,7 +1126,6 @@ public class TouchExplorer extends BaseEventStreamTransformation
                     policyFlags);
         }
     }
-
 
     /**
      * Determines whether a two pointer gesture is a dragging one.
