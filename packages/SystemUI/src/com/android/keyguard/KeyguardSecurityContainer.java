@@ -1198,6 +1198,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 });
                 mPopup.show();
             });
+
+            mUserSwitcherViewGroup.setAlpha(0f);
         }
 
         @Override
