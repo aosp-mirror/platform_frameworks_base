@@ -276,6 +276,11 @@ public abstract class SharedConnectivityService extends Service {
 
     private void onRegisterCallback(ISharedConnectivityCallback callback) {
         mRemoteCallbackList.register(callback);
+        try {
+            callback.onServiceConnected();
+        } catch (RemoteException e) {
+            if (DEBUG) Log.w(TAG, "Exception in onRegisterCallback", e);
+        }
         if (mCountDownLatch != null) {
             mCountDownLatch.countDown();
         }
