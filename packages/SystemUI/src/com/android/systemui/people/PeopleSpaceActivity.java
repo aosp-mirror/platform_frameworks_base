@@ -28,6 +28,8 @@ import androidx.activity.ComponentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.android.systemui.compose.ComposeFacade;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.people.ui.view.PeopleViewBinder;
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel;
 
@@ -43,11 +45,14 @@ public class PeopleSpaceActivity extends ComponentActivity {
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
 
     private final PeopleViewModel.Factory mViewModelFactory;
+    private final FeatureFlags mFeatureFlags;
 
     @Inject
-    public PeopleSpaceActivity(PeopleViewModel.Factory viewModelFactory) {
+    public PeopleSpaceActivity(PeopleViewModel.Factory viewModelFactory,
+            FeatureFlags featureFlags) {
         super();
         mViewModelFactory = viewModelFactory;
+        mFeatureFlags = featureFlags;
     }
 
     @Override
@@ -67,7 +72,8 @@ public class PeopleSpaceActivity extends ComponentActivity {
             return null;
         };
 
-        if (ComposeFacade.INSTANCE.isComposeAvailable()) {
+        if (mFeatureFlags.isEnabled(Flags.COMPOSE_PEOPLE_SPACE)
+                && ComposeFacade.INSTANCE.isComposeAvailable()) {
             Log.d(TAG, "Using the Compose implementation of the PeopleSpaceActivity");
             ComposeFacade.INSTANCE.setPeopleSpaceActivityContent(this, viewModel, onResult);
         } else {

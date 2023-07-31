@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -39,7 +40,6 @@ import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.time.FakeSystemClock
 import com.android.wm.shell.animation.Interpolators
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
@@ -72,6 +72,7 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
     private lateinit var configRepository: FakeConfigurationRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
+    private lateinit var keyguardInteractor: KeyguardInteractor
     private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var shadeRepository: FakeShadeRepository
     private lateinit var featureFlags: FakeFeatureFlags
@@ -81,23 +82,21 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testScope = TestScope()
         transitionRepository = FakeKeyguardTransitionRepository()
-        configRepository = FakeConfigurationRepository()
-        keyguardRepository = FakeKeyguardRepository()
-        bouncerRepository = FakeKeyguardBouncerRepository()
         shadeRepository = FakeShadeRepository()
         featureFlags =
             FakeFeatureFlags().apply {
                 set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
                 set(Flags.FACE_AUTH_REFACTOR, false)
             }
-        val keyguardInteractor =
-            KeyguardInteractor(
-                keyguardRepository,
-                commandQueue = mock(),
-                featureFlags,
-                bouncerRepository,
-                configRepository,
+        KeyguardInteractorFactory.create(
+                featureFlags = featureFlags,
             )
+            .also {
+                keyguardInteractor = it.keyguardInteractor
+                keyguardRepository = it.repository
+                configRepository = it.configurationRepository
+                bouncerRepository = it.bouncerRepository
+            }
 
         underTest =
             UdfpsLockscreenViewModel(
@@ -115,7 +114,7 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
                         burnInHelperWrapper = mock(),
                         testScope.backgroundScope,
                         configRepository,
-                        FakeSystemClock(),
+                        keyguardInteractor,
                     ),
                     keyguardInteractor,
                     shadeRepository,
