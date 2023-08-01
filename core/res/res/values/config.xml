@@ -5565,10 +5565,6 @@
     <!-- pdp data reject retry delay in ms -->
     <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
 
-    <!-- Duration in milliseconds for device to vibrate on mash press on power
-         button. -->
-    <integer name="config_mashPressVibrateTimeOnPowerButton">0</integer>
-
     <!-- Whether or not to enable the binder heavy hitter watcher by default -->
     <bool name="config_defaultBinderHeavyHitterWatcherEnabled">false</bool>
 
