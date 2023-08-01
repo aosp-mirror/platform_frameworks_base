@@ -178,7 +178,8 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
     private String getSecondaryLabel(boolean isActive, boolean isTransient,
             boolean isDataSaverEnabled, int numConnectedDevices, boolean isWifiTetheringAllowed) {
         if (!isWifiTetheringAllowed) {
-            return mContext.getString(R.string.wifitrackerlib_admin_restricted_network);
+            return mContext.getString(
+                    com.android.wifitrackerlib.R.string.wifitrackerlib_admin_restricted_network);
         } else if (isTransient) {
             return mContext.getString(R.string.quick_settings_hotspot_secondary_label_transient);
         } else if (isDataSaverEnabled) {
