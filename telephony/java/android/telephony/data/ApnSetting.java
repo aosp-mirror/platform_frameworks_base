@@ -399,6 +399,11 @@ public class ApnSetting implements Parcelable {
     public @interface ProtocolType {}
 
     // Possible values for MVNO type.
+    /**
+     * Default value for MVNO type if it's not set.
+     * @hide
+     */
+    public static final int MVNO_TYPE_UNKNOWN = -1;
     /** MVNO type for service provider name. */
     public static final int MVNO_TYPE_SPN = 0;
     /** MVNO type for IMSI. */
@@ -410,10 +415,11 @@ public class ApnSetting implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = { "MVNO_TYPE_" }, value = {
-        MVNO_TYPE_SPN,
-        MVNO_TYPE_IMSI,
-        MVNO_TYPE_GID,
-        MVNO_TYPE_ICCID,
+            MVNO_TYPE_UNKNOWN,
+            MVNO_TYPE_SPN,
+            MVNO_TYPE_IMSI,
+            MVNO_TYPE_GID,
+            MVNO_TYPE_ICCID,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MvnoType {}
@@ -1480,7 +1486,7 @@ public class ApnSetting implements Parcelable {
         String mvnoTypeString = TextUtils.isEmpty(mvnoType)
                 ? mvnoType : mvnoType.toLowerCase(Locale.ROOT);
         Integer mvnoTypeInt = MVNO_TYPE_STRING_MAP.get(mvnoTypeString);
-        return  mvnoTypeInt == null ? UNSPECIFIED_INT : mvnoTypeInt;
+        return  mvnoTypeInt == null ? MVNO_TYPE_UNKNOWN : mvnoTypeInt;
     }
 
     /** @hide */
@@ -1755,7 +1761,7 @@ public class ApnSetting implements Parcelable {
         private int mMaxConns;
         private int mWaitTime;
         private int mMaxConnsTime;
-        private int mMvnoType = UNSPECIFIED_INT;
+        private int mMvnoType = MVNO_TYPE_UNKNOWN;
         private String mMvnoMatchData;
         private int mApnSetId;
         private int mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
