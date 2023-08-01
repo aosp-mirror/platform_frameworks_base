@@ -64,17 +64,22 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.Slog;
 import android.view.RemoteAnimationDefinition;
 import android.window.SizeConfigurationBuckets;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.uri.NeededUriGrants;
+import com.android.server.utils.quota.Categorizer;
+import com.android.server.utils.quota.Category;
+import com.android.server.utils.quota.CountQuotaTracker;
 import com.android.server.vr.VrManagerInternal;
 
 /**
@@ -89,6 +94,13 @@ class ActivityClientController extends IActivityClientController.Stub {
     private final WindowManagerGlobalLock mGlobalLock;
     private final ActivityTaskSupervisor mTaskSupervisor;
     private final Context mContext;
+
+    // Prevent malicious app abusing the Activity#setPictureInPictureParams API
+    @VisibleForTesting CountQuotaTracker mSetPipAspectRatioQuotaTracker;
+    // Limit to 60 times / minute
+    private static final int SET_PIP_ASPECT_RATIO_LIMIT = 60;
+    // The timeWindowMs here can not be smaller than QuotaTracker#MIN_WINDOW_SIZE_MS
+    private static final long SET_PIP_ASPECT_RATIO_TIME_WINDOW_MS = 60_000;
 
     /** Wrapper around VoiceInteractionServiceManager. */
     private AssistUtils mAssistUtils;
@@ -661,6 +673,7 @@ class ActivityClientController extends IActivityClientController.Stub {
     public boolean enterPictureInPictureMode(IBinder token, final PictureInPictureParams params) {
         final long origId = Binder.clearCallingIdentity();
         try {
+            ensureSetPipAspectRatioQuotaTracker();
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "enterPictureInPictureMode", token, params);
@@ -675,6 +688,7 @@ class ActivityClientController extends IActivityClientController.Stub {
     public void setPictureInPictureParams(IBinder token, final PictureInPictureParams params) {
         final long origId = Binder.clearCallingIdentity();
         try {
+            ensureSetPipAspectRatioQuotaTracker();
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "setPictureInPictureParams", token, params);
@@ -709,6 +723,19 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     /**
+     * Initialize the {@link #mSetPipAspectRatioQuotaTracker} if applicable, which should happen
+     * out of {@link #mGlobalLock} to avoid deadlock (AM lock is used in QuotaTrack ctor).
+     */
+    private void ensureSetPipAspectRatioQuotaTracker() {
+        if (mSetPipAspectRatioQuotaTracker == null) {
+            mSetPipAspectRatioQuotaTracker = new CountQuotaTracker(mContext,
+                    Categorizer.SINGLE_CATEGORIZER);
+            mSetPipAspectRatioQuotaTracker.setCountLimit(Category.SINGLE_CATEGORY,
+                    SET_PIP_ASPECT_RATIO_LIMIT, SET_PIP_ASPECT_RATIO_TIME_WINDOW_MS);
+        }
+    }
+
+    /**
      * Checks the state of the system and the activity associated with the given {@param token} to
      * verify that picture-in-picture is supported for that activity.
      *
@@ -730,6 +757,19 @@ class ActivityClientController extends IActivityClientController.Stub {
         if (!r.supportsPictureInPicture()) {
             throw new IllegalStateException(caller
                     + ": Current activity does not support picture-in-picture.");
+        }
+
+        // Rate limit how frequent an app can request aspect ratio change via
+        // Activity#setPictureInPictureParams
+        final int userId = UserHandle.getCallingUserId();
+        if (r.pictureInPictureArgs.hasSetAspectRatio()
+                && params.hasSetAspectRatio()
+                && !r.pictureInPictureArgs.getAspectRatioRational().equals(
+                params.getAspectRatioRational())
+                && !mSetPipAspectRatioQuotaTracker.noteEvent(
+                userId, r.packageName, "setPipAspectRatio")) {
+            throw new IllegalStateException(caller
+                    + ": Too many PiP aspect ratio change requests from " + r.packageName);
         }
 
         if (params.hasSetAspectRatio()
