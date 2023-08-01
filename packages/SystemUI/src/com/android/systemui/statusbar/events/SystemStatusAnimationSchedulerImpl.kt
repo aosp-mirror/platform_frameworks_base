@@ -243,7 +243,7 @@ constructor(
         if (!event.showAnimation && event.forceVisible) {
             // If animations are turned off, we'll transition directly to the dot
             animationState.value = SHOWING_PERSISTENT_DOT
-            notifyTransitionToPersistentDot()
+            notifyTransitionToPersistentDot(event)
             return
         }
 
@@ -335,7 +335,7 @@ constructor(
         }
         animators.add(chipAnimationController.onSystemEventAnimationFinish(hasPersistentDot))
         if (hasPersistentDot) {
-            val dotAnim = notifyTransitionToPersistentDot()
+            val dotAnim = notifyTransitionToPersistentDot(currentlyDisplayedEvent)
             if (dotAnim != null) {
                 animators.add(dotAnim)
             }
@@ -344,12 +344,12 @@ constructor(
         return AnimatorSet().also { it.playTogether(animators) }
     }
 
-    private fun notifyTransitionToPersistentDot(): Animator? {
+    private fun notifyTransitionToPersistentDot(event: StatusEvent?): Animator? {
         logger?.logTransitionToPersistentDotCallbackInvoked()
         val anims: List<Animator> =
             listeners.mapNotNull {
                 it.onSystemStatusAnimationTransitionToPersistentDot(
-                    currentlyDisplayedEvent?.contentDescription
+                    event?.contentDescription
                 )
             }
         if (anims.isNotEmpty()) {
