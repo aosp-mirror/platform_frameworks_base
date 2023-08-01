@@ -32,7 +32,6 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.NullPointerException;
 import java.util.concurrent.Executor;
 
 /**
@@ -270,15 +269,19 @@ public class Filter implements AutoCloseable {
         synchronized (mCallbackLock) {
             if (mCallback != null && mExecutor != null) {
                 mExecutor.execute(() -> {
+                    FilterCallback callback;
                     synchronized (mCallbackLock) {
-                        if (mCallback != null) {
-                            try {
-                                mCallback.onFilterStatusChanged(this, status);
-                            }
-                            catch (NullPointerException e) {
-                                Log.d(TAG, "catch exception:" + e);
-                            }
+                        callback = mCallback;
+                    }
+                    if (callback != null) {
+                        try {
+                            callback.onFilterStatusChanged(this, status);
+                        } catch (NullPointerException e) {
+                            Log.d(TAG, "catch exception:" + e);
                         }
+                    }
+                    if (callback != null) {
+                        callback.onFilterStatusChanged(this, status);
                     }
                 });
             }
@@ -289,19 +292,20 @@ public class Filter implements AutoCloseable {
         synchronized (mCallbackLock) {
             if (mCallback != null && mExecutor != null) {
                 mExecutor.execute(() -> {
+                    FilterCallback callback;
                     synchronized (mCallbackLock) {
-                        if (mCallback != null) {
-                            try {
-                                mCallback.onFilterEvent(this, events);
-                            }
-                            catch (NullPointerException e) {
-                                Log.d(TAG, "catch exception:" + e);
-                            }
-                        } else {
-                            for (FilterEvent event : events) {
-                                if (event instanceof MediaEvent) {
-                                    ((MediaEvent)event).release();
-                                }
+                        callback = mCallback;
+                    }
+                    if (callback != null) {
+                        try {
+                            callback.onFilterEvent(this, events);
+                        } catch (NullPointerException e) {
+                            Log.d(TAG, "catch exception:" + e);
+                        }
+                    } else {
+                        for (FilterEvent event : events) {
+                            if (event instanceof MediaEvent) {
+                                ((MediaEvent) event).release();
                             }
                         }
                     }
@@ -309,7 +313,7 @@ public class Filter implements AutoCloseable {
             } else {
                 for (FilterEvent event : events) {
                     if (event instanceof MediaEvent) {
-                        ((MediaEvent)event).release();
+                        ((MediaEvent) event).release();
                     }
                 }
             }
