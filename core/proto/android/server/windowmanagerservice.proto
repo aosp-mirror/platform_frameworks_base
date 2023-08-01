@@ -609,4 +609,6 @@ message BackNavigationProto {
     optional bool animation_in_progress = 1;
     optional int32 last_back_type = 2;
     optional bool show_wallpaper = 3;
+    optional string main_open_activity = 4;
+    optional bool animation_running = 5;
 }
