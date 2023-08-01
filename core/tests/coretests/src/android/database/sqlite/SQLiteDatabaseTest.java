@@ -180,8 +180,8 @@ public class SQLiteDatabaseTest {
                     assertFalse(r);
                     s.reset();
                     assertEquals(i + 1, mDatabase.getLastInsertRowId());
-                    assertEquals(1, mDatabase.getLastChangedRowsCount());
-                    assertEquals(i + 2, mDatabase.getTotalChangedRowsCount());
+                    assertEquals(1, mDatabase.getLastChangedRowCount());
+                    assertEquals(i + 2, mDatabase.getTotalChangedRowCount());
                 }
             }
             mDatabase.setTransactionSuccessful();
@@ -205,13 +205,30 @@ public class SQLiteDatabaseTest {
                     assertFalse(r);
                     s.reset();
                     assertEquals(size + i + 1, mDatabase.getLastInsertRowId());
-                    assertEquals(1, mDatabase.getLastChangedRowsCount());
-                    assertEquals(size + i + 2, mDatabase.getTotalChangedRowsCount());
+                    assertEquals(1, mDatabase.getLastChangedRowCount());
+                    assertEquals(size + i + 2, mDatabase.getTotalChangedRowCount());
                 }
             }
             mDatabase.setTransactionSuccessful();
         } finally {
             mDatabase.endTransaction();
+        }
+    }
+
+    @Test
+    public void testAutomaticCountersOutsideTransactions() {
+        try {
+            mDatabase.getLastChangedRowCount();
+            fail("getLastChangedRowCount() succeeded outside a transaction");
+        } catch (IllegalStateException e) {
+            // This exception is expected.
+        }
+
+        try {
+            mDatabase.getTotalChangedRowCount();
+            fail("getTotalChangedRowCount() succeeded outside a transaction");
+        } catch (IllegalStateException e) {
+            // This exception is expected.
         }
     }
 }

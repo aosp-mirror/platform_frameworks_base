@@ -2208,10 +2208,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *
      * @return The number of rows changed by the most recent sql statement
      * @throws IllegalStateException if there is no current transaction.
-     * @hide
      */
-    public long getLastChangedRowsCount() {
-        return getThreadSession().getLastChangedRowsCount();
+    public long getLastChangedRowCount() {
+        return getThreadSession().getLastChangedRowCount();
     }
 
     /**
@@ -2223,9 +2222,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * <code><pre>
      *    database.beginTransaction();
      *    try {
-     *        long initialValue = database.getTotalChangedRowsCount();
+     *        long initialValue = database.getTotalChangedRowCount();
      *        // Execute SQL statements
-     *        long changedRows = database.getTotalChangedRowsCount() - initialValue;
+     *        long changedRows = database.getTotalChangedRowCount() - initialValue;
      *        // changedRows counts the total number of rows updated in the transaction.
      *    } finally {
      *        database.endTransaction();
@@ -2236,10 +2235,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *
      * @return The number of rows changed on the current connection.
      * @throws IllegalStateException if there is no current transaction.
-     * @hide
      */
-    public long getTotalChangedRowsCount() {
-        return getThreadSession().getTotalChangedRowsCount();
+    public long getTotalChangedRowCount() {
+        return getThreadSession().getTotalChangedRowCount();
     }
 
     /**
