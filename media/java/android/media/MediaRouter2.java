@@ -460,6 +460,9 @@ public final class MediaRouter2 {
      * updates} in order to keep the system UI in a consistent state. You can also call this method
      * at any other point to update the listing preference dynamically.
      *
+     * <p>Any calls to this method from a privileged router will throw an {@link
+     * UnsupportedOperationException}.
+     *
      * <p>Notes:
      *
      * <ol>
@@ -476,24 +479,7 @@ public final class MediaRouter2 {
      *     route listing. When null, the system uses its default listing criteria.
      */
     public void setRouteListingPreference(@Nullable RouteListingPreference routeListingPreference) {
-        synchronized (mLock) {
-            if (Objects.equals(mRouteListingPreference, routeListingPreference)) {
-                // Nothing changed. We return early to save a call to the system server.
-                return;
-            }
-            mRouteListingPreference = routeListingPreference;
-            try {
-                if (mStub == null) {
-                    MediaRouter2Stub stub = new MediaRouter2Stub();
-                    mMediaRouterService.registerRouter2(stub, mImpl.getPackageName());
-                    mStub = stub;
-                }
-                mMediaRouterService.setRouteListingPreference(mStub, mRouteListingPreference);
-            } catch (RemoteException ex) {
-                ex.rethrowFromSystemServer();
-            }
-            notifyRouteListingPreferenceUpdated(routeListingPreference);
-        }
+        mImpl.setRouteListingPreference(routeListingPreference);
     }
 
     /**
@@ -1962,6 +1948,8 @@ public final class MediaRouter2 {
 
         void unregisterRouteCallback();
 
+        void setRouteListingPreference(@Nullable RouteListingPreference preference);
+
         List<MediaRoute2Info> getAllRoutes();
 
         void setOnGetControllerHintsListener(OnGetControllerHintsListener listener);
@@ -2100,6 +2088,12 @@ public final class MediaRouter2 {
         @Override
         public void unregisterRouteCallback() {
             // Do nothing.
+        }
+
+        @Override
+        public void setRouteListingPreference(@Nullable RouteListingPreference preference) {
+            throw new UnsupportedOperationException(
+                    "RouteListingPreference cannot be set by a privileged MediaRouter2 instance.");
         }
 
         /** Gets the list of all discovered routes. */
@@ -2889,6 +2883,28 @@ public final class MediaRouter2 {
                 } catch (RemoteException ex) {
                     Log.e(TAG, "unregisterRouteCallback: Unable to set discovery request.", ex);
                 }
+            }
+        }
+
+        @Override
+        public void setRouteListingPreference(@Nullable RouteListingPreference preference) {
+            synchronized (mLock) {
+                if (Objects.equals(mRouteListingPreference, preference)) {
+                    // Nothing changed. We return early to save a call to the system server.
+                    return;
+                }
+                mRouteListingPreference = preference;
+                try {
+                    if (mStub == null) {
+                        MediaRouter2Stub stub = new MediaRouter2Stub();
+                        mMediaRouterService.registerRouter2(stub, mImpl.getPackageName());
+                        mStub = stub;
+                    }
+                    mMediaRouterService.setRouteListingPreference(mStub, mRouteListingPreference);
+                } catch (RemoteException ex) {
+                    ex.rethrowFromSystemServer();
+                }
+                notifyRouteListingPreferenceUpdated(preference);
             }
         }
 
