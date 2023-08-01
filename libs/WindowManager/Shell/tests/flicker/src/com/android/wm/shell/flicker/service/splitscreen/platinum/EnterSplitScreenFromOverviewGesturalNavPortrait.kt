@@ -22,7 +22,7 @@ import android.tools.common.Rotation
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.EnterSplitScreenFromOverview
 import org.junit.Test
 
-class EnterSplitScreenFromOverviewGesturalNavPortrait :
+open class EnterSplitScreenFromOverviewGesturalNavPortrait :
     EnterSplitScreenFromOverview(Rotation.ROTATION_0) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit

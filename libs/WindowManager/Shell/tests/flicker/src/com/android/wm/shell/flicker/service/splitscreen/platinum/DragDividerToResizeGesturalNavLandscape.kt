@@ -22,7 +22,7 @@ import android.tools.common.Rotation
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.DragDividerToResize
 import org.junit.Test
 
-class DragDividerToResizeGesturalNavLandscape : DragDividerToResize(Rotation.ROTATION_90) {
+open class DragDividerToResizeGesturalNavLandscape : DragDividerToResize(Rotation.ROTATION_90) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test

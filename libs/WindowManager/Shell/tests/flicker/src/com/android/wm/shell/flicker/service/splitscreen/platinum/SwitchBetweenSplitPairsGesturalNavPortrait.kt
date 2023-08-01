@@ -22,7 +22,8 @@ import android.tools.common.Rotation
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.SwitchBetweenSplitPairs
 import org.junit.Test
 
-class SwitchBetweenSplitPairsGesturalNavPortrait : SwitchBetweenSplitPairs(Rotation.ROTATION_0) {
+open class SwitchBetweenSplitPairsGesturalNavPortrait :
+    SwitchBetweenSplitPairs(Rotation.ROTATION_0) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test
