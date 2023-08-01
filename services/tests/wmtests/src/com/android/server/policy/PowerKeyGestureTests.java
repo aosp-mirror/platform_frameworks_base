@@ -26,6 +26,7 @@ import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_POWER_GO_
 import android.provider.Settings;
 import android.view.Display;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -35,6 +36,11 @@ import org.junit.Test;
  *  atest WmTests:PowerKeyGestureTests
  */
 public class PowerKeyGestureTests extends ShortcutKeyTestBase {
+    @Before
+    public void setUp() {
+        setUpPhoneWindowManager();
+    }
+
     /**
      * Power single press to turn screen on/off.
      */

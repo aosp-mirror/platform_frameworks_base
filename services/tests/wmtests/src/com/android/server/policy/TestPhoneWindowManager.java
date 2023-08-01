@@ -27,6 +27,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyLong;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyString;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.description;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
@@ -177,16 +178,16 @@ class TestPhoneWindowManager {
         }
     }
 
-    TestPhoneWindowManager(Context context) {
+    TestPhoneWindowManager(Context context, boolean supportSettingsUpdate) {
         MockitoAnnotations.initMocks(this);
         mHandlerThread = new HandlerThread("fake window manager");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mContext = mockingDetails(context).isSpy() ? context : spy(context);
-        mHandler.runWithScissors(this::setUp,  0 /* timeout */);
+        mHandler.runWithScissors(() -> setUp(supportSettingsUpdate),  0 /* timeout */);
     }
 
-    private void setUp() {
+    private void setUp(boolean supportSettingsUpdate) {
         mPhoneWindowManager = spy(new PhoneWindowManager());
 
         // Use stubOnly() to reduce memory usage if it doesn't need verification.
@@ -266,7 +267,15 @@ class TestPhoneWindowManager {
         });
 
         doNothing().when(mPhoneWindowManager).initializeHdmiState();
-        doNothing().when(mPhoneWindowManager).updateSettings();
+        if (supportSettingsUpdate) {
+            doAnswer(inv -> {
+                // Make any call to updateSettings run synchronously for tests.
+                mPhoneWindowManager.updateSettings(null);
+                return null;
+            }).when(mPhoneWindowManager).updateSettings(any(Handler.class));
+        } else {
+            doNothing().when(mPhoneWindowManager).updateSettings(any());
+        }
         doNothing().when(mPhoneWindowManager).screenTurningOn(anyInt(), any());
         doNothing().when(mPhoneWindowManager).screenTurnedOn(anyInt());
         doNothing().when(mPhoneWindowManager).startedWakingUp(anyInt(), anyInt());
