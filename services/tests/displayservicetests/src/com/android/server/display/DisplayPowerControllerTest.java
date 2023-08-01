@@ -59,6 +59,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -303,6 +304,7 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 294107062)
     public void testDisplayBrightnessFollowers_BothDpcsSupportNits() {
         DisplayPowerControllerHolder followerDpc =
                 createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
@@ -356,6 +358,7 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 294107062)
     public void testDisplayBrightnessFollowers_FollowerDoesNotSupportNits() {
         DisplayPowerControllerHolder followerDpc =
                 createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
@@ -388,6 +391,7 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 294107062)
     public void testDisplayBrightnessFollowers_LeadDpcDoesNotSupportNits() {
         DisplayPowerControllerHolder followerDpc =
                 createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
@@ -418,6 +422,7 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 294107062)
     public void testDisplayBrightnessFollowers_NeitherDpcSupportsNits() {
         DisplayPowerControllerHolder followerDpc =
                 createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
@@ -450,6 +455,7 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 294107062)
     public void testDisplayBrightnessFollowers_AutomaticBrightness() {
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
@@ -521,6 +527,7 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 294107062)
     public void testDisplayBrightnessFollowersRemoval_RemoveSingleFollower() {
         DisplayPowerControllerHolder followerDpc = createDisplayPowerController(FOLLOWER_DISPLAY_ID,
                 FOLLOWER_UNIQUE_ID);
@@ -612,6 +619,7 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
+    @FlakyTest(bugId = 294107062)
     public void testDisplayBrightnessFollowersRemoval_RemoveAllFollowers() {
         DisplayPowerControllerHolder followerHolder =
                 createDisplayPowerController(FOLLOWER_DISPLAY_ID, FOLLOWER_UNIQUE_ID);
