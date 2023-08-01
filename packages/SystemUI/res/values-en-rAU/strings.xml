@@ -147,8 +147,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Face recognised. Press to continue."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Face recognised. Press the unlock icon to continue."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authenticated"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Cancel authentication"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Use PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Use pattern"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Use password"</string>
@@ -182,6 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"To set up Face Unlock again, your current face model will be deleted.\n\nYou\'ll need to set up this feature again to use your face to unlock your phone."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Couldn\'t set up Face Unlock. Go to Settings to try again."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Touch the fingerprint sensor"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Press the unlock icon to continue"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Can’t recognise face. Use fingerprint instead."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -361,8 +361,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Unlocked by face"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Face recognised"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Swipe up to try again"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Swipe up to try Face Unlock again"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Unlock to use NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"This device belongs to your organisation"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -932,8 +931,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Try another PIN"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Confirm change for <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swipe to see more"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"Retry face authentication"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Loading recommendations"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Hide this media control for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

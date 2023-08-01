@@ -147,8 +147,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Yuz aniqlandi. Davom etish uchun bosing."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Yuz aniqlandi. Davom etish uchun ochish belgisini bosing."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Tasdiqlandi"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Autentifikatsiyani bekor qilish"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN kod kiritish"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Grafik kalitdan foydalanish"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Paroldan foydalanish"</string>
@@ -182,6 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Yuz bilan ochish funksiyasini qayta sozlash uchun joriy yuz modelingiz oʻchirib tashlanadi.\n\nTelefonni qulfdan chiqarish maqsadida yuzingizdan foydalanish uchun bu funksiyani qayta sozlashingiz kerak."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Yuz bilan ochish sozlanmadimi. Sozlamalarni ochib, qaytadan urining."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Barmoq izi skaneriga tegining"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Davom etish uchun qulfni ochish belgisini bosing"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Bu yuz notanish. Barmoq izi orqali urining."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -361,8 +361,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Yuz bilan ochildi"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Yuz aniqlandi"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Qayta urinish uchun tepaga suring"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Tepaga suring va yana Yuz bilan oching"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ishlatish uchun qurilma qulfini oching"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Bu qurilma tashkilotingizga tegishli"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Bu qurilma <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tashkilotiga tegishli"</string>
@@ -932,8 +931,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Boshqa PIN kod ishlating"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> uchun oʻzgarishlarni tasdiqlang"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Batafsil axborot olish uchun suring"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"Yuz autentifikatsiyasi uchun qayta urining"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Tavsiyalar yuklanmoqda"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> uchun media boshqaruvi berkitilsinmi?"</string>

@@ -147,8 +147,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Nakilala ang mukha. Pindutin para magpatuloy."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Nakilala ang mukha. Pindutin ang unlock para magpatuloy."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Na-authenticate"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Kanselahin ang Pag-authenticate"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Gumamit ng PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Gumamit ng pattern"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Gumamit ng password"</string>
@@ -182,6 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Para ma-set up ulit ang Pag-unlock Gamit ang Mukha, made-delete ang iyong kasalukuyang face model.\n\nKakailanganin mong i-set up ulit ang feature na ito para magamit ang iyong mukha para i-unlock ang telepono mo."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Hindi na-set up ang pag-unlock gamit ang mukha. Pumunta sa Mga Setting para subukan ulit."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Pindutin ang fingerprint sensor"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Pindutin ang icon ng pag-unlock para magpatuloy"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Hindi makilala ang mukha. Gumamit ng fingerprint."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -361,8 +361,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Na-unlock gamit ang mukha"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Nakilala ang mukha"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Mag-swipe pataas para subukan ulit"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Mag-swipe up para ulitin ang Pag-unlock Gamit ang Mukha"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"I-unlock para magamit ang NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Pagmamay-ari ng iyong organisasyon ang device na ito"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Pagmamay-ari ng <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ang device na ito"</string>
@@ -932,8 +931,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Sumubok ng ibang PIN"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Kumpirmahin ang pagbabago para sa <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Mag-swipe para tumingin ng higit pa"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"Subukan ulit ang pag-authenticate ng mukha"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Nilo-load ang rekomendasyon"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"itago ang kontrol sa media na ito para sa <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
