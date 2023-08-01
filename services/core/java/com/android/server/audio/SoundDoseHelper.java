@@ -334,9 +334,8 @@ public class SoundDoseHelper {
                 SAFE_MEDIA_VOLUME_UNINITIALIZED);
         mSafeMediaVolumeDevices.append(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES,
                 SAFE_MEDIA_VOLUME_UNINITIALIZED);
-        // TODO(b/278265907): enable A2DP when we can distinguish A2DP headsets
-        // mSafeMediaVolumeDevices.append(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-        //        SAFE_MEDIA_VOLUME_UNINITIALIZED);
+        mSafeMediaVolumeDevices.append(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                SAFE_MEDIA_VOLUME_UNINITIALIZED);
     }
 
     float getOutputRs2UpperBound() {
