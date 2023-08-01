@@ -147,8 +147,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"முகம் அங்கீகரிக்கப்பட்டது. தொடர அழுத்தவும்."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"முகம் அங்கீகரிக்கப்பட்டது. தொடர அன்லாக் ஐகானை அழுத்தவும்."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"அங்கீகரிக்கப்பட்டது"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"அங்கீகரிப்பை ரத்துசெய்"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"பின்னைப் பயன்படுத்து"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"பேட்டர்னைப் பயன்படுத்து"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"கடவுச்சொல்லைப் பயன்படுத்து"</string>
@@ -182,6 +181,8 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை மீண்டும் அமைக்க, உங்களுடைய தற்போதைய முகத் தோற்றப் பதிவு நீக்கப்படும்.\n\nஉங்கள் முகத்தைப் பயன்படுத்தி மொபைலைத் திறக்க இந்த அம்சத்தை மீண்டும் அமைக்க வேண்டும்."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைக்க முடியவில்லை. அமைப்புகளுக்குச் சென்று மீண்டும் முயலவும்."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"கைரேகை சென்சாரைத் தொடவும்"</string>
+    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
+    <skip />
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"முகத்தை அடையாளம் காண முடியவில்லை. கைரேகையைப் பயன்படுத்தவும்."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -361,8 +362,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"முகத்தால் அன்லாக் செய்யப்பட்டது"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"மீண்டும் முயல மேல்நோக்கி ஸ்வைப் செய்யவும்"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"முகம் காட்டித் திறத்தலை மீண்டும் முயல மேலே ஸ்வைப் செய்யவும்"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCயைப் பயன்படுத்த அன்லாக் செய்யவும்"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"இந்த சாதனம் உங்கள் நிறுவனத்துக்கு சொந்தமானது"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"இந்த சாதனம் <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> நிறுவனத்துக்கு சொந்தமானது"</string>
@@ -932,8 +932,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"வேறு பின்னைப் பயன்படுத்தவும்"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> ஐ மாற்றுவதை உறுதிப்படுத்தவும்"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"மேலும் பார்க்க ஸ்வைப் செய்யவும்"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"முக அங்கீகரிப்பை மீண்டும் முயலலாம்"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"பரிந்துரைகளை ஏற்றுகிறது"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"மீடியா"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கான இந்த மீடியா கட்டுப்பாடுகளை மறைக்கவா?"</string>

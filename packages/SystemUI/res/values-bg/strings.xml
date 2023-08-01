@@ -181,6 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"За да настроите „Отключване с лице“ отново, текущият модел на лицето ви ще бъде изтрит.\n\nЩе трябва да настроите функцията отново, за да отключвате телефона си с лице."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Функцията „Отключване с лице“ не бе настроена. Отворете настройките, за да опитате отново."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Докоснете сензора за отпечатъци"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Натиснете иконата за отключване, за да продължите"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Лицето не е разпознато. Използвайте отпечатък."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -930,8 +931,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Опитайте с друг ПИН код"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Потвърдете промяната за <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Прекарайте пръст, за да видите повече"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"Повторен опит за удостоверяване с лице"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Препоръките се зареждат"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мултимедия"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Скриване на мултимед. контрола за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
