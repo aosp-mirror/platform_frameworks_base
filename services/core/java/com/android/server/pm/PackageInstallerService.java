@@ -1886,7 +1886,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
 
         public void onSessionFinished(final PackageInstallerSession session, boolean success) {
-            mCallbacks.notifySessionFinished(session.sessionId, session.userId, success);
+            if (success) {
+                // There is a timing issue here, if the callback opens the session again in
+                // notifySessionFinished() immediately, the session may not be removed from
+                // the mSession. But to avoid adding unknown latency, only notifying failures
+                // are moved to the last of posted runnable, notifying success cases are
+                // still kept here.
+                mCallbacks.notifySessionFinished(session.sessionId, session.userId, success);
+            }
 
             mInstallHandler.post(new Runnable() {
                 @Override
@@ -1914,6 +1921,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         }
 
                         mSettingsWriteRequest.runNow();
+                    }
+                    if (!success) {
+                        mCallbacks.notifySessionFinished(
+                                session.sessionId, session.userId, success);
                     }
                 }
             });
