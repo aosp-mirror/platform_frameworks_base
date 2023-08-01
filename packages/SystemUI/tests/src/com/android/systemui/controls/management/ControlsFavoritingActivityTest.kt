@@ -17,14 +17,11 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.SingleActivityFactory
 import com.android.systemui.controls.ControlStatus
-import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.createLoadDataObject
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
@@ -73,17 +70,12 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
 
     @Mock lateinit var controller: ControlsControllerImpl
 
-    @Mock lateinit var listingController: ControlsListingController
-
     @Mock lateinit var userTracker: UserTracker
 
     private var latch: CountDownLatch = CountDownLatch(1)
 
     @Mock private lateinit var mockDispatcher: OnBackInvokedDispatcher
     @Captor private lateinit var captureCallback: ArgumentCaptor<OnBackInvokedCallback>
-    @Captor
-    private lateinit var listingCallback:
-        ArgumentCaptor<ControlsListingController.ControlsListingCallback>
     @Captor
     private lateinit var controlsCallback: ArgumentCaptor<Consumer<ControlsController.LoadData>>
 
@@ -93,10 +85,8 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
         ActivityTestRule(
             /* activityFactory= */ SingleActivityFactory {
                 TestableControlsFavoritingActivity(
-                    featureFlags,
                     executor,
                     controller,
-                    listingController,
                     userTracker,
                     mockDispatcher,
                     latch
@@ -109,7 +99,6 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        featureFlags.set(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS, false)
     }
 
     // b/259549854 to root-cause and fix
@@ -130,14 +119,8 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
     }
 
     @Test
-    fun testNewFlowEnabled_buttons() {
-        featureFlags.set(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS, true)
+    fun testButtons() {
         with(launchActivity()) {
-            verify(listingController).addCallback(listingCallback.capture())
-            listingCallback.value.onServicesUpdated(
-                listOf(mock(ControlsServiceInfo::class.java), mock(ControlsServiceInfo::class.java))
-            )
-
             val rearrangeButton = requireViewById<Button>(R.id.rearrange)
             assertThat(rearrangeButton.visibility).isEqualTo(View.VISIBLE)
             assertThat(rearrangeButton.isEnabled).isFalse()
@@ -149,36 +132,8 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
     }
 
     @Test
-    fun testNewFlowDisabled_buttons() {
+    fun testRearrangePressed_savesAndlaunchesActivity() {
         with(launchActivity()) {
-            verify(listingController).addCallback(listingCallback.capture())
-            activityRule.runOnUiThread {
-                listingCallback.value.onServicesUpdated(
-                    listOf(
-                        mock(ControlsServiceInfo::class.java),
-                        mock(ControlsServiceInfo::class.java)
-                    )
-                )
-            }
-
-            val rearrangeButton = requireViewById<Button>(R.id.rearrange)
-            assertThat(rearrangeButton.visibility).isEqualTo(View.GONE)
-            assertThat(rearrangeButton.isEnabled).isFalse()
-
-            val otherAppsButton = requireViewById<Button>(R.id.other_apps)
-            otherAppsButton.waitForPost()
-            assertThat(otherAppsButton.visibility).isEqualTo(View.VISIBLE)
-        }
-    }
-
-    @Test
-    fun testNewFlowEnabled_rearrangePressed_savesAndlaunchesActivity() {
-        featureFlags.set(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS, true)
-        with(launchActivity()) {
-            verify(listingController).addCallback(capture(listingCallback))
-            listingCallback.value.onServicesUpdated(
-                listOf(mock(ControlsServiceInfo::class.java), mock(ControlsServiceInfo::class.java))
-            )
             verify(controller).loadForComponent(any(), capture(controlsCallback), any())
             activityRule.runOnUiThread {
                 controlsCallback.value.accept(
@@ -224,19 +179,15 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
         )
 
     class TestableControlsFavoritingActivity(
-        featureFlags: FeatureFlags,
         executor: Executor,
         controller: ControlsControllerImpl,
-        listingController: ControlsListingController,
         userTracker: UserTracker,
         private val mockDispatcher: OnBackInvokedDispatcher,
         private val latch: CountDownLatch
     ) :
         ControlsFavoritingActivity(
-            featureFlags,
             executor,
             controller,
-            listingController,
             userTracker,
         ) {
 

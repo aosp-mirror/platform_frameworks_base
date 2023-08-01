@@ -628,9 +628,6 @@ object Flags {
     // 2000 - device controls
     @JvmField val APP_PANELS_ALL_APPS_ALLOWED = releasedFlag(2001, "app_panels_all_apps_allowed")
 
-    @JvmField
-    val CONTROLS_MANAGEMENT_NEW_FLOWS = releasedFlag(2002, "controls_management_new_flows")
-
     // Enables removing app from Home control panel as a part of a new flow
     // TODO(b/269132640): Tracking Bug
     @JvmField
