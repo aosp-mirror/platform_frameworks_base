@@ -232,6 +232,7 @@ class TestPhoneWindowManager {
         doReturn(mPackageManager).when(mContext).getPackageManager();
         doReturn(mSensorPrivacyManager).when(mContext).getSystemService(
                 eq(SensorPrivacyManager.class));
+        doReturn(mSearchManager).when(mContext).getSystemService(eq(SearchManager.class));
         doReturn(false).when(mPackageManager).hasSystemFeature(any());
         try {
             doThrow(new PackageManager.NameNotFoundException("test")).when(mPackageManager)
@@ -357,11 +358,7 @@ class TestPhoneWindowManager {
             case LONG_PRESS_POWER_GO_TO_VOICE_ASSIST:
                 break;
             case LONG_PRESS_POWER_ASSISTANT:
-                doNothing().when(mPhoneWindowManager).sendCloseSystemWindows();
-                doReturn(true).when(mPhoneWindowManager).isUserSetupComplete();
-                doReturn(mContext).when(mContext).createContextAsUser(any(), anyInt());
-                doReturn(mSearchManager).when(mContext)
-                        .getSystemService(eq(Context.SEARCH_SERVICE));
+                setupAssistForLaunch();
                 mPhoneWindowManager.mLongPressOnPowerAssistantTimeoutMs = 500;
                 break;
         }
@@ -433,6 +430,16 @@ class TestPhoneWindowManager {
 
     void setKeyguardServiceDelegateIsShowing(boolean isShowing) {
         doReturn(isShowing).when(mKeyguardServiceDelegate).isShowing();
+    }
+
+    void setupAssistForLaunch() {
+        doNothing().when(mPhoneWindowManager).sendCloseSystemWindows();
+        doReturn(true).when(mPhoneWindowManager).isUserSetupComplete();
+        doReturn(mContext).when(mContext).createContextAsUser(any(), anyInt());
+    }
+
+    void overrideSearchManager(SearchManager searchManager) {
+        mPhoneWindowManager.mSearchManager = searchManager;
     }
 
     void assumeResolveActivityNotNull() {
@@ -529,7 +536,7 @@ class TestPhoneWindowManager {
                 .interceptPowerKeyDown(any(), anyBoolean(), any());
     }
 
-    void assertAssistLaunch() {
+    void assertSearchManagerLaunchAssist() {
         waitForIdle();
         verify(mSearchManager, timeout(SHORTCUT_KEY_DELAY_MILLIS)).launchAssist(any());
     }
@@ -550,6 +557,11 @@ class TestPhoneWindowManager {
     void assertShowRecentApps() {
         waitForIdle();
         verify(mStatusBarManagerInternal).showRecentApps(anyBoolean());
+    }
+
+    void assertStatusBarStartAssist() {
+        waitForIdle();
+        verify(mStatusBarManagerInternal).startAssist(any());
     }
 
     void assertSwitchKeyboardLayout(int direction) {

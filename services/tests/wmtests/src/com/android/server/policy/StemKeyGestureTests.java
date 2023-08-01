@@ -16,9 +16,11 @@
 
 package com.android.server.policy;
 
+import static android.provider.Settings.Global.STEM_PRIMARY_BUTTON_LONG_PRESS;
 import static android.provider.Settings.Global.STEM_PRIMARY_BUTTON_SHORT_PRESS;
 import static android.view.KeyEvent.KEYCODE_STEM_PRIMARY;
 
+import static com.android.server.policy.PhoneWindowManager.LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT;
 import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS;
 import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_PRIMARY_LAUNCH_TARGET_ACTIVITY;
 
@@ -89,6 +91,35 @@ public class StemKeyGestureTests extends ShortcutKeyTestBase {
 
         mPhoneWindowManager.assertActivityTargetLaunched(targetComponent);
     }
+
+    @Test
+    public void stemLongKey_triggerSearchServiceToLaunchAssist() {
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_LONG_PRESS,
+                LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.setupAssistForLaunch();
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+
+        sendKey(KEYCODE_STEM_PRIMARY, /* longPress= */ true);
+        mPhoneWindowManager.assertSearchManagerLaunchAssist();
+    }
+
+    @Test
+    public void stemLongKey_whenNoSearchService_triggerStatusBarToStartAssist() {
+        overrideBehavior(
+                STEM_PRIMARY_BUTTON_LONG_PRESS,
+                LONG_PRESS_PRIMARY_LAUNCH_VOICE_ASSISTANT);
+        setUpPhoneWindowManager(/* supportSettingsUpdate= */ true);
+        mPhoneWindowManager.setupAssistForLaunch();
+        mPhoneWindowManager.overrideSearchManager(null);
+        mPhoneWindowManager.overrideStatusBarManagerInternal();
+        mPhoneWindowManager.overrideIsUserSetupComplete(true);
+
+        sendKey(KEYCODE_STEM_PRIMARY, /* longPress= */ true);
+        mPhoneWindowManager.assertStatusBarStartAssist();
+    }
+
 
     private void overrideBehavior(String key, int expectedBehavior) {
         Settings.Global.putLong(mContext.getContentResolver(), key, expectedBehavior);

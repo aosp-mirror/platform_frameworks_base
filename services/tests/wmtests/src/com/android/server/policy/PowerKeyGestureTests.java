@@ -112,7 +112,7 @@ public class PowerKeyGestureTests extends ShortcutKeyTestBase {
         // Show assistant.
         mPhoneWindowManager.overrideLongPressOnPower(LONG_PRESS_POWER_ASSISTANT);
         sendKey(KEYCODE_POWER, true);
-        mPhoneWindowManager.assertAssistLaunch();
+        mPhoneWindowManager.assertSearchManagerLaunchAssist();
 
         // Show global actions.
         mPhoneWindowManager.overrideLongPressOnPower(LONG_PRESS_POWER_GLOBAL_ACTIONS);
