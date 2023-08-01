@@ -19,7 +19,8 @@ package com.android.server.policy;
 import android.platform.test.annotations.Presubmit;
 import android.view.KeyEvent;
 
-import androidx.test.filters.SmallTest;
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.LargeTest;
 
 import com.android.internal.annotations.Keep;
 import com.android.server.input.KeyboardMetricsCollector.KeyboardLogEvent;
@@ -32,7 +33,7 @@ import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 
 @Presubmit
-@SmallTest
+@LargeTest
 @RunWith(JUnitParamsRunner.class)
 public class ShortcutLoggingTests extends ShortcutKeyTestBase {
 
@@ -234,6 +235,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
     }
 
     @Test
+    @FlakyTest(bugId = 293273386)
     @Parameters(method = "shortcutTestArguments")
     public void testShortcuts(String testName, int[] testKeys, KeyboardLogEvent expectedLogEvent,
             int expectedKey, int expectedModifierState) {
