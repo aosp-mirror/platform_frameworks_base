@@ -147,8 +147,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"चेहरे की पहचान हो गई. जारी रखने के लिए टैप करें."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"चेहरे की पहचान हो गई. जारी रखने के लिए अनलॉक आइकॉन को टैप करें."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"पुष्टि हो गई"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"पुष्टि करने की प्रोसेस को रद्द करें"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"पिन इस्तेमाल करें"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"पैटर्न इस्तेमाल करें"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"पासवर्ड इस्तेमाल करें"</string>
@@ -182,6 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"फ़ेस अनलॉक की सुविधा दोबारा सेट अप करने के लिए, आपके चेहरे के मौजूदा मॉडल को मिटा दिया जाएगा.\n\nअपने चेहरे से फ़ोन अनलॉक करने के लिए, आपको इस सुविधा को दोबारा सेट अप करना होगा."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"फ़ेस अनलॉक की सुविधा सेट अप नहीं की जा सकी. सेटिंग पर जाकर दोबारा कोशिश करें."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फ़िंगरप्रिंट सेंसर को छुएं"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"जारी रखने के लिए अनलॉक आइकॉन पर टैप करें"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"चेहरे की पहचान नहीं हुई. फ़िंगरप्रिंट इस्तेमाल करें."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -361,8 +361,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"चेहरे से अनलॉक किया गया"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"चेहरे की पहचान हो गई"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"फिर से कोशिश करने के लिए ऊपर की ओर स्वाइप करें"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"फ़ेस अनलॉक को फिर से आज़माने के लिए ऊपर की ओर स्वाइप करें"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"एनएफ़सी इस्तेमाल करने के लिए स्क्रीन को अनलॉक करें"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> के पास है"</string>
@@ -932,8 +931,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"कोई और पिन आज़माएं"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> में बदलाव के लिए पुष्टि करें"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ज़्यादा देखने के लिए स्वाइप करें"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"चेहरे की पुष्टि करने वाली प्रोसेस फिर से करें"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सुझाव लोड हो रहे हैं"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"मीडिया"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"क्या <xliff:g id="APP_NAME">%1$s</xliff:g> के लिए, इस मीडिया कंट्रोल को छिपाना है?"</string>

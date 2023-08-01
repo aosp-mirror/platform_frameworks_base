@@ -147,8 +147,7 @@
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Ansigt genkendt. Tryk for at fortsætte."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Ansigt genkendt. Tryk på oplåsningsikonet for at fortsætte."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Godkendt"</string>
-    <!-- no translation found for biometric_dialog_cancel_authentication (981316588773442637) -->
-    <skip />
+    <string name="biometric_dialog_cancel_authentication" msgid="981316588773442637">"Annuller godkendelsen"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Brug pinkode"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Brug mønster"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Brug adgangskode"</string>
@@ -182,6 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Hvis du vil konfigurere ansigtslås igen, bliver din nuværende ansigtsmodel slettet.\n\nDu skal konfigurere funktionen igen for at bruge ansigtsgenkendelse til at låse din telefon op."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Ansigtslås kunne ikke konfigureres. Gå til Indstillinger for at prøve igen."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sæt fingeren på fingeraftrykssensoren"</string>
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Tryk på oplåsningsikonet for at fortsætte"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ansigtet kan ikke genkendes. Brug fingeraftryk i stedet."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -361,8 +361,7 @@
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Låst op via ansigtsgenkendelse"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Ansigtet er genkendt"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Stryg opad for at prøve igen"</string>
-    <!-- no translation found for accesssibility_keyguard_retry (8880238862712870676) -->
-    <skip />
+    <string name="accesssibility_keyguard_retry" msgid="8880238862712870676">"Stryg opad for at prøve ansigtslåsen igen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås op for at bruge NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Denne enhed tilhører din organisation"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Denne enhed tilhører <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -932,8 +931,7 @@
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Prøv en anden pinkode"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Bekræft ændring på <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Stryg for at se mere"</string>
-    <!-- no translation found for retry_face (416380073082560186) -->
-    <skip />
+    <string name="retry_face" msgid="416380073082560186">"Prøv ansigtsgodkendelse igen"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Indlæser anbefalinger"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medie"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Vil du skjule denne mediefunktion for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
