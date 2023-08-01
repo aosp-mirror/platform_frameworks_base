@@ -24,6 +24,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING_LOCKSCREEN_HOSTED
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
@@ -89,11 +90,19 @@ constructor(
     val dreamingToLockscreenTransition: Flow<TransitionStep> =
         repository.transition(DREAMING, LOCKSCREEN)
 
+    /** DREAMING_LOCKSCREEN_HOSTED->LOCKSCREEN transition information. */
+    val dreamingLockscreenHostedToLockscreenTransition: Flow<TransitionStep> =
+        repository.transition(DREAMING_LOCKSCREEN_HOSTED, LOCKSCREEN)
+
     /** GONE->AOD transition information. */
     val goneToAodTransition: Flow<TransitionStep> = repository.transition(GONE, AOD)
 
     /** GONE->DREAMING transition information. */
     val goneToDreamingTransition: Flow<TransitionStep> = repository.transition(GONE, DREAMING)
+
+    /** GONE->DREAMING_LOCKSCREEN_HOSTED transition information. */
+    val goneToDreamingLockscreenHostedTransition: Flow<TransitionStep> =
+        repository.transition(GONE, DREAMING_LOCKSCREEN_HOSTED)
 
     /** LOCKSCREEN->AOD transition information. */
     val lockscreenToAodTransition: Flow<TransitionStep> = repository.transition(LOCKSCREEN, AOD)
@@ -101,6 +110,10 @@ constructor(
     /** LOCKSCREEN->DREAMING transition information. */
     val lockscreenToDreamingTransition: Flow<TransitionStep> =
         repository.transition(LOCKSCREEN, DREAMING)
+
+    /** LOCKSCREEN->DREAMING_LOCKSCREEN_HOSTED transition information. */
+    val lockscreenToDreamingLockscreenHostedTransition: Flow<TransitionStep> =
+        repository.transition(LOCKSCREEN, DREAMING_LOCKSCREEN_HOSTED)
 
     /** LOCKSCREEN->OCCLUDED transition information. */
     val lockscreenToOccludedTransition: Flow<TransitionStep> =
