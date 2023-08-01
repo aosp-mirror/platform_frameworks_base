@@ -37,6 +37,8 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_3_2;
+import static android.content.pm.PackageManager.USER_MIN_ASPECT_RATIO_FULLSCREEN;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
@@ -48,6 +50,8 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTAT
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
@@ -805,6 +809,108 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         assertEquals(mController.overrideOrientationIfNeeded(
                 /* candidate */ SCREEN_ORIENTATION_PORTRAIT), SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    // shouldApplyUser...Override
+    @Test
+    public void testShouldApplyUserFullscreenOverride_trueProperty_returnsFalse() throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
+                /* value */ true);
+
+        mController = new LetterboxUiController(mWm, mActivity);
+        doReturn(false).when(mLetterboxConfiguration).isUserAppAspectRatioFullscreenEnabled();
+
+        assertFalse(mController.shouldApplyUserFullscreenOverride());
+    }
+
+    @Test
+    public void testShouldApplyUserFullscreenOverride_falseFullscreenProperty_returnsFalse()
+            throws Exception {
+        prepareActivityThatShouldApplyUserFullscreenOverride();
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE,
+                /* value */ false);
+
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldApplyUserFullscreenOverride());
+    }
+
+    @Test
+    public void testShouldApplyUserFullscreenOverride_falseSettingsProperty_returnsFalse()
+            throws Exception {
+        prepareActivityThatShouldApplyUserFullscreenOverride();
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ false);
+
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldApplyUserFullscreenOverride());
+    }
+
+    @Test
+    public void testShouldApplyUserFullscreenOverride_disabledIgnoreOrientationRequest() {
+        prepareActivityThatShouldApplyUserFullscreenOverride();
+        mDisplayContent.setIgnoreOrientationRequest(false);
+
+        assertFalse(mController.shouldApplyUserFullscreenOverride());
+    }
+
+    @Test
+    public void testShouldApplyUserFullscreenOverride_returnsTrue() {
+        prepareActivityThatShouldApplyUserFullscreenOverride();
+
+        assertTrue(mController.shouldApplyUserFullscreenOverride());
+    }
+
+    @Test
+    public void testShouldApplyUserMinAspectRatioOverride_falseProperty_returnsFalse()
+            throws Exception {
+        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ false);
+
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
+    }
+
+    @Test
+    public void testShouldApplyUserMinAspectRatioOverride_trueProperty_returnsFalse()
+            throws Exception {
+        doReturn(false).when(mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE, /* value */ true);
+
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
+    }
+
+    @Test
+    public void testShouldApplyUserMinAspectRatioOverride_disabledIgnoreOrientationRequest() {
+        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
+        mDisplayContent.setIgnoreOrientationRequest(false);
+
+        assertFalse(mController.shouldApplyUserMinAspectRatioOverride());
+    }
+
+    @Test
+    public void testShouldApplyUserMinAspectRatioOverride_returnsTrue() {
+        prepareActivityThatShouldApplyUserMinAspectRatioOverride();
+
+        assertTrue(mController.shouldApplyUserMinAspectRatioOverride());
+    }
+
+    private void prepareActivityThatShouldApplyUserMinAspectRatioOverride() {
+        spyOn(mController);
+        doReturn(true).when(mLetterboxConfiguration).isUserAppAspectRatioSettingsEnabled();
+        mDisplayContent.setIgnoreOrientationRequest(true);
+        doReturn(USER_MIN_ASPECT_RATIO_3_2).when(mController).getUserMinAspectRatioOverrideCode();
+    }
+
+    private void prepareActivityThatShouldApplyUserFullscreenOverride() {
+        spyOn(mController);
+        doReturn(true).when(mLetterboxConfiguration).isUserAppAspectRatioFullscreenEnabled();
+        mDisplayContent.setIgnoreOrientationRequest(true);
+        doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN).when(mController)
+                .getUserMinAspectRatioOverrideCode();
     }
 
     // shouldUseDisplayLandscapeNaturalOrientation
