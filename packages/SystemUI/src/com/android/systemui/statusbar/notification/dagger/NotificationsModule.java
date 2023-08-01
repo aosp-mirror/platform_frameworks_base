@@ -91,6 +91,7 @@ import javax.inject.Provider;
         NotificationSectionHeadersModule.class,
         NotificationListViewModelModule.class,
         ActivatableNotificationViewModelModule.class,
+        NotificationMemoryModule.class,
 })
 public interface NotificationsModule {
     @Binds
