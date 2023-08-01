@@ -134,6 +134,7 @@ android_library {
         "res-keyguard",
         "res",
     ],
+    use_resource_processor: true,
     static_libs: [
         "WifiTrackerLib",
         "WindowManager-Shell",
@@ -452,6 +453,7 @@ android_app {
     ],
     resource_dirs: [],
 
+    use_resource_processor: true,
     platform_apis: true,
     system_ext_specific: true,
     certificate: "platform",
