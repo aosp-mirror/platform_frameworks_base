@@ -19,6 +19,8 @@ package com.android.systemui.appops;
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 
+import static com.android.systemui.appops.AppOpsControllerImpl.OPS_MIC;
+
 import static junit.framework.TestCase.assertFalse;
 
 import static org.junit.Assert.assertEquals;
@@ -168,6 +170,28 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 TEST_ATTRIBUTION_NAME, AppOpsManager.OP_FLAG_SELF, AppOpsManager.MODE_ALLOWED);
         mTestableLooper.processAllMessages();
         verify(mCallback).onActiveStateChanged(AppOpsManager.OP_RECORD_AUDIO,
+                TEST_UID, TEST_PACKAGE_NAME, true);
+    }
+
+
+    // Only the app ops in the {@link com.android.systemui.appops.AppOpsControllerImpl.OPS} will be
+    // supported by the {@link AppOpsControllerImpl} to add callbacks. The state changes of active
+    // app ops will be notified by the callback.
+    @Test
+    public void addCallback_partialIncludedCode() {
+        mController.addCallback(new int[]{AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
+                AppOpsManager.OP_FINE_LOCATION}, mCallback);
+        mController.onOpActiveChanged(
+                AppOpsManager.OPSTR_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
+        mController.onOpActiveChanged(
+                AppOpsManager.OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO, TEST_UID, TEST_PACKAGE_NAME,
+                true);
+        assertEquals(2, mController.getActiveAppOps().size());
+
+        mTestableLooper.processAllMessages();
+        verify(mCallback).onActiveStateChanged(AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
+                TEST_UID, TEST_PACKAGE_NAME, true);
+        verify(mCallback, never()).onActiveStateChanged(AppOpsManager.OP_RECORD_AUDIO,
                 TEST_UID, TEST_PACKAGE_NAME, true);
     }
 
@@ -504,41 +528,17 @@ public class AppOpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testUnpausedRecordingSentActive() {
-        mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO}, mCallback);
-        mTestableLooper.processAllMessages();
-        mController.onOpActiveChanged(
-                AppOpsManager.OPSTR_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
-
-        mTestableLooper.processAllMessages();
-        mRecordingCallback.onRecordingConfigChanged(Collections.emptyList());
-
-        mTestableLooper.processAllMessages();
-
-        verify(mCallback).onActiveStateChanged(
-                AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
+    public void testUnPausedRecordingSentActive() {
+        for (int i = 0; i < OPS_MIC.length; i++) {
+            verifyUnPausedSentActive(OPS_MIC[i]);
+        }
     }
 
     @Test
     public void testAudioPausedSentInactive() {
-        mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO}, mCallback);
-        mTestableLooper.processAllMessages();
-        mController.onOpActiveChanged(
-                AppOpsManager.OPSTR_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
-        mTestableLooper.processAllMessages();
-
-        AudioRecordingConfiguration mockARC = mock(AudioRecordingConfiguration.class);
-        when(mockARC.getClientUid()).thenReturn(TEST_UID_OTHER);
-        when(mockARC.isClientSilenced()).thenReturn(true);
-
-        mRecordingCallback.onRecordingConfigChanged(List.of(mockARC));
-        mTestableLooper.processAllMessages();
-
-        InOrder inOrder = inOrder(mCallback);
-        inOrder.verify(mCallback).onActiveStateChanged(
-                AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
-        inOrder.verify(mCallback).onActiveStateChanged(
-                AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, false);
+        for (int i = 0; i < OPS_MIC.length; i++) {
+            verifyAudioPausedSentInactive(OPS_MIC[i]);
+        }
     }
 
     @Test
@@ -671,6 +671,41 @@ public class AppOpsControllerTest extends SysuiTestCase {
         assertEquals(2, list.size());
         int cameraIdx = list.get(0).getCode() == AppOpsManager.OP_PHONE_CALL_CAMERA ? 0 : 1;
         assertEquals(AppOpsManager.OP_PHONE_CALL_CAMERA, list.get(cameraIdx).getCode());
+    }
+
+    private void verifyUnPausedSentActive(int micOpCode) {
+        mController.addCallback(new int[]{micOpCode}, mCallback);
+        mTestableLooper.processAllMessages();
+        mController.onOpActiveChanged(AppOpsManager.opToPublicName(micOpCode), TEST_UID,
+                TEST_PACKAGE_NAME, true);
+
+        mTestableLooper.processAllMessages();
+        mRecordingCallback.onRecordingConfigChanged(Collections.emptyList());
+
+        mTestableLooper.processAllMessages();
+
+        verify(mCallback).onActiveStateChanged(micOpCode, TEST_UID, TEST_PACKAGE_NAME, true);
+    }
+
+    private void verifyAudioPausedSentInactive(int micOpCode) {
+        mController.addCallback(new int[]{micOpCode}, mCallback);
+        mTestableLooper.processAllMessages();
+        mController.onOpActiveChanged(AppOpsManager.opToPublicName(micOpCode), TEST_UID_OTHER,
+                TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+
+        AudioRecordingConfiguration mockARC = mock(AudioRecordingConfiguration.class);
+        when(mockARC.getClientUid()).thenReturn(TEST_UID_OTHER);
+        when(mockARC.isClientSilenced()).thenReturn(true);
+
+        mRecordingCallback.onRecordingConfigChanged(List.of(mockARC));
+        mTestableLooper.processAllMessages();
+
+        InOrder inOrder = inOrder(mCallback);
+        inOrder.verify(mCallback).onActiveStateChanged(
+                micOpCode, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        inOrder.verify(mCallback).onActiveStateChanged(
+                micOpCode, TEST_UID_OTHER, TEST_PACKAGE_NAME, false);
     }
 
     private class TestHandler extends AppOpsControllerImpl.H {

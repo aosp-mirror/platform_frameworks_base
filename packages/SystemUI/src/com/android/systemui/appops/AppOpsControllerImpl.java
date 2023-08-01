@@ -20,6 +20,7 @@ import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
 import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 import static android.media.AudioManager.ACTION_MICROPHONE_MUTE_CHANGED;
 
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,6 +34,7 @@ import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import androidx.annotation.WorkerThread;
@@ -96,18 +98,57 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     private final SparseArray<ArrayList<AudioRecordingConfiguration>> mRecordingsByUid =
             new SparseArray<>();
 
-    protected static final int[] OPS = new int[] {
-            AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION,
-            AppOpsManager.OP_CAMERA,
-            AppOpsManager.OP_PHONE_CALL_CAMERA,
-            AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+    @VisibleForTesting
+    protected static final int[] OPS_MIC = new int[] {
             AppOpsManager.OP_RECORD_AUDIO,
-            AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
-            AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
             AppOpsManager.OP_PHONE_CALL_MICROPHONE,
-            AppOpsManager.OP_COARSE_LOCATION,
-            AppOpsManager.OP_FINE_LOCATION
+            AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,
+            AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO
     };
+
+    protected static final int[] OPS_CAMERA = new int[] {
+            AppOpsManager.OP_CAMERA,
+            AppOpsManager.OP_PHONE_CALL_CAMERA
+    };
+
+    protected static final int[] OPS_LOC = new int[] {
+            AppOpsManager.OP_FINE_LOCATION,
+            AppOpsManager.OP_COARSE_LOCATION,
+            AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION
+    };
+
+    protected static final int[] OPS_OTHERS = new int[] {
+            AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+            AppOpsManager.OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO
+    };
+
+
+   protected static final int[] OPS = concatOps(OPS_MIC, OPS_CAMERA, OPS_LOC, OPS_OTHERS);
+
+    /**
+     * @param opArrays the given op arrays.
+     * @return the concatenations of the given op arrays. Null arrays are treated as empty.
+     */
+    private static int[] concatOps(@Nullable int[]...opArrays) {
+        if (opArrays == null) {
+            return new int[0];
+        }
+        int totalLength = 0;
+        for (int[] opArray : opArrays) {
+            if (opArray == null || opArray.length == 0) {
+                continue;
+            }
+            totalLength += opArray.length;
+        }
+        final int[] concatOps = new int[totalLength];
+        int index = 0;
+        for (int[] opArray : opArrays) {
+            if (opArray == null || opArray.length == 0) continue;
+            System.arraycopy(opArray, 0, concatOps, index, opArray.length);
+            index += opArray.length;
+        }
+        return concatOps;
+    }
 
     @Inject
     public AppOpsControllerImpl(
@@ -533,12 +574,17 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     }
 
     private boolean isOpCamera(int op) {
-        return op == AppOpsManager.OP_CAMERA || op == AppOpsManager.OP_PHONE_CALL_CAMERA;
+        for (int i = 0; i < OPS_CAMERA.length; i++) {
+            if (op == OPS_CAMERA[i]) return true;
+        }
+        return false;
     }
 
     private boolean isOpMicrophone(int op) {
-        return op == AppOpsManager.OP_RECORD_AUDIO || op == AppOpsManager.OP_PHONE_CALL_MICROPHONE
-                || op == AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
+        for (int i = 0; i < OPS_MIC.length; i++) {
+            if (op == OPS_MIC[i]) return true;
+        }
+        return false;
     }
 
     protected class H extends Handler {
