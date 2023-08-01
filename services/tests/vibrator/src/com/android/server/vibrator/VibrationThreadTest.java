@@ -1503,7 +1503,6 @@ public class VibrationThreadTest {
         assertTrue(fakeVibrator.getAmplitudes().isEmpty());
     }
 
-    @FlakyTest
     @Test
     public void vibrate_multipleVibrations_withCancel() throws Exception {
         mVibratorProviders.get(VIBRATOR_ID).setSupportedEffects(
