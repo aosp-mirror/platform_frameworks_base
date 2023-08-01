@@ -817,13 +817,17 @@ public class BubbleController implements ConfigurationChangeListener,
      * @param interceptBack whether back should be intercepted or not.
      */
     void updateWindowFlagsForBackpress(boolean interceptBack) {
-        if (mStackView != null && mAddedToWindowManager) {
+        if (mAddedToWindowManager) {
             mWmLayoutParams.flags = interceptBack
                     ? 0
                     : WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
             mWmLayoutParams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-            mWindowManager.updateViewLayout(mStackView, mWmLayoutParams);
+            if (mStackView != null) {
+                mWindowManager.updateViewLayout(mStackView, mWmLayoutParams);
+            } else if (mLayerView != null) {
+                mWindowManager.updateViewLayout(mLayerView, mWmLayoutParams);
+            }
         }
     }
 
