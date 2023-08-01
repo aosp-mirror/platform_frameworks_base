@@ -70,17 +70,27 @@ constructor(
                     combine(
                         transitionInteractor.startedKeyguardTransitionStep,
                         transitionInteractor.finishedKeyguardState,
-                        ::Pair
+                        keyguardInteractor.isActiveDreamLockscreenHosted,
+                        ::Triple
                     ),
-                    ::toTriple
+                    ::toQuad
                 )
-                .collect { (isAbleToDream, lastStartedTransition, finishedKeyguardState) ->
+                .collect {
+                    (
+                        isAbleToDream,
+                        lastStartedTransition,
+                        finishedKeyguardState,
+                        isActiveDreamLockscreenHosted) ->
                     val isOnLockscreen = finishedKeyguardState == KeyguardState.LOCKSCREEN
                     val isTransitionInterruptible =
                         lastStartedTransition.to == KeyguardState.LOCKSCREEN &&
                             !invalidFromStates.contains(lastStartedTransition.from)
                     if (isAbleToDream && (isOnLockscreen || isTransitionInterruptible)) {
-                        startTransitionTo(KeyguardState.DREAMING)
+                        if (isActiveDreamLockscreenHosted) {
+                            startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+                        } else {
+                            startTransitionTo(KeyguardState.DREAMING)
+                        }
                     }
                 }
         }
