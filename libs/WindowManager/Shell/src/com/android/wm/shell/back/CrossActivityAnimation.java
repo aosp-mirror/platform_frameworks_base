@@ -51,9 +51,11 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
+import javax.inject.Inject;
+
 /** Class that defines cross-activity animation. */
 @ShellMainThread
-class CrossActivityAnimation {
+public class CrossActivityAnimation extends ShellBackAnimation {
     /**
      * Minimum scale of the entering/closing window.
      */
@@ -106,6 +108,7 @@ class CrossActivityAnimation {
     private final SpringAnimation mLeavingProgressSpring;
     // Max window x-shift in pixels.
     private final float mWindowXShift;
+    private final BackAnimationRunner mBackAnimationRunner;
 
     private float mEnteringProgress = 0f;
     private float mLeavingProgress = 0f;
@@ -126,11 +129,11 @@ class CrossActivityAnimation {
     private IRemoteAnimationFinishedCallback mFinishCallback;
 
     private final BackProgressAnimator mProgressAnimator = new BackProgressAnimator();
-    final BackAnimationRunner mBackAnimationRunner;
 
     private final BackAnimationBackground mBackground;
 
-    CrossActivityAnimation(Context context, BackAnimationBackground background) {
+    @Inject
+    public CrossActivityAnimation(Context context, BackAnimationBackground background) {
         mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
         mBackAnimationRunner = new BackAnimationRunner(new Callback(), new Runner());
         mBackground = background;
@@ -355,6 +358,11 @@ class CrossActivityAnimation {
 
         applyTransform(surface, targetRect, Math.max(alpha, MIN_WINDOW_ALPHA));
         mTransaction.apply();
+    }
+
+    @Override
+    public BackAnimationRunner getRunner() {
+        return mBackAnimationRunner;
     }
 
     private final class Callback extends IOnBackInvokedCallback.Default {

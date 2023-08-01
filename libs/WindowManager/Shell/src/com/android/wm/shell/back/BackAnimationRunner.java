@@ -32,7 +32,7 @@ import android.window.IOnBackInvokedCallback;
  * before it received IBackAnimationRunner#onAnimationStart, so the controller could continue
  * trigger the real back behavior.
  */
-class BackAnimationRunner {
+public class BackAnimationRunner {
     private static final String TAG = "ShellBackPreview";
 
     private final IOnBackInvokedCallback mCallback;
@@ -44,8 +44,8 @@ class BackAnimationRunner {
     /** True when the back animation is cancelled */
     private boolean mAnimationCancelled;
 
-    BackAnimationRunner(@NonNull IOnBackInvokedCallback callback,
-            @NonNull IRemoteAnimationRunner runner) {
+    public BackAnimationRunner(
+            @NonNull IOnBackInvokedCallback callback, @NonNull IRemoteAnimationRunner runner) {
         mCallback = callback;
         mRunner = runner;
     }

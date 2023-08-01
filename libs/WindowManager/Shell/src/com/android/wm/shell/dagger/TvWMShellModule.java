@@ -49,11 +49,11 @@ import dagger.Provides;
 import java.util.Optional;
 
 /**
- * Provides dependencies from {@link com.android.wm.shell}, these dependencies are only
- * accessible from components within the WM subcomponent (can be explicitly exposed to the
- * SysUIComponent, see {@link WMComponent}).
+ * Provides dependencies from {@link com.android.wm.shell}, these dependencies are only accessible
+ * from components within the WM subcomponent (can be explicitly exposed to the SysUIComponent, see
+ * {@link com.android.systemui.dagger.WMComponent}).
  *
- * This module only defines Shell dependencies for the TV SystemUI implementation.  Common
+ * <p>This module only defines Shell dependencies for the TV SystemUI implementation. Common
  * dependencies should go into {@link WMShellBaseModule}.
  */
 @Module(includes = {TvPipModule.class})
