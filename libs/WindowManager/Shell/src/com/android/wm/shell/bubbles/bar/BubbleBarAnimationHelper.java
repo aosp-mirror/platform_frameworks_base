@@ -215,6 +215,14 @@ public class BubbleBarAnimationHelper {
         mExpandedViewAlphaAnimator.reverse();
     }
 
+    /**
+     * Cancel current animations
+     */
+    public void cancelAnimations() {
+        PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
+        mExpandedViewAlphaAnimator.cancel();
+    }
+
     private void updateExpandedView() {
         if (mExpandedBubble == null || mExpandedBubble.getBubbleBarExpandedView() == null) {
             Log.w(TAG, "Trying to update the expanded view without a bubble");

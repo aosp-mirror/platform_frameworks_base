@@ -30,12 +30,11 @@ import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -90,14 +89,10 @@ class UdfpsFingerprintViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
             )
         val keyguardInteractor =
-            KeyguardInteractor(
-                keyguardRepository,
-                fakeCommandQueue,
-                featureFlags,
-                bouncerRepository,
-                configRepository,
-            )
-
+            KeyguardInteractorFactory.create(
+                    featureFlags = featureFlags,
+                )
+                .keyguardInteractor
         underTest =
             FingerprintViewModel(
                 context,
@@ -109,7 +104,7 @@ class UdfpsFingerprintViewModelTest : SysuiTestCase() {
                         burnInHelper,
                         testScope.backgroundScope,
                         configRepository,
-                        FakeSystemClock(),
+                        keyguardInteractor,
                     ),
                     keyguardInteractor,
                     shadeRepository,

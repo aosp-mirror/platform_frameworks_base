@@ -20,6 +20,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION;
+import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
@@ -51,6 +52,10 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.shared.model.ScreenModel;
+import com.android.systemui.keyguard.shared.model.ScreenState;
 import com.android.systemui.plugins.ClockController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -61,6 +66,9 @@ import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
+
+import kotlin.coroutines.CoroutineContext;
+import kotlin.coroutines.EmptyCoroutineContext;
 
 import java.io.PrintWriter;
 
@@ -91,6 +99,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final FeatureFlags mFeatureFlags;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final Rect mClipBounds = new Rect();
+    private final KeyguardInteractor mKeyguardInteractor;
 
     private Boolean mStatusViewCentered = true;
 
@@ -122,6 +131,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             KeyguardLogger logger,
             FeatureFlags featureFlags,
             InteractionJankMonitor interactionJankMonitor,
+            KeyguardInteractor keyguardInteractor,
             DumpManager dumpManager) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
@@ -134,12 +144,34 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mInteractionJankMonitor = interactionJankMonitor;
         mFeatureFlags = featureFlags;
         mDumpManager = dumpManager;
+        mKeyguardInteractor = keyguardInteractor;
     }
 
     @Override
     public void onInit() {
         mKeyguardClockSwitchController.init();
         mDumpManager.registerDumpable(this);
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            startCoroutines(EmptyCoroutineContext.INSTANCE);
+        }
+    }
+
+    void startCoroutines(CoroutineContext context) {
+        collectFlow(mView, mKeyguardInteractor.getDozeTimeTick(),
+                (Long millis) -> {
+                        dozeTimeTick();
+                }, context);
+
+        collectFlow(mView, mKeyguardInteractor.getScreenModel(),
+                (ScreenModel model) -> {
+                    if (model.getState() == ScreenState.SCREEN_TURNING_ON) {
+                        dozeTimeTick();
+                    }
+                }, context);
+    }
+
+    public KeyguardStatusView getView() {
+        return mView;
     }
 
     @Override

@@ -24,7 +24,6 @@ import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager
 import com.android.systemui.controls.settings.FakeControlsSettingsRepository
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -36,7 +35,6 @@ import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
@@ -44,6 +42,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.util.Optional
 
@@ -102,14 +101,11 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
                 metricsLogger,
                 vibratorHelper,
                 controlsSettingsRepository,
-                controlsSettingsDialogManager,
-                featureFlags
         ))
         coordinator.activityContext = mContext
 
         `when`(cvh.cws.ci.controlId).thenReturn(ID)
         `when`(cvh.cws.control?.isAuthRequired()).thenReturn(true)
-        `when`(featureFlags.isEnabled(Flags.USE_APP_PANELS)).thenReturn(false)
 
         action = spy(coordinator.Action(ID, {}, false, true))
         doReturn(action).`when`(coordinator).createAction(any(), any(), anyBoolean(), anyBoolean())
@@ -155,13 +151,11 @@ class ControlActionCoordinatorImplTest : SysuiTestCase() {
         coordinator.toggle(cvh, "", true)
 
         verify(coordinator).bouncerOrRun(action)
-        verify(controlsSettingsDialogManager).maybeShowDialog(any(), any())
         verify(action).invoke()
     }
 
     @Test
     fun testToggleWhenLockedDoesNotTriggerDialog_featureFlagEnabled() {
-        `when`(featureFlags.isEnabled(Flags.USE_APP_PANELS)).thenReturn(true)
         action = spy(coordinator.Action(ID, {}, false, false))
         doReturn(action).`when`(coordinator).createAction(any(), any(), anyBoolean(), anyBoolean())
 

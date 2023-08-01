@@ -2820,7 +2820,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public void onScreenTurningOn() {
-        mKeyguardStatusViewController.dozeTimeTick();
+        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            mKeyguardStatusViewController.dozeTimeTick();
+        }
     }
 
     private void onMiddleClicked() {
@@ -3070,10 +3072,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
     }
 
-    @Override
     public void dozeTimeTick() {
         mLockIconViewController.dozeTimeTick();
-        mKeyguardStatusViewController.dozeTimeTick();
+        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            mKeyguardStatusViewController.dozeTimeTick();
+        }
         if (mInterpolatedDarkAmount > 0) {
             positionClockAndNotifications();
         }
