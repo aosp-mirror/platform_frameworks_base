@@ -222,7 +222,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && (info.getType() == Transitions.TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE
                 || info.getType() == Transitions.TRANSIT_CANCEL_DRAG_TO_DESKTOP_MODE
                 || info.getType() == Transitions.TRANSIT_EXIT_DESKTOP_MODE
-                || info.getType() == Transitions.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE)) {
+                || info.getType() == Transitions.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE
+                || info.getType() == Transitions.TRANSIT_MOVE_TO_DESKTOP)) {
             mWindowDecorByTaskId.get(change.getTaskInfo().taskId)
                     .addTransitionPausingRelayout(transition);
         }
@@ -356,7 +357,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     // App sometimes draws before the insets from WindowDecoration#relayout have
                     // been added, so they must be added here
                     mWindowDecorByTaskId.get(mTaskId).addCaptionInset(wct);
-                    mDesktopTasksController.get().moveToDesktop(mTaskId, wct);
+                    decoration.incrementRelayoutBlock();
+                    mDesktopTasksController.get().moveToDesktop(decoration, mTaskId, wct);
                 }
                 decoration.closeHandleMenu();
             } else if (id == R.id.fullscreen_button) {

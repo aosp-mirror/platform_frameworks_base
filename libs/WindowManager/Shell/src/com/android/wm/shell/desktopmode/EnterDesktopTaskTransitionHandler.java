@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.graphics.PointF;
@@ -36,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration;
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator;
 
 import java.util.ArrayList;
@@ -60,6 +62,7 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
     private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
     private MoveToDesktopAnimator mMoveToDesktopAnimator;
+    private DesktopModeWindowDecoration mDesktopModeWindowDecoration;
 
     public EnterDesktopTaskTransitionHandler(
             Transitions transitions) {
@@ -128,6 +131,18 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
                 onAnimationEndCallback);
     }
 
+    /**
+     * Starts Transition of type TRANSIT_MOVE_TO_DESKTOP
+     * @param wct WindowContainerTransaction for transition
+     * @param decor {@link DesktopModeWindowDecoration} of task being animated
+     */
+    public void moveToDesktop(@NonNull WindowContainerTransaction wct,
+            DesktopModeWindowDecoration decor) {
+        mDesktopModeWindowDecoration = decor;
+        startTransition(Transitions.TRANSIT_MOVE_TO_DESKTOP, wct,
+                null /* onAnimationEndCallback */);
+    }
+
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startT,
@@ -167,136 +182,207 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
         }
 
         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-        if (type == Transitions.TRANSIT_START_DRAG_TO_DESKTOP_MODE
+        if (type == Transitions.TRANSIT_MOVE_TO_DESKTOP
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
-            // Transitioning to freeform but keeping fullscreen bounds, so the crop is set
-            // to null and we don't require an animation
-            final SurfaceControl sc = change.getLeash();
-            startT.setWindowCrop(sc, null);
-
-            if (mMoveToDesktopAnimator == null
-                    || mMoveToDesktopAnimator.getTaskId() != change.getTaskInfo().taskId) {
-                Slog.e(TAG, "No animator available for this transition");
-                return false;
-            }
-
-            // Calculate and set position of the task
-            final PointF position = mMoveToDesktopAnimator.getPosition();
-            startT.setPosition(sc, position.x, position.y);
-            finishT.setPosition(sc, position.x, position.y);
-
-            startT.apply();
-
-            mTransitions.getMainExecutor().execute(
-                    () -> finishCallback.onTransitionFinished(null, null));
-
-            return true;
+            return animateMoveToDesktop(change, startT, finishCallback);
         }
 
-        Rect endBounds = change.getEndAbsBounds();
+        if (type == Transitions.TRANSIT_START_DRAG_TO_DESKTOP_MODE
+                && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+            return animateStartDragToDesktopMode(change, startT, finishT, finishCallback);
+        }
+
+        final Rect endBounds = change.getEndAbsBounds();
         if (type == Transitions.TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
                 && !endBounds.isEmpty()) {
-            // This Transition animates a task to freeform bounds after being dragged into freeform
-            // mode and brings the remaining freeform tasks to front
-            final SurfaceControl sc = change.getLeash();
-            startT.setWindowCrop(sc, endBounds.width(),
-                    endBounds.height());
-            startT.apply();
-
-            // End the animation that shrinks the window when task is first dragged from fullscreen
-            if (mMoveToDesktopAnimator != null) {
-                mMoveToDesktopAnimator.endAnimator();
-            }
-
-            // We want to find the scale of the current bounds relative to the end bounds. The
-            // task is currently scaled to DRAG_FREEFORM_SCALE and the final bounds will be
-            // scaled to FINAL_FREEFORM_SCALE. So, it is scaled to
-            // DRAG_FREEFORM_SCALE / FINAL_FREEFORM_SCALE relative to the freeform bounds
-            final ValueAnimator animator =
-                    ValueAnimator.ofFloat(
-                            MoveToDesktopAnimator.DRAG_FREEFORM_SCALE / FINAL_FREEFORM_SCALE, 1f);
-            animator.setDuration(FREEFORM_ANIMATION_DURATION);
-            final SurfaceControl.Transaction t = mTransactionSupplier.get();
-            animator.addUpdateListener(animation -> {
-                final float animationValue = (float) animation.getAnimatedValue();
-                t.setScale(sc, animationValue, animationValue);
-
-                final float animationWidth = endBounds.width() * animationValue;
-                final float animationHeight = endBounds.height() * animationValue;
-                final int animationX = endBounds.centerX() - (int) (animationWidth / 2);
-                final int animationY = endBounds.centerY() - (int) (animationHeight / 2);
-
-                t.setPosition(sc, animationX, animationY);
-                t.apply();
-            });
-
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (mOnAnimationFinishedCallback != null) {
-                        mOnAnimationFinishedCallback.accept(finishT);
-                    }
-                    mTransitions.getMainExecutor().execute(
-                            () -> finishCallback.onTransitionFinished(null, null));
-                }
-            });
-
-            animator.start();
-            return true;
+            return animateFinalizeDragToDesktopMode(change, startT, finishT, finishCallback,
+                    endBounds);
         }
 
         if (type == Transitions.TRANSIT_CANCEL_DRAG_TO_DESKTOP_MODE
                 && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
-            // This Transition animates a task to fullscreen after being dragged from the status
-            // bar and then released back into the status bar area
-            final SurfaceControl sc = change.getLeash();
-            // Hide the first (fullscreen) frame because the animation will start from the smaller
-            // scale size.
-            startT.hide(sc)
-                    .setWindowCrop(sc, endBounds.width(), endBounds.height())
-                    .apply();
-
-            if (mMoveToDesktopAnimator == null
-                    || mMoveToDesktopAnimator.getTaskId() != change.getTaskInfo().taskId) {
-                Slog.e(TAG, "No animator available for this transition");
-                return false;
-            }
-
-            // End the animation that shrinks the window when task is first dragged from fullscreen
-            mMoveToDesktopAnimator.endAnimator();
-
-            final ValueAnimator animator = new ValueAnimator();
-            animator.setFloatValues(MoveToDesktopAnimator.DRAG_FREEFORM_SCALE, 1f);
-            animator.setDuration(FREEFORM_ANIMATION_DURATION);
-            final SurfaceControl.Transaction t = mTransactionSupplier.get();
-
-            // Get position of the task
-            final float x = mMoveToDesktopAnimator.getPosition().x;
-            final float y = mMoveToDesktopAnimator.getPosition().y;
-
-            animator.addUpdateListener(animation -> {
-                final float scale = (float) animation.getAnimatedValue();
-                t.setPosition(sc, x * (1 - scale), y * (1 - scale))
-                        .setScale(sc, scale, scale)
-                        .show(sc)
-                        .apply();
-            });
-            animator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (mOnAnimationFinishedCallback != null) {
-                        mOnAnimationFinishedCallback.accept(finishT);
-                    }
-                    mTransitions.getMainExecutor().execute(
-                            () -> finishCallback.onTransitionFinished(null, null));
-                }
-            });
-            animator.start();
-            return true;
+            return animateCancelDragToDesktopMode(change, startT, finishT, finishCallback,
+                    endBounds);
         }
 
         return false;
+    }
+
+    private boolean animateMoveToDesktop(
+            @NonNull TransitionInfo.Change change,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        if (mDesktopModeWindowDecoration == null) {
+            Slog.e(TAG, "Window Decoration is not available for this transition");
+            return false;
+        }
+
+        final SurfaceControl leash = change.getLeash();
+        final Rect startBounds = change.getStartAbsBounds();
+        startT.setPosition(leash, startBounds.left, startBounds.right)
+                .setWindowCrop(leash, startBounds.width(), startBounds.height())
+                .show(leash);
+        mDesktopModeWindowDecoration.showResizeVeil(startT, startBounds);
+
+        final ValueAnimator animator = ValueAnimator.ofObject(new RectEvaluator(),
+                change.getStartAbsBounds(), change.getEndAbsBounds());
+        animator.setDuration(FREEFORM_ANIMATION_DURATION);
+        SurfaceControl.Transaction t = mTransactionSupplier.get();
+        animator.addUpdateListener(animation -> {
+            final Rect animationValue = (Rect) animator.getAnimatedValue();
+            t.setPosition(leash, animationValue.left, animationValue.right)
+                    .setWindowCrop(leash, animationValue.width(), animationValue.height())
+                    .show(leash);
+            mDesktopModeWindowDecoration.updateResizeVeil(t, animationValue);
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mDesktopModeWindowDecoration.hideResizeVeil();
+                mTransitions.getMainExecutor().execute(
+                        () -> finishCallback.onTransitionFinished(null, null));
+            }
+        });
+        animator.start();
+        return true;
+    }
+
+    private boolean animateStartDragToDesktopMode(
+            @NonNull TransitionInfo.Change change,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        // Transitioning to freeform but keeping fullscreen bounds, so the crop is set
+        // to null and we don't require an animation
+        final SurfaceControl sc = change.getLeash();
+        startT.setWindowCrop(sc, null);
+
+        if (mMoveToDesktopAnimator == null
+                || mMoveToDesktopAnimator.getTaskId() != change.getTaskInfo().taskId) {
+            Slog.e(TAG, "No animator available for this transition");
+            return false;
+        }
+
+        // Calculate and set position of the task
+        final PointF position = mMoveToDesktopAnimator.getPosition();
+        startT.setPosition(sc, position.x, position.y);
+        finishT.setPosition(sc, position.x, position.y);
+
+        startT.apply();
+
+        mTransitions.getMainExecutor().execute(
+                () -> finishCallback.onTransitionFinished(null, null));
+
+        return true;
+    }
+
+    private boolean animateFinalizeDragToDesktopMode(
+            @NonNull TransitionInfo.Change change,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull Transitions.TransitionFinishCallback finishCallback,
+            @NonNull Rect endBounds) {
+        // This Transition animates a task to freeform bounds after being dragged into freeform
+        // mode and brings the remaining freeform tasks to front
+        final SurfaceControl sc = change.getLeash();
+        startT.setWindowCrop(sc, endBounds.width(),
+                endBounds.height());
+        startT.apply();
+
+        // End the animation that shrinks the window when task is first dragged from fullscreen
+        if (mMoveToDesktopAnimator != null) {
+            mMoveToDesktopAnimator.endAnimator();
+        }
+
+        // We want to find the scale of the current bounds relative to the end bounds. The
+        // task is currently scaled to DRAG_FREEFORM_SCALE and the final bounds will be
+        // scaled to FINAL_FREEFORM_SCALE. So, it is scaled to
+        // DRAG_FREEFORM_SCALE / FINAL_FREEFORM_SCALE relative to the freeform bounds
+        final ValueAnimator animator =
+                ValueAnimator.ofFloat(
+                        MoveToDesktopAnimator.DRAG_FREEFORM_SCALE / FINAL_FREEFORM_SCALE, 1f);
+        animator.setDuration(FREEFORM_ANIMATION_DURATION);
+        final SurfaceControl.Transaction t = mTransactionSupplier.get();
+        animator.addUpdateListener(animation -> {
+            final float animationValue = (float) animation.getAnimatedValue();
+            t.setScale(sc, animationValue, animationValue);
+
+            final float animationWidth = endBounds.width() * animationValue;
+            final float animationHeight = endBounds.height() * animationValue;
+            final int animationX = endBounds.centerX() - (int) (animationWidth / 2);
+            final int animationY = endBounds.centerY() - (int) (animationHeight / 2);
+
+            t.setPosition(sc, animationX, animationY);
+            t.apply();
+        });
+
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mOnAnimationFinishedCallback != null) {
+                    mOnAnimationFinishedCallback.accept(finishT);
+                }
+                mTransitions.getMainExecutor().execute(
+                        () -> finishCallback.onTransitionFinished(null, null));
+            }
+        });
+
+        animator.start();
+        return true;
+    }
+    private boolean animateCancelDragToDesktopMode(
+            @NonNull TransitionInfo.Change change,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull Transitions.TransitionFinishCallback finishCallback,
+            @NonNull Rect endBounds) {
+        // This Transition animates a task to fullscreen after being dragged from the status
+        // bar and then released back into the status bar area
+        final SurfaceControl sc = change.getLeash();
+        // Hide the first (fullscreen) frame because the animation will start from the smaller
+        // scale size.
+        startT.hide(sc)
+                .setWindowCrop(sc, endBounds.width(), endBounds.height())
+                .apply();
+
+        if (mMoveToDesktopAnimator == null
+                || mMoveToDesktopAnimator.getTaskId() != change.getTaskInfo().taskId) {
+            Slog.e(TAG, "No animator available for this transition");
+            return false;
+        }
+
+        // End the animation that shrinks the window when task is first dragged from fullscreen
+        mMoveToDesktopAnimator.endAnimator();
+
+        final ValueAnimator animator = new ValueAnimator();
+        animator.setFloatValues(MoveToDesktopAnimator.DRAG_FREEFORM_SCALE, 1f);
+        animator.setDuration(FREEFORM_ANIMATION_DURATION);
+        final SurfaceControl.Transaction t = mTransactionSupplier.get();
+
+        // Get position of the task
+        final float x = mMoveToDesktopAnimator.getPosition().x;
+        final float y = mMoveToDesktopAnimator.getPosition().y;
+
+        animator.addUpdateListener(animation -> {
+            final float scale = (float) animation.getAnimatedValue();
+            t.setPosition(sc, x * (1 - scale), y * (1 - scale))
+                    .setScale(sc, scale, scale)
+                    .show(sc)
+                    .apply();
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mOnAnimationFinishedCallback != null) {
+                    mOnAnimationFinishedCallback.accept(finishT);
+                }
+                mTransitions.getMainExecutor().execute(
+                        () -> finishCallback.onTransitionFinished(null, null));
+            }
+        });
+        animator.start();
+        return true;
     }
 
     @Nullable
