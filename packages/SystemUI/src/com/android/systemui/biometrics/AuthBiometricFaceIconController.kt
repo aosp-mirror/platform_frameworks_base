@@ -100,6 +100,9 @@ class AuthBiometricFaceIconController(
             )
         } else if (newState == STATE_ERROR && oldState != STATE_ERROR) {
             animateIconOnce(R.drawable.face_dialog_dark_to_error)
+            iconView.contentDescription = context.getString(
+                    R.string.keyguard_face_failed
+            )
         } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
             animateIconOnce(R.drawable.face_dialog_dark_to_checkmark)
             iconView.contentDescription = context.getString(
