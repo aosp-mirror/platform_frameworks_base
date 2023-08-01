@@ -226,6 +226,7 @@ import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.LetterboxConfiguration.DEFAULT_LETTERBOX_ASPECT_RATIO_FOR_MULTI_WINDOW;
 import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
@@ -2676,7 +2677,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean transferSplashScreenIfNeeded() {
         if (finishing || !mHandleExitSplashScreen || mStartingSurface == null
                 || mStartingWindow == null
-                || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH) {
+                || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH
+                // skip copy splash screen to client if it was resized
+                || (mStartingData != null && mStartingData.mResizedFromTransfer)) {
             return false;
         }
         if (isTransferringSplashScreen()) {
@@ -7632,7 +7635,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     void prepareSurfaces() {
         final boolean show = isVisible() || isAnimating(PARENTS,
-                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS
+                        | ANIMATION_TYPE_PREDICT_BACK);
 
         if (mSurfaceControl != null) {
             if (show && !mLastSurfaceShowing) {

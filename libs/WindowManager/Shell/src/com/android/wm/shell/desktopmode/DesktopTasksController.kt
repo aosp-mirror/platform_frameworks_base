@@ -150,20 +150,24 @@ class DesktopTasksController(
      * back to front during the launch.
      */
     fun stashDesktopApps(displayId: Int) {
-        KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: stashDesktopApps")
-        desktopModeTaskRepository.setStashed(displayId, true)
+        if (DesktopModeStatus.isStashingEnabled()) {
+            KtProtoLog.v(WM_SHELL_DESKTOP_MODE, "DesktopTasksController: stashDesktopApps")
+            desktopModeTaskRepository.setStashed(displayId, true)
+        }
     }
 
     /**
      * Clear the stashed state for the given display
      */
     fun hideStashedDesktopApps(displayId: Int) {
-        KtProtoLog.v(
-                WM_SHELL_DESKTOP_MODE,
-                "DesktopTasksController: hideStashedApps displayId=%d",
-                displayId
-        )
-        desktopModeTaskRepository.setStashed(displayId, false)
+        if (DesktopModeStatus.isStashingEnabled()) {
+            KtProtoLog.v(
+                    WM_SHELL_DESKTOP_MODE,
+                    "DesktopTasksController: hideStashedApps displayId=%d",
+                    displayId
+            )
+            desktopModeTaskRepository.setStashed(displayId, false)
+        }
     }
 
     /** Get number of tasks that are marked as visible */
@@ -172,9 +176,13 @@ class DesktopTasksController(
     }
 
     /** Move a task with given `taskId` to desktop */
-    fun moveToDesktop(taskId: Int, wct: WindowContainerTransaction = WindowContainerTransaction()) {
+    fun moveToDesktop(
+            decor: DesktopModeWindowDecoration,
+            taskId: Int,
+            wct: WindowContainerTransaction = WindowContainerTransaction()
+    ) {
         shellTaskOrganizer.getRunningTaskInfo(taskId)?.let {
-            task -> moveToDesktop(task, wct)
+            task -> moveToDesktop(decor, task, wct)
         }
     }
 
@@ -182,6 +190,7 @@ class DesktopTasksController(
      * Move a task to desktop
      */
     fun moveToDesktop(
+            decor: DesktopModeWindowDecoration,
             task: RunningTaskInfo,
             wct: WindowContainerTransaction = WindowContainerTransaction()
     ) {
@@ -195,7 +204,7 @@ class DesktopTasksController(
         addMoveToDesktopChanges(wct, task)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+            enterDesktopTaskTransitionHandler.moveToDesktop(wct, decor)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
         }

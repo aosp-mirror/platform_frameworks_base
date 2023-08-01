@@ -57,6 +57,7 @@ import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import org.junit.After
@@ -92,6 +93,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock lateinit var mToggleResizeDesktopTaskTransitionHandler:
             ToggleResizeDesktopTaskTransitionHandler
     @Mock lateinit var launchAdjacentController: LaunchAdjacentController
+    @Mock lateinit var desktopModeWindowDecoration: DesktopModeWindowDecoration
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var controller: DesktopTasksController
@@ -276,8 +278,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToDesktop_displayFullscreen_windowingModeSetToFreeform() {
         val task = setUpFullscreenTask()
         task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FULLSCREEN
-        controller.moveToDesktop(task)
-        val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
+        controller.moveToDesktop(desktopModeWindowDecoration, task)
+        val wct = getLatestMoveToDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
             .isEqualTo(WINDOWING_MODE_FREEFORM)
     }
@@ -286,15 +288,15 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveToDesktop_displayFreeform_windowingModeSetToUndefined() {
         val task = setUpFullscreenTask()
         task.configuration.windowConfiguration.displayWindowingMode = WINDOWING_MODE_FREEFORM
-        controller.moveToDesktop(task)
-        val wct = getLatestWct(expectTransition = TRANSIT_CHANGE)
+        controller.moveToDesktop(desktopModeWindowDecoration, task)
+        val wct = getLatestMoveToDesktopWct()
         assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
                 .isEqualTo(WINDOWING_MODE_UNDEFINED)
     }
 
     @Test
     fun moveToDesktop_nonExistentTask_doesNothing() {
-        controller.moveToDesktop(999)
+        controller.moveToDesktop(desktopModeWindowDecoration, 999)
         verifyWCTNotExecuted()
     }
 
@@ -305,9 +307,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val fullscreenTask = setUpFullscreenTask()
         markTaskHidden(freeformTask)
 
-        controller.moveToDesktop(fullscreenTask)
+        controller.moveToDesktop(desktopModeWindowDecoration, fullscreenTask)
 
-        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
+        with(getLatestMoveToDesktopWct()) {
             // Operations should include home task, freeform task
             assertThat(hierarchyOps).hasSize(3)
             assertReorderSequence(homeTask, freeformTask, fullscreenTask)
@@ -327,9 +329,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val freeformTaskSecond = setUpFreeformTask(displayId = SECOND_DISPLAY)
         markTaskHidden(freeformTaskSecond)
 
-        controller.moveToDesktop(fullscreenTaskDefault)
+        controller.moveToDesktop(desktopModeWindowDecoration, fullscreenTaskDefault)
 
-        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
+        with(getLatestMoveToDesktopWct()) {
             // Check that hierarchy operations do not include tasks from second display
             assertThat(hierarchyOps.map { it.container })
                 .doesNotContain(homeTaskSecond.token.asBinder())
@@ -498,6 +500,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun handleRequest_fullscreenTask_desktopStashed_returnWCTWithAllAppsBroughtToFront() {
         assumeTrue(ENABLE_SHELL_TRANSITIONS)
+        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
 
         val stashedFreeformTask = setUpFreeformTask(DEFAULT_DISPLAY)
         markTaskHidden(stashedFreeformTask)
@@ -569,6 +572,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     fun handleRequest_freeformTask_desktopStashed_returnWCTWithAllAppsBroughtToFront() {
         assumeTrue(ENABLE_SHELL_TRANSITIONS)
+        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
 
         val stashedFreeformTask = setUpFreeformTask(DEFAULT_DISPLAY)
         markTaskHidden(stashedFreeformTask)
@@ -626,6 +630,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     fun stashDesktopApps_stateUpdates() {
+        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
+
         controller.stashDesktopApps(DEFAULT_DISPLAY)
 
         assertThat(desktopModeTaskRepository.isStashed(DEFAULT_DISPLAY)).isTrue()
@@ -634,6 +640,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     fun hideStashedDesktopApps_stateUpdates() {
+        whenever(DesktopModeStatus.isStashingEnabled()).thenReturn(true)
+
         desktopModeTaskRepository.setStashed(DEFAULT_DISPLAY, true)
         desktopModeTaskRepository.setStashed(SECOND_DISPLAY, true)
         controller.hideStashedDesktopApps(DEFAULT_DISPLAY)
@@ -709,6 +717,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         if (ENABLE_SHELL_TRANSITIONS) {
             verify(transitions).startTransition(eq(expectTransition), arg.capture(), isNull())
+        } else {
+            verify(shellTaskOrganizer).applyTransaction(arg.capture())
+        }
+        return arg.value
+    }
+
+    private fun getLatestMoveToDesktopWct(): WindowContainerTransaction {
+        val arg = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
+        if (ENABLE_SHELL_TRANSITIONS) {
+            verify(enterDesktopTransitionHandler).moveToDesktop(arg.capture(), any())
         } else {
             verify(shellTaskOrganizer).applyTransaction(arg.capture())
         }

@@ -37,7 +37,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityStat
 import com.android.systemui.keyguard.shared.model.ScreenModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -101,7 +100,7 @@ constructor(
     /** Whether the system is dreaming with an overlay active */
     val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
     /** Whether the system is dreaming and the active dream is hosted in lockscreen */
-    val isActiveDreamLockscreenHosted: Flow<Boolean> = repository.isActiveDreamLockscreenHosted
+    val isActiveDreamLockscreenHosted: StateFlow<Boolean> = repository.isActiveDreamLockscreenHosted
     /** Event for when the camera gesture is detected */
     val onCameraLaunchDetected: Flow<CameraLaunchSourceModel> = conflatedCallbackFlow {
         val callback =
@@ -241,8 +240,16 @@ constructor(
         repository.setQuickSettingsVisible(isVisible)
     }
 
-    fun setKeyguardRootVisibility(statusBarState: Int, goingToFullShade: Boolean, isOcclusionTransitionRunning: Boolean) {
-        repository.setKeyguardVisibility(statusBarState, goingToFullShade, isOcclusionTransitionRunning)
+    fun setKeyguardRootVisibility(
+        statusBarState: Int,
+        goingToFullShade: Boolean,
+        isOcclusionTransitionRunning: Boolean
+    ) {
+        repository.setKeyguardVisibility(
+            statusBarState,
+            goingToFullShade,
+            isOcclusionTransitionRunning
+        )
     }
 
     fun setClockPosition(x: Int, y: Int) {

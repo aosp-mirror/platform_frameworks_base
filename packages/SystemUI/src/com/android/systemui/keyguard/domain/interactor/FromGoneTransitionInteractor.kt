@@ -48,6 +48,7 @@ constructor(
         listenForGoneToAodOrDozing()
         listenForGoneToDreaming()
         listenForGoneToLockscreen()
+        listenForGoneToDreamingLockscreenHosted()
     }
 
     // Primarily for when the user chooses to lock down the device
@@ -63,12 +64,35 @@ constructor(
         }
     }
 
+    private fun listenForGoneToDreamingLockscreenHosted() {
+        scope.launch {
+            keyguardInteractor.isActiveDreamLockscreenHosted
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (isActiveDreamLockscreenHosted, lastStartedStep) ->
+                    if (isActiveDreamLockscreenHosted && lastStartedStep.to == KeyguardState.GONE) {
+                        startTransitionTo(KeyguardState.DREAMING_LOCKSCREEN_HOSTED)
+                    }
+                }
+        }
+    }
+
     private fun listenForGoneToDreaming() {
         scope.launch {
             keyguardInteractor.isAbleToDream
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { (isAbleToDream, lastStartedStep) ->
-                    if (isAbleToDream && lastStartedStep.to == KeyguardState.GONE) {
+                .sample(
+                    combine(
+                        transitionInteractor.startedKeyguardTransitionStep,
+                        keyguardInteractor.isActiveDreamLockscreenHosted,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { (isAbleToDream, lastStartedStep, isActiveDreamLockscreenHosted) ->
+                    if (
+                        isAbleToDream &&
+                            lastStartedStep.to == KeyguardState.GONE &&
+                            !isActiveDreamLockscreenHosted
+                    ) {
                         startTransitionTo(KeyguardState.DREAMING)
                     }
                 }

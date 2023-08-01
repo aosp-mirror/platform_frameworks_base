@@ -421,6 +421,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      * Refresh clock. Called in response to TIME_TICK broadcasts.
      */
     void refresh() {
+        mLogBuffer.log(TAG, LogLevel.INFO, "refresh");
         if (mSmartspaceController != null) {
             mSmartspaceController.requestSmartspaceUpdate();
         }
