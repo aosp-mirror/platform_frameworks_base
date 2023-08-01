@@ -959,17 +959,22 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         // Need to update layers on involved displays since they were all paused while
         // the animation played. This puts the layers back into the correct order.
-        mController.mBuildingFinishLayers = true;
-        try {
-            for (int i = displays.size() - 1; i >= 0; --i) {
-                if (displays.valueAt(i) == null) continue;
-                displays.valueAt(i).assignChildLayers(t);
-            }
-        } finally {
-            mController.mBuildingFinishLayers = false;
+        for (int i = displays.size() - 1; i >= 0; --i) {
+            if (displays.valueAt(i) == null) continue;
+            updateDisplayLayers(displays.valueAt(i), t);
         }
+
         for (int i = 0; i < info.getRootCount(); ++i) {
             t.reparent(info.getRoot(i).getLeash(), null);
+        }
+    }
+
+    private static void updateDisplayLayers(DisplayContent dc, SurfaceControl.Transaction t) {
+        dc.mTransitionController.mBuildingFinishLayers = true;
+        try {
+            dc.assignChildLayers(t);
+        } finally {
+            dc.mTransitionController.mBuildingFinishLayers = false;
         }
     }
 
@@ -2346,8 +2351,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final WindowContainer<?> wc = sortedTargets.get(i).mContainer;
             // Don't include wallpapers since they are in a different DA.
             if (isWallpaper(wc)) continue;
-            final int endDisplayId = getDisplayId(wc);
-            if (endDisplayId < 0) continue;
+            final DisplayContent dc = wc.getDisplayContent();
+            if (dc == null) continue;
+            final int endDisplayId = dc.getDisplayId();
 
             // Check if Root was already created for this display with a higher-Z window
             if (outInfo.findRootIndex(endDisplayId) >= 0) continue;
@@ -2369,6 +2375,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final SurfaceControl rootLeash = leashReference.makeAnimationLeash().setName(
                     "Transition Root: " + leashReference.getName()).build();
             rootLeash.setUnreleasedWarningCallSite("Transition.calculateTransitionRoots");
+            // Update layers to start transaction because we prevent assignment during collect, so
+            // the layer of transition root can be correct.
+            updateDisplayLayers(dc, startT);
             startT.setLayer(rootLeash, leashReference.getLastLayer());
             outInfo.addRootLeash(endDisplayId, rootLeash,
                     ancestor.getBounds().left, ancestor.getBounds().top);
