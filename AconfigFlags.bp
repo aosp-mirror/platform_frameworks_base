@@ -31,6 +31,7 @@ java_defaults {
         ":android.companion.virtual.flags-aconfig-java{.generated_srcjars}",
         ":android.view.inputmethod.flags-aconfig-java{.generated_srcjars}",
         ":android.widget.flags-aconfig-java{.generated_srcjars}",
+        ":com.android.media.flags.bettertogether-aconfig-java{.generated_srcjars}",
     ],
     // Add aconfig-annotations-lib as a dependency for the optimization
     libs: ["aconfig-annotations-lib"],
@@ -214,3 +215,15 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+// Media BetterTogether
+aconfig_declarations {
+    name: "com.android.media.flags.bettertogether-aconfig",
+    package: "com.android.media.flags",
+    srcs: ["media/java/android/media/flags/media_better_together.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.media.flags.bettertogether-aconfig-java",
+    aconfig_declarations: "com.android.media.flags.bettertogether-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
