@@ -844,12 +844,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public boolean onStateChanged(InsetsState state) {
         boolean stateChanged = false;
         if (!CAPTION_ON_SHELL) {
-            stateChanged = !mState.equals(state, true /* excludingCaptionInsets */,
-                    false /* excludeInvisibleIme */)
+            stateChanged = !mState.equals(state, true /* excludesCaptionBar */,
+                    false /* excludesInvisibleIme */)
                     || captionInsetsUnchanged();
         } else {
-            stateChanged = !mState.equals(state, false /* excludingCaptionInsets */,
-                    false /* excludeInvisibleIme */);
+            stateChanged = !mState.equals(state, false /* excludesCaptionBar */,
+                    false /* excludesInvisibleIme */);
         }
         if (!stateChanged && mLastDispatchedState.equals(state)) {
             return false;
@@ -862,8 +862,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         applyLocalVisibilityOverride();
         updateCompatSysUiVisibility();
 
-        if (!mState.equals(lastState, false /* excludingCaptionInsets */,
-                true /* excludeInvisibleIme */)) {
+        if (!mState.equals(lastState, false /* excludesCaptionBar */,
+                true /* excludesInvisibleIme */)) {
             if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged");
             mHost.notifyInsetsChanged();
             if (lastState.getDisplayFrame().equals(mState.getDisplayFrame())) {
