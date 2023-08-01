@@ -1985,7 +1985,7 @@ public abstract class ContentResolver implements ContentInterface {
      * Open a raw file descriptor to access (potentially type transformed)
      * data from a "content:" URI.  This interacts with the underlying
      * {@link ContentProvider#openTypedAssetFile} method of the provider
-     * associated with the given URI, to retrieve retrieve any appropriate
+     * associated with the given URI, to retrieve any appropriate
      * data stream for the data stored there.
      *
      * <p>Unlike {@link #openAssetFileDescriptor}, this function only works
