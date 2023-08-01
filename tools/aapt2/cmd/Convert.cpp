@@ -425,6 +425,7 @@ int ConvertCommand::Action(const std::vector<std::string>& args) {
   if (force_sparse_encoding_) {
     table_flattener_options_.sparse_entries = SparseEntriesMode::Forced;
   }
+  table_flattener_options_.use_compact_entries = enable_compact_entries_;
   if (resources_config_path_) {
     if (!ExtractResourceConfig(*resources_config_path_, &context, table_flattener_options_)) {
       return 1;
