@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class FromDreamingTransitionInteractor
+class FromDreamingLockscreenHostedTransitionInteractor
 @Inject
 constructor(
     override val transitionRepository: KeyguardTransitionRepository,
@@ -44,29 +44,47 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
 ) :
     TransitionInteractor(
-        fromState = KeyguardState.DREAMING,
+        fromState = KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
     ) {
 
     override fun start() {
-        listenForDreamingToOccluded()
-        listenForDreamingToGone()
-        listenForDreamingToDozing()
+        listenForDreamingLockscreenHostedToLockscreen()
+        listenForDreamingLockscreenHostedToGone()
+        listenForDreamingLockscreenHostedToDozing()
+        listenForDreamingLockscreenHostedToOccluded()
+        listenForDreamingLockscreenHostedToPrimaryBouncer()
     }
 
-    fun startToLockscreenTransition() {
+    private fun listenForDreamingLockscreenHostedToLockscreen() {
         scope.launch {
-            if (transitionInteractor.startedKeyguardState.value == KeyguardState.DREAMING) {
-                startTransitionTo(KeyguardState.LOCKSCREEN)
-            }
+            keyguardInteractor.isActiveDreamLockscreenHosted
+                // Add a slight delay to prevent transitioning to lockscreen from happening too soon
+                // as dozing can arrive in a slight gap after the lockscreen hosted dream stops.
+                .onEach { delay(50) }
+                .sample(
+                    combine(
+                        keyguardInteractor.dozeTransitionModel,
+                        transitionInteractor.startedKeyguardTransitionStep,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect {
+                    (isActiveDreamLockscreenHosted, dozeTransitionModel, lastStartedTransition) ->
+                    if (
+                        !isActiveDreamLockscreenHosted &&
+                            DozeStateModel.isDozeOff(dozeTransitionModel.to) &&
+                            lastStartedTransition.to == KeyguardState.DREAMING_LOCKSCREEN_HOSTED
+                    ) {
+                        startTransitionTo(KeyguardState.LOCKSCREEN)
+                    }
+                }
         }
     }
 
-    private fun listenForDreamingToOccluded() {
+    private fun listenForDreamingLockscreenHostedToOccluded() {
         scope.launch {
-            keyguardInteractor.isDreaming
-                // Add a slight delay, as dreaming and occluded events will arrive with a small gap
-                // in time. This prevents a transition to OCCLUSION happening prematurely.
-                .onEach { delay(50) }
+            keyguardInteractor.isActiveDreamLockscreenHosted
                 .sample(
                     combine(
                         keyguardInteractor.isKeyguardOccluded,
@@ -75,30 +93,40 @@ constructor(
                     ),
                     ::toTriple
                 )
-                .collect { (isDreaming, isOccluded, lastStartedTransition) ->
+                .collect { (isActiveDreamLockscreenHosted, isOccluded, lastStartedTransition) ->
                     if (
                         isOccluded &&
-                            !isDreaming &&
-                            (lastStartedTransition.to == KeyguardState.DREAMING ||
-                                lastStartedTransition.to == KeyguardState.LOCKSCREEN)
+                            !isActiveDreamLockscreenHosted &&
+                            lastStartedTransition.to == KeyguardState.DREAMING_LOCKSCREEN_HOSTED
                     ) {
-                        // At the moment, checking for LOCKSCREEN state above provides a corrective
-                        // action. There's no great signal to determine when the dream is ending
-                        // and a transition to OCCLUDED is beginning directly. For now, the solution
-                        // is DREAMING->LOCKSCREEN->OCCLUDED
                         startTransitionTo(KeyguardState.OCCLUDED)
                     }
                 }
         }
     }
 
-    private fun listenForDreamingToGone() {
+    private fun listenForDreamingLockscreenHostedToPrimaryBouncer() {
+        scope.launch {
+            keyguardInteractor.primaryBouncerShowing
+                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (isBouncerShowing, lastStartedTransitionStep) ->
+                    if (
+                        isBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.DREAMING_LOCKSCREEN_HOSTED
+                    ) {
+                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+                    }
+                }
+        }
+    }
+
+    private fun listenForDreamingLockscreenHostedToGone() {
         scope.launch {
             keyguardInteractor.biometricUnlockState
                 .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { (biometricUnlockState, lastStartedTransitionStep) ->
                     if (
-                        lastStartedTransitionStep.to == KeyguardState.DREAMING &&
+                        lastStartedTransitionStep.to == KeyguardState.DREAMING_LOCKSCREEN_HOSTED &&
                             biometricUnlockState == BiometricUnlockModel.WAKE_AND_UNLOCK_FROM_DREAM
                     ) {
                         startTransitionTo(KeyguardState.GONE)
@@ -107,17 +135,17 @@ constructor(
         }
     }
 
-    private fun listenForDreamingToDozing() {
+    private fun listenForDreamingLockscreenHostedToDozing() {
         scope.launch {
             combine(
                     keyguardInteractor.dozeTransitionModel,
-                    transitionInteractor.finishedKeyguardState,
+                    transitionInteractor.startedKeyguardTransitionStep,
                     ::Pair
                 )
-                .collect { (dozeTransitionModel, keyguardState) ->
+                .collect { (dozeTransitionModel, lastStartedTransitionStep) ->
                     if (
                         dozeTransitionModel.to == DozeStateModel.DOZE &&
-                            keyguardState == KeyguardState.DREAMING
+                            lastStartedTransitionStep.to == KeyguardState.DREAMING_LOCKSCREEN_HOSTED
                     ) {
                         startTransitionTo(KeyguardState.DOZING)
                     }
