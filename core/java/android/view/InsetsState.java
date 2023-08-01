@@ -380,11 +380,17 @@ public class InsetsState implements Parcelable {
             @InternalInsetsSide @Nullable SparseIntArray idSideMap,
             @Nullable boolean[] typeVisibilityMap, Insets insets, int type) {
         int index = indexOf(type);
-        Insets existing = typeInsetsMap[index];
-        if (existing == null) {
-            typeInsetsMap[index] = insets;
-        } else {
-            typeInsetsMap[index] = Insets.max(existing, insets);
+
+        // Don't put Insets.NONE into typeInsetsMap. Otherwise, two WindowInsets can be considered
+        // as non-equal while they provide the same insets of each type from WindowInsets#getInsets
+        // if one WindowInsets has Insets.NONE for a type and the other has null for the same type.
+        if (!Insets.NONE.equals(insets)) {
+            Insets existing = typeInsetsMap[index];
+            if (existing == null) {
+                typeInsetsMap[index] = insets;
+            } else {
+                typeInsetsMap[index] = Insets.max(existing, insets);
+            }
         }
 
         if (typeVisibilityMap != null) {
@@ -696,15 +702,14 @@ public class InsetsState implements Parcelable {
      * An equals method can exclude the caption insets. This is useful because we assemble the
      * caption insets information on the client side, and when we communicate with server, it's
      * excluded.
-     * @param excludingCaptionInsets {@code true} if we want to compare two InsetsState objects but
-     *                                           ignore the caption insets source value.
-     * @param excludeInvisibleImeFrames If {@link WindowInsets.Type#ime()} frames should be ignored
-     *                                  when IME is not visible.
+     * @param excludesCaptionBar If {@link Type#captionBar()}} should be ignored.
+     * @param excludesInvisibleIme If {@link WindowInsets.Type#ime()} should be ignored when IME is
+     *                             not visible.
      * @return {@code true} if the two InsetsState objects are equal, {@code false} otherwise.
      */
     @VisibleForTesting
-    public boolean equals(@Nullable Object o, boolean excludingCaptionInsets,
-            boolean excludeInvisibleImeFrames) {
+    public boolean equals(@Nullable Object o, boolean excludesCaptionBar,
+            boolean excludesInvisibleIme) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
 
@@ -721,29 +726,35 @@ public class InsetsState implements Parcelable {
 
         final SparseArray<InsetsSource> thisSources = mSources;
         final SparseArray<InsetsSource> thatSources = state.mSources;
-        if (!excludingCaptionInsets && !excludeInvisibleImeFrames) {
+        if (!excludesCaptionBar && !excludesInvisibleIme) {
             return thisSources.contentEquals(thatSources);
         } else {
             final int thisSize = thisSources.size();
             final int thatSize = thatSources.size();
             int thisIndex = 0;
             int thatIndex = 0;
-            while (thisIndex < thisSize && thatIndex < thatSize) {
+            while (thisIndex < thisSize || thatIndex < thatSize) {
+                InsetsSource thisSource = thisIndex < thisSize
+                        ? thisSources.valueAt(thisIndex)
+                        : null;
+
                 // Seek to the next non-excluding source of ours.
-                InsetsSource thisSource = thisSources.valueAt(thisIndex);
                 while (thisSource != null
-                        && (excludingCaptionInsets && thisSource.getType() == captionBar()
-                                || excludeInvisibleImeFrames && thisSource.getType() == ime()
+                        && (excludesCaptionBar && thisSource.getType() == captionBar()
+                                || excludesInvisibleIme && thisSource.getType() == ime()
                                         && !thisSource.isVisible())) {
                     thisIndex++;
                     thisSource = thisIndex < thisSize ? thisSources.valueAt(thisIndex) : null;
                 }
 
+                InsetsSource thatSource = thatIndex < thatSize
+                        ? thatSources.valueAt(thatIndex)
+                        : null;
+
                 // Seek to the next non-excluding source of theirs.
-                InsetsSource thatSource = thatSources.valueAt(thatIndex);
                 while (thatSource != null
-                        && (excludingCaptionInsets && thatSource.getType() == captionBar()
-                                || excludeInvisibleImeFrames && thatSource.getType() == ime()
+                        && (excludesCaptionBar && thatSource.getType() == captionBar()
+                                || excludesInvisibleIme && thatSource.getType() == ime()
                                         && !thatSource.isVisible())) {
                     thatIndex++;
                     thatSource = thatIndex < thatSize ? thatSources.valueAt(thatIndex) : null;
@@ -756,7 +767,7 @@ public class InsetsState implements Parcelable {
                 thisIndex++;
                 thatIndex++;
             }
-            return thisIndex >= thisSize && thatIndex >= thatSize;
+            return true;
         }
     }
 
