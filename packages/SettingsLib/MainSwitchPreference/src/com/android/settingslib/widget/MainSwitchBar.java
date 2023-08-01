@@ -18,7 +18,6 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -52,9 +51,6 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
     protected TextView mTextView;
     protected Switch mSwitch;
-    private Drawable mBackgroundOn;
-    private Drawable mBackgroundOff;
-    private Drawable mBackgroundDisabled;
     private View mFrameView;
 
     public MainSwitchBar(Context context) {
@@ -89,12 +85,6 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         mFrameView = findViewById(R.id.frame);
         mTextView = (TextView) findViewById(R.id.switch_text);
         mSwitch = (Switch) findViewById(android.R.id.switch_widget);
-        if (BuildCompatUtils.isAtLeastS()) {
-            mBackgroundOn = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_on);
-            mBackgroundOff = getContext().getDrawable(R.drawable.settingslib_switch_bar_bg_off);
-            mBackgroundDisabled = getContext().getDrawable(
-                    R.drawable.settingslib_switch_bar_bg_disabled);
-        }
         addOnSwitchChangeListener((switchView, isChecked) -> setChecked(isChecked));
 
         if (mSwitch.getVisibility() == VISIBLE) {
@@ -216,17 +206,15 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
     /**
      * Enable or disable the text and switch.
      */
+    @Override
     public void setEnabled(boolean enabled) {
         super.setEnabled(enabled);
         mTextView.setEnabled(enabled);
         mSwitch.setEnabled(enabled);
 
         if (BuildCompatUtils.isAtLeastS()) {
-            if (enabled) {
-                mFrameView.setBackground(isChecked() ? mBackgroundOn : mBackgroundOff);
-            } else {
-                mFrameView.setBackground(mBackgroundDisabled);
-            }
+            mFrameView.setEnabled(enabled);
+            mFrameView.setActivated(isChecked());
         }
     }
 
@@ -243,7 +231,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         if (!BuildCompatUtils.isAtLeastS()) {
             setBackgroundColor(isChecked ? mBackgroundActivatedColor : mBackgroundColor);
         } else {
-            mFrameView.setBackground(isChecked ? mBackgroundOn : mBackgroundOff);
+            mFrameView.setActivated(isChecked);
         }
     }
 
