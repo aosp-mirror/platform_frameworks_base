@@ -49,7 +49,7 @@ class RemoteProvisioningShellCommand extends ShellCommand {
             + "  Show this message.\n"
             + "dump\n"
             + "  Dump service diagnostics.\n"
-            + "list [--min-version MIN_VERSION]\n"
+            + "list\n"
             + "  List the names of the IRemotelyProvisionedComponent instances.\n"
             + "csr [--challenge CHALLENGE] NAME\n"
             + "  Generate and print a base64-encoded CSR from the named\n"
