@@ -38,6 +38,10 @@ public abstract class StartingData {
      */
     Task mAssociatedTask;
 
+
+    /** Whether the starting window is resized from transfer across activities. */
+    boolean mResizedFromTransfer;
+
     /** Whether the starting window is drawn. */
     boolean mIsDisplayed;
 
