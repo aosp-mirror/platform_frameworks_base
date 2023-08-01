@@ -1022,9 +1022,12 @@ public class VibrationThreadTest {
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1, 100)
                 .compose();
         CombinedVibration effect = CombinedVibration.createParallel(composed);
-        long vibrationId = startThreadAndDispatcher(effect);
-
+        // We create the HalVibration here to obtain the vibration id and use it to mock the
+        // required response when calling triggerSyncedVibration.
+        HalVibration halVibration = createVibration(effect);
+        long vibrationId = halVibration.id;
         when(mManagerHooks.triggerSyncedVibration(eq(vibrationId))).thenReturn(true);
+        startThreadAndDispatcher(halVibration);
 
         assertTrue(waitUntil(
                 () -> !mVibratorProviders.get(1).getEffectSegments(vibrationId).isEmpty()
@@ -1056,7 +1059,6 @@ public class VibrationThreadTest {
         mVibratorProviders.get(4).setSupportedPrimitives(
                 VibrationEffect.Composition.PRIMITIVE_CLICK);
         when(mManagerHooks.prepareSyncedVibration(anyLong(), any())).thenReturn(true);
-        when(mManagerHooks.triggerSyncedVibration(anyLong())).thenReturn(true);
 
         VibrationEffect composed = VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
@@ -1067,7 +1069,12 @@ public class VibrationThreadTest {
                 .addVibrator(3, VibrationEffect.createWaveform(new long[]{10}, new int[]{100}, -1))
                 .addVibrator(4, composed)
                 .combine();
-        long vibrationId = startThreadAndDispatcher(effect);
+        // We create the HalVibration here to obtain the vibration id and use it to mock the
+        // required response when calling triggerSyncedVibration.
+        HalVibration halVibration = createVibration(effect);
+        long vibrationId = halVibration.id;
+        when(mManagerHooks.triggerSyncedVibration(eq(vibrationId))).thenReturn(true);
+        startThreadAndDispatcher(halVibration);
         waitForCompletion();
 
         long expectedCap = IVibratorManager.CAP_SYNC
@@ -1117,13 +1124,17 @@ public class VibrationThreadTest {
         mockVibrators(vibratorIds);
         mVibratorProviders.get(2).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
         when(mManagerHooks.prepareSyncedVibration(anyLong(), any())).thenReturn(true);
-        when(mManagerHooks.triggerSyncedVibration(anyLong())).thenReturn(false);
 
         CombinedVibration effect = CombinedVibration.startParallel()
                 .addVibrator(1, VibrationEffect.createOneShot(10, 100))
                 .addVibrator(2, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .combine();
-        long vibrationId = startThreadAndDispatcher(effect);
+        // We create the HalVibration here to obtain the vibration id and use it to mock the
+        // required response when calling triggerSyncedVibration.
+        HalVibration halVibration = createVibration(effect);
+        long vibrationId = halVibration.id;
+        when(mManagerHooks.triggerSyncedVibration(eq(vibrationId))).thenReturn(false);
+        startThreadAndDispatcher(halVibration);
         waitForCompletion();
 
         long expectedCap = IVibratorManager.CAP_SYNC
