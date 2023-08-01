@@ -2095,10 +2095,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             HashMap<Integer, Pair<Image, TotalCaptureResult>> captureMap, Integer jpegOrientation,
             Byte jpegQuality) {
         ArrayList<CaptureBundle> ret = new ArrayList<>();
-        for (Integer stagetId : captureMap.keySet()) {
-            Pair<Image, TotalCaptureResult> entry = captureMap.get(stagetId);
+        for (Integer stageId : captureMap.keySet()) {
+            Pair<Image, TotalCaptureResult> entry = captureMap.get(stageId);
             CaptureBundle bundle = new CaptureBundle();
-            bundle.stage = stagetId;
+            bundle.stage = stageId;
             bundle.captureImage = initializeParcelImage(entry.first);
             bundle.sequenceId = entry.second.getSequenceId();
             bundle.captureResult = entry.second.getNativeMetadata();
