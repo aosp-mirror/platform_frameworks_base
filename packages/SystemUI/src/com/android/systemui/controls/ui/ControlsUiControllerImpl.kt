@@ -506,30 +506,22 @@ class ControlsUiControllerImpl @Inject constructor (
         val isPanel = selectedItem is SelectedItem.PanelItem
         val selectedStructure = (selectedItem as? SelectedItem.StructureItem)?.structure
                 ?: EMPTY_STRUCTURE
-        val newFlows = featureFlags.isEnabled(Flags.CONTROLS_MANAGEMENT_NEW_FLOWS)
 
         val items = buildList {
             add(OverflowMenuAdapter.MenuItem(
                     context.getText(R.string.controls_open_app),
                     OPEN_APP_ID
             ))
-            if (newFlows || isPanel) {
-                if (extraApps) {
-                    add(OverflowMenuAdapter.MenuItem(
-                            context.getText(R.string.controls_menu_add_another_app),
-                            ADD_APP_ID
-                    ))
-                }
-                if (featureFlags.isEnabled(Flags.APP_PANELS_REMOVE_APPS_ALLOWED)) {
-                    add(OverflowMenuAdapter.MenuItem(
-                            context.getText(R.string.controls_menu_remove),
-                            REMOVE_APP_ID,
-                    ))
-                }
-            } else {
+            if (extraApps) {
                 add(OverflowMenuAdapter.MenuItem(
-                        context.getText(R.string.controls_menu_add),
-                        ADD_CONTROLS_ID
+                        context.getText(R.string.controls_menu_add_another_app),
+                        ADD_APP_ID
+                ))
+            }
+            if (featureFlags.isEnabled(Flags.APP_PANELS_REMOVE_APPS_ALLOWED)) {
+                add(OverflowMenuAdapter.MenuItem(
+                        context.getText(R.string.controls_menu_remove),
+                        REMOVE_APP_ID,
                 ))
             }
             if (!isPanel) {
