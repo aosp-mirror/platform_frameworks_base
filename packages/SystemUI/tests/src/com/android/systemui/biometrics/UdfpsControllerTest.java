@@ -23,6 +23,7 @@ import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
+import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -61,6 +62,7 @@ import android.os.RemoteException;
 import android.os.VibrationAttributes;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.Pair;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -1128,6 +1130,36 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void playHapticOnTouchUdfpsArea_a11yTouchExplorationEnabled_oneWayHapticsEnabled()
+            throws RemoteException {
+        when(mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)).thenReturn(true);
+        // Configure UdfpsView to accept the ACTION_DOWN event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+
+        // GIVEN that the overlay is showing and a11y touch exploration enabled
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // WHEN ACTION_HOVER is received
+        verify(mUdfpsView).setOnHoverListener(mHoverListenerCaptor.capture());
+        MotionEvent enterEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_HOVER_ENTER, 0, 0, 0);
+        mHoverListenerCaptor.getValue().onHover(mUdfpsView, enterEvent);
+        enterEvent.recycle();
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_HOVER_MOVE, 0, 0, 0);
+        mHoverListenerCaptor.getValue().onHover(mUdfpsView, moveEvent);
+        moveEvent.recycle();
+
+        // THEN context click haptic is played
+        verify(mVibrator).performHapticFeedback(
+                any(),
+                eq(HapticFeedbackConstants.CONTEXT_CLICK)
+        );
+    }
+
+    @Test
     public void noHapticOnTouchUdfpsArea_a11yTouchExplorationDisabled() throws RemoteException {
         // Configure UdfpsView to accept the ACTION_DOWN event
         when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
@@ -1157,6 +1189,35 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 any(),
                 anyString(),
                 any());
+    }
+
+    @Test
+    public void noHapticOnTouchUdfpsArea_a11yTouchExplorationDisabled__oneWayHapticsEnabled()
+            throws RemoteException {
+        when(mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)).thenReturn(true);
+        // Configure UdfpsView to accept the ACTION_DOWN event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+
+        // GIVEN that the overlay is showing and a11y touch exploration NOT enabled
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // WHEN ACTION_DOWN is received
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricExecutor.runAllReady();
+        downEvent.recycle();
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        mBiometricExecutor.runAllReady();
+        moveEvent.recycle();
+
+        // THEN NO haptic played
+        verify(mVibrator, never()).performHapticFeedback(any(), anyInt());
     }
 
     @Test
@@ -1513,5 +1574,46 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // THEN is fingerDown should be FALSE
         assertFalse(mUdfpsController.isFingerDown());
+    }
+
+    @Test
+    public void playHaptic_onAodInterrupt_oneWayHapticsDisabled_onAcquiredBad_usesVibrate()
+            throws RemoteException {
+        // GIVEN UDFPS overlay is showing
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // GIVEN there's been an AoD interrupt
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(false);
+        mScreenObserver.onScreenTurnedOn();
+        mUdfpsController.onAodInterrupt(0, 0, 0, 0);
+
+        // THEN vibrate is used
+        verify(mVibrator).vibrate(
+                anyInt(),
+                anyString(),
+                eq(UdfpsController.EFFECT_CLICK),
+                eq("aod-lock-icon-longpress"),
+                eq(UdfpsController.LOCK_ICON_VIBRATION_ATTRIBUTES)
+        );
+    }
+
+    @Test
+    public void playHaptic_onAodInterrupt_oneWayHapticsEnabled_onAcquiredBad_performHapticFeedback()
+            throws RemoteException {
+        when(mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)).thenReturn(true);
+        // GIVEN UDFPS overlay is showing
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        // GIVEN there's been an AoD interrupt
+        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(false);
+        mScreenObserver.onScreenTurnedOn();
+        mUdfpsController.onAodInterrupt(0, 0, 0, 0);
+
+        // THEN vibrate is used
+        verify(mVibrator).performHapticFeedback(any(), eq(UdfpsController.LONG_PRESS));
     }
 }
