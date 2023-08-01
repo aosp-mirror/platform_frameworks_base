@@ -746,7 +746,6 @@ public class Element {
             case TAG_PROVIDER:
             case TAG_RECEIVER:
             case TAG_SERVICE:
-            case TAG_USES_LIBRARY:
                 switch (name) {
                     case TAG_ATTR_NAME:
                         return true;
