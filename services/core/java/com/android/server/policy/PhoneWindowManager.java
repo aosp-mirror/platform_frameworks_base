@@ -4499,6 +4499,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 } else {
                     sleepRelease(event.getEventTime());
                 }
+                sendSystemKeyToStatusBarAsync(event);
                 break;
             }
 
@@ -4509,6 +4510,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!down) {
                     mPowerManagerInternal.setUserInactiveOverrideFromWindowManager();
                 }
+                sendSystemKeyToStatusBarAsync(event);
                 break;
             }
 
