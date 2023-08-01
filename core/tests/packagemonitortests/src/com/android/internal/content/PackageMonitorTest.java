@@ -44,10 +44,10 @@ import org.mockito.MockitoAnnotations;
  */
 @RunWith(AndroidJUnit4.class)
 public class PackageMonitorTest {
-
     private static final String FAKE_PACKAGE_NAME = "com.android.internal.content.fakeapp";
     private static final int FAKE_PACKAGE_UID = 123;
     private static final int FAKE_USER_ID = 0;
+    private static final int WAIT_CALLBACK_CALLED_IN_MS = 300;
 
     @Mock
     Context mMockContext;
