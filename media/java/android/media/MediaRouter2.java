@@ -439,14 +439,7 @@ public final class MediaRouter2 {
      * call is ignored because the app is in the background.
      */
     public boolean showSystemOutputSwitcher() {
-        synchronized (mLock) {
-            try {
-                return mMediaRouterService.showMediaOutputSwitcher(mImpl.getPackageName());
-            } catch (RemoteException ex) {
-                ex.rethrowFromSystemServer();
-            }
-        }
-        return false;
+        return mImpl.showSystemOutputSwitcher();
     }
 
     /**
@@ -1950,6 +1943,8 @@ public final class MediaRouter2 {
 
         void setRouteListingPreference(@Nullable RouteListingPreference preference);
 
+        boolean showSystemOutputSwitcher();
+
         List<MediaRoute2Info> getAllRoutes();
 
         void setOnGetControllerHintsListener(OnGetControllerHintsListener listener);
@@ -2094,6 +2089,12 @@ public final class MediaRouter2 {
         public void setRouteListingPreference(@Nullable RouteListingPreference preference) {
             throw new UnsupportedOperationException(
                     "RouteListingPreference cannot be set by a privileged MediaRouter2 instance.");
+        }
+
+        @Override
+        public boolean showSystemOutputSwitcher() {
+            throw new UnsupportedOperationException(
+                    "Cannot show system output switcher from a privileged router.");
         }
 
         /** Gets the list of all discovered routes. */
@@ -2906,6 +2907,18 @@ public final class MediaRouter2 {
                 }
                 notifyRouteListingPreferenceUpdated(preference);
             }
+        }
+
+        @Override
+        public boolean showSystemOutputSwitcher() {
+            synchronized (mLock) {
+                try {
+                    return mMediaRouterService.showMediaOutputSwitcher(mImpl.getPackageName());
+                } catch (RemoteException ex) {
+                    ex.rethrowFromSystemServer();
+                }
+            }
+            return false;
         }
 
         /**
