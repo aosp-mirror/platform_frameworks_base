@@ -18,6 +18,11 @@ package com.android.server.permission.access.immutable
 
 import android.util.SparseArray
 
+/**
+ * Immutable map with index-based access, [Int] keys and mutable data structure values.
+ *
+ * @see MutableReference
+ */
 sealed class IntReferenceMap<I : Immutable<M>, M : I>(
     internal val array: SparseArray<MutableReference<I, M>>
 ) : Immutable<MutableIntReferenceMap<I, M>> {
@@ -42,6 +47,11 @@ sealed class IntReferenceMap<I : Immutable<M>, M : I>(
     override fun toString(): String = array.toString()
 }
 
+/**
+ * Mutable map with index-based access, [Int] keys and mutable data structure values.
+ *
+ * @see MutableReference
+ */
 class MutableIntReferenceMap<I : Immutable<M>, M : I>(
     array: SparseArray<MutableReference<I, M>> = SparseArray()
 ) : IntReferenceMap<I, M>(array) {
