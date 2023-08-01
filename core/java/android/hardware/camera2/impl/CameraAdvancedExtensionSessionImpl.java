@@ -265,7 +265,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         List<CameraOutputConfig> outputConfigs = sessionConfig.outputConfigs;
         ArrayList<OutputConfiguration> outputList = new ArrayList<>();
         for (CameraOutputConfig output : outputConfigs) {
-            Surface outputSurface = initializeSurfrace(output);
+            Surface outputSurface = initializeSurface(output);
             if (outputSurface == null) {
                 continue;
             }
@@ -278,7 +278,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             if ((output.sharedSurfaceConfigs != null) && !output.sharedSurfaceConfigs.isEmpty()) {
                 cameraOutput.enableSurfaceSharing();
                 for (CameraOutputConfig sharedOutputConfig : output.sharedSurfaceConfigs) {
-                    Surface sharedSurface = initializeSurfrace(sharedOutputConfig);
+                    Surface sharedSurface = initializeSurface(sharedOutputConfig);
                     if (sharedSurface == null) {
                         continue;
                     }
@@ -1156,7 +1156,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         return ret;
     }
 
-    private Surface initializeSurfrace(CameraOutputConfig output) {
+    private Surface initializeSurface(CameraOutputConfig output) {
         switch(output.type) {
             case CameraOutputConfig.TYPE_SURFACE:
                 if (output.surface == null) {
