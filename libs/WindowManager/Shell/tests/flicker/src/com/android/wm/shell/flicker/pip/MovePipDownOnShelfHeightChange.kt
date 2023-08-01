@@ -63,12 +63,8 @@ class MovePipDownOnShelfHeightChange(flicker: LegacyFlickerTest) :
     }
 
     /** Checks that the visible region of [pipApp] window always moves down during the animation. */
-    @Presubmit
-    @Test
-    fun pipWindowMovesDown() = pipWindowMoves(Direction.DOWN)
+    @Presubmit @Test fun pipWindowMovesDown() = pipWindowMoves(Direction.DOWN)
 
     /** Checks that the visible region of [pipApp] layer always moves down during the animation. */
-    @Presubmit
-    @Test
-    fun pipLayerMovesDown() = pipLayerMoves(Direction.DOWN)
+    @Presubmit @Test fun pipLayerMovesDown() = pipLayerMoves(Direction.DOWN)
 }
