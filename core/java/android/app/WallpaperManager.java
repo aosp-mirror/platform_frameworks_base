@@ -2929,19 +2929,16 @@ public class WallpaperManager {
         ComponentName cn = null;
         String[] cmfWallpaperMap = context.getResources().getStringArray(
                 com.android.internal.R.array.default_wallpaper_component_per_device_color);
-        if (cmfWallpaperMap == null || cmfWallpaperMap.length == 0) {
-            Log.d(TAG, "No CMF wallpaper config");
-            return getDefaultWallpaperComponent(context);
-        }
-
-        for (String entry : cmfWallpaperMap) {
-            String[] cmfWallpaper;
-            if (!TextUtils.isEmpty(entry)) {
-                cmfWallpaper = entry.split(",");
-                if (cmfWallpaper != null && cmfWallpaper.length == 2 && VALUE_CMF_COLOR.equals(
-                        cmfWallpaper[0]) && !TextUtils.isEmpty(cmfWallpaper[1])) {
-                    cn = ComponentName.unflattenFromString(cmfWallpaper[1]);
-                    break;
+        if (cmfWallpaperMap != null && cmfWallpaperMap.length > 0) {
+            for (String entry : cmfWallpaperMap) {
+                String[] cmfWallpaper;
+                if (!TextUtils.isEmpty(entry)) {
+                    cmfWallpaper = entry.split(",");
+                    if (cmfWallpaper != null && cmfWallpaper.length == 2 && VALUE_CMF_COLOR.equals(
+                            cmfWallpaper[0]) && !TextUtils.isEmpty(cmfWallpaper[1])) {
+                        cn = ComponentName.unflattenFromString(cmfWallpaper[1]);
+                        break;
+                    }
                 }
             }
         }
@@ -2950,7 +2947,7 @@ public class WallpaperManager {
             cn = null;
         }
 
-        return cn;
+        return cn == null ? getDefaultWallpaperComponent(context) : cn;
     }
 
     private static boolean isComponentExist(Context context, ComponentName cn) {
