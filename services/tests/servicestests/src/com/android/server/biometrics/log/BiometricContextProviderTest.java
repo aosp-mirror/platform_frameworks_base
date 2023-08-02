@@ -252,12 +252,23 @@ public class BiometricContextProviderTest {
     }
 
     @Test
+    public void testSubscribesWithDifferentState() throws RemoteException {
+        final Consumer<OperationContext> nonEmptyConsumer = mock(Consumer.class);
+        mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_AOD);
+        mProvider.subscribe(mOpContext, nonEmptyConsumer);
+        verify(nonEmptyConsumer).accept(same(mOpContext.toAidlContext()));
+    }
+
+    @Test
     public void testUnsubscribes() throws RemoteException {
         final Consumer<OperationContext> emptyConsumer = mock(Consumer.class);
         mProvider.subscribe(mOpContext, emptyConsumer);
         mProvider.unsubscribe(mOpContext);
 
         mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_AOD);
+
+        //reset to unknown to avoid trigger accept when subscribe
+        mListener.onDisplayStateChanged(AuthenticateOptions.DISPLAY_STATE_UNKNOWN);
 
         final Consumer<OperationContext> nonEmptyConsumer = mock(Consumer.class);
         mProvider.subscribe(mOpContext, nonEmptyConsumer);
