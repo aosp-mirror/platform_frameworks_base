@@ -30,6 +30,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.testutils.FakeNavControllerWrapper
 import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.spaprivileged.framework.compose.getPlaceholder
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
 import com.android.settingslib.spaprivileged.tests.testutils.FakeRestrictionsProvider
 import com.android.settingslib.spaprivileged.tests.testutils.TestAppRecord
@@ -95,9 +96,7 @@ class TogglePermissionAppListPageTest {
 
         val summaryState = getSummary(listModel)
 
-        assertThat(summaryState.value).isEqualTo(
-            context.getString(R.string.summary_placeholder)
-        )
+        assertThat(summaryState.value).isEqualTo(context.getPlaceholder())
     }
 
     @Test

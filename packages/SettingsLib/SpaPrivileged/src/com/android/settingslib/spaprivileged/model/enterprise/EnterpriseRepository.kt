@@ -20,7 +20,7 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResources.Strings.Settings.PERSONAL_CATEGORY_HEADER
 import android.app.admin.DevicePolicyResources.Strings.Settings.WORK_CATEGORY_HEADER
 import android.content.Context
-import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.R
 
 class EnterpriseRepository(private val context: Context) {
     private val resources by lazy {

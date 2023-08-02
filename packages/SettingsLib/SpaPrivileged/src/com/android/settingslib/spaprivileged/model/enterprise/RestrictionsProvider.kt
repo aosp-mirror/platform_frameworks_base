@@ -27,7 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.settingslib.RestrictedLockUtils
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
 import com.android.settingslib.RestrictedLockUtilsInternal
-import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.widget.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -56,11 +56,15 @@ private data class BlockedByAdminImpl(
 
     override fun getSummary(checked: Boolean?) = when (checked) {
         true -> enterpriseRepository.getEnterpriseString(
-            Settings.ENABLED_BY_ADMIN_SWITCH_SUMMARY, R.string.enabled_by_admin
+            updatableStringId = Settings.ENABLED_BY_ADMIN_SWITCH_SUMMARY,
+            resId = R.string.enabled_by_admin,
         )
+
         false -> enterpriseRepository.getEnterpriseString(
-            Settings.DISABLED_BY_ADMIN_SWITCH_SUMMARY, R.string.disabled_by_admin
+            updatableStringId = Settings.DISABLED_BY_ADMIN_SWITCH_SUMMARY,
+            resId = R.string.disabled_by_admin,
         )
+
         else -> ""
     }
 
