@@ -378,6 +378,12 @@ final class ProcessStateRecord {
     private boolean mReachable;
 
     /**
+     * Whether or not this process is reversed reachable from given process.
+     */
+    @GuardedBy("mService")
+    private boolean mReversedReachable;
+
+    /**
      * The most recent time when the last visible activity within this process became invisible.
      *
      * <p> It'll be set to 0 if there is never a visible activity, or Long.MAX_VALUE if there is
@@ -453,6 +459,9 @@ final class ProcessStateRecord {
     private int mCachedProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
     @GuardedBy("mService")
     private int mCachedSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
+
+    @GuardedBy("mService")
+    private boolean mScheduleLikeTopApp = false;
 
     ProcessStateRecord(ProcessRecord app) {
         mApp = app;
@@ -614,9 +623,11 @@ final class ProcessStateRecord {
     void forceProcessStateUpTo(int newState) {
         if (mRepProcState > newState) {
             synchronized (mProcLock) {
+                final int prevProcState = mRepProcState;
                 setReportedProcState(newState);
                 setCurProcState(newState);
                 setCurRawProcState(newState);
+                mService.mOomAdjuster.onProcessStateChanged(mApp, prevProcState);
             }
         }
     }
@@ -985,6 +996,16 @@ final class ProcessStateRecord {
     }
 
     @GuardedBy("mService")
+    boolean isReversedReachable() {
+        return mReversedReachable;
+    }
+
+    @GuardedBy("mService")
+    void setReversedReachable(boolean reversedReachable) {
+        mReversedReachable = reversedReachable;
+    }
+
+    @GuardedBy("mService")
     void resetCachedInfo() {
         mCachedHasActivities = VALUE_INVALID;
         mCachedIsHeavyWeight = VALUE_INVALID;
@@ -1132,6 +1153,16 @@ final class ProcessStateRecord {
     @GuardedBy("mService")
     int getCachedSchedGroup() {
         return mCachedSchedGroup;
+    }
+
+    @GuardedBy("mService")
+    boolean shouldScheduleLikeTopApp() {
+        return mScheduleLikeTopApp;
+    }
+
+    @GuardedBy("mService")
+    void setScheduleLikeTopApp(boolean scheduleLikeTopApp) {
+        mScheduleLikeTopApp = scheduleLikeTopApp;
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
