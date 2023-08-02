@@ -89,11 +89,13 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
         }
     }
 
+    @Override
     protected AlertingNotificationManager createAlertingNotificationManager() {
         return mHeadsUpManager;
     }
 
     @Before
+    @Override
     public void setUp() {
         initMocks(this);
         when(mEntry.getSbn()).thenReturn(mSbn);
@@ -105,8 +107,9 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     }
 
     @After
+    @Override
     public void tearDown() {
-        mTestHandler.removeCallbacksAndMessages(null);
+        super.tearDown();
     }
 
     @Test
@@ -173,7 +176,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
                 () -> mLivesPastNormalTime = mHeadsUpManager.isAlerting(mEntry.getKey());
         mTestHandler.postDelayed(pastNormalTimeRunnable,
                         (TEST_A11Y_AUTO_DISMISS_TIME + TEST_AUTO_DISMISS_TIME) / 2);
-        mTestHandler.postDelayed(TEST_TIMEOUT_RUNNABLE, TEST_A11Y_TIMEOUT_TIME);
+        mTestHandler.postDelayed(mTestTimeoutRunnable, TEST_A11Y_TIMEOUT_TIME);
 
         TestableLooper.get(this).processMessages(2);
 
