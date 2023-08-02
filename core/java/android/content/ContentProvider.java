@@ -1483,6 +1483,12 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         // proper SQL syntax for us.
         SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
 
+        // Guard against SQL injection attacks
+        qBuilder.setStrict(true);
+        qBuilder.setProjectionMap(MAP_OF_QUERYABLE_COLUMNS);
+        qBuilder.setStrictColumns(true);
+        qBuilder.setStrictGrammar(true);
+
         // Set the table we're querying.
         qBuilder.setTables(DATABASE_TABLE_NAME);
 
@@ -1545,6 +1551,12 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * <pre>// SQLiteQueryBuilder is a helper class that creates the
         // proper SQL syntax for us.
         SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
+
+        // Guard against SQL injection attacks
+        qBuilder.setStrict(true);
+        qBuilder.setProjectionMap(MAP_OF_QUERYABLE_COLUMNS);
+        qBuilder.setStrictColumns(true);
+        qBuilder.setStrictGrammar(true);
 
         // Set the table we're querying.
         qBuilder.setTables(DATABASE_TABLE_NAME);
