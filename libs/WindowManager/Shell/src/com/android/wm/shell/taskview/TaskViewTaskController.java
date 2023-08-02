@@ -317,18 +317,12 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         // we know about -- so leave clean-up here even if shell transitions are enabled.
         if (mTaskToken == null || !mTaskToken.equals(taskInfo.token)) return;
 
-        if (mListener != null) {
-            final int taskId = taskInfo.taskId;
-            mListenerExecutor.execute(() -> {
-                mListener.onTaskRemovalStarted(taskId);
-            });
-        }
-        mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, false);
+        final SurfaceControl taskLeash = mTaskLeash;
+        handleAndNotifyTaskRemoval(mTaskInfo);
 
         // Unparent the task when this surface is destroyed
-        mTransaction.reparent(mTaskLeash, null).apply();
+        mTransaction.reparent(taskLeash, null).apply();
         resetTaskInfo();
-        mTaskViewBase.onTaskVanished(taskInfo);
     }
 
     @Override
@@ -498,6 +492,20 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    /** Notifies listeners of a task being removed and stops intercepting back presses on it. */
+    private void handleAndNotifyTaskRemoval(ActivityManager.RunningTaskInfo taskInfo) {
+        if (taskInfo != null) {
+            if (mListener != null) {
+                final int taskId = taskInfo.taskId;
+                mListenerExecutor.execute(() -> {
+                    mListener.onTaskRemovalStarted(taskId);
+                });
+            }
+            mTaskViewBase.onTaskVanished(taskInfo);
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(taskInfo.token, false);
+        }
+    }
+
     /** Returns the task info for the task in the TaskView. */
     @Nullable
     public ActivityManager.RunningTaskInfo getTaskInfo() {
@@ -523,18 +531,12 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
      */
     void cleanUpPendingTask() {
         if (mPendingInfo != null) {
-            if (mListener != null) {
-                final int taskId = mPendingInfo.taskId;
-                mListenerExecutor.execute(() -> {
-                    mListener.onTaskRemovalStarted(taskId);
-                });
-            }
-            mTaskViewBase.onTaskVanished(mPendingInfo);
-            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mPendingInfo.token, false);
+            final ActivityManager.RunningTaskInfo pendingInfo = mPendingInfo;
+            handleAndNotifyTaskRemoval(pendingInfo);
 
             // Make sure the task is removed
             WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.removeTask(mPendingInfo.token);
+            wct.removeTask(pendingInfo.token);
             mTaskViewTransitions.closeTaskView(wct, this);
         }
         resetTaskInfo();
@@ -559,16 +561,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
      * is used instead.
      */
     void prepareCloseAnimation() {
-        if (mTaskToken != null) {
-            if (mListener != null) {
-                final int taskId = mTaskInfo.taskId;
-                mListenerExecutor.execute(() -> {
-                    mListener.onTaskRemovalStarted(taskId);
-                });
-            }
-            mTaskViewBase.onTaskVanished(mTaskInfo);
-            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, false);
-        }
+        handleAndNotifyTaskRemoval(mTaskInfo);
         resetTaskInfo();
     }
 

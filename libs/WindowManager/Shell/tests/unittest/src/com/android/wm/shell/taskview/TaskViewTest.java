@@ -607,4 +607,29 @@ public class TaskViewTest extends ShellTestCase {
         verify(mTaskViewTaskController).applyCaptionInsetsIfNeeded();
         verify(mOrganizer).applyTransaction(any());
     }
+
+    @Test
+    public void testReleaseInOnTaskRemoval_noNPE() {
+        mTaskViewTaskController = spy(new TaskViewTaskController(mContext, mOrganizer,
+                mTaskViewTransitions, mSyncQueue));
+        mTaskView = new TaskView(mContext, mTaskViewTaskController);
+        mTaskView.setListener(mExecutor, new TaskView.Listener() {
+            @Override
+            public void onTaskRemovalStarted(int taskId) {
+                mTaskView.release();
+            }
+        });
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+
+        assertThat(mTaskViewTaskController.getTaskInfo()).isEqualTo(mTaskInfo);
+
+        mTaskViewTaskController.prepareCloseAnimation();
+
+        assertThat(mTaskViewTaskController.getTaskInfo()).isNull();
+    }
 }
