@@ -617,7 +617,8 @@ object Flags {
     val CLIPBOARD_IMAGE_TIMEOUT = unreleasedFlag(1702, "clipboard_image_timeout", teamfood = true)
     // TODO(b/279405451): Tracking Bug
     @JvmField
-    val CLIPBOARD_SHARED_TRANSITIONS = unreleasedFlag(1703, "clipboard_shared_transitions")
+    val CLIPBOARD_SHARED_TRANSITIONS =
+            unreleasedFlag(1703, "clipboard_shared_transitions", teamfood = true)
 
     // TODO(b/283300105): Tracking Bug
     @JvmField val SCENE_CONTAINER = unreleasedFlag(1802, "scene_container")
@@ -627,11 +628,6 @@ object Flags {
 
     // 2000 - device controls
     @JvmField val APP_PANELS_ALL_APPS_ALLOWED = releasedFlag(2001, "app_panels_all_apps_allowed")
-
-    // Enables removing app from Home control panel as a part of a new flow
-    // TODO(b/269132640): Tracking Bug
-    @JvmField
-    val APP_PANELS_REMOVE_APPS_ALLOWED = releasedFlag(2003, "app_panels_remove_apps_allowed")
 
     // 2200 - biometrics (udfps, sfps, BiometricPrompt, etc.)
     // TODO(b/259264861): Tracking Bug

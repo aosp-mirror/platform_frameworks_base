@@ -31,6 +31,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
+import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
@@ -317,7 +318,9 @@ constructor(
             return
         }
 
-        if (user == userTracker.userHandle) {
+        // When switched to a secondary user, the sysUI is still running in the main user, we will
+        // need to update the shortcut in the secondary user.
+        if (user == getCurrentRunningUser()) {
             updateNoteTaskAsUserInternal(user)
         } else {
             // TODO(b/278729185): Replace fire and forget service with a bounded service.
@@ -353,6 +356,9 @@ constructor(
 
         updateNoteTaskAsUser(user)
     }
+
+    // Returns the [UserHandle] that this class is running on.
+    @VisibleForTesting internal fun getCurrentRunningUser(): UserHandle = Process.myUserHandle()
 
     private val SecureSettings.preferredUser: UserHandle
         get() {

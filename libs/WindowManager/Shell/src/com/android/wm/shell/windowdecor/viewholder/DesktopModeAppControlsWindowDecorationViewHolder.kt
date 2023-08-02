@@ -28,6 +28,7 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
     private val openMenuButton: View = rootView.findViewById(R.id.open_menu_button)
     private val closeWindowButton: ImageButton = rootView.findViewById(R.id.close_window)
     private val expandMenuButton: ImageButton = rootView.findViewById(R.id.expand_menu_button)
+    private val maximizeWindowButton: ImageButton = rootView.findViewById(R.id.maximize_window)
     private val appNameTextView: TextView = rootView.findViewById(R.id.application_name)
     private val appIconImageView: ImageView = rootView.findViewById(R.id.application_icon)
 
@@ -37,6 +38,7 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
         openMenuButton.setOnClickListener(onCaptionButtonClickListener)
         openMenuButton.setOnTouchListener(onCaptionTouchListener)
         closeWindowButton.setOnClickListener(onCaptionButtonClickListener)
+        maximizeWindowButton.setOnClickListener(onCaptionButtonClickListener)
         closeWindowButton.setOnTouchListener(onCaptionTouchListener)
         appNameTextView.text = appName
         appIconImageView.setImageDrawable(appIcon)
@@ -49,6 +51,8 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
 
         closeWindowButton.imageTintList = ColorStateList.valueOf(
                 getCaptionCloseButtonColor(taskInfo))
+        maximizeWindowButton.imageTintList = ColorStateList.valueOf(
+                getCaptionMaximizeButtonColor(taskInfo))
         expandMenuButton.imageTintList = ColorStateList.valueOf(
                 getCaptionExpandButtonColor(taskInfo))
         appNameTextView.setTextColor(getCaptionAppNameTextColor(taskInfo))
@@ -67,6 +71,14 @@ internal class DesktopModeAppControlsWindowDecorationViewHolder(
             context.getColor(R.color.desktop_mode_caption_close_button_light)
         } else {
             context.getColor(R.color.desktop_mode_caption_close_button_dark)
+        }
+    }
+
+    private fun getCaptionMaximizeButtonColor(taskInfo: RunningTaskInfo): Int {
+        return if (shouldUseLightCaptionColors(taskInfo)) {
+            context.getColor(R.color.desktop_mode_caption_maximize_button_light)
+        } else {
+            context.getColor(R.color.desktop_mode_caption_maximize_button_dark)
         }
     }
 

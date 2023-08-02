@@ -418,14 +418,11 @@ public class MidiService extends IMidiManager.Stub {
             setDeviceServer(server);
         }
 
-        @RequiresPermission(anyOf = {Manifest.permission.QUERY_USERS,
-                Manifest.permission.CREATE_USERS,
-                Manifest.permission.MANAGE_USERS})
         public Device(BluetoothDevice bluetoothDevice) {
             mBluetoothDevice = bluetoothDevice;
             mServiceInfo = null;
             mUid = mBluetoothServiceUid;
-            mUserId = mUserManager.getMainUser().getIdentifier();
+            mUserId = UserHandle.getUserId(mUid);
         }
 
         private void setDeviceServer(IMidiDeviceServer server) {

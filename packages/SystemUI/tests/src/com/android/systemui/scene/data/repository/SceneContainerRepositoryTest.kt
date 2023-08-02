@@ -22,11 +22,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.SceneTransitionModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -91,11 +93,30 @@ class SceneContainerRepositoryTest : SysuiTestCase() {
         val sceneTransitionProgress by collectLastValue(underTest.transitionProgress)
         assertThat(sceneTransitionProgress).isEqualTo(1f)
 
-        underTest.setSceneTransitionProgress(0.1f)
+        val transitionState =
+            MutableStateFlow<ObservableTransitionState>(
+                ObservableTransitionState.Idle(SceneKey.Lockscreen)
+            )
+        underTest.setTransitionState(transitionState)
+        assertThat(sceneTransitionProgress).isEqualTo(1f)
+
+        val progress = MutableStateFlow(1f)
+        transitionState.value =
+            ObservableTransitionState.Transition(
+                fromScene = SceneKey.Lockscreen,
+                toScene = SceneKey.Shade,
+                progress = progress,
+            )
+        assertThat(sceneTransitionProgress).isEqualTo(1f)
+
+        progress.value = 0.1f
         assertThat(sceneTransitionProgress).isEqualTo(0.1f)
 
-        underTest.setSceneTransitionProgress(0.9f)
+        progress.value = 0.9f
         assertThat(sceneTransitionProgress).isEqualTo(0.9f)
+
+        underTest.setTransitionState(null)
+        assertThat(sceneTransitionProgress).isEqualTo(1f)
     }
 
     @Test

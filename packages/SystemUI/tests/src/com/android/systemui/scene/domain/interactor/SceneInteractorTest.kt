@@ -22,11 +22,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
+import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.SceneTransitionModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,7 +39,8 @@ import org.junit.runners.JUnit4
 class SceneInteractorTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
-    private val underTest = utils.sceneInteractor()
+    private val repository = utils.fakeSceneContainerRepository()
+    private val underTest = utils.sceneInteractor(repository = repository)
 
     @Test
     fun allSceneKeys() {
@@ -55,11 +58,20 @@ class SceneInteractorTest : SysuiTestCase() {
 
     @Test
     fun sceneTransitionProgress() = runTest {
-        val progress by collectLastValue(underTest.transitionProgress)
-        assertThat(progress).isEqualTo(1f)
+        val transitionProgress by collectLastValue(underTest.transitionProgress)
+        assertThat(transitionProgress).isEqualTo(1f)
 
-        underTest.setSceneTransitionProgress(0.55f)
-        assertThat(progress).isEqualTo(0.55f)
+        val progress = MutableStateFlow(0.55f)
+        repository.setTransitionState(
+            MutableStateFlow(
+                ObservableTransitionState.Transition(
+                    fromScene = SceneKey.Lockscreen,
+                    toScene = SceneKey.Shade,
+                    progress = progress,
+                ),
+            )
+        )
+        assertThat(transitionProgress).isEqualTo(0.55f)
     }
 
     @Test

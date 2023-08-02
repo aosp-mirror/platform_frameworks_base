@@ -66,6 +66,23 @@ constructor(
             },
         )
 
+    /** Lockscreen alpha */
+    val lockscreenAlpha: Flow<Float> =
+        transitionAnimation.createFlow(
+            duration = 50.milliseconds,
+            onStart = {
+                leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
+                willRunDismissFromKeyguard = primaryBouncerInteractor.willRunDismissFromKeyguard()
+            },
+            onStep = {
+                if (willRunDismissFromKeyguard || leaveShadeOpen) {
+                    1f
+                } else {
+                    0f
+                }
+            },
+        )
+
     /** Scrim alpha values */
     val scrimAlpha: Flow<ScrimAlpha> =
         transitionAnimation

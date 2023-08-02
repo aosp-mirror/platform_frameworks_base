@@ -18,11 +18,13 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.data.repository.SceneContainerRepository
+import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.RemoteUserInput
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.SceneTransitionModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -69,13 +71,17 @@ constructor(
     /** Whether the container with the given name is visible. */
     val isVisible: StateFlow<Boolean> = repository.isVisible
 
-    /** Sets scene transition progress to the current scene in the container with the given name. */
-    fun setSceneTransitionProgress(progress: Float) {
-        repository.setSceneTransitionProgress(progress)
+    /**
+     * Binds the given flow so the system remembers it.
+     *
+     * Note that you must call is with `null` when the UI is done or risk a memory leak.
+     */
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
+        repository.setTransitionState(transitionState)
     }
 
     /** Progress of the transition into the current scene in the container with the given name. */
-    val transitionProgress: StateFlow<Float> = repository.transitionProgress
+    val transitionProgress: Flow<Float> = repository.transitionProgress
 
     /**
      * Scene transitions as pairs of keys. A new value is emitted exactly once, each time a scene

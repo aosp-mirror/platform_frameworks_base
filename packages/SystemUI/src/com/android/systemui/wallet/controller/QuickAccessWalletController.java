@@ -157,9 +157,10 @@ public class QuickAccessWalletController {
      * Query the wallet cards from {@link QuickAccessWalletClient}.
      *
      * @param cardsRetriever a callback to retrieve wallet cards.
+     * @param maxCards the maximum number of cards requested from the QuickAccessWallet
      */
     public void queryWalletCards(
-            QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever) {
+            QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever, int maxCards) {
         if (mClock.elapsedRealtime() - mQawClientCreatedTimeMillis
                 > RECREATION_TIME_WINDOW) {
             Log.i(TAG, "Re-creating the QAW client to avoid stale.");
@@ -175,9 +176,20 @@ public class QuickAccessWalletController {
                 mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height);
         int iconSizePx = mContext.getResources().getDimensionPixelSize(R.dimen.wallet_icon_size);
         GetWalletCardsRequest request =
-                new GetWalletCardsRequest(cardWidth, cardHeight, iconSizePx, /* maxCards= */ 1);
+                new GetWalletCardsRequest(cardWidth, cardHeight, iconSizePx, maxCards);
         mQuickAccessWalletClient.getWalletCards(mBgExecutor, request, cardsRetriever);
     }
+
+    /**
+     * Query the wallet cards from {@link QuickAccessWalletClient}.
+     *
+     * @param cardsRetriever a callback to retrieve wallet cards.
+     */
+    public void queryWalletCards(
+            QuickAccessWalletClient.OnWalletCardsRetrievedCallback cardsRetriever) {
+        queryWalletCards(cardsRetriever, /* maxCards= */ 1);
+    }
+
 
     /**
      * Re-create the {@link QuickAccessWalletClient} of the controller.

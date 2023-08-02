@@ -337,6 +337,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.onSystemReady();
         TestableLooper.get(this).processAllMessages();
 
+        when(mPowerManager.isInteractive()).thenReturn(true);
+
         // Given device is dreaming
         when(mUpdateMonitor.isDreaming()).thenReturn(true);
 
