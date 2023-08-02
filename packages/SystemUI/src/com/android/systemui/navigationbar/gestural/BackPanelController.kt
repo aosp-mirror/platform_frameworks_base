@@ -36,11 +36,12 @@ import androidx.dynamicanimation.animation.DynamicAnimation
 import com.android.internal.jank.Cuj
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.util.LatencyTracker
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.ViewController
+import com.android.systemui.util.concurrency.BackPanelUiThread
+import com.android.systemui.util.concurrency.UiThreadContext
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -84,11 +85,11 @@ internal constructor(
     context: Context,
     private val windowManager: WindowManager,
     private val viewConfiguration: ViewConfiguration,
-    @Main private val mainHandler: Handler,
+    private val mainHandler: Handler,
     private val systemClock: SystemClock,
     private val vibratorHelper: VibratorHelper,
     private val configurationController: ConfigurationController,
-    private val latencyTracker: LatencyTracker,
+    latencyTracker: LatencyTracker,
     private val interactionJankMonitor: InteractionJankMonitor,
 ) : ViewController<BackPanel>(BackPanel(context, latencyTracker)), NavigationEdgeBackPlugin {
 
@@ -103,7 +104,7 @@ internal constructor(
     constructor(
         private val windowManager: WindowManager,
         private val viewConfiguration: ViewConfiguration,
-        @Main private val mainHandler: Handler,
+        @BackPanelUiThread private val uiThreadContext: UiThreadContext,
         private val systemClock: SystemClock,
         private val vibratorHelper: VibratorHelper,
         private val configurationController: ConfigurationController,
@@ -112,20 +113,19 @@ internal constructor(
     ) {
         /** Construct a [BackPanelController]. */
         fun create(context: Context): BackPanelController {
-            val backPanelController =
-                BackPanelController(
+            uiThreadContext.isCurrentThread()
+            return BackPanelController(
                     context,
                     windowManager,
                     viewConfiguration,
-                    mainHandler,
+                    uiThreadContext.handler,
                     systemClock,
                     vibratorHelper,
                     configurationController,
                     latencyTracker,
                     interactionJankMonitor
                 )
-            backPanelController.init()
-            return backPanelController
+                .also { it.init() }
         }
     }
 

@@ -19,6 +19,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.os.Process
+import android.view.Choreographer
 import com.android.systemui.Dependency
 import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
@@ -31,6 +32,12 @@ import dagger.Module
 import dagger.Provides
 import java.util.concurrent.Executor
 import javax.inject.Named
+import javax.inject.Qualifier
+
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class BackPanelUiThread
 
 /** Dagger Module for classes found within the concurrent package. */
 @Module
@@ -104,6 +111,39 @@ object SysUIConcurrencyModule {
             NOTIFICATION_INFLATION_SLOW_DELIVERY_THRESHOLD
         )
         return looper
+    }
+
+    @Provides
+    @SysUISingleton
+    @BackPanelUiThread
+    fun provideBackPanelUiThreadContext(
+        @Main mainLooper: Looper,
+        @Main mainHandler: Handler,
+        @Main mainExecutor: Executor
+    ): UiThreadContext {
+        return if (Flags.edgeBackGestureHandlerThread()) {
+            val thread =
+                HandlerThread("BackPanelUiThread", Process.THREAD_PRIORITY_DISPLAY).apply {
+                    start()
+                    looper.setSlowLogThresholdMs(
+                        LONG_SLOW_DISPATCH_THRESHOLD,
+                        LONG_SLOW_DELIVERY_THRESHOLD
+                    )
+                }
+            UiThreadContext(
+                thread.looper,
+                thread.threadHandler,
+                thread.threadExecutor,
+                thread.threadHandler.runWithScissors { Choreographer.getInstance() }
+            )
+        } else {
+            UiThreadContext(
+                mainLooper,
+                mainHandler,
+                mainExecutor,
+                mainHandler.runWithScissors { Choreographer.getInstance() }
+            )
+        }
     }
 
     /**
