@@ -24,12 +24,12 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.wm.shell.flicker.ICommonAssertions
-import com.android.wm.shell.flicker.appWindowBecomesVisible
-import com.android.wm.shell.flicker.layerBecomesVisible
-import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
-import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
 import com.android.wm.shell.flicker.splitscreen.benchmark.SwitchBackToSplitFromAnotherAppBenchmark
+import com.android.wm.shell.flicker.utils.ICommonAssertions
+import com.android.wm.shell.flicker.utils.appWindowBecomesVisible
+import com.android.wm.shell.flicker.utils.layerBecomesVisible
+import com.android.wm.shell.flicker.utils.splitAppLayerBoundsIsVisibleAtEnd
+import com.android.wm.shell.flicker.utils.splitScreenDividerBecomesVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
