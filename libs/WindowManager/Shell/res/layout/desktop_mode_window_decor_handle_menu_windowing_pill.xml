@@ -18,7 +18,7 @@
     android:layout_width="@dimen/desktop_mode_handle_menu_width"
     android:layout_height="@dimen/desktop_mode_handle_menu_windowing_pill_height"
     android:orientation="horizontal"
-    android:background="@drawable/desktop_mode_decor_menu_background"
+    android:background="@drawable/desktop_mode_decor_handle_menu_background"
     android:gravity="center_vertical">
 
     <ImageButton

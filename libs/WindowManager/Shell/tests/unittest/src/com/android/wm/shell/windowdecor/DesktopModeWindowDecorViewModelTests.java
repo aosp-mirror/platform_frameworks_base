@@ -48,6 +48,7 @@ import android.view.SurfaceView;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
@@ -100,6 +101,7 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
     @Mock private ShellInit mShellInit;
     @Mock private DesktopModeWindowDecorViewModel.DesktopModeKeyguardChangeListener
             mDesktopModeKeyguardChangeListener;
+    @Mock private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final List<InputManager> mMockInputManagers = new ArrayList<>();
 
     private DesktopModeWindowDecorViewModel mDesktopModeWindowDecorViewModel;
@@ -109,27 +111,28 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
         mMockInputManagers.add(mInputManager);
 
         mDesktopModeWindowDecorViewModel =
-            new DesktopModeWindowDecorViewModel(
-                mContext,
-                mMainHandler,
-                mMainChoreographer,
-                mShellInit,
-                mTaskOrganizer,
-                mDisplayController,
-                mShellController,
-                mSyncQueue,
-                mTransitions,
-                Optional.of(mDesktopModeController),
-                Optional.of(mDesktopTasksController),
-                mDesktopModeWindowDecorFactory,
-                mMockInputMonitorFactory,
-                mTransactionFactory,
-                mDesktopModeKeyguardChangeListener
-            );
+                new DesktopModeWindowDecorViewModel(
+                        mContext,
+                        mMainHandler,
+                        mMainChoreographer,
+                        mShellInit,
+                        mTaskOrganizer,
+                        mDisplayController,
+                        mShellController,
+                        mSyncQueue,
+                        mTransitions,
+                        Optional.of(mDesktopModeController),
+                        Optional.of(mDesktopTasksController),
+                        mDesktopModeWindowDecorFactory,
+                        mMockInputMonitorFactory,
+                        mTransactionFactory,
+                        mDesktopModeKeyguardChangeListener,
+                        mRootTaskDisplayAreaOrganizer
+                );
 
         doReturn(mDesktopModeWindowDecoration)
-            .when(mDesktopModeWindowDecorFactory)
-            .create(any(), any(), any(), any(), any(), any(), any(), any());
+                .when(mDesktopModeWindowDecorFactory)
+                .create(any(), any(), any(), any(), any(), any(), any(), any(), any());
         doReturn(mTransaction).when(mTransactionFactory).get();
         doReturn(mDisplayLayout).when(mDisplayController).getDisplayLayout(anyInt());
         doReturn(STABLE_INSETS).when(mDisplayLayout).stableInsets();
@@ -172,7 +175,8 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
                         surfaceControl,
                         mMainHandler,
                         mMainChoreographer,
-                        mSyncQueue);
+                        mSyncQueue,
+                        mRootTaskDisplayAreaOrganizer);
         verify(mDesktopModeWindowDecoration).close();
     }
 
@@ -205,7 +209,8 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
                         surfaceControl,
                         mMainHandler,
                         mMainChoreographer,
-                        mSyncQueue);
+                        mSyncQueue,
+                        mRootTaskDisplayAreaOrganizer);
     }
 
     @Test
@@ -291,7 +296,7 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
                     taskInfo, surfaceControl, startT, finishT);
         });
         verify(mDesktopModeWindowDecorFactory, never())
-                .create(any(), any(), any(), any(), any(), any(), any(), any());
+                .create(any(), any(), any(), any(), any(), any(), any(), any(), any());
     }
 
     private void runOnMainThread(Runnable r) throws Exception {
@@ -307,10 +312,10 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
     private static ActivityManager.RunningTaskInfo createTaskInfo(int taskId,
             int displayId, @WindowConfiguration.WindowingMode int windowingMode) {
         ActivityManager.RunningTaskInfo taskInfo =
-                 new TestRunningTaskInfoBuilder()
-                .setDisplayId(displayId)
-                .setVisible(true)
-                .build();
+                new TestRunningTaskInfoBuilder()
+                        .setDisplayId(displayId)
+                        .setVisible(true)
+                        .build();
         taskInfo.taskId = taskId;
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         return taskInfo;

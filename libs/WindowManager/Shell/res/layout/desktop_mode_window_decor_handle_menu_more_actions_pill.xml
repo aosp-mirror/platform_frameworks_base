@@ -18,7 +18,7 @@
     android:layout_width="@dimen/desktop_mode_handle_menu_width"
     android:layout_height="@dimen/desktop_mode_handle_menu_more_actions_pill_height"
     android:orientation="vertical"
-    android:background="@drawable/desktop_mode_decor_menu_background">
+    android:background="@drawable/desktop_mode_decor_handle_menu_background">
 
     <Button
         android:id="@+id/screenshot_button"

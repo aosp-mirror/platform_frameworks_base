@@ -401,6 +401,24 @@
     <!-- Height of button (32dp)  + 2 * margin (5dp each). -->
     <dimen name="freeform_decor_caption_height">42dp</dimen>
 
+    <!-- The width of the maximize menu in desktop mode. -->
+    <dimen name="desktop_mode_maximize_menu_width">287dp</dimen>
+
+    <!-- The height of the maximize menu in desktop mode. -->
+    <dimen name="desktop_mode_maximize_menu_height">112dp</dimen>
+
+    <!-- The larger of the two corner radii of the maximize menu buttons. -->
+    <dimen name="desktop_mode_maximize_menu_buttons_large_corner_radius">4dp</dimen>
+
+    <!-- The smaller of the two corner radii of the maximize menu buttons. -->
+    <dimen name="desktop_mode_maximize_menu_buttons_small_corner_radius">2dp</dimen>
+
+    <!-- The corner radius of the maximize menu. -->
+    <dimen name="desktop_mode_maximize_menu_corner_radius">8dp</dimen>
+
+    <!-- The radius of the Maximize menu shadow. -->
+    <dimen name="desktop_mode_maximize_menu_shadow_radius">8dp</dimen>
+
     <!-- The width of the handle menu in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_width">216dp</dimen>
 
