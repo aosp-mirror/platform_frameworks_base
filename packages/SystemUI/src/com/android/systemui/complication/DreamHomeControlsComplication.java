@@ -29,8 +29,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -201,23 +199,6 @@ public class DreamHomeControlsComplication implements Complication {
 
         private final UiEventLogger mUiEventLogger;
 
-        @VisibleForTesting
-        public enum DreamOverlayEvent implements UiEventLogger.UiEventEnum {
-            @UiEvent(doc = "The home controls on the screensaver has been tapped.")
-            DREAM_HOME_CONTROLS_TAPPED(1212);
-
-            private final int mId;
-
-            DreamOverlayEvent(int id) {
-                mId = id;
-            }
-
-            @Override
-            public int getId() {
-                return mId;
-            }
-        }
-
         @Inject
         DreamHomeControlsChipViewController(
                 @Named(DREAM_HOME_CONTROLS_CHIP_VIEW) ImageView view,
@@ -246,7 +227,7 @@ public class DreamHomeControlsComplication implements Complication {
         private void onClickHomeControls(View v) {
             if (DEBUG) Log.d(TAG, "home controls complication tapped");
 
-            mUiEventLogger.log(DreamOverlayEvent.DREAM_HOME_CONTROLS_TAPPED);
+            mUiEventLogger.log(DreamOverlayUiEvent.DREAM_HOME_CONTROLS_TAPPED);
 
             final Intent intent = new Intent(mContext, ControlsActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK)
