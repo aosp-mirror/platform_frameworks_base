@@ -209,9 +209,19 @@ public class BubblePositionerTest extends ShellTestCase {
      * {@link BubbleStackView.RelativeStackPosition}.
      */
     private float getDefaultYPosition() {
-        final float desiredY = mContext.getResources().getDimensionPixelOffset(
+        final boolean isTablet = mPositioner.isLargeScreen();
+
+        // On tablet the position is centered, on phone it is an offset from the top.
+        final float desiredY = isTablet
+                ? mPositioner.getScreenRect().height() / 2f - (mPositioner.getBubbleSize() / 2f)
+                : mContext.getResources().getDimensionPixelOffset(
                         R.dimen.bubble_stack_starting_offset_y);
-        float offsetPercent = desiredY / mPositioner.getAvailableRect().height();
+        // Since we're visually centering the bubbles on tablet, use total screen height rather
+        // than the available height.
+        final float height = isTablet
+                ? mPositioner.getScreenRect().height()
+                : mPositioner.getAvailableRect().height();
+        float offsetPercent = desiredY / height;
         offsetPercent = Math.max(0f, Math.min(1f, offsetPercent));
         final RectF allowableStackRegion =
                 mPositioner.getAllowableStackPositionRegion(1 /* bubbleCount */);
