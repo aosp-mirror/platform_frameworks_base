@@ -18,9 +18,9 @@ package com.android.systemui.statusbar.notification
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import androidx.core.animation.AnimatorTestRule
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeViewController.Companion.WAKEUP_ANIMATION_DELAY_MS

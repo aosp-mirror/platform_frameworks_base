@@ -19,10 +19,10 @@ package com.android.systemui.keyguard.data.repository
 import android.graphics.Point
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import androidx.core.animation.AnimatorTestRule
 import androidx.test.filters.SmallTest
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.AnimatorTestRule
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
