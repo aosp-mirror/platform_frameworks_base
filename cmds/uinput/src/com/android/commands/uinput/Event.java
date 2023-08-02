@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import src.com.android.commands.uinput.InputAbsInfo;
@@ -36,10 +37,19 @@ import src.com.android.commands.uinput.InputAbsInfo;
 public class Event {
     private static final String TAG = "UinputEvent";
 
-    public static final String COMMAND_REGISTER = "register";
-    public static final String COMMAND_DELAY = "delay";
-    public static final String COMMAND_INJECT = "inject";
     private static final int ABS_CNT = 64;
+
+    enum Command {
+        REGISTER("register"),
+        DELAY("delay"),
+        INJECT("inject");
+
+        final String mCommandName;
+
+        Command(String command) {
+            mCommandName = command;
+        }
+    }
 
     // These constants come from "include/uapi/linux/input.h" in the kernel
     enum Bus {
@@ -56,7 +66,7 @@ public class Event {
     }
 
     private int mId;
-    private String mCommand;
+    private Command mCommand;
     private String mName;
     private int mVid;
     private int mPid;
@@ -72,7 +82,7 @@ public class Event {
         return mId;
     }
 
-    public String getCommand() {
+    public Command getCommand() {
         return mCommand;
     }
 
@@ -146,7 +156,14 @@ public class Event {
         }
 
         private void setCommand(String command) {
-            mEvent.mCommand = command;
+            Objects.requireNonNull(command, "Command must not be null");
+            for (Command cmd : Command.values()) {
+                if (cmd.mCommandName.equals(command)) {
+                    mEvent.mCommand = cmd;
+                    return;
+                }
+            }
+            throw new IllegalStateException("Unrecognized command: " + command);
         }
 
         public void setName(String name) {
@@ -195,21 +212,23 @@ public class Event {
             } else if (mEvent.mCommand == null) {
                 throw new IllegalStateException("Event does not contain a command");
             }
-            if (COMMAND_REGISTER.equals(mEvent.mCommand)) {
-                if (mEvent.mConfiguration == null) {
-                    throw new IllegalStateException(
-                            "Device registration is missing configuration");
+            switch (mEvent.mCommand) {
+                case REGISTER -> {
+                    if (mEvent.mConfiguration == null) {
+                        throw new IllegalStateException(
+                                "Device registration is missing configuration");
+                    }
                 }
-            } else if (COMMAND_DELAY.equals(mEvent.mCommand)) {
-                if (mEvent.mDuration <= 0) {
-                    throw new IllegalStateException("Delay has missing or invalid duration");
+                case DELAY -> {
+                    if (mEvent.mDuration <= 0) {
+                        throw new IllegalStateException("Delay has missing or invalid duration");
+                    }
                 }
-            } else if (COMMAND_INJECT.equals(mEvent.mCommand)) {
-                if (mEvent.mInjections  == null) {
-                    throw new IllegalStateException("Inject command is missing injection data");
+                case INJECT -> {
+                    if (mEvent.mInjections  == null) {
+                        throw new IllegalStateException("Inject command is missing injection data");
+                    }
                 }
-            } else {
-                throw new IllegalStateException("Unknown command " + mEvent.mCommand);
             }
             return mEvent;
         }
