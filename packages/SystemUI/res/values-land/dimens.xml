@@ -69,6 +69,9 @@
 
     <dimen name="controls_header_horizontal_padding">12dp</dimen>
     <dimen name="controls_content_margin_horizontal">16dp</dimen>
+    <dimen name="controls_content_padding">16dp</dimen>
+    <dimen name="control_list_vertical_spacing">8dp</dimen>
+    <dimen name="control_list_horizontal_spacing">16dp</dimen>
 
     <!-- Rear Display Education dimens -->
     <dimen name="rear_display_animation_width">246dp</dimen>
