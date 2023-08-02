@@ -83,7 +83,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pattern
             )
             utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             underTest.onShown()
@@ -105,7 +105,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pattern
             )
             utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             runCurrent()
@@ -128,7 +128,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pattern
             )
             utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             underTest.onDragStart()
@@ -176,7 +176,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pattern
             )
             utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             underTest.onDragStart()
@@ -208,7 +208,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Pattern
             )
             utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             underTest.onDragStart()

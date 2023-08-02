@@ -73,6 +73,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             featureFlags = featureFlags,
             sysUiState = sysUiState,
             displayId = Display.DEFAULT_DISPLAY,
+            sceneLogger = mock(),
         )
 
     @Before
@@ -97,7 +98,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
 
             assertThat(isVisible).isFalse()
 
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Shade))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Shade), "reason")
             assertThat(isVisible).isTrue()
         }
 
@@ -117,10 +118,10 @@ class SceneContainerStartableTest : SysuiTestCase() {
             underTest.start()
             assertThat(isVisible).isTrue()
 
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone), "reason")
             assertThat(isVisible).isTrue()
 
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Shade))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Shade), "reason")
             assertThat(isVisible).isTrue()
         }
 
@@ -326,7 +327,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
                     SceneKey.QuickSettings,
                 )
                 .forEachIndexed { index, sceneKey ->
-                    sceneInteractor.setCurrentScene(SceneModel(sceneKey))
+                    sceneInteractor.setCurrentScene(SceneModel(sceneKey), "reason")
                     runCurrent()
 
                     verify(sysUiState, times(index + 1)).commitUpdate(Display.DEFAULT_DISPLAY)
@@ -342,7 +343,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         featureFlags.set(Flags.SCENE_CONTAINER, isFeatureEnabled)
         authenticationRepository.setUnlocked(isDeviceUnlocked)
         keyguardRepository.setBypassEnabled(isBypassEnabled)
-        initialSceneKey?.let { sceneInteractor.setCurrentScene(SceneModel(it)) }
+        initialSceneKey?.let { sceneInteractor.setCurrentScene(SceneModel(it), "reason") }
     }
 
     companion object {

@@ -52,7 +52,7 @@ class SceneInteractorTest : SysuiTestCase() {
         val currentScene by collectLastValue(underTest.currentScene)
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
 
-        underTest.setCurrentScene(SceneModel(SceneKey.Shade))
+        underTest.setCurrentScene(SceneModel(SceneKey.Shade), "reason")
         assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Shade))
     }
 
@@ -79,10 +79,10 @@ class SceneInteractorTest : SysuiTestCase() {
         val isVisible by collectLastValue(underTest.isVisible)
         assertThat(isVisible).isTrue()
 
-        underTest.setVisible(false)
+        underTest.setVisible(false, "reason")
         assertThat(isVisible).isFalse()
 
-        underTest.setVisible(true)
+        underTest.setVisible(true, "reason")
         assertThat(isVisible).isTrue()
     }
 
@@ -92,7 +92,7 @@ class SceneInteractorTest : SysuiTestCase() {
         assertThat(transitions).isNull()
 
         val initialSceneKey = underTest.currentScene.value.key
-        underTest.setCurrentScene(SceneModel(SceneKey.Shade))
+        underTest.setCurrentScene(SceneModel(SceneKey.Shade), "reason")
         assertThat(transitions)
             .isEqualTo(
                 SceneTransitionModel(
@@ -101,7 +101,7 @@ class SceneInteractorTest : SysuiTestCase() {
                 )
             )
 
-        underTest.setCurrentScene(SceneModel(SceneKey.QuickSettings))
+        underTest.setCurrentScene(SceneModel(SceneKey.QuickSettings), "reason")
         assertThat(transitions)
             .isEqualTo(
                 SceneTransitionModel(
