@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Për të konfiguruar përsëri \"Shkyçjen me fytyrë\", modeli yt aktual i fytyrës do të fshihet.\n\nDo të duhet ta konfigurosh përsëri këtë veçori që të përdorësh fytyrën tënde për të shkyçur telefonin."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Shkyçja me fytyrë nuk mund të konfigurohej. Shko te \"Cilësimet\" për të provuar përsëri."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Prek sensorin e gjurmës së gishtit"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Shtyp ikonën e shkyçjes për të vazhduar"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Nuk mund ta dallojë fytyrën. Përdor më mirë gjurmën e gishtit."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Per riconfigurare lo sblocco con il volto, l\'attuale modello del volto verrà eliminato.\n\nDovrai riconfigurare questa funzionalità per usare il volto per sbloccare il telefono."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Impossibile configurare lo sblocco con il volto. Vai alle Impostazioni e riprova."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Tocca il sensore di impronte"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Premi l\'icona Sblocca per continuare"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Impossibile riconoscere il volto. Usa l\'impronta."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

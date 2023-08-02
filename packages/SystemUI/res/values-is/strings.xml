@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Núverandi andlitslíkani verður eytt til að setja andlitskenni upp á ný.\n\nÞú þarft að setja þennan eiginleika upp aftur til að nota andlitið til að taka símann úr lás."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Ekki var hægt að setja upp andlitskenni. Farðu í stillingar og reyndu aftur."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Snertu fingrafaralesarann"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Ýttu á táknið taka úr lás til að halda áfram"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Andlit þekkist ekki. Notaðu fingrafar í staðinn."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

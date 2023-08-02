@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Üz ilə Kiliddən Açmanı yenidən ayarlamaq üçün cari üz modeli silinəcək.\n\nTelefonu üz ilə kiliddən çıxarmaq üçün bu funksiyanı yenidən ayarlamalısınız."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Üz ilə Kiliddən Açma ayarlanmadı. Yenidən cəhd etmək üçün Ayarlara keçin."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Barmaq izi sensoruna klikləyin"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"\"Kiliddən çıxarın\" ikonasını basaraq davam edin"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Tanımaq olmur. Barmaq izini işlədin."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

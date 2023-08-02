@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"얼굴 인식 잠금 해제를 다시 설정하기 위해 현재 얼굴 모델이 삭제됩니다.\n\n얼굴을 사용하여 휴대전화 잠금을 해제하려면 이 기능을 다시 설정해야 합니다."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"얼굴 인식 잠금 해제를 설정할 수 없습니다. 설정으로 이동하여 다시 시도해 보세요."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"지문 센서를 터치하세요."</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"계속하려면 잠금 해제 아이콘을 누르세요."</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"얼굴을 인식할 수 없습니다. 대신 지문을 사용하세요."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

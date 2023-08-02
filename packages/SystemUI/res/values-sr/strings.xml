@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Да бисте поново подесили откључавање лицем, актуелни модел лица се брише.\n\nМораћете поново да подесите ову функцију да бисте користили лице за откључавање телефона."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Подешавање откључавања лицем није успело. Идите у Подешавања да бисте пробали поново."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Додирните сензор за отисак прста"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Притисните икону откључавања за наставак"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Лице није препознато. Користите отисак прста."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

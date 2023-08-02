@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"‘မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း’ ကို စနစ်ပြန်ထည့်ရန် သင်၏ လက်ရှိ မျက်နှာနမူနာကို ဖျက်လိုက်ပါမည်။\n\nဖုန်းလော့ခ်ဖွင့်ရန်အတွက် သင့်မျက်နှာသုံးရန် ဤတူးလ်ကို စနစ်ပြန်ထည့်ရမည်။"</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို စနစ်ထည့်သွင်း၍မရပါ။ ဆက်တင်များသို့သွားပြီး ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"လက်ဗွေအာရုံခံကိရိယာကို တို့ပါ"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"ရှေ့ဆက်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"မျက်နှာကို မမှတ်မိပါ။ လက်ဗွေကို အစားထိုးသုံးပါ။"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

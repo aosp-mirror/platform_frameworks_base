@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Щоб знову налаштувати фейс-контроль, наявну модель обличчя буде видалено.\n\nЩоб розблоковувати телефон за допомогою фейс-контролю, вам доведеться налаштувати цю функцію знову."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Не вдалося налаштувати фейс-контроль. Перейдіть у налаштування, щоб повторити спробу."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Торкніться сканера відбитків пальців"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Щоб продовжити, натисніть значок розблокування"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Обличчя не розпізнано. Скористайтеся відбитком пальця."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

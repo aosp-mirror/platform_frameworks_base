@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Ca să configurezi din nou Deblocarea facială, modelul facial actual se va șterge.\n\nVa trebui să configurezi din nou funcția ca să-ți deblochezi telefonul cu fața."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Nu s-a putut configura deblocarea facială. Accesează Setările pentru a încerca din nou."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Atinge senzorul de amprente"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Apasă pe pictograma de deblocare pentru a continua"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Chipul nu a fost recunoscut. Folosește amprenta."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

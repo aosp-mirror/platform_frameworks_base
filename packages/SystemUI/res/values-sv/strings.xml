@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Din nuvarande ansiktsmodell raderas när du konfigurerar ansiktslås igen.\n\nDu måste konfigurera den här funktionen igen för att kunna låsa upp telefonen med ditt ansikte."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Det gick inte att konfigurera ansiktslåset. Öppna inställningarna och försök igen."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Tryck på fingeravtryckssensorn"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Tryck på ikonen lås upp för att fortsätta"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ansiktet kändes inte igen. Använd fingeravtryck."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
