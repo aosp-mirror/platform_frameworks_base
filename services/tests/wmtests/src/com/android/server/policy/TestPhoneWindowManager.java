@@ -185,11 +185,10 @@ class TestPhoneWindowManager {
         mHandler = new Handler(mHandlerThread.getLooper());
         mContext = mockingDetails(context).isSpy() ? context : spy(context);
         mHandler.runWithScissors(() -> setUp(supportSettingsUpdate),  0 /* timeout */);
+        waitForIdle();
     }
 
     private void setUp(boolean supportSettingsUpdate) {
-        mPhoneWindowManager = spy(new PhoneWindowManager());
-
         // Use stubOnly() to reduce memory usage if it doesn't need verification.
         final MockSettings spyStubOnly = withSettings().stubOnly()
                 .defaultAnswer(CALLS_REAL_METHODS);
@@ -199,6 +198,8 @@ class TestPhoneWindowManager {
                 .mockStatic(FrameworkStatsLog.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
+
+        mPhoneWindowManager = spy(new PhoneWindowManager());
 
         doReturn(mWindowManagerInternal).when(
                 () -> LocalServices.getService(eq(WindowManagerInternal.class)));
