@@ -24,13 +24,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
 
 class StructureAdapter(
-    private val models: List<StructureContainer>
+    private val models: List<StructureContainer>,
+    private val currentUserId: Int
 ) : RecyclerView.Adapter<StructureAdapter.StructureHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, p1: Int): StructureHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         return StructureHolder(
-            layoutInflater.inflate(R.layout.controls_structure_page, parent, false)
+            layoutInflater.inflate(R.layout.controls_structure_page, parent, false),
+            currentUserId
         )
     }
 
@@ -40,7 +42,8 @@ class StructureAdapter(
         holder.bind(models[index].model)
     }
 
-    class StructureHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class StructureHolder(view: View, currentUserId: Int) :
+            RecyclerView.ViewHolder(view) {
 
         private val recyclerView: RecyclerView
         private val controlAdapter: ControlAdapter
@@ -48,7 +51,7 @@ class StructureAdapter(
         init {
             recyclerView = itemView.requireViewById<RecyclerView>(R.id.listAll)
             val elevation = itemView.context.resources.getFloat(R.dimen.control_card_elevation)
-            controlAdapter = ControlAdapter(elevation)
+            controlAdapter = ControlAdapter(elevation, currentUserId)
             setUpRecyclerView()
         }
 
