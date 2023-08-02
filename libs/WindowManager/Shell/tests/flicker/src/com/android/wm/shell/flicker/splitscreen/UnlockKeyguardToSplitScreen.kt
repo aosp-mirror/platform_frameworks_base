@@ -69,11 +69,12 @@ class UnlockKeyguardToSplitScreen(override val flicker: LegacyFlickerTest) :
     @Test
     @Presubmit
     fun visibleLayersShownMoreThanOneConsecutiveEntry_withoutWallpaper() =
-        flicker.assertLayers { this.visibleLayersShownMoreThanOneConsecutiveEntry(
-            LayersTraceSubject.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS + listOf(
-                WALLPAPER_BBQ_WRAPPER
+        flicker.assertLayers {
+            this.visibleLayersShownMoreThanOneConsecutiveEntry(
+                LayersTraceSubject.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS +
+                    listOf(WALLPAPER_BBQ_WRAPPER)
             )
-        ) }
+        }
 
     @Test
     fun splitScreenDividerIsVisibleAtEnd() {
