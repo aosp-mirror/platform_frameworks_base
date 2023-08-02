@@ -2623,6 +2623,8 @@
   <java-symbol type="string" name="fingerprint_recalibrate_notification_name" />
   <java-symbol type="string" name="fingerprint_recalibrate_notification_title" />
   <java-symbol type="string" name="fingerprint_recalibrate_notification_content" />
+  <java-symbol type="string" name="fingerprint_setup_notification_title" />
+  <java-symbol type="string" name="fingerprint_setup_notification_content" />
   <java-symbol type="string" name="fingerprint_error_power_pressed" />
 
   <!-- Fingerprint config -->
@@ -2690,6 +2692,7 @@
   <java-symbol type="string" name="face_authenticated_no_confirmation_required" />
   <java-symbol type="string" name="face_authenticated_confirmation_required" />
   <java-symbol type="string" name="face_error_security_update_required" />
+  <java-symbol type="string" name="face_setup_notification_title" />
 
   <java-symbol type="string" name="config_biometric_prompt_ui_package" />
   <java-symbol type="array" name="config_biometric_sensors" />

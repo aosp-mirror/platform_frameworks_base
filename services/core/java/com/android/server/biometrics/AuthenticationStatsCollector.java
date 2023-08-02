@@ -19,9 +19,13 @@ package com.android.server.biometrics;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.sensors.BiometricNotification;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,13 +54,16 @@ public class AuthenticationStatsCollector {
     @NonNull private final Map<Integer, AuthenticationStats> mUserAuthenticationStatsMap;
 
     @NonNull private AuthenticationStatsPersister mAuthenticationStatsPersister;
+    @NonNull private BiometricNotification mBiometricNotification;
 
-    public AuthenticationStatsCollector(@NonNull Context context, int modality) {
+    public AuthenticationStatsCollector(@NonNull Context context, int modality,
+            @NonNull BiometricNotification biometricNotification) {
         mContext = context;
         mThreshold = context.getResources()
                 .getFraction(R.fraction.config_biometricNotificationFrrThreshold, 1, 1);
         mUserAuthenticationStatsMap = new HashMap<>();
         mModality = modality;
+        mBiometricNotification = biometricNotification;
     }
 
     private void initializeUserAuthenticationStatsMap() {
@@ -86,16 +93,45 @@ public class AuthenticationStatsCollector {
         sendNotificationIfNeeded(userId);
     }
 
+    /** Check if a notification should be sent after a calculation cycle. */
     private void sendNotificationIfNeeded(int userId) {
         AuthenticationStats authenticationStats = mUserAuthenticationStatsMap.get(userId);
-        if (authenticationStats.getTotalAttempts() >= MINIMUM_ATTEMPTS) {
-            // Send notification if FRR exceeds the threshold
-            if (authenticationStats.getEnrollmentNotifications() < MAXIMUM_ENROLLMENT_NOTIFICATIONS
-                    && authenticationStats.getFrr() >= mThreshold) {
-                // TODO(wenhuiy): Send notifications.
-            }
+        if (authenticationStats.getTotalAttempts() < MINIMUM_ATTEMPTS) {
+            return;
+        }
 
+        // Don't send notification if FRR below the threshold.
+        if (authenticationStats.getEnrollmentNotifications() >= MAXIMUM_ENROLLMENT_NOTIFICATIONS
+                || authenticationStats.getFrr() < mThreshold) {
             authenticationStats.resetData();
+            return;
+        }
+
+        authenticationStats.resetData();
+
+        final PackageManager packageManager = mContext.getPackageManager();
+
+        // Don't send notification to single-modality devices.
+        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)
+                || !packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            return;
+        }
+
+        final FaceManager faceManager = mContext.getSystemService(FaceManager.class);
+        final boolean hasEnrolledFace = faceManager.hasEnrolledTemplates(userId);
+
+        final FingerprintManager fingerprintManager = mContext
+                .getSystemService(FingerprintManager.class);
+        final boolean hasEnrolledFingerprint = fingerprintManager.hasEnrolledTemplates(userId);
+
+        // Don't send notification when both face and fingerprint are enrolled.
+        if (hasEnrolledFace && hasEnrolledFingerprint) {
+            return;
+        }
+        if (hasEnrolledFace && !hasEnrolledFingerprint) {
+            mBiometricNotification.sendFpEnrollNotification(mContext);
+        } else if (!hasEnrolledFace && hasEnrolledFingerprint) {
+            mBiometricNotification.sendFaceEnrollNotification(mContext);
         }
     }
 
