@@ -182,7 +182,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
         // Cancel any existing CUJs before starting the animation
         interactionJankMonitor.cancel(CUJ_SCREEN_OFF_SHOW_AOD)
-
+        PropertyAnimator.cancelAnimation(keyguardView, AnimatableProperty.ALPHA)
         PropertyAnimator.setProperty(
             keyguardView, AnimatableProperty.ALPHA, 1f,
             AnimationProperties()
