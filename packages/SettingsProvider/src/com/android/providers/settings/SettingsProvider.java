@@ -1997,7 +1997,7 @@ public class SettingsProvider extends ContentProvider {
 
                 case MUTATION_OPERATION_RESET: {
                     mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_SYSTEM,
-                            UserHandle.USER_SYSTEM, callingPackage, mode, tag);
+                            runAsUserId, callingPackage, mode, tag);
                     return true;
                 }
             }
