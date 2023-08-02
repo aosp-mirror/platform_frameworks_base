@@ -4479,8 +4479,8 @@ public class Intent implements Parcelable, Cloneable {
      * @see #EXTRA_SIM_LOCKED_REASON
      * @see #EXTRA_REBROADCAST_ON_UNLOCK
      *
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED} or
-     * {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED} or
+     * {@link android.telephony.TelephonyManager#ACTION_SIM_APPLICATION_STATE_CHANGED}
      *
      * @hide
      */
@@ -4503,42 +4503,42 @@ public class Intent implements Parcelable, Cloneable {
      * @see #SIM_STATE_IMSI
      * @see #SIM_STATE_LOADED
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     public static final String EXTRA_SIM_STATE = "ss";
 
     /**
      * The intent value UNKNOWN represents the SIM state unknown
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     public static final String SIM_STATE_UNKNOWN = "UNKNOWN";
 
     /**
      * The intent value NOT_READY means that the SIM is not ready eg. radio is off or powering on
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     public static final String SIM_STATE_NOT_READY = "NOT_READY";
 
     /**
      * The intent value ABSENT means the SIM card is missing
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     public static final String SIM_STATE_ABSENT = "ABSENT";
 
     /**
      * The intent value PRESENT means the device has a SIM card inserted
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     public static final String SIM_STATE_PRESENT = "PRESENT";
 
     /**
      * The intent value CARD_IO_ERROR means for three consecutive times there was SIM IO error
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     static public final String SIM_STATE_CARD_IO_ERROR = "CARD_IO_ERROR";
 
@@ -4546,35 +4546,35 @@ public class Intent implements Parcelable, Cloneable {
      * The intent value CARD_RESTRICTED means card is present but not usable due to carrier
      * restrictions
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     static public final String SIM_STATE_CARD_RESTRICTED = "CARD_RESTRICTED";
 
     /**
      * The intent value LOCKED means the SIM is locked by PIN or by network
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     public static final String SIM_STATE_LOCKED = "LOCKED";
 
     /**
      * The intent value READY means the SIM is ready to be accessed
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     public static final String SIM_STATE_READY = "READY";
 
     /**
      * The intent value IMSI means the SIM IMSI is ready in property
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     public static final String SIM_STATE_IMSI = "IMSI";
 
     /**
      * The intent value LOADED means all SIM records, including IMSI, are loaded
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED}
      */
     public static final String SIM_STATE_LOADED = "LOADED";
 
@@ -4588,21 +4588,24 @@ public class Intent implements Parcelable, Cloneable {
      * @see #SIM_ABSENT_ON_PERM_DISABLED
      *
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
+     * @deprecated Use
+     * {@link android.telephony.TelephonyManager#ACTION_SIM_APPLICATION_STATE_CHANGED}
      */
     public static final String EXTRA_SIM_LOCKED_REASON = "reason";
 
     /**
      * The intent value PIN means the SIM is locked on PIN1
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
+     * @deprecated Use
+     * {@link android.telephony.TelephonyManager#ACTION_SIM_APPLICATION_STATE_CHANGED}
      */
     public static final String SIM_LOCKED_ON_PIN = "PIN";
 
     /**
      * The intent value PUK means the SIM is locked on PUK1
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
+     * @deprecated Use
+     * {@link android.telephony.TelephonyManager#ACTION_SIM_APPLICATION_STATE_CHANGED}
      */
     /* PUK means ICC is locked on PUK1 */
     public static final String SIM_LOCKED_ON_PUK = "PUK";
@@ -4610,14 +4613,16 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * The intent value NETWORK means the SIM is locked on NETWORK PERSONALIZATION
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
+     * @deprecated Use
+     * {@link android.telephony.TelephonyManager#ACTION_SIM_APPLICATION_STATE_CHANGED}
      */
     public static final String SIM_LOCKED_NETWORK = "NETWORK";
 
     /**
      * The intent value PERM_DISABLED means SIM is permanently disabled due to puk fails
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
+     * @deprecated Use
+     * {@link android.telephony.TelephonyManager#ACTION_SIM_APPLICATION_STATE_CHANGED}
      */
     public static final String SIM_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
 
@@ -4626,8 +4631,8 @@ public class Intent implements Parcelable, Cloneable {
      * is a rebroadcast on unlock. Defaults to {@code false} if not specified.
      *
      * @hide
-     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED} or
-     * {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
+     * @deprecated Use {@link android.telephony.TelephonyManager#ACTION_SIM_CARD_STATE_CHANGED} or
+     * {@link android.telephony.TelephonyManager#ACTION_SIM_APPLICATION_STATE_CHANGED}
      */
     public static final String EXTRA_REBROADCAST_ON_UNLOCK = "rebroadcastOnUnlock";
 
