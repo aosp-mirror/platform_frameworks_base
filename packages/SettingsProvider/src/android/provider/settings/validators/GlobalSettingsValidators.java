@@ -441,5 +441,6 @@ public class GlobalSettingsValidators {
                                 String.valueOf(Global.Wearable.TETHERED_CONFIG_TETHERED)
                         }));
         VALIDATORS.put(Global.Wearable.PHONE_SWITCHING_SUPPORTED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.WEAR_LAUNCHER_UI_MODE, NON_NEGATIVE_INTEGER_VALIDATOR);
     }
 }
