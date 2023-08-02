@@ -723,6 +723,10 @@ public class UserManagerService extends IUserManager.Stub {
                     user.unlockRealtime = SystemClock.elapsedRealtime();
                 }
             }
+            if (targetUser.getUserIdentifier() == UserHandle.USER_SYSTEM
+                    && UserManager.isCommunalProfileEnabled()) {
+                mUms.startCommunalProfile();
+            }
         }
 
         @Override
@@ -826,6 +830,26 @@ public class UserManagerService extends IUserManager.Stub {
      */
     UserManagerInternal getInternalForInjectorOnly() {
         return mLocalService;
+    }
+
+    private void startCommunalProfile() {
+        final int communalProfileId = getCommunalProfileIdUnchecked();
+        if (communalProfileId != UserHandle.USER_NULL) {
+            Slogf.d(LOG_TAG, "Starting the Communal Profile");
+            boolean started = false;
+            try {
+                started = ActivityManager.getService().startProfile(communalProfileId);
+            } catch (RemoteException e) {
+                // Should not happen - same process
+                e.rethrowAsRuntimeException();
+            }
+            if (!started) {
+                Slogf.wtf(LOG_TAG,
+                        "Failed to start communal profile userId=%d", communalProfileId);
+            }
+        } else {
+            Slogf.w(LOG_TAG, "Cannot start Communal Profile because there isn't one");
+        }
     }
 
     /** Marks all ephemeral users as slated for deletion. **/
