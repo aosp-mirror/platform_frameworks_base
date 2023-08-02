@@ -28,7 +28,7 @@ import android.util.Size;
 import android.view.Gravity;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 
 import java.io.PrintWriter;
 
@@ -41,7 +41,8 @@ public class PipBoundsAlgorithm {
     private static final float INVALID_SNAP_FRACTION = -1f;
 
     @NonNull private final PipBoundsState mPipBoundsState;
-    @NonNull protected final PipSizeSpecHandler mPipSizeSpecHandler;
+    @NonNull protected final PipDisplayLayoutState mPipDisplayLayoutState;
+    @NonNull protected final SizeSpecSource mSizeSpecSource;
     private final PipSnapAlgorithm mSnapAlgorithm;
     private final PipKeepClearAlgorithmInterface mPipKeepClearAlgorithm;
 
@@ -53,11 +54,13 @@ public class PipBoundsAlgorithm {
     public PipBoundsAlgorithm(Context context, @NonNull PipBoundsState pipBoundsState,
             @NonNull PipSnapAlgorithm pipSnapAlgorithm,
             @NonNull PipKeepClearAlgorithmInterface pipKeepClearAlgorithm,
-            @NonNull PipSizeSpecHandler pipSizeSpecHandler) {
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState,
+            @NonNull SizeSpecSource sizeSpecSource) {
         mPipBoundsState = pipBoundsState;
         mSnapAlgorithm = pipSnapAlgorithm;
         mPipKeepClearAlgorithm = pipKeepClearAlgorithm;
-        mPipSizeSpecHandler = pipSizeSpecHandler;
+        mPipDisplayLayoutState = pipDisplayLayoutState;
+        mSizeSpecSource = sizeSpecSource;
         reloadResources(context);
         // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
         // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
@@ -74,11 +77,6 @@ public class PipBoundsAlgorithm {
                 R.dimen.config_pictureInPictureDefaultAspectRatio);
         mDefaultStackGravity = res.getInteger(
                 R.integer.config_defaultPictureInPictureGravity);
-        final String screenEdgeInsetsDpString = res.getString(
-                R.string.config_defaultPictureInPictureScreenEdgeInsets);
-        final Size screenEdgeInsetsDp = !screenEdgeInsetsDpString.isEmpty()
-                ? Size.parseSize(screenEdgeInsetsDpString)
-                : null;
         mMinAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
         mMaxAspectRatio = res.getFloat(
@@ -160,8 +158,8 @@ public class PipBoundsAlgorithm {
             // If either dimension is smaller than the allowed minimum, adjust them
             // according to mOverridableMinSize
             return new Size(
-                    Math.max(windowLayout.minWidth, mPipSizeSpecHandler.getOverrideMinEdgeSize()),
-                    Math.max(windowLayout.minHeight, mPipSizeSpecHandler.getOverrideMinEdgeSize()));
+                    Math.max(windowLayout.minWidth, getOverrideMinEdgeSize()),
+                    Math.max(windowLayout.minHeight, getOverrideMinEdgeSize()));
         }
         return null;
     }
@@ -255,10 +253,10 @@ public class PipBoundsAlgorithm {
         final Size size;
         if (useCurrentMinEdgeSize || useCurrentSize) {
             // Use the existing size but adjusted to the new aspect ratio.
-            size = mPipSizeSpecHandler.getSizeForAspectRatio(
+            size = mSizeSpecSource.getSizeForAspectRatio(
                     new Size(stackBounds.width(), stackBounds.height()), aspectRatio);
         } else {
-            size = mPipSizeSpecHandler.getDefaultSize(aspectRatio);
+            size = mSizeSpecSource.getDefaultSize(aspectRatio);
         }
 
         final int left = (int) (stackBounds.centerX() - size.getWidth() / 2f);
@@ -287,7 +285,7 @@ public class PipBoundsAlgorithm {
         getInsetBounds(insetBounds);
 
         // Calculate the default size
-        defaultSize = mPipSizeSpecHandler.getDefaultSize(mDefaultAspectRatio);
+        defaultSize = mSizeSpecSource.getDefaultSize(mDefaultAspectRatio);
 
         // Now that we have the default size, apply the snap fraction if valid or position the
         // bounds using the default gravity.
@@ -309,7 +307,11 @@ public class PipBoundsAlgorithm {
      * Populates the bounds on the screen that the PIP can be visible in.
      */
     public void getInsetBounds(Rect outRect) {
-        outRect.set(mPipSizeSpecHandler.getInsetBounds());
+        outRect.set(mPipDisplayLayoutState.getInsetBounds());
+    }
+
+    private int getOverrideMinEdgeSize() {
+        return mSizeSpecSource.getOverrideMinEdgeSize();
     }
 
     /**

@@ -28,6 +28,8 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.common.pip.LegacySizeSpecSource;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.dagger.WMShellBaseModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.pip.Pip;
@@ -42,7 +44,6 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUiEventLogger;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.pip.tv.TvPipBoundsAlgorithm;
 import com.android.wm.shell.pip.tv.TvPipBoundsController;
 import com.android.wm.shell.pip.tv.TvPipBoundsState;
@@ -138,23 +139,23 @@ public abstract class TvPipModule {
     @Provides
     static TvPipBoundsAlgorithm provideTvPipBoundsAlgorithm(Context context,
             TvPipBoundsState tvPipBoundsState, PipSnapAlgorithm pipSnapAlgorithm,
-            PipSizeSpecHandler pipSizeSpecHandler) {
+            PipDisplayLayoutState pipDisplayLayoutState, SizeSpecSource sizeSpecSource) {
         return new TvPipBoundsAlgorithm(context, tvPipBoundsState, pipSnapAlgorithm,
-                pipSizeSpecHandler);
+                pipDisplayLayoutState, sizeSpecSource);
     }
 
     @WMSingleton
     @Provides
     static TvPipBoundsState provideTvPipBoundsState(Context context,
-            PipSizeSpecHandler pipSizeSpecHandler, PipDisplayLayoutState pipDisplayLayoutState) {
-        return new TvPipBoundsState(context, pipSizeSpecHandler, pipDisplayLayoutState);
+            SizeSpecSource sizeSpecSource, PipDisplayLayoutState pipDisplayLayoutState) {
+        return new TvPipBoundsState(context, sizeSpecSource, pipDisplayLayoutState);
     }
 
     @WMSingleton
     @Provides
-    static PipSizeSpecHandler providePipSizeSpecHelper(Context context,
+    static SizeSpecSource provideSizeSpecSource(Context context,
             PipDisplayLayoutState pipDisplayLayoutState) {
-        return new PipSizeSpecHandler(context, pipDisplayLayoutState);
+        return new LegacySizeSpecSource(context, pipDisplayLayoutState);
     }
 
     // Handler needed for loadDrawableAsync() in PipControlsViewController

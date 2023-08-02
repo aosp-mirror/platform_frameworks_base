@@ -36,7 +36,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.TriConsumer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
@@ -87,7 +87,7 @@ public class PipBoundsState {
     private int mStashOffset;
     private @Nullable PipReentryState mPipReentryState;
     private final LauncherState mLauncherState = new LauncherState();
-    private final @Nullable PipSizeSpecHandler mPipSizeSpecHandler;
+    private final @NonNull SizeSpecSource mSizeSpecSource;
     private @Nullable ComponentName mLastPipComponentName;
     private final @NonNull MotionBoundsState mMotionBoundsState = new MotionBoundsState();
     private boolean mIsImeShowing;
@@ -127,17 +127,20 @@ public class PipBoundsState {
     private @Nullable TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
     private List<Consumer<Rect>> mOnPipExclusionBoundsChangeCallbacks = new ArrayList<>();
 
-    public PipBoundsState(@NonNull Context context, PipSizeSpecHandler pipSizeSpecHandler,
-            PipDisplayLayoutState pipDisplayLayoutState) {
+    public PipBoundsState(@NonNull Context context, @NonNull SizeSpecSource sizeSpecSource,
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState) {
         mContext = context;
         reloadResources();
-        mPipSizeSpecHandler = pipSizeSpecHandler;
+        mSizeSpecSource = sizeSpecSource;
         mPipDisplayLayoutState = pipDisplayLayoutState;
     }
 
     /** Reloads the resources. */
     public void onConfigurationChanged() {
         reloadResources();
+
+        // update the size spec resources upon config change too
+        mSizeSpecSource.onConfigurationChanged();
     }
 
     private void reloadResources() {
@@ -319,7 +322,7 @@ public class PipBoundsState {
     /** Sets the preferred size of PIP as specified by the activity in PIP mode. */
     public void setOverrideMinSize(@Nullable Size overrideMinSize) {
         final boolean changed = !Objects.equals(overrideMinSize, getOverrideMinSize());
-        mPipSizeSpecHandler.setOverrideMinSize(overrideMinSize);
+        mSizeSpecSource.setOverrideMinSize(overrideMinSize);
         if (changed && mOnMinimalSizeChangeCallback != null) {
             mOnMinimalSizeChangeCallback.run();
         }
@@ -328,12 +331,12 @@ public class PipBoundsState {
     /** Returns the preferred minimal size specified by the activity in PIP. */
     @Nullable
     public Size getOverrideMinSize() {
-        return mPipSizeSpecHandler.getOverrideMinSize();
+        return mSizeSpecSource.getOverrideMinSize();
     }
 
     /** Returns the minimum edge size of the override minimum size, or 0 if not set. */
     public int getOverrideMinEdgeSize() {
-        return mPipSizeSpecHandler.getOverrideMinEdgeSize();
+        return mSizeSpecSource.getOverrideMinEdgeSize();
     }
 
     /** Get the state of the bounds in motion. */
@@ -613,5 +616,6 @@ public class PipBoundsState {
         }
         mLauncherState.dump(pw, innerPrefix);
         mMotionBoundsState.dump(pw, innerPrefix);
+        mSizeSpecSource.dump(pw, innerPrefix);
     }
 }
