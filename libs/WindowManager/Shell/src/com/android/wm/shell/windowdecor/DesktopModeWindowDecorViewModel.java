@@ -374,6 +374,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDesktopTasksController.ifPresent(c -> c.moveToNextDisplay(mTaskId));
                     decoration.closeHandleMenu();
                 }
+            } else if (id == R.id.maximize_window) {
+                final RunningTaskInfo taskInfo = decoration.mTaskInfo;
+                mDesktopTasksController.ifPresent(c -> c.toggleDesktopTaskSize(
+                        taskInfo, decoration));
+                decoration.closeHandleMenu();
             }
         }
 
