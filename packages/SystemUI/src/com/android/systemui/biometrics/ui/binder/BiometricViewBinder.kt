@@ -93,9 +93,11 @@ object BiometricViewBinder {
         val subtitleView = view.findViewById<TextView>(R.id.subtitle)
         val descriptionView = view.findViewById<TextView>(R.id.description)
 
-        // set selected for marquee
-        titleView.isSelected = true
-        subtitleView.isSelected = true
+        // set selected to enable marquee unless a screen reader is enabled
+        titleView.isSelected =
+            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
+        subtitleView.isSelected =
+            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         descriptionView.movementMethod = ScrollingMovementMethod()
 
         val iconViewOverlay = view.findViewById<LottieAnimationView>(R.id.biometric_icon_overlay)
