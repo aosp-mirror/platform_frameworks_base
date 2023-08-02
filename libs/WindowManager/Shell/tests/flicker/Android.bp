@@ -24,6 +24,11 @@ package {
 }
 
 filegroup {
+    name: "WMShellFlickerTestsUtils-src",
+    srcs: ["src/com/android/wm/shell/flicker/utils/*.kt"],
+}
+
+filegroup {
     name: "WMShellFlickerTestsBase-src",
     srcs: ["src/com/android/wm/shell/flicker/*.kt"],
 }
@@ -53,6 +58,28 @@ filegroup {
     ],
 }
 
+java_library {
+    name: "wm-shell-flicker-utils",
+    platform_apis: true,
+    optimize: {
+        enabled: false,
+    },
+    srcs: [
+        ":WMShellFlickerTestsUtils-src",
+    ],
+    static_libs: [
+        "androidx.test.ext.junit",
+        "flickertestapplib",
+        "flickerlib",
+        "flickerlib-helpers",
+        "platform-test-annotations",
+        "wm-flicker-common-app-helpers",
+        "wm-flicker-common-assertions",
+        "launcher-helper-lib",
+        "launcher-aosp-tapl",
+    ],
+}
+
 java_defaults {
     name: "WMShellFlickerTestsDefault",
     manifest: "manifests/AndroidManifest.xml",
@@ -65,6 +92,7 @@ java_defaults {
     test_suites: ["device-tests"],
     libs: ["android.test.runner"],
     static_libs: [
+        "wm-shell-flicker-utils",
         "androidx.test.ext.junit",
         "flickertestapplib",
         "flickerlib",

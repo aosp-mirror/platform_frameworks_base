@@ -21,7 +21,7 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import androidx.test.filters.RequiresDevice
-import com.android.wm.shell.flicker.Direction
+import com.android.wm.shell.flicker.utils.Direction
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith

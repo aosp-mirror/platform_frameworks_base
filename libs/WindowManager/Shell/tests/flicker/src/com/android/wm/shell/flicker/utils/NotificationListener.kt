@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker
+package com.android.wm.shell.flicker.utils
 
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
