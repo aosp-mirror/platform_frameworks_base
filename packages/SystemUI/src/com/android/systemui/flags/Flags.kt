@@ -195,10 +195,10 @@ object Flags {
     @JvmField val FALSING_OFF_FOR_UNFOLDED = releasedFlag(225, "falsing_off_for_unfolded")
 
     /** Enables code to show contextual loyalty cards in wallet entrypoints */
-    // TODO(b/247587924): Tracking Bug
+    // TODO(b/294110497): Tracking Bug
     @JvmField
     val ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS =
-        unreleasedFlag(226, "enable_wallet_contextual_loyalty_cards", teamfood = false)
+        unreleasedFlag(226, "enable_wallet_contextual_loyalty_cards", teamfood = true)
 
     // TODO(b/242908637): Tracking Bug
     @JvmField val WALLPAPER_FULLSCREEN_PREVIEW = releasedFlag(227, "wallpaper_fullscreen_preview")
