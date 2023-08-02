@@ -62,7 +62,8 @@ class ControlViewHolder(
     val controlsController: ControlsController,
     val uiExecutor: DelayableExecutor,
     val bgExecutor: DelayableExecutor,
-    val controlActionCoordinator: ControlActionCoordinator
+    val controlActionCoordinator: ControlActionCoordinator,
+    val currentUserId: Int
 ) {
 
     companion object {
@@ -99,6 +100,7 @@ class ControlViewHolder(
         }
     }
 
+    private val canUseIconPredicate = CanUseIconPredicate(currentUserId)
     private val toggleBackgroundIntensity: Float = layout.context.resources
             .getFraction(R.fraction.controls_toggle_bg_intensity, 1, 1)
     private var stateAnimator: ValueAnimator? = null
@@ -411,7 +413,9 @@ class ControlViewHolder(
 
         status.setTextColor(color)
 
-        control?.getCustomIcon()?.let {
+        control?.getCustomIcon()
+                ?.takeIf(canUseIconPredicate)
+                ?.let {
             // do not tint custom icons, assume the intended icon color is correct
             if (icon.imageTintList != null) {
                 icon.imageTintList = null
