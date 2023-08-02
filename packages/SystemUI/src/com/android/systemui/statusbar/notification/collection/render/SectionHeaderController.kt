@@ -38,7 +38,7 @@ interface SectionHeaderController {
 }
 
 @SectionHeaderScope
-internal class SectionHeaderNodeControllerImpl @Inject constructor(
+class SectionHeaderNodeControllerImpl @Inject constructor(
     @NodeLabel override val nodeLabel: String,
     private val layoutInflater: LayoutInflater,
     @HeaderText @StringRes private val headerTextResId: Int,
