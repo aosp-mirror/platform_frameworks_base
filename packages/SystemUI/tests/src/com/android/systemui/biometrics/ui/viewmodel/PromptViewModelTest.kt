@@ -499,6 +499,7 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         val messageVisible by collectLastValue(viewModel.isIndicatorMessageVisible)
         val size by collectLastValue(viewModel.size)
         val legacyState by collectLastValue(viewModel.legacyState)
+        val confirmationRequired by collectLastValue(viewModel.isConfirmationRequired)
 
         if (testCase.isCoex && testCase.authenticatedByFingerprint) {
             viewModel.ensureFingerprintHasStarted(isDelayed = true)
@@ -507,7 +508,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
         viewModel.showHelp(helpMessage)
 
         assertThat(size).isEqualTo(PromptSize.MEDIUM)
-        assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_PENDING_CONFIRMATION)
+        if (confirmationRequired == true) {
+            assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_PENDING_CONFIRMATION)
+        } else {
+            assertThat(legacyState).isEqualTo(AuthBiometricView.STATE_AUTHENTICATED)
+        }
         assertThat(message).isEqualTo(PromptMessage.Help(helpMessage))
         assertThat(messageVisible).isTrue()
         assertThat(authenticating).isFalse()
