@@ -33,6 +33,7 @@ import com.android.keyguard.InternalFaceAuthReasons.AUTH_REQUEST_DURING_CANCELLA
 import com.android.keyguard.InternalFaceAuthReasons.BIOMETRIC_ENABLED
 import com.android.keyguard.InternalFaceAuthReasons.CAMERA_LAUNCHED
 import com.android.keyguard.InternalFaceAuthReasons.DEVICE_WOKEN_UP_ON_REACH_GESTURE
+import com.android.keyguard.InternalFaceAuthReasons.DISPLAY_OFF
 import com.android.keyguard.InternalFaceAuthReasons.DREAM_STARTED
 import com.android.keyguard.InternalFaceAuthReasons.DREAM_STOPPED
 import com.android.keyguard.InternalFaceAuthReasons.ENROLLMENTS_CHANGED
@@ -131,6 +132,7 @@ private object InternalFaceAuthReasons {
     const val NON_STRONG_BIOMETRIC_ALLOWED_CHANGED =
         "Face auth stopped because non strong biometric allowed changed"
     const val POSTURE_CHANGED = "Face auth started/stopped due to device posture changed."
+    const val DISPLAY_OFF = "Face auth stopped due to display state OFF."
 }
 
 /**
@@ -221,7 +223,8 @@ constructor(private val id: Int, val reason: String, var extraInfo: Int = 0) :
     FACE_AUTH_UPDATED_STRONG_AUTH_CHANGED(1255, STRONG_AUTH_ALLOWED_CHANGED),
     @UiEvent(doc = NON_STRONG_BIOMETRIC_ALLOWED_CHANGED)
     FACE_AUTH_NON_STRONG_BIOMETRIC_ALLOWED_CHANGED(1256, NON_STRONG_BIOMETRIC_ALLOWED_CHANGED),
-    @UiEvent(doc = ACCESSIBILITY_ACTION) FACE_AUTH_ACCESSIBILITY_ACTION(1454, ACCESSIBILITY_ACTION);
+    @UiEvent(doc = ACCESSIBILITY_ACTION) FACE_AUTH_ACCESSIBILITY_ACTION(1454, ACCESSIBILITY_ACTION),
+    @UiEvent(doc = DISPLAY_OFF) FACE_AUTH_DISPLAY_OFF(1461, DISPLAY_OFF);
 
     override fun getId(): Int = this.id
 
