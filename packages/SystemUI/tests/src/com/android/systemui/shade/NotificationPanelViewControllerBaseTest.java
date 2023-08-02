@@ -106,6 +106,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
@@ -300,6 +301,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected GoneToDreamingTransitionViewModel mGoneToDreamingTransitionViewModel;
     @Mock protected GoneToDreamingLockscreenHostedTransitionViewModel
             mGoneToDreamingLockscreenHostedTransitionViewModel;
+    @Mock protected PrimaryBouncerToGoneTransitionViewModel
+            mPrimaryBouncerToGoneTransitionViewModel;
     @Mock protected KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock protected KeyguardLongPressViewModel mKeyuardLongPressViewModel;
     @Mock protected AlternateBouncerInteractor mAlternateBouncerInteractor;
@@ -502,6 +505,10 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mLockscreenToOccludedTransitionViewModel.lockscreenTranslationY(anyInt()))
                 .thenReturn(emptyFlow());
 
+        // Primary Bouncer->Gone
+        when(mPrimaryBouncerToGoneTransitionViewModel.getLockscreenAlpha())
+                .thenReturn(emptyFlow());
+
         NotificationWakeUpCoordinator coordinator =
                 new NotificationWakeUpCoordinator(
                         mDumpManager,
@@ -631,6 +638,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mGoneToDreamingTransitionViewModel,
                 mGoneToDreamingLockscreenHostedTransitionViewModel,
                 mLockscreenToOccludedTransitionViewModel,
+                mPrimaryBouncerToGoneTransitionViewModel,
                 mMainDispatcher,
                 mKeyguardTransitionInteractor,
                 mDumpManager,
