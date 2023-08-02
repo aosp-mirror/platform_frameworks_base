@@ -43,6 +43,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
@@ -82,6 +83,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.ParcelFileDescriptor;
@@ -105,6 +107,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.IntArray;
+import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -246,6 +249,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runStreamingInstall();
                 case "install-incremental":
                     return runIncrementalInstall();
+                case "install-archived":
+                    return runArchivedInstall();
                 case "install-abandon":
                 case "install-destroy":
                     return runInstallAbandon();
@@ -1549,6 +1554,16 @@ class PackageManagerShellCommand extends ShellCommand {
         return doRunInstall(params);
     }
 
+    private int runArchivedInstall() throws RemoteException {
+        final InstallParams params = makeInstallParams(UNSUPPORTED_INSTALL_CMD_OPTS);
+        params.sessionParams.installFlags |= PackageManager.INSTALL_ARCHIVED;
+        if (params.sessionParams.dataLoaderParams == null) {
+            params.sessionParams.setDataLoaderParams(
+                    PackageManagerShellCommandDataLoader.getStreamingDataLoaderParams(this));
+        }
+        return doRunInstall(params);
+    }
+
     private int runIncrementalInstall() throws RemoteException {
         final InstallParams params = makeInstallParams(UNSUPPORTED_INSTALL_CMD_OPTS);
         if (params.sessionParams.dataLoaderParams == null) {
@@ -1579,6 +1594,8 @@ class PackageManagerShellCommand extends ShellCommand {
         final boolean isStreaming = params.sessionParams.dataLoaderParams != null;
         final boolean isApex =
                 (params.sessionParams.installFlags & PackageManager.INSTALL_APEX) != 0;
+        final boolean installArchived =
+                (params.sessionParams.installFlags & PackageManager.INSTALL_ARCHIVED) != 0;
 
         ArrayList<String> args = getRemainingArgs();
 
@@ -1593,6 +1610,13 @@ class PackageManagerShellCommand extends ShellCommand {
         if (isApex && hasSplits) {
             pw.println("Error: can't specify SPLIT(s) for APEX");
             return 1;
+        }
+
+        if (installArchived) {
+            if (hasSplits) {
+                pw.println("Error: can't have SPLIT(s) for Archival install");
+                return 1;
+            }
         }
 
         if (!isStreaming) {
@@ -1613,8 +1637,8 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean abandonSession = true;
         try {
             if (isStreaming) {
-                if (doAddFiles(sessionId, args, params.sessionParams.sizeBytes, isApex)
-                        != PackageInstaller.STATUS_SUCCESS) {
+                if (doAddFiles(sessionId, args, params.sessionParams.sizeBytes, isApex,
+                        installArchived) != PackageInstaller.STATUS_SUCCESS) {
                     return 1;
                 }
             } else {
@@ -3856,7 +3880,7 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int doAddFiles(int sessionId, ArrayList<String> args, long sessionSizeBytes,
-            boolean isApex) throws RemoteException {
+            boolean isApex, boolean installArchived) throws RemoteException {
         PackageInstaller.Session session = null;
         try {
             session = new PackageInstaller.Session(
@@ -3865,9 +3889,17 @@ class PackageManagerShellCommand extends ShellCommand {
             // 1. Single file from stdin.
             if (args.isEmpty() || STDIN_PATH.equals(args.get(0))) {
                 final String name = "base" + RANDOM.nextInt() + "." + (isApex ? "apex" : "apk");
-                final Metadata metadata = Metadata.forStdIn(name);
-                session.addFile(LOCATION_DATA_APP, name, sessionSizeBytes,
-                        metadata.toByteArray(), null);
+                final long size;
+                final Metadata metadata;
+                if (!installArchived) {
+                    metadata = Metadata.forStdIn(name);
+                    size = sessionSizeBytes;
+                } else {
+                    metadata = Metadata.forArchived(
+                            getArchivedPackage(STDIN_PATH, sessionSizeBytes));
+                    size = -1;
+                }
+                session.addFile(LOCATION_DATA_APP, name, size, metadata.toByteArray(), null);
                 return 0;
             }
 
@@ -3876,16 +3908,21 @@ class PackageManagerShellCommand extends ShellCommand {
 
                 if (delimLocation != -1) {
                     // 2. File with specified size read from stdin.
+                    if (installArchived) {
+                        getOutPrintWriter().println(
+                                "Error: can't install with size from STDIN for Archival install");
+                        return 1;
+                    }
                     if (processArgForStdin(arg, session) != 0) {
                         return 1;
                     }
                 } else {
                     // 3. Local file.
-                    processArgForLocalFile(arg, session);
+                    processArgForLocalFile(arg, session, installArchived);
                 }
             }
             return 0;
-        } catch (IllegalArgumentException e) {
+        } catch (IOException | IllegalArgumentException e) {
             getErrPrintWriter().println("Failed to add file(s), reason: " + e);
             getOutPrintWriter().println("Failure [failed to add file(s)]");
             return 1;
@@ -3974,26 +4011,67 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private void processArgForLocalFile(String arg, PackageInstaller.Session session) {
+    private ArchivedPackageParcel getArchivedPackage(String inPath, long sizeBytes)
+            throws RemoteException, IOException {
+        final var fdWithSize = openInFile(inPath, sizeBytes);
+        if (fdWithSize.first == null) {
+            throw new IllegalArgumentException("Error: Can't open file: " + inPath);
+        }
+
+        File tmpFile = null;
+        final ParcelFileDescriptor fd = fdWithSize.first;
+        try (InputStream inStream = new AutoCloseInputStream(fd)) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                File tmpStagingDir = Environment.getDataAppDirectory(null);
+                tmpFile = new File(tmpStagingDir, "tmdl" + RANDOM.nextInt() + ".tmp");
+
+                try (OutputStream outStream = new FileOutputStream(tmpFile)) {
+                    Streams.copy(inStream, outStream);
+                }
+
+                return mInterface.getArchivedPackage(tmpFile.getAbsolutePath());
+            } finally {
+                if (tmpFile != null) {
+                    tmpFile.delete();
+                }
+                Binder.restoreCallingIdentity(identity);
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Error: Can't stage file: " + inPath, e);
+        }
+    }
+
+    private void processArgForLocalFile(String arg, PackageInstaller.Session session,
+            boolean installArchived) throws IOException, RemoteException {
         final String inPath = arg;
 
         final File file = new File(inPath);
         final String name = file.getName();
-        final long size = getFileStatSize(file);
-        final Metadata metadata = Metadata.forLocalFile(inPath);
+        final long size;
+        final Metadata metadata;
+        if (installArchived) {
+            metadata = Metadata.forArchived(getArchivedPackage(inPath, -1));
+            size = 0;
+        } else {
+            metadata = Metadata.forLocalFile(inPath);
+            size = getFileStatSize(file);
+        }
 
         byte[] v4signatureBytes = null;
-        // Try to load the v4 signature file for the APK; it might not exist.
-        final String v4SignaturePath = inPath + V4Signature.EXT;
-        final ParcelFileDescriptor pfd = openFileForSystem(v4SignaturePath, "r");
-        if (pfd != null) {
-            try {
-                final V4Signature v4signature = V4Signature.readFrom(pfd);
-                v4signatureBytes = v4signature.toByteArray();
-            } catch (IOException ex) {
-                Slog.e(TAG, "V4 signature file exists but failed to be parsed.", ex);
-            } finally {
-                IoUtils.closeQuietly(pfd);
+        if (!installArchived) {
+            // Try to load the v4 signature file for the APK; it might not exist.
+            final String v4SignaturePath = inPath + V4Signature.EXT;
+            final ParcelFileDescriptor pfd = openFileForSystem(v4SignaturePath, "r");
+            if (pfd != null) {
+                try {
+                    final V4Signature v4signature = V4Signature.readFrom(pfd);
+                    v4signatureBytes = v4signature.toByteArray();
+                } catch (IOException ex) {
+                    Slog.e(TAG, "V4 signature file exists but failed to be parsed.", ex);
+                } finally {
+                    IoUtils.closeQuietly(pfd);
+                }
             }
         }
 
@@ -4015,6 +4093,32 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private Pair<ParcelFileDescriptor, Long> openInFile(String inPath, long sizeBytes)
+            throws IOException {
+        final ParcelFileDescriptor fd;
+        if (STDIN_PATH.equals(inPath)) {
+            fd = ParcelFileDescriptor.dup(getInFileDescriptor());
+        } else if (inPath != null) {
+            fd = openFileForSystem(inPath, "r");
+            if (fd == null) {
+                return Pair.create(null, -1L);
+            }
+            sizeBytes = fd.getStatSize();
+            if (sizeBytes < 0) {
+                fd.close();
+                getErrPrintWriter().println("Unable to get size of: " + inPath);
+                return Pair.create(null, -1L);
+            }
+        } else {
+            fd = ParcelFileDescriptor.dup(getInFileDescriptor());
+        }
+        if (sizeBytes <= 0) {
+            getErrPrintWriter().println("Error: must specify an APK size");
+            return Pair.create(null, 1L);
+        }
+        return Pair.create(fd, sizeBytes);
+    }
+
     private int doWriteSplit(int sessionId, String inPath, long sizeBytes, String splitName,
             boolean logSuccess) throws RemoteException {
         PackageInstaller.Session session = null;
@@ -4024,26 +4128,13 @@ class PackageManagerShellCommand extends ShellCommand {
 
             final PrintWriter pw = getOutPrintWriter();
 
-            final ParcelFileDescriptor fd;
-            if (STDIN_PATH.equals(inPath)) {
-                fd = ParcelFileDescriptor.dup(getInFileDescriptor());
-            } else if (inPath != null) {
-                fd = openFileForSystem(inPath, "r");
-                if (fd == null) {
-                    return -1;
-                }
-                sizeBytes = fd.getStatSize();
-                if (sizeBytes < 0) {
-                    getErrPrintWriter().println("Unable to get size of: " + inPath);
-                    return -1;
-                }
-            } else {
-                fd = ParcelFileDescriptor.dup(getInFileDescriptor());
+            final var fdWithSize = openInFile(inPath, sizeBytes);
+            if (fdWithSize.first == null) {
+                long resultCode = fdWithSize.second;
+                return (int) resultCode;
             }
-            if (sizeBytes <= 0) {
-                getErrPrintWriter().println("Error: must specify an APK size");
-                return 1;
-            }
+            final ParcelFileDescriptor fd = fdWithSize.first;
+            sizeBytes = fdWithSize.second;
 
             session.write(splitName, 0, sizeBytes, fd);
 

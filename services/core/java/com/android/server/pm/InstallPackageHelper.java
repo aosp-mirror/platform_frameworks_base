@@ -1144,8 +1144,16 @@ final class InstallPackageHelper {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
         final ParsedPackage parsedPackage;
         try (PackageParser2 pp = mPm.mInjector.getPreparingPackageParser()) {
-            parsedPackage = pp.parsePackage(tmpPackageFile, parseFlags, false);
-            AndroidPackageUtils.validatePackageDexMetadata(parsedPackage);
+            if (request.getPackageLite() == null || !PackageInstallerSession.isArchivedInstallation(
+                    request.getInstallFlags())) {
+                // TODO: pass packageLite from install request instead of reparsing the package
+                parsedPackage = pp.parsePackage(tmpPackageFile, parseFlags, false);
+                AndroidPackageUtils.validatePackageDexMetadata(parsedPackage);
+            } else {
+                // Archived install mode, no APK.
+                parsedPackage = pp.parsePackageFromPackageLite(request.getPackageLite(),
+                        parseFlags);
+            }
         } catch (PackageManagerException e) {
             throw new PrepareFailure("Failed parse during installPackageLI", e);
         } finally {
@@ -1547,6 +1555,7 @@ final class InstallPackageHelper {
                     // TODO: Are these system flags actually set properly at this stage?
                     boolean isUpdatedSystemAppInferred =
                             pkgSetting != null && pkgSetting.isSystem();
+                    // derivePackageAbi works OK for archived packages despite logging some errors.
                     final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
                             derivedAbi = mPackageAbiHelper.derivePackageAbi(parsedPackage,
                             systemApp, (isUpdatedSystemAppFromExistingSetting
