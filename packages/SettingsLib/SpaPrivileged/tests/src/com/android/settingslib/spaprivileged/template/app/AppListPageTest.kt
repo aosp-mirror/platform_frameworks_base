@@ -116,7 +116,7 @@ class AppListPageTest {
 
     private fun onMoreOptions() =
         composeTestRule.onNodeWithContentDescription(
-            context.getString(R.string.abc_action_menu_overflow_description)
+            context.getString(androidx.appcompat.R.string.abc_action_menu_overflow_description)
         )
 
     private companion object {

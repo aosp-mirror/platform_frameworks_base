@@ -22,7 +22,7 @@ android_library {
     name: "SpaPrivilegedLib",
 
     srcs: ["src/**/*.kt"],
-
+    use_resource_processor: true,
     static_libs: [
         "SpaLib",
         "SettingsLib",
@@ -45,5 +45,6 @@ java_defaults {
 // Expose the srcs to tests, so the tests can access the internal classes.
 filegroup {
     name: "SpaPrivilegedLib_srcs",
+    visibility: [":__subpackages__"],
     srcs: ["src/**/*.kt"],
 }

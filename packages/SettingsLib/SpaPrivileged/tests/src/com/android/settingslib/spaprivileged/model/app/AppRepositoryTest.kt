@@ -25,7 +25,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.testutils.delay
-import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.framework.common.userManager
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -66,7 +65,8 @@ class AppRepositoryTest {
 
         val contentDescription = produceIconContentDescription()
 
-        assertThat(contentDescription.value).isEqualTo(context.getString(R.string.category_work))
+        assertThat(contentDescription.value)
+            .isEqualTo(context.getString(com.android.settingslib.R.string.category_work))
     }
 
     @Test

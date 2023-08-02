@@ -32,7 +32,7 @@ import androidx.compose.ui.state.ToggleableState
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.widget.preference.SwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
-import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.spaprivileged.framework.compose.getPlaceholder
 import com.android.settingslib.spaprivileged.model.enterprise.BaseUserRestricted
 import com.android.settingslib.spaprivileged.model.enterprise.BlockedByAdmin
 import com.android.settingslib.spaprivileged.model.enterprise.NoRestricted
@@ -72,9 +72,12 @@ internal object RestrictedSwitchPreference {
         checked: State<Boolean?>,
     ): State<String> = when (restrictedMode) {
         is NoRestricted -> summaryIfNoRestricted
-        is BaseUserRestricted -> stateOf(context.getString(R.string.disabled))
+        is BaseUserRestricted -> stateOf(
+            context.getString(com.android.settingslib.R.string.disabled)
+        )
+
         is BlockedByAdmin -> derivedStateOf { restrictedMode.getSummary(checked.value) }
-        null -> stateOf(context.getString(R.string.summary_placeholder))
+        null -> stateOf(context.getPlaceholder())
     }
 }
 
