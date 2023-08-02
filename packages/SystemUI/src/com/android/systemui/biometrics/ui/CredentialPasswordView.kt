@@ -53,7 +53,6 @@ class CredentialPasswordView(context: Context, attrs: AttributeSet?) :
         subtitleView = requireViewById(R.id.subtitle)
         descriptionView = requireViewById(R.id.description)
         iconView = requireViewById(R.id.icon)
-        subtitleView = requireViewById(R.id.subtitle)
         passwordField = requireViewById(R.id.lockPassword)
         credentialHeader = requireViewById(R.id.auth_credential_header)
         credentialInput = requireViewById(R.id.auth_credential_input)
