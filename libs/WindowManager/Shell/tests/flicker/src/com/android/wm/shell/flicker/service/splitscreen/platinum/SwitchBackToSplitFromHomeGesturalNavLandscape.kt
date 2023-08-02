@@ -22,7 +22,7 @@ import android.tools.common.Rotation
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.SwitchBackToSplitFromHome
 import org.junit.Test
 
-class SwitchBackToSplitFromHomeGesturalNavLandscape :
+open class SwitchBackToSplitFromHomeGesturalNavLandscape :
     SwitchBackToSplitFromHome(Rotation.ROTATION_90) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit

@@ -22,7 +22,7 @@ import android.tools.common.Rotation
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.DismissSplitScreenByGoHome
 import org.junit.Test
 
-class DismissSplitScreenByGoHomeGesturalNavLandscape :
+open class DismissSplitScreenByGoHomeGesturalNavLandscape :
     DismissSplitScreenByGoHome(Rotation.ROTATION_90) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit

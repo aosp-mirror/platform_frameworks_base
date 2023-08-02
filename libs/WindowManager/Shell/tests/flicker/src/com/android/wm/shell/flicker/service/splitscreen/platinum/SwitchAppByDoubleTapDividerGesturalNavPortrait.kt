@@ -22,7 +22,7 @@ import android.tools.common.Rotation
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.SwitchAppByDoubleTapDivider
 import org.junit.Test
 
-class SwitchAppByDoubleTapDividerGesturalNavPortrait :
+open class SwitchAppByDoubleTapDividerGesturalNavPortrait :
     SwitchAppByDoubleTapDivider(Rotation.ROTATION_0) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit

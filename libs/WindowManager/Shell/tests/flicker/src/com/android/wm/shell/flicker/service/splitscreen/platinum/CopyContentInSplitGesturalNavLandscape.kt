@@ -22,7 +22,7 @@ import android.tools.common.Rotation
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.CopyContentInSplit
 import org.junit.Test
 
-class CopyContentInSplitGesturalNavLandscape : CopyContentInSplit(Rotation.ROTATION_90) {
+open class CopyContentInSplitGesturalNavLandscape : CopyContentInSplit(Rotation.ROTATION_90) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
     @Test

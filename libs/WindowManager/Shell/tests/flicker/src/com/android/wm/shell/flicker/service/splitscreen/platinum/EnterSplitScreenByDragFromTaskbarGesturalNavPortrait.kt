@@ -22,7 +22,7 @@ import android.tools.common.Rotation
 import com.android.wm.shell.flicker.service.splitscreen.scenarios.EnterSplitScreenByDragFromTaskbar
 import org.junit.Test
 
-class EnterSplitScreenByDragFromTaskbarGesturalNavPortrait :
+open class EnterSplitScreenByDragFromTaskbarGesturalNavPortrait :
     EnterSplitScreenByDragFromTaskbar(Rotation.ROTATION_0) {
     @PlatinumTest(focusArea = "sysui")
     @Presubmit
