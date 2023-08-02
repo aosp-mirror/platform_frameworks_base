@@ -346,7 +346,7 @@ public class TransitionAnimationHelper {
                         .setFrameScale(1)
                         .setPixelFormat(PixelFormat.RGBA_8888)
                         .setChildrenOnly(true)
-                        .setAllowProtected(true)
+                        .setAllowProtected(false)
                         .setCaptureSecureLayers(true)
                         .build();
         final ScreenCapture.ScreenshotHardwareBuffer edgeBuffer =
