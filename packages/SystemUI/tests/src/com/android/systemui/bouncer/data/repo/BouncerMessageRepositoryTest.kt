@@ -101,7 +101,7 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
         fingerprintRepository = FakeDeviceEntryFingerprintAuthRepository()
         testScope = TestScope()
 
-        whenever(updateMonitor.isFingerprintAllowedInBouncer).thenReturn(false)
+        whenever(updateMonitor.isUnlockingWithFingerprintAllowed).thenReturn(false)
         whenever(securityModel.getSecurityMode(PRIMARY_USER_ID)).thenReturn(PIN)
         underTest =
             BouncerMessageRepositoryImpl(

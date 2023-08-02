@@ -59,21 +59,21 @@ class BouncerMessageFactoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun bouncerMessages_choosesTheRightMessage_basedOnSecurityModeAndFpAllowedInBouncer() =
+    fun bouncerMessages_choosesTheRightMessage_basedOnSecurityModeAndFpAuthIsAllowed() =
         testScope.runTest {
-            primaryMessage(PROMPT_REASON_DEFAULT, mode = PIN, fpAllowedInBouncer = false)
+            primaryMessage(PROMPT_REASON_DEFAULT, mode = PIN, fpAuthAllowed = false)
                 .isEqualTo("Enter PIN")
-            primaryMessage(PROMPT_REASON_DEFAULT, mode = PIN, fpAllowedInBouncer = true)
+            primaryMessage(PROMPT_REASON_DEFAULT, mode = PIN, fpAuthAllowed = true)
                 .isEqualTo("Unlock with PIN or fingerprint")
 
-            primaryMessage(PROMPT_REASON_DEFAULT, mode = Password, fpAllowedInBouncer = false)
+            primaryMessage(PROMPT_REASON_DEFAULT, mode = Password, fpAuthAllowed = false)
                 .isEqualTo("Enter password")
-            primaryMessage(PROMPT_REASON_DEFAULT, mode = Password, fpAllowedInBouncer = true)
+            primaryMessage(PROMPT_REASON_DEFAULT, mode = Password, fpAuthAllowed = true)
                 .isEqualTo("Unlock with password or fingerprint")
 
-            primaryMessage(PROMPT_REASON_DEFAULT, mode = Pattern, fpAllowedInBouncer = false)
+            primaryMessage(PROMPT_REASON_DEFAULT, mode = Pattern, fpAuthAllowed = false)
                 .isEqualTo("Draw pattern")
-            primaryMessage(PROMPT_REASON_DEFAULT, mode = Pattern, fpAllowedInBouncer = true)
+            primaryMessage(PROMPT_REASON_DEFAULT, mode = Pattern, fpAuthAllowed = true)
                 .isEqualTo("Unlock with pattern or fingerprint")
         }
 
@@ -94,44 +94,44 @@ class BouncerMessageFactoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun bouncerMessages_setsPrimaryAndSecondaryMessage_basedOnSecurityModeAndFpAllowedInBouncer() =
+    fun bouncerMessages_setsPrimaryAndSecondaryMessage_basedOnSecurityModeAndFpAuthIsAllowed() =
         testScope.runTest {
             primaryMessage(
                     PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT,
                     mode = PIN,
-                    fpAllowedInBouncer = true
+                    fpAuthAllowed = true
                 )
                 .isEqualTo("Wrong PIN. Try again.")
             secondaryMessage(
                     PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT,
                     mode = PIN,
-                    fpAllowedInBouncer = true
+                    fpAuthAllowed = true
                 )
                 .isEqualTo("Or unlock with fingerprint")
 
             primaryMessage(
                     PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT,
                     mode = Password,
-                    fpAllowedInBouncer = true
+                    fpAuthAllowed = true
                 )
                 .isEqualTo("Wrong password. Try again.")
             secondaryMessage(
                     PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT,
                     mode = Password,
-                    fpAllowedInBouncer = true
+                    fpAuthAllowed = true
                 )
                 .isEqualTo("Or unlock with fingerprint")
 
             primaryMessage(
                     PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT,
                     mode = Pattern,
-                    fpAllowedInBouncer = true
+                    fpAuthAllowed = true
                 )
                 .isEqualTo("Wrong pattern. Try again.")
             secondaryMessage(
                     PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT,
                     mode = Pattern,
-                    fpAllowedInBouncer = true
+                    fpAuthAllowed = true
                 )
                 .isEqualTo("Or unlock with fingerprint")
         }
@@ -139,11 +139,11 @@ class BouncerMessageFactoryTest : SysuiTestCase() {
     private fun primaryMessage(
         reason: Int,
         mode: KeyguardSecurityModel.SecurityMode,
-        fpAllowedInBouncer: Boolean
+        fpAuthAllowed: Boolean
     ): StringSubject {
         return assertThat(
             context.resources.getString(
-                bouncerMessageModel(mode, fpAllowedInBouncer, reason)!!.message!!.messageResId!!
+                bouncerMessageModel(mode, fpAuthAllowed, reason)!!.message!!.messageResId!!
             )
         )!!
     }
@@ -151,25 +151,23 @@ class BouncerMessageFactoryTest : SysuiTestCase() {
     private fun secondaryMessage(
         reason: Int,
         mode: KeyguardSecurityModel.SecurityMode,
-        fpAllowedInBouncer: Boolean
+        fpAuthAllowed: Boolean
     ): StringSubject {
         return assertThat(
             context.resources.getString(
-                bouncerMessageModel(mode, fpAllowedInBouncer, reason)!!
-                    .secondaryMessage!!
-                    .messageResId!!
+                bouncerMessageModel(mode, fpAuthAllowed, reason)!!.secondaryMessage!!.messageResId!!
             )
         )!!
     }
 
     private fun bouncerMessageModel(
         mode: KeyguardSecurityModel.SecurityMode,
-        fpAllowedInBouncer: Boolean,
+        fpAuthAllowed: Boolean,
         reason: Int,
         secondaryMessageOverride: String? = null,
     ): BouncerMessageModel? {
         whenever(securityModel.getSecurityMode(0)).thenReturn(mode)
-        whenever(updateMonitor.isFingerprintAllowedInBouncer).thenReturn(fpAllowedInBouncer)
+        whenever(updateMonitor.isUnlockingWithFingerprintAllowed).thenReturn(fpAuthAllowed)
 
         return underTest.createFromPromptReason(
             reason,

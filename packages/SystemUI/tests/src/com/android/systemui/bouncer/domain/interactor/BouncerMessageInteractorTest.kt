@@ -76,7 +76,7 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
 
         allowTestableLooperAsMainThread()
         whenever(securityModel.getSecurityMode(PRIMARY_USER_ID)).thenReturn(PIN)
-        whenever(updateMonitor.isFingerprintAllowedInBouncer).thenReturn(false)
+        whenever(updateMonitor.isUnlockingWithFingerprintAllowed).thenReturn(false)
     }
 
     suspend fun TestScope.init() {

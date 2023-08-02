@@ -99,7 +99,7 @@ constructor(
             getBouncerMessage(
                 reason,
                 securityModel.getSecurityMode(userId),
-                updateMonitor.isFingerprintAllowedInBouncer
+                updateMonitor.isUnlockingWithFingerprintAllowed
             )
         return pair?.let {
             BouncerMessageModel(
@@ -115,43 +115,48 @@ constructor(
 
     /**
      * Helper method that provides the relevant bouncer message that should be shown for different
-     * scenarios indicated by [reason]. [securityMode] & [fpAllowedInBouncer] parameters are used to
+     * scenarios indicated by [reason]. [securityMode] & [fpAuthIsAllowed] parameters are used to
      * provide a more specific message.
      */
     private fun getBouncerMessage(
         @BouncerPromptReason reason: Int,
         securityMode: SecurityMode,
-        fpAllowedInBouncer: Boolean = false
+        fpAuthIsAllowed: Boolean = false
     ): Pair<Int, Int>? {
         return when (reason) {
+            // Primary auth locked out
+            PROMPT_REASON_PRIMARY_AUTH_LOCKED_OUT -> primaryAuthLockedOut(securityMode)
+            // Primary auth required reasons
             PROMPT_REASON_RESTART -> authRequiredAfterReboot(securityMode)
             PROMPT_REASON_TIMEOUT -> authRequiredAfterPrimaryAuthTimeout(securityMode)
             PROMPT_REASON_DEVICE_ADMIN -> authRequiredAfterAdminLockdown(securityMode)
             PROMPT_REASON_USER_REQUEST -> authRequiredAfterUserLockdown(securityMode)
-            PROMPT_REASON_AFTER_LOCKOUT -> biometricLockout(securityMode)
             PROMPT_REASON_PREPARE_FOR_UPDATE -> authRequiredForUnattendedUpdate(securityMode)
             PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE -> authRequiredForMainlineUpdate(securityMode)
             PROMPT_REASON_FINGERPRINT_LOCKED_OUT -> fingerprintUnlockUnavailable(securityMode)
+            PROMPT_REASON_AFTER_LOCKOUT -> biometricLockout(securityMode)
+            // Non strong auth not available reasons
             PROMPT_REASON_FACE_LOCKED_OUT ->
-                if (fpAllowedInBouncer) faceLockedOutButFingerprintAvailable(securityMode)
+                if (fpAuthIsAllowed) faceLockedOutButFingerprintAvailable(securityMode)
                 else faceLockedOut(securityMode)
-            PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT ->
-                if (fpAllowedInBouncer) incorrectSecurityInputWithFingerprint(securityMode)
-                else incorrectSecurityInput(securityMode)
             PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT ->
-                if (fpAllowedInBouncer) nonStrongAuthTimeoutWithFingerprintAllowed(securityMode)
+                if (fpAuthIsAllowed) nonStrongAuthTimeoutWithFingerprintAllowed(securityMode)
                 else nonStrongAuthTimeout(securityMode)
             PROMPT_REASON_TRUSTAGENT_EXPIRED ->
-                if (fpAllowedInBouncer) trustAgentDisabledWithFingerprintAllowed(securityMode)
+                if (fpAuthIsAllowed) trustAgentDisabledWithFingerprintAllowed(securityMode)
                 else trustAgentDisabled(securityMode)
+            // Auth incorrect input reasons.
+            PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT ->
+                if (fpAuthIsAllowed) incorrectSecurityInputWithFingerprint(securityMode)
+                else incorrectSecurityInput(securityMode)
             PROMPT_REASON_INCORRECT_FACE_INPUT ->
-                if (fpAllowedInBouncer) incorrectFaceInputWithFingerprintAllowed(securityMode)
+                if (fpAuthIsAllowed) incorrectFaceInputWithFingerprintAllowed(securityMode)
                 else incorrectFaceInput(securityMode)
             PROMPT_REASON_INCORRECT_FINGERPRINT_INPUT -> incorrectFingerprintInput(securityMode)
+            // Default message
             PROMPT_REASON_DEFAULT ->
-                if (fpAllowedInBouncer) defaultMessageWithFingerprint(securityMode)
+                if (fpAuthIsAllowed) defaultMessageWithFingerprint(securityMode)
                 else defaultMessage(securityMode)
-            PROMPT_REASON_PRIMARY_AUTH_LOCKED_OUT -> primaryAuthLockedOut(securityMode)
             else -> null
         }
     }
