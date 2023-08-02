@@ -109,6 +109,7 @@ import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.BatteryExternalStatsWorker;
 import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.power.stats.BatteryUsageStatsProvider;
@@ -2605,6 +2606,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         awaitCompletion();
         synchronized (mStats) {
             mStats.dumpConstantsLocked(pw);
+
+            pw.println("Flags:");
+            pw.println("    " + Flags.FLAG_STREAMLINED_BATTERY_STATS
+                    + ": " + Flags.streamlinedBatteryStats());
         }
     }
 
