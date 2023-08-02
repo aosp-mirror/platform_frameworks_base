@@ -702,9 +702,10 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     // region updateNoteTaskAsUser
     @Test
     fun updateNoteTaskAsUser_sameUser_shouldUpdateShortcuts() {
-        val user = userTracker.userHandle
+        val user = UserHandle.CURRENT
         val controller = spy(createNoteTaskController())
         doNothing().whenever(controller).updateNoteTaskAsUserInternal(any())
+        whenever(controller.getCurrentRunningUser()).thenReturn(user)
 
         controller.updateNoteTaskAsUser(user)
 
@@ -714,10 +715,10 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     @Test
     fun updateNoteTaskAsUser_differentUser_shouldUpdateShortcutsInUserProcess() {
-        // FakeUserTracker will default to UserHandle.SYSTEM.
         val user = UserHandle.CURRENT
         val controller = spy(createNoteTaskController(isEnabled = true))
         doNothing().whenever(controller).updateNoteTaskAsUserInternal(any())
+        whenever(controller.getCurrentRunningUser()).thenReturn(UserHandle.SYSTEM)
 
         controller.updateNoteTaskAsUser(user)
 
