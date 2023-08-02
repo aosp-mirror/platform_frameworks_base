@@ -24,6 +24,12 @@ import static android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESE
 import static android.Manifest.permission.USE_COMPANION_TRANSPORTS;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
+import static android.companion.CompanionDeviceService.DEVICE_EVENT_BLE_APPEARED;
+import static android.companion.CompanionDeviceService.DEVICE_EVENT_BLE_DISAPPEARED;
+import static android.companion.CompanionDeviceService.DEVICE_EVENT_BT_CONNECTED;
+import static android.companion.CompanionDeviceService.DEVICE_EVENT_BT_DISCONNECTED;
+import static android.companion.CompanionDeviceService.DEVICE_EVENT_SELF_MANAGED_APPEARED;
+import static android.companion.CompanionDeviceService.DEVICE_EVENT_SELF_MANAGED_DISAPPEARED;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
@@ -383,17 +389,8 @@ public class CompanionDeviceManagerService extends SystemService {
 
         if (!association.shouldBindWhenPresent()) return;
 
-        final int userId = association.getUserId();
-        final String packageName = association.getPackageName();
-        // Set bindImportant to true when the association is self-managed to avoid the target
-        // service being killed.
-        final boolean bindImportant = association.isSelfManaged();
+        bindApplicationIfNeeded(association);
 
-        if (!mCompanionAppController.isCompanionApplicationBound(userId, packageName)) {
-            mCompanionAppController.bindCompanionApplication(userId, packageName, bindImportant);
-        } else if (DEBUG) {
-            Log.i(TAG, "u" + userId + "\\" + packageName + " is already bound");
-        }
         mCompanionAppController.notifyCompanionApplicationDeviceAppeared(association);
     }
 
@@ -414,11 +411,57 @@ public class CompanionDeviceManagerService extends SystemService {
         if (association.shouldBindWhenPresent()) {
             mCompanionAppController.notifyCompanionApplicationDeviceDisappeared(association);
         }
+    }
 
-        // Check if there are other devices associated to the app that are present.
-        if (shouldBindPackage(userId, packageName)) return;
+    private void onDeviceEventInternal(int associationId, int event) {
+        Slog.i(TAG, "onDeviceEventInternal() id=" + associationId + " event= " + event);
+        final AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        final String packageName = association.getPackageName();
+        final int userId = association.getUserId();
+        switch (event) {
+            case DEVICE_EVENT_BLE_APPEARED:
+            case DEVICE_EVENT_BT_CONNECTED:
+            case DEVICE_EVENT_SELF_MANAGED_APPEARED:
+                if (!association.shouldBindWhenPresent()) return;
 
-        mCompanionAppController.unbindCompanionApplication(userId, packageName);
+                bindApplicationIfNeeded(association);
+
+                mCompanionAppController.notifyCompanionApplicationDeviceEvent(
+                        association, event);
+                break;
+            case DEVICE_EVENT_BLE_DISAPPEARED:
+            case DEVICE_EVENT_BT_DISCONNECTED:
+            case DEVICE_EVENT_SELF_MANAGED_DISAPPEARED:
+                if (!mCompanionAppController.isCompanionApplicationBound(userId, packageName)) {
+                    if (DEBUG) Log.w(TAG, "u" + userId + "\\" + packageName + " is NOT bound");
+                    return;
+                }
+                if (association.shouldBindWhenPresent()) {
+                    mCompanionAppController.notifyCompanionApplicationDeviceEvent(
+                            association, event);
+                }
+                // Check if there are other devices associated to the app that are present.
+                if (shouldBindPackage(userId, packageName)) return;
+                mCompanionAppController.unbindCompanionApplication(userId, packageName);
+                break;
+            default:
+                Slog.e(TAG, "Event: " + event + "is not supported");
+                break;
+        }
+    }
+
+    private void bindApplicationIfNeeded(AssociationInfo association) {
+        final String packageName = association.getPackageName();
+        final int userId = association.getUserId();
+        // Set bindImportant to true when the association is self-managed to avoid the target
+        // service being killed.
+        final boolean bindImportant = association.isSelfManaged();
+        if (!mCompanionAppController.isCompanionApplicationBound(userId, packageName)) {
+            mCompanionAppController.bindCompanionApplication(
+                    userId, packageName, bindImportant);
+        } else if (DEBUG) {
+            Log.i(TAG, "u" + userId + "\\" + packageName + " is already bound");
+        }
     }
 
     /**
@@ -883,7 +926,6 @@ public class CompanionDeviceManagerService extends SystemService {
                         + " active=" + active
                         + " deviceAddress=" + deviceAddress);
             }
-
             final int userId = getCallingUserId();
             enforceCallerIsSystemOr(userId, packageName);
 
@@ -912,10 +954,17 @@ public class CompanionDeviceManagerService extends SystemService {
             // an application sets/unsets the mNotifyOnDeviceNearby flag.
             mAssociationStore.updateAssociation(association);
 
+            int associationId = association.getId();
             // If device is already present, then trigger callback.
-            if (active && mDevicePresenceMonitor.isDevicePresent(association.getId())) {
-                if (DEBUG) Log.d(TAG, "Device is already present. Triggering callback.");
-                onDeviceAppearedInternal(association.getId());
+            if (active && mDevicePresenceMonitor.isDevicePresent(associationId)) {
+                Slog.i(TAG, "Device is already present. Triggering callback.");
+                if (mDevicePresenceMonitor.isBlePresent(associationId)
+                        || mDevicePresenceMonitor.isSimulatePresent(associationId)) {
+                    onDeviceAppearedInternal(associationId);
+                    onDeviceEventInternal(associationId, DEVICE_EVENT_BLE_APPEARED);
+                } else if (mDevicePresenceMonitor.isBtConnected(associationId)) {
+                    onDeviceEventInternal(associationId, DEVICE_EVENT_BT_CONNECTED);
+                }
             }
 
             // If last listener is unregistered, then unbind application.
@@ -1379,6 +1428,11 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void onDeviceDisappeared(int associationId) {
             onDeviceDisappearedInternal(associationId);
+        }
+
+        @Override
+        public void onDeviceEvent(int associationId, int event) {
+            onDeviceEventInternal(associationId, event);
         }
     };
 

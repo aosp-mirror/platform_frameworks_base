@@ -17,6 +17,7 @@
 
 package android.companion;
 
+import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,13 +32,14 @@ import android.util.Log;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
- * A service that receives calls from the system when the associated companion device appears
- * nearby or is connected, as well as when the device is no longer "present" or connected.
- * See {@link #onDeviceAppeared(AssociationInfo)}/{@link #onDeviceDisappeared(AssociationInfo)}.
+ * A service that receives calls from the system with device events.
+ * See {@link #onDeviceEvent(AssociationInfo, int)}.
  *
  * <p>
  * Companion applications must create a service that {@code extends}
@@ -120,6 +122,57 @@ public abstract class CompanionDeviceService extends Service {
      * {@link android.Manifest.permission#BIND_COMPANION_DEVICE_SERVICE}</p>
      */
     public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
+
+    /** @hide */
+    @IntDef(prefix = {"DEVICE_EVENT"}, value = {
+            DEVICE_EVENT_BLE_APPEARED,
+            DEVICE_EVENT_BLE_DISAPPEARED,
+            DEVICE_EVENT_BT_CONNECTED,
+            DEVICE_EVENT_BT_DISCONNECTED,
+            DEVICE_EVENT_SELF_MANAGED_APPEARED,
+            DEVICE_EVENT_SELF_MANAGED_DISAPPEARED
+    })
+
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeviceEvent {}
+
+    /**
+     * Companion app receives {@link #onDeviceEvent(AssociationInfo, int)} callback
+     * with this event if the device comes into BLE range.
+     */
+    public static final int DEVICE_EVENT_BLE_APPEARED = 0;
+
+    /**
+     * Companion app receives {@link #onDeviceEvent(AssociationInfo, int)} callback
+     * with this event if the device is no longer in BLE range.
+     */
+    public static final int DEVICE_EVENT_BLE_DISAPPEARED = 1;
+
+    /**
+     * Companion app receives {@link #onDeviceEvent(AssociationInfo, int)} callback
+     * with this event when the bluetooth device is connected.
+     */
+    public static final int DEVICE_EVENT_BT_CONNECTED = 2;
+
+    /**
+     * Companion app receives {@link #onDeviceEvent(AssociationInfo, int)} callback
+     * with this event if the bluetooth device is disconnected.
+     */
+    public static final int DEVICE_EVENT_BT_DISCONNECTED = 3;
+
+    /**
+     * A companion app for a {@link AssociationInfo#isSelfManaged() self-managed} device will
+     * receive the callback {@link #onDeviceEvent(AssociationInfo, int)} if it reports that a
+     * device has appeared on its own.
+     */
+    public static final int DEVICE_EVENT_SELF_MANAGED_APPEARED = 4;
+
+    /**
+     * A companion app for a {@link AssociationInfo#isSelfManaged() self-managed} device will
+     * receive the callback {@link #onDeviceEvent(AssociationInfo, int)} if it reports that a
+     * device has disappeared on its own.
+     */
+    public static final int DEVICE_EVENT_SELF_MANAGED_DISAPPEARED = 5;
 
     private final Stub mRemote = new Stub();
 
@@ -251,7 +304,10 @@ public abstract class CompanionDeviceService extends Service {
      * Called by system whenever a device associated with this app is connected.
      *
      * @param associationInfo A record for the companion device.
+     *
+     * @deprecated please override {@link #onDeviceEvent(AssociationInfo, int)} instead.
      */
+    @Deprecated
     @MainThread
     public void onDeviceAppeared(@NonNull AssociationInfo associationInfo) {
         if (!associationInfo.isSelfManaged()) {
@@ -263,12 +319,39 @@ public abstract class CompanionDeviceService extends Service {
      * Called by system whenever a device associated with this app is disconnected.
      *
      * @param associationInfo A record for the companion device.
+     *
+     * @deprecated please override {@link #onDeviceEvent(AssociationInfo, int)} instead.
      */
+    @Deprecated
     @MainThread
     public void onDeviceDisappeared(@NonNull AssociationInfo associationInfo) {
         if (!associationInfo.isSelfManaged()) {
             onDeviceDisappeared(associationInfo.getDeviceMacAddressAsString());
         }
+    }
+
+    /**
+     *  Called by the system during device events.
+     *
+     *  <p>E.g. Event {@link #DEVICE_EVENT_BLE_APPEARED} will be called when the associated
+     *  companion device comes into BLE range.
+     *  <p>Event {@link #DEVICE_EVENT_BLE_DISAPPEARED} will be called when the associated
+     *  companion device is no longer in BLE range.
+     *  <p> Event {@link #DEVICE_EVENT_BT_CONNECTED} will be called when the associated
+     *  companion device is connected.
+     *  <p>Event {@link #DEVICE_EVENT_BT_DISCONNECTED} will be called when the associated
+     *  companion device is disconnected.
+     *  Note that app must receive {@link #DEVICE_EVENT_BLE_APPEARED} first before
+     *  {@link #DEVICE_EVENT_BLE_DISAPPEARED} and {@link #DEVICE_EVENT_BT_CONNECTED}
+     *  before {@link #DEVICE_EVENT_BT_DISCONNECTED}.
+     *
+     * @param associationInfo A record for the companion device.
+     * @param event Associated companion device's event.
+     */
+    @MainThread
+    public void onDeviceEvent(@NonNull AssociationInfo associationInfo,
+            @DeviceEvent int event) {
+        // Do nothing. Companion apps can override this function.
     }
 
     @Nullable
@@ -303,6 +386,12 @@ public abstract class CompanionDeviceService extends Service {
         @Override
         public void onDeviceDisappeared(AssociationInfo associationInfo) {
             mMainHandler.postAtFrontOfQueue(() -> mService.onDeviceDisappeared(associationInfo));
+        }
+
+        @Override
+        public void onDeviceEvent(AssociationInfo associationInfo, int event) {
+            mMainHandler.postAtFrontOfQueue(
+                    () -> mService.onDeviceEvent(associationInfo, event));
         }
     }
 }
