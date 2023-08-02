@@ -334,7 +334,7 @@ public class LongScreenshotActivity extends Activity {
         if (mScreenshotUserHandle != Process.myUserHandle()) {
             // TODO: Fix transition for work profile. Omitting it in the meantime.
             mActionExecutor.launchIntentAsync(
-                    ActionIntentCreator.INSTANCE.createEditIntent(uri, this),
+                    ActionIntentCreator.INSTANCE.createEdit(uri, this),
                     null,
                     mScreenshotUserHandle, false);
         } else {

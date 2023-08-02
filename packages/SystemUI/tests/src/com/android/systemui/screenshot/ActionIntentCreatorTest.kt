@@ -34,7 +34,7 @@ import org.mockito.Mockito.`when` as whenever
 class ActionIntentCreatorTest : SysuiTestCase() {
 
     @Test
-    fun testCreateShareIntent() {
+    fun testCreateShare() {
         val uri = Uri.parse("content://fake")
 
         val output = ActionIntentCreator.createShare(uri)
@@ -59,7 +59,17 @@ class ActionIntentCreatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCreateShareIntentWithSubject() {
+    fun testCreateShare_embeddedUserIdRemoved() {
+        val uri = Uri.parse("content://555@fake")
+
+        val output = ActionIntentCreator.createShare(uri)
+
+        assertThat(output.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java))
+            .hasData(Uri.parse("content://fake"))
+    }
+
+    @Test
+    fun testCreateShareWithSubject() {
         val uri = Uri.parse("content://fake")
         val subject = "Example subject"
 
@@ -83,7 +93,7 @@ class ActionIntentCreatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCreateShareIntentWithExtraText() {
+    fun testCreateShareWithText() {
         val uri = Uri.parse("content://fake")
         val extraText = "Extra text"
 
@@ -107,13 +117,13 @@ class ActionIntentCreatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCreateEditIntent() {
+    fun testCreateEdit() {
         val uri = Uri.parse("content://fake")
         val context = mock<Context>()
 
         whenever(context.getString(eq(R.string.config_screenshotEditor))).thenReturn("")
 
-        val output = ActionIntentCreator.createEditIntent(uri, context)
+        val output = ActionIntentCreator.createEdit(uri, context)
 
         assertThat(output).hasAction(Intent.ACTION_EDIT)
         assertThat(output).hasData(uri)
@@ -129,7 +139,18 @@ class ActionIntentCreatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testCreateEditIntent_withEditor() {
+    fun testCreateEdit_embeddedUserIdRemoved() {
+        val uri = Uri.parse("content://555@fake")
+        val context = mock<Context>()
+        whenever(context.getString(eq(R.string.config_screenshotEditor))).thenReturn("")
+
+        val output = ActionIntentCreator.createEdit(uri, context)
+
+        assertThat(output).hasData(Uri.parse("content://fake"))
+    }
+
+    @Test
+    fun testCreateEdit_withEditor() {
         val uri = Uri.parse("content://fake")
         val context = mock<Context>()
         val component = ComponentName("com.android.foo", "com.android.foo.Something")
@@ -137,7 +158,7 @@ class ActionIntentCreatorTest : SysuiTestCase() {
         whenever(context.getString(eq(R.string.config_screenshotEditor)))
             .thenReturn(component.flattenToString())
 
-        val output = ActionIntentCreator.createEditIntent(uri, context)
+        val output = ActionIntentCreator.createEdit(uri, context)
 
         assertThat(output).hasComponent(component)
     }
