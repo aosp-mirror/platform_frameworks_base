@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.authentication.data.repository
 
+import android.app.admin.DevicePolicyManager
+import android.content.IntentFilter
+import android.os.UserHandle
 import com.android.internal.widget.LockPatternChecker
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardSecurityModel
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -37,13 +43,17 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -54,9 +64,10 @@ interface AuthenticationRepository {
      * Whether the device is unlocked.
      *
      * A device that is not yet unlocked requires unlocking by completing an authentication
-     * challenge according to the current authentication method.
-     *
-     * Note that this state has no real bearing on whether the lockscreen is showing or dismissed.
+     * challenge according to the current authentication method, unless in cases when the current
+     * authentication method is not "secure" (for example, None); in such cases, the value of this
+     * flow will always be `true`, even if the lockscreen is showing and still needs to be dismissed
+     * by the user to proceed.
      */
     val isUnlocked: StateFlow<Boolean>
 
@@ -86,8 +97,29 @@ interface AuthenticationRepository {
     val throttling: StateFlow<AuthenticationThrottlingModel>
 
     /**
+     * The currently-configured authentication method. This determines how the authentication
+     * challenge needs to be completed in order to unlock an otherwise locked device.
+     *
+     * Note: there may be other ways to unlock the device that "bypass" the need for this
+     * authentication challenge (notably, biometrics like fingerprint or face unlock).
+     *
+     * Note: by design, this is a [Flow] and not a [StateFlow]; a consumer who wishes to get a
+     * snapshot of the current authentication method without establishing a collector of the flow
+     * can do so by invoking [getAuthenticationMethod].
+     */
+    val authenticationMethod: Flow<AuthenticationMethodModel>
+
+    /**
      * Returns the currently-configured authentication method. This determines how the
-     * authentication challenge is completed in order to unlock an otherwise locked device.
+     * authentication challenge needs to be completed in order to unlock an otherwise locked device.
+     *
+     * Note: there may be other ways to unlock the device that "bypass" the need for this
+     * authentication challenge (notably, biometrics like fingerprint or face unlock).
+     *
+     * Note: by design, this is offered as a convenience method alongside [authenticationMethod].
+     * The flow should be used for code that wishes to stay up-to-date its logic as the
+     * authentication changes over time and this method should be used for simple code that only
+     * needs to check the current value.
      */
     suspend fun getAuthenticationMethod(): AuthenticationMethodModel
 
@@ -141,6 +173,7 @@ constructor(
     private val userRepository: UserRepository,
     keyguardRepository: KeyguardRepository,
     private val lockPatternUtils: LockPatternUtils,
+    broadcastDispatcher: BroadcastDispatcher,
 ) : AuthenticationRepository {
 
     override val isUnlocked = keyguardRepository.isKeyguardUnlocked
@@ -148,7 +181,7 @@ constructor(
     override suspend fun isLockscreenEnabled(): Boolean {
         return withContext(backgroundDispatcher) {
             val selectedUserId = userRepository.selectedUserId
-            !lockPatternUtils.isLockPatternEnabled(selectedUserId)
+            !lockPatternUtils.isLockScreenDisabled(selectedUserId)
         }
     }
 
@@ -172,18 +205,31 @@ constructor(
     private val UserRepository.selectedUserId: Int
         get() = getSelectedUserInfo().id
 
+    override val authenticationMethod: Flow<AuthenticationMethodModel> =
+        userRepository.selectedUserInfo
+            .map { it.id }
+            .distinctUntilChanged()
+            .flatMapLatest { selectedUserId ->
+                broadcastDispatcher
+                    .broadcastFlow(
+                        filter =
+                            IntentFilter(
+                                DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
+                            ),
+                        user = UserHandle.of(selectedUserId),
+                    )
+                    .onStart { emit(Unit) }
+                    .map { selectedUserId }
+            }
+            .map { selectedUserId ->
+                withContext(backgroundDispatcher) {
+                    blockingAuthenticationMethodInternal(selectedUserId)
+                }
+            }
+
     override suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
         return withContext(backgroundDispatcher) {
-            val selectedUserId = userRepository.selectedUserId
-            when (getSecurityMode.apply(selectedUserId)) {
-                KeyguardSecurityModel.SecurityMode.PIN,
-                KeyguardSecurityModel.SecurityMode.SimPin,
-                KeyguardSecurityModel.SecurityMode.SimPuk -> AuthenticationMethodModel.Pin
-                KeyguardSecurityModel.SecurityMode.Password -> AuthenticationMethodModel.Password
-                KeyguardSecurityModel.SecurityMode.Pattern -> AuthenticationMethodModel.Pattern
-                KeyguardSecurityModel.SecurityMode.None -> AuthenticationMethodModel.None
-                KeyguardSecurityModel.SecurityMode.Invalid -> error("Invalid security mode!")
-            }
+            blockingAuthenticationMethodInternal(userRepository.selectedUserId)
         }
     }
 
@@ -300,6 +346,27 @@ constructor(
         }
 
         return flow.asStateFlow()
+    }
+
+    /**
+     * Returns the authentication method for the given user ID.
+     *
+     * WARNING: this is actually a blocking IPC/"binder" call that's expensive to do on the main
+     * thread. We keep it not marked as `suspend` because we want to be able to run this without a
+     * `runBlocking` which has a ton of performance/blocking problems.
+     */
+    private fun blockingAuthenticationMethodInternal(
+        userId: Int,
+    ): AuthenticationMethodModel {
+        return when (getSecurityMode.apply(userId)) {
+            KeyguardSecurityModel.SecurityMode.PIN,
+            KeyguardSecurityModel.SecurityMode.SimPin,
+            KeyguardSecurityModel.SecurityMode.SimPuk -> AuthenticationMethodModel.Pin
+            KeyguardSecurityModel.SecurityMode.Password -> AuthenticationMethodModel.Password
+            KeyguardSecurityModel.SecurityMode.Pattern -> AuthenticationMethodModel.Pattern
+            KeyguardSecurityModel.SecurityMode.None -> AuthenticationMethodModel.None
+            KeyguardSecurityModel.SecurityMode.Invalid -> error("Invalid security mode!")
+        }
     }
 }
 
