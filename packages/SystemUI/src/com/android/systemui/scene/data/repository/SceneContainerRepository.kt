@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.scene.data.repository
 
+import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.SceneTransitionModel
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 
 /** Source of truth for scene framework application state. */
 class SceneContainerRepository
@@ -38,8 +45,17 @@ constructor(
     private val _currentScene = MutableStateFlow(SceneModel(config.initialSceneKey))
     val currentScene: StateFlow<SceneModel> = _currentScene.asStateFlow()
 
-    private val _transitionProgress = MutableStateFlow(1f)
-    val transitionProgress: StateFlow<Float> = _transitionProgress.asStateFlow()
+    private val transitionState = MutableStateFlow<Flow<ObservableTransitionState>?>(null)
+    val transitionProgress: Flow<Float> =
+        transitionState.flatMapLatest { observableTransitionStateFlow ->
+            observableTransitionStateFlow?.flatMapLatest { observableTransitionState ->
+                when (observableTransitionState) {
+                    is ObservableTransitionState.Idle -> flowOf(1f)
+                    is ObservableTransitionState.Transition -> observableTransitionState.progress
+                }
+            }
+                ?: flowOf(1f)
+        }
 
     private val _transitions = MutableStateFlow<SceneTransitionModel?>(null)
     val transitions: StateFlow<SceneTransitionModel?> = _transitions.asStateFlow()
@@ -92,8 +108,12 @@ constructor(
         _isVisible.value = isVisible
     }
 
-    /** Sets scene transition progress to the current scene in the container with the given name. */
-    fun setSceneTransitionProgress(progress: Float) {
-        _transitionProgress.value = progress
+    /**
+     * Binds the given flow so the system remembers it.
+     *
+     * Note that you must call is with `null` when the UI is done or risk a memory leak.
+     */
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
+        this.transitionState.value = transitionState
     }
 }

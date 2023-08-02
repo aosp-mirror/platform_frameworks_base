@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.notifications.ui.composable.Notifications
@@ -63,7 +64,7 @@ constructor(
             )
 
     @Composable
-    override fun Content(
+    override fun SceneScope.Content(
         modifier: Modifier,
     ) = ShadeScene(viewModel, modifier)
 
@@ -86,11 +87,12 @@ private fun ShadeScene(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier =
-            Modifier.fillMaxSize()
+            modifier
+                .fillMaxSize()
                 .clickable(onClick = { viewModel.onContentClicked() })
                 .padding(horizontal = 16.dp, vertical = 48.dp)
     ) {
-        QuickSettings(modifier = modifier.height(160.dp))
-        Notifications(modifier = modifier.weight(1f))
+        QuickSettings(modifier = Modifier.height(160.dp))
+        Notifications(modifier = Modifier.weight(1f))
     }
 }

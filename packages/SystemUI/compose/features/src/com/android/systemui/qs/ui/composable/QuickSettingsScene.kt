@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.scene.shared.model.Direction
@@ -57,7 +58,7 @@ constructor(
             .asStateFlow()
 
     @Composable
-    override fun Content(
+    override fun SceneScope.Content(
         modifier: Modifier,
     ) {
         QuickSettingsScene(
