@@ -38,4 +38,6 @@
          protected. -->
     <bool name="flag_battery_shield_icon">false</bool>
 
+    <!-- Whether face auth will immediately stop when the display state is OFF -->
+    <bool name="flag_stop_face_auth_on_display_off">false</bool>
 </resources>
