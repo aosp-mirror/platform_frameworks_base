@@ -50,7 +50,6 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 import android.view.IWindowManager;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import com.android.server.am.AssistDataRequester;
@@ -154,7 +153,6 @@ public class AssistDataRequesterTest {
                 .noteOpNoThrow(eq(OP_ASSIST_SCREENSHOT), anyInt(), anyString(), any(), any());
     }
 
-    @FlakyTest(bugId = 280107567)
     @Test
     public void testRequestData() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
@@ -262,7 +260,6 @@ public class AssistDataRequesterTest {
         assertReceivedDataCount(0, 1, 0, 1);
     }
 
-    @FlakyTest(bugId = 280107567)
     @Test
     public void testNoFetchScreenshots_expectNoScreenshotCallbacks() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
@@ -274,7 +271,6 @@ public class AssistDataRequesterTest {
         assertReceivedDataCount(5, 5, 0, 0);
     }
 
-    @FlakyTest(bugId = 280107567)
     @Test
     public void testDisallowAssistScreenshot_expectNullScreenshotCallback() throws Exception {
         setupMocks(CURRENT_ACTIVITY_ASSIST_ALLOWED, CALLER_ASSIST_STRUCTURE_ALLOWED,
@@ -321,7 +317,8 @@ public class AssistDataRequesterTest {
         assertEquals("Expected " + numPendingScreenshots + " pending screenshots, got "
                         + mDataRequester.getPendingScreenshotCount(),
                 numPendingScreenshots, mDataRequester.getPendingScreenshotCount());
-        assertFalse("Expected request NOT completed", mCallbacks.mRequestCompleted);
+        assertEquals("Expected request NOT completed, unless no pending data",
+                numPendingData == 0 && numPendingScreenshots == 0, mCallbacks.mRequestCompleted);
         mGate.countDown();
         waitForIdle(mHandler);
         assertEquals("Expected " + numReceivedData + " data, received "
@@ -380,14 +377,7 @@ public class AssistDataRequesterTest {
 
         @Override
         public void onAssistRequestCompleted() {
-            mHandler.post(() -> {
-                try {
-                    mGate.await(10, TimeUnit.SECONDS);
-                    mRequestCompleted = true;
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "Failed to wait", e);
-                }
-            });
+            mRequestCompleted = true;
         }
     }
 }
