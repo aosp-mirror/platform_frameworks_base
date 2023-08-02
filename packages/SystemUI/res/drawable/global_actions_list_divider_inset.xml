@@ -15,6 +15,6 @@
 -->
 <inset
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/controls_list_divider"
+    android:drawable="@drawable/global_actions_list_divider"
     android:insetRight="@dimen/control_spinner_padding_horizontal"
     android:insetLeft="@dimen/control_spinner_padding_horizontal" />
