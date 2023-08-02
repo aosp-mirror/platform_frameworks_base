@@ -80,8 +80,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     @VisibleForTesting
     static final String UNIQUE_ID_PREFIX = "virtual:";
 
-    private final ArrayMap<IBinder, VirtualDisplayDevice> mVirtualDisplayDevices =
-            new ArrayMap<IBinder, VirtualDisplayDevice>();
+    private final ArrayMap<IBinder, VirtualDisplayDevice> mVirtualDisplayDevices = new ArrayMap<>();
     private final Handler mHandler;
     private final SurfaceControlDisplayFactory mSurfaceControlDisplayFactory;
 
@@ -113,9 +112,16 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     public DisplayDevice createVirtualDisplayLocked(IVirtualDisplayCallback callback,
             IMediaProjection projection, int ownerUid, String ownerPackageName, Surface surface,
             int flags, VirtualDisplayConfig virtualDisplayConfig) {
+        IBinder appToken = callback.asBinder();
+        if (mVirtualDisplayDevices.containsKey(appToken)) {
+            Slog.wtfStack(TAG,
+                    "Can't create virtual display, display with same appToken already exists");
+            return null;
+        }
+
         String name = virtualDisplayConfig.getName();
         boolean secure = (flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
-        IBinder appToken = callback.asBinder();
+
         IBinder displayToken = mSurfaceControlDisplayFactory.createDisplay(name, secure,
                 virtualDisplayConfig.getRequestedRefreshRate());
         final String baseUniqueId =

@@ -248,6 +248,8 @@ public class DisplayManagerServiceTest {
     @Mock VirtualDeviceManagerInternal mMockVirtualDeviceManagerInternal;
     @Mock IVirtualDisplayCallback.Stub mMockAppToken;
     @Mock IVirtualDisplayCallback.Stub mMockAppToken2;
+
+    @Mock IVirtualDisplayCallback.Stub mMockAppToken3;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock LightsManager mMockLightsManager;
     @Mock VirtualDisplayAdapter mMockVirtualDisplayAdapter;
@@ -838,6 +840,7 @@ public class DisplayManagerServiceTest {
 
         registerDefaultDisplays(displayManager);
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        when(mMockAppToken2.asBinder()).thenReturn(mMockAppToken2);
 
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
@@ -851,7 +854,7 @@ public class DisplayManagerServiceTest {
         int displayId1 =
                 localService.createVirtualDisplay(
                         builder1.build(),
-                        mMockAppToken /* callback */,
+                        mMockAppToken2 /* callback */,
                         virtualDevice /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
@@ -893,6 +896,7 @@ public class DisplayManagerServiceTest {
 
         registerDefaultDisplays(displayManager);
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        when(mMockAppToken2.asBinder()).thenReturn(mMockAppToken2);
 
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
@@ -927,7 +931,7 @@ public class DisplayManagerServiceTest {
         int displayId2 =
                 localService.createVirtualDisplay(
                         builder2.build(),
-                        mMockAppToken /* callback */,
+                        mMockAppToken2 /* callback */,
                         virtualDevice /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
@@ -950,6 +954,8 @@ public class DisplayManagerServiceTest {
 
         registerDefaultDisplays(displayManager);
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        when(mMockAppToken2.asBinder()).thenReturn(mMockAppToken2);
+        when(mMockAppToken3.asBinder()).thenReturn(mMockAppToken3);
 
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
@@ -999,7 +1005,7 @@ public class DisplayManagerServiceTest {
         int ownDisplayGroupDisplayId =
                 localService.createVirtualDisplay(
                         ownDisplayGroupConfig,
-                        mMockAppToken /* callback */,
+                        mMockAppToken2 /* callback */,
                         virtualDevice /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
@@ -1024,7 +1030,7 @@ public class DisplayManagerServiceTest {
         int defaultDisplayGroupDisplayId =
                 localService.createVirtualDisplay(
                         defaultDisplayGroupConfig,
-                        mMockAppToken /* callback */,
+                        mMockAppToken3 /* callback */,
                         null /* virtualDeviceToken */,
                         mock(DisplayWindowPolicyController.class),
                         PACKAGE_NAME);
