@@ -25,6 +25,7 @@ import android.content.pm.ServiceInfo
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.os.Handler
+import android.os.Parcel
 import android.service.quicksettings.IQSTileService
 import android.service.quicksettings.Tile
 import android.test.suitebuilder.annotation.SmallTest
@@ -33,6 +34,7 @@ import android.testing.TestableLooper
 import android.view.IWindowManager
 import android.view.View
 import com.android.internal.logging.MetricsLogger
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.view.LaunchableFrameLayout
@@ -47,6 +49,7 @@ import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
+import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
@@ -394,5 +397,46 @@ class CustomTileTest : SysuiTestCase() {
 
         verify(tileServiceManager, never()).setBindRequested(true)
         verify(tileService, never()).onStartListening()
+    }
+
+    @Test
+    fun testAlwaysUseDefaultLabelIfNoLabelIsSet() {
+        // Give it an icon to prevent issues
+        serviceInfo.icon = R.drawable.android
+
+        val label1 = "Label 1"
+        val label2 = "Label 2"
+
+        `when`(serviceInfo.loadLabel(any())).thenReturn(label1)
+        customTile.handleSetListening(true)
+        testableLooper.processAllMessages()
+        customTile.handleSetListening(false)
+        testableLooper.processAllMessages()
+
+        assertThat(customTile.state.label).isEqualTo(label1)
+
+        // Retrieve the tile as if bound (a separate copy)
+        val tile = copyTileUsingParcel(customTile.qsTile)
+
+        // Change the language
+        `when`(serviceInfo.loadLabel(any())).thenReturn(label2)
+
+        // Set the tile to listening and apply the tile (unmodified)
+        customTile.handleSetListening(true)
+        testableLooper.processAllMessages()
+        customTile.updateTileState(tile)
+        customTile.refreshState()
+        testableLooper.processAllMessages()
+
+        assertThat(customTile.state.label).isEqualTo(label2)
+    }
+
+    private fun copyTileUsingParcel(t: Tile): Tile {
+        val parcel = Parcel.obtain()
+        parcel.setDataPosition(0)
+        t.writeToParcel(parcel, 0)
+        parcel.setDataPosition(0)
+
+        return Tile.CREATOR.createFromParcel(parcel)
     }
 }
