@@ -188,6 +188,25 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void queryWalletCards_walletEnabled_queryMultipleCards() {
+        mController.queryWalletCards(mCardsRetriever, 5);
+
+        verify(mQuickAccessWalletClient)
+                .getWalletCards(
+                        eq(MoreExecutors.directExecutor()), mRequestCaptor.capture(),
+                        eq(mCardsRetriever));
+
+        GetWalletCardsRequest request = mRequestCaptor.getValue();
+        assertEquals(5, mRequestCaptor.getValue().getMaxCards());
+        assertEquals(
+                mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_width),
+                request.getCardWidthPx());
+        assertEquals(
+                mContext.getResources().getDimensionPixelSize(R.dimen.wallet_tile_card_view_height),
+                request.getCardHeightPx());
+    }
+
+    @Test
     public void queryWalletCards_walletFeatureNotAvailable_noQuery() {
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(false);
 
