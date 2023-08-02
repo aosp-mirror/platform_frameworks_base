@@ -260,7 +260,9 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         synchronized (mLock) {
-            mProjectionGrant.stop();
+            if (mProjectionGrant != null) {
+                mProjectionGrant.stop();
+            }
         }
     }
 
