@@ -112,6 +112,7 @@ public class Uinput {
                     error("Device id=" + e.getId() + " is already registered. Ignoring event.");
             case INJECT -> d.injectEvent(e.getInjections());
             case DELAY -> d.addDelay(e.getDuration());
+            case SYNC -> d.syncEvent(e.getSyncToken());
         }
     }
 

@@ -42,7 +42,8 @@ public class Event {
     enum Command {
         REGISTER("register"),
         DELAY("delay"),
-        INJECT("inject");
+        INJECT("inject"),
+        SYNC("sync");
 
         final String mCommandName;
 
@@ -77,6 +78,7 @@ public class Event {
     private int mFfEffectsMax = 0;
     private String mInputport;
     private SparseArray<InputAbsInfo> mAbsInfo;
+    private String mSyncToken;
 
     public int getId() {
         return mId;
@@ -124,6 +126,10 @@ public class Event {
 
     public String getPort() {
         return mInputport;
+    }
+
+    public String getSyncToken() {
+        return mSyncToken;
     }
 
     /**
@@ -206,6 +212,10 @@ public class Event {
             mEvent.mInputport = port;
         }
 
+        public void setSyncToken(String syncToken) {
+            mEvent.mSyncToken = Objects.requireNonNull(syncToken, "Sync token must not be null");
+        }
+
         public Event build() {
             if (mEvent.mId == -1) {
                 throw new IllegalStateException("No event id");
@@ -225,8 +235,13 @@ public class Event {
                     }
                 }
                 case INJECT -> {
-                    if (mEvent.mInjections  == null) {
+                    if (mEvent.mInjections == null) {
                         throw new IllegalStateException("Inject command is missing injection data");
+                    }
+                }
+                case SYNC -> {
+                    if (mEvent.mSyncToken == null) {
+                        throw new IllegalStateException("Sync command is missing sync token");
                     }
                 }
             }
@@ -294,6 +309,9 @@ public class Event {
                                 break;
                             case "port":
                                 eb.setInputport(mReader.nextString());
+                                break;
+                            case "syncToken":
+                                eb.setSyncToken(mReader.nextString());
                                 break;
                             default:
                                 mReader.skipValue();
