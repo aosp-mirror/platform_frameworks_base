@@ -349,7 +349,8 @@ class Dimmer {
 
         // Otherwise use the same duration as the animation on the WindowContainer
         AnimationAdapter animationAdapter = container.mSurfaceAnimator.getAnimation();
-        return animationAdapter == null ? DEFAULT_DIM_ANIM_DURATION
+        final float durationScale = container.mWmService.getTransitionAnimationScaleLocked();
+        return animationAdapter == null ? (long) (DEFAULT_DIM_ANIM_DURATION * durationScale)
                 : animationAdapter.getDurationHint();
     }
 
