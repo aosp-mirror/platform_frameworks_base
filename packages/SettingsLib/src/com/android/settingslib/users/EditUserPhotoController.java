@@ -60,6 +60,7 @@ public class EditUserPhotoController {
     private final File mImagesDir;
     private Bitmap mNewUserPhotoBitmap;
     private Drawable mNewUserPhotoDrawable;
+    private String mCachedDrawablePath;
 
     public EditUserPhotoController(Activity activity, ActivityStarter activityStarter,
             ImageView view, Bitmap savedBitmap, Drawable savedDrawable, String fileAuthority) {
@@ -156,6 +157,9 @@ public class EditUserPhotoController {
     private void onPhotoProcessed(Bitmap bitmap) {
         if (bitmap != null) {
             mNewUserPhotoBitmap = bitmap;
+            ThreadUtils.postOnBackgroundThread(() -> {
+                mCachedDrawablePath = saveNewUserPhotoBitmap().getPath();
+            });
             mNewUserPhotoDrawable = CircleFramedDrawable
                     .getInstance(mImageView.getContext(), mNewUserPhotoBitmap);
             mImageView.setImageDrawable(mNewUserPhotoDrawable);
@@ -185,5 +189,9 @@ public class EditUserPhotoController {
 
     void removeNewUserPhotoBitmapFile() {
         new File(mImagesDir, NEW_USER_PHOTO_FILE_NAME).delete();
+    }
+
+    String getCachedDrawablePath() {
+        return mCachedDrawablePath;
     }
 }
