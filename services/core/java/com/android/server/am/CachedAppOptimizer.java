@@ -238,7 +238,7 @@ public final class CachedAppOptimizer {
     private static final String ATRACE_COMPACTION_TRACK = "Compaction";
     private static final String ATRACE_FREEZER_TRACK = "Freezer";
 
-    private static final int FREEZE_BINDER_TIMEOUT_MS = 100;
+    private static final int FREEZE_BINDER_TIMEOUT_MS = 0;
     private static final int FREEZE_DEADLOCK_TIMEOUT_MS = 1000;
 
     @VisibleForTesting static final boolean ENABLE_FILE_COMPACT = false;
