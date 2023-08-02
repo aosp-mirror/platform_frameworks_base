@@ -363,8 +363,8 @@ class BouncerMessageRepositoryTest : SysuiTestCase() {
 
     private fun message(primaryResId: Int, secondaryResId: Int): BouncerMessageModel {
         return BouncerMessageModel(
-            message = Message(messageResId = primaryResId),
-            secondaryMessage = Message(messageResId = secondaryResId)
+            message = Message(messageResId = primaryResId, animate = false),
+            secondaryMessage = Message(messageResId = secondaryResId, animate = false)
         )
     }
     private fun message(value: String): BouncerMessageModel {

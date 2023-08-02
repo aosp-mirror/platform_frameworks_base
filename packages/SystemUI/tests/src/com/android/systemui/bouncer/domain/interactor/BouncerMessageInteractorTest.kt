@@ -150,11 +150,12 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
 
             underTest.setCustomMessage("not empty")
 
-            assertThat(repository.customMessage.value)
-                .isEqualTo(BouncerMessageModel(secondaryMessage = Message(message = "not empty")))
+            val customMessage = repository.customMessage
+            assertThat(customMessage.value!!.message!!.messageResId).isEqualTo(keyguard_enter_pin)
+            assertThat(customMessage.value!!.secondaryMessage!!.message).isEqualTo("not empty")
 
             underTest.setCustomMessage(null)
-            assertThat(repository.customMessage.value).isNull()
+            assertThat(customMessage.value).isNull()
         }
 
     @Test
@@ -164,11 +165,15 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
 
             underTest.setFaceAcquisitionMessage("not empty")
 
-            assertThat(repository.faceAcquisitionMessage.value)
-                .isEqualTo(BouncerMessageModel(secondaryMessage = Message(message = "not empty")))
+            val faceAcquisitionMessage = repository.faceAcquisitionMessage
+
+            assertThat(faceAcquisitionMessage.value!!.message!!.messageResId)
+                .isEqualTo(keyguard_enter_pin)
+            assertThat(faceAcquisitionMessage.value!!.secondaryMessage!!.message)
+                .isEqualTo("not empty")
 
             underTest.setFaceAcquisitionMessage(null)
-            assertThat(repository.faceAcquisitionMessage.value).isNull()
+            assertThat(faceAcquisitionMessage.value).isNull()
         }
 
     @Test
@@ -178,11 +183,15 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
 
             underTest.setFingerprintAcquisitionMessage("not empty")
 
-            assertThat(repository.fingerprintAcquisitionMessage.value)
-                .isEqualTo(BouncerMessageModel(secondaryMessage = Message(message = "not empty")))
+            val fingerprintAcquisitionMessage = repository.fingerprintAcquisitionMessage
+
+            assertThat(fingerprintAcquisitionMessage.value!!.message!!.messageResId)
+                .isEqualTo(keyguard_enter_pin)
+            assertThat(fingerprintAcquisitionMessage.value!!.secondaryMessage!!.message)
+                .isEqualTo("not empty")
 
             underTest.setFingerprintAcquisitionMessage(null)
-            assertThat(repository.fingerprintAcquisitionMessage.value).isNull()
+            assertThat(fingerprintAcquisitionMessage.value).isNull()
         }
 
     @Test

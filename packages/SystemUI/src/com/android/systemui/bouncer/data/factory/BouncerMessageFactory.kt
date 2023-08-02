@@ -93,6 +93,7 @@ constructor(
     fun createFromPromptReason(
         @BouncerPromptReason reason: Int,
         userId: Int,
+        secondaryMsgOverride: String? = null
     ): BouncerMessageModel? {
         val pair =
             getBouncerMessage(
@@ -102,20 +103,15 @@ constructor(
             )
         return pair?.let {
             BouncerMessageModel(
-                message = Message(messageResId = pair.first),
-                secondaryMessage = Message(messageResId = pair.second)
+                message = Message(messageResId = pair.first, animate = false),
+                secondaryMessage =
+                    secondaryMsgOverride?.let {
+                        Message(message = secondaryMsgOverride, animate = false)
+                    }
+                        ?: Message(messageResId = pair.second, animate = false)
             )
         }
     }
-
-    fun createFromString(
-        primaryMsg: String? = null,
-        secondaryMsg: String? = null
-    ): BouncerMessageModel =
-        BouncerMessageModel(
-            message = primaryMsg?.let { Message(message = it) },
-            secondaryMessage = secondaryMsg?.let { Message(message = it) },
-        )
 
     /**
      * Helper method that provides the relevant bouncer message that should be shown for different
@@ -159,6 +155,9 @@ constructor(
             else -> null
         }
     }
+
+    fun emptyMessage(): BouncerMessageModel =
+        BouncerMessageModel(Message(message = ""), Message(message = ""))
 }
 
 @Retention(AnnotationRetention.SOURCE)

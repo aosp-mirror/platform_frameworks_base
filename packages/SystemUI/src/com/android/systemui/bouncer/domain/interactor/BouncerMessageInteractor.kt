@@ -86,7 +86,11 @@ constructor(
 
         repository.setFingerprintAcquisitionMessage(
             if (value != null) {
-                factory.createFromString(secondaryMsg = value)
+                factory.createFromPromptReason(
+                    PROMPT_REASON_DEFAULT,
+                    userRepository.getSelectedUserInfo().id,
+                    secondaryMsgOverride = value
+                )
             } else {
                 null
             }
@@ -98,7 +102,11 @@ constructor(
 
         repository.setFaceAcquisitionMessage(
             if (value != null) {
-                factory.createFromString(secondaryMsg = value)
+                factory.createFromPromptReason(
+                    PROMPT_REASON_DEFAULT,
+                    userRepository.getSelectedUserInfo().id,
+                    secondaryMsgOverride = value
+                )
             } else {
                 null
             }
@@ -110,7 +118,11 @@ constructor(
 
         repository.setCustomMessage(
             if (value != null) {
-                factory.createFromString(secondaryMsg = value)
+                factory.createFromPromptReason(
+                    PROMPT_REASON_DEFAULT,
+                    userRepository.getSelectedUserInfo().id,
+                    secondaryMsgOverride = value
+                )
             } else {
                 null
             }
@@ -140,8 +152,7 @@ constructor(
     // always maps to an empty string.
     private fun nullOrEmptyMessage() =
         flowOf(
-            if (featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) null
-            else factory.createFromString("", "")
+            if (featureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) null else factory.emptyMessage()
         )
 
     val bouncerMessage =

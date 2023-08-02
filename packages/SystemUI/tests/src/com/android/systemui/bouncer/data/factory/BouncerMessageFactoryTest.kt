@@ -78,6 +78,22 @@ class BouncerMessageFactoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun bouncerMessages_overridesSecondaryMessageValue() =
+        testScope.runTest {
+            val bouncerMessageModel =
+                bouncerMessageModel(
+                    PIN,
+                    true,
+                    PROMPT_REASON_DEFAULT,
+                    secondaryMessageOverride = "face acquisition message"
+                )!!
+            assertThat(context.resources.getString(bouncerMessageModel.message!!.messageResId!!))
+                .isEqualTo("Unlock with PIN or fingerprint")
+            assertThat(bouncerMessageModel.secondaryMessage!!.message!!)
+                .isEqualTo("face acquisition message")
+        }
+
+    @Test
     fun bouncerMessages_setsPrimaryAndSecondaryMessage_basedOnSecurityModeAndFpAllowedInBouncer() =
         testScope.runTest {
             primaryMessage(
@@ -149,11 +165,16 @@ class BouncerMessageFactoryTest : SysuiTestCase() {
     private fun bouncerMessageModel(
         mode: KeyguardSecurityModel.SecurityMode,
         fpAllowedInBouncer: Boolean,
-        reason: Int
+        reason: Int,
+        secondaryMessageOverride: String? = null,
     ): BouncerMessageModel? {
         whenever(securityModel.getSecurityMode(0)).thenReturn(mode)
         whenever(updateMonitor.isFingerprintAllowedInBouncer).thenReturn(fpAllowedInBouncer)
 
-        return underTest.createFromPromptReason(reason, 0)
+        return underTest.createFromPromptReason(
+            reason,
+            0,
+            secondaryMsgOverride = secondaryMessageOverride
+        )
     }
 }
