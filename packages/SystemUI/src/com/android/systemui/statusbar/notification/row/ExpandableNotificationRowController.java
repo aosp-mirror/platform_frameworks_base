@@ -21,16 +21,12 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 
-import android.net.Uri;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -75,10 +71,6 @@ import javax.inject.Named;
 @NotificationRowScope
 public class ExpandableNotificationRowController implements NotifViewController {
     private static final String TAG = "NotifRowController";
-
-    static final Uri BUBBLES_SETTING_URI =
-            Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_BUBBLES);
-    private static final String BUBBLES_SETTING_ENABLED_VALUE = "1";
     private final ExpandableNotificationRow mView;
     private final NotificationListContainer mListContainer;
     private final RemoteInputViewSubcomponent.Factory mRemoteInputViewSubcomponentFactory;
@@ -112,23 +104,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final ExpandableNotificationRowDragController mDragController;
     private final NotificationDismissibilityProvider mDismissibilityProvider;
     private final IStatusBarService mStatusBarService;
-
-    private final NotificationSettingsController mSettingsController;
-
-    @VisibleForTesting
-    final NotificationSettingsController.Listener mSettingsListener =
-            new NotificationSettingsController.Listener() {
-                @Override
-                public void onSettingChanged(Uri setting, int userId, String value) {
-                    if (BUBBLES_SETTING_URI.equals(setting)) {
-                        final int viewUserId = mView.getEntry().getSbn().getUserId();
-                        if (viewUserId == UserHandle.USER_ALL || viewUserId == userId) {
-                            mView.getPrivateLayout().setBubblesEnabledForUser(
-                                    BUBBLES_SETTING_ENABLED_VALUE.equals(value));
-                        }
-                    }
-                }
-            };
     private final ExpandableNotificationRow.ExpandableNotificationRowLogger mLoggerCallback =
             new ExpandableNotificationRow.ExpandableNotificationRowLogger() {
                 @Override
@@ -226,7 +201,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
             FeatureFlags featureFlags,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
             Optional<BubblesManager> bubblesManagerOptional,
-            NotificationSettingsController settingsController,
             ExpandableNotificationRowDragController dragController,
             NotificationDismissibilityProvider dismissibilityProvider,
             IStatusBarService statusBarService) {
@@ -255,7 +229,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mFeatureFlags = featureFlags;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         mBubblesManagerOptional = bubblesManagerOptional;
-        mSettingsController = settingsController;
         mDragController = dragController;
         mMetricsLogger = metricsLogger;
         mChildrenContainerLogger = childrenContainerLogger;
@@ -325,14 +298,12 @@ public class ExpandableNotificationRowController implements NotifViewController 
                         NotificationMenuRowPlugin.class, false /* Allow multiple */);
                 mView.setOnKeyguard(mStatusBarStateController.getState() == KEYGUARD);
                 mStatusBarStateController.addCallback(mStatusBarStateListener);
-                mSettingsController.addCallback(BUBBLES_SETTING_URI, mSettingsListener);
             }
 
             @Override
             public void onViewDetachedFromWindow(View v) {
                 mPluginManager.removePluginListener(mView);
                 mStatusBarStateController.removeCallback(mStatusBarStateListener);
-                mSettingsController.removeCallback(BUBBLES_SETTING_URI, mSettingsListener);
             }
         });
     }

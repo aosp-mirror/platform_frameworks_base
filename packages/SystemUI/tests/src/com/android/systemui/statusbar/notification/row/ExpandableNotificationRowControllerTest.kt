@@ -17,10 +17,6 @@
 
 package com.android.systemui.statusbar.notification.row
 
-import android.app.Notification
-import android.net.Uri
-import android.os.UserHandle
-import android.os.UserHandle.USER_ALL
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -32,17 +28,13 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.statusbar.SmartReplyController
-import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider
 import com.android.systemui.statusbar.notification.collection.render.FakeNodeController
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController.BUBBLES_SETTING_URI
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
@@ -53,9 +45,9 @@ import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.wmshell.BubblesManager
+import java.util.Optional
 import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
@@ -63,10 +55,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.anyBoolean
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
-import java.util.*
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
@@ -103,10 +92,10 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val featureFlags: FeatureFlags = mock()
     private val peopleNotificationIdentifier: PeopleNotificationIdentifier = mock()
     private val bubblesManager: BubblesManager = mock()
-    private val settingsController: NotificationSettingsController = mock()
     private val dragController: ExpandableNotificationRowDragController = mock()
     private val dismissibilityProvider: NotificationDismissibilityProvider = mock()
     private val statusBarService: IStatusBarService = mock()
+
     private lateinit var controller: ExpandableNotificationRowController
 
     @Before
@@ -143,16 +132,11 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 featureFlags,
                 peopleNotificationIdentifier,
                 Optional.of(bubblesManager),
-                settingsController,
                 dragController,
                 dismissibilityProvider,
                 statusBarService
             )
         whenever(view.childrenContainer).thenReturn(childrenContainer)
-
-        val notification = Notification.Builder(mContext).build()
-        val sbn = SbnBuilder().setNotification(notification).build()
-        whenever(view.entry).thenReturn(NotificationEntryBuilder().setSbn(sbn).build())
     }
 
     @After
@@ -219,75 +203,5 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
         Mockito.verify(childView, never()).isChangingPosition = any()
         Mockito.verify(view).removeChildNotification(eq(childView))
         Mockito.verify(listContainer).notifyGroupChildRemoved(eq(childView), eq(childrenContainer))
-    }
-
-    @Test
-    fun registerSettingsListener_forBubbles() {
-        controller.init(mock(NotificationEntry::class.java))
-        val viewStateObserver = withArgCaptor {
-            verify(view).addOnAttachStateChangeListener(capture());
-        }
-        viewStateObserver.onViewAttachedToWindow(view);
-        verify(settingsController).addCallback(any(), any());
-    }
-
-    @Test
-    fun unregisterSettingsListener_forBubbles() {
-        controller.init(mock(NotificationEntry::class.java))
-        val viewStateObserver = withArgCaptor {
-            verify(view).addOnAttachStateChangeListener(capture());
-        }
-        viewStateObserver.onViewDetachedFromWindow(view);
-        verify(settingsController).removeCallback(any(), any());
-    }
-
-    @Test
-    fun settingsListener_invalidUri() {
-        controller.mSettingsListener.onSettingChanged(Uri.EMPTY, view.entry.sbn.userId, "1")
-
-        verify(view, never()).getPrivateLayout()
-    }
-
-    @Test
-    fun settingsListener_invalidUserId() {
-        controller.mSettingsListener.onSettingChanged(BUBBLES_SETTING_URI, -1000, "1")
-        controller.mSettingsListener.onSettingChanged(BUBBLES_SETTING_URI, -1000, null)
-
-        verify(view, never()).getPrivateLayout()
-    }
-
-    @Test
-    fun settingsListener_validUserId() {
-        val childView: NotificationContentView = mock()
-        whenever(view.privateLayout).thenReturn(childView)
-
-        controller.mSettingsListener.onSettingChanged(
-                BUBBLES_SETTING_URI, view.entry.sbn.userId, "1")
-        verify(childView).setBubblesEnabledForUser(true)
-
-        controller.mSettingsListener.onSettingChanged(
-                BUBBLES_SETTING_URI, view.entry.sbn.userId, "9")
-        verify(childView).setBubblesEnabledForUser(false)
-    }
-
-    @Test
-    fun settingsListener_userAll() {
-        val childView: NotificationContentView = mock()
-        whenever(view.privateLayout).thenReturn(childView)
-
-        val notification = Notification.Builder(mContext).build()
-        val sbn = SbnBuilder().setNotification(notification)
-                .setUser(UserHandle.of(USER_ALL))
-                .build()
-        whenever(view.entry).thenReturn(NotificationEntryBuilder()
-                .setSbn(sbn)
-                .setUser(UserHandle.of(USER_ALL))
-                .build())
-
-        controller.mSettingsListener.onSettingChanged(BUBBLES_SETTING_URI, 9, "1")
-        verify(childView).setBubblesEnabledForUser(true)
-
-        controller.mSettingsListener.onSettingChanged(BUBBLES_SETTING_URI, 1, "0")
-        verify(childView).setBubblesEnabledForUser(false)
     }
 }
