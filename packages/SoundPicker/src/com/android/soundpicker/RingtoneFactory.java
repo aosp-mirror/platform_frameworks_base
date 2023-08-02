@@ -19,6 +19,7 @@ package com.android.soundpicker;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
@@ -53,10 +54,7 @@ public class RingtoneFactory {
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setFlags(audioAttributesFlags)
                 .build();
-        // TODO: We are currently only using MEDIA_SOUND for enabledMedia. This will change once we
-        //  start playing sound and/or vibration.
-        return new Ringtone.Builder(mApplicationContext, Ringtone.MEDIA_SOUND, audioAttributes)
-                .setUri(uri)
-                .build();
+        return RingtoneManager.getRingtone(mApplicationContext, uri,
+                /* volumeShaperConfig= */ null, audioAttributes);
     }
 }

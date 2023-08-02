@@ -496,11 +496,30 @@ public class RingtoneManager {
             mPreviousRingtone.stop();
         }
 
-        mPreviousRingtone = new Ringtone.Builder(
-                mContext, Ringtone.MEDIA_SOUND, getDefaultAudioAttributes(mType))
-                .setUri(getRingtoneUri(position))
-                .build();
+        Ringtone ringtone;
+        Uri positionUri = getRingtoneUri(position);
+        if (Ringtone.useRingtoneV2()) {
+            mPreviousRingtone = new Ringtone.Builder(
+                    mContext, Ringtone.MEDIA_SOUND, getDefaultAudioAttributes(mType))
+                    .setUri(positionUri)
+                    .build();
+        } else {
+            mPreviousRingtone = createRingtoneV1WithStreamType(mContext, positionUri,
+                    inferStreamType(), /* volumeShaperConfig= */ null);
+        }
         return mPreviousRingtone;
+    }
+
+    private static Ringtone createRingtoneV1WithStreamType(
+            final Context context, Uri ringtoneUri, int streamType,
+            @Nullable VolumeShaper.Configuration volumeShaperConfig) {
+        try {
+            return Ringtone.createV1WithCustomStreamType(context, streamType, ringtoneUri,
+                    volumeShaperConfig);
+        } catch (Exception ex) {
+            Log.e(TAG, "Failed to open ringtone " + ringtoneUri + ": " + ex);
+        }
+        return null;
     }
 
     /**
@@ -694,9 +713,14 @@ public class RingtoneManager {
      * @return A {@link Ringtone} for the given URI, or null.
      */
     public static Ringtone getRingtone(final Context context, Uri ringtoneUri) {
-        return new Ringtone.Builder(context, Ringtone.MEDIA_SOUND, getDefaultAudioAttributes(-1))
-                .setUri(ringtoneUri)
-                .build();
+        if (Ringtone.useRingtoneV2()) {
+            return new Ringtone.Builder(
+                    context, Ringtone.MEDIA_SOUND, getDefaultAudioAttributes(-1))
+                    .setUri(ringtoneUri)
+                    .build();
+        } else {
+            return createRingtoneV1WithStreamType(context, ringtoneUri, -1, null);
+        }
     }
 
     /**
@@ -706,11 +730,22 @@ public class RingtoneManager {
             @Nullable VolumeShaper.Configuration volumeShaperConfig,
             AudioAttributes audioAttributes) {
         // TODO: move caller(s) away from this method: inline the builder call.
-        return new Ringtone.Builder(context, Ringtone.MEDIA_SOUND, audioAttributes)
-                .setUri(ringtoneUri)
-                .setVolumeShaperConfig(volumeShaperConfig)
-                .setUseExactAudioAttributes(true)  // May be using audio-coupled via attrs
-                .build();
+        if (Ringtone.useRingtoneV2()) {
+            return new Ringtone.Builder(context, Ringtone.MEDIA_SOUND, audioAttributes)
+                    .setUri(ringtoneUri)
+                    .setVolumeShaperConfig(volumeShaperConfig)
+                    .setUseExactAudioAttributes(true)  // May be using audio-coupled via attrs
+                    .build();
+        } else {
+            try {
+                return Ringtone.createV1WithCustomAudioAttributes(context, audioAttributes,
+                        ringtoneUri, volumeShaperConfig, /* allowRemote= */ true);
+            } catch (Exception ex) {
+                // Match broad catching of createRingtoneV1.
+                Log.e(TAG, "Failed to open ringtone " + ringtoneUri + ": " + ex);
+                return null;
+            }
+        }
     }
 
     /**
