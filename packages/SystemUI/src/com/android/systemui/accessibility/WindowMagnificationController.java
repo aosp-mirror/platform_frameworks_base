@@ -124,7 +124,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private float mScale;
 
     /**
-     * MagnificationFrame represents the bound of {@link #mMirrorSurface} and is constrained
+     * MagnificationFrame represents the bound of {@link #mMirrorSurfaceView} and is constrained
      * by the {@link #mMagnificationFrameBoundary}.
      * We use MagnificationFrame to calculate the position of {@link #mMirrorView}.
      * We combine MagnificationFrame with {@link #mMagnificationFrameOffsetX} and
@@ -225,6 +225,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private boolean mAllowDiagonalScrolling = false;
     private boolean mEditSizeEnable = false;
     private boolean mSettingsPanelVisibility = false;
+    @VisibleForTesting
+    WindowMagnificationSizePrefs mWindowMagnificationSizePrefs;
 
     @Nullable
     private final MirrorWindowControl mMirrorWindowControl;
@@ -249,6 +251,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mWindowMagnifierCallback = callback;
         mSysUiState = sysUiState;
         mConfiguration = new Configuration(context.getResources().getConfiguration());
+        mWindowMagnificationSizePrefs = new WindowMagnificationSizePrefs(mContext);
 
         final Display display = mContext.getDisplay();
         mDisplayId = mContext.getDisplayId();
@@ -272,8 +275,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 com.android.internal.R.integer.config_shortAnimTime);
         updateDimensions();
 
-        final Size windowSize = getDefaultWindowSizeWithWindowBounds(mWindowBounds);
-        setMagnificationFrame(windowSize.getWidth(), windowSize.getHeight(),
+        final Size windowFrameSize = restoreMagnificationWindowFrameSizeIfPossible();
+        setMagnificationFrame(windowFrameSize.getWidth(), windowFrameSize.getHeight(),
                 mWindowBounds.width() / 2, mWindowBounds.height() / 2);
         computeBounceAnimationScale();
 
@@ -381,10 +384,14 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (!mMagnificationSizeScaleOptions.contains(index)) {
             return;
         }
-        final float scale = mMagnificationSizeScaleOptions.get(index, 1.0f);
-        final int initSize = Math.min(mWindowBounds.width(), mWindowBounds.height()) / 3;
-        int size = (int) (initSize * scale);
+        int size = getMagnificationWindowSizeFromIndex(index);
         setWindowSize(size, size);
+    }
+
+    int getMagnificationWindowSizeFromIndex(@MagnificationSize int index) {
+        final float scale = mMagnificationSizeScaleOptions.get(index, 1.0f);
+        int initSize = Math.min(mWindowBounds.width(), mWindowBounds.height()) / 3;
+        return (int) (initSize * scale) - (int) (initSize * scale) % 2;
     }
 
     void setEditMagnifierSizeMode(boolean enable) {
@@ -394,6 +401,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (isActivated()) {
             updateDimensions();
             applyTapExcludeRegion();
+        }
+
+        if (!enable) {
+            // Keep the magnifier size when exiting edit mode
+            mWindowMagnificationSizePrefs.saveSizeForCurrentDensity(
+                    new Size(mMagnificationFrame.width(), mMagnificationFrame.height()));
         }
     }
 
@@ -519,12 +532,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             return false;
         }
         mWindowBounds.set(currentWindowBounds);
-        final Size windowSize = getDefaultWindowSizeWithWindowBounds(mWindowBounds);
+        final Size windowFrameSize = restoreMagnificationWindowFrameSizeIfPossible();
         final float newCenterX = (getCenterX()) * mWindowBounds.width() / oldWindowBounds.width();
         final float newCenterY = (getCenterY()) * mWindowBounds.height() / oldWindowBounds.height();
 
-        setMagnificationFrame(windowSize.getWidth(), windowSize.getHeight(), (int) newCenterX,
-                (int) newCenterY);
+        setMagnificationFrame(windowFrameSize.getWidth(), windowFrameSize.getHeight(),
+                (int) newCenterX, (int) newCenterY);
         calculateMagnificationFrameBoundary();
         return true;
     }
@@ -738,6 +751,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     private void setMagnificationFrame(int width, int height, int centerX, int centerY) {
+        mWindowMagnificationSizePrefs.saveSizeForCurrentDensity(new Size(width, height));
+
         // Sets the initial frame area for the mirror and place it to the given center on the
         // display.
         final int initX = centerX - width / 2;
@@ -745,12 +760,18 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mMagnificationFrame.set(initX, initY, initX + width, initY + height);
     }
 
-    private Size getDefaultWindowSizeWithWindowBounds(Rect windowBounds) {
-        int initSize = Math.min(windowBounds.width(), windowBounds.height()) / 2;
-        initSize = Math.min(mResources.getDimensionPixelSize(R.dimen.magnification_max_frame_size),
-                initSize);
-        initSize += 2 * mMirrorSurfaceMargin;
-        return new Size(initSize, initSize);
+    private Size restoreMagnificationWindowFrameSizeIfPossible() {
+        if (!mWindowMagnificationSizePrefs.isPreferenceSavedForCurrentDensity()) {
+            return getDefaultMagnificationWindowFrameSize();
+        }
+
+        return mWindowMagnificationSizePrefs.getSizeForCurrentDensity();
+    }
+
+    private Size getDefaultMagnificationWindowFrameSize() {
+        final int defaultSize = getMagnificationWindowSizeFromIndex(MagnificationSize.MEDIUM)
+                - 2 * mMirrorSurfaceMargin;
+        return new Size(defaultSize, defaultSize);
     }
 
     /**
