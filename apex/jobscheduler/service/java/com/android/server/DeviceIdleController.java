@@ -79,6 +79,7 @@ import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.WearModeManagerInternal;
 import android.provider.DeviceConfig;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
@@ -126,6 +127,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -373,10 +375,9 @@ public class DeviceIdleController extends SystemService
     @GuardedBy("this")
     private boolean mBatterySaverEnabled;
     @GuardedBy("this")
-    private boolean mIsOffBody;
+    private boolean mModeManagerRequestedQuickDoze;
     @GuardedBy("this")
-    private boolean mForceBodyState;
-    private Sensor mOffBodySensor;
+    private boolean mForceModeManagerQuickDozeRequest;
 
     /** Time in the elapsed realtime timebase when this listener last received a motion event. */
     @GuardedBy("this")
@@ -435,7 +436,7 @@ public class DeviceIdleController extends SystemService
     private static final int ACTIVE_REASON_FORCED = 6;
     private static final int ACTIVE_REASON_ALARM = 7;
     private static final int ACTIVE_REASON_EMERGENCY_CALL = 8;
-    private static final int ACTIVE_REASON_ONBODY = 9;
+    private static final int ACTIVE_REASON_MODE_MANAGER = 9;
 
     @VisibleForTesting
     static String stateToString(int state) {
@@ -832,64 +833,35 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    /**
-     * LowLatencyOffBodyListener monitors if a device is on body or off body.
-     */
     @VisibleForTesting
-    final class LowLatencyOffBodyListener implements SensorEventListener {
+    class ModeManagerQuickDozeRequestConsumer implements Consumer<Boolean> {
         @Override
-        public void onSensorChanged(SensorEvent event) {
-            if (DEBUG) {
-                Slog.d(TAG, "LowLatencyOffBodyListener detects onSensorChanged event, values are: "
-                        + Arrays.toString(event.values));
-            }
-            if (event.values == null || event.values.length == 0) {
-                // The event returned should contain a single value to indicate off-body state.
-                // No value indicates something went wrong. Take no action and log an error.
-                Slog.e(TAG,
-                        "LowLatencyOffBodyListener detects onSensorChanged event but no event "
-                                + "value returns.");
-                return;
-            }
+        public void accept(Boolean enabled) {
+            Slog.d(TAG, "Mode manager quick doze request: " + enabled);
             synchronized (DeviceIdleController.this) {
-                final boolean isOffBody = (event.values[0] == 0);
-                if (!mForceBodyState && mIsOffBody != isOffBody) {
-                    // Only consider the sensor value change when mForceBodyState is false, which
-                    // is used to enforce the mIsOffBody to be set by the adb shell command.
-                    mIsOffBody = isOffBody;
-                    onOffBodyChangedLocked();
+                if (!mForceModeManagerQuickDozeRequest
+                        && mModeManagerRequestedQuickDoze != enabled) {
+                    mModeManagerRequestedQuickDoze = enabled;
+                    onModeManagerRequestChangedLocked();
                 }
             }
         }
 
         @GuardedBy("DeviceIdleController.this")
-        public void onOffBodyChangedLocked() {
-            // Get into quick doze faster when the device is off body instead of taking
+        public void onModeManagerRequestChangedLocked() {
+            // Get into quick doze faster when mode manager requests instead of taking
             // traditional multi-stage approach.
             updateQuickDozeFlagLocked();
-            if (!mIsOffBody && !mBatterySaverEnabled) {
-                mActiveReason = ACTIVE_REASON_ONBODY;
-                becomeActiveLocked("onbody", Process.myUid());
+            if (!mModeManagerRequestedQuickDoze && !mBatterySaverEnabled) {
+                mActiveReason = ACTIVE_REASON_MODE_MANAGER;
+                becomeActiveLocked("mode_manager", Process.myUid());
             }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {}
-
-        public void registerLocked() {
-            mOffBodySensor =
-                    mSensorManager.getDefaultSensor(Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT, true);
-            if (mOffBodySensor == null) {
-                Slog.w(TAG, "Body sensor is NULL, unable to register mOffBodySensor.");
-                return;
-            }
-            mSensorManager.registerListener(this, mOffBodySensor,
-                    SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
 
     @VisibleForTesting
-    final LowLatencyOffBodyListener mLowLatencyOffBodyListener = new LowLatencyOffBodyListener();
+    final ModeManagerQuickDozeRequestConsumer mModeManagerQuickDozeRequestConsumer =
+            new ModeManagerQuickDozeRequestConsumer();
 
     @VisibleForTesting
     final class MotionListener extends TriggerEventListener
@@ -1052,7 +1024,7 @@ public class DeviceIdleController extends SystemService
          */
         private static final String KEY_WAIT_FOR_UNLOCK = "wait_for_unlock";
         private static final String KEY_USE_WINDOW_ALARMS = "use_window_alarms";
-        private static final String KEY_USE_BODY_SENSOR = "use_body_sensor";
+        private static final String KEY_USE_MODE_MANAGER = "use_mode_manager";
 
         private long mDefaultFlexTimeShort =
                 !COMPRESS_TIME ? 60 * 1000L : 5 * 1000L;
@@ -1112,7 +1084,7 @@ public class DeviceIdleController extends SystemService
         private long mDefaultNotificationAllowlistDurationMs = 30 * 1000L;
         private boolean mDefaultWaitForUnlock = true;
         private boolean mDefaultUseWindowAlarms = true;
-        private boolean mDefaultUseBodySensor = false;
+        private boolean mDefaultUseModeManager = false;
 
         /**
          * A somewhat short alarm window size that we will tolerate for various alarm timings.
@@ -1356,7 +1328,7 @@ public class DeviceIdleController extends SystemService
         /**
          * Whether to use an on/off body signal to affect state transition policy.
          */
-        public boolean USE_BODY_SENSOR = mDefaultUseBodySensor;
+        public boolean USE_MODE_MANAGER = mDefaultUseModeManager;
 
         private final boolean mSmallBatteryDevice;
 
@@ -1464,8 +1436,8 @@ public class DeviceIdleController extends SystemService
                     com.android.internal.R.bool.device_idle_wait_for_unlock);
             mDefaultUseWindowAlarms = res.getBoolean(
                     com.android.internal.R.bool.device_idle_use_window_alarms);
-            mDefaultUseBodySensor = res.getBoolean(
-                    com.android.internal.R.bool.device_idle_use_body_sensor);
+            mDefaultUseModeManager = res.getBoolean(
+                    com.android.internal.R.bool.device_idle_use_mode_manager);
 
             FLEX_TIME_SHORT = mDefaultFlexTimeShort;
             LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT = mDefaultLightIdleAfterInactiveTimeout;
@@ -1499,7 +1471,7 @@ public class DeviceIdleController extends SystemService
             NOTIFICATION_ALLOWLIST_DURATION_MS = mDefaultNotificationAllowlistDurationMs;
             WAIT_FOR_UNLOCK = mDefaultWaitForUnlock;
             USE_WINDOW_ALARMS = mDefaultUseWindowAlarms;
-            USE_BODY_SENSOR = mDefaultUseBodySensor;
+            USE_MODE_MANAGER = mDefaultUseModeManager;
         }
 
         private long getTimeout(long defTimeout, long compTimeout) {
@@ -1661,9 +1633,9 @@ public class DeviceIdleController extends SystemService
                             USE_WINDOW_ALARMS = properties.getBoolean(
                                     KEY_USE_WINDOW_ALARMS, mDefaultUseWindowAlarms);
                             break;
-                        case KEY_USE_BODY_SENSOR:
-                            USE_BODY_SENSOR = properties.getBoolean(
-                                    KEY_USE_BODY_SENSOR, mDefaultUseBodySensor);
+                        case KEY_USE_MODE_MANAGER:
+                            USE_MODE_MANAGER = properties.getBoolean(
+                                    KEY_USE_MODE_MANAGER, mDefaultUseModeManager);
                             break;
                         default:
                             Slog.e(TAG, "Unknown configuration key: " + name);
@@ -1802,8 +1774,8 @@ public class DeviceIdleController extends SystemService
             pw.print("    "); pw.print(KEY_USE_WINDOW_ALARMS); pw.print("=");
             pw.println(USE_WINDOW_ALARMS);
 
-            pw.print("    "); pw.print(KEY_USE_BODY_SENSOR); pw.print("=");
-            pw.println(USE_BODY_SENSOR);
+            pw.print("    "); pw.print(KEY_USE_MODE_MANAGER); pw.print("=");
+            pw.println(USE_MODE_MANAGER);
         }
     }
 
@@ -2668,8 +2640,15 @@ public class DeviceIdleController extends SystemService
                         mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
 
-                if (mConstants.USE_BODY_SENSOR) {
-                    mLowLatencyOffBodyListener.registerLocked();
+                if (mConstants.USE_MODE_MANAGER) {
+                    WearModeManagerInternal modeManagerInternal = LocalServices.getService(
+                            WearModeManagerInternal.class);
+                    if (modeManagerInternal != null) {
+                        modeManagerInternal.addActiveStateChangeListener(
+                                WearModeManagerInternal.QUICK_DOZE_REQUEST_IDENTIFIER,
+                                AppSchedulingModuleThread.getExecutor(),
+                                mModeManagerQuickDozeRequestConsumer);
+                    }
                 }
                 mLocalPowerManager.registerLowPowerModeObserver(ServiceType.QUICK_DOZE,
                         state -> {
@@ -3374,9 +3353,10 @@ public class DeviceIdleController extends SystemService
     /** Calls to {@link #updateQuickDozeFlagLocked(boolean)} by considering appropriate signals. */
     @GuardedBy("this")
     private void updateQuickDozeFlagLocked() {
-        if (mConstants.USE_BODY_SENSOR) {
-            // Only disable the quick doze flag when the device is on body and battery saver is off.
-            updateQuickDozeFlagLocked(mIsOffBody || mBatterySaverEnabled);
+        if (mConstants.USE_MODE_MANAGER) {
+            // Only disable the quick doze flag when mode manager request is false and
+            // battery saver is off.
+            updateQuickDozeFlagLocked(mModeManagerRequestedQuickDoze || mBatterySaverEnabled);
         } else {
             updateQuickDozeFlagLocked(mBatterySaverEnabled);
         }
@@ -4482,7 +4462,7 @@ public class DeviceIdleController extends SystemService
         pw.println("  unforce");
         pw.println(
                 "    Resume normal functioning after force-idle or force-inactive or "
-                        + "force-offbody or force-onbody.");
+                        + "force-modemanager-quickdoze.");
         pw.println("  get [light|deep|force|screen|charging|network|offbody|forcebodystate]");
         pw.println("    Retrieve the current given state.");
         pw.println("  disable [light|deep|all]");
@@ -4517,14 +4497,9 @@ public class DeviceIdleController extends SystemService
                 + "and any [-d] is ignored");
         pw.println("  motion");
         pw.println("    Simulate a motion event to bring the device out of deep doze");
-        pw.println("  force-offbody");
-        pw.println(
-                "    Simulate a low latency body sensor detecting a device is offbody. "
-                        + "mForceBodyState will be set to true to ignore body sensor reading.");
-        pw.println("  force-onbody");
-        pw.println(
-                "    Simulate a low latency body sensor detecting a device is onbody. "
-                        + "mForceBodyState will be set to true to ignore body sensor reading.");
+        pw.println("  force-modemanager-quickdoze [true|false]");
+        pw.println("    Simulate mode manager request to enable (true) or disable (false) "
+                + "quick doze. Mode manager changes will be ignored until unforce is called.");
     }
 
     class Shell extends ShellCommand {
@@ -4656,8 +4631,9 @@ public class DeviceIdleController extends SystemService
                     pw.print(lightStateToString(mLightState));
                     pw.print(", deep state: ");
                     pw.println(stateToString(mState));
-                    mForceBodyState = false;
-                    pw.println("mForceBodyState: " + mForceBodyState);
+                    mForceModeManagerQuickDozeRequest = false;
+                    pw.println("mForceModeManagerQuickDozeRequest: "
+                            + mForceModeManagerQuickDozeRequest);
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
@@ -4678,8 +4654,12 @@ public class DeviceIdleController extends SystemService
                             case "screen": pw.println(mScreenOn); break;
                             case "charging": pw.println(mCharging); break;
                             case "network": pw.println(mNetworkConnected); break;
-                            case "offbody": pw.println(mIsOffBody); break;
-                            case "forcebodystate": pw.println(mForceBodyState); break;
+                            case "modemanagerquick":
+                                pw.println(mModeManagerRequestedQuickDoze);
+                                break;
+                            case "forcemodemanagerquick":
+                                pw.println(mForceModeManagerQuickDozeRequest);
+                                break;
                             default: pw.println("Unknown get option: " + arg); break;
                         }
                     } finally {
@@ -4976,35 +4956,31 @@ public class DeviceIdleController extends SystemService
                     Binder.restoreCallingIdentity(token);
                 }
             }
-        } else if ("force-offbody".equals(cmd)) {
+        } else if ("force-modemanager-quickdoze".equals(cmd)) {
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
-            synchronized (DeviceIdleController.this) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    mForceBodyState = true;
-                    pw.println("mForceBodyState: " + mForceBodyState);
-                    mIsOffBody = true;
-                    pw.println("mIsOffBody: " + mIsOffBody);
-                    mLowLatencyOffBodyListener.onOffBodyChangedLocked();
-                } finally {
-                    Binder.restoreCallingIdentity(token);
+            String arg = shell.getNextArg();
+
+            if ("true".equalsIgnoreCase(arg) || "false".equalsIgnoreCase(arg)) {
+                boolean enabled = Boolean.parseBoolean(arg);
+
+                synchronized (DeviceIdleController.this) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        mForceModeManagerQuickDozeRequest = true;
+                        pw.println("mForceModeManagerQuickDozeRequest: "
+                                + mForceModeManagerQuickDozeRequest);
+                        mModeManagerRequestedQuickDoze = enabled;
+                        pw.println("mModeManagerRequestedQuickDoze: "
+                                + mModeManagerRequestedQuickDoze);
+                        mModeManagerQuickDozeRequestConsumer.onModeManagerRequestChangedLocked();
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
                 }
-            }
-        } else if ("force-onbody".equals(cmd)) {
-            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
-                    null);
-            synchronized (DeviceIdleController.this) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    mForceBodyState = true;
-                    pw.println("mForceBodyState: " + mForceBodyState);
-                    mIsOffBody = false;
-                    pw.println("mIsOffBody: " + mIsOffBody);
-                    mLowLatencyOffBodyListener.onOffBodyChangedLocked();
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
+            } else {
+                pw.println("Provide true or false argument after force-modemanager-quickdoze");
+                return -1;
             }
         } else {
             return shell.handleDefaultCommands(cmd);

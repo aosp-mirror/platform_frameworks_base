@@ -4520,7 +4520,7 @@
   <java-symbol type="integer" name="device_idle_notification_allowlist_duration_ms" />
   <java-symbol type="bool" name="device_idle_wait_for_unlock" />
   <java-symbol type="bool" name="device_idle_use_window_alarms" />
-  <java-symbol type="bool" name="device_idle_use_body_sensor" />
+  <java-symbol type="bool" name="device_idle_use_mode_manager" />
 
   <!-- Binder heavy hitter watcher configs -->
   <java-symbol type="bool" name="config_defaultBinderHeavyHitterWatcherEnabled" />
