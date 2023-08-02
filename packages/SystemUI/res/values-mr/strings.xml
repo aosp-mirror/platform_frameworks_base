@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"फेस अनलॉक पुन्हा सेट करण्यासाठी, तुमचे सध्याचे फेस मॉडेल हटवले जाईल.\n\nतुमचा फोन अनलॉक करण्यासाठी तुमचा चेहरा वापरण्याकरिता तुम्हाला हे वैशिष्ट्य पुन्हा सेट करावे लागेल."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"फेस अनलॉक सेट करता आले नाही. सेटिंग्ज वर जा आणि पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फिंगरप्रिंट सेन्सरला स्पर्श करा"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"पुढे सुरू ठेवण्यासाठी, अनलॉक करा चा आयकन प्रेस करा"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"चेहरा ओळखू शकत नाही. त्याऐवजी फिंगरप्रिंट वापरा."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

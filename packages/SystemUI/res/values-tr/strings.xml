@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Yüz Tanıma Kilidi\'ni tekrar kurmak için mevcut yüz modeliniz silinir.\n\nYüzünüzü kullanarak telefonunuzun kilidini açmak için bu özelliği yeniden kurmanız gerekir."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Yüz tanıma kilidi kurulamadı. Tekrar denemek için Ayarlar\'a gidin."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Parmak izi sensörüne dokunun"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Devam etmek için kilit açma simgesine basın"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Yüz tanınamadı. Bunun yerine parmak izi kullanın."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />

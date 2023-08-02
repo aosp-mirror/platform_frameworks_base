@@ -181,8 +181,7 @@
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Lai vēlreiz iestatītu autorizāciju pēc sejas, jūsu pašreizējais sejas modelis tiks izdzēsts.\n\nJums būs vēlreiz jāiestata šī funkcija, lai varētu atbloķēt tālruni, izmantojot seju."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Nevarēja iestatīt autorizāciju pēc sejas. Atveriet iestatījumus, lai mēģinātu vēlreiz."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Pieskarieties pirksta nospieduma sensoram"</string>
-    <!-- no translation found for fingerprint_dialog_authenticated_confirmation (1603899612957562862) -->
-    <skip />
+    <string name="fingerprint_dialog_authenticated_confirmation" msgid="1603899612957562862">"Lai turpinātu, nospiediet atbloķēšanas ikonu."</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Nevar atpazīt seju. Lietojiet pirksta nospiedumu."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
