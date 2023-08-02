@@ -775,8 +775,6 @@ public class Element {
                 return index ==  R.styleable.AndroidManifestReceiver_name;
             case TAG_SERVICE:
                 return index ==  R.styleable.AndroidManifestService_name;
-            case TAG_USES_LIBRARY:
-                return index ==  R.styleable.AndroidManifestUsesLibrary_name;
             default:
                 return false;
         }
