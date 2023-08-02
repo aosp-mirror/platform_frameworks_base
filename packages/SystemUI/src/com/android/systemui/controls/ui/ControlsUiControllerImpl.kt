@@ -657,7 +657,7 @@ class ControlsUiControllerImpl @Inject constructor (
 
         val maxColumns = ControlAdapter.findMaxColumns(activityContext.resources)
 
-        val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
+        val listView = parent.requireViewById(R.id.controls_list) as ViewGroup
         listView.removeAllViews()
         var lastRow: ViewGroup = createRow(inflater, listView)
         selectedStructure.controls.forEach {
