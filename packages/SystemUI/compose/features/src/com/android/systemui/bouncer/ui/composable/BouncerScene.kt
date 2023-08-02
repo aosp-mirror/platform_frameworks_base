@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.R
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
@@ -81,7 +82,7 @@ constructor(
             .asStateFlow()
 
     @Composable
-    override fun Content(
+    override fun SceneScope.Content(
         modifier: Modifier,
     ) = BouncerScene(viewModel, dialogFactory, modifier)
 }

@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.dagger.SysUISingleton
@@ -66,7 +67,7 @@ constructor(
             )
 
     @Composable
-    override fun Content(
+    override fun SceneScope.Content(
         modifier: Modifier,
     ) {
         LockscreenScene(

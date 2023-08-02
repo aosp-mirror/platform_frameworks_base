@@ -119,9 +119,11 @@ class SceneTestUtils(
         )
     }
 
-    fun sceneInteractor(): SceneInteractor {
+    fun sceneInteractor(
+        repository: SceneContainerRepository = fakeSceneContainerRepository()
+    ): SceneInteractor {
         return SceneInteractor(
-            repository = fakeSceneContainerRepository(),
+            repository = repository,
         )
     }
 
