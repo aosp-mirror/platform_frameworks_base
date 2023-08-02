@@ -790,12 +790,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     boolean isSupportWindowlessStartingSurface() {
-        // Enable after ag/20426257
         final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
-        if (lastOrganizer == null) {
-            return false;
-        }
-        return false;
+        return lastOrganizer != null;
     }
     /**
      * Notify the shell ({@link com.android.wm.shell.ShellTaskOrganizer} that the client has

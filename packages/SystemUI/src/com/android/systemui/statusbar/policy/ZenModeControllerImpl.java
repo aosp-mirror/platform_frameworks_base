@@ -46,7 +46,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -68,17 +67,17 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     private final Context mContext;
     private final UserTracker mUserTracker;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final SettingObserver mModeSetting;
-    private final SettingObserver mConfigSetting;
     private final NotificationManager mNoMan;
     private final AlarmManager mAlarmManager;
     private final SetupObserver mSetupObserver;
     private final UserManager mUserManager;
+    private final GlobalSettings mGlobalSettings;
 
     private int mUserId;
     private boolean mRegistered;
     private ZenModeConfig mConfig;
-    private int mZenMode;
+    // This value is changed in the main thread, but may be read in a background thread.
+    private volatile int mZenMode;
     private long mZenUpdateTime;
     private NotificationManager.Policy mConsolidatedNotificationPolicy;
 
@@ -111,18 +110,20 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mUserTracker = userTracker;
-        mModeSetting = new SettingObserver(globalSettings, handler, Global.ZEN_MODE,
-                userTracker.getUserId()) {
+        mGlobalSettings = globalSettings;
+
+        ContentObserver modeContentObserver = new ContentObserver(handler) {
             @Override
-            protected void handleValueChanged(int value, boolean observedChange) {
+            public void onChange(boolean selfChange) {
+                int value = getModeSettingValueFromProvider();
+                Log.d(TAG, "Zen mode setting changed to " + value);
                 updateZenMode(value);
                 fireZenChanged(value);
             }
         };
-        mConfigSetting = new SettingObserver(globalSettings, handler, Global.ZEN_MODE_CONFIG_ETAG,
-                userTracker.getUserId()) {
+        ContentObserver configContentObserver = new ContentObserver(handler) {
             @Override
-            protected void handleValueChanged(int value, boolean observedChange) {
+            public void onChange(boolean selfChange) {
                 try {
                     Trace.beginSection("updateZenModeConfig");
                     updateZenModeConfig();
@@ -132,9 +133,9 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
             }
         };
         mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        mModeSetting.setListening(true);
-        updateZenMode(mModeSetting.getValue());
-        mConfigSetting.setListening(true);
+        globalSettings.registerContentObserver(Global.ZEN_MODE, modeContentObserver);
+        updateZenMode(getModeSettingValueFromProvider());
+        globalSettings.registerContentObserver(Global.ZEN_MODE_CONFIG_ETAG, configContentObserver);
         updateZenModeConfig();
         updateConsolidatedNotificationPolicy();
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -144,6 +145,10 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
         mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(handler));
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
+    }
+
+    private int getModeSettingValueFromProvider() {
+        return mGlobalSettings.getInt(Global.ZEN_MODE, /* default */ Global.ZEN_MODE_OFF);
     }
 
     @Override

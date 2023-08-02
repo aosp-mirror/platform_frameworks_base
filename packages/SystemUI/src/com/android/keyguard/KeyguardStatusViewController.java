@@ -340,6 +340,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onTimeChanged() {
+            Slog.v(TAG, "onTimeChanged");
             refreshTime();
         }
 

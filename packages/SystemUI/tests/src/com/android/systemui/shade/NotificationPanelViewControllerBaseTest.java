@@ -99,6 +99,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.ui.view.KeyguardRootView;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel;
@@ -297,7 +298,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected LockscreenToOccludedTransitionViewModel
             mLockscreenToOccludedTransitionViewModel;
     @Mock protected GoneToDreamingTransitionViewModel mGoneToDreamingTransitionViewModel;
-
+    @Mock protected GoneToDreamingLockscreenHostedTransitionViewModel
+            mGoneToDreamingLockscreenHostedTransitionViewModel;
     @Mock protected KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock protected KeyguardLongPressViewModel mKeyuardLongPressViewModel;
     @Mock protected AlternateBouncerInteractor mAlternateBouncerInteractor;
@@ -478,6 +480,20 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mGoneToDreamingTransitionViewModel.lockscreenTranslationY(anyInt()))
                 .thenReturn(emptyFlow());
 
+        // Gone->Dreaming lockscreen hosted
+        when(mKeyguardTransitionInteractor.getGoneToDreamingLockscreenHostedTransition())
+                .thenReturn(emptyFlow());
+        when(mGoneToDreamingLockscreenHostedTransitionViewModel.getLockscreenAlpha())
+                .thenReturn(emptyFlow());
+
+        // Dreaming lockscreen hosted->Lockscreen
+        when(mKeyguardTransitionInteractor.getDreamingLockscreenHostedToLockscreenTransition())
+                .thenReturn(emptyFlow());
+
+        // Lockscreen->Dreaming lockscreen hosted
+        when(mKeyguardTransitionInteractor.getLockscreenToDreamingLockscreenHostedTransition())
+                .thenReturn(emptyFlow());
+
         // Lockscreen->Occluded
         when(mKeyguardTransitionInteractor.getLockscreenToOccludedTransition())
                 .thenReturn(emptyFlow());
@@ -613,6 +629,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mOccludedToLockscreenTransitionViewModel,
                 mLockscreenToDreamingTransitionViewModel,
                 mGoneToDreamingTransitionViewModel,
+                mGoneToDreamingLockscreenHostedTransitionViewModel,
                 mLockscreenToOccludedTransitionViewModel,
                 mMainDispatcher,
                 mKeyguardTransitionInteractor,
