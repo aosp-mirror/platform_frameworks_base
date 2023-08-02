@@ -147,6 +147,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToDreamingTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenToOccludedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
@@ -602,6 +603,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mGoneToDreamingLockscreenHostedTransitionViewModel;
 
     private final LockscreenToOccludedTransitionViewModel mLockscreenToOccludedTransitionViewModel;
+    private final PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
 
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
@@ -761,6 +763,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             GoneToDreamingLockscreenHostedTransitionViewModel
                     goneToDreamingLockscreenHostedTransitionViewModel,
             LockscreenToOccludedTransitionViewModel lockscreenToOccludedTransitionViewModel,
+            PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
             @Main CoroutineDispatcher mainDispatcher,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             DumpManager dumpManager,
@@ -790,6 +793,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mGoneToDreamingLockscreenHostedTransitionViewModel =
                 goneToDreamingLockscreenHostedTransitionViewModel;
         mLockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel;
+        mPrimaryBouncerToGoneTransitionViewModel = primaryBouncerToGoneTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mKeyguardInteractor = keyguardInteractor;
         mKeyguardViewConfigurator = keyguardViewConfigurator;
@@ -1172,6 +1176,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         collectFlow(mView, mLockscreenToOccludedTransitionViewModel.lockscreenTranslationY(
                 mLockscreenToOccludedTransitionTranslationY),
                 setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
+
+        // Primary bouncer->Gone (ensures lockscreen content is not visible on successful auth)
+        collectFlow(mView, mPrimaryBouncerToGoneTransitionViewModel.getLockscreenAlpha(),
+                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
     }
 
     @VisibleForTesting
