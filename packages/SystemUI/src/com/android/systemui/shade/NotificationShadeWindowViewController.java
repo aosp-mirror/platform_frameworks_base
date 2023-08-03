@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.NotificationInsetsController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -157,6 +158,7 @@ public class NotificationShadeWindowViewController {
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
+            NotificationExpansionRepository notificationExpansionRepository,
             FeatureFlags featureFlags,
             SystemClock clock,
             BouncerMessageInteractor bouncerMessageInteractor,
@@ -201,6 +203,10 @@ public class NotificationShadeWindowViewController {
 
         collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
                 mLockscreenToDreamingTransition);
+        collectFlow(
+                mView,
+                notificationExpansionRepository.isExpandAnimationRunning(),
+                this::setExpandAnimationRunning);
 
         mClock = clock;
         if (featureFlags.isEnabled(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION)) {
@@ -518,7 +524,7 @@ public class NotificationShadeWindowViewController {
         pw.println(mTouchActive);
     }
 
-    public void setExpandAnimationRunning(boolean running) {
+    private void setExpandAnimationRunning(boolean running) {
         if (mExpandAnimationRunning != running) {
             mExpandAnimationRunning = running;
             mNotificationShadeWindowController.setLaunchingActivity(mExpandAnimationRunning);

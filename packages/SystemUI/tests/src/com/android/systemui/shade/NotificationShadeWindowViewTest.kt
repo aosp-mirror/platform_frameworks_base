@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.NotificationShadeDepthController
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -185,6 +186,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 Mockito.mock(KeyguardMessageAreaController.Factory::class.java),
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
+                NotificationExpansionRepository(),
                 featureFlags,
                 FakeSystemClock(),
                 BouncerMessageInteractor(

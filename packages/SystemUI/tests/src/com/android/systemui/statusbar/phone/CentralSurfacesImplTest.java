@@ -159,6 +159,7 @@ import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.data.repository.NotificationExpansionRepository;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
@@ -514,6 +515,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mNotificationShelfController,
                 mStackScrollerController,
                 mNotificationPresenter,
+                new NotificationExpansionRepository(),
                 mDozeParameters,
                 mScrimController,
                 mLockscreenWallpaperLazy,
