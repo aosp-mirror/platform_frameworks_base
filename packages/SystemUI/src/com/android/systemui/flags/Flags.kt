@@ -195,10 +195,10 @@ object Flags {
     @JvmField val FALSING_OFF_FOR_UNFOLDED = releasedFlag(225, "falsing_off_for_unfolded")
 
     /** Enables code to show contextual loyalty cards in wallet entrypoints */
-    // TODO(b/247587924): Tracking Bug
+    // TODO(b/294110497): Tracking Bug
     @JvmField
     val ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS =
-        unreleasedFlag(226, "enable_wallet_contextual_loyalty_cards", teamfood = false)
+        unreleasedFlag(226, "enable_wallet_contextual_loyalty_cards", teamfood = true)
 
     // TODO(b/242908637): Tracking Bug
     @JvmField val WALLPAPER_FULLSCREEN_PREVIEW = releasedFlag(227, "wallpaper_fullscreen_preview")
@@ -266,7 +266,7 @@ object Flags {
     @JvmField val KEYGUARD_TALKBACK_FIX = releasedFlag(238, "keyguard_talkback_fix")
 
     // TODO(b/287268101): Tracking bug.
-    @JvmField val TRANSIT_CLOCK = unreleasedFlag(239, "lockscreen_custom_transit_clock")
+    @JvmField val TRANSIT_CLOCK = unreleasedFlag(239, "lockscreen_custom_transit_clock", teamfood = true)
 
     /** Migrate the lock icon view to the new keyguard root view. */
     // TODO(b/286552209): Tracking bug.

@@ -18,6 +18,7 @@ package com.android.systemui.scene.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.data.repository.SceneContainerRepository
+import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.RemoteUserInput
 import com.android.systemui.scene.shared.model.SceneKey
@@ -41,6 +42,7 @@ class SceneInteractor
 @Inject
 constructor(
     private val repository: SceneContainerRepository,
+    private val logger: SceneLogger,
 ) {
 
     /**
@@ -54,8 +56,17 @@ constructor(
     }
 
     /** Sets the scene in the container with the given name. */
-    fun setCurrentScene(scene: SceneModel) {
+    fun setCurrentScene(scene: SceneModel, loggingReason: String) {
         val currentSceneKey = repository.currentScene.value.key
+        if (currentSceneKey == scene.key) {
+            return
+        }
+
+        logger.logSceneChange(
+            from = currentSceneKey,
+            to = scene.key,
+            reason = loggingReason,
+        )
         repository.setCurrentScene(scene)
         repository.setSceneTransition(from = currentSceneKey, to = scene.key)
     }
@@ -64,7 +75,17 @@ constructor(
     val currentScene: StateFlow<SceneModel> = repository.currentScene
 
     /** Sets the visibility of the container with the given name. */
-    fun setVisible(isVisible: Boolean) {
+    fun setVisible(isVisible: Boolean, loggingReason: String) {
+        val wasVisible = repository.isVisible.value
+        if (wasVisible == isVisible) {
+            return
+        }
+
+        logger.logVisibilityChange(
+            from = wasVisible,
+            to = isVisible,
+            reason = loggingReason,
+        )
         return repository.setVisible(isVisible)
     }
 

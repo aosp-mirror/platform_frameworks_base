@@ -82,7 +82,9 @@ constructor(
 ) : LogContextInteractor {
 
     init {
-        foldProvider.start()
+        applicationScope.launch {
+            foldProvider.start()
+        }
     }
 
     override val displayState =

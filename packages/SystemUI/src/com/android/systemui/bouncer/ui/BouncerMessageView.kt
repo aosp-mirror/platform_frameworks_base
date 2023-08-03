@@ -41,8 +41,6 @@ class BouncerMessageView : LinearLayout {
         super.onFinishInflate()
         primaryMessageView = findViewById(R.id.bouncer_primary_message_area)
         secondaryMessageView = findViewById(R.id.bouncer_secondary_message_area)
-        primaryMessageView?.disable()
-        secondaryMessageView?.disable()
     }
 
     fun init(factory: KeyguardMessageAreaController.Factory) {

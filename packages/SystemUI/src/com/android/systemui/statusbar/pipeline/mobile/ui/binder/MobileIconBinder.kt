@@ -99,7 +99,16 @@ object MobileIconBinder {
                     }
                 }
 
-                launch { viewModel.isVisible.collect { isVisible -> view.isVisible = isVisible } }
+                launch {
+                    viewModel.isVisible.collect { isVisible ->
+                        viewModel.verboseLogger?.logBinderReceivedVisibility(
+                            view,
+                            viewModel.subscriptionId,
+                            isVisible
+                        )
+                        view.isVisible = isVisible
+                    }
+                }
 
                 // Set the icon for the triangle
                 launch {

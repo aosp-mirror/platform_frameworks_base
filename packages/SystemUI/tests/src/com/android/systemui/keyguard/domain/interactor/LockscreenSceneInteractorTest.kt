@@ -130,11 +130,11 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
     fun switchFromLockScreenToGone_authMethodNotSwipe_doesNotUnlockDevice() =
         testScope.runTest {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Lockscreen))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Lockscreen), "reason")
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(isUnlocked).isFalse()
 
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone), "reason")
 
             assertThat(isUnlocked).isFalse()
         }
@@ -144,13 +144,13 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             runCurrent()
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Shade))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Shade), "reason")
             runCurrent()
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
             runCurrent()
             assertThat(isUnlocked).isFalse()
 
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Gone), "reason")
 
             assertThat(isUnlocked).isFalse()
         }
@@ -161,7 +161,7 @@ class LockscreenSceneInteractorTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.currentScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Swipe)
             runCurrent()
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.QuickSettings))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.QuickSettings), "reason")
             runCurrent()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.QuickSettings))
 

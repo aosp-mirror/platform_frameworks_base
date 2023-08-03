@@ -38,6 +38,19 @@ class VerboseMobileViewLogger
 constructor(
     @VerboseMobileViewLog private val buffer: LogBuffer,
 ) {
+    fun logBinderReceivedVisibility(parentView: View, subId: Int, visibility: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = parentView.getIdForLogging()
+                int1 = subId
+                bool1 = visibility
+            },
+            { "Binder[subId=$int1, viewId=$str1] received visibility: $bool1" },
+        )
+    }
+
     fun logBinderReceivedSignalIcon(parentView: View, subId: Int, icon: SignalIconModel) {
         buffer.log(
             TAG,
