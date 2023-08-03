@@ -703,7 +703,7 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"መተግበሪያው አዲስ የቴሌኮም ግንኙነቶችን እንዲመዘግብ ያስችለዋል።"</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"የቴሌኮም ግንኙነቶችን ያቀናብራል"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"መተግበሪያው የቴሌኮም ግንኙነቶችን እንዲያቀናብር ያስችለዋል።"</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ከውስጠ-ጥሪ ማያ ገፅ ጋር መስተጋብር ይፈጥራል"</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ከውስጠ-ጥሪ ማሳያ ገፅ ጋር መስተጋብር ይፈጥራል"</string>
     <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"መተግበሪያው ተጠቃሚው በጥሪ ውስጥ ያለውን ማያ ገፅ መቼ እና እንዴት ማየት እንደሚችል እንዲቆጣጠር ይፈቅድለታል።"</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"ከስልክ አገልግሎቶች ጋር መስተጋብር ይፈጥራል"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"መተግበሪያው ጥሪዎችን እንዲያደርግ/እንዲቀበል ከስልክ አገልግሎቶች ጋር መስተጋብር እንዲፈጥር ያስችለዋል።"</string>

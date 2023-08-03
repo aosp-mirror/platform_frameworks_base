@@ -703,8 +703,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"ಹೊಸ ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಣಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ಒಳ-ಕರೆ ಪರದೆಯ ಮೂಲಕ ಸಂವಹನ ನಡೆಸಿ"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"ಬಳಕೆದಾರರು ಒಳ-ಕರೆಯ ಪರದೆಯನ್ನು ಯಾವಾಗ ಮತ್ತು ಹೇಗೆ ನೋಡುತ್ತಾರೆ ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"ಒಳ-ಕಾಲ್ ಸ್ಕ್ರೀನ್ ಮೂಲಕ ಸಂವಹನ ನಡೆಸಿ"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"ಬಳಕೆದಾರರು ಒಳ-ಕಾಲ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಯಾವಾಗ ಮತ್ತು ಹೇಗೆ ನೋಡುತ್ತಾರೆ ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"ಟೆಲಿಫೋನಿ ಸೇವೆಗಳೊಂದಿಗೆ ಸಂವಾದ ನಡೆಸಿ"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"ಕರೆಗಳನ್ನು ಮಾಡಲು/ಸ್ವೀಕರಿಸುವ ನಿಟ್ಟಿನಲ್ಲಿ ಲಿಫೋನಿ ಸೇವೆಗಳ ಜೊತೆ ಸಂವಾದ ನಡೆಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಕೊಡಿ."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"ಒಳ ಕರೆ ಬಳಕೆದಾರರ ಅನುಭವವನ್ನು ಒದಗಿಸಿ"</string>

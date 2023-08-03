@@ -703,8 +703,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"नवीन टेलिकॉम कनेक्शनची नोंदणी करण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"टेलिकॉम कनेक्शन व्यवस्थापित करा"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"टेलिकॉम कनेक्शन व्यवस्थापित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"कॉल-मधील स्‍क्रीनशी परस्‍परसंवाद करा"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"वापरकर्ता कॉल-मधील स्‍क्रीन केव्‍हा आणि कशी पाहतो ते नियंत्रित करण्‍याची अ‍ॅपला अनुमती देते."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"कॉलमधील स्‍क्रीनशी संवाद साधा"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"वापरकर्ता कॉलमधील स्‍क्रीन केव्‍हा आणि कशी पाहतो ते नियंत्रित करण्‍याची अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"टेलिफोनी सेवांशी परस्परसंवाद साधा"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"कॉल करण्यासाठी/घेण्यासाठी टेलिफोनी सेवांशी परस्परसंवाद साधण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"एक कॉल-मधील वापरकर्ता अनुभव प्रदान करा"</string>

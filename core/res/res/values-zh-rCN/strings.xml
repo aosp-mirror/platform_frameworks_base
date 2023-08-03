@@ -1936,7 +1936,7 @@
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>不可用"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"需要权限"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"无法使用摄像头"</string>
-    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"继续在手机上操作"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"在手机上继续操作"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"无法使用麦克风"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"无法使用 Android TV 设置"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"无法使用平板电脑设置"</string>
