@@ -314,21 +314,6 @@ public final class MediaRouter2 {
     }
 
     /**
-     * Returns whether any route in {@code routeList} has a same unique ID with given route.
-     *
-     * @hide
-     */
-    static boolean checkRouteListContainsRouteId(
-            @NonNull List<MediaRoute2Info> routeList, @NonNull String routeId) {
-        for (MediaRoute2Info info : routeList) {
-            if (TextUtils.equals(routeId, info.getId())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Gets the client package name of the app which this media router controls.
      *
      * <p>This will return null for non-system media routers.
@@ -1492,13 +1477,13 @@ public final class MediaRouter2 {
             }
 
             List<MediaRoute2Info> selectedRoutes = getSelectedRoutes();
-            if (checkRouteListContainsRouteId(selectedRoutes, route.getId())) {
+            if (containsRouteInfoWithId(selectedRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring selecting a route that is already selected. route=" + route);
                 return;
             }
 
             List<MediaRoute2Info> selectableRoutes = getSelectableRoutes();
-            if (!checkRouteListContainsRouteId(selectableRoutes, route.getId())) {
+            if (!containsRouteInfoWithId(selectableRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring selecting a non-selectable route=" + route);
                 return;
             }
@@ -1531,13 +1516,13 @@ public final class MediaRouter2 {
             }
 
             List<MediaRoute2Info> selectedRoutes = getSelectedRoutes();
-            if (!checkRouteListContainsRouteId(selectedRoutes, route.getId())) {
+            if (!containsRouteInfoWithId(selectedRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring deselecting a route that is not selected. route=" + route);
                 return;
             }
 
             List<MediaRoute2Info> deselectableRoutes = getDeselectableRoutes();
-            if (!checkRouteListContainsRouteId(deselectableRoutes, route.getId())) {
+            if (!containsRouteInfoWithId(deselectableRoutes, route.getId())) {
                 Log.w(TAG, "Ignoring deselecting a non-deselectable route=" + route);
                 return;
             }
@@ -1700,6 +1685,16 @@ public final class MediaRouter2 {
             }
         }
 
+        /** Returns whether any route in {@code routeList} has a same unique ID with given route. */
+        private static boolean containsRouteInfoWithId(
+                @NonNull List<MediaRoute2Info> routeList, @NonNull String routeId) {
+            for (MediaRoute2Info info : routeList) {
+                if (TextUtils.equals(routeId, info.getId())) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     class SystemRoutingController extends RoutingController {
