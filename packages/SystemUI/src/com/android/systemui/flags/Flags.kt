@@ -289,7 +289,8 @@ object Flags {
     val WALLPAPER_PICKER_PREVIEW_ANIMATION =
             unreleasedFlag(
                     244,
-                    "wallpaper_picker_preview_animation"
+                    "wallpaper_picker_preview_animation",
+                teamfood = true
             )
 
     // 300 - power menu
