@@ -37,7 +37,7 @@ constructor(
 
     fun openMail(rowIdx: Int) {
         val rowSel =
-            By.res(getPackage(), "mail_row_item_text").textEndsWith(String.format("%04d", rowIdx))
+            By.res(packageName, "mail_row_item_text").textEndsWith(String.format("%04d", rowIdx))
         var row: UiObject2? = null
         for (i in 1..1000) {
             row = uiDevice.wait(Until.findObject(rowSel), SHORT_WAIT_TIME_MS)
@@ -46,7 +46,7 @@ constructor(
         }
         require(row != null) { "" }
         row.click()
-        uiDevice.wait(Until.gone(By.res(getPackage(), MAIL_LIST_RES_ID)), FIND_TIMEOUT)
+        uiDevice.wait(Until.gone(By.res(packageName, MAIL_LIST_RES_ID)), FIND_TIMEOUT)
     }
 
     fun scrollDown() {
@@ -55,7 +55,7 @@ constructor(
     }
 
     fun waitForMailList(): UiObject2 {
-        val sel = By.res(getPackage(), MAIL_LIST_RES_ID).scrollable(true)
+        val sel = By.res(packageName, MAIL_LIST_RES_ID).scrollable(true)
         val ret = uiDevice.wait(Until.findObject(sel), FIND_TIMEOUT)
         requireNotNull(ret) { "Unable to find $MAIL_LIST_RES_ID object" }
         return ret

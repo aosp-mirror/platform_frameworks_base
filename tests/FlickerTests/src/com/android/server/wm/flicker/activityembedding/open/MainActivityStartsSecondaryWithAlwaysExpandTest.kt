@@ -70,8 +70,7 @@ class MainActivityStartsSecondaryWithAlwaysExpandTest(flicker: LegacyFlickerTest
 
     @Ignore("Not applicable to this CUJ.") override fun navBarWindowIsVisibleAtStartAndEnd() {}
 
-    @FlakyTest(bugId = 291575593)
-    override fun entireScreenCovered() {}
+    @FlakyTest(bugId = 291575593) override fun entireScreenCovered() {}
 
     @Ignore("Not applicable to this CUJ.") override fun statusBarWindowIsAlwaysVisible() {}
 

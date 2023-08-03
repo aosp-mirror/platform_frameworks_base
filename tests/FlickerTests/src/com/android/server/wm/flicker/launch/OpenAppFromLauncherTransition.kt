@@ -30,7 +30,7 @@ abstract class OpenAppFromLauncherTransition(flicker: LegacyFlickerTest) :
     @Presubmit
     @Test
     open fun focusChanges() {
-        flicker.assertEventLog { this.focusChanges("NexusLauncherActivity", testApp.`package`) }
+        flicker.assertEventLog { this.focusChanges("NexusLauncherActivity", testApp.packageName) }
     }
 
     /**

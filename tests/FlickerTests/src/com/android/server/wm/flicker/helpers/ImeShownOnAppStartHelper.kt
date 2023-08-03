@@ -71,7 +71,7 @@ constructor(
             if (rotation.isRotated()) {
                 imePackageName
             } else {
-                getPackage()
+                packageName
             }
         open(expectedPackage)
     }
@@ -79,7 +79,7 @@ constructor(
     fun startDialogThemedActivity(wmHelper: WindowManagerStateHelper) {
         val button =
             uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "start_dialog_themed_activity_btn")),
+                Until.findObject(By.res(packageName, "start_dialog_themed_activity_btn")),
                 FIND_TIMEOUT
             )
 
@@ -132,7 +132,7 @@ constructor(
     fun toggleFixPortraitOrientation(wmHelper: WindowManagerStateHelper) {
         val button =
             uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "toggle_fixed_portrait_btn")),
+                Until.findObject(By.res(packageName, "toggle_fixed_portrait_btn")),
                 FIND_TIMEOUT
             )
         require(button != null) {
@@ -140,7 +140,7 @@ constructor(
                 "was left in an unknown state (e.g. Screen turned off)"
         }
         button.click()
-        mInstrumentation.waitForIdleSync()
+        instrumentation.waitForIdleSync()
         // Ensure app relaunching transition finish and the IME has shown
         waitIMEShown(wmHelper)
     }

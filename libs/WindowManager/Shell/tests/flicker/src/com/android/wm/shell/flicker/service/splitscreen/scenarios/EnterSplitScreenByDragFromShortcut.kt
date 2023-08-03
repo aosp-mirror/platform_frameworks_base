@@ -63,7 +63,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
             .getAppIcon(secondaryApp.appName)
             .openDeepShortcutMenu()
             .getMenuItem("Split Screen Secondary Activity")
-            .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
+            .dragToSplitscreen(secondaryApp.packageName, primaryApp.packageName)
         SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
 
         // TODO: Do we want this check in here? Add to the other tests?

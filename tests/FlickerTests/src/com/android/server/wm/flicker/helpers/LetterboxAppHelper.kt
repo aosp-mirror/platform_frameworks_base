@@ -38,7 +38,7 @@ constructor(
         ActivityOptions.NonResizeablePortraitActivity.COMPONENT.toFlickerComponent()
 ) : StandardAppHelper(instr, launcherName, component) {
 
-    private val gestureHelper: GestureHelper = GestureHelper(mInstrumentation)
+    private val gestureHelper: GestureHelper = GestureHelper(instrumentation)
 
     fun clickRestart(wmHelper: WindowManagerStateHelper) {
         val restartButton =

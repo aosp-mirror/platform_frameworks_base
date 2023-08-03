@@ -41,7 +41,7 @@ constructor(
      */
     fun swipeDown(): Boolean {
         val gameView =
-            uiDevice.wait(Until.findObject(By.res(getPackage(), GAME_APP_VIEW_RES)), WAIT_TIME_MS)
+            uiDevice.wait(Until.findObject(By.res(packageName, GAME_APP_VIEW_RES)), WAIT_TIME_MS)
         require(gameView != null) { "Mock game app view not found." }
 
         val bound = gameView.getVisibleBounds()

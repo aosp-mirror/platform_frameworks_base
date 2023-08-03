@@ -61,7 +61,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
         tapl.launchedAppState.taskbar
             .openAllApps()
             .getAppIcon(secondaryApp.appName)
-            .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
+            .dragToSplitscreen(secondaryApp.packageName, primaryApp.packageName)
         SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
     }
 

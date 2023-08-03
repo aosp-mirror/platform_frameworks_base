@@ -40,7 +40,7 @@ constructor(
      */
     open fun openIME(wmHelper: WindowManagerStateHelper) {
         val editText =
-            uiDevice.wait(Until.findObject(By.res(getPackage(), "plain_text_input")), FIND_TIMEOUT)
+            uiDevice.wait(Until.findObject(By.res(packageName, "plain_text_input")), FIND_TIMEOUT)
 
         requireNotNull(editText) {
             "Text field not found, this usually happens when the device " +
@@ -67,7 +67,7 @@ constructor(
     open fun finishActivity(wmHelper: WindowManagerStateHelper) {
         val finishButton =
             uiDevice.wait(
-                Until.findObject(By.res(getPackage(), "finish_activity_btn")),
+                Until.findObject(By.res(packageName, "finish_activity_btn")),
                 FIND_TIMEOUT
             )
         requireNotNull(finishButton) {

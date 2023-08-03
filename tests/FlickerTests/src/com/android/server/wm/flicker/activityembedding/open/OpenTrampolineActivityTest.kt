@@ -104,8 +104,10 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
         flicker.assertWm {
             notContains(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
                 .then()
-                .isAppWindowInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT,
-                    isOptional = true)
+                .isAppWindowInvisible(
+                    ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT,
+                    isOptional = true
+                )
                 .then()
                 .isAppWindowVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
         }
@@ -133,8 +135,10 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
                 }
                 // Begin of transition.
                 .then()
-                .isAppWindowInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT,
-                    isOptional = true)
+                .isAppWindowInvisible(
+                    ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT,
+                    isOptional = true
+                )
                 .then()
                 .invoke("mainAndSecondaryInSplit") {
                     val mainActivityRegion =
@@ -174,8 +178,10 @@ class OpenTrampolineActivityTest(flicker: LegacyFlickerTest) : ActivityEmbedding
                         .coversExactly(startDisplayBounds)
                 }
                 .then()
-                .isInvisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT,
-                    isOptional = true)
+                .isInvisible(
+                    ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT,
+                    isOptional = true
+                )
                 .then()
                 .isVisible(ActivityEmbeddingAppHelper.SECONDARY_ACTIVITY_COMPONENT)
         }

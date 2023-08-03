@@ -40,7 +40,7 @@ constructor(
         ActivityOptions.SimpleActivity.COMPONENT.toFlickerComponent()
 
     fun openSecondActivity(device: UiDevice, wmHelper: WindowManagerStateHelper) {
-        val launchActivityButton = By.res(getPackage(), LAUNCH_SECOND_ACTIVITY)
+        val launchActivityButton = By.res(packageName, LAUNCH_SECOND_ACTIVITY)
         val button = device.wait(Until.findObject(launchActivityButton), FIND_TIMEOUT)
 
         requireNotNull(button) {

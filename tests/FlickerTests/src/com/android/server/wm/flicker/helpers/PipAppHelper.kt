@@ -46,12 +46,14 @@ open class PipAppHelper(instrumentation: Instrumentation) :
 
     private val mediaController: MediaController?
         get() =
-            mediaSessionManager.getActiveSessions(null).firstOrNull { it.packageName == `package` }
+            mediaSessionManager.getActiveSessions(null).firstOrNull {
+                it.packageName == packageName
+            }
 
-    private val gestureHelper: GestureHelper = GestureHelper(mInstrumentation)
+    private val gestureHelper: GestureHelper = GestureHelper(instrumentation)
 
     open fun clickObject(resId: String) {
-        val selector = By.res(`package`, resId)
+        val selector = By.res(packageName, resId)
         val obj = uiDevice.findObject(selector) ?: error("Could not find `$resId` object")
 
         obj.click()
@@ -286,7 +288,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
 
     fun checkWithCustomActionsCheckbox() =
         uiDevice
-            .findObject(By.res(`package`, WITH_CUSTOM_ACTIONS_BUTTON_ID))
+            .findObject(By.res(packageName, WITH_CUSTOM_ACTIONS_BUTTON_ID))
             ?.takeIf { it.isCheckable }
             ?.apply { if (!isChecked) clickObject(WITH_CUSTOM_ACTIONS_BUTTON_ID) }
             ?: error("'With custom actions' checkbox not found")
@@ -302,7 +304,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         ReplaceWith("closePipWindow(wmHelper)")
     )
     open fun closePipWindow() {
-        closePipWindow(WindowManagerStateHelper(mInstrumentation))
+        closePipWindow(WindowManagerStateHelper(instrumentation))
     }
 
     /** Returns the pip window bounds. */
@@ -386,8 +388,10 @@ open class PipAppHelper(instrumentation: Instrumentation) :
                 Log.d(TAG, "window " + pipAppWindow)
                 if (pipAppWindow == null) return@add false
                 val pipRegion = pipAppWindow.frameRegion
-                Log.d(TAG, "region " + pipRegion +
-                        " covers " + windowRect.coversMoreThan(pipRegion))
+                Log.d(
+                    TAG,
+                    "region " + pipRegion + " covers " + windowRect.coversMoreThan(pipRegion)
+                )
                 return@add windowRect.coversMoreThan(pipRegion)
             }
             .waitForAndVerify()

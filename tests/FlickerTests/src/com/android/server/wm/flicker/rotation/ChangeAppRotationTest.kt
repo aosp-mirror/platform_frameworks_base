@@ -98,7 +98,7 @@ class ChangeAppRotationTest(flicker: LegacyFlickerTest) : RotationTransition(fli
     @Presubmit
     @Test
     fun focusChanges() {
-        flicker.assertEventLog { this.focusChanges(testApp.`package`) }
+        flicker.assertEventLog { this.focusChanges(testApp.packageName) }
     }
 
     /**
