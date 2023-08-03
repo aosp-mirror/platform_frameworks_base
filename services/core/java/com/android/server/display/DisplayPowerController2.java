@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -2627,12 +2628,15 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
     }
 
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     private void noteScreenBrightness(float brightness) {
         if (mBatteryStats != null) {
             try {
                 // TODO(brightnessfloat): change BatteryStats to use float
-                mBatteryStats.noteScreenBrightness(BrightnessSynchronizer.brightnessFloatToInt(
-                        brightness));
+                int brightnessInt = mFlags.isBrightnessIntRangeUserPerceptionEnabled()
+                        ? BrightnessSynchronizer.brightnessFloatToIntSetting(mContext, brightness)
+                        : BrightnessSynchronizer.brightnessFloatToInt(brightness);
+                mBatteryStats.noteScreenBrightness(brightnessInt);
             } catch (RemoteException e) {
                 // same process
             }

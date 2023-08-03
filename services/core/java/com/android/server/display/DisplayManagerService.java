@@ -578,7 +578,8 @@ public final class DisplayManagerService extends SystemService {
                 foldSettingProvider,
                 mDisplayDeviceRepo, new LogicalDisplayListener(), mSyncRoot, mHandler, mFlags);
         mDisplayModeDirector = new DisplayModeDirector(context, mHandler, mFlags);
-        mBrightnessSynchronizer = new BrightnessSynchronizer(mContext);
+        mBrightnessSynchronizer = new BrightnessSynchronizer(mContext,
+                mFlags.isBrightnessIntRangeUserPerceptionEnabled());
         Resources resources = mContext.getResources();
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultDisplayDefaultColorMode);
