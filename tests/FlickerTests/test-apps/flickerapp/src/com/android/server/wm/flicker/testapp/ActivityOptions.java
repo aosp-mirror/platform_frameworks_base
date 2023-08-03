@@ -178,6 +178,12 @@ public class ActivityOptions {
                 FLICKER_APP_PACKAGE + ".LaunchNewActivity");
     }
 
+    public static class TransferSplashscreenActivity {
+        public static final String LABEL = "TransferSplashscreenActivity";
+        public static final ComponentName COMPONENT = new ComponentName(FLICKER_APP_PACKAGE,
+                FLICKER_APP_PACKAGE + ".TransferSplashscreenActivity");
+    }
+
     public static class Pip {
         // Test App > Pip Activity
         public static final String LABEL = "PipActivity";

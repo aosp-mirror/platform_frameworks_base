@@ -53,7 +53,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppFromIconColdTest(flicker: LegacyFlickerTest) : OpenAppFromLauncherTransition(flicker) {
+open class OpenAppFromIconColdTest(flicker: LegacyFlickerTest) :
+        OpenAppFromLauncherTransition(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -87,6 +88,7 @@ class OpenAppFromIconColdTest(flicker: LegacyFlickerTest) : OpenAppFromLauncherT
     override fun appWindowReplacesLauncherAsTopWindow() {
         super.appWindowReplacesLauncherAsTopWindow()
     }
+
     @FlakyTest(bugId = 240916028)
     @Test
     override fun appWindowAsTopWindowAtEnd() {
