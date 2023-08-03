@@ -496,4 +496,12 @@ public class LogModule {
     public static LogBuffer provideDisplayMetricsRepoLogBuffer(LogBufferFactory factory) {
         return factory.create("DisplayMetricsRepo", 50);
     }
+
+    /** Provides a {@link LogBuffer} for the scene framework. */
+    @Provides
+    @SysUISingleton
+    @SceneFrameworkLog
+    public static LogBuffer provideSceneFrameworkLogBuffer(LogBufferFactory factory) {
+        return factory.create("SceneFramework", 50);
+    }
 }
