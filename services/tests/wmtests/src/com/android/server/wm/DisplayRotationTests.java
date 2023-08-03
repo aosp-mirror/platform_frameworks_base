@@ -74,6 +74,7 @@ import android.view.WindowManager;
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
@@ -880,6 +881,33 @@ public class DisplayRotationTests {
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
     }
 
+    @Test
+    public void sensorRotation_locked_halfFolded_configOff_rotationUnchanged() throws Exception {
+        mBuilder.setIsFoldable(true);
+        mBuilder.setSupportHalfFoldAutoRotateOverride(false);
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
+
+        enableOrientationSensor();
+
+        mTarget.foldStateChanged(DeviceStateController.DeviceState.OPEN);
+        freezeRotation(Surface.ROTATION_270);
+
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_0));
+        assertTrue(waitForUiHandler());
+        // No rotation...
+        assertEquals(Surface.ROTATION_270, mTarget.rotationForOrientation(
+                SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
+
+        // ... half-fold -> still no rotation
+        mTarget.foldStateChanged(DeviceStateController.DeviceState.HALF_FOLDED);
+        assertTrue(waitForUiHandler());
+        verify(sMockWm).updateRotation(false, false);
+        assertTrue(waitForUiHandler());
+        assertEquals(Surface.ROTATION_270, mTarget.rotationForOrientation(
+                SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
+    }
+
     // =================================
     // Tests for Policy based Rotation
     // =================================
@@ -1017,7 +1045,7 @@ public class DisplayRotationTests {
 
     @Test
     public void testSensorRotationAfterDisplayChangeBeforeTimeout_ignoresSensor() throws Exception {
-        mBuilder.setSupportHalfFoldAutoRotateOverride(true)
+        mBuilder.setIsFoldable(true)
                 .setPauseRotationWhenUnfolding(true)
                 .setDisplaySwitchRotationBlockTimeMs(1000)
                 .build();
@@ -1035,7 +1063,7 @@ public class DisplayRotationTests {
 
     @Test
     public void testSensorRotationAfterDisplayChangeAfterTimeout_usesSensor() throws Exception {
-        mBuilder.setSupportHalfFoldAutoRotateOverride(true)
+        mBuilder.setIsFoldable(true)
                 .setPauseRotationWhenUnfolding(true)
                 .setDisplaySwitchRotationBlockTimeMs(1000)
                 .build();
@@ -1053,7 +1081,7 @@ public class DisplayRotationTests {
 
     @Test
     public void testSensorRotationAfterHingeEventBeforeTimeout_ignoresSensor() throws Exception {
-        mBuilder.setSupportHalfFoldAutoRotateOverride(true)
+        mBuilder.setIsFoldable(true)
                 .setPauseRotationWhenUnfolding(true)
                 .setMaxHingeAngle(165)
                 .setHingeAngleRotationBlockTimeMs(400)
@@ -1073,7 +1101,7 @@ public class DisplayRotationTests {
     @Test
     public void testSensorRotationAfterHingeEventBeforeTimeoutFlagDisabled_usesSensorData()
             throws Exception {
-        mBuilder.setSupportHalfFoldAutoRotateOverride(true)
+        mBuilder.setIsFoldable(true)
                 .setPauseRotationWhenUnfolding(false)
                 .setMaxHingeAngle(165)
                 .setHingeAngleRotationBlockTimeMs(400)
@@ -1092,7 +1120,7 @@ public class DisplayRotationTests {
 
     @Test
     public void testSensorRotationAfterHingeEventAfterTimeout_usesSensorData() throws Exception {
-        mBuilder.setSupportHalfFoldAutoRotateOverride(true)
+        mBuilder.setIsFoldable(true)
                 .setPauseRotationWhenUnfolding(true)
                 .setMaxHingeAngle(165)
                 .setHingeAngleRotationBlockTimeMs(400)
@@ -1112,7 +1140,7 @@ public class DisplayRotationTests {
 
     @Test
     public void testSensorRotationAfterLargeHingeEventBeforeTimeout_usesSensor() throws Exception {
-        mBuilder.setSupportHalfFoldAutoRotateOverride(true)
+        mBuilder.setIsFoldable(true)
                 .setPauseRotationWhenUnfolding(true)
                 .setMaxHingeAngle(165)
                 .setHingeAngleRotationBlockTimeMs(400)
@@ -1254,6 +1282,7 @@ public class DisplayRotationTests {
         private int mCarDockRotation;
         private int mDeskDockRotation;
         private int mUndockedHdmiRotation;
+        private boolean mIsFoldable;
 
         private DisplayRotationBuilder setIsDefaultDisplay(boolean isDefaultDisplay) {
             mIsDefaultDisplay = isDefaultDisplay;
@@ -1308,9 +1337,17 @@ public class DisplayRotationTests {
             return this;
         }
 
+        private DisplayRotationBuilder setIsFoldable(boolean value) {
+            mIsFoldable = value;
+            return this;
+        }
+
         private DisplayRotationBuilder setSupportHalfFoldAutoRotateOverride(
                 boolean supportHalfFoldAutoRotateOverride) {
             mSupportHalfFoldAutoRotateOverride = supportHalfFoldAutoRotateOverride;
+            if (supportHalfFoldAutoRotateOverride) {
+                mIsFoldable = true;
+            }
             return this;
         }
 
@@ -1455,6 +1492,11 @@ public class DisplayRotationTests {
             when(mMockContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_windowManagerHalfFoldAutoRotateOverride))
                     .thenReturn(mSupportHalfFoldAutoRotateOverride);
+
+            when(mMockContext.getResources().getIntArray(
+                    R.array.config_foldedDeviceStates))
+                    .thenReturn(mIsFoldable ? new int[]{0} : new int[]{});
+
             mMockDisplayRotationReversionController =
                     mock(DisplayRotationReversionController.class);
             when(mMockDisplayContent.getRotationReversionController())
