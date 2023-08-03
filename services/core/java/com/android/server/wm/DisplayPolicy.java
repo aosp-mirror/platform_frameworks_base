@@ -176,7 +176,7 @@ public class DisplayPolicy {
 
     // TODO(b/266197298): Remove this by a more general protocol from the insets providers.
     private static final boolean USE_CACHED_INSETS_FOR_DISPLAY_SWITCH =
-            SystemProperties.getBoolean("persist.wm.debug.cached_insets_switch", false);
+            SystemProperties.getBoolean("persist.wm.debug.cached_insets_switch", true);
 
     private final WindowManagerService mService;
     private final Context mContext;
