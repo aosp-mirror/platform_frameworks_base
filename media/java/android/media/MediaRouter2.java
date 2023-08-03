@@ -105,27 +105,26 @@ public final class MediaRouter2 {
      * <p>Uses {@link MediaRoute2Info#getId()} to set each entry's key.
      */
     @GuardedBy("mLock")
-    final Map<String, MediaRoute2Info> mRoutes = new ArrayMap<>();
+    private final Map<String, MediaRoute2Info> mRoutes = new ArrayMap<>();
+
+    private final RoutingController mSystemController;
 
     @GuardedBy("mLock")
-    @Nullable
-    private RouteListingPreference mRouteListingPreference;
+    private final Map<String, RoutingController> mNonSystemRoutingControllers = new ArrayMap<>();
 
-    final RoutingController mSystemController;
+    private final AtomicInteger mNextRequestId = new AtomicInteger(1);
+    private final Handler mHandler;
 
     @GuardedBy("mLock")
     private RouteDiscoveryPreference mDiscoveryPreference = RouteDiscoveryPreference.EMPTY;
 
     // TODO: Make MediaRouter2 is always connected to the MediaRouterService.
     @GuardedBy("mLock")
-    MediaRouter2Stub mStub;
+    private MediaRouter2Stub mStub;
 
     @GuardedBy("mLock")
-    private final Map<String, RoutingController> mNonSystemRoutingControllers = new ArrayMap<>();
-
-    private final AtomicInteger mNextRequestId = new AtomicInteger(1);
-
-    final Handler mHandler;
+    @Nullable
+    private RouteListingPreference mRouteListingPreference;
 
     /**
      * Stores an auxiliary copy of {@link #mFilteredRoutes} at the time of the last route callback
