@@ -234,6 +234,23 @@ public class AssistUtils {
     }
 
     /**
+     * Allows subscription to {@link android.service.voice.VisualQueryDetectionService} service
+     * status.
+     *
+     * @param listener to receive visual service start/stop events.
+     */
+    public void subscribeVisualQueryRecognitionStatus(IVisualQueryRecognitionStatusListener
+            listener) {
+        try {
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.subscribeVisualQueryRecognitionStatus(listener);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register visual query detection start listener", e);
+        }
+    }
+
+    /**
      * Enables visual detection service.
      *
      * @param listener to receive visual attention gained/lost events.

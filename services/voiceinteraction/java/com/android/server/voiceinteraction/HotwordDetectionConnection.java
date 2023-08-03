@@ -368,29 +368,29 @@ final class HotwordDetectionConnection {
     /**
      * This method is only used by VisualQueryDetector.
      */
-    void startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
+    boolean startPerceivingLocked(IVisualQueryDetectionVoiceInteractionCallback callback) {
         if (DEBUG) {
             Slog.d(TAG, "startPerceivingLocked");
         }
         final VisualQueryDetectorSession session = getVisualQueryDetectorSessionLocked();
         if (session == null) {
-            return;
+            return false;
         }
-        session.startPerceivingLocked(callback);
+        return session.startPerceivingLocked(callback);
     }
 
     /**
      * This method is only used by VisaulQueryDetector.
      */
-    void stopPerceivingLocked() {
+    boolean stopPerceivingLocked() {
         if (DEBUG) {
             Slog.d(TAG, "stopPerceivingLocked");
         }
         final VisualQueryDetectorSession session = getVisualQueryDetectorSessionLocked();
         if (session == null) {
-            return;
+            return false;
         }
-        session.stopPerceivingLocked();
+        return session.stopPerceivingLocked();
     }
 
     public void startListeningFromExternalSourceLocked(
