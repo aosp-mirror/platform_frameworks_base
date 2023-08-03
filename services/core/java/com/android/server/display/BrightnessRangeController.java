@@ -24,7 +24,7 @@ import java.util.function.BooleanSupplier;
 
 class BrightnessRangeController {
 
-    private static final boolean NBM_FEATURE_FLAG = false;
+    private static final boolean NBM_FEATURE_FLAG = true;
 
     private final HighBrightnessModeController mHbmController;
     private final NormalBrightnessModeController mNormalBrightnessModeController =
@@ -42,6 +42,7 @@ class BrightnessRangeController {
 
     void dump(PrintWriter pw) {
         mHbmController.dump(pw);
+        mNormalBrightnessModeController.dump(pw);
     }
 
     void onAmbientLuxChange(float ambientLux) {
