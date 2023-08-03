@@ -195,7 +195,7 @@
     <color name="control_primary_text">#E6FFFFFF</color>
     <color name="control_secondary_text">#99FFFFFF</color>
     <color name="control_default_foreground">@color/GM2_grey_500</color>
-    <color name="control_default_background">@color/GM2_grey_900</color>
+    <color name="control_default_background">#303134</color>
     <color name="control_spinner_dropdown">@*android:color/foreground_material_dark</color>
     <color name="control_more_vert">@*android:color/foreground_material_dark</color>
     <color name="control_enabled_light_background">#413C2D</color>

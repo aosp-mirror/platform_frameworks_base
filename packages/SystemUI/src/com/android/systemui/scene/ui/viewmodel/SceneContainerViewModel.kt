@@ -19,10 +19,12 @@ package com.android.systemui.scene.ui.viewmodel
 import android.view.MotionEvent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.RemoteUserInput
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /** Models UI state for the scene container. */
@@ -54,9 +56,13 @@ constructor(
         interactor.setCurrentScene(scene)
     }
 
-    /** Notifies of the progress of a scene transition. */
-    fun setSceneTransitionProgress(progress: Float) {
-        interactor.setSceneTransitionProgress(progress)
+    /**
+     * Binds the given flow so the system remembers it.
+     *
+     * Note that you must call is with `null` when the UI is done or risk a memory leak.
+     */
+    fun setTransitionState(transitionState: Flow<ObservableTransitionState>?) {
+        interactor.setTransitionState(transitionState)
     }
 
     /** Handles a [MotionEvent] representing remote user input. */

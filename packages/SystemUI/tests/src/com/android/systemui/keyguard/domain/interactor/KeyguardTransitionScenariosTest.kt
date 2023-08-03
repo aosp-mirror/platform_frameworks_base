@@ -1077,9 +1077,64 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
                 withArgCaptor<TransitionInfo> {
                     verify(transitionRepository).startTransition(capture(), anyBoolean())
                 }
-            // THEN a transition to AlternateBouncer should occur
+            // THEN a transition to OCCLUDED should occur
             assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.OCCLUDED)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun dozingToOccluded() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DOZING
+            runTransition(KeyguardState.LOCKSCREEN, KeyguardState.DOZING)
+            runCurrent()
+
+            // WHEN the keyguard is occluded and device wakes up
+            keyguardRepository.setKeyguardOccluded(true)
+            keyguardRepository.setWakefulnessModel(startingToWake())
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to OCCLUDED should occur
+            assertThat(info.ownerName).isEqualTo("FromDozingTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DOZING)
+            assertThat(info.to).isEqualTo(KeyguardState.OCCLUDED)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun aodToOccluded() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to AOD
+            runTransition(KeyguardState.LOCKSCREEN, KeyguardState.AOD)
+            runCurrent()
+
+            // WHEN the keyguard is occluded and aod ends
+            keyguardRepository.setKeyguardOccluded(true)
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(
+                    from = DozeStateModel.DOZE_AOD,
+                    to = DozeStateModel.FINISH,
+                )
+            )
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to OCCLUDED should occur
+            assertThat(info.ownerName).isEqualTo("FromAodTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.AOD)
             assertThat(info.to).isEqualTo(KeyguardState.OCCLUDED)
             assertThat(info.animator).isNotNull()
 

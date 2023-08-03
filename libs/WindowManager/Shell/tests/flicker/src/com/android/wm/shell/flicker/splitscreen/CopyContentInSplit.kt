@@ -25,12 +25,12 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
-import com.android.wm.shell.flicker.ICommonAssertions
-import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
-import com.android.wm.shell.flicker.appWindowKeepVisible
-import com.android.wm.shell.flicker.layerKeepVisible
-import com.android.wm.shell.flicker.splitAppLayerBoundsKeepVisible
 import com.android.wm.shell.flicker.splitscreen.benchmark.CopyContentInSplitBenchmark
+import com.android.wm.shell.flicker.utils.ICommonAssertions
+import com.android.wm.shell.flicker.utils.SPLIT_SCREEN_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.utils.appWindowKeepVisible
+import com.android.wm.shell.flicker.utils.layerKeepVisible
+import com.android.wm.shell.flicker.utils.splitAppLayerBoundsKeepVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith

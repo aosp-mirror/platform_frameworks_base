@@ -16,7 +16,7 @@
 
 @file:JvmName("WaitUtils")
 
-package com.android.wm.shell.flicker
+package com.android.wm.shell.flicker.utils
 
 import android.os.SystemClock
 

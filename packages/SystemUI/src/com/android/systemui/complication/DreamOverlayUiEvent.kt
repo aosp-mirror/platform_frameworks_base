@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.ui.composable
+package com.android.systemui.complication
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.scene.shared.model.Scene
+import com.android.internal.logging.UiEvent
+import com.android.internal.logging.UiEventLogger.UiEventEnum
 
-/** Compose-capable extension of [Scene]. */
-interface ComposableScene : Scene {
-    @Composable fun SceneScope.Content(modifier: Modifier)
+/** UI log events for the dream overlay. */
+enum class DreamOverlayUiEvent(private val mId: Int) : UiEventEnum {
+    @UiEvent(doc = "The home controls on the screensaver has been tapped.")
+    DREAM_HOME_CONTROLS_TAPPED(1212),
+    @UiEvent(doc = "The clock on the screensaver has been tapped") DREAM_CLOCK_TAPPED(1440),
+    @UiEvent(doc = "The weather on the screensaver has been tapped") DREAM_WEATHER_TAPPED(1441);
+
+    override fun getId(): Int {
+        return mId
+    }
 }

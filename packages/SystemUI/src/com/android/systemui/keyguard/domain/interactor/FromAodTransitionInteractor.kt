@@ -24,9 +24,11 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel.Companion.isWakeAndUnlock
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -43,19 +45,27 @@ constructor(
     ) {
 
     override fun start() {
-        listenForAodToLockscreen()
+        listenForAodToLockscreenOrOccluded()
         listenForAodToGone()
     }
 
-    private fun listenForAodToLockscreen() {
+    private fun listenForAodToLockscreenOrOccluded() {
         scope.launch {
             keyguardInteractor
                 .dozeTransitionTo(DozeStateModel.FINISH)
-                .sample(transitionInteractor.startedKeyguardTransitionStep, ::Pair)
-                .collect { pair ->
-                    val (dozeToAod, lastStartedStep) = pair
+                .sample(
+                    combine(
+                        transitionInteractor.startedKeyguardTransitionStep,
+                        keyguardInteractor.isKeyguardOccluded,
+                        ::Pair
+                    ),
+                    ::toTriple
+                )
+                .collect { (_, lastStartedStep, occluded) ->
                     if (lastStartedStep.to == KeyguardState.AOD) {
-                        startTransitionTo(KeyguardState.LOCKSCREEN)
+                        startTransitionTo(
+                            if (occluded) KeyguardState.OCCLUDED else KeyguardState.LOCKSCREEN
+                        )
                     }
                 }
         }

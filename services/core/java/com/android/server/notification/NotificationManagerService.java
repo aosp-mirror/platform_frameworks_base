@@ -2531,7 +2531,8 @@ public class NotificationManagerService extends SystemService {
                 }
                 enqueueNotificationInternal(r.getSbn().getPackageName(), r.getSbn().getOpPkg(),
                         r.getSbn().getUid(), r.getSbn().getInitialPid(), r.getSbn().getTag(),
-                        r.getSbn().getId(),  r.getSbn().getNotification(), userId, muteOnReturn);
+                        r.getSbn().getId(),  r.getSbn().getNotification(), userId, muteOnReturn,
+                        false /* byForegroundService */);
             } catch (Exception e) {
                 Slog.e(TAG, "Cannot un-snooze notification", e);
             }
@@ -3526,7 +3527,8 @@ public class NotificationManagerService extends SystemService {
         public void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,
                 Notification notification, int userId) throws RemoteException {
             enqueueNotificationInternal(pkg, opPkg, Binder.getCallingUid(),
-                    Binder.getCallingPid(), tag, id, notification, userId);
+                    Binder.getCallingPid(), tag, id, notification, userId,
+                    false /* byForegroundService */);
         }
 
         @Override
@@ -6095,7 +6097,7 @@ public class NotificationManagerService extends SystemService {
             }
             if (summaryRecord != null && checkDisqualifyingFeatures(userId, uid,
                     summaryRecord.getSbn().getId(), summaryRecord.getSbn().getTag(), summaryRecord,
-                    true)) {
+                    true, false)) {
                 return summaryRecord;
             }
         }
@@ -6424,7 +6426,15 @@ public class NotificationManagerService extends SystemService {
         public void enqueueNotification(String pkg, String opPkg, int callingUid, int callingPid,
                 String tag, int id, Notification notification, int userId) {
             enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
-                    userId);
+                    userId, false /* byForegroundService */);
+        }
+
+        @Override
+        public void enqueueNotification(String pkg, String opPkg, int callingUid, int callingPid,
+                String tag, int id, Notification notification, int userId,
+                boolean byForegroundService) {
+            enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
+                    userId, byForegroundService);
         }
 
         @Override
@@ -6602,19 +6612,19 @@ public class NotificationManagerService extends SystemService {
 
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
-            int incomingUserId) {
+            int incomingUserId, boolean byForegroundService) {
         enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, notification,
-                incomingUserId, false);
+                incomingUserId, false /* postSilently */, byForegroundService);
     }
 
     void enqueueNotificationInternal(final String pkg, final String opPkg, final int callingUid,
             final int callingPid, final String tag, final int id, final Notification notification,
-            int incomingUserId, boolean postSilently) {
+            int incomingUserId, boolean postSilently, boolean byForegroundService) {
         PostNotificationTracker tracker = acquireWakeLockForPost(pkg, callingUid);
         boolean enqueued = false;
         try {
             enqueued = enqueueNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id,
-                    notification, incomingUserId, postSilently, tracker);
+                    notification, incomingUserId, postSilently, tracker, byForegroundService);
         } finally {
             if (!enqueued) {
                 tracker.cancel();
@@ -6645,10 +6655,10 @@ public class NotificationManagerService extends SystemService {
      * @return True if we successfully processed the notification and handed off the task of
      * enqueueing it to a background thread; false otherwise.
      */
-    private boolean enqueueNotificationInternal(final String pkg, final String opPkg,
+    private boolean enqueueNotificationInternal(final String pkg, final String opPkg,  //HUI
             final int callingUid, final int callingPid, final String tag, final int id,
             final Notification notification, int incomingUserId, boolean postSilently,
-            PostNotificationTracker tracker) {
+            PostNotificationTracker tracker, boolean byForegroundService) {
         if (DBG) {
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id
                     + " notification=" + notification);
@@ -6794,7 +6804,7 @@ public class NotificationManagerService extends SystemService {
                 mPreferencesHelper.hasUserDemotedInvalidMsgApp(pkg, notificationUid));
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
-                r.getSbn().getOverrideGroupKey() != null)) {
+                r.getSbn().getOverrideGroupKey() != null, byForegroundService)) {
             return false;
         }
 
@@ -7214,7 +7224,7 @@ public class NotificationManagerService extends SystemService {
      * Has side effects.
      */
     boolean checkDisqualifyingFeatures(int userId, int uid, int id, String tag,
-            NotificationRecord r, boolean isAutogroup) {
+            NotificationRecord r, boolean isAutogroup, boolean byForegroundService) {
         Notification n = r.getNotification();
         final String pkg = r.getSbn().getPackageName();
         final boolean isSystemNotification =
@@ -7305,7 +7315,8 @@ public class NotificationManagerService extends SystemService {
         if (n.isStyle(Notification.CallStyle.class)) {
             boolean hasFullScreenIntent = n.fullScreenIntent != null;
             boolean requestedFullScreenIntent = (n.flags & FLAG_FSI_REQUESTED_BUT_DENIED) != 0;
-            if (!n.isFgsOrUij() && !hasFullScreenIntent && !requestedFullScreenIntent) {
+            if (!n.isFgsOrUij() && !hasFullScreenIntent && !requestedFullScreenIntent
+                    && !byForegroundService) {
                 throw new IllegalArgumentException(r.getKey() + " Not posted."
                         + " CallStyle notifications must be for a foreground service or"
                         + " user initated job or use a fullScreenIntent.");

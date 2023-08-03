@@ -21,7 +21,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.wm.shell.flicker.BaseBenchmarkTest
-import com.android.wm.shell.flicker.SplitScreenUtils
+import com.android.wm.shell.flicker.utils.SplitScreenUtils
 
 abstract class SplitScreenBase(flicker: LegacyFlickerTest) : BaseBenchmarkTest(flicker) {
     protected val context: Context = instrumentation.context

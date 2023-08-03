@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.service.splitscreen.scenarios
+package com.android.wm.shell.flicker.utils
 
 import android.app.Instrumentation
 import android.graphics.Point
@@ -39,8 +39,7 @@ import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.NotificationAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.wm.shell.flicker.LAUNCHER_UI_PACKAGE_NAME
-import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
+import com.android.server.wm.flicker.testapp.ActivityOptions.SplitScreen.Primary
 import org.junit.Assert.assertNotNull
 
 object SplitScreenUtils {
@@ -112,6 +111,16 @@ object SplitScreenUtils {
         waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
     }
 
+    fun enterSplitViaIntent(
+        wmHelper: WindowManagerStateHelper,
+        primaryApp: StandardAppHelper,
+        secondaryApp: StandardAppHelper
+    ) {
+        val stringExtras = mapOf(Primary.EXTRA_LAUNCH_ADJACENT to "true")
+        primaryApp.launchViaIntent(wmHelper, null, null, stringExtras)
+        waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
+    }
+
     fun splitFromOverview(tapl: LauncherInstrumentation, device: UiDevice) {
         // Note: The initial split position in landscape is different between tablet and phone.
         // In landscape, tablet will let the first app split to right side, and phone will
@@ -145,17 +154,6 @@ object SplitScreenUtils {
                 .open()
         }
         SystemClock.sleep(TIMEOUT_MS)
-    }
-
-    fun enterSplitViaIntent(
-        wmHelper: WindowManagerStateHelper,
-        primaryApp: StandardAppHelper,
-        secondaryApp: StandardAppHelper
-    ) {
-        val stringExtras =
-            mapOf(ActivityOptions.SplitScreen.Primary.EXTRA_LAUNCH_ADJACENT to "true")
-        primaryApp.launchViaIntent(wmHelper, null, null, stringExtras)
-        SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
     }
 
     fun dragFromNotificationToSplit(
@@ -325,14 +323,14 @@ object SplitScreenUtils {
         dividerBar.drag(
             Point(
                 if (dragToRight) {
-                    displayBounds.width * 4 / 5
+                    displayBounds.right
                 } else {
-                    displayBounds.width * 1 / 5
+                    displayBounds.left
                 },
                 if (dragToBottom) {
-                    displayBounds.height * 4 / 5
+                    displayBounds.bottom
                 } else {
-                    displayBounds.height * 1 / 5
+                    displayBounds.top
                 }
             )
         )
