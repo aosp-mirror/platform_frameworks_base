@@ -713,8 +713,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"Aplikaciji omogućuje registriranje novih telekomunikacijskih veza."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"upravljanje telekomunikacijskim vezama"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"Aplikaciji omogućuje upravljanje telekomunikacijskim vezama."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"interakcija sa zaslonom tijekom poziva"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Omogućuje aplikaciji upravljanje vremenom i načinom na koji se korisniku prikazuje zaslon tijekom poziva."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"interakcija s filtriranjem poziva"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Omogućuje aplikaciji kada se i kako korisniku prikazuje zaslon filtriranja poziva."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"interakcija s telefonskim uslugama"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"Omogućuje aplikacijama interakciju s telefonskim uslugama za uspostavljanje i primanje poziva."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"pružanje korisničkog iskustva tijekom poziva"</string>

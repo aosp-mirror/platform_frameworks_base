@@ -712,8 +712,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"Апп-д шинэ телеком холболтуудыг бүртгэхийг зөвшөөрнө."</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"телеком холболтуудыг удирдах."</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"Апп-д телеком холболтуудыг удирдахыг зөвшөөрнө."</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"дуудлагын дэлгэцтэй харьцах"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Апп-д дуудлагын дэлгэцийг хэрэглэгчид хэзээ хэрхэн харуулахыг удирдахыг зөвшөөрнө."</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"call screen-тай харьцах"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"Апп-д call screen-г хэрэглэгчид хэзээ хэрхэн харуулахыг удирдахыг зөвшөөрнө."</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"телефоны үйлчилгээтэй харилцах"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"Апп-д телефон үйлчилгээтэй харилцаж дуудлага хийх/авахыг зөвшөөрнө."</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"дуудлага хийж байгаа хэрэглэгчтэй харьцах"</string>

@@ -712,8 +712,8 @@
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"एपलाई नयाँ दूरसंचार सम्पर्क दर्ता गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"दूरसंचार जडान व्यवस्थापन गर्नुहोस्"</string>
     <string name="permdesc_connection_manager" msgid="1426093604238937733">"एपलाई टेलिकम जडान व्यवस्थापन गर्न अनुमति दिन्छ।"</string>
-    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"आगमन कल स्क्रिन संग अन्तर्क्रिया गर्नुहोस्"</string>
-    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"कहिले र कसरी प्रयोगकर्ताले आगमन कल स्क्रीन हेर्न सक्दछ भनेर नियन्त्रण गर्न एपलाई अनुमति दिनुहोस्।"</string>
+    <string name="permlab_bind_incall_service" msgid="5990625112603493016">"इन-कल स्क्रिनसँग अन्तर्क्रिया गर्नुहोस्"</string>
+    <string name="permdesc_bind_incall_service" msgid="4124917526967765162">"प्रयोगकर्ताले कहिले र कसरी इन-कल स्क्रिन देख्छन् भन्ने कुरा नियन्त्रण गर्न यो एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_bind_connection_service" msgid="5409268245525024736">"टेलिफोनी सेवा अन्तरक्रिया"</string>
     <string name="permdesc_bind_connection_service" msgid="6261796725253264518">"एपलाई कल बनाउन/प्राप्त गर्न टेलीफोनी सेवा साथ अन्तरक्रिया गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_control_incall_experience" msgid="6436863486094352987">"आउने-कल प्रयोगकर्ता अनुभव प्रदान गर्नुहोस्"</string>
