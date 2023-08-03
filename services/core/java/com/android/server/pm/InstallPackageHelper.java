@@ -2417,7 +2417,8 @@ final class InstallPackageHelper {
             final InstallRequest installRequest = reconciledPkg.mInstallRequest;
             final boolean instantApp = ((installRequest.getScanFlags() & SCAN_AS_INSTANT_APP) != 0);
             final boolean isApex = ((installRequest.getScanFlags() & SCAN_AS_APEX) != 0);
-            final AndroidPackage pkg = installRequest.getScannedPackageSetting().getPkg();
+            final PackageSetting ps = installRequest.getScannedPackageSetting();
+            final AndroidPackage pkg = ps.getPkg();
             final String packageName = pkg.getPackageName();
             final String codePath = pkg.getPath();
             final boolean onIncremental = mIncrementalManager != null
@@ -2517,7 +2518,7 @@ final class InstallPackageHelper {
                 // Compile the layout resources.
                 if (SystemProperties.getBoolean(PRECOMPILE_LAYOUTS, false)) {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "compileLayouts");
-                    mViewCompiler.compileLayouts(pkg);
+                    mViewCompiler.compileLayouts(ps, pkg.getBaseApkPath());
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
 

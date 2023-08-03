@@ -2914,29 +2914,28 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             FileUtils.setPermissions(fstr.getFD(), 0640, SYSTEM_UID, PACKAGE_INFO_GID);
 
             StringBuilder sb = new StringBuilder();
-            for (final PackageSetting pkg : mPackages.values()) {
+            for (final PackageSetting ps : mPackages.values()) {
                 // TODO(b/135203078): This doesn't handle multiple users
-                final String dataPath = pkg.getPkg() == null ? null :
-                        PackageInfoUtils.getDataDir(pkg.getPkg(), UserHandle.USER_SYSTEM)
-                                .getAbsolutePath();
+                final String dataPath = PackageInfoUtils.getDataDir(ps, UserHandle.USER_SYSTEM)
+                        .getAbsolutePath();
 
-                if (pkg.getPkg() == null || dataPath == null) {
-                    if (!"android".equals(pkg.getPackageName())) {
-                        Slog.w(TAG, "Skipping " + pkg + " due to missing metadata");
+                if (ps.getPkg() == null || dataPath == null) {
+                    if (!"android".equals(ps.getPackageName())) {
+                        Slog.w(TAG, "Skipping " + ps + " due to missing metadata");
                     }
                     continue;
                 }
-                if (pkg.getPkg().isApex()) {
+                if (ps.getPkg().isApex()) {
                     // Don't persist APEX which doesn't have a valid app id and will cause parsing
                     // error in libpackagelistparser
                     continue;
                 }
 
-                final boolean isDebug = pkg.getPkg().isDebuggable();
+                final boolean isDebug = ps.getPkg().isDebuggable();
                 final IntArray gids = new IntArray();
                 for (final int userId : userIds) {
                     gids.addAll(mPermissionDataProvider.getGidsForUid(UserHandle.getUid(userId,
-                            pkg.getAppId())));
+                            ps.getAppId())));
                 }
 
                 // Avoid any application that has a space in its path.
@@ -2964,13 +2963,13 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 //   system/core/libpackagelistparser
                 //
                 sb.setLength(0);
-                sb.append(pkg.getPkg().getPackageName());
+                sb.append(ps.getPkg().getPackageName());
                 sb.append(" ");
-                sb.append(pkg.getPkg().getUid());
+                sb.append(ps.getPkg().getUid());
                 sb.append(isDebug ? " 1 " : " 0 ");
                 sb.append(dataPath);
                 sb.append(" ");
-                sb.append(pkg.getSeInfo());
+                sb.append(ps.getSeInfo());
                 sb.append(" ");
                 final int gidsSize = gids.size();
                 if (gids != null && gids.size() > 0) {
@@ -2983,19 +2982,19 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     sb.append("none");
                 }
                 sb.append(" ");
-                sb.append(pkg.getPkg().isProfileableByShell() ? "1" : "0");
+                sb.append(ps.getPkg().isProfileableByShell() ? "1" : "0");
                 sb.append(" ");
-                sb.append(pkg.getPkg().getLongVersionCode());
+                sb.append(ps.getPkg().getLongVersionCode());
                 sb.append(" ");
-                sb.append(pkg.getPkg().isProfileable() ? "1" : "0");
+                sb.append(ps.getPkg().isProfileable() ? "1" : "0");
                 sb.append(" ");
-                if (pkg.isSystem()) {
+                if (ps.isSystem()) {
                     sb.append("@system");
-                } else if (pkg.isProduct()) {
+                } else if (ps.isProduct()) {
                     sb.append("@product");
-                } else if (pkg.getInstallSource().mInstallerPackageName != null
-                           && !pkg.getInstallSource().mInstallerPackageName.isEmpty()) {
-                    sb.append(pkg.getInstallSource().mInstallerPackageName);
+                } else if (ps.getInstallSource().mInstallerPackageName != null
+                           && !ps.getInstallSource().mInstallerPackageName.isEmpty()) {
+                    sb.append(ps.getInstallSource().mInstallerPackageName);
                 } else {
                     sb.append("@null");
                 }
@@ -3123,6 +3122,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         if (pkg.getVolumeUuid() != null) {
             serializer.attribute(null, "volumeUuid", pkg.getVolumeUuid());
         }
+        serializer.attributeBoolean(null, "defaultToDeviceProtectedStorage",
+                pkg.isDefaultToDeviceProtectedStorage());
         if (pkg.getCategoryOverride() != ApplicationInfo.CATEGORY_UNDEFINED) {
             serializer.attributeInt(null, "categoryHint", pkg.getCategoryOverride());
         }
@@ -3911,6 +3912,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         String installInitiatingPackageName = null;
         boolean installInitiatorUninstalled = false;
         String volumeUuid = null;
+        boolean defaultToDeviceProtectedStorage = false;
         boolean updateAvailable = false;
         int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
         int pkgFlags = 0;
@@ -3960,6 +3962,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             installInitiatorUninstalled = parser.getAttributeBoolean(null,
                     "installInitiatorUninstalled", false);
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
+            defaultToDeviceProtectedStorage = parser.getAttributeBoolean(
+                    null, "defaultToDeviceProtectedStorage", false);
             categoryHint = parser.getAttributeInt(null, "categoryHint",
                     ApplicationInfo.CATEGORY_UNDEFINED);
             appMetadataFilePath = parser.getAttributeValue(null, "appMetadataFilePath");
@@ -4099,6 +4103,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     installInitiatorUninstalled);
             packageSetting.setInstallSource(installSource)
                     .setVolumeUuid(volumeUuid)
+                    .setDefaultToDeviceProtectedStorage(defaultToDeviceProtectedStorage)
                     .setCategoryOverride(categoryHint)
                     .setLegacyNativeLibraryPath(legacyNativeLibraryPathStr)
                     .setPrimaryCpuAbi(primaryCpuAbiString)
@@ -4886,6 +4891,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             pw.print("]");
         }
         pw.println();
+        File dataDir = PackageInfoUtils.getDataDir(ps, UserHandle.myUserId());
+        pw.print(prefix); pw.print("  dataDir="); pw.println(dataDir.getAbsolutePath());
         if (pkg != null) {
             pw.print(prefix); pw.print("  versionName="); pw.println(pkg.getVersionName());
             pw.print(prefix); pw.print("  usesNonSdkApi="); pw.println(pkg.isNonSdkApiRequested());
@@ -4917,8 +4924,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 pw.append(prefix).append("  queriesIntents=")
                         .println(ps.getPkg().getQueriesIntents());
             }
-            File dataDir = PackageInfoUtils.getDataDir(pkg, UserHandle.myUserId());
-            pw.print(prefix); pw.print("  dataDir="); pw.println(dataDir.getAbsolutePath());
             pw.print(prefix); pw.print("  supportsScreens=[");
             boolean first = true;
             if (pkg.isSmallScreensSupported()) {
