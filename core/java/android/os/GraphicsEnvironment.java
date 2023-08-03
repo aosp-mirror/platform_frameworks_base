@@ -178,23 +178,6 @@ public class GraphicsEnvironment {
     }
 
     /**
-     * Query to determine if the Game Mode has enabled ANGLE.
-     */
-    private boolean isAngleEnabledByGameMode(Context context, String packageName) {
-        try {
-            final boolean gameModeEnabledAngle =
-                    (mGameManager != null) && mGameManager.isAngleEnabled(packageName);
-            Log.v(TAG, "ANGLE GameManagerService for " + packageName + ": " + gameModeEnabledAngle);
-            return gameModeEnabledAngle;
-        } catch (SecurityException e) {
-            Log.e(TAG, "Caught exception while querying GameManagerService if ANGLE is enabled "
-                    + "for package: " + packageName);
-        }
-
-        return false;
-    }
-
-    /**
      * Query to determine the ANGLE driver choice.
      */
     private String queryAngleChoice(Context context, Bundle coreSettings,
@@ -422,8 +405,7 @@ public class GraphicsEnvironment {
      * 2) The per-application switch (i.e. Settings.Global.ANGLE_GL_DRIVER_SELECTION_PKGS and
      *    Settings.Global.ANGLE_GL_DRIVER_SELECTION_VALUES; which corresponds to the
      *    “angle_gl_driver_selection_pkgs” and “angle_gl_driver_selection_values” settings); if it
-     *    forces a choice;
-     * 3) Use ANGLE if isAngleEnabledByGameMode() returns true;
+     *    forces a choice.
      */
     private String queryAngleChoiceInternal(Context context, Bundle bundle,
                                                        String packageName) {
@@ -457,10 +439,6 @@ public class GraphicsEnvironment {
         Log.v(TAG, "  angle_gl_driver_selection_pkgs=" + optInPackages);
         Log.v(TAG, "  angle_gl_driver_selection_values=" + optInValues);
 
-        final String gameModeChoice = isAngleEnabledByGameMode(context, packageName)
-                                      ? ANGLE_GL_DRIVER_CHOICE_ANGLE
-                                      : ANGLE_GL_DRIVER_CHOICE_DEFAULT;
-
         // Make sure we have good settings to use
         if (optInPackages.size() == 0 || optInPackages.size() != optInValues.size()) {
             Log.v(TAG,
@@ -469,7 +447,7 @@ public class GraphicsEnvironment {
                             + optInPackages.size() + ", "
                         + "number of values: "
                             + optInValues.size());
-            return gameModeChoice;
+            return ANGLE_GL_DRIVER_CHOICE_DEFAULT;
         }
 
         // See if this application is listed in the per-application settings list
@@ -477,7 +455,7 @@ public class GraphicsEnvironment {
 
         if (pkgIndex < 0) {
             Log.v(TAG, packageName + " is not listed in per-application setting");
-            return gameModeChoice;
+            return ANGLE_GL_DRIVER_CHOICE_DEFAULT;
         }
         mAngleOptInIndex = pkgIndex;
 
@@ -491,11 +469,9 @@ public class GraphicsEnvironment {
             return ANGLE_GL_DRIVER_CHOICE_ANGLE;
         } else if (optInValue.equals(ANGLE_GL_DRIVER_CHOICE_NATIVE)) {
             return ANGLE_GL_DRIVER_CHOICE_NATIVE;
-        } else {
-            // The user either chose default or an invalid value; go with the default driver or what
-            // the game mode indicates
-            return gameModeChoice;
         }
+        // The user either chose default or an invalid value; go with the default driver.
+        return ANGLE_GL_DRIVER_CHOICE_DEFAULT;
     }
 
     /**
