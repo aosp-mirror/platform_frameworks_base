@@ -2120,6 +2120,21 @@ public final class Settings {
             "android.settings.MANAGE_MORE_DEFAULT_APPS_SETTINGS";
 
     /**
+     * Activity Action: Show app screen size list settings for user to override app aspect
+     * ratio.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Can include the following extra {@link android.content.Intent#EXTRA_PACKAGE_NAME} specifying
+     * the name of the package to scroll to in the page.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_USER_ASPECT_RATIO_SETTINGS =
+            "android.settings.MANAGE_USER_ASPECT_RATIO_SETTINGS";
+
+    /**
      * Activity Action: Show notification settings.
      *
      * @hide
