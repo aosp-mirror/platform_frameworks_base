@@ -13,7 +13,7 @@
       android:layout_height="@dimen/image_button_height"
       android:layout_alignParentTop="true"
       android:layout_centerHorizontal="true"
-      android:scaleType="fitCenter"></ImageButton>
+      android:scaleType="fitCenter"/>
 
 <TextView
       android:id="@+id/shortcutLabel"
@@ -22,7 +22,6 @@
       android:layout_marginTop="@dimen/grid_item_text_view_margin_top"
       android:layout_below="@+id/shortcutIconBtn"
       android:layout_centerHorizontal="true"
-      android:ellipsize="end"
       android:gravity="center_horizontal"
       android:importantForAccessibility="no"
       android:lines="2"
