@@ -32,6 +32,7 @@ import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMET
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PRIMARY_AUTH_LOCKED_OUT
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART
+import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST
@@ -53,6 +54,9 @@ import com.android.systemui.R.string.kg_primary_auth_locked_out_password
 import com.android.systemui.R.string.kg_primary_auth_locked_out_pattern
 import com.android.systemui.R.string.kg_primary_auth_locked_out_pin
 import com.android.systemui.R.string.kg_prompt_after_dpm_lock
+import com.android.systemui.R.string.kg_prompt_after_update_password
+import com.android.systemui.R.string.kg_prompt_after_update_pattern
+import com.android.systemui.R.string.kg_prompt_after_update_pin
 import com.android.systemui.R.string.kg_prompt_after_user_lockdown_password
 import com.android.systemui.R.string.kg_prompt_after_user_lockdown_pattern
 import com.android.systemui.R.string.kg_prompt_after_user_lockdown_pin
@@ -89,69 +93,76 @@ constructor(
     fun createFromPromptReason(
         @BouncerPromptReason reason: Int,
         userId: Int,
+        secondaryMsgOverride: String? = null
     ): BouncerMessageModel? {
         val pair =
             getBouncerMessage(
                 reason,
                 securityModel.getSecurityMode(userId),
-                updateMonitor.isFingerprintAllowedInBouncer
+                updateMonitor.isUnlockingWithFingerprintAllowed
             )
         return pair?.let {
             BouncerMessageModel(
-                message = Message(messageResId = pair.first),
-                secondaryMessage = Message(messageResId = pair.second)
+                message = Message(messageResId = pair.first, animate = false),
+                secondaryMessage =
+                    secondaryMsgOverride?.let {
+                        Message(message = secondaryMsgOverride, animate = false)
+                    }
+                        ?: Message(messageResId = pair.second, animate = false)
             )
         }
     }
 
-    fun createFromString(
-        primaryMsg: String? = null,
-        secondaryMsg: String? = null
-    ): BouncerMessageModel =
-        BouncerMessageModel(
-            message = primaryMsg?.let { Message(message = it) },
-            secondaryMessage = secondaryMsg?.let { Message(message = it) },
-        )
-
     /**
      * Helper method that provides the relevant bouncer message that should be shown for different
-     * scenarios indicated by [reason]. [securityMode] & [fpAllowedInBouncer] parameters are used to
+     * scenarios indicated by [reason]. [securityMode] & [fpAuthIsAllowed] parameters are used to
      * provide a more specific message.
      */
     private fun getBouncerMessage(
         @BouncerPromptReason reason: Int,
         securityMode: SecurityMode,
-        fpAllowedInBouncer: Boolean = false
+        fpAuthIsAllowed: Boolean = false
     ): Pair<Int, Int>? {
         return when (reason) {
+            // Primary auth locked out
+            PROMPT_REASON_PRIMARY_AUTH_LOCKED_OUT -> primaryAuthLockedOut(securityMode)
+            // Primary auth required reasons
             PROMPT_REASON_RESTART -> authRequiredAfterReboot(securityMode)
             PROMPT_REASON_TIMEOUT -> authRequiredAfterPrimaryAuthTimeout(securityMode)
             PROMPT_REASON_DEVICE_ADMIN -> authRequiredAfterAdminLockdown(securityMode)
             PROMPT_REASON_USER_REQUEST -> authRequiredAfterUserLockdown(securityMode)
-            PROMPT_REASON_AFTER_LOCKOUT -> biometricLockout(securityMode)
             PROMPT_REASON_PREPARE_FOR_UPDATE -> authRequiredForUnattendedUpdate(securityMode)
+            PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE -> authRequiredForMainlineUpdate(securityMode)
             PROMPT_REASON_FINGERPRINT_LOCKED_OUT -> fingerprintUnlockUnavailable(securityMode)
-            PROMPT_REASON_FACE_LOCKED_OUT -> faceUnlockUnavailable(securityMode)
-            PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT ->
-                if (fpAllowedInBouncer) incorrectSecurityInputWithFingerprint(securityMode)
-                else incorrectSecurityInput(securityMode)
+            PROMPT_REASON_AFTER_LOCKOUT -> biometricLockout(securityMode)
+            // Non strong auth not available reasons
+            PROMPT_REASON_FACE_LOCKED_OUT ->
+                if (fpAuthIsAllowed) faceLockedOutButFingerprintAvailable(securityMode)
+                else faceLockedOut(securityMode)
             PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT ->
-                if (fpAllowedInBouncer) nonStrongAuthTimeoutWithFingerprintAllowed(securityMode)
+                if (fpAuthIsAllowed) nonStrongAuthTimeoutWithFingerprintAllowed(securityMode)
                 else nonStrongAuthTimeout(securityMode)
             PROMPT_REASON_TRUSTAGENT_EXPIRED ->
-                if (fpAllowedInBouncer) trustAgentDisabledWithFingerprintAllowed(securityMode)
+                if (fpAuthIsAllowed) trustAgentDisabledWithFingerprintAllowed(securityMode)
                 else trustAgentDisabled(securityMode)
+            // Auth incorrect input reasons.
+            PROMPT_REASON_INCORRECT_PRIMARY_AUTH_INPUT ->
+                if (fpAuthIsAllowed) incorrectSecurityInputWithFingerprint(securityMode)
+                else incorrectSecurityInput(securityMode)
             PROMPT_REASON_INCORRECT_FACE_INPUT ->
-                if (fpAllowedInBouncer) incorrectFaceInputWithFingerprintAllowed(securityMode)
+                if (fpAuthIsAllowed) incorrectFaceInputWithFingerprintAllowed(securityMode)
                 else incorrectFaceInput(securityMode)
             PROMPT_REASON_INCORRECT_FINGERPRINT_INPUT -> incorrectFingerprintInput(securityMode)
+            // Default message
             PROMPT_REASON_DEFAULT ->
-                if (fpAllowedInBouncer) defaultMessageWithFingerprint(securityMode)
+                if (fpAuthIsAllowed) defaultMessageWithFingerprint(securityMode)
                 else defaultMessage(securityMode)
-            PROMPT_REASON_PRIMARY_AUTH_LOCKED_OUT -> primaryAuthLockedOut(securityMode)
             else -> null
         }
     }
+
+    fun emptyMessage(): BouncerMessageModel =
+        BouncerMessageModel(Message(message = ""), Message(message = ""))
 }
 
 @Retention(AnnotationRetention.SOURCE)
@@ -172,6 +183,7 @@ constructor(
     PROMPT_REASON_NONE,
     PROMPT_REASON_RESTART,
     PROMPT_REASON_PRIMARY_AUTH_LOCKED_OUT,
+    PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE,
 )
 annotation class BouncerPromptReason
 
@@ -284,6 +296,15 @@ private fun authRequiredForUnattendedUpdate(securityMode: SecurityMode): Pair<In
     }
 }
 
+private fun authRequiredForMainlineUpdate(securityMode: SecurityMode): Pair<Int, Int> {
+    return when (securityMode) {
+        SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_after_update_pattern)
+        SecurityMode.Password -> Pair(keyguard_enter_password, kg_prompt_after_update_password)
+        SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_prompt_after_update_pin)
+        else -> Pair(0, 0)
+    }
+}
+
 private fun authRequiredAfterPrimaryAuthTimeout(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
         SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_prompt_pattern_auth_timeout)
@@ -311,11 +332,20 @@ private fun nonStrongAuthTimeoutWithFingerprintAllowed(securityMode: SecurityMod
     }
 }
 
-private fun faceUnlockUnavailable(securityMode: SecurityMode): Pair<Int, Int> {
+private fun faceLockedOut(securityMode: SecurityMode): Pair<Int, Int> {
     return when (securityMode) {
         SecurityMode.Pattern -> Pair(keyguard_enter_pattern, kg_face_locked_out)
         SecurityMode.Password -> Pair(keyguard_enter_password, kg_face_locked_out)
         SecurityMode.PIN -> Pair(keyguard_enter_pin, kg_face_locked_out)
+        else -> Pair(0, 0)
+    }
+}
+
+private fun faceLockedOutButFingerprintAvailable(securityMode: SecurityMode): Pair<Int, Int> {
+    return when (securityMode) {
+        SecurityMode.Pattern -> Pair(kg_unlock_with_pattern_or_fp, kg_face_locked_out)
+        SecurityMode.Password -> Pair(kg_unlock_with_password_or_fp, kg_face_locked_out)
+        SecurityMode.PIN -> Pair(kg_unlock_with_pin_or_fp, kg_face_locked_out)
         else -> Pair(0, 0)
     }
 }
