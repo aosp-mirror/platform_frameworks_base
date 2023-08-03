@@ -34,7 +34,7 @@ import android.util.SparseIntArray;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.frameworks.servicestests.R;
+import com.android.frameworks.powerstatstests.R;
 import com.android.server.power.stats.wakeups.CpuWakeupStats.Wakeup;
 
 import org.junit.Test;

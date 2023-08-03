@@ -23,7 +23,7 @@ import android.content.Context;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.frameworks.servicestests.R;
+import com.android.frameworks.powerstatstests.R;
 import com.android.internal.util.CollectionUtils;
 
 import org.junit.Test;

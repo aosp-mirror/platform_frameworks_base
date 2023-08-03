@@ -17,15 +17,6 @@
       ]
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.power"},
-        {"exclude-filter": "com.android.server.power.BatteryStatsTests"},
-        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
-      ]
-    },
-    {
       "name": "PowerServiceTests",
       "options": [
         {"include-filter": "com.android.server.power"},
@@ -48,15 +39,13 @@
     {
       "name": "FrameworksServicesTests",
       "options": [
-        {"include-filter": "com.android.server.power"},
-        {"exclude-filter": "com.android.server.power.BatteryStatsTests"}
+        {"include-filter": "com.android.server.power"}
       ]
     },
     {
       "name": "PowerServiceTests",
       "options": [
         {"include-filter": "com.android.server.power"},
-        {"exclude-filter": "com.android.server.power.BatteryStatsTests"},
         {"exclude-annotation": "org.junit.Ignore"}
       ]
     }

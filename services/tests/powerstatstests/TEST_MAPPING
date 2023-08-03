@@ -1,0 +1,22 @@
+{
+  "presubmit": [
+    {
+      "name": "PowerStatsTests",
+      "options": [
+        {"include-filter": "com.android.server.power.stats"},
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "PowerStatsTests",
+      "options": [
+        {"include-filter": "com.android.server.power.stats"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
+  ]
+}

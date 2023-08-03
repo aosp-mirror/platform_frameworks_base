@@ -38,9 +38,16 @@
       ],
       "name": "FrameworksServicesTests",
       "options": [
-        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
-        { "include-filter": "com.android.server.power.stats.BatteryStatsTests" }
+        { "include-filter": "com.android.server.am.BatteryStatsServiceTest" }
       ]
+    },
+    {
+      "file_patterns": [
+        "Battery[^/]*\\.java",
+        "Kernel[^/]*\\.java",
+        "[^/]*Power[^/]*\\.java"
+      ],
+      "name": "PowerStatsTests"
     },
     {
       "name": "FrameworksCoreTests",

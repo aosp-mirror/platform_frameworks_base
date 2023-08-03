@@ -46,7 +46,7 @@ import android.telephony.TelephonyManager;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.frameworks.servicestests.R;
+import com.android.frameworks.powerstatstests.R;
 
 import com.google.common.collect.Range;
 
