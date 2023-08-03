@@ -658,37 +658,37 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     out.println(
                             "Error: Activity not started, unable to "
                                     + "resolve " + intent.toString());
-                    break;
+                    return 1;
                 case ActivityManager.START_CLASS_NOT_FOUND:
                     out.println(NO_CLASS_ERROR_CODE);
                     out.println("Error: Activity class " +
                             intent.getComponent().toShortString()
                             + " does not exist.");
-                    break;
+                    return 1;
                 case ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT:
                     out.println(
                             "Error: Activity not started, you requested to "
                                     + "both forward and receive its result");
-                    break;
+                    return 1;
                 case ActivityManager.START_PERMISSION_DENIED:
                     out.println(
                             "Error: Activity not started, you do not "
                                     + "have permission to access it.");
-                    break;
+                    return 1;
                 case ActivityManager.START_NOT_VOICE_COMPATIBLE:
                     out.println(
                             "Error: Activity not started, voice control not allowed for: "
                                     + intent);
-                    break;
+                    return 1;
                 case ActivityManager.START_NOT_CURRENT_USER_ACTIVITY:
                     out.println(
                             "Error: Not allowed to start background user activity"
                                     + " that shouldn't be displayed for all users.");
-                    break;
+                    return 1;
                 default:
                     out.println(
                             "Error: Activity not started, unknown error code " + res);
-                    break;
+                    return 1;
             }
             out.flush();
             if (mWaitOption && launched) {
