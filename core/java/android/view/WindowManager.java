@@ -880,22 +880,23 @@ public interface WindowManager extends ViewManager {
     int LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP = 600;
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the app can be opted-in or opted-out
-     * from the compatibility treatment that avoids {@link
-     * android.app.Activity#setRequestedOrientation} loops. The loop can be trigerred by
-     * ignoreRequestedOrientation display setting enabled on the device or by the landscape natural
-     * orientation of the device.
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the app can be opted-in or opted-out from the
+     * compatibility treatment that avoids {@link android.app.Activity#setRequestedOrientation
+     * Activity#setRequestedOrientation()} loops. Loops can be triggered by the OEM-configured
+     * ignore requested orientation display setting (on Android 12 (API level 31) and higher) or by
+     * the landscape natural orientation of the device.
      *
      * <p>The treatment is disabled by default but device manufacturers can enable the treatment
      * using their discretion to improve display compatibility.
      *
-     * <p>With this property set to {@code true}, the system could ignore {@link
-     * android.app.Activity#setRequestedOrientation} call from an app if one of the following
-     * conditions are true:
+     * <p>With this property set to {@code true}, the system could ignore
+     * {@link android.app.Activity#setRequestedOrientation Activity#setRequestedOrientation()} call
+     * from an app if one of the following conditions are true:
      * <ul>
-     *     <li>Activity is relaunching due to the previous {@link
-     *     android.app.Activity#setRequestedOrientation} call.
+     *     <li>Activity is relaunching due to the previous
+     *     {@link android.app.Activity#setRequestedOrientation Activity#setRequestedOrientation()}
+     *     call.
      *     <li>Camera compatibility force rotation treatment is active for the package.
      * </ul>
      *
@@ -919,14 +920,16 @@ public interface WindowManager extends ViewManager {
     /**
      * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
      * for an app to inform the system that the app can be opted-out from the compatibility
-     * treatment that avoids {@link android.app.Activity#setRequestedOrientation} loops. The loop
-     * can be trigerred by ignoreRequestedOrientation display setting enabled on the device or
-     * by the landscape natural orientation of the device.
+     * treatment that avoids {@link android.app.Activity#setRequestedOrientation
+     * Activity#setRequestedOrientation()} loops. Loops can be triggered by the OEM-configured
+     * ignore requested orientation display setting (on Android 12 (API level 31) and higher) or by
+     * the landscape natural orientation of the device.
      *
-     * <p>The system could ignore {@link android.app.Activity#setRequestedOrientation}
-     * call from an app if both of the following conditions are true:
+     * <p>The system could ignore {@link android.app.Activity#setRequestedOrientation
+     * Activity#setRequestedOrientation()} call from an app if both of the following conditions are
+     * true:
      * <ul>
-     *     <li>Activity has requested orientation more than 2 times within 1-second timer
+     *     <li>Activity has requested orientation more than two times within one-second timer
      *     <li>Activity is not letterboxed for fixed orientation
      * </ul>
      *
@@ -953,23 +956,21 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that it needs to be opted-out from the
-     * compatibility treatment that sandboxes {@link android.view.View} API.
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that it needs to be opted-out from the compatibility
+     * treatment that sandboxes the {@link android.view.View View} API.
      *
      * <p>The treatment can be enabled by device manufacturers for applications which misuse
-     * {@link android.view.View} APIs by expecting that
-     * {@link android.view.View#getLocationOnScreen},
-     * {@link android.view.View#getBoundsOnScreen},
-     * {@link android.view.View#getWindowVisibleDisplayFrame},
-     * {@link android.view.View#getWindowDisplayFrame}
+     * {@link android.view.View View} APIs by expecting that
+     * {@link android.view.View#getLocationOnScreen View#getLocationOnScreen()} and
+     * {@link android.view.View#getWindowVisibleDisplayFrame View#getWindowVisibleDisplayFrame()}
      * return coordinates as if an activity is positioned in the top-left corner of the screen, with
-     * left coordinate equal to 0. This may not be the case for applications in multi-window and in
+     * left coordinate equal to 0. This may not be the case for applications in multi-window and
      * letterbox modes.
      *
      * <p>Setting this property to {@code false} informs the system that the application must be
-     * opted-out from the "Sandbox {@link android.view.View} API to Activity bounds" treatment even
-     * if the device manufacturer has opted the app into the treatment.
+     * opted-out from the "Sandbox View API to Activity bounds" treatment even if the device
+     * manufacturer has opted the app into the treatment.
      *
      * <p>Not setting this property at all, or setting this property to {@code true} has no effect.
      *
@@ -987,12 +988,11 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_ALLOW_SANDBOXING_VIEW_BOUNDS_APIS";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the application can be opted-in or opted-out
-     * from the compatibility treatment that enables sending a fake focus event for unfocused
-     * resumed split screen activities. This is needed because some game engines wait to get
-     * focus before drawing the content of the app which isn't guaranteed by default in multi-window
-     * modes.
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the application can be opted-in or opted-out from the
+     * compatibility treatment that enables sending a fake focus event for unfocused resumed
+     * split-screen activities. This is needed because some game engines wait to get focus before
+     * drawing the content of the app which isn't guaranteed by default in multi-window mode.
      *
      * <p>Device manufacturers can enable this treatment using their discretion on a per-device
      * basis to improve display compatibility. The treatment also needs to be specifically enabled
@@ -1022,9 +1022,9 @@ public interface WindowManager extends ViewManager {
     String PROPERTY_COMPAT_ENABLE_FAKE_FOCUS = "android.window.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the app should be excluded from the
-     * camera compatibility force rotation treatment.
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the app should be excluded from the camera compatibility
+     * force rotation treatment.
      *
      * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
      * orientation of the device and set opposite to natural orientation for a landscape app
@@ -1034,10 +1034,11 @@ public interface WindowManager extends ViewManager {
      * rotation can cause letterboxing. The forced rotation is triggered as soon as app opens to
      * camera and is removed once camera is closed.
      *
-     * <p>The camera compatibility can be enabled by device manufacturers on the displays that have
-     * ignoreOrientationRequest display setting enabled (enables compatibility mode for fixed
-     * orientation, see <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced letterboxing</a>
-     * for more details).
+     * <p>The camera compatibility can be enabled by device manufacturers on displays that have the
+     * ignore requested orientation display setting enabled (enables compatibility mode for fixed
+     * orientation on Android 12 (API level 31) or higher; see
+     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
+     * letterboxing</a> for more details).
      *
      * <p>With this property set to {@code true} or unset, the system may apply the force rotation
      * treatment to fixed orientation activities. Device manufacturers can exclude packages from the
@@ -1060,9 +1061,9 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_FORCE_ROTATION";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the app should be excluded
-     * from the activity "refresh" after the camera compatibility force rotation treatment.
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the app should be excluded from the activity "refresh"
+     * after the camera compatibility force rotation treatment.
      *
      * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
      * orientation of the device and set opposite to natural orientation for a landscape app
@@ -1079,10 +1080,11 @@ public interface WindowManager extends ViewManager {
      * camera preview and can lead to sideways or stretching issues persisting even after force
      * rotation.
      *
-     * <p>The camera compatibility can be enabled by device manufacturers on the displays that have
-     * ignoreOrientationRequest display setting enabled (enables compatibility mode for fixed
-     * orientation, see <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced letterboxing</a>
-     * for more details).
+     * <p>The camera compatibility can be enabled by device manufacturers on displays that have the
+     * ignore requested orientation display setting enabled (enables compatibility mode for fixed
+     * orientation on Android 12 (API level 31) or higher; see
+     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
+     * letterboxing</a> for more details).
      *
      * <p>With this property set to {@code true} or unset, the system may "refresh" activity after
      * the force rotation treatment. Device manufacturers can exclude packages from the "refresh"
@@ -1105,10 +1107,10 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the activity should be or shouldn't be
-     * "refreshed" after the camera compatibility force rotation treatment using "paused ->
-     * resumed" cycle rather than "stopped -> resumed".
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the activity should be or shouldn't be "refreshed" after
+     * the camera compatibility force rotation treatment using "paused -> resumed" cycle rather than
+     * "stopped -> resumed".
      *
      * <p>The camera compatibility treatment aligns orientations of portrait app window and natural
      * orientation of the device and set opposite to natural orientation for a landscape app
@@ -1124,10 +1126,11 @@ public interface WindowManager extends ViewManager {
      * values in apps (e.g., display or camera rotation) that influence camera preview and can lead
      * to sideways or stretching issues persisting even after force rotation.
      *
-     * <p>The camera compatibility can be enabled by device manufacturers on the displays that have
-     * ignoreOrientationRequest display setting enabled (enables compatibility mode for fixed
-     * orientation, see <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced letterboxing</a>
-     * for more details).
+     * <p>The camera compatibility can be enabled by device manufacturers on displays that have the
+     * ignore requested orientation display setting enabled (enables compatibility mode for fixed
+     * orientation on Android 12 (API level 31) or higher; see
+     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
+     * letterboxing</a> for more details).
      *
      * <p>Device manufacturers can override packages to "refresh" via "resumed -> paused -> resumed"
      * cycle using their discretion to improve display compatibility.
@@ -1153,22 +1156,23 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the app should be excluded from the
-     * compatibility override for orientation set by the device manufacturer. When the orientation
-     * override is applied it can:
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the app should be excluded from the compatibility
+     * override for orientation set by the device manufacturer. When the orientation override is
+     * applied it can:
      * <ul>
      *   <li>Replace the specific orientation requested by the app with another selected by the
-             device manufacturer, e.g. replace undefined requested by the app with portrait.
+             device manufacturer; for example, replace undefined requested by the app with portrait.
      *   <li>Always use an orientation selected by the device manufacturer.
      *   <li>Do one of the above but only when camera connection is open.
      * </ul>
      *
-     * <p>This property is different from {@link PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION}
+     * <p>This property is different from {@link #PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION}
      * (which is used to avoid orientation loops caused by the incorrect use of {@link
-     * android.app.Activity#setRequestedOrientation}) because this property overrides the app to an
-     * orientation selected by the device manufacturer rather than ignoring one of orientation
-     * requests coming from the app while respecting the previous one.
+     * android.app.Activity#setRequestedOrientation Activity#setRequestedOrientation()}) because
+     * this property overrides the app to an orientation selected by the device manufacturer rather
+     * than ignoring one of orientation requests coming from the app while respecting the previous
+     * one.
      *
      * <p>With this property set to {@code true} or unset, device manufacturers can override
      * orientation for the app using their discretion to improve display compatibility.
@@ -1190,10 +1194,10 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the app should be opted-out from the
-     * compatibility override that fixes display orientation to landscape natural orientation when
-     * an activity is fullscreen.
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the app should be opted-out from the compatibility
+     * override that fixes display orientation to landscape natural orientation when an activity is
+     * fullscreen.
      *
      * <p>When this compat override is enabled and while display is fixed to the landscape natural
      * orientation, the orientation requested by the activity will be still respected by bounds
@@ -1202,16 +1206,17 @@ public interface WindowManager extends ViewManager {
      * lanscape natural orientation.
      *
      * <p>The treatment is disabled by default but device manufacturers can enable the treatment
-     * using their discretion to improve display compatibility on the displays that have
-     * ignoreOrientationRequest display setting enabled (enables compatibility mode for fixed
-     * orientation, see <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced letterboxing</a>
-     * for more details).
+     * using their discretion to improve display compatibility on displays that have the ignore
+     * orientation request display setting enabled by OEMs on the device (enables compatibility mode
+     * for fixed orientation on Android 12 (API level 31) or higher; see
+     * <a href="https://developer.android.com/guide/practices/enhanced-letterboxing">Enhanced
+     * letterboxing</a> for more details).
      *
      * <p>With this property set to {@code true} or unset, the system wiil use landscape display
      * orientation when the following conditions are met:
      * <ul>
      *     <li>Natural orientation of the display is landscape
-     *     <li>ignoreOrientationRequest display setting is enabled
+     *     <li>ignore requested orientation display setting is enabled
      *     <li>Activity is fullscreen.
      *     <li>Device manufacturer enabled the treatment.
      * </ul>
@@ -1233,9 +1238,9 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the app should be opted-out from the
-     * compatibility override that changes the min aspect ratio.
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the app should be opted-out from the compatibility
+     * override that changes the min aspect ratio.
      *
      * <p>When this compat override is enabled the min aspect ratio given in the app's manifest can
      * be overridden by the device manufacturer using their discretion to improve display
@@ -1264,14 +1269,14 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} for an app to inform the system that the app should be opted-out from the
-     * compatibility overrides that change the resizability of the app.
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * for an app to inform the system that the app should be opted-out from the compatibility
+     * overrides that change the resizability of the app.
      *
      * <p>When these compat overrides are enabled they force the packages they are applied to to be
-     * resizable / unresizable. If the app is forced to be resizable this won't change whether
-     * the app can be put into multi-windowing mode, but allow the app to resize without going into
-     * size-compat mode when the window container resizes, such as display size change or screen
+     * resizable/unresizable. If the app is forced to be resizable this won't change whether the app
+     * can be put into multi-windowing mode, but allow the app to resize without going into size
+     * compatibility mode when the window container resizes, such as display size change or screen
      * rotation.
      *
      * <p>Setting this property to {@code false} informs the system that the app must be
@@ -1320,34 +1325,29 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
-     * Application-level
-     * {@link android.content.pm.PackageManager.Property PackageManager.Property}
-     * tag that specifies whether OEMs are permitted to provide activity
-     * embedding split-rule configurations on behalf of the app.
+     * Application-level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * tag that specifies whether OEMs are permitted to provide activity embedding split-rule
+     * configurations on behalf of the app.
      *
-     * <p>If {@code true}, the system is permitted to override the app's
-     * windowing behavior and implement activity embedding split rules, such as
-     * displaying activities side by side. A system override informs the app
-     * that the activity embedding APIs are disabled so the app will not provide
-     * its own activity embedding rules, which would conflict with the system's
+     * <p>If {@code true}, the system is permitted to override the app's windowing behavior and
+     * implement activity embedding split rules, such as displaying activities side by side. A
+     * system override informs the app that the activity embedding APIs are disabled so the app
+     * doesn't provide its own activity embedding rules, which would conflict with the system's
      * rules.
      *
-     * <p>If {@code false}, the system is not permitted to override the
-     * windowing behavior of the app. Set the property to {@code false} if the
-     * app provides its own activity embedding split rules, or if you want to
-     * prevent the system override for any other reason.
+     * <p>If {@code false}, the system is not permitted to override the windowing behavior of the
+     * app. Set the property to {@code false} if the app provides its own activity embedding split
+     * rules, or if you want to prevent the system override for any other reason.
      *
      * <p>The default value is {@code false}.
      *
-     * <p class="note"><b>Note:</b> Refusal to permit the system override is not
-     * enforceable. OEMs can override the app's activity embedding
-     * implementation whether or not this property is specified and set to
-     * <code>false</code>. The property is, in effect, a hint to OEMs.
+     * <p class="note"><b>Note:</b> Refusal to permit the system override is not enforceable. OEMs
+     * can override the app's activity embedding implementation whether or not this property is
+     * specified and set to {@code false}. The property is, in effect, a hint to OEMs.
      *
-     * <p>OEMs can implement activity embedding on any API level. The best
-     * practice for apps is to always explicitly set this property in the app
-     * manifest file regardless of targeted API level rather than rely on the
-     * default value.
+     * <p>OEMs can implement activity embedding on any API level. The best practice for apps is to
+     * always explicitly set this property in the app manifest file regardless of targeted API level
+     * rather than rely on the default value.
      *
      * <p><b>Syntax:</b>
      * <pre>
@@ -1362,14 +1362,15 @@ public interface WindowManager extends ViewManager {
             "android.window.PROPERTY_ACTIVITY_EMBEDDING_ALLOW_SYSTEM_OVERRIDE";
 
     /**
-     * Application level {@link android.content.pm.PackageManager.Property PackageManager
-     * .Property} that an app can specify to inform the system that the app is ActivityEmbedding
-     * split feature enabled.
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager.Property}
+     * that an app can specify to inform the system that the app is activity embedding split feature
+     * enabled.
      *
      * <p>With this property, the system could provide custom behaviors for the apps that are
-     * ActivityEmbedding split feature enabled. For example, the fixed-portrait orientation
+     * activity embedding split feature enabled. For example, the fixed-portrait orientation
      * requests of the activities could be ignored by the system in order to provide seamless
-     * ActivityEmbedding split experiences while holding the large-screen devices in landscape mode.
+     * activity embedding split experiences while holding large screen devices in landscape
+     * orientation.
      *
      * <p><b>Syntax:</b>
      * <pre>

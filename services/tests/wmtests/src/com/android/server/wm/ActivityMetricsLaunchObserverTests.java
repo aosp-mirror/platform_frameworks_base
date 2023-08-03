@@ -182,12 +182,12 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
 
     @Test
     public void testLaunchState() {
-        final ToIntFunction<Boolean> launchTemplate = doRelaunch -> {
+        final ToIntFunction<Runnable> launchTemplate = action -> {
             clearInvocations(mLaunchObserver);
             onActivityLaunched(mTopActivity);
             notifyTransitionStarting(mTopActivity);
-            if (doRelaunch) {
-                mActivityMetricsLogger.notifyActivityRelaunched(mTopActivity);
+            if (action != null) {
+                action.run();
             }
             final ActivityMetricsLogger.TransitionInfoSnapshot info =
                     notifyWindowsDrawn(mTopActivity);
@@ -199,21 +199,27 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         // Assume that the process is started (ActivityBuilder has mocked the returned value of
         // ATMS#getProcessController) but the activity has not attached process.
         mTopActivity.app = null;
-        assertWithMessage("Warm launch").that(launchTemplate.applyAsInt(false /* doRelaunch */))
+        assertWithMessage("Warm launch").that(launchTemplate.applyAsInt(null))
                 .isEqualTo(WaitResult.LAUNCH_STATE_WARM);
 
         mTopActivity.app = app;
         mNewActivityCreated = false;
-        assertWithMessage("Hot launch").that(launchTemplate.applyAsInt(false /* doRelaunch */))
+        assertWithMessage("Hot launch").that(launchTemplate.applyAsInt(null))
                 .isEqualTo(WaitResult.LAUNCH_STATE_HOT);
 
-        assertWithMessage("Relaunch").that(launchTemplate.applyAsInt(true /* doRelaunch */))
+        assertWithMessage("Relaunch").that(launchTemplate.applyAsInt(
+                () -> mActivityMetricsLogger.notifyActivityRelaunched(mTopActivity)))
                 .isEqualTo(WaitResult.LAUNCH_STATE_RELAUNCH);
+
+        assertWithMessage("Cold launch by restart").that(launchTemplate.applyAsInt(
+                () -> mActivityMetricsLogger.notifyBindApplication(
+                        mTopActivity.info.applicationInfo)))
+                .isEqualTo(WaitResult.LAUNCH_STATE_COLD);
 
         mTopActivity.app = null;
         mNewActivityCreated = true;
         doReturn(null).when(mAtm).getProcessController(app.mName, app.mUid);
-        assertWithMessage("Cold launch").that(launchTemplate.applyAsInt(false /* doRelaunch */))
+        assertWithMessage("Cold launch").that(launchTemplate.applyAsInt(null))
                 .isEqualTo(WaitResult.LAUNCH_STATE_COLD);
     }
 
