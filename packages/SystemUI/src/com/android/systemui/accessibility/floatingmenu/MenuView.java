@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerViewAccessibilityDelegate;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
+import com.android.systemui.aconfig.Flags;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -284,6 +285,22 @@ class MenuView extends FrameLayout implements
     void updateMenuMoveToTucked(boolean isMoveToTucked) {
         mIsMoveToTucked = isMoveToTucked;
         mMenuViewModel.updateMenuMoveToTucked(isMoveToTucked);
+
+        if (Flags.floatingMenuOverlapsNavBarsFlag()) {
+            if (isMoveToTucked) {
+                final float halfWidth = getMenuWidth() / 2.0f;
+                final boolean isOnLeftSide = mMenuAnimationController.isOnLeftSide();
+                final Rect clipBounds = new Rect(
+                        (int) (!isOnLeftSide ? 0 : halfWidth),
+                        0,
+                        (int) (!isOnLeftSide ? halfWidth : getMenuWidth()),
+                        getMenuHeight()
+                );
+                setClipBounds(clipBounds);
+            } else {
+                setClipBounds(null);
+            }
+        }
     }
 
 
