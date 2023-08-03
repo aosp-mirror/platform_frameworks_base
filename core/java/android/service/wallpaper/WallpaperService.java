@@ -41,6 +41,9 @@ import android.app.Service;
 import android.app.WallpaperColors;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -193,6 +196,18 @@ public abstract class WallpaperService extends Service {
 
     // TODO (b/287037772) remove this flag and the forceReport argument in reportVisibility
     private boolean mIsWearOs;
+
+    /**
+     * Wear products currently force a slight scaling transition to wallpapers
+     * when the QSS is opened. However, on Wear 6 (SDK 35) and above, 1P watch faces
+     * will be expected to either implement their own scaling, or to override this
+     * method to allow the WallpaperController to continue to scale for them.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long WEAROS_WALLPAPER_HANDLES_SCALING = 272527315L;
 
     static final class WallpaperCommand {
         String action;
@@ -601,7 +616,7 @@ public abstract class WallpaperService extends Service {
          * @hide
          */
         public boolean shouldZoomOutWallpaper() {
-            return false;
+            return mIsWearOs && !CompatChanges.isChangeEnabled(WEAROS_WALLPAPER_HANDLES_SCALING);
         }
 
         /**
