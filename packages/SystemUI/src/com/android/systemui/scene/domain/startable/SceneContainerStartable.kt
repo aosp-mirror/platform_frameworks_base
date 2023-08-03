@@ -28,6 +28,7 @@ import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.model.SysUiState
 import com.android.systemui.model.updateFlags
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.logger.SceneLogger
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING
@@ -57,13 +58,17 @@ constructor(
     private val featureFlags: FeatureFlags,
     private val sysUiState: SysUiState,
     @DisplayId private val displayId: Int,
+    private val sceneLogger: SceneLogger,
 ) : CoreStartable {
 
     override fun start() {
         if (featureFlags.isEnabled(Flags.SCENE_CONTAINER)) {
+            sceneLogger.logFrameworkEnabled(isEnabled = true)
             hydrateVisibility()
             automaticallySwitchScenes()
             hydrateSystemUiState()
+        } else {
+            sceneLogger.logFrameworkEnabled(isEnabled = false)
         }
     }
 
@@ -73,7 +78,9 @@ constructor(
             sceneInteractor.currentScene
                 .map { it.key }
                 .distinctUntilChanged()
-                .collect { sceneKey -> sceneInteractor.setVisible(sceneKey != SceneKey.Gone) }
+                .collect { sceneKey ->
+                    sceneInteractor.setVisible(sceneKey != SceneKey.Gone, "scene is $sceneKey")
+                }
         }
     }
 
@@ -88,10 +95,17 @@ constructor(
                         isUnlocked ->
                             when (currentSceneKey) {
                                 // When the device becomes unlocked in Bouncer, go to Gone.
-                                is SceneKey.Bouncer -> SceneKey.Gone
+                                is SceneKey.Bouncer ->
+                                    SceneKey.Gone to "device unlocked in Bouncer scene"
                                 // When the device becomes unlocked in Lockscreen, go to Gone if
                                 // bypass is enabled.
-                                is SceneKey.Lockscreen -> SceneKey.Gone.takeIf { isBypassEnabled }
+                                is SceneKey.Lockscreen ->
+                                    if (isBypassEnabled) {
+                                        SceneKey.Gone to
+                                            "device unlocked in Lockscreen scene with bypass"
+                                    } else {
+                                        null
+                                    }
                                 // We got unlocked while on a scene that's not Lockscreen or
                                 // Bouncer, no need to change scenes.
                                 else -> null
@@ -104,13 +118,19 @@ constructor(
                                 is SceneKey.Bouncer -> null
                                 // We got locked while on a scene that's not Lockscreen or Bouncer,
                                 // go to Lockscreen.
-                                else -> SceneKey.Lockscreen
+                                else ->
+                                    SceneKey.Lockscreen to "device locked in $currentSceneKey scene"
                             }
                         else -> null
                     }
                 }
                 .filterNotNull()
-                .collect { targetSceneKey -> switchToScene(targetSceneKey) }
+                .collect { (targetSceneKey, loggingReason) ->
+                    switchToScene(
+                        targetSceneKey = targetSceneKey,
+                        loggingReason = loggingReason,
+                    )
+                }
         }
 
         applicationScope.launch {
@@ -121,7 +141,16 @@ constructor(
                     if (isAsleep) {
                         // When the device goes to sleep, reset the current scene.
                         val isUnlocked = authenticationInteractor.isUnlocked.value
-                        switchToScene(if (isUnlocked) SceneKey.Gone else SceneKey.Lockscreen)
+                        val (targetSceneKey, loggingReason) =
+                            if (isUnlocked) {
+                                SceneKey.Gone to "device is asleep while unlocked"
+                            } else {
+                                SceneKey.Lockscreen to "device is asleep while locked"
+                            }
+                        switchToScene(
+                            targetSceneKey = targetSceneKey,
+                            loggingReason = loggingReason,
+                        )
                     }
                 }
         }
@@ -147,9 +176,10 @@ constructor(
         }
     }
 
-    private fun switchToScene(targetSceneKey: SceneKey) {
+    private fun switchToScene(targetSceneKey: SceneKey, loggingReason: String) {
         sceneInteractor.setCurrentScene(
             scene = SceneModel(targetSceneKey),
+            loggingReason = loggingReason,
         )
     }
 }

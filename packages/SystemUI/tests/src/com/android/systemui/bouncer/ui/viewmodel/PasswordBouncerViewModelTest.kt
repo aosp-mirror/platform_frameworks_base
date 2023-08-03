@@ -79,7 +79,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Password
             )
             utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             underTest.onShown()
@@ -99,7 +99,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Password
             )
             utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             runCurrent()
@@ -119,7 +119,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Password
             )
             utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             underTest.onPasswordInputChanged("password")
@@ -139,7 +139,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Password
             )
             utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             underTest.onPasswordInputChanged("wrong")
@@ -161,7 +161,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Password
             )
             utils.authenticationRepository.setUnlocked(false)
-            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer))
+            sceneInteractor.setCurrentScene(SceneModel(SceneKey.Bouncer), "reason")
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             underTest.onShown()
             underTest.onPasswordInputChanged("wrong")
