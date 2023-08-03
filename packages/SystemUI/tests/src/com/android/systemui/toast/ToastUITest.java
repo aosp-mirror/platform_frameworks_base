@@ -18,6 +18,8 @@ package com.android.systemui.toast;
 
 import static android.view.accessibility.AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -63,7 +65,6 @@ import com.android.internal.util.IntPair;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -110,8 +111,7 @@ public class ToastUITest extends SysuiTestCase {
     @Mock private IAccessibilityManager mAccessibilityManager;
     @Mock private PluginManager mPluginManager;
     @Mock private DumpManager mDumpManager;
-    @Mock private ToastLogger mToastLogger;
-    @Mock private FeatureFlags mFeatureFlags;
+    private final ToastLogger mToastLogger = spy(new ToastLogger(logcatLogBuffer()));
     @Mock private PackageManager mPackageManager;
 
     @Mock private ITransientNotificationCallback mCallback;

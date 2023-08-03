@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 
 import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 
 import static junit.framework.Assert.assertFalse;
@@ -45,7 +46,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 
 import org.junit.After;
@@ -88,7 +88,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         private AlertEntry mLastCreatedEntry;
 
         private TestableAlertingNotificationManager(Handler handler) {
-            super(mock(HeadsUpManagerLogger.class), handler);
+            super(new HeadsUpManagerLogger(logcatLogBuffer()), handler);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mStickyDisplayTime = TEST_STICKY_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
