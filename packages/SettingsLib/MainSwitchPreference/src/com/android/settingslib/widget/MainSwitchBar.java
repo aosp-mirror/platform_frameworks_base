@@ -123,7 +123,8 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
     @Override
     public boolean performClick() {
-        return mSwitch.performClick();
+        mSwitch.performClick();
+        return super.performClick();
     }
 
     /**
