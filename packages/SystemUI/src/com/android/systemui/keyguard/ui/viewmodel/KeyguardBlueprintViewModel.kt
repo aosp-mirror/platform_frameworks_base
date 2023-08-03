@@ -15,23 +15,15 @@
  *
  */
 
-package com.android.systemui.keyguard.ui.view.layout
+package com.android.systemui.keyguard.ui.viewmodel
 
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import javax.inject.Inject
 
-@Module
-abstract class LockscreenLayoutModule {
-    @Binds
-    @IntoSet
-    abstract fun bindDefaultLayout(
-        defaultLockscreenLayout: DefaultLockscreenLayout
-    ): LockscreenLayout
-
-    @Binds
-    @IntoSet
-    abstract fun bindShortcutsBesideUdfpsLockscreenLayout(
-        shortcutsBesideUdfpsLockscreenLayout: ShortcutsBesideUdfpsLockscreenLayout
-    ): LockscreenLayout
+@SysUISingleton
+class KeyguardBlueprintViewModel
+@Inject
+constructor(keyguardBlueprintInteractor: KeyguardBlueprintInteractor) {
+    val blueprint = keyguardBlueprintInteractor.blueprint
 }
