@@ -324,6 +324,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
     private final boolean mSupportSandboxedDetectionService;
+    private final String mAttributionTag;
 
     @GuardedBy("mLock")
     private boolean mIsAvailabilityOverriddenByTestApi = false;
@@ -846,13 +847,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
      * @param targetSdkVersion The target SDK version.
      * @param SupportSandboxedDetectionService {@code true} if HotwordDetectionService should be
      * triggered, otherwise {@code false}.
+     * @param attributionTag an optional attribution tag passed form the
+     * {@link VoiceInteractionService} context via the
+     * {@link createAlwaysOnHotwordDetectorInternal(String, Locale, boolean, PersistableBundle,
+     * SharedMemory, ModuleProperties, Executor, Callback)}.
      *
      * @hide
      */
     public AlwaysOnHotwordDetector(String text, Locale locale, Executor executor, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
-            boolean supportSandboxedDetectionService) {
+            boolean supportSandboxedDetectionService, @Nullable String attributionTag) {
         super(modelManagementService, executor, callback);
 
         mHandler = new MyHandler(Looper.getMainLooper());
@@ -865,6 +870,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
         mSupportSandboxedDetectionService = supportSandboxedDetectionService;
+        mAttributionTag = attributionTag;
     }
 
     // Do nothing. This method should not be abstract.
@@ -876,11 +882,14 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             @Nullable SoundTrigger.ModuleProperties moduleProperties) {
         if (mSupportSandboxedDetectionService) {
             initAndVerifyDetector(options, sharedMemory, mInternalCallback,
-                    DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
+                    DETECTOR_TYPE_TRUSTED_HOTWORD_DSP, mAttributionTag);
         }
         try {
             Identity identity = new Identity();
             identity.packageName = ActivityThread.currentOpPackageName();
+            if (IS_IDENTITY_WITH_ATTRIBUTION_TAG) {
+                identity.attributionTag = mAttributionTag;
+            }
             if (moduleProperties == null) {
                 moduleProperties = mModelManagementService
                         .listModuleProperties(identity)
