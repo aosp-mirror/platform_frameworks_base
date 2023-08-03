@@ -33,6 +33,14 @@
     <!-- Maximum velocity to initiate a fling, as measured in dips per second. -->
     <dimen name="config_viewMaxFlingVelocity">8000dp</dimen>
 
+    <!-- Minimum velocity (absolute value) to initiate a fling from a rotary encoder device, as
+         measured in dips per second. Setting this to -1dp disables rotary encoder fling.  -->
+    <dimen name="config_viewMinRotaryEncoderFlingVelocity">500dp</dimen>
+
+    <!-- Maximum velocity (absolute value) to initiate a fling from a rotary encoder device, as
+         measured in dips per second. Setting this to -1dp disables rotary encoder fling.  -->
+    <dimen name="config_viewMaxRotaryEncoderFlingVelocity">8000dp</dimen>
+
     <!-- Number of notifications to keep in the notification service historical archive.
          Reduced intentionally for watches to retain minimal memory footprint -->
     <integer name="config_notificationServiceArchiveSize">1</integer>
