@@ -417,7 +417,10 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private void updateLockIconLocation() {
         final float scaleFactor = mAuthController.getScaleFactor();
         final int scaledPadding = (int) (mDefaultPaddingPx * scaleFactor);
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+            mView.getLockIcon().setPadding(scaledPadding, scaledPadding, scaledPadding,
+                    scaledPadding);
+        } else {
             if (mUdfpsSupported) {
                 mView.setCenterLocation(mAuthController.getUdfpsLocation(),
                         mAuthController.getUdfpsRadius(), scaledPadding);

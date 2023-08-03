@@ -19,10 +19,10 @@ package com.android.systemui.keyguard.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.constraintlayout.widget.ConstraintLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import com.android.keyguard.LockIconView
 import com.android.systemui.R
@@ -62,8 +62,9 @@ class KeyguardRootView(
     }
 
     private fun addLeftShortcut() {
-        val view = LaunchableImageView(context, attrs)
-            .apply {
+        val padding = resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_padding)
+        val view =
+            LaunchableImageView(context, attrs).apply {
                 id = R.id.start_button
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 background =
@@ -79,13 +80,15 @@ class KeyguardRootView(
                         context.theme
                     )
                 visibility = View.INVISIBLE
+                setPadding(padding, padding, padding, padding)
             }
         addView(view)
     }
 
     private fun addRightShortcut() {
-        val view = LaunchableImageView(context, attrs)
-            .apply {
+        val padding = resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_padding)
+        val view =
+            LaunchableImageView(context, attrs).apply {
                 id = R.id.end_button
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 background =
@@ -101,20 +104,19 @@ class KeyguardRootView(
                         context.theme
                     )
                 visibility = View.INVISIBLE
+                setPadding(padding, padding, padding, padding)
             }
         addView(view)
     }
 
     private fun addSettingsPopupMenu() {
-        val view = LayoutInflater.from(context).inflate(
-            R.layout.keyguard_settings_popup_menu,
-            this,
-            false
-        )
-        .apply {
-            id = R.id.keyguard_settings_button
-            visibility = GONE
-        }
+        val view =
+            LayoutInflater.from(context)
+                .inflate(R.layout.keyguard_settings_popup_menu, this, false)
+                .apply {
+                    id = R.id.keyguard_settings_button
+                    visibility = GONE
+                }
         addView(view)
     }
 }

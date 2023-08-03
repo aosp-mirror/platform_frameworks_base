@@ -26,27 +26,28 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.binder.KeyguardAmbientIndicationAreaViewBinder
+import com.android.systemui.keyguard.ui.binder.KeyguardBlueprintViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardIndicationAreaBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardSettingsViewBinder
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
+import com.android.systemui.keyguard.ui.view.layout.KeyguardBlueprintCommandListener
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardAmbientIndicationViewModel
-import com.android.systemui.keyguard.ui.view.layout.KeyguardLayoutManager
-import com.android.systemui.keyguard.ui.view.layout.KeyguardLayoutManagerCommandListener
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardBlueprintViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
+import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
-import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.statusbar.KeyguardIndicationController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
-import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import javax.inject.Inject
@@ -68,9 +69,8 @@ constructor(
     private val notificationShadeWindowView: NotificationShadeWindowView,
     private val featureFlags: FeatureFlags,
     private val indicationController: KeyguardIndicationController,
-    private val keyguardLayoutManager: KeyguardLayoutManager,
-    private val keyguardLayoutManagerCommandListener: KeyguardLayoutManagerCommandListener,
-    private val keyguardQuickAffordancesCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
+    private val keyguardQuickAffordancesCombinedViewModel:
+        KeyguardQuickAffordancesCombinedViewModel,
     private val falsingManager: FalsingManager,
     private val vibratorHelper: VibratorHelper,
     private val keyguardStateController: KeyguardStateController,
@@ -78,6 +78,8 @@ constructor(
     private val activityStarter: ActivityStarter,
     private val occludingAppDeviceEntryMessageViewModel: OccludingAppDeviceEntryMessageViewModel,
     private val chipbarCoordinator: ChipbarCoordinator,
+    private val keyguardBlueprintCommandListener: KeyguardBlueprintCommandListener,
+    private val keyguardBlueprintViewModel: KeyguardBlueprintViewModel,
 ) : CoreStartable {
 
     private var rootViewHandle: DisposableHandle? = null
@@ -100,8 +102,8 @@ constructor(
         bindAmbientIndicationArea()
         bindSettingsPopupMenu()
 
-        keyguardLayoutManager.layoutViews()
-        keyguardLayoutManagerCommandListener.start()
+        KeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel)
+        keyguardBlueprintCommandListener.start()
     }
 
     fun setupNotificationStackScrollLayout(legacyParent: ViewGroup) {
@@ -125,8 +127,6 @@ constructor(
         leftShortcutHandle?.onConfigurationChanged()
         rightShortcutHandle?.onConfigurationChanged()
         ambientIndicationAreaHandle?.onConfigurationChanged()
-
-        keyguardLayoutManager.layoutViews()
     }
 
     fun bindIndicationArea() {
@@ -152,14 +152,15 @@ constructor(
 
     private fun bindKeyguardRootView() {
         rootViewHandle?.dispose()
-        rootViewHandle = KeyguardRootViewBinder.bind(
-            keyguardRootView,
-            keyguardRootViewModel,
-            featureFlags,
-            occludingAppDeviceEntryMessageViewModel,
-            chipbarCoordinator,
-            keyguardStateController,
-        )
+        rootViewHandle =
+            KeyguardRootViewBinder.bind(
+                keyguardRootView,
+                keyguardRootViewModel,
+                featureFlags,
+                occludingAppDeviceEntryMessageViewModel,
+                chipbarCoordinator,
+                keyguardStateController,
+            )
     }
 
     private fun bindLockIconView(legacyParent: ViewGroup) {
