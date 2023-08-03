@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.dagger.pip;
 
-import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Handler;
 
@@ -229,7 +228,6 @@ public abstract class Pip1Module {
 
     @WMSingleton
     @Provides
-    @Nullable
     static PipTransition providePipTransition(Context context,
             ShellInit shellInit, ShellTaskOrganizer shellTaskOrganizer, Transitions transitions,
             PipAnimationController pipAnimationController, PipBoundsAlgorithm pipBoundsAlgorithm,

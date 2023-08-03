@@ -36,10 +36,13 @@ import dagger.Provides;
 public abstract class PipModule {
     @WMSingleton
     @Provides
-    @Nullable
     static PipTransitionController providePipTransitionController(
             com.android.wm.shell.pip.PipTransition legacyPipTransition,
-            com.android.wm.shell.pip2.PipTransition newPipTransition) {
-        return PipUtils.isPip2ExperimentEnabled() ? newPipTransition : legacyPipTransition;
+            @Nullable com.android.wm.shell.pip2.PipTransition newPipTransition) {
+        if (PipUtils.isPip2ExperimentEnabled() && newPipTransition != null) {
+            return newPipTransition;
+        } else {
+            return legacyPipTransition;
+        }
     }
 }
