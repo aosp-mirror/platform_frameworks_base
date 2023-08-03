@@ -295,6 +295,24 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    public SparseArray<String> getHardwareInputIdMap() {
+        synchronized (mLock) {
+            return mHardwareInputIdMap.clone();
+        }
+    }
+
+    public SparseArray<String> getHdmiInputIdMap() {
+        synchronized (mLock) {
+            return mHdmiInputIdMap.clone();
+        }
+    }
+
+    public Map<String, TvInputInfo> getInputMap() {
+        synchronized (mLock) {
+            return Collections.unmodifiableMap(mInputMap);
+        }
+    }
+
     public Map<String, List<String>> getHdmiParentInputMap() {
         synchronized (mLock) {
             return Collections.unmodifiableMap(mHdmiParentInputMap);
