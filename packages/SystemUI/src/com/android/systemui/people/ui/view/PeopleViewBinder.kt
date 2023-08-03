@@ -109,14 +109,6 @@ object PeopleViewBinder {
                     }
             }
         }
-
-        // Make sure to refresh the tiles/conversations when the Activity is resumed, so that it
-        // updates them when going back to the Activity after leaving it.
-        lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.onTileRefreshRequested()
-            }
-        }
     }
 
     private fun setNoConversationsContent(view: ViewGroup, onGotItClicked: () -> Unit) {

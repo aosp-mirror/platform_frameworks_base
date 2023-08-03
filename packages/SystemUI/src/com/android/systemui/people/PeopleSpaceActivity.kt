@@ -20,7 +20,10 @@ import android.appwidget.AppWidgetManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.compose.ComposeFacade.isComposeAvailable
 import com.android.systemui.compose.ComposeFacade.setPeopleSpaceActivityContent
 import com.android.systemui.flags.FeatureFlags
@@ -29,6 +32,7 @@ import com.android.systemui.people.ui.view.PeopleViewBinder
 import com.android.systemui.people.ui.view.PeopleViewBinder.bind
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 /** People Tile Widget configuration activity that shows the user their conversation tiles. */
 class PeopleSpaceActivity
@@ -49,6 +53,16 @@ constructor(
                 AppWidgetManager.INVALID_APPWIDGET_ID,
             )
         viewModel.onWidgetIdChanged(widgetId)
+
+        // Make sure to refresh the tiles/conversations when the lifecycle is resumed, so that it
+        // updates them when going back to the Activity after leaving it.
+        // Note that we do this here instead of inside an effect in the PeopleScreen() composable
+        // because otherwise onTileRefreshRequested() will be called after the first composition,
+        // which will trigger a new recomposition and redraw, affecting the GPU memory (see
+        // b/276871425).
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) { viewModel.onTileRefreshRequested() }
+        }
 
         // Set the content of the activity, using either the View or Compose implementation.
         if (featureFlags.isEnabled(Flags.COMPOSE_PEOPLE_SPACE) && isComposeAvailable()) {
