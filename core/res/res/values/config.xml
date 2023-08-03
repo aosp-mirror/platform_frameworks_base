@@ -6587,4 +6587,7 @@
          vibrations for the customized haptic feedback IDs, and continue to use the system defaults
          for the non-customized ones. -->
     <string name="config_hapticFeedbackCustomizationFile" />
+
+    <!-- Whether or not ActivityManager PSS profiling is disabled. -->
+    <bool name="config_am_disablePssProfiling">false</bool>
 </resources>
