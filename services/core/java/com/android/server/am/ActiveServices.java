@@ -6434,7 +6434,6 @@ public final class ActiveServices {
         }
         updateServiceConnectionActivitiesLocked(psr);
         psr.removeAllConnections();
-        psr.removeAllSdkSandboxConnections();
 
         psr.mAllowlistManager = false;
 
