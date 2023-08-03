@@ -24,6 +24,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.PluginManager
@@ -56,6 +57,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
@@ -70,7 +72,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val activableNotificationViewController: ActivatableNotificationViewController = mock()
     private val rivSubComponentFactory: RemoteInputViewSubcomponent.Factory = mock()
     private val metricsLogger: MetricsLogger = mock()
-    private val logBufferLogger: NotificationRowLogger = mock()
+    private val logBufferLogger = NotificationRowLogger(logcatLogBuffer(), logcatLogBuffer())
     private val listContainer: NotificationListContainer = mock()
     private val childrenContainer: NotificationChildrenContainer = mock()
     private val smartReplyConstants: SmartReplyConstants = mock()
@@ -108,7 +110,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 rivSubComponentFactory,
                 metricsLogger,
                 logBufferLogger,
-                mock<NotificationChildrenContainerLogger>(),
+                NotificationChildrenContainerLogger(logcatLogBuffer()),
                 listContainer,
                 smartReplyConstants,
                 smartReplyController,
@@ -149,13 +151,13 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
         whenever(view.isParentDismissed).thenReturn(true)
 
         Assert.assertTrue(controller.offerToKeepInParentForAnimation())
-        Mockito.verify(view).setKeepInParentForDismissAnimation(true)
+        verify(view).setKeepInParentForDismissAnimation(true)
     }
 
     @Test
     fun offerKeepInParent_parentNotDismissed() {
         Assert.assertFalse(controller.offerToKeepInParentForAnimation())
-        Mockito.verify(view, never()).setKeepInParentForDismissAnimation(anyBoolean())
+        verify(view, never()).setKeepInParentForDismissAnimation(anyBoolean())
     }
 
     @Test
@@ -165,7 +167,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
         whenever(view.keepInParentForDismissAnimation()).thenReturn(true)
 
         Assert.assertTrue(controller.removeFromParentIfKeptForAnimation())
-        Mockito.verify(parentView).removeChildNotification(view)
+        verify(parentView).removeChildNotification(view)
     }
 
     @Test
@@ -186,9 +188,9 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
         controller.removeChild(childNodeController, /* isTransfer= */ true)
 
         // VERIFY the listContainer is not notified
-        Mockito.verify(childView).isChangingPosition = eq(true)
-        Mockito.verify(view).removeChildNotification(eq(childView))
-        Mockito.verify(listContainer, never()).notifyGroupChildRemoved(any(), any())
+        verify(childView).isChangingPosition = eq(true)
+        verify(view).removeChildNotification(eq(childView))
+        verify(listContainer, never()).notifyGroupChildRemoved(any(), any())
     }
 
     @Test
@@ -200,8 +202,8 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
         controller.removeChild(childNodeController, /* isTransfer= */ false)
 
         // VERIFY the listContainer is passed the childrenContainer for transient animations
-        Mockito.verify(childView, never()).isChangingPosition = any()
-        Mockito.verify(view).removeChildNotification(eq(childView))
-        Mockito.verify(listContainer).notifyGroupChildRemoved(eq(childView), eq(childrenContainer))
+        verify(childView, never()).isChangingPosition = any()
+        verify(view).removeChildNotification(eq(childView))
+        verify(listContainer).notifyGroupChildRemoved(eq(childView), eq(childrenContainer))
     }
 }
