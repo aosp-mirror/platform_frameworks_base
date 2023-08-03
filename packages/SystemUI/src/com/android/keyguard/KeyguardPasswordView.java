@@ -189,17 +189,18 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                             if (controller.isCancelled()) {
                                 return;
                             }
+                            float value = (float) animation.getAnimatedValue();
+                            float fraction = anim.getAnimatedFraction();
                             Insets shownInsets = controller.getShownStateInsets();
                             int dist = (int) (-shownInsets.bottom / 4
-                                    * anim.getAnimatedFraction());
+                                    * fraction);
                             Insets insets = Insets.add(shownInsets, Insets.of(0, 0, 0, dist));
                             if (mDisappearAnimationListener != null) {
                                 mDisappearAnimationListener.setTranslationY(-dist);
                             }
 
-                            controller.setInsetsAndAlpha(insets,
-                                    (float) animation.getAnimatedValue(),
-                                    anim.getAnimatedFraction());
+                            controller.setInsetsAndAlpha(insets, value, fraction);
+                            setAlpha(value);
                         });
                         anim.addListener(new AnimatorListenerAdapter() {
                             @Override
