@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -86,6 +87,7 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
 
     private final ArgumentCaptor<Notification> mNotificationArgumentCaptor =
             ArgumentCaptor.forClass(Notification.class);
+    private BiometricNotificationService mBiometricNotificationService;
     private TestableLooper mLooper;
     private KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback;
     private KeyguardStateController.Callback mKeyguardStateControllerCallback;
@@ -104,7 +106,7 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
         BiometricNotificationDialogFactory dialogFactory = new BiometricNotificationDialogFactory();
         BiometricNotificationBroadcastReceiver broadcastReceiver =
                 new BiometricNotificationBroadcastReceiver(mContext, dialogFactory);
-        BiometricNotificationService biometricNotificationService =
+        mBiometricNotificationService =
                 new BiometricNotificationService(mContext,
                         mKeyguardUpdateMonitor, mKeyguardStateController, handler,
                         mNotificationManager,
@@ -112,7 +114,7 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
                         mFingerprintReEnrollNotificationOptional,
                         mFingerprintManager,
                         mFaceManager);
-        biometricNotificationService.start();
+        mBiometricNotificationService.start();
 
         ArgumentCaptor<KeyguardUpdateMonitorCallback> updateMonitorCallbackArgumentCaptor =
                 ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
@@ -229,6 +231,26 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
 
         verify(mNotificationManager).cancelAsUser(eq(TAG), eq(FINGERPRINT_NOTIFICATION_ID),
                 eq(UserHandle.CURRENT));
+    }
+
+    @Test
+    public void testResetFaceUnlockReEnroll_onStart() {
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+
+        mKeyguardUpdateMonitorCallback.onBiometricError(
+                BiometricFaceConstants.BIOMETRIC_ERROR_RE_ENROLL,
+                "Testing Face Re-enrollment" /* errString */,
+                BiometricSourceType.FACE
+        );
+
+        mBiometricNotificationService.start();
+        mKeyguardStateControllerCallback.onKeyguardShowingChanged();
+
+        mLooper.moveTimeForward(SHOW_NOTIFICATION_DELAY_MS);
+        mLooper.processAllMessages();
+
+        verify(mNotificationManager, never()).notifyAsUser(eq(TAG), eq(FACE_NOTIFICATION_ID),
+                mNotificationArgumentCaptor.capture(), any());
     }
 
 }
