@@ -25,6 +25,7 @@ import android.window.TaskFragmentParentInfo;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.window.extensions.core.util.function.Function;
 
 /**
@@ -186,10 +187,21 @@ class SplitContainer {
         return (mSplitRule instanceof SplitPlaceholderRule);
     }
 
-    @NonNull
-    SplitInfo toSplitInfo() {
-        return new SplitInfo(mPrimaryContainer.toActivityStack(),
-                mSecondaryContainer.toActivityStack(), mCurrentSplitAttributes, mToken);
+    /**
+     * Returns the SplitInfo representing this container.
+     *
+     * @return the SplitInfo representing this container if the underlying TaskFragmentContainers
+     * are stable, or {@code null} if any TaskFragmentContainer is in an intermediate state.
+     */
+    @Nullable
+    SplitInfo toSplitInfoIfStable() {
+        final ActivityStack primaryActivityStack = mPrimaryContainer.toActivityStackIfStable();
+        final ActivityStack secondaryActivityStack = mSecondaryContainer.toActivityStackIfStable();
+        if (primaryActivityStack == null || secondaryActivityStack == null) {
+            return null;
+        }
+        return new SplitInfo(primaryActivityStack, secondaryActivityStack,
+                mCurrentSplitAttributes, mToken);
     }
 
     static boolean shouldFinishPrimaryWithSecondary(@NonNull SplitRule splitRule) {

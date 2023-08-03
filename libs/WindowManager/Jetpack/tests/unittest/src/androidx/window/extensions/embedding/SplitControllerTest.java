@@ -1251,6 +1251,34 @@ public class SplitControllerTest {
     }
 
     @Test
+    public void testSplitInfoCallback_NotReportSplitIfUnstable() {
+        final Activity r0 = createMockActivity();
+        final Activity r1 = createMockActivity();
+        addSplitTaskFragments(r0, r1);
+
+        // Should report new SplitInfo list if stable.
+        mSplitController.updateCallbackIfNecessary();
+        assertEquals(1, mSplitInfos.size());
+
+        // Should not report new SplitInfo list if unstable, e.g. any Activity is finishing.
+        mSplitInfos.clear();
+        final Activity r2 = createMockActivity();
+        final Activity r3 = createMockActivity();
+        doReturn(true).when(r2).isFinishing();
+        addSplitTaskFragments(r2, r3);
+
+        mSplitController.updateCallbackIfNecessary();
+        assertTrue(mSplitInfos.isEmpty());
+
+        // Should report SplitInfo list if it becomes stable again.
+        mSplitInfos.clear();
+        doReturn(false).when(r2).isFinishing();
+
+        mSplitController.updateCallbackIfNecessary();
+        assertEquals(2, mSplitInfos.size());
+    }
+
+    @Test
     public void testSplitInfoCallback_reportSplitInMultipleTasks() {
         final int taskId0 = 1;
         final int taskId1 = 2;
