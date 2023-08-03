@@ -2296,12 +2296,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         private VibrationAttributes createVibrationAttributes(CommonOptions commonOptions) {
-            final int flags =
-                    commonOptions.force ? VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY : 0;
+            // This will bypass user settings, Do Not Disturb and other interruption policies.
+            final int flags = commonOptions.force ? ATTRIBUTES_ALL_BYPASS_FLAGS : 0;
             return new VibrationAttributes.Builder()
                     .setFlags(flags)
-                    // Used to apply Settings.System.HAPTIC_FEEDBACK_INTENSITY to scale effects.
-                    .setUsage(VibrationAttributes.USAGE_TOUCH)
+                    // Used to allow vibrations when the adb shell process is running in background.
+                    // This will apply the NOTIFICATION_VIBRATION_INTENSITY setting.
+                    .setUsage(VibrationAttributes.USAGE_COMMUNICATION_REQUEST)
                     .build();
         }
 
