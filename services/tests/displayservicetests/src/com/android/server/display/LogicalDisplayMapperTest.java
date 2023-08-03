@@ -44,9 +44,13 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,6 +62,7 @@ import android.os.IPowerManager;
 import android.os.IThermalService;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.view.Display;
 import android.view.DisplayAddress;
@@ -69,7 +74,7 @@ import androidx.test.filters.SmallTest;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
-import com.android.server.utils.FoldSettingWrapper;
+import com.android.server.utils.FoldSettingProvider;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -93,6 +98,7 @@ public class LogicalDisplayMapperTest {
     private static int sUniqueTestDisplayId = 0;
     private static final int DEVICE_STATE_CLOSED = 0;
     private static final int DEVICE_STATE_OPEN = 2;
+    private static final int FLAG_GO_TO_SLEEP_ON_FOLD = 0;
     private static int sNextNonDefaultDisplayId = DEFAULT_DISPLAY + 1;
     private static final File NON_EXISTING_FILE = new File("/non_existing_folder/should_not_exist");
 
@@ -107,7 +113,7 @@ public class LogicalDisplayMapperTest {
 
     @Mock LogicalDisplayMapper.Listener mListenerMock;
     @Mock Context mContextMock;
-    @Mock FoldSettingWrapper mFoldSettingWrapperMock;
+    @Mock FoldSettingProvider mFoldSettingProviderMock;
     @Mock Resources mResourcesMock;
     @Mock IPowerManager mIPowerManagerMock;
     @Mock IThermalService mIThermalServiceMock;
@@ -120,7 +126,7 @@ public class LogicalDisplayMapperTest {
     @Captor ArgumentCaptor<Integer> mDisplayEventCaptor;
 
     @Before
-    public void setUp() {
+    public void setUp() throws RemoteException {
         // Share classloader to allow package private access.
         System.setProperty("dexmaker.share_classloader", "true");
         MockitoAnnotations.initMocks(this);
@@ -150,7 +156,9 @@ public class LogicalDisplayMapperTest {
 
         when(mContextMock.getSystemServiceName(PowerManager.class))
                 .thenReturn(Context.POWER_SERVICE);
-        when(mFoldSettingWrapperMock.shouldStayAwakeOnFold()).thenReturn(false);
+        when(mFoldSettingProviderMock.shouldStayAwakeOnFold()).thenReturn(false);
+        when(mFoldSettingProviderMock.shouldSleepOnFold()).thenReturn(false);
+        when(mIPowerManagerMock.isInteractive()).thenReturn(true);
         when(mContextMock.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
         when(mContextMock.getResources()).thenReturn(mResourcesMock);
         when(mResourcesMock.getBoolean(
@@ -166,9 +174,10 @@ public class LogicalDisplayMapperTest {
         when(mFlagsMock.isConnectedDisplayManagementEnabled()).thenReturn(false);
         mLooper = new TestLooper();
         mHandler = new Handler(mLooper.getLooper());
-        mLogicalDisplayMapper = new LogicalDisplayMapper(mContextMock, mDisplayDeviceRepo,
+        mLogicalDisplayMapper = new LogicalDisplayMapper(mContextMock, mFoldSettingProviderMock,
+                mDisplayDeviceRepo,
                 mListenerMock, new DisplayManagerService.SyncRoot(), mHandler,
-                mDeviceStateToLayoutMapSpy, mFoldSettingWrapperMock, mFlagsMock);
+                mDeviceStateToLayoutMapSpy, mFlagsMock);
     }
 
 
@@ -645,8 +654,8 @@ public class LogicalDisplayMapperTest {
     }
 
     @Test
-    public void testDeviceShouldNotSleepWhenFoldSettingTrue() {
-        when(mFoldSettingWrapperMock.shouldStayAwakeOnFold()).thenReturn(true);
+    public void testDeviceShouldNotSleepWhenStayAwakeSettingTrue() {
+        when(mFoldSettingProviderMock.shouldStayAwakeOnFold()).thenReturn(true);
 
         assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_CLOSED,
                 DEVICE_STATE_OPEN,
@@ -676,6 +685,26 @@ public class LogicalDisplayMapperTest {
                 /* isOverrideActive= */true,
                 /* isInteractive= */true,
                 /* isBootCompleted= */true));
+    }
+
+    @Test
+    public void testDeviceShouldPutToSleepWhenSleepSettingTrue() throws RemoteException {
+        when(mFoldSettingProviderMock.shouldSleepOnFold()).thenReturn(true);
+
+        finishBootAndFoldDevice();
+
+        verify(mIPowerManagerMock, atLeastOnce()).goToSleep(anyLong(), anyInt(),
+                eq(FLAG_GO_TO_SLEEP_ON_FOLD));
+    }
+
+    @Test
+    public void testDeviceShouldNotBePutToSleepWhenSleepSettingFalse() throws RemoteException {
+        when(mFoldSettingProviderMock.shouldSleepOnFold()).thenReturn(false);
+
+        finishBootAndFoldDevice();
+
+        verify(mIPowerManagerMock, never()).goToSleep(anyLong(), anyInt(),
+                eq(FLAG_GO_TO_SLEEP_ON_FOLD));
     }
 
     @Test
@@ -929,6 +958,15 @@ public class LogicalDisplayMapperTest {
     /////////////////
     // Helper Methods
     /////////////////
+
+    private void finishBootAndFoldDevice() {
+        mLogicalDisplayMapper.setDeviceStateLocked(DEVICE_STATE_OPEN, false);
+        advanceTime(1000);
+        mLogicalDisplayMapper.onBootCompleted();
+        advanceTime(1000);
+        mLogicalDisplayMapper.setDeviceStateLocked(DEVICE_STATE_CLOSED, false);
+        advanceTime(1000);
+    }
 
     private void createDefaultDisplay(Layout layout, DisplayDevice device) {
         createDefaultDisplay(layout, info(device).address);

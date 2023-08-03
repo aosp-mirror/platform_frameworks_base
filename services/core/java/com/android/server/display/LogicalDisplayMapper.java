@@ -43,7 +43,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
-import com.android.server.utils.FoldSettingWrapper;
+import com.android.server.utils.FoldSettingProvider;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -149,7 +149,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final Listener mListener;
     private final DisplayManagerService.SyncRoot mSyncRoot;
     private final LogicalDisplayMapperHandler mHandler;
-    private final FoldSettingWrapper mFoldSettingWrapper;
+    private final FoldSettingProvider mFoldSettingProvider;
     private final PowerManager mPowerManager;
 
     /**
@@ -196,26 +196,27 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private boolean mInteractive;
     private final DisplayManagerFlags mFlags;
 
-    LogicalDisplayMapper(@NonNull Context context, @NonNull DisplayDeviceRepository repo,
+    LogicalDisplayMapper(@NonNull Context context, FoldSettingProvider foldSettingProvider,
+            @NonNull DisplayDeviceRepository repo,
             @NonNull Listener listener, @NonNull DisplayManagerService.SyncRoot syncRoot,
-            @NonNull Handler handler, FoldSettingWrapper foldSettingWrapper,
-            DisplayManagerFlags flags) {
-        this(context, repo, listener, syncRoot, handler, new DeviceStateToLayoutMap(
-                (isDefault) -> isDefault ? DEFAULT_DISPLAY : sNextNonDefaultDisplayId++),
-                foldSettingWrapper, flags);
+            @NonNull Handler handler, DisplayManagerFlags flags) {
+        this(context, foldSettingProvider, repo, listener, syncRoot, handler,
+                new DeviceStateToLayoutMap((isDefault) -> isDefault ? DEFAULT_DISPLAY
+                        : sNextNonDefaultDisplayId++), flags);
     }
 
-    LogicalDisplayMapper(@NonNull Context context, @NonNull DisplayDeviceRepository repo,
+    LogicalDisplayMapper(@NonNull Context context, FoldSettingProvider foldSettingProvider,
+            @NonNull DisplayDeviceRepository repo,
             @NonNull Listener listener, @NonNull DisplayManagerService.SyncRoot syncRoot,
             @NonNull Handler handler, @NonNull DeviceStateToLayoutMap deviceStateToLayoutMap,
-            FoldSettingWrapper foldSettingWrapper, DisplayManagerFlags flags) {
+            DisplayManagerFlags flags) {
         mSyncRoot = syncRoot;
         mPowerManager = context.getSystemService(PowerManager.class);
         mInteractive = mPowerManager.isInteractive();
         mHandler = new LogicalDisplayMapperHandler(handler.getLooper());
         mDisplayDeviceRepo = repo;
         mListener = listener;
-        mFoldSettingWrapper = foldSettingWrapper;
+        mFoldSettingProvider = foldSettingProvider;
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         mSupportsConcurrentInternalDisplays = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_supportsConcurrentInternalDisplays);
@@ -488,10 +489,13 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 });
             } else if (sleepDevice) {
                 // Send the device to sleep when required.
+                int goToSleepFlag =
+                        mFoldSettingProvider.shouldSleepOnFold() ? 0
+                                : PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP;
                 mHandler.post(() -> {
                     mPowerManager.goToSleep(SystemClock.uptimeMillis(),
                             PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD,
-                            PowerManager.GO_TO_SLEEP_FLAG_SOFT_SLEEP);
+                            goToSleepFlag);
                 });
             }
         }
@@ -565,7 +569,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 && mDeviceStatesOnWhichToSleep.get(pendingState)
                 && !mDeviceStatesOnWhichToSleep.get(currentState)
                 && !isOverrideActive
-                && isInteractive && isBootCompleted && !mFoldSettingWrapper.shouldStayAwakeOnFold();
+                && isInteractive && isBootCompleted
+                && !mFoldSettingProvider.shouldStayAwakeOnFold();
     }
 
     private boolean areAllTransitioningDisplaysOffLocked() {
