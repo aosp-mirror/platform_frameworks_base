@@ -31970,7 +31970,7 @@ package android.os {
     method public boolean isInteractive();
     method public boolean isLowPowerStandbyEnabled();
     method public boolean isPowerSaveMode();
-    method public boolean isRebootingUserspaceSupported();
+    method @Deprecated public boolean isRebootingUserspaceSupported();
     method @Deprecated public boolean isScreenOn();
     method public boolean isSustainedPerformanceModeSupported();
     method public boolean isWakeLockLevelSupported(int);
