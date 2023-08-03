@@ -1319,11 +1319,8 @@ public class SubscriptionManager {
     private final Context mContext;
 
     // Cache of Resource that has been created in getResourcesForSubId. Key is a Pair containing
-    // the Package Name and subId. Applications can create new contexts from
-    // {@link android.content.Context#createPackageContext} with the same resources for different
-    // purposes. Therefore, Cache can be wasted for resources from different contexts in the same
-    // package. Use the package name rather than the context itself as a key value of cache.
-    private static final Map<Pair<String, Integer>, Resources> sResourcesCache =
+    // the Context and subId.
+    private static final Map<Pair<Context, Integer>, Resources> sResourcesCache =
             new ConcurrentHashMap<>();
 
     /**
@@ -2812,13 +2809,12 @@ public class SubscriptionManager {
             boolean useRootLocale) {
         // Check if resources for this context and subId already exist in the resource cache.
         // Resources that use the root locale are not cached.
-        Pair<String, Integer> cacheKey = null;
+        Pair<Context, Integer> cacheKey = null;
         if (isValidSubscriptionId(subId) && !useRootLocale) {
-            cacheKey = Pair.create(context.getPackageName(), subId);
-            Resources cached = sResourcesCache.get(cacheKey);
-            if (cached != null) {
+            cacheKey = Pair.create(context, subId);
+            if (sResourcesCache.containsKey(cacheKey)) {
                 // Cache hit. Use cached Resources.
-                return cached;
+                return sResourcesCache.get(cacheKey);
             }
         }
 
