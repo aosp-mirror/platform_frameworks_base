@@ -284,9 +284,6 @@ public class GnssNative {
 
     /** Callbacks for notifications. */
     public interface NotificationCallbacks {
-        void onReportNiNotification(int notificationId, int niType, int notifyFlags,
-                int timeout, int defaultResponse, String requestorId, String text,
-                int requestorIdEncoding, int textEncoding);
         void onReportNfwNotification(String proxyAppPackageName, byte protocolStack,
                 String otherProtocolStackName, byte requestor, String requestorId,
                 byte responseType, boolean inEmergencyMode, boolean isCachedLocation);
@@ -933,14 +930,6 @@ public class GnssNative {
     }
 
     /**
-     * Send a network initiated respnse.
-     */
-    public void sendNiResponse(int notificationId, int userResponse) {
-        Preconditions.checkState(mRegistered);
-        mGnssHal.sendNiResponse(notificationId, userResponse);
-    }
-
-    /**
      * Request an eventual update of GNSS power statistics.
      */
     public void requestPowerStats() {
@@ -1244,16 +1233,6 @@ public class GnssNative {
     }
 
     @NativeEntryPoint
-    void reportNiNotification(int notificationId, int niType, int notifyFlags,
-            int timeout, int defaultResponse, String requestorId, String text,
-            int requestorIdEncoding, int textEncoding) {
-        Binder.withCleanCallingIdentity(
-                () -> mNotificationCallbacks.onReportNiNotification(notificationId, niType,
-                        notifyFlags, timeout, defaultResponse, requestorId, text,
-                        requestorIdEncoding, textEncoding));
-    }
-
-    @NativeEntryPoint
     void requestSetID(int flags) {
         Binder.withCleanCallingIdentity(() -> mAGpsCallbacks.onRequestSetID(flags));
     }
@@ -1488,10 +1467,6 @@ public class GnssNative {
             return native_is_gnss_visibility_control_supported();
         }
 
-        protected void sendNiResponse(int notificationId, int userResponse) {
-            native_send_ni_response(notificationId, userResponse);
-        }
-
         protected void requestPowerStats() {
             native_request_power_stats();
         }
@@ -1647,8 +1622,6 @@ public class GnssNative {
     // network initiated (NI) APIs
 
     private static native boolean native_is_gnss_visibility_control_supported();
-
-    private static native void native_send_ni_response(int notificationId, int userResponse);
 
     // power stats APIs
 

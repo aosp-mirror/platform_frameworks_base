@@ -1750,13 +1750,6 @@ public class LocationManagerService extends ILocationManager.Stub implements
         }
 
         @Override
-        public void sendNiResponse(int notifId, int userResponse) {
-            if (mGnssManagerService != null) {
-                mGnssManagerService.sendNiResponse(notifId, userResponse);
-            }
-        }
-
-        @Override
         public @Nullable LocationTime getGnssTimeMillis() {
             LocationProviderManager gpsManager = getLocationProviderManager(GPS_PROVIDER);
             if (gpsManager == null) {
