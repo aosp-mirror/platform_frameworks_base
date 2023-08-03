@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.mock;
@@ -82,9 +84,9 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 mPowerInteractor,
                 mStateController,
                 mRemoteInputUriController,
-                mock(RemoteInputControllerLogger.class),
+                new RemoteInputControllerLogger(logcatLogBuffer()),
                 mClickNotifier,
-                mock(ActionClickLogger.class),
+                new ActionClickLogger(logcatLogBuffer()),
                 mock(DumpManager.class));
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)

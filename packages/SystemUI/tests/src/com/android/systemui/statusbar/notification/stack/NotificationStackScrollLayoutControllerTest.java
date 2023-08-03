@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
@@ -154,8 +155,10 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private VisibilityLocationProviderDelegator mVisibilityLocationProviderDelegator;
     @Mock private ShadeController mShadeController;
     @Mock private InteractionJankMonitor mJankMonitor;
-    @Mock private StackStateLogger mStackLogger;
-    @Mock private NotificationStackScrollLogger mLogger;
+    private final StackStateLogger mStackLogger = new StackStateLogger(logcatLogBuffer(),
+            logcatLogBuffer());
+    private final NotificationStackScrollLogger mLogger = new NotificationStackScrollLogger(
+            logcatLogBuffer(), logcatLogBuffer(), logcatLogBuffer());
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock private NotificationTargetsHelper mNotificationTargetsHelper;
     @Mock private SecureSettings mSecureSettings;

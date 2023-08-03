@@ -16,9 +16,12 @@
 
 package com.android.systemui.statusbar.notification.interruption;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -50,7 +53,8 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
     private HeadsUpViewBinder mViewBinder;
     @Mock private NotificationMessagingUtil mNotificationMessagingUtil;
     @Mock private RowContentBindStage mBindStage;
-    @Mock private HeadsUpViewBinderLogger mLogger;
+    private final HeadsUpViewBinderLogger mLogger = spy(
+            new HeadsUpViewBinderLogger(logcatLogBuffer()));
     @Mock private NotificationEntry mEntry;
     @Mock private ExpandableNotificationRow mRow;
 
