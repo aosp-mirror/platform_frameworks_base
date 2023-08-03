@@ -115,6 +115,8 @@ import java.util.regex.Pattern;
  * with the lower case value of the view's text are shown.
  *   <li>All other datasets are hidden.
  * </ol>
+ * <p>Note: If user enters four or more characters, all datasets will be hidden</p>
+ *
  */
 public final class Dataset implements Parcelable {
     /**

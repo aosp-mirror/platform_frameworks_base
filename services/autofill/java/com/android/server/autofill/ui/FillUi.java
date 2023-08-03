@@ -426,10 +426,16 @@ final class FillUi {
             if (mDestroyed) {
                 return;
             }
+            final int size = mFilterText == null ? 0 : mFilterText.length();
             if (count <= 0) {
                 if (sDebug) {
-                    final int size = mFilterText == null ? 0 : mFilterText.length();
                     Slog.d(TAG, "No dataset matches filter with " + size + " chars");
+                }
+                mCallback.requestHideFillUi();
+            } else if (size > 3) {
+                // Do not show suggestion if user entered four or more characters
+                if (sDebug) {
+                    Slog.d(TAG, "Not showing fill UI because user entered more than 3 characters");
                 }
                 mCallback.requestHideFillUi();
             } else {
