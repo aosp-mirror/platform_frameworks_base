@@ -135,6 +135,9 @@ public class BiometricNotificationService implements CoreStartable {
         intentFilter.addAction(ACTION_SHOW_FACE_REENROLL_DIALOG);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.FACE_UNLOCK_RE_ENROLL, REENROLL_NOT_REQUIRED,
+                UserHandle.USER_CURRENT);
     }
 
     private void queueFaceReenrollNotification() {
