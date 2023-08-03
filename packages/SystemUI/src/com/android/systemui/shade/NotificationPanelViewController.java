@@ -230,6 +230,8 @@ import com.android.systemui.util.Utils;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import kotlin.Unit;
 
 import java.io.PrintWriter;
@@ -3379,6 +3381,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mBlockingExpansionForCurrentTouch = isTracking();
     }
 
+    @NeverCompile
     @Override
     public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG + ":");
