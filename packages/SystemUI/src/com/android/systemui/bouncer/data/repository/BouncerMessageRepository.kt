@@ -28,6 +28,7 @@ import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART
+import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TRUSTAGENT_EXPIRED
 import com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_USER_REQUEST
@@ -38,6 +39,7 @@ import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
@@ -105,6 +107,9 @@ interface BouncerMessageRepository {
     fun clearMessage()
 }
 
+private const val SYS_BOOT_REASON_PROP = "sys.boot.reason.last"
+private const val REBOOT_MAINLINE_UPDATE = "reboot,mainline_update"
+
 @SysUISingleton
 class BouncerMessageRepositoryImpl
 @Inject
@@ -114,6 +119,7 @@ constructor(
     updateMonitor: KeyguardUpdateMonitor,
     private val bouncerMessageFactory: BouncerMessageFactory,
     private val userRepository: UserRepository,
+    private val systemPropertiesHelper: SystemPropertiesHelper,
     fingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
 ) : BouncerMessageRepository {
 
@@ -132,6 +138,9 @@ constructor(
     private val isAnyBiometricsEnabledAndEnrolled =
         or(isFaceEnrolledAndEnabled, isFingerprintEnrolledAndEnabled)
 
+    private val wasRebootedForMainlineUpdate
+        get() = systemPropertiesHelper.get(SYS_BOOT_REASON_PROP) == REBOOT_MAINLINE_UPDATE
+
     private val authFlagsBasedPromptReason: Flow<Int> =
         combine(
                 biometricSettingsRepository.authenticationFlags,
@@ -144,7 +153,8 @@ constructor(
                 return@map if (
                     trustOrBiometricsAvailable && flags.isPrimaryAuthRequiredAfterReboot
                 ) {
-                    PROMPT_REASON_RESTART
+                    if (wasRebootedForMainlineUpdate) PROMPT_REASON_RESTART_FOR_MAINLINE_UPDATE
+                    else PROMPT_REASON_RESTART
                 } else if (trustOrBiometricsAvailable && flags.isPrimaryAuthRequiredAfterTimeout) {
                     PROMPT_REASON_TIMEOUT
                 } else if (flags.isPrimaryAuthRequiredAfterDpmLockdown) {
