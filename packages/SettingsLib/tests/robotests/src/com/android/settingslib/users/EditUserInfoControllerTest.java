@@ -99,7 +99,7 @@ public class EditUserInfoControllerTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mActivity = spy(ActivityController.of(new FragmentActivity()).get());
-        mActivity.setTheme(R.style.Theme_AppCompat_DayNight);
+        mActivity.setTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight);
         mController = new TestEditUserInfoController();
         mPhotoRestrictedByBase = false;
     }

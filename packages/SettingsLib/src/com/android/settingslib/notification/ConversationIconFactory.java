@@ -32,7 +32,6 @@ import android.util.IconDrawableFactory;
 import android.util.Log;
 
 import com.android.launcher3.icons.BaseIconFactory;
-import com.android.settingslib.R;
 import com.android.settingslib.Utils;
 
 /**
@@ -81,7 +80,7 @@ public class ConversationIconFactory extends BaseIconFactory {
         mPackageManager = pm;
         mIconDrawableFactory = iconDrawableFactory;
         mImportantConversationColor = context.getResources().getColor(
-                R.color.important_conversation, null);
+                com.android.launcher3.icons.R.color.important_conversation, null);
     }
 
     /**
