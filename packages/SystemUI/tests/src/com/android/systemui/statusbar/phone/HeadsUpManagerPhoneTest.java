@@ -32,6 +32,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.AlertingNotificationManager;
@@ -107,11 +108,13 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         }
     }
 
+    @Override
     protected AlertingNotificationManager createAlertingNotificationManager() {
         return mHeadsUpManager;
     }
 
     @Before
+    @Override
     public void setUp() {
         AccessibilityManagerWrapper accessibilityMgr =
                 mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
@@ -119,8 +122,10 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 .thenReturn(TEST_AUTO_DISMISS_TIME);
         when(mVSProvider.isReorderingAllowed()).thenReturn(true);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
-        super.setUp();
+        mContext.getOrCreateTestableResources().addOverride(
+                R.integer.ambient_notification_extension_time, 500);
 
+        super.setUp();
         mHeadsUpManager = new TestableHeadsUpManagerPhone(
                 mContext,
                 mHeadsUpManagerLogger,
@@ -137,8 +142,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     }
 
     @After
+    @Override
     public void tearDown() {
-        mTestHandler.removeCallbacksAndMessages(null);
+        super.tearDown();
     }
 
     @Test
@@ -184,7 +190,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         assertTrue(mHeadsUpManager.canRemoveImmediately(mEntry.getKey()));
     }
 
-
     @Test
     public void testExtendHeadsUp() {
         mHeadsUpManager.showNotification(mEntry);
@@ -192,7 +197,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 () -> mLivesPastNormalTime = mHeadsUpManager.isAlerting(mEntry.getKey());
         mTestHandler.postDelayed(pastNormalTimeRunnable,
                 TEST_AUTO_DISMISS_TIME + mHeadsUpManager.mExtensionTime / 2);
-        mTestHandler.postDelayed(TEST_TIMEOUT_RUNNABLE, TEST_TIMEOUT_TIME);
+        mTestHandler.postDelayed(mTestTimeoutRunnable, TEST_TIMEOUT_TIME);
 
         mHeadsUpManager.extendHeadsUp();
 
