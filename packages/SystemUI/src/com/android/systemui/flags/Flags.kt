@@ -270,7 +270,7 @@ object Flags {
 
     /** Migrate the lock icon view to the new keyguard root view. */
     // TODO(b/286552209): Tracking bug.
-    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag(240, "migrate_lock_icon", teamfood = true)
+    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag(240, "migrate_lock_icon")
 
     // TODO(b/288276738): Tracking bug.
     @JvmField val WIDGET_ON_KEYGUARD = unreleasedFlag(241, "widget_on_keyguard")
