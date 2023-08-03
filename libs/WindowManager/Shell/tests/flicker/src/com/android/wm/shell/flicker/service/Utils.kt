@@ -23,6 +23,7 @@ import android.platform.test.rule.UnlockScreenRule
 import android.tools.common.NavBar
 import android.tools.common.Rotation
 import android.tools.device.apphelpers.MessagingAppHelper
+import android.tools.device.flicker.rules.ArtifactSaverRule
 import android.tools.device.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.device.flicker.rules.LaunchAppRule
 import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
@@ -33,9 +34,10 @@ object Utils {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
 
     fun testSetupRule(navigationMode: NavBar, rotation: Rotation): RuleChain {
-        return RuleChain.outerRule(UnlockScreenRule())
+        return RuleChain.outerRule(ArtifactSaverRule())
+            .around(UnlockScreenRule())
             .around(
-                NavigationModeRule(navigationMode.value, /* changeNavigationModeAfterTest */ false)
+                NavigationModeRule(navigationMode.value, false)
             )
             .around(
                 LaunchAppRule(MessagingAppHelper(instrumentation), clearCacheAfterParsing = false)
