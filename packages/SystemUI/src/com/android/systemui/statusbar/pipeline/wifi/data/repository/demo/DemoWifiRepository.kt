@@ -48,6 +48,9 @@ constructor(
     private val _wifiNetwork = MutableStateFlow<WifiNetworkModel>(WifiNetworkModel.Inactive)
     override val wifiNetwork: StateFlow<WifiNetworkModel> = _wifiNetwork
 
+    private val _secondaryNetworks = MutableStateFlow<List<WifiNetworkModel>>(emptyList())
+    override val secondaryNetworks: StateFlow<List<WifiNetworkModel>> = _secondaryNetworks
+
     private val _wifiActivity =
         MutableStateFlow(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
     override val wifiActivity: StateFlow<DataActivityModel> = _wifiActivity

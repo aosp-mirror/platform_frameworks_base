@@ -115,6 +115,11 @@ constructor(
             .flatMapLatest { it.wifiNetwork }
             .stateIn(scope, SharingStarted.WhileSubscribed(), realImpl.wifiNetwork.value)
 
+    override val secondaryNetworks: StateFlow<List<WifiNetworkModel>> =
+        activeRepo
+            .flatMapLatest { it.secondaryNetworks }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), realImpl.secondaryNetworks.value)
+
     override val wifiActivity: StateFlow<DataActivityModel> =
         activeRepo
             .flatMapLatest { it.wifiActivity }
