@@ -419,12 +419,20 @@ public class DynamicSystemInstallationService extends Service
         mDynSystem.remove();
     }
 
+    private boolean isDsuSlotLocked() {
+        // Slot names ending with ".lock" are a customized installation.
+        // We expect the client app to provide custom UI to enter/exit DSU mode.
+        // We will ignore the ACTION_REBOOT_TO_NORMAL command and will not show
+        // notifications in this case.
+        return mDynSystem.getActiveDsuSlot().endsWith(".lock");
+    }
+
     private void executeRebootToNormalCommand() {
         if (!isInDynamicSystem()) {
             Log.e(TAG, "It's already running in normal system.");
             return;
         }
-        if (mDynSystem.getActiveDsuSlot().endsWith(".lock")) {
+        if (isDsuSlotLocked()) {
             Log.e(TAG, "Ignore the reboot intent for a locked DSU slot");
             return;
         }
@@ -449,13 +457,13 @@ public class DynamicSystemInstallationService extends Service
     private void executeNotifyIfInUseCommand() {
         switch (getStatus()) {
             case STATUS_IN_USE:
-                if (!mHideNotification) {
+                if (!mHideNotification && !isDsuSlotLocked()) {
                     startForeground(NOTIFICATION_ID,
                             buildNotification(STATUS_IN_USE, CAUSE_NOT_SPECIFIED));
                 }
                 break;
             case STATUS_READY:
-                if (!mHideNotification) {
+                if (!mHideNotification && !isDsuSlotLocked()) {
                     startForeground(NOTIFICATION_ID,
                             buildNotification(STATUS_READY, CAUSE_NOT_SPECIFIED));
                 }

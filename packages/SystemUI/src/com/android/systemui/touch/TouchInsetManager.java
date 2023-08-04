@@ -90,6 +90,9 @@ public class TouchInsetManager {
             final Region cumulativeRegion = Region.obtain();
 
             mTrackedViews.stream().forEach(view -> {
+                if (!view.isAttachedToWindow()) {
+                    return;
+                }
                 final Rect boundaries = new Rect();
                 view.getDrawingRect(boundaries);
                 ((ViewGroup) view.getRootView()).offsetDescendantRectToMyCoords(view, boundaries);

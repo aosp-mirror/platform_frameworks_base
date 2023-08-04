@@ -5176,6 +5176,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Tell anyone interested that we are done booting!
             SystemProperties.set("sys.boot_completed", "1");
 
+            // Start PSI monitoring in LMKD if it was skipped earlier.
+            ProcessList.startPsiMonitoringAfterBoot();
+
             // And trigger dev.bootcomplete if we are not showing encryption progress
             if (!"trigger_restart_min_framework".equals(VoldProperties.decrypt().orElse(""))
                     || "".equals(VoldProperties.encrypt_progress().orElse(""))) {

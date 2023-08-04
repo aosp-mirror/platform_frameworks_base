@@ -47,6 +47,7 @@ constructor(
             duration = TO_LOCKSCREEN_DURATION,
             onStep = { value -> -translatePx + value * translatePx },
             interpolator = EMPHASIZED_DECELERATE,
+            onCancel = { 0f },
         )
     }
 

@@ -87,6 +87,7 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
 
     private val userTrackerCallback = object : UserTracker.Callback {
         override fun onUserChanged(newUser: Int, userContext: Context) {
+            readShowSilentNotificationSetting()
             if (isLockedOrLocking) {
                 // maybe public mode changed
                 notifyStateChanged("onUserSwitched")
