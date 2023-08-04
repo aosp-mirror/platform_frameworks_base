@@ -57,7 +57,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -205,9 +204,6 @@ constructor(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
-    private val defaultDataSubIdChangeEvent: MutableSharedFlow<Unit> =
-        MutableSharedFlow(extraBufferCapacity = 1)
-
     override val defaultDataSubId: StateFlow<Int> =
         broadcastDispatcher
             .broadcastFlow(
@@ -223,7 +219,6 @@ constructor(
                 initialValue = INVALID_SUBSCRIPTION_ID,
             )
             .onStart { emit(subscriptionManagerProxy.getDefaultDataSubscriptionId()) }
-            .onEach { defaultDataSubIdChangeEvent.tryEmit(Unit) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), INVALID_SUBSCRIPTION_ID)
 
     private val carrierConfigChangedEvent =
@@ -232,7 +227,7 @@ constructor(
             .onEach { logger.logActionCarrierConfigChanged() }
 
     override val defaultDataSubRatConfig: StateFlow<Config> =
-        merge(defaultDataSubIdChangeEvent, carrierConfigChangedEvent)
+        merge(defaultDataSubId, carrierConfigChangedEvent)
             .onStart { emit(Unit) }
             .mapLatest { Config.readConfig(context) }
             .distinctUntilChanged()

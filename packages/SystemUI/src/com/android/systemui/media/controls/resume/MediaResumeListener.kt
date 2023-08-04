@@ -122,9 +122,9 @@ constructor(
                     Log.e(TAG, "Error getting package information", e)
                 }
 
-                Log.d(TAG, "Adding resume controls $desc")
+                Log.d(TAG, "Adding resume controls for ${browser.userId}: $desc")
                 mediaDataManager.addResumptionControls(
-                    currentUserId,
+                    browser.userId,
                     desc,
                     resumeAction,
                     token,
@@ -196,7 +196,11 @@ constructor(
                 }
             resumeComponents.add(component to lastPlayed)
         }
-        Log.d(TAG, "loaded resume components ${resumeComponents.toArray().contentToString()}")
+        Log.d(
+            TAG,
+            "loaded resume components for $currentUserId: " +
+                "${resumeComponents.toArray().contentToString()}"
+        )
 
         if (needsUpdate) {
             // Save any missing times that we had to fill in
@@ -210,11 +214,21 @@ constructor(
             return
         }
 
+        val pm = context.packageManager
         val now = systemClock.currentTimeMillis()
         resumeComponents.forEach {
             if (now.minus(it.second) <= RESUME_MEDIA_TIMEOUT) {
-                val browser = mediaBrowserFactory.create(mediaBrowserCallback, it.first)
-                browser.findRecentMedia()
+                // Verify that the service exists for this user
+                val intent = Intent(MediaBrowserService.SERVICE_INTERFACE)
+                intent.component = it.first
+                val inf = pm.resolveServiceAsUser(intent, 0, currentUserId)
+                if (inf != null) {
+                    val browser =
+                        mediaBrowserFactory.create(mediaBrowserCallback, it.first, currentUserId)
+                    browser.findRecentMedia()
+                } else {
+                    Log.d(TAG, "User $currentUserId does not have component ${it.first}")
+                }
             }
         }
     }
@@ -244,7 +258,7 @@ constructor(
                 Log.d(TAG, "Checking for service component for " + data.packageName)
                 val pm = context.packageManager
                 val serviceIntent = Intent(MediaBrowserService.SERVICE_INTERFACE)
-                val resumeInfo = pm.queryIntentServices(serviceIntent, 0)
+                val resumeInfo = pm.queryIntentServicesAsUser(serviceIntent, 0, currentUserId)
 
                 val inf = resumeInfo?.filter { it.serviceInfo.packageName == data.packageName }
                 if (inf != null && inf.size > 0) {
@@ -280,13 +294,17 @@ constructor(
                         browser: ResumeMediaBrowser
                     ) {
                         // Since this is a test, just save the component for later
-                        Log.d(TAG, "Can get resumable media from $componentName")
+                        Log.d(
+                            TAG,
+                            "Can get resumable media for ${browser.userId} from $componentName"
+                        )
                         mediaDataManager.setResumeAction(key, getResumeAction(componentName))
                         updateResumptionList(componentName)
                         mediaBrowser = null
                     }
                 },
-                componentName
+                componentName,
+                currentUserId
             )
         mediaBrowser?.testConnection()
     }
@@ -326,7 +344,7 @@ constructor(
     /** Get a runnable which will resume media playback */
     private fun getResumeAction(componentName: ComponentName): Runnable {
         return Runnable {
-            mediaBrowser = mediaBrowserFactory.create(null, componentName)
+            mediaBrowser = mediaBrowserFactory.create(null, componentName, currentUserId)
             mediaBrowser?.restart()
         }
     }

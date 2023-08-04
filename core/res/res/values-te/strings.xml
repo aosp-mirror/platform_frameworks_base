@@ -656,7 +656,7 @@
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"వేలిముద్ర సెన్సార్‌ను ఉపయోగించడం సాధ్యం కాదు. రిపెయిర్ ప్రొవైడర్‌ను సందర్శించండి"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Power button pressed"</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"వేలు <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"<xliff:g id="FINGERID">%d</xliff:g>వ వేలు"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"వేలిముద్రను ఉపయోగించండి"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"వేలిముద్ర లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"కొనసాగించడానికి మీ వేలిముద్రను ఉపయోగించండి"</string>
@@ -2163,7 +2163,7 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"అన్‌పాజ్ చేయండి"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"వర్క్ యాప్‌లు లేవు"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"వ్యక్తిగత యాప్‌లు లేవు"</string>
-    <string name="miniresolver_open_work" msgid="6286176185835401931">"వర్క్ <xliff:g id="APP">%s</xliff:g> యాప్‌ను తెరవాలా?"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"<xliff:g id="APP">%s</xliff:g> వర్క్ యాప్‌ను తెరవాలా?"</string>
     <string name="miniresolver_open_in_personal" msgid="807427577794490375">"వ్యక్తిగత <xliff:g id="APP">%s</xliff:g> యాప్‌లో తెరవాలా?"</string>
     <string name="miniresolver_open_in_work" msgid="941341494673509916">"వర్క్ <xliff:g id="APP">%s</xliff:g> యాప్‌లో తెరవాలా?"</string>
     <string name="miniresolver_call_in_work" msgid="528779988307529039">"వర్క్ యాప్ నుండి కాల్ చేయాలా?"</string>

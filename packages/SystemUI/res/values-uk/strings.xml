@@ -69,7 +69,7 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Увімкнути USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Докладніше"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Знімок екрана"</string>
-    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Extend Unlock вимкнено"</string>
+    <string name="global_action_smart_lock_disabled" msgid="6286551337177954859">"Відкладене блокування вимкнено"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"надіслане зображення"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Збереження знімка екрана..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Зберігання знімка екрана в робочому профілі…"</string>
@@ -143,7 +143,7 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Підтверджено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Щоб завершити, натисніть \"Підтвердити\""</string>
     <string name="biometric_dialog_tap_confirm_with_face" msgid="2378151312221818694">"Розблоковано (фейс-контроль)"</string>
-    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Розблоковано (фейсконтроль). Натисніть, щоб продовжити."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Розблоковано (фейс-контроль). Натисніть, щоб продовжити."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Обличчя розпізнано. Натисніть, щоб продовжити."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Обличчя розпізнано. Натисніть значок розблокування."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Автентифіковано"</string>
@@ -185,7 +185,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Обличчя не розпізнано"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Скористайтеся відбитком"</string>
-    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Фейсконтроль недоступний"</string>
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Фейс-контроль недоступний"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth під’єднано."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Відсоток заряду акумулятора невідомий."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Підключено до <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -351,12 +351,12 @@
     <string name="tap_again" msgid="1315420114387908655">"Натисніть знову"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Проведіть пальцем угору, щоб відкрити"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Щоб відкрити, натисніть значок розблокування."</string>
-    <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Розблоковано (фейсконтроль). Відкрити: проведіть угору."</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Розблоковано (фейсконтроль). Натисніть значок розблокування."</string>
-    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Розблоковано (фейсконтроль). Натисніть, щоб відкрити."</string>
+    <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Розблоковано (фейс-контроль). Відкрити: проведіть угору."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Розблоковано (фейс-контроль). Натисніть значок розблокування."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Розблоковано (фейс-контроль). Натисніть, щоб відкрити."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Обличчя розпізнано. Натисніть, щоб відкрити."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Обличчя розпізнано. Натисніть значок розблокування."</string>
-    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Розблоковано (фейсконтроль)"</string>
+    <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Розблоковано (фейс-контроль)"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Обличчя розпізнано"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Проведіть пальцем угору, щоб повторити спробу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Розблокуйте екран, щоб скористатись NFC"</string>
@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Меню кнопки живлення"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Сторінка <xliff:g id="ID_1">%1$d</xliff:g> з <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заблокований екран"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон перегрівся й вимкнувся"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Зараз телефон працює як зазвичай.\nНатисніть, щоб дізнатися більше"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефон перегрівся, тому вимкнувся, щоб охолонути. Зараз він працює, як зазвичай.\n\nТелефон перегрівається, якщо ви:\n	• використовуєте ресурсомісткі додатки (ігри, відео, навігація)\n	• завантажуєте великі файли на телефон або з нього\n	• використовуєте телефон за високої температури"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Переглянути запобіжні заходи"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Телефон нагрівається"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Під час охолодження деякі функції обмежуються.\nНатисніть, щоб дізнатися більше"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ваш телефон охолоджуватиметься автоматично. Ви можете далі користуватися телефоном, але він може працювати повільніше.\n\nКоли телефон охолоне, він працюватиме належним чином."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Переглянути запобіжні заходи"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Від’єднайте пристрій"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Пристрій нагрівається біля зарядного порту. Якщо він під’єднаний до зарядного пристрою або USB-аксесуара, від’єднайте його, однак будьте обережні, оскільки кабель також може бути гарячий."</string>

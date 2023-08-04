@@ -759,13 +759,7 @@
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Мени на копчето за вклучување"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Страница <xliff:g id="ID_1">%1$d</xliff:g> од <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заклучен екран"</string>
-    <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефонот се исклучи поради загреаност"</string>
-    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Сега телефонот работи нормално.\nДопрете за повеќе информации"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефонот беше премногу загреан, така што се исклучи за да се олади. Сега работи нормално.\n\nТелефонот може премногу да се загрее ако:\n	• користите апликации што работат со многу ресурси (како што се, на пример, апликациите за видеа, навигација или игри)\n	• преземате или поставувате големи датотеки\n	•го користите телефонот на високи температури"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Прикажи ги чекорите за грижа за уредот"</string>
-    <string name="high_temp_title" msgid="2218333576838496100">"Телефонот се загрева"</string>
-    <string name="high_temp_notif_message" msgid="1277346543068257549">"Некои функции се ограничени додека телефонот се лади.\nДопрете за повеќе информации"</string>
-    <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефонот автоматски ќе се обиде да се олади. Вие сепак ќе може да го користите, но тој може да работи побавно.\n\nОткако ќе се олади, ќе работи нормално."</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Прикажи ги чекорите за грижа за уредот"</string>
     <string name="high_temp_alarm_title" msgid="8654754369605452169">"Исклучете го уредот од кабел"</string>
     <string name="high_temp_alarm_notify_message" msgid="3917622943609118956">"Вашиот уред се загрева во близина на портата за полнење. Ако е поврзан со полнач или USB-додаток, исклучете го од него и внимавајте бидејќи кабелот може да е топол."</string>

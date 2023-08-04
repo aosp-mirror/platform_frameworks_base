@@ -231,7 +231,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Vnovičen zagon …"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Ponastavitev na tovarniške nastavitve"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Vnovičen zagon …"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"Se zaustavlja ..."</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"Izklaplja se ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Tablični računalnik se bo zaustavil."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Naprava Android TV se bo zaustavila."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Ura se bo izklopila."</string>
