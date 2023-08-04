@@ -125,7 +125,7 @@ public class UserBackupManagerServiceTest {
         mService.setEnabled(true);
         mService.setSetupComplete(true);
         mService.enqueueFullBackup("com.test.backup.app", /* lastBackedUp= */ 0);
-    }
+        }
 
     @After
     public void tearDown() {
