@@ -2323,11 +2323,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"এটা সহযোগী এপক নেপথ্যৰ পৰা অগ্ৰভূমি সেৱাসমূহ আৰম্ভ কৰিবলৈ দিয়ে।"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"মাইক্ৰ’ফ’নটো উপলব্ধ"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"মাইক্ৰ’ফ’নটো অৱৰোধ কৰি থোৱা আছে"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"দ্বৈত স্ক্ৰীন"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ডুৱেল স্ক্ৰীন অন আছে"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen অন আছে"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ সমল দেখুৱাবলৈ দুয়োখন ডিছপ্লে’ ব্যৱহাৰ কৰি আছে"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ডিভাইচটো অতি বেছি গৰম হৈছে"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"আপোনাৰ ফ’নটো অতি বেছি গৰম হোৱাৰ বাবে ডুৱেল স্ক্ৰীন উপলব্ধ নহয়"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"আপোনাৰ ফ’নটো অতি বেছি গৰম হোৱাৰ বাবে Dual Screen উপলব্ধ নহয়"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen উপলব্ধ নহয়"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"বেটাৰী সঞ্চয়কাৰী অন হৈ থকাৰ কাৰণে Dual Screen সুবিধাটো উপলব্ধ নহয়। আপুনি ছেটিঙত এই সুবিধাটো অফ কৰিব পাৰে।"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"ছেটিঙলৈ যাওক"</string>
