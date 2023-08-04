@@ -1317,7 +1317,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         return getCredentialTypeInternal(userId);
     }
 
-    // TODO: this is a hot path, can we optimize it?
     /**
      * Returns the credential type of the user, can be one of {@link #CREDENTIAL_TYPE_NONE},
      * {@link #CREDENTIAL_TYPE_PATTERN}, {@link #CREDENTIAL_TYPE_PIN} and
