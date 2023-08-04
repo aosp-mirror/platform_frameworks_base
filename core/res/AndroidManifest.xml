@@ -4032,6 +4032,13 @@
     <permission android:name="android.permission.READ_WALLPAPER_INTERNAL"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allow apps to always update wallpaper by sending data.
+        @SystemApi
+        @hide
+    -->
+    <permission android:name="android.permission.ALWAYS_UPDATE_WALLPAPER"
+        android:protectionLevel="internal|role" />
+
     <!-- ===================================================== -->
     <!-- Permissions for changing the system clock / time zone -->
     <!-- ===================================================== -->

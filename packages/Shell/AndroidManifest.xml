@@ -849,11 +849,15 @@
     <!-- Permission required for accessing all content provider mime types -->
     <uses-permission android:name="android.permission.GET_ANY_PROVIDER_TYPE" />
 
+    <!-- Permission required for CTS test - CtsWallpaperTestCases -->
+    <uses-permission android:name="android.permission.ALWAYS_UPDATE_WALLPAPER" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true">
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.shell"

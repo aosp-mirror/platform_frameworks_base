@@ -2670,6 +2670,8 @@ public class WallpaperManager {
      * @param z Arbitrary integer argument based on command.
      * @param extras Optional additional information for the command, or null.
      */
+    @RequiresPermission(value = android.Manifest.permission.ALWAYS_UPDATE_WALLPAPER,
+            conditional = true)
     public void sendWallpaperCommand(IBinder windowToken, String action,
             int x, int y, int z, Bundle extras) {
         try {
