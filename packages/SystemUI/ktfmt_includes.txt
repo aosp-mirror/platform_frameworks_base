@@ -438,7 +438,6 @@
 -packages/SystemUI/src/com/android/systemui/statusbar/policy/WalletControllerImpl.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/policy/dagger/RemoteInput.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/policy/dagger/SmartRepliesInflationModule.kt
--packages/SystemUI/src/com/android/systemui/statusbar/tv/VpnStatusObserver.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/window/StatusBarWindowModule.kt
 -packages/SystemUI/src/com/android/systemui/statusbar/window/StatusBarWindowStateController.kt
 -packages/SystemUI/src/com/android/systemui/temporarydisplay/TemporaryViewDisplayController.kt
@@ -446,7 +445,6 @@
 -packages/SystemUI/src/com/android/systemui/temporarydisplay/chipbar/ChipbarRootView.kt
 -packages/SystemUI/src/com/android/systemui/toast/ToastDefaultAnimation.kt
 -packages/SystemUI/src/com/android/systemui/toast/ToastLogger.kt
--packages/SystemUI/src/com/android/systemui/tv/TVSystemUICoreStartableModule.kt
 -packages/SystemUI/src/com/android/systemui/unfold/FoldAodAnimationController.kt
 -packages/SystemUI/src/com/android/systemui/unfold/FoldStateLogger.kt
 -packages/SystemUI/src/com/android/systemui/unfold/SysUIUnfoldModule.kt
