@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -26,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -70,7 +73,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     @Mock private NotificationEntry mEntry;
     @Mock private StatusBarNotification mSbn;
     @Mock private Notification mNotification;
-    @Mock private HeadsUpManagerLogger mLogger;
+    private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
     @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
 
     private final class TestableHeadsUpManager extends HeadsUpManager {
@@ -86,14 +89,17 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
         }
     }
 
+    @Override
     protected AlertingNotificationManager createAlertingNotificationManager() {
         return mHeadsUpManager;
     }
 
     @Before
+    @Override
     public void setUp() {
         initMocks(this);
         when(mEntry.getSbn()).thenReturn(mSbn);
+        when(mEntry.getKey()).thenReturn("entryKey");
         when(mSbn.getNotification()).thenReturn(mNotification);
         super.setUp();
         mHeadsUpManager = new TestableHeadsUpManager(mContext, mLogger, mTestHandler,
@@ -101,8 +107,9 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     }
 
     @After
+    @Override
     public void tearDown() {
-        mTestHandler.removeCallbacksAndMessages(null);
+        super.tearDown();
     }
 
     @Test
@@ -169,7 +176,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
                 () -> mLivesPastNormalTime = mHeadsUpManager.isAlerting(mEntry.getKey());
         mTestHandler.postDelayed(pastNormalTimeRunnable,
                         (TEST_A11Y_AUTO_DISMISS_TIME + TEST_AUTO_DISMISS_TIME) / 2);
-        mTestHandler.postDelayed(TEST_TIMEOUT_RUNNABLE, TEST_A11Y_TIMEOUT_TIME);
+        mTestHandler.postDelayed(mTestTimeoutRunnable, TEST_A11Y_TIMEOUT_TIME);
 
         TestableLooper.get(this).processMessages(2);
 

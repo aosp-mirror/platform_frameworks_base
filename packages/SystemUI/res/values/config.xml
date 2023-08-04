@@ -681,7 +681,6 @@
         <item>6</item> <!-- WAKE_REASON_WAKE_KEY -->
         <item>7</item> <!-- WAKE_REASON_WAKE_MOTION -->
         <item>9</item> <!-- WAKE_REASON_LID -->
-        <item>10</item> <!-- WAKE_REASON_DISPLAY_GROUP_ADDED -->
         <item>12</item> <!-- WAKE_REASON_UNFOLD_DEVICE -->
         <item>15</item> <!-- WAKE_REASON_TAP -->
         <item>16</item> <!-- WAKE_REASON_LIFT -->

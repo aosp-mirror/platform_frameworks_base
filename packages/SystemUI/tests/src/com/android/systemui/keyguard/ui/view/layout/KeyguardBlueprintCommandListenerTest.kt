@@ -18,10 +18,11 @@ package com.android.systemui.keyguard.ui.view.layout
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import java.io.PrintWriter
 import org.junit.Before
@@ -31,32 +32,33 @@ import org.junit.runners.JUnit4
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(JUnit4::class)
 @SmallTest
-class KeyguardLayoutManagerCommandListenerTest : SysuiTestCase() {
-    private lateinit var keyguardLayoutManagerCommandListener: KeyguardLayoutManagerCommandListener
+class KeyguardBlueprintCommandListenerTest : SysuiTestCase() {
+    private lateinit var keyguardBlueprintCommandListener: KeyguardBlueprintCommandListener
     @Mock private lateinit var commandRegistry: CommandRegistry
-    @Mock private lateinit var keyguardLayoutManager: KeyguardLayoutManager
+    @Mock private lateinit var keyguardBlueprintRepository: KeyguardBlueprintRepository
+    @Mock private lateinit var keyguardBlueprintInteractor: KeyguardBlueprintInteractor
     @Mock private lateinit var pw: PrintWriter
     private lateinit var command: () -> Command
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        keyguardLayoutManagerCommandListener =
-            KeyguardLayoutManagerCommandListener(
+        keyguardBlueprintCommandListener =
+            KeyguardBlueprintCommandListener(
                 commandRegistry,
-                keyguardLayoutManager,
+                keyguardBlueprintRepository,
+                keyguardBlueprintInteractor,
             )
-        keyguardLayoutManagerCommandListener.start()
+        keyguardBlueprintCommandListener.start()
         command =
             withArgCaptor<() -> Command> {
-                verify(commandRegistry).registerCommand(eq("layout"), capture())
+                verify(commandRegistry).registerCommand(eq("blueprint"), capture())
             }
     }
 
@@ -64,25 +66,19 @@ class KeyguardLayoutManagerCommandListenerTest : SysuiTestCase() {
     fun testHelp() {
         command().execute(pw, listOf("help"))
         verify(pw, atLeastOnce()).println(anyString())
-        verify(keyguardLayoutManager, never()).transitionToLayout(anyString())
+        verify(keyguardBlueprintInteractor, never()).transitionToBlueprint(anyString())
     }
 
     @Test
     fun testBlank() {
         command().execute(pw, listOf())
         verify(pw, atLeastOnce()).println(anyString())
-        verify(keyguardLayoutManager, never()).transitionToLayout(anyString())
+        verify(keyguardBlueprintInteractor, never()).transitionToBlueprint(anyString())
     }
 
     @Test
     fun testValidArg() {
-        bindFakeIdMapToLayoutManager()
         command().execute(pw, listOf("fake"))
-        verify(keyguardLayoutManager).transitionToLayout("fake")
-    }
-
-    private fun bindFakeIdMapToLayoutManager() {
-        val map = mapOf("fake" to mock(LockscreenLayout::class.java))
-        whenever(keyguardLayoutManager.layoutIdMap).thenReturn(map)
+        verify(keyguardBlueprintInteractor).transitionToBlueprint("fake")
     }
 }

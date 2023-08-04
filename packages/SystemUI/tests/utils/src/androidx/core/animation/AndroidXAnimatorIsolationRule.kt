@@ -16,40 +16,51 @@
 
 package androidx.core.animation
 
+import com.android.systemui.util.test.TestExceptionDeferrer
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
+/**
+ * This rule is used by [com.android.systemui.SysuiTestCase] to fail any test which attempts to
+ * start an AndroidX [Animator] without using [androidx.core.animation.AnimatorTestRule].
+ */
 class AndroidXAnimatorIsolationRule : TestRule {
 
-    private class TestAnimationHandler : AnimationHandler(null) {
-        override fun addAnimationFrameCallback(callback: AnimationFrameCallback?) = doFail()
-        override fun removeCallback(callback: AnimationFrameCallback?) = doFail()
-        override fun onAnimationFrame(frameTime: Long) = doFail()
-        override fun setFrameDelay(frameDelay: Long) = doFail()
-        override fun getFrameDelay(): Long = doFail()
+    private class IsolatingAnimationHandler(ruleThread: Thread) : AnimationHandler(null) {
+        private val exceptionDeferrer = TestExceptionDeferrer(TAG, ruleThread)
+        override fun addAnimationFrameCallback(callback: AnimationFrameCallback?) = onError()
+        override fun removeCallback(callback: AnimationFrameCallback?) = onError()
+        override fun onAnimationFrame(frameTime: Long) = onError()
+        override fun setFrameDelay(frameDelay: Long) = onError()
+
+        private fun onError() =
+            exceptionDeferrer.fail(
+                "Test's animations are not isolated! " +
+                    "Did you forget to add an AnimatorTestRule to your test class?"
+            )
+
+        fun throwDeferred() = exceptionDeferrer.throwDeferred()
     }
 
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
             @Throws(Throwable::class)
             override fun evaluate() {
-                AnimationHandler.setTestHandler(testHandler)
+                val isolationHandler = IsolatingAnimationHandler(Thread.currentThread())
+                AnimationHandler.setTestHandler(isolationHandler)
                 try {
                     base.evaluate()
                 } finally {
                     AnimationHandler.setTestHandler(null)
+                    // Pass or fail, a deferred exception should be the failure reason
+                    isolationHandler.throwDeferred()
                 }
             }
         }
     }
 
-    companion object {
-        private val testHandler = TestAnimationHandler()
-        private fun doFail(): Nothing =
-            error(
-                "Test's animations are not isolated! " +
-                    "Did you forget to add an AnimatorTestRule to your test class?"
-            )
+    private companion object {
+        private const val TAG = "AndroidXAnimatorIsolationRule"
     }
 }

@@ -181,6 +181,10 @@ public class LockIconView extends FrameLayout implements Dumpable {
         mLockIcon.setImageState(getLockIconState(mIconType, mAod), true);
     }
 
+    public ImageView getLockIcon() {
+        return mLockIcon;
+    }
+
     private void addLockIconImageView(Context context, AttributeSet attrs) {
         mLockIcon = new ImageView(context, attrs);
         mLockIcon.setId(R.id.lock_icon);

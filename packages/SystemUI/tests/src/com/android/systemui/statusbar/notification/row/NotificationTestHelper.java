@@ -21,6 +21,7 @@ import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
 import static org.junit.Assert.assertEquals;
@@ -178,13 +179,13 @@ public class NotificationTestHelper {
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
                 mock(NotifInflationErrorManager.class),
-                mock(RowContentBindStageLogger.class));
+                new RowContentBindStageLogger(logcatLogBuffer()));
 
         CommonNotifCollection collection = mock(CommonNotifCollection.class);
 
         mBindPipeline = new NotifBindPipeline(
                 collection,
-                mock(NotifBindPipelineLogger.class),
+                new NotifBindPipelineLogger(logcatLogBuffer()),
                 mTestLooper.getLooper());
         mBindPipeline.setStage(mBindStage);
 
@@ -596,7 +597,7 @@ public class NotificationTestHelper {
                 mock(NotificationGutsManager.class),
                 mDismissibilityProvider,
                 mock(MetricsLogger.class),
-                mock(NotificationChildrenContainerLogger.class),
+                new NotificationChildrenContainerLogger(logcatLogBuffer()),
                 mock(SmartReplyConstants.class),
                 mock(SmartReplyController.class),
                 mFeatureFlags,

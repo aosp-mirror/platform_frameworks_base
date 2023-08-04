@@ -53,7 +53,10 @@ constructor(
 
     /** Requests a transition to the scene with the given key. */
     fun setCurrentScene(scene: SceneModel) {
-        interactor.setCurrentScene(scene)
+        interactor.setCurrentScene(
+            scene = scene,
+            loggingReason = SCENE_TRANSITION_LOGGING_REASON,
+        )
     }
 
     /**
@@ -68,5 +71,9 @@ constructor(
     /** Handles a [MotionEvent] representing remote user input. */
     fun onRemoteUserInput(event: MotionEvent) {
         interactor.onRemoteUserInput(RemoteUserInput.translateMotionEvent(event))
+    }
+
+    companion object {
+        private const val SCENE_TRANSITION_LOGGING_REASON = "user input"
     }
 }

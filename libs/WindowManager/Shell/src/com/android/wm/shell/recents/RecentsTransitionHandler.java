@@ -604,7 +604,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 } else if (change.getMode() == TRANSIT_CHANGE) {
                     // Finish recents animation if the display is changed, so the default
                     // transition handler can play the animation such as rotation effect.
-                    if (change.hasFlags(TransitionInfo.FLAG_IS_DISPLAY)) {
+                    if (change.hasFlags(TransitionInfo.FLAG_IS_DISPLAY)
+                            && info.getType() == TRANSIT_CHANGE) {
                         // This call to cancel will use the screenshots taken preemptively in
                         // handleMidTransitionRequest() prior to the display changing
                         cancel(mWillFinishToHome, true /* withScreenshots */, "display change");

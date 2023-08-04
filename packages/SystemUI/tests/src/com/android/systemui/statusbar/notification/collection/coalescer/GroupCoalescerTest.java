@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.coalescer;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.clearInvocations;
@@ -62,8 +64,7 @@ public class GroupCoalescerTest extends SysuiTestCase {
 
     @Mock private NotificationListener mListenerService;
     @Mock private GroupCoalescer.BatchableNotificationHandler mListener;
-    @Mock private GroupCoalescerLogger mLogger;
-
+    private final GroupCoalescerLogger mLogger = new GroupCoalescerLogger(logcatLogBuffer());
     @Captor private ArgumentCaptor<NotificationHandler> mListenerCaptor;
 
     private final NoManSimulator mNoMan = new NoManSimulator();

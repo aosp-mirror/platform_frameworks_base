@@ -92,6 +92,7 @@ class SceneTestUtils(
             )
         }
     }
+
     private val context = test.context
 
     fun fakeSceneContainerRepository(
@@ -124,6 +125,7 @@ class SceneTestUtils(
     ): SceneInteractor {
         return SceneInteractor(
             repository = repository,
+            logger = mock(),
         )
     }
 

@@ -19,6 +19,7 @@ package com.android.systemui.shade;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -221,7 +222,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     @Mock protected KeyguardStateController mKeyguardStateController;
     @Mock protected DozeLog mDozeLog;
-    @Mock protected ShadeLogger mShadeLog;
+    private final ShadeLogger mShadeLog = new ShadeLogger(logcatLogBuffer());
     @Mock protected CommandQueue mCommandQueue;
     @Mock protected VibratorHelper mVibratorHelper;
     @Mock protected LatencyTracker mLatencyTracker;
@@ -309,7 +310,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected MotionEvent mDownMotionEvent;
     @Mock protected CoroutineDispatcher mMainDispatcher;
     @Mock protected KeyguardSliceViewController mKeyguardSliceViewController;
-    @Mock protected KeyguardLogger mKeyguardLogger;
+    private final KeyguardLogger mKeyguardLogger = new KeyguardLogger(logcatLogBuffer());
     @Mock protected KeyguardStatusView mKeyguardStatusView;
     @Captor
     protected ArgumentCaptor<NotificationStackScrollLayout.OnEmptySpaceClickListener>
@@ -518,7 +519,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                         mKeyguardBypassController,
                         mDozeParameters,
                         mScreenOffAnimationController,
-                        mock(NotificationWakeUpCoordinatorLogger.class));
+                        new NotificationWakeUpCoordinatorLogger(logcatLogBuffer()));
         mConfigurationController = new ConfigurationControllerImpl(mContext);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,

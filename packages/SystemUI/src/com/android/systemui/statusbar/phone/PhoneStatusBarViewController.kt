@@ -150,10 +150,10 @@ class PhoneStatusBarViewController private constructor(
     fun onTouch(event: MotionEvent) {
         if (centralSurfaces.statusBarWindowState == WINDOW_STATE_SHOWING) {
             val upOrCancel =
-                    event.action == MotionEvent.ACTION_UP ||
+                event.action == MotionEvent.ACTION_UP ||
                     event.action == MotionEvent.ACTION_CANCEL
             centralSurfaces.setInteracting(WINDOW_STATUS_BAR,
-                    !upOrCancel || shadeController.isExpandedVisible)
+                !upOrCancel || shadeController.isExpandedVisible)
         }
     }
 
@@ -171,7 +171,7 @@ class PhoneStatusBarViewController private constructor(
             if (!centralSurfaces.commandQueuePanelsEnabled) {
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     Log.v(TAG, String.format("onTouchForwardedFromStatusBar: panel disabled, " +
-                            "ignoring touch at (${event.x.toInt()},${event.y.toInt()})"))
+                        "ignoring touch at (${event.x.toInt()},${event.y.toInt()})"))
                 }
                 return false
             }
@@ -182,7 +182,7 @@ class PhoneStatusBarViewController private constructor(
                 sceneInteractor.get()
                     .onRemoteUserInput(RemoteUserInput.translateMotionEvent(event))
                 // TODO(b/291965119): remove once view is expanded to cover the status bar
-                sceneInteractor.get().setVisible(true)
+                sceneInteractor.get().setVisible(true, "swipe down from status bar")
                 return false
             }
 
@@ -191,11 +191,11 @@ class PhoneStatusBarViewController private constructor(
                 // bar eat the gesture.
                 if (!shadeViewController.isViewEnabled) {
                     shadeLogger.logMotionEvent(event,
-                            "onTouchForwardedFromStatusBar: panel view disabled")
+                        "onTouchForwardedFromStatusBar: panel view disabled")
                     return true
                 }
                 if (shadeViewController.isFullyCollapsed &&
-                        event.y < 1f) {
+                    event.y < 1f) {
                     // b/235889526 Eat events on the top edge of the phone when collapsed
                     shadeLogger.logMotionEvent(event, "top edge touch ignored")
                     return true
@@ -257,26 +257,26 @@ class PhoneStatusBarViewController private constructor(
             view: PhoneStatusBarView
         ): PhoneStatusBarViewController {
             val statusBarMoveFromCenterAnimationController =
-                    if (featureFlags.isEnabled(Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS)) {
-                        unfoldComponent.getOrNull()?.getStatusBarMoveFromCenterAnimationController()
-                    } else {
-                        null
-                    }
+                if (featureFlags.isEnabled(Flags.ENABLE_UNFOLD_STATUS_BAR_ANIMATIONS)) {
+                    unfoldComponent.getOrNull()?.getStatusBarMoveFromCenterAnimationController()
+                } else {
+                    null
+                }
 
             return PhoneStatusBarViewController(
-                    view,
-                    progressProvider.getOrNull(),
-                    centralSurfaces,
-                    shadeController,
-                    shadeViewController,
-                    sceneInteractor,
-                    shadeLogger,
-                    statusBarMoveFromCenterAnimationController,
-                    userChipViewModel,
-                    viewUtil,
-                    featureFlags,
-                    configurationController,
-                    statusOverlayHoverListenerFactory,
+                view,
+                progressProvider.getOrNull(),
+                centralSurfaces,
+                shadeController,
+                shadeViewController,
+                sceneInteractor,
+                shadeLogger,
+                statusBarMoveFromCenterAnimationController,
+                userChipViewModel,
+                viewUtil,
+                featureFlags,
+                configurationController,
+                statusOverlayHoverListenerFactory,
             )
         }
     }

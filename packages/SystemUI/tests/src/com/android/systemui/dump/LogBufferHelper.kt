@@ -23,6 +23,7 @@ import com.android.systemui.log.LogcatEchoTracker
 /**
  * Creates a LogBuffer that will echo everything to logcat, which is useful for debugging tests.
  */
+@JvmOverloads
 fun logcatLogBuffer(name: String = "EchoToLogcatLogBuffer") =
     LogBuffer(name, 50, LogcatEchoTrackerAlways())
 

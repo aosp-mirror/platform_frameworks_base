@@ -27,6 +27,7 @@ import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_PRIMARY;
 import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_SECONDARY_USER;
 import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_WORK_PROFILE;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.flags.Flags.REVAMPED_BOUNCER_MESSAGES;
 
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
@@ -1081,8 +1082,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mLockPatternUtils.reportFailedPasswordAttempt(userId);
         if (timeoutMs > 0) {
             mLockPatternUtils.reportPasswordLockout(timeoutMs, userId);
-            mView.showTimeoutDialog(userId, timeoutMs, mLockPatternUtils,
-                    mSecurityModel.getSecurityMode(userId));
+            if (!mFeatureFlags.isEnabled(REVAMPED_BOUNCER_MESSAGES)) {
+                mView.showTimeoutDialog(userId, timeoutMs, mLockPatternUtils,
+                        mSecurityModel.getSecurityMode(userId));
+            }
         }
     }
 
