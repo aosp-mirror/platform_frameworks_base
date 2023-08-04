@@ -27,7 +27,9 @@
     },
     {
       "name": "CtsInstalledLoadingProgressHostTests"
-    },
+    }
+   ],
+  "presubmit-large": [
     {
       "name": "CtsPackageManagerTestCases",
       "options": [

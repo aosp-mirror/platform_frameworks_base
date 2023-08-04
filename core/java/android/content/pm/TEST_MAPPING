@@ -114,7 +114,9 @@
                     "exclude-annotation":"org.junit.Ignore"
                 }
             ]
-        },
+        }
+    ],
+    "presubmit-large":[
         {
             "name":"CtsPackageManagerTestCases",
             "options":[
@@ -125,9 +127,7 @@
                     "exclude-annotation":"org.junit.Ignore"
                 }
             ]
-        }
-    ],
-    "presubmit-large":[
+        },
         {
             "name":"CtsUsesNativeLibraryTest",
             "options":[
