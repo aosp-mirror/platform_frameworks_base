@@ -29,7 +29,6 @@ import com.android.server.pm.PackageSettingBuilder
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageState
-import com.android.server.pm.pkg.PackageStateImpl
 import com.android.server.pm.pkg.PackageUserState
 import com.android.server.pm.pkg.PackageUserStateImpl
 import com.android.server.pm.pkg.component.ParsedActivity
@@ -125,7 +124,7 @@ class PackageStateTest {
 
         fillMissingData(packageState, pkg as PackageImpl)
 
-        visitType(seenTypes, emptyList(), PackageStateImpl.copy(packageState),
+        visitType(seenTypes, emptyList(), PackageSetting(packageState, true),
             PackageState::class.starProjectedType)
         visitType(seenTypes, emptyList(), pkg, AndroidPackage::class.starProjectedType)
         visitType(seenTypes, emptyList(), packageState.getUserStateOrDefault(0),
