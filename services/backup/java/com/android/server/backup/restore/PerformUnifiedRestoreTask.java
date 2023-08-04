@@ -16,6 +16,8 @@
 
 package com.android.server.backup.restore;
 
+import static android.app.backup.BackupAnnotations.OperationType.RESTORE;
+
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
@@ -30,6 +32,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import android.annotation.Nullable;
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
+import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupManagerMonitor;
@@ -84,7 +87,6 @@ import java.util.Objects;
 import java.util.Set;
 
 public class PerformUnifiedRestoreTask implements BackupRestoreTask {
-
     private UserBackupManagerService backupManagerService;
     private final OperationStorage mOperationStorage;
     private final int mUserId;
@@ -427,10 +429,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             RestoreDescription desc = transport.nextRestorePackage();
             if (desc == null) {
                 Slog.e(TAG, "No restore metadata available; halting");
+                Bundle monitoringExtras = addRestoreOperationTypeToEvent(/*extras*/null);
                 mBackupManagerMonitorEventSender.monitorEvent(
                         BackupManagerMonitor.LOG_EVENT_ID_NO_RESTORE_METADATA_AVAILABLE,
                         mCurrentPackage,
-                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                        monitoringExtras);
                 mStatus = BackupTransport.TRANSPORT_ERROR;
                 executeNextState(UnifiedRestoreState.FINAL);
                 return;
@@ -439,10 +443,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     desc.getPackageName())) {
                 Slog.e(TAG, "Required package metadata but got "
                         + desc.getPackageName());
+                Bundle monitoringExtras = addRestoreOperationTypeToEvent(/*extras*/null);
                 mBackupManagerMonitorEventSender.monitorEvent(
                         BackupManagerMonitor.LOG_EVENT_ID_NO_PM_METADATA_RECEIVED,
                         mCurrentPackage,
-                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                        monitoringExtras);
                 mStatus = BackupTransport.TRANSPORT_ERROR;
                 executeNextState(UnifiedRestoreState.FINAL);
                 return;
@@ -474,10 +480,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // the restore operation.
             if (!mPmAgent.hasMetadata()) {
                 Slog.e(TAG, "PM agent has no metadata, so not restoring");
+                Bundle monitoringExtras = addRestoreOperationTypeToEvent(/*extras*/null);
                 mBackupManagerMonitorEventSender.monitorEvent(
                         BackupManagerMonitor.LOG_EVENT_ID_PM_AGENT_HAS_NO_METADATA,
                         mCurrentPackage,
-                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                        monitoringExtras);
                 EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
                         PACKAGE_MANAGER_SENTINEL,
                         "Package manager restore metadata missing");
@@ -494,10 +502,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         } catch (Exception e) {
             // If we lost the transport at any time, halt
             Slog.e(TAG, "Unable to contact transport for restore: " + e.getMessage());
+            Bundle monitoringExtras = addRestoreOperationTypeToEvent(/*extras*/null);
             mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_LOST_TRANSPORT,
                     null,
-                    BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT, null);
+                    BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT,
+                    monitoringExtras);
             mStatus = BackupTransport.TRANSPORT_ERROR;
             backupManagerService.getBackupHandler().removeMessages(
                     MSG_BACKUP_RESTORE_STEP, this);
@@ -554,11 +564,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 // Whoops, we thought we could restore this package but it
                 // turns out not to be present.  Skip it.
                 Slog.e(TAG, "Package not present: " + pkgName);
+                Bundle monitoringExtras = addRestoreOperationTypeToEvent(/*extras*/null);
                 mBackupManagerMonitorEventSender.monitorEvent(
                         BackupManagerMonitor.LOG_EVENT_ID_PACKAGE_NOT_PRESENT,
                         mCurrentPackage,
                         BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                        null);
+                        monitoringExtras);
                 EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, pkgName,
                         "Package missing on device");
                 nextState = UnifiedRestoreState.RUNNING_QUEUE;
@@ -581,6 +592,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(
                             monitoringExtras,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY, false);
+                    monitoringExtras = addRestoreOperationTypeToEvent(monitoringExtras);
                     mBackupManagerMonitorEventSender.monitorEvent(
                             BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER,
                             mCurrentPackage,
@@ -603,6 +615,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     monitoringExtras = mBackupManagerMonitorEventSender.putMonitoringExtra(
                             monitoringExtras,
                             BackupManagerMonitor.EXTRA_LOG_RESTORE_ANYWAY, true);
+                    monitoringExtras = addRestoreOperationTypeToEvent(monitoringExtras);
                     mBackupManagerMonitorEventSender.monitorEvent(
                             BackupManagerMonitor.LOG_EVENT_ID_RESTORE_VERSION_HIGHER,
                             mCurrentPackage,
@@ -656,9 +669,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 Slog.i(TAG, "Data exists for package " + packageName
                         + " but app has no agent; skipping");
             }
+            Bundle monitoringExtras = addRestoreOperationTypeToEvent(/*extras*/null);
             mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_APP_HAS_NO_AGENT, mCurrentPackage,
-                    BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, null);
+                    BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, monitoringExtras);
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                     "Package has no agent");
             executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
@@ -669,9 +683,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
         if (!BackupUtils.signaturesMatch(metaInfo.sigHashes, mCurrentPackage, pmi)) {
             Slog.w(TAG, "Signature mismatch restoring " + packageName);
+            Bundle monitoringExtras = addRestoreOperationTypeToEvent(/*extras*/null);
             mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_SIGNATURE_MISMATCH, mCurrentPackage,
-                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
+                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                    monitoringExtras);
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                     "Signature mismatch");
             executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
@@ -685,9 +701,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 mBackupEligibilityRules.getBackupDestination());
         if (mAgent == null) {
             Slog.w(TAG, "Can't find backup agent for " + packageName);
+            Bundle monitoringExtras = addRestoreOperationTypeToEvent(/*extras*/null);
             mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_CANT_FIND_AGENT, mCurrentPackage,
-                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY, null);
+                    BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                    monitoringExtras);
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE, packageName,
                     "Restore agent missing");
             executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
@@ -1100,10 +1118,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             if (DEBUG) {
                 Slog.w(TAG, "Full-data restore target timed out; shutting down");
             }
-
+            Bundle monitoringExtras = addRestoreOperationTypeToEvent(/*extras*/null);
             mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_TIMEOUT,
-                    mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, null);
+                    mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
+                    monitoringExtras);
             mEngineThread.handleTimeout();
 
             IoUtils.closeQuietly(mEnginePipes[1]);
@@ -1363,9 +1382,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     public void handleCancel(boolean cancelAll) {
         mOperationStorage.removeOperation(mEphemeralOpToken);
         Slog.e(TAG, "Timeout restoring application " + mCurrentPackage.packageName);
+        Bundle monitoringExtras = addRestoreOperationTypeToEvent(/*extras*/null);
         mBackupManagerMonitorEventSender.monitorEvent(
                 BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_RESTORE_TIMEOUT,
-                mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, null);
+                mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT, monitoringExtras);
         EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
                 mCurrentPackage.packageName, "restore timeout");
         // Handle like an agent that threw on invocation: wipe it and go on to the next
@@ -1437,5 +1457,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 mObserver = null;
             }
         }
+    }
+
+    private Bundle addRestoreOperationTypeToEvent (@Nullable Bundle extra) {
+        return mBackupManagerMonitorEventSender.putMonitoringExtra(
+                extra,
+                BackupManagerMonitor.EXTRA_LOG_OPERATION_TYPE, RESTORE);
     }
 }
