@@ -121,6 +121,7 @@ import android.graphics.HardwareRenderer.FrameDrawingCallback;
 import android.graphics.HardwareRendererObserver;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -821,6 +822,8 @@ public final class ViewRootImpl implements ViewParent,
     final AccessibilityManager mAccessibilityManager;
 
     AccessibilityInteractionController mAccessibilityInteractionController;
+
+    Paint mRoundDisplayAccessibilityHighlightPaint;
 
     final AccessibilityInteractionConnectionManager mAccessibilityInteractionConnectionManager =
             new AccessibilityInteractionConnectionManager();
@@ -5096,19 +5099,65 @@ public final class ViewRootImpl implements ViewParent,
      * Note: We are doing this here to be able to draw the highlight for
      *       virtual views in addition to real ones.
      *
+     * Note: A round accessibility focus border is drawn on rounded watch
+     *
+     * Note: Need to set bounds of accessibility focused drawable before drawing on rounded watch,
+     * so that when accessibility focus moved, root will be invalidated at
+     * {@link #draw(boolean, SurfaceSyncGroup, boolean)} and accessibility focus border will be
+     * updated.
+     *
      * @param canvas The canvas on which to draw.
      */
     private void drawAccessibilityFocusedDrawableIfNeeded(Canvas canvas) {
         final Rect bounds = mAttachInfo.mTmpInvalRect;
         if (getAccessibilityFocusedRect(bounds)) {
+            boolean isRoundWatch = mContext.getResources().getConfiguration().isScreenRound()
+                    && mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
             final Drawable drawable = getAccessibilityFocusedDrawable();
             if (drawable != null) {
                 drawable.setBounds(bounds);
                 drawable.draw(canvas);
+                if (mDisplay != null && isRoundWatch) {
+                    // Draw an extra round accessibility focus border on round watch
+                    drawAccessibilityFocusedBorderOnRoundDisplay(canvas, bounds,
+                            getRoundDisplayRadius(), getRoundDisplayAccessibilityHighlightPaint());
+                }
             }
         } else if (mAttachInfo.mAccessibilityFocusDrawable != null) {
             mAttachInfo.mAccessibilityFocusDrawable.setBounds(0, 0, 0, 0);
         }
+    }
+
+    private int getRoundDisplayRadius() {
+        Point displaySize = new Point();
+        mDisplay.getRealSize(displaySize);
+        return displaySize.x / 2;
+    }
+
+    private Paint getRoundDisplayAccessibilityHighlightPaint() {
+        // Lazily create the round display accessibility highlight paint.
+        if (mRoundDisplayAccessibilityHighlightPaint == null) {
+            mRoundDisplayAccessibilityHighlightPaint = new Paint();
+            mRoundDisplayAccessibilityHighlightPaint.setStyle(Paint.Style.STROKE);
+            mRoundDisplayAccessibilityHighlightPaint.setAntiAlias(true);
+        }
+        mRoundDisplayAccessibilityHighlightPaint.setStrokeWidth(
+                mAccessibilityManager.getAccessibilityFocusStrokeWidth());
+        mRoundDisplayAccessibilityHighlightPaint.setColor(
+                mAccessibilityManager.getAccessibilityFocusColor());
+        return mRoundDisplayAccessibilityHighlightPaint;
+    }
+
+    private void drawAccessibilityFocusedBorderOnRoundDisplay(Canvas canvas, Rect bounds,
+            int roundDisplayRadius, Paint accessibilityFocusHighlightPaint) {
+        int saveCount = canvas.save();
+        canvas.clipRect(bounds);
+        canvas.drawCircle(/* cx= */ roundDisplayRadius,
+                /* cy= */ roundDisplayRadius,
+                /* radius= */ roundDisplayRadius
+                        - mAccessibilityManager.getAccessibilityFocusStrokeWidth() / 2.0f,
+                accessibilityFocusHighlightPaint);
+        canvas.restoreToCount(saveCount);
     }
 
     private boolean getAccessibilityFocusedRect(Rect bounds) {
