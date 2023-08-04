@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker.activityembedding
+package com.android.server.wm.flicker.activityembedding.open
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
@@ -27,6 +27,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -42,7 +43,7 @@ import org.junit.runners.Parameterized
  * Transitions: From A launch a trampoline Activity T, T launches secondary Activity B and
  * finishes itself, end up in split A|B.
  *
- * To run this test: `atest FlickerTests:OpenTrampolineActivityTest`
+ * To run this test: `atest FlickerTestsOther:OpenTrampolineActivityTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
