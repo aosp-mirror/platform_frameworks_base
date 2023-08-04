@@ -439,7 +439,7 @@
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Deaktiveret"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Monokromasi"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranopi (rød-grøn)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopi (rød-grøn)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomali (rød-grøn)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanopi (blå-gul)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Farvekorrigering"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Farvekorrigering kan være en nyttig funktion, når du vil:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Se farver mere nøjagtigt&lt;/li&gt; &lt;li&gt;&amp;nbsp;Fjerne farver, så du nemmere kan fokusere&lt;/li&gt; &lt;/ol&gt;"</string>
