@@ -1107,6 +1107,16 @@ public class SubscriptionManager {
      */
     public static final String SATELLITE_ENABLED = SimInfo.COLUMN_SATELLITE_ENABLED;
 
+    /**
+     * TelephonyProvider column name for satellite attach enabled for carrier. The value of this
+     * column is set based on user settings.
+     * By default, it's disabled.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String SATELLITE_ATTACH_ENABLED_FOR_CARRIER =
+            SimInfo.COLUMN_SATELLITE_ATTACH_ENABLED_FOR_CARRIER;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},
