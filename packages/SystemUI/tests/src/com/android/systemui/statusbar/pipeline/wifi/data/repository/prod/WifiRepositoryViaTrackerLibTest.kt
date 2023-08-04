@@ -103,6 +103,15 @@ class WifiRepositoryViaTrackerLibTest : SysuiTestCase() {
     }
 
     @Test
+    fun wifiPickerTrackerCreation_scansDisabled() =
+        testScope.runTest {
+            collectLastValue(underTest.wifiNetwork)
+            testScope.runCurrent()
+
+            verify(wifiPickerTracker).disableScanning()
+        }
+
+    @Test
     fun isWifiEnabled_enabled_true() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isWifiEnabled)

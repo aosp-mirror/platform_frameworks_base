@@ -136,19 +136,21 @@ constructor(
                         }
                     }
 
-                // TODO(b/292591403): [WifiPickerTrackerFactory] currently scans to see all
-                // available wifi networks every 10s. Because SysUI only needs to display the
-                // **connected** network, we don't need scans to be running. We should disable these
-                // scans (ideal) or at least run them very infrequently.
-                wifiPickerTracker = wifiPickerTrackerFactory.create(lifecycle, callback)
+                wifiPickerTracker =
+                    wifiPickerTrackerFactory.create(lifecycle, callback).apply {
+                        // By default, [WifiPickerTracker] will scan to see all available wifi
+                        // networks in the area. Because SysUI only needs to display the
+                        // **connected** network, we don't need scans to be running (and in fact,
+                        // running scans is costly and should be avoided whenever possible).
+                        this?.disableScanning()
+                    }
                 // The lifecycle must be STARTED in order for the callback to receive events.
                 mainExecutor.execute { lifecycle.currentState = Lifecycle.State.STARTED }
                 awaitClose {
                     mainExecutor.execute { lifecycle.currentState = Lifecycle.State.CREATED }
                 }
             }
-            // TODO(b/292534484): Update to Eagerly once scans are disabled. (Here and other flows)
-            .stateIn(scope, SharingStarted.WhileSubscribed(), current)
+            .stateIn(scope, SharingStarted.Eagerly, current)
     }
 
     override val isWifiEnabled: StateFlow<Boolean> =
@@ -161,7 +163,7 @@ constructor(
                 columnName = COL_NAME_IS_ENABLED,
                 initialValue = false,
             )
-            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val wifiNetwork: StateFlow<WifiNetworkModel> =
         wifiPickerTrackerInfo
@@ -172,7 +174,7 @@ constructor(
                 columnPrefix = "",
                 initialValue = WIFI_NETWORK_DEFAULT,
             )
-            .stateIn(scope, SharingStarted.WhileSubscribed(), WIFI_NETWORK_DEFAULT)
+            .stateIn(scope, SharingStarted.Eagerly, WIFI_NETWORK_DEFAULT)
 
     /** Converts WifiTrackerLib's [WifiEntry] into our internal model. */
     private fun WifiEntry.toWifiNetworkModel(): WifiNetworkModel {
@@ -236,7 +238,7 @@ constructor(
                 columnName = COL_NAME_IS_DEFAULT,
                 initialValue = false,
             )
-            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val wifiActivity: StateFlow<DataActivityModel> =
         WifiRepositoryHelper.createActivityFlow(
