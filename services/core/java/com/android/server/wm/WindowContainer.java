@@ -1143,6 +1143,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void onResize() {
+        if (mControllableInsetProvider != null) {
+            mControllableInsetProvider.onWindowContainerBoundsChanged();
+        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.onParentResize();
@@ -1162,6 +1165,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void onMovedByResize() {
+        if (mControllableInsetProvider != null) {
+            mControllableInsetProvider.onWindowContainerBoundsChanged();
+        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.onMovedByResize();
