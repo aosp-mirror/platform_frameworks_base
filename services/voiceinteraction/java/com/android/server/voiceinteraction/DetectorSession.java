@@ -753,11 +753,11 @@ abstract class DetectorSession {
                                 "Failed to obtain permission RECORD_AUDIO for identity "
                                         + mVoiceInteractorIdentity);
                     }
-                    int hotwordOp = AppOpsManager.strOpToOp(
-                            AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
-                    mAppOpsManager.noteOpNoThrow(hotwordOp,
+                    mAppOpsManager.noteOpNoThrow(
+                            AppOpsPolicy.getVoiceActivationOp(),
                             mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
-                            mVoiceInteractorIdentity.attributionTag, HOTWORD_DETECTION_OP_MESSAGE);
+                            mVoiceInteractorIdentity.attributionTag,
+                                    HOTWORD_DETECTION_OP_MESSAGE);
                 } else {
                     enforcePermissionForDataDelivery(mContext, mVoiceInteractorIdentity,
                             RECORD_AUDIO, HOTWORD_DETECTION_OP_MESSAGE);

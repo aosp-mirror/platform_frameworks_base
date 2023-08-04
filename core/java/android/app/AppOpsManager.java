@@ -2809,7 +2809,8 @@ public class AppOpsManager {
                 "RECORD_AUDIO_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_RECEIVE_SANDBOX_TRIGGER_AUDIO,
                 OPSTR_RECEIVE_SANDBOX_TRIGGER_AUDIO,
-                "RECEIVE_SANDBOX_TRIGGER_AUDIO").build(),
+                "RECEIVE_SANDBOX_TRIGGER_AUDIO")
+                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_RECEIVE_SANDBOX_NEGATIVE_DATA_AUDIO,
                 OPSTR_RECEIVE_SANDBOX_NEGATIVE_DATA_AUDIO,
                 "RECEIVE_SANDBOX_NEGATIVE_DATA_AUDIO").build()
