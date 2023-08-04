@@ -81,8 +81,8 @@ class InsetsSourceProvider {
     private boolean mIsLeashReadyForDispatching;
     private final Rect mSourceFrame = new Rect();
     private final Rect mLastSourceFrame = new Rect();
-    private final Rect mLastContainerBounds = new Rect();
     private @NonNull Insets mInsetsHint = Insets.NONE;
+    private boolean mInsetsHintStale = true;
     private @Flags int mFlagsFromFrameProvider;
     private @Flags int mFlagsFromServer;
 
@@ -238,6 +238,10 @@ class InsetsSourceProvider {
             mSource.setFlags(mFlagsFromFrameProvider | mFlagsFromServer);
         }
         updateSourceFrameForServerVisibility();
+        if (!mLastSourceFrame.equals(mSourceFrame)) {
+            mLastSourceFrame.set(mSourceFrame);
+            mInsetsHintStale = true;
+        }
 
         if (mOverrideFrameProviders != null) {
             // Not necessary to clear the mOverrideFrames here. It will be cleared every time the
@@ -279,28 +283,29 @@ class InsetsSourceProvider {
         // visible. (i.e. No surface, pending insets that were given during layout, etc..)
         if (mServerVisible) {
             mSource.setFrame(mSourceFrame);
-            updateInsetsHint();
         } else {
             mSource.setFrame(0, 0, 0, 0);
         }
     }
 
-    // To be called when mSourceFrame or the window container bounds is changed.
-    private void updateInsetsHint() {
-        if (!mControllable || !mServerVisible) {
-            return;
-        }
-        final Rect bounds = mWindowContainer.getBounds();
-        if (mSourceFrame.equals(mLastSourceFrame) && bounds.equals(mLastContainerBounds)) {
-            return;
-        }
-        mLastSourceFrame.set(mSourceFrame);
-        mLastContainerBounds.set(bounds);
-        mInsetsHint = mSource.calculateInsets(bounds, true /* ignoreVisibility */);
+    void onWindowContainerBoundsChanged() {
+        mInsetsHintStale = true;
     }
 
     @VisibleForTesting
     Insets getInsetsHint() {
+        if (!mServerVisible) {
+            return mInsetsHint;
+        }
+        final WindowState win = mWindowContainer.asWindowState();
+        if (win != null && win.mGivenInsetsPending) {
+            return mInsetsHint;
+        }
+        if (mInsetsHintStale) {
+            final Rect bounds = mWindowContainer.getBounds();
+            mInsetsHint = mSource.calculateInsets(bounds, true /* ignoreVisibility */);
+            mInsetsHintStale = false;
+        }
         return mInsetsHint;
     }
 
@@ -359,8 +364,9 @@ class InsetsSourceProvider {
                     mSetLeashPositionConsumer.accept(t);
                 }
             }
-            if (!mControl.getInsetsHint().equals(mInsetsHint)) {
-                mControl.setInsetsHint(mInsetsHint);
+            final Insets insetsHint = getInsetsHint();
+            if (!mControl.getInsetsHint().equals(insetsHint)) {
+                mControl.setInsetsHint(insetsHint);
                 changed = true;
             }
             if (changed) {
@@ -494,7 +500,7 @@ class InsetsSourceProvider {
         mControlTarget = target;
         updateVisibility();
         mControl = new InsetsSourceControl(mSource.getId(), mSource.getType(), leash,
-                mClientVisible, surfacePosition, mInsetsHint);
+                mClientVisible, surfacePosition, getInsetsHint());
 
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
@@ -605,6 +611,9 @@ class InsetsSourceProvider {
         if (mControllable) {
             pw.print(prefix + "mInsetsHint=");
             pw.print(mInsetsHint);
+            if (mInsetsHintStale) {
+                pw.print(" stale");
+            }
             pw.println();
         }
         pw.print(prefix);
